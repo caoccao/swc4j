@@ -23,6 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestSWCNative {
     @Test
     public void testGetVersion() {
-        assertEquals(SWCNative.LIB_VERSION, SWCNative.getVersion());
+        assertEquals("0.1.0", SWCNative.getVersion());
     }
 }

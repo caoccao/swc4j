@@ -59,8 +59,8 @@ jobs:
     - name: Cargo Build and Test
       run: |
         cd rust
-        cargo test
         cargo build -r
+        cargo test -r
         deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -a ${{ matrix.arch }}
 
     - name: Setup JDK 8
