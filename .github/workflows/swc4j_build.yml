@@ -38,7 +38,7 @@ jobs:
             arch: arm64
             ext: .dylib
 
-    name: Build swc4j lib for ${{ matrix.os }} ${{ matrix.arch }}
+    name: Build swc4j for ${{ matrix.os }} ${{ matrix.arch }}
     runs-on: ${{ matrix.image }}
 
     steps:
@@ -63,6 +63,12 @@ jobs:
         cargo build -r
         deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -a ${{ matrix.arch }}
 
+    - name: Upload the Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: swc4j-${{ matrix.os }}-${{ matrix.arch }}-${{ env.SWC4J_VERSION }}
+        path: src/main/resources/*${{ matrix.ext }}
+
     - name: Setup JDK 8
       uses: actions/setup-java@v4
       with:
@@ -71,13 +77,7 @@ jobs:
 
     - name: Build and Test
       run: |
-        gradle build test --rerun-tasks --debug
-
-    - name: Upload the Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: swc4j-${{ matrix.os }}-${{ matrix.arch }}-${{ env.SWC4J_VERSION }}
-        path: src/main/resources/*${{ matrix.ext }}
+        gradle build test --rerun-tasks
 
   build_swc4j_jar:
     needs: [build_swc4j_lib]
@@ -121,7 +121,7 @@ jobs:
 
     - name: Build the Artifact
       run: |
-        gradle build generatePomFileForGeneratePomPublication -x test --debug
+        gradle build generatePomFileForGeneratePomPublication -x test
 
     - name: Upload the Artifact
       uses: actions/upload-artifact@v4
