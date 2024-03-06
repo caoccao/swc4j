@@ -1,0 +1,152 @@
+name: swc4j Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+
+env:
+  SWC4J_VERSION: 0.1.0
+
+jobs:
+  build_swc4j_lib:
+    strategy:
+      matrix:
+        include:
+          - image: windows-latest
+            os: windows
+            arch: x86_64
+            ext: .dll
+          - image: ubuntu-latest
+            os: linux
+            arch: x86_64
+            ext: .so
+          - image: macos-latest
+            os: macos
+            arch: x86_64
+            ext: .dylib
+          - image: macos-14
+            os: macos
+            arch: arm64
+            ext: .dylib
+
+    name: Build swc4j lib for ${{ matrix.os }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.image }}
+
+    steps:
+
+    - name: Checkout the code
+      uses: actions/checkout@v4
+
+    - name: Setup Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        toolchain: stable
+
+    - name: Setup Deno
+      uses: denoland/setup-deno@v1
+      with:
+        deno-version: vx.x.x
+
+    - name: Cargo Build and Test
+      run: |
+        cd rust
+        cargo test
+        cargo build -r
+        deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -a ${{ matrix.arch }}
+
+    - name: Setup JDK 8
+      uses: actions/setup-java@v4
+      with:
+        distribution: corretto
+        java-version: 8
+
+    - name: Build and Test
+      run: |
+        gradle build test --rerun-tasks --debug
+
+    - name: Upload the Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: swc4j-${{ matrix.os }}-${{ matrix.arch }}-${{ env.SWC4J_VERSION }}
+        path: src/main/resources/*${{ matrix.ext }}
+
+  build_swc4j_jar:
+    needs: [build_swc4j_lib]
+    name: Build swc4j Jar
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout the code
+      uses: actions/checkout@v4
+
+    - name: Setup JDK 8
+      uses: actions/setup-java@v4
+      with:
+        distribution: corretto
+        java-version: 8
+
+    - name: Download swc4j Windows x86_64
+      uses: actions/download-artifact@v4
+      with:
+        name: swc4j-windows-x86_64-${{ env.SWC4J_VERSION }}
+        path: src/main/resources/
+
+    - name: Download swc4j Linux x86_64
+      uses: actions/download-artifact@v4
+      with:
+        name: swc4j-linux-x86_64-${{ env.SWC4J_VERSION }}
+        path: src/main/resources/
+
+    - name: Download swc4j MacOS x86_64
+      uses: actions/download-artifact@v4
+      with:
+        name: swc4j-macos-x86_64-${{ env.SWC4J_VERSION }}
+        path: src/main/resources/
+
+    - name: Download swc4j MacOS arm64
+      uses: actions/download-artifact@v4
+      with:
+        name: swc4j-macos-arm64-${{ env.SWC4J_VERSION }}
+        path: src/main/resources/
+
+    - name: Build the Artifact
+      run: |
+        gradle build generatePomFileForGeneratePomPublication -x test --debug
+
+    - name: Upload the Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: swc4j-${{ env.SWC4J_VERSION }}
+        path: |
+          build/libs/*.jar
+          build/libs/*.pom
+
+    - name: Delete swc4j Windows x86_64
+      uses: geekyeggo/delete-artifact@v4
+      with:
+        name: swc4j-windows-x86_64-${{ env.SWC4J_VERSION }}
+
+    - name: Delete swc4j Linux x86_64
+      uses: geekyeggo/delete-artifact@v4
+      with:
+        name: swc4j-linux-x86_64-${{ env.SWC4J_VERSION }}
+
+    - name: Delete swc4j MacOS x86_64
+      uses: geekyeggo/delete-artifact@v4
+      with:
+        name: swc4j-macos-x86_64-${{ env.SWC4J_VERSION }}
+
+    - name: Delete swc4j MacOS arm64
+      uses: geekyeggo/delete-artifact@v4
+      with:
+        name: swc4j-macos-arm64-${{ env.SWC4J_VERSION }}
