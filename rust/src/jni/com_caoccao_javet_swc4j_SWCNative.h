@@ -7,6 +7,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef com_caoccao_javet_swc4j_SWCNative_BUFFER_LENGTH
+#define com_caoccao_javet_swc4j_SWCNative_BUFFER_LENGTH 4096L
+#undef com_caoccao_javet_swc4j_SWCNative_MIN_LAST_MODIFIED_GAP_IN_MILLIS
+#define com_caoccao_javet_swc4j_SWCNative_MIN_LAST_MODIFIED_GAP_IN_MILLIS 60000i64
 /*
  * Class:     com_caoccao_javet_swc4j_SWCNative
  * Method:    getVersion

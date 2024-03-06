@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j;
+package com.caoccao.javet.swc4j.utils;
 
-import org.junit.jupiter.api.Test;
+import java.util.Objects;
+import java.util.StringJoiner;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+public final class StringUtils {
+    private StringUtils() {
+    }
 
-public class TestSWCNative {
-    @Test
-    public void testGetVersion() {
-        assertEquals(SWCNative.LIB_VERSION, SWCNative.getVersion());
+    public static String join(CharSequence delimiter, CharSequence... elements) {
+        Objects.requireNonNull(delimiter);
+        Objects.requireNonNull(elements);
+        StringJoiner stringJoiner = new StringJoiner(delimiter);
+        for (CharSequence cs : elements) {
+            stringJoiner.add(cs);
+        }
+        return stringJoiner.toString();
     }
 }

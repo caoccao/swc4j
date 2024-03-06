@@ -108,6 +108,8 @@ task<Exec>("buildJNIHeaders") {
             "-d",
             "$buildDir/generated/tmp/jni",
             "src/main/java/com/caoccao/javet/swc4j/SWCNative.java",
+            "src/main/java/com/caoccao/javet/swc4j/utils/OSUtils.java",
+            "src/main/java/com/caoccao/javet/swc4j/utils/StringUtils.java",
         )
     }
 }
