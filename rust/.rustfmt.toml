@@ -1,0 +1,3 @@
+# Copyright 2018-2019 the Deno authors. All rights reserved. MIT license.
+max_width = 120
+tab_spaces = 2
