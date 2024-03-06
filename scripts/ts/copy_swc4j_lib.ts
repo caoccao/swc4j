@@ -27,7 +27,7 @@ import * as flags from "https://deno.land/std/flags/mod.ts"
 import * as fs from "https://deno.land/std/fs/mod.ts"
 import * as path from "https://deno.land/std/path/mod.ts"
 
-const NAME = 'swc4j'
+const NAMES = ['swc4j', 'libswc4j']
 const VERSION = '0.1.0'
 const OS_AND_PREFIX_MAP = {
   '.dll': {
@@ -48,11 +48,10 @@ async function copy(debug: boolean = false, arch: string = 'x86_64'): Promise<nu
   const scriptDirPath = path.dirname(path.fromFileUrl(import.meta.url))
   const sourceDirPath = path.join(scriptDirPath, '../../rust/target', debug ? 'debug' : 'release')
   const targetDirPath = path.join(scriptDirPath, '../../src/main/resources')
-  const fileMap: Record<string, string> = {}
   for await (const { isFile, name } of Deno.readDir(sourceDirPath)) {
     if (isFile) {
       const parsedName = path.parse(name)
-      if (parsedName.name === NAME && parsedName.ext in OS_AND_PREFIX_MAP) {
+      if (NAMES.includes(parsedName.name) && parsedName.ext in OS_AND_PREFIX_MAP) {
         const osAndPrefix = OS_AND_PREFIX_MAP[parsedName.ext]
         const sourceFilePath = path.join(sourceDirPath, name)
         const targetFilePath = path.join(targetDirPath, `${osAndPrefix.prefix}${parsedName.name}-${osAndPrefix.os}-${arch}.v.${VERSION}${parsedName.ext}`)

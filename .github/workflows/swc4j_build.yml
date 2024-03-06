@@ -77,7 +77,7 @@ jobs:
 
     - name: Build and Test
       run: |
-        gradle build test --rerun-tasks
+        gradle build test --rerun-tasks --debug
 
   build_swc4j_jar:
     needs: [build_swc4j_lib]
