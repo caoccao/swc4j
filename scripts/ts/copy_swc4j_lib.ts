@@ -56,6 +56,9 @@ async function copy(debug: boolean = false, arch: string = 'x86_64'): Promise<nu
         const sourceFilePath = path.join(sourceDirPath, name)
         const targetFilePath = path.join(targetDirPath, `${osAndPrefix.prefix}${parsedName.name}-${osAndPrefix.os}-${arch}.v.${VERSION}${parsedName.ext}`)
         console.info(`Copy from ${sourceFilePath} to ${targetFilePath}.`)
+        if (!fs.existsSync(targetDirPath)) {
+          Deno.mkdirSync(targetDirPath, { recursive: true });
+        }
         fs.copySync(sourceFilePath, targetFilePath, { overwrite: true })
       }
     }
