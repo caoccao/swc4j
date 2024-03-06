@@ -16,13 +16,11 @@
 
 package com.caoccao.javet.swc4j;
 
-import org.junit.jupiter.api.Test;
+final class SwcNative {
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-public class TestSWCNative {
-    @Test
-    public void testGetVersion() {
-        assertEquals("0.1.0", SWCNative.getVersion());
+    static {
+        new SwcLibLoader().load();
     }
+
+    public static native String getVersion();
 }

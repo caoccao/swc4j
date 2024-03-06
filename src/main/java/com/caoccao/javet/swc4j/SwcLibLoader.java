@@ -24,7 +24,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.text.MessageFormat;
 
-final class SWCLibLoader {
+final class SwcLibLoader {
     private static final String ANDROID_ABI_ARM = "armeabi-v7a";
     private static final String ANDROID_ABI_ARM64 = "arm64-v8a";
     private static final String ANDROID_ABI_X86 = "x86";
@@ -51,7 +51,7 @@ final class SWCLibLoader {
     private static final String RESOURCE_NAME_FORMAT = "/{0}";
     private static final String XRR = "755";
 
-    SWCLibLoader() {
+    SwcLibLoader() {
     }
 
     private void deployLibFile(String resourceFileName, File libFile) {
@@ -69,7 +69,7 @@ final class SWCLibLoader {
         }
         if (!isLibFileLocked) {
             byte[] buffer = new byte[BUFFER_LENGTH];
-            try (InputStream inputStream = SWCNative.class.getResourceAsStream(resourceFileName);
+            try (InputStream inputStream = SwcNative.class.getResourceAsStream(resourceFileName);
                  FileOutputStream outputStream = new FileOutputStream(libFile.getAbsolutePath())) {
                 if (inputStream != null) {
                     while (true) {
@@ -178,7 +178,7 @@ final class SWCLibLoader {
         String resourceFileName = MessageFormat.format(RESOURCE_NAME_FORMAT, OSUtils.IS_ANDROID
                 ? StringUtils.join("/", LIB_FILE_NAME_PREFIX, getAndroidABI(), getLibFileName())
                 : getLibFileName());
-        if (SWCNative.class.getResource(resourceFileName) == null) {
+        if (SwcNative.class.getResource(resourceFileName) == null) {
             throw new RuntimeException(MessageFormat.format("Lib {0} is not found", resourceFileName));
         }
         return resourceFileName;

@@ -22,7 +22,7 @@ use jni::JNIEnv;
 pub const VERSION: &'static str = "0.1.0";
 
 #[no_mangle]
-pub extern "system" fn Java_com_caoccao_javet_swc4j_SWCNative_getVersion<'local>(
+pub extern "system" fn Java_com_caoccao_javet_swc4j_SwcNative_getVersion<'local>(
   jni_env: JNIEnv<'local>,
   _: JClass<'local>,
 ) -> jstring {
