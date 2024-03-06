@@ -48,6 +48,9 @@ async function copy(debug: boolean = false, arch: string = 'x86_64'): Promise<nu
   const scriptDirPath = path.dirname(path.fromFileUrl(import.meta.url))
   const sourceDirPath = path.join(scriptDirPath, '../../rust/target', debug ? 'debug' : 'release')
   const targetDirPath = path.join(scriptDirPath, '../../src/main/resources')
+  if (!fs.existsSync(targetDirPath)) {
+    Deno.mkdirSync(targetDirPath, { recursive: true });
+  }
   for await (const { isFile, name } of Deno.readDir(sourceDirPath)) {
     if (isFile) {
       const parsedName = path.parse(name)
@@ -56,9 +59,6 @@ async function copy(debug: boolean = false, arch: string = 'x86_64'): Promise<nu
         const sourceFilePath = path.join(sourceDirPath, name)
         const targetFilePath = path.join(targetDirPath, `${osAndPrefix.prefix}${parsedName.name}-${osAndPrefix.os}-${arch}.v.${VERSION}${parsedName.ext}`)
         console.info(`Copy from ${sourceFilePath} to ${targetFilePath}.`)
-        if (!fs.existsSync(targetDirPath)) {
-          Deno.mkdirSync(targetDirPath, { recursive: true });
-        }
         fs.copySync(sourceFilePath, targetFilePath, { overwrite: true })
       }
     }
