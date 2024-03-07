@@ -25,7 +25,7 @@ jobs:
             os: windows
             arch: x86_64
             ext: .dll
-            rustenv: setx /m  RUSTFLAGS '-Awarnings'
+            rustenv: $env:RUSTFLAGS = '-Awarnings'
           - image: ubuntu-latest
             os: linux
             arch: x86_64
