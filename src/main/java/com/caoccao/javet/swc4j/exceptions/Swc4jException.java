@@ -14,34 +14,42 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j;
+package com.caoccao.javet.swc4j.exceptions;
 
 /**
- * The type Swc4j.
+ * The type Swc4j exception.
  *
  * @since 0.1.0
  */
-public final class Swc4j {
-
-    static {
-        new Swc4jLibLoader().load();
+public class Swc4jException extends Exception {
+    /**
+     * Instantiates a new Swc4j exception.
+     *
+     * @param message the message
+     * @since 0.1.0
+     */
+    public Swc4jException(String message) {
+        super(message);
     }
 
     /**
-     * Instantiates a new Swc4j.
+     * Instantiates a new Swc4j exception.
      *
+     * @param message the message
+     * @param cause   the cause
      * @since 0.1.0
      */
-    public Swc4j() {
+    public Swc4jException(String message, Throwable cause) {
+        super(message, cause);
     }
 
     /**
-     * Gets version.
+     * Instantiates a new Swc4j exception.
      *
-     * @return the version
+     * @param cause the cause
      * @since 0.1.0
      */
-    public String getVersion() {
-        return Swc4jNative.getVersion();
+    public Swc4jException(Throwable cause) {
+        super(cause);
     }
 }

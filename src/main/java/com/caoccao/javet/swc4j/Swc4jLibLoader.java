@@ -16,16 +16,24 @@
 
 package com.caoccao.javet.swc4j;
 
+import com.caoccao.javet.swc4j.exceptions.Swc4jLibException;
+import com.caoccao.javet.swc4j.interfaces.ISwc4jLogger;
 import com.caoccao.javet.swc4j.utils.ArrayUtils;
 import com.caoccao.javet.swc4j.utils.OSUtils;
 import com.caoccao.javet.swc4j.utils.StringUtils;
+import com.caoccao.javet.swc4j.utils.Swc4jDefaultLogger;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.text.MessageFormat;
 
-final class SwcLibLoader {
+/**
+ * The type Swc4j lib loader.
+ *
+ * @since 0.1.0
+ */
+final class Swc4jLibLoader {
     private static final String ANDROID_ABI_ARM = "armeabi-v7a";
     private static final String ANDROID_ABI_ARM64 = "arm64-v8a";
     private static final String ANDROID_ABI_X86 = "x86";
@@ -44,6 +52,7 @@ final class SwcLibLoader {
     private static final String LIB_FILE_NAME_PREFIX = "lib";
     private static final String LIB_NAME = "swc4j";
     private static final String LIB_VERSION = "0.1.0";
+    private static final ISwc4jLogger LOGGER = new Swc4jDefaultLogger(Swc4jLibLoader.class.getName());
     private static final long MIN_LAST_MODIFIED_GAP_IN_MILLIS = 60L * 1000L; // 1 minute
     private static final String OS_ANDROID = "android";
     private static final String OS_LINUX = "linux";
@@ -52,7 +61,12 @@ final class SwcLibLoader {
     private static final String RESOURCE_NAME_FORMAT = "/{0}";
     private static final String XRR = "755";
 
-    SwcLibLoader() {
+    /**
+     * Instantiates a new Swc4j lib loader.
+     *
+     * @since 0.1.0
+     */
+    Swc4jLibLoader() {
     }
 
     private void deployLibFile(String resourceFileName, File libFile) {
@@ -63,14 +77,12 @@ final class SwcLibLoader {
                 libFile.delete();
             } catch (Throwable t) {
                 isLibFileLocked = true;
-                System.err.println(MessageFormat.format(
-                        "Failed to delete {0} because it is locked.",
-                        libFile.getAbsolutePath()));
+                LOGGER.logError("Failed to delete {0} because it is locked.", libFile.getAbsolutePath());
             }
         }
         if (!isLibFileLocked) {
             byte[] buffer = new byte[BUFFER_LENGTH];
-            try (InputStream inputStream = SwcNative.class.getResourceAsStream(resourceFileName);
+            try (InputStream inputStream = Swc4jNative.class.getResourceAsStream(resourceFileName);
                  FileOutputStream outputStream = new FileOutputStream(libFile.getAbsolutePath())) {
                 if (inputStream != null) {
                     while (true) {
@@ -88,9 +100,7 @@ final class SwcLibLoader {
                     }
                 }
             } catch (Throwable t) {
-                System.err.println(MessageFormat.format(
-                        "Failed to write to {0} because it is locked.",
-                        libFile.getAbsolutePath()));
+                LOGGER.logError("Failed to write to {0} because it is locked.", libFile.getAbsolutePath());
             }
         }
     }
@@ -123,15 +133,15 @@ final class SwcLibLoader {
         return null;
     }
 
-    private String getLibFileName() {
+    private String getLibFileName() throws Swc4jLibException {
         String fileExtension = getFileExtension();
         String osName = getOSName();
         if (fileExtension == null || osName == null || OSUtils.IS_ANDROID) {
-            throw new RuntimeException(MessageFormat.format("OS {0} is not supported", OSUtils.OS_NAME));
+            throw Swc4jLibException.osNotSupported(OSUtils.OS_NAME);
         }
         String osArch = getOSArch();
         if (osArch == null) {
-            throw new RuntimeException(MessageFormat.format("Arch {0} is not supported", OSUtils.OS_ARCH));
+            throw Swc4jLibException.archNotSupported(OSUtils.OS_ARCH);
         }
         return MessageFormat.format(
                 LIB_FILE_NAME_FORMAT,
@@ -175,16 +185,21 @@ final class SwcLibLoader {
         return null;
     }
 
-    private String getResourceFileName() {
+    private String getResourceFileName() throws Swc4jLibException {
         String resourceFileName = MessageFormat.format(RESOURCE_NAME_FORMAT, OSUtils.IS_ANDROID
                 ? StringUtils.join("/", LIB_FILE_NAME_PREFIX, getAndroidABI(), getLibFileName())
                 : getLibFileName());
-        if (SwcNative.class.getResource(resourceFileName) == null) {
-            throw new RuntimeException(MessageFormat.format("Lib {0} is not found", resourceFileName));
+        if (Swc4jNative.class.getResource(resourceFileName) == null) {
+            throw Swc4jLibException.libNotFound(resourceFileName);
         }
         return resourceFileName;
     }
 
+    /**
+     * Load the native library.
+     *
+     * @since 0.1.0
+     */
     void load() {
         String libFilePath = null;
         try {
@@ -198,8 +213,7 @@ final class SwcLibLoader {
             }
             if (!rootLibPath.exists()) {
                 if (!rootLibPath.mkdirs()) {
-                    throw new RuntimeException(
-                            MessageFormat.format("Failed to create {0}.", rootLibPath.getAbsolutePath()));
+                    throw Swc4jLibException.libNotCreated(rootLibPath.getAbsolutePath());
                 }
             }
             String resourceFileName = getResourceFileName();
@@ -208,8 +222,7 @@ final class SwcLibLoader {
             deployLibFile(resourceFileName, libFile);
             System.load(libFilePath);
         } catch (Throwable t) {
-            t.printStackTrace(System.err);
-            throw new RuntimeException(MessageFormat.format("Failed to load {0}", libFilePath));
+            LOGGER.error(t.getMessage(), t);
         }
     }
 
@@ -230,13 +243,9 @@ final class SwcLibLoader {
                                     if (libFiles != null && libFiles.length > 0) {
                                         for (File libFile : libFiles) {
                                             if (libFile.delete()) {
-                                                System.out.println(MessageFormat.format(
-                                                        "Deleted {0}.",
-                                                        libFile.getAbsolutePath()));
+                                                LOGGER.logDebug("Deleted {0}.", libFile.getAbsolutePath());
                                             } else {
-                                                System.out.println(MessageFormat.format(
-                                                        "{0} is locked.",
-                                                        libFile.getAbsolutePath()));
+                                                LOGGER.logDebug("{0} is locked.", libFile.getAbsolutePath());
                                                 toBeDeleted = true;
                                                 break;
                                             }
@@ -245,38 +254,28 @@ final class SwcLibLoader {
                                         toBeDeleted = true;
                                     }
                                 } catch (Throwable t) {
-                                    System.err.println(MessageFormat.format(
-                                            "Failed to delete {0}.",
-                                            libFileOrPath.getAbsolutePath()));
+                                    LOGGER.logError("Failed to delete {0}.", libFileOrPath.getAbsolutePath());
                                 }
                             } else if (libFileOrPath.isFile()) {
                                 toBeDeleted = true;
                             }
                             if (toBeDeleted) {
                                 if (libFileOrPath.delete()) {
-                                    System.out.println(MessageFormat.format(
-                                            "Deleted {0}.",
-                                            libFileOrPath.getAbsolutePath()));
+                                    LOGGER.logDebug("Deleted {0}.", libFileOrPath.getAbsolutePath());
                                 } else {
-                                    System.out.println(MessageFormat.format(
-                                            "{0} is locked.",
-                                            libFileOrPath.getAbsolutePath()));
+                                    LOGGER.logDebug("{0} is locked.", libFileOrPath.getAbsolutePath());
                                 }
                             }
                         }
                     }
                 } else {
                     if (!rootLibPath.delete()) {
-                        System.err.println(MessageFormat.format(
-                                "Failed to delete {0}.",
-                                rootLibPath.getAbsolutePath()));
+                        LOGGER.logError("Failed to delete {0}.", rootLibPath.getAbsolutePath());
                     }
                 }
             }
         } catch (Throwable t) {
-            System.err.println(MessageFormat.format(
-                    "Failed to clean up {0}.",
-                    rootLibPath.getAbsolutePath()));
+            LOGGER.logError("Failed to clean up {0}.", rootLibPath.getAbsolutePath());
         }
     }
 }

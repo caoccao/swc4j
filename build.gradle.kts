@@ -107,11 +107,7 @@ task<Exec>("buildJNIHeaders") {
             "rust/src/jni",
             "-d",
             "$buildDir/generated/tmp/jni",
-            "src/main/java/com/caoccao/javet/swc4j/SwcNative.java",
-            "src/main/java/com/caoccao/javet/swc4j/SwcLibLoader.java",
-            "src/main/java/com/caoccao/javet/swc4j/utils/ArrayUtils.java",
-            "src/main/java/com/caoccao/javet/swc4j/utils/OSUtils.java",
-            "src/main/java/com/caoccao/javet/swc4j/utils/StringUtils.java",
+            "src/main/java/com/caoccao/javet/swc4j/Swc4jNative.java",
         )
     }
 }

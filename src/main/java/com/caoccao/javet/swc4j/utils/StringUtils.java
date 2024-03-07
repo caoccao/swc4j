@@ -19,10 +19,23 @@ package com.caoccao.javet.swc4j.utils;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+/**
+ * The type String utils.
+ *
+ * @since 0.1.0
+ */
 public final class StringUtils {
     private StringUtils() {
     }
 
+    /**
+     * Join string.
+     *
+     * @param delimiter the delimiter
+     * @param elements  the elements
+     * @return the string
+     * @since 0.1.0
+     */
     public static String join(CharSequence delimiter, CharSequence... elements) {
         Objects.requireNonNull(delimiter);
         Objects.requireNonNull(elements);

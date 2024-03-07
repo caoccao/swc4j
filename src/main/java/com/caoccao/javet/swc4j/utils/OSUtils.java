@@ -18,6 +18,11 @@ package com.caoccao.javet.swc4j.utils;
 
 import java.lang.management.ManagementFactory;
 
+/**
+ * The type OS utils.
+ *
+ * @since 0.1.0
+ */
 public final class OSUtils {
     public static final String OS_ARCH = System.getProperty("os.arch");
     public static final String OS_NAME = System.getProperty("os.name");
