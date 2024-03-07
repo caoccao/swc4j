@@ -25,18 +25,22 @@ jobs:
             os: windows
             arch: x86_64
             ext: .dll
+            env: set
           - image: ubuntu-latest
             os: linux
             arch: x86_64
             ext: .so
+            env: export
           - image: macos-latest
             os: macos
             arch: x86_64
             ext: .dylib
+            env: export
           - image: macos-14
             os: macos
             arch: arm64
             ext: .dylib
+            env: export
 
     name: Build swc4j for ${{ matrix.os }} ${{ matrix.arch }}
     runs-on: ${{ matrix.image }}
@@ -59,7 +63,7 @@ jobs:
     - name: Cargo Build and Test
       run: |
         cd rust
-        echo 'rustflags = ["-Awarnings"]' >> .cargo/config.toml
+        ${{ matrix.env }} RUSTFLAGS=-Awarnings
         cargo build -r
         cargo test -r
         deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o ${{ matrix.os }} -a ${{ matrix.arch }}
