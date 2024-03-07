@@ -76,17 +76,12 @@ jobs:
 
     - name: Build and Test
       run: |
-        gradle build test generatePomFileForGeneratePomPublication javadoc --rerun-tasks --debug
-
-    - name: Clean Up
-      uses: edgarrc/action-7z@v1
-      with:
-        args: 7z d build/libs/swc4j-${{ env.SWC4J_VERSION }}-javadoc.jar '*.dll' '*.so' '*.dylib'
+        gradle build test generatePomFileForGeneratePomPublication --rerun-tasks --debug
 
     - name: Upload the Artifact
       uses: actions/upload-artifact@v4
       with:
         name: swc4j-${{ matrix.os }}-${{ matrix.arch }}-${{ env.SWC4J_VERSION }}
         path: |
-          build/libs/*.jar
-          build/libs/*.pom
+          build/libs/swc4j-${{ env.SWC4J_VERSION }}.jar
+          build/libs/swc4j-${{ env.SWC4J_VERSION }}.pom
