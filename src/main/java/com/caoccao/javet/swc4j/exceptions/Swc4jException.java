@@ -21,7 +21,7 @@ package com.caoccao.javet.swc4j.exceptions;
  *
  * @since 0.1.0
  */
-public class Swc4jException extends Exception {
+public abstract class Swc4jException extends Exception {
     /**
      * Instantiates a new Swc4j exception.
      *

@@ -15,18 +15,15 @@
 * limitations under the License.
 */
 
-use jni::objects::JClass;
 use jni::sys::jstring;
 use jni::JNIEnv;
+use std::ptr::null_mut;
 
-mod core;
+pub const VERSION: &'static str = "0.1.0";
 
-pub use core::VERSION;
-
-#[no_mangle]
-pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_getVersion<'local>(
-  env: JNIEnv<'local>,
-  _: JClass<'local>,
-) -> jstring {
-  core::get_version(env)
+pub fn get_version<'local>(env: JNIEnv<'local>) -> jstring {
+  match env.new_string(VERSION) {
+    Ok(s) => s.into_raw(),
+    Err(_) => null_mut(),
+  }
 }
