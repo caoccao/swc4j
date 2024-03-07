@@ -22,5 +22,8 @@ final class SwcNative {
         new SwcLibLoader().load();
     }
 
+    private SwcNative() {
+    }
+
     public static native String getVersion();
 }

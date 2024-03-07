@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j;
 
+import com.caoccao.javet.swc4j.utils.ArrayUtils;
 import com.caoccao.javet.swc4j.utils.OSUtils;
 import com.caoccao.javet.swc4j.utils.StringUtils;
 
@@ -217,7 +218,7 @@ final class SwcLibLoader {
             if (rootLibPath.exists()) {
                 if (rootLibPath.isDirectory()) {
                     File[] files = rootLibPath.listFiles();
-                    if (files != null && files.length > 0) {
+                    if (ArrayUtils.isNotEmpty(files)) {
                         for (File libFileOrPath : files) {
                             if (libFileOrPath.lastModified() + MIN_LAST_MODIFIED_GAP_IN_MILLIS > System.currentTimeMillis()) {
                                 continue;
