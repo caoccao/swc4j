@@ -25,7 +25,7 @@ jobs:
             os: windows
             arch: x86_64
             ext: .dll
-            env: set
+            env: setx
           - image: ubuntu-latest
             os: linux
             arch: x86_64
@@ -63,7 +63,7 @@ jobs:
     - name: Cargo Build and Test
       run: |
         cd rust
-        ${{ matrix.env }} RUSTFLAGS=-Awarnings
+        ${{ matrix.env }} RUSTFLAGS='-Awarnings'
         cargo build -r
         cargo test -r
         deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o ${{ matrix.os }} -a ${{ matrix.arch }}
