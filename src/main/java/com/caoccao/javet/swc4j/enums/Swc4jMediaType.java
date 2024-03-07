@@ -14,15 +14,33 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j;
+package com.caoccao.javet.swc4j.enums;
 
-import org.junit.jupiter.api.Test;
+public enum Swc4jMediaType {
+    JavaScript(0),
+    Jsx(1),
+    Mjs(2),
+    Cjs(3),
+    TypeScript(4),
+    Mts(5),
+    Cts(6),
+    Dts(7),
+    Dmts(8),
+    Dcts(9),
+    Tsx(10),
+    Json(11),
+    Wasm(12),
+    TsBuildInfo(13),
+    SourceMap(14),
+    Unknown(15);
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+    private final int id;
 
-public class TestSwc4jNative {
-    @Test
-    public void testGetVersion() {
-        assertEquals("0.1.0", Swc4jNative.coreGetVersion());
+    Swc4jMediaType(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 }

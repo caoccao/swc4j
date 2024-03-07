@@ -9,5 +9,6 @@ edition = "2021"
 crate_type = ["cdylib", "rlib"]
 
 [dependencies]
+deno_ast = { version = "1.0.1", features = ["module_specifier", "transpiling", "transforms"] }
+deno_media_type = "0.1.2"
 jni = "0.21.1"
-swc = "0.273.15"

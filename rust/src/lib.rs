@@ -16,17 +16,29 @@
 */
 
 use jni::objects::JClass;
-use jni::sys::jstring;
+use jni::sys::{jboolean, jint, jobject, jstring};
 use jni::JNIEnv;
 
 mod core;
+mod utils;
 
 pub use core::VERSION;
 
 #[no_mangle]
-pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_getVersion<'local>(
+pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion<'local>(
   env: JNIEnv<'local>,
   _: JClass<'local>,
 ) -> jstring {
-  core::get_version(env)
+  core::get_version(&env)
+}
+
+#[no_mangle]
+pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'local>(
+  mut env: JNIEnv<'local>,
+  _: JClass<'local>,
+  code: jstring,
+  media_type_id: jint,
+  file_name: jstring,
+) -> jobject {
+  core::transpile(&mut env, code, media_type_id, file_name)
 }

@@ -21,5 +21,10 @@ final class Swc4jNative {
     private Swc4jNative() {
     }
 
-    public static native String getVersion();
+    public static native String coreGetVersion();
+
+    public static native Object coreTranspile(
+            String code,
+            int mediaTypeId,
+            String fileName);
 }
