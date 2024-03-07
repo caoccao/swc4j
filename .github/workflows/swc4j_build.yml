@@ -59,7 +59,7 @@ jobs:
     - name: Cargo Build and Test
       run: |
         cd rust
-        export RUSTFLAGS=-Awarnings
+        echo 'rustflags = ["-Awarnings"]' >> .cargo/config.toml
         cargo build -r
         cargo test -r
         deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o ${{ matrix.os }} -a ${{ matrix.arch }}
