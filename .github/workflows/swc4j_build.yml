@@ -25,22 +25,18 @@ jobs:
             os: windows
             arch: x86_64
             ext: .dll
-            rustenv: $env:RUSTFLAGS = '-Awarnings'
           - image: ubuntu-latest
             os: linux
             arch: x86_64
             ext: .so
-            rustenv: export RUSTFLAGS='-Awarnings'
           - image: macos-latest
             os: macos
             arch: x86_64
             ext: .dylib
-            rustenv: export RUSTFLAGS='-Awarnings'
           - image: macos-14
             os: macos
             arch: arm64
             ext: .dylib
-            rustenv: export RUSTFLAGS='-Awarnings'
 
     name: Build swc4j for ${{ matrix.os }} ${{ matrix.arch }}
     runs-on: ${{ matrix.image }}
@@ -61,9 +57,10 @@ jobs:
         deno-version: vx.x.x
 
     - name: Cargo Build and Test
+      env:
+        RUSTFLAGS: -Awarnings
       run: |
         cd rust
-        ${{ matrix.rustenv }}
         cargo build -r
         cargo test -r
         deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o ${{ matrix.os }} -a ${{ matrix.arch }}
