@@ -16,8 +16,10 @@
 */
 
 use jni::objects::JClass;
-use jni::sys::{jboolean, jint, jobject, jstring};
+use jni::sys::{jint, jobject, jstring};
 use jni::JNIEnv;
+
+use std::ptr::null_mut;
 
 mod core;
 mod utils;
@@ -29,7 +31,7 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion<'
   env: JNIEnv<'local>,
   _: JClass<'local>,
 ) -> jstring {
-  core::get_version(&env)
+  utils::converter::string_to_jstring(&env, core::get_version().as_str())
 }
 
 #[no_mangle]
@@ -40,5 +42,9 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'l
   media_type_id: jint,
   file_name: jstring,
 ) -> jobject {
-  core::transpile(&mut env, code, media_type_id, file_name)
+  let code = utils::converter::jstring_to_string(&mut env, code);
+  let file_name = utils::converter::jstring_to_string(&mut env, file_name);
+  let media_type = utils::converter::media_type_id_to_media_type(media_type_id);
+  core::transpile(code, media_type, file_name);
+  null_mut()
 }

@@ -15,26 +15,18 @@
 * limitations under the License.
 */
 
-use jni::sys::{jboolean, jint, jobject, jstring};
-use jni::JNIEnv;
-use std::ptr::null_mut;
-
 use deno_ast::*;
-
-use crate::utils::converter;
 
 pub const VERSION: &'static str = "0.1.0";
 
-pub fn transpile<'local>(env: &mut JNIEnv<'local>, code: jstring, media_type_id: jint, file_name: jstring) -> jobject {
-  let url = ModuleSpecifier::parse(&format!("file:///{}", converter::jstring_to_string(env, file_name))).unwrap();
-  let media_type = converter::media_type_id_to_media_type(media_type_id);
-  let source_code = converter::jstring_to_string(env, code);
+pub fn transpile<'local>(code: String, media_type: MediaType, file_name: String) {
+  let url = ModuleSpecifier::parse(&format!("file:///{}", file_name)).unwrap();
   println!("url: {}", url.to_string());
-  println!("source: {}", source_code.to_string());
+  println!("source: {}", code.to_string());
   println!("media_type: {}", media_type.to_string());
   let parsed_source = parse_module(ParseParams {
     specifier: url.to_string(),
-    text_info: SourceTextInfo::from_string(source_code.to_string()),
+    text_info: SourceTextInfo::from_string(code.to_string()),
     media_type: media_type,
     capture_tokens: false,
     maybe_syntax: None,
@@ -45,9 +37,8 @@ pub fn transpile<'local>(env: &mut JNIEnv<'local>, code: jstring, media_type_id:
   println!("script: {}", parsed_source.is_script());
   let transpiled_js_code = parsed_source.transpile(&EmitOptions::default()).unwrap();
   println!("{}", transpiled_js_code.text);
-  null_mut()
 }
 
-pub fn get_version<'local>(env: &JNIEnv<'local>) -> jstring {
-  converter::string_to_jstring(&env, VERSION)
+pub fn get_version<'local>() -> String {
+  VERSION.to_string()
 }

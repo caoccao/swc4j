@@ -16,7 +16,7 @@
 */
 
 use jni::objects::JString;
-use jni::sys::{jboolean, jint, jobject, jstring};
+use jni::sys::jstring;
 use jni::JNIEnv;
 use std::ptr::null_mut;
 
@@ -31,7 +31,7 @@ pub fn jstring_to_string<'local>(env: &mut JNIEnv<'local>, s: jstring) -> String
   }
 }
 
-pub fn media_type_id_to_media_type(media_type_id: jint) -> MediaType {
+pub fn media_type_id_to_media_type(media_type_id: i32) -> MediaType {
   match media_type_id {
     0 => MediaType::JavaScript,
     1 => MediaType::Jsx,
