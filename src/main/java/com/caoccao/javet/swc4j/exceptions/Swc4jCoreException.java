@@ -42,4 +42,15 @@ public final class Swc4jCoreException extends Swc4jException {
     public static Swc4jCoreException featureNotSupported(String feature) {
         return new Swc4jCoreException(MessageFormat.format("Feature {0} is not supported", feature));
     }
+
+    /**
+     * Transpile error.
+     *
+     * @param message the message
+     * @return the swc4j core exception
+     * @since 0.1.0
+     */
+    public static Swc4jCoreException transpileError(String message) {
+        return new Swc4jCoreException(message);
+    }
 }

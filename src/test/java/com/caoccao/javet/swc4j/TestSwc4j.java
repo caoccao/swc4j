@@ -37,7 +37,7 @@ public class TestSwc4j {
     }
 
     @Test
-    public void testTranspile() throws Swc4jCoreException {
+    public void testTranspileTypeScriptInlineSourceMap() throws Swc4jCoreException {
         String code = "function add(a:number, b:number) { return a+b; }";
         String expectedCode = "function add(a, b) {\n" +
                 "  return a + b;\n" +
@@ -48,7 +48,6 @@ public class TestSwc4j {
                 .setFileName(fileName)
                 .setMediaType(Swc4jMediaType.TypeScript);
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
-        System.out.println(output.getCode());
         assertNotNull(output);
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
         assertEquals(
@@ -57,5 +56,23 @@ public class TestSwc4j {
                         expectedCode.length(),
                         expectedCode.length() + expectedMapPrefix.length()));
         assertNull(output.getSourceMap());
+    }
+
+    @Test
+    public void testTranspileWrongMediaType() {
+        String code = "function add(a:number, b:number) { return a+b; }";
+        String fileName = "abc.ts";
+        Swc4jTranspileOptions options = new Swc4jTranspileOptions()
+                .setFileName(fileName)
+                .setMediaType(Swc4jMediaType.JavaScript);
+        assertEquals(
+                "Expected ',', got ':' at file:///abc.ts:1:15\n" +
+                        "\n" +
+                        "  function add(a:number, b:number) { return a+b; }\n" +
+                        "                ~",
+                assertThrows(
+                        Swc4jCoreException.class,
+                        () -> swc4j.transpile(code, options))
+                        .getMessage());
     }
 }

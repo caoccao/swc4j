@@ -25,15 +25,17 @@ use outputs::ToJniType;
 use std::ffi::c_void;
 use std::ptr::null_mut;
 
+pub mod converter;
 pub mod core;
+pub mod error;
 pub mod options;
 pub mod outputs;
-pub mod utils;
 
 #[no_mangle]
 pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
   debug_println!("JNI_OnLoad()");
   let mut env = java_vm.get_env().expect("Cannot get JNI env");
+  error::init(&mut env);
   options::init(&mut env);
   outputs::init(&mut env);
   JNI_VERSION_1_8
@@ -44,7 +46,7 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion<'
   env: JNIEnv<'local>,
   _: JClass<'local>,
 ) -> jstring {
-  utils::converter::string_to_jstring(&env, core::get_version())
+  converter::string_to_jstring(&env, core::get_version())
 }
 
 #[no_mangle]
@@ -54,10 +56,13 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'l
   code: jstring,
   options: jobject,
 ) -> jobject {
-  let code = utils::converter::jstring_to_string(&mut env, code);
+  let code = converter::jstring_to_string(&mut env, code);
   let options = options::TranspileOptions::from_jni_type(&mut env, options);
   match core::transpile(code, options) {
-    Some(output) => output.to_jni_type(&mut env),
-    None => null_mut(),
+    Ok(output) => output.to_jni_type(&mut env),
+    Err(message) => {
+      error::throw_transpile_error(&mut env, message.as_str());
+      null_mut()
+    },
   }
 }

@@ -21,23 +21,26 @@ use crate::{options, outputs};
 
 const VERSION: &'static str = "0.1.0";
 
-pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Option<outputs::TranspileOutput> {
+pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Result<outputs::TranspileOutput, String> {
   let url = ModuleSpecifier::parse(&format!("file:///{}", options.file_name)).unwrap();
-  let parsed_source = parse_module(ParseParams {
+  match parse_module(ParseParams {
     specifier: url.to_string(),
     text_info: SourceTextInfo::from_string(code.to_string()),
     media_type: options.media_type,
     capture_tokens: false,
     maybe_syntax: None,
     scope_analysis: false,
-  })
-  .unwrap();
-  let transpiled_js_code = parsed_source.transpile(&EmitOptions::default()).unwrap();
-  Some(outputs::TranspileOutput {
-    code: transpiled_js_code.text,
-    module: parsed_source.is_module(),
-    source_map: transpiled_js_code.source_map,
-  })
+  }) {
+    Ok(parsed_source) => match parsed_source.transpile(&EmitOptions::default()) {
+      Ok(transpiled_js_code) => Ok(outputs::TranspileOutput {
+        code: transpiled_js_code.text,
+        module: parsed_source.is_module(),
+        source_map: transpiled_js_code.source_map,
+      }),
+      Err(e) => Err(e.to_string()),
+    },
+    Err(e) => Err(e.to_string()),
+  }
 }
 
 pub fn get_version<'local>() -> &'local str {

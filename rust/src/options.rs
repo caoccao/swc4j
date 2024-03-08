@@ -22,7 +22,7 @@ use jni::JNIEnv;
 
 use deno_ast::MediaType;
 
-use crate::utils;
+use crate::converter;
 
 struct JniCalls {
   pub jmethod_id_transpile_options_get_file_name: JMethodID,
@@ -85,7 +85,7 @@ impl FromJniType for TranspileOptions {
       )
     };
     let file_name = unsafe { file_name.unwrap().as_jni().l };
-    let file_name = utils::converter::jstring_to_string(env, file_name);
+    let file_name = converter::jstring_to_string(env, file_name);
     // media_type
     let media_type = unsafe {
       env.call_method_unchecked(
@@ -105,7 +105,7 @@ impl FromJniType for TranspileOptions {
       )
     };
     let media_type = unsafe { media_type.unwrap().as_jni().i };
-    let media_type = utils::converter::media_type_id_to_media_type(media_type);
+    let media_type = converter::media_type_id_to_media_type(media_type);
     // construct
     TranspileOptions { file_name, media_type }
   }

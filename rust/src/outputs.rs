@@ -21,7 +21,7 @@ use jni::JNIEnv;
 
 use std::ptr::null_mut;
 
-use crate::utils;
+use crate::converter;
 
 struct JniCalls {
   pub jclass_transpile_output: GlobalRef,
@@ -64,14 +64,14 @@ pub struct TranspileOutput {
 impl ToJniType for TranspileOutput {
   fn to_jni_type<'local>(&self, env: &mut JNIEnv<'local>) -> jobject {
     let code = jvalue {
-      l: utils::converter::string_to_jstring(env, &self.code),
+      l: converter::string_to_jstring(env, &self.code),
     };
     let module = jvalue {
       z: if self.module { 1u8 } else { 0u8 },
     };
     let source_map = jvalue {
       l: match &self.source_map {
-        Some(s) => utils::converter::string_to_jstring(env, &s),
+        Some(s) => converter::string_to_jstring(env, &s),
         None => null_mut(),
       },
     };
