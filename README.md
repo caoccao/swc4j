@@ -26,7 +26,7 @@ Swc4jTranspileOptions options = new Swc4jTranspileOptions()
         .setFileName(fileName)
         .setMediaType(Swc4jMediaType.TypeScript);
 // Transpile the code.
-Swc4jTranspileOutput output = swc4j.transpile(code, options);
+Swc4jTranspileOutput output = new Swc4j().transpile(code, options);
 // Print the transpiled code.
 System.out.println(output.getCode());
 ```
