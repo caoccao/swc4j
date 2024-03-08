@@ -37,19 +37,23 @@ static mut JNI_CALLS: Option<JniCalls> = None;
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   let jclass_transpile_options = env
     .find_class("com/caoccao/javet/swc4j/options/Swc4jTranspileOptions")
-    .unwrap();
+    .expect("Couldn't find class Swc4jTranspileOptions");
   let jmethod_id_transpile_options_get_file_name = env
     .get_method_id(&jclass_transpile_options, "getFileName", "()Ljava/lang/String;")
-    .unwrap();
+    .expect("Couldn't find method Swc4jTranspileOptions.getFileName");
   let jmethod_id_transpile_options_get_media_type = env
     .get_method_id(
       &jclass_transpile_options,
       "getMediaType",
       "()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;",
     )
-    .unwrap();
-  let jclass_media_type = env.find_class("com/caoccao/javet/swc4j/enums/Swc4jMediaType").unwrap();
-  let jmethod_id_media_type_get_id = env.get_method_id(&jclass_media_type, "getId", "()I").unwrap();
+    .expect("Couldn't find method Swc4jTranspileOptions.getMediaType");
+  let jclass_media_type = env
+    .find_class("com/caoccao/javet/swc4j/enums/Swc4jMediaType")
+    .expect("Couldn't find class Swc4jMediaType");
+  let jmethod_id_media_type_get_id = env
+    .get_method_id(&jclass_media_type, "getId", "()I")
+    .expect("Couldn't find method Swc4jMediaType.getId");
   unsafe {
     JNI_CALLS = Some(JniCalls {
       jmethod_id_transpile_options_get_file_name,

@@ -19,22 +19,28 @@ package com.caoccao.javet.swc4j.outputs;
 public class Swc4jTranspileOutput {
     protected String code;
     protected boolean module;
+    protected String sourceMap;
 
     public Swc4jTranspileOutput() {
         this(null);
     }
 
     public Swc4jTranspileOutput(String code) {
-        this(code, false);
+        this(code, null, false);
     }
 
-    public Swc4jTranspileOutput(String code, boolean module) {
+    public Swc4jTranspileOutput(String code, String sourceMap, boolean module) {
         setCode(code);
         setModule(module);
+        setSourceMap(sourceMap);
     }
 
     public String getCode() {
         return code;
+    }
+
+    public String getSourceMap() {
+        return sourceMap;
     }
 
     public boolean isModule() {
@@ -48,6 +54,11 @@ public class Swc4jTranspileOutput {
 
     public Swc4jTranspileOutput setModule(boolean module) {
         this.module = module;
+        return this;
+    }
+
+    public Swc4jTranspileOutput setSourceMap(String sourceMap) {
+        this.sourceMap = sourceMap;
         return this;
     }
 }
