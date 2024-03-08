@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j;
+package com.caoccao.javet.swc4j.utils;
 
-final class Swc4jNative {
+public final class AssertionUtils {
 
-    private Swc4jNative() {
+    private static final String VALUE = "Value";
+
+    private AssertionUtils() {
     }
 
-    static native String coreGetVersion();
+    public static <T> T notNull(T value) {
+        return notNull(value, VALUE);
+    }
 
-    static native Object coreTranspile(String code, Object options);
+    public static <T> T notNull(T value, String name) {
+        if (value == null) {
+            throw new NullPointerException(name + " is not nullable");
+        }
+        return value;
+    }
 }

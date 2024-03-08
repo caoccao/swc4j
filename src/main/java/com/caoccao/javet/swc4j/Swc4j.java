@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 /**
  * The type Swc4j.
@@ -57,7 +58,6 @@ public final class Swc4j {
     public Swc4jTranspileOutput transpile(String code, Swc4jTranspileOptions options) throws Swc4jCoreException {
         return (Swc4jTranspileOutput) Swc4jNative.coreTranspile(
                 code,
-                options.getMediaType().getId(),
-                options.getFileName());
+                AssertionUtils.notNull(options, "Options"));
     }
 }

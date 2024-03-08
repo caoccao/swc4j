@@ -17,17 +17,19 @@
 
 use deno_ast::*;
 
-pub const VERSION: &'static str = "0.1.0";
+use crate::options;
 
-pub fn transpile<'local>(code: String, media_type: MediaType, file_name: String) {
-  let url = ModuleSpecifier::parse(&format!("file:///{}", file_name)).unwrap();
+const VERSION: &'static str = "0.1.0";
+
+pub fn transpile<'local>(code: String, options: options::TranspileOptions) {
+  let url = ModuleSpecifier::parse(&format!("file:///{}", options.file_name)).unwrap();
   println!("url: {}", url.to_string());
   println!("source: {}", code.to_string());
-  println!("media_type: {}", media_type.to_string());
+  println!("media_type: {}", options.media_type.to_string());
   let parsed_source = parse_module(ParseParams {
     specifier: url.to_string(),
     text_info: SourceTextInfo::from_string(code.to_string()),
-    media_type: media_type,
+    media_type: options.media_type,
     capture_tokens: false,
     maybe_syntax: None,
     scope_analysis: false,
@@ -39,6 +41,6 @@ pub fn transpile<'local>(code: String, media_type: MediaType, file_name: String)
   println!("{}", transpiled_js_code.text);
 }
 
-pub fn get_version<'local>() -> String {
-  VERSION.to_string()
+pub fn get_version<'local>() -> &'local str {
+  VERSION
 }

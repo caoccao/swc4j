@@ -15,23 +15,23 @@
 * limitations under the License.
 */
 
-use jni::objects::JClass;
-use jni::sys::{jint, jobject, jstring};
 use jni::JNIEnv;
+use jni::objects::JClass;
+use jni::sys::{jobject, jstring};
+use options::FromJniType;
 
 use std::ptr::null_mut;
 
-mod core;
-mod utils;
-
-pub use core::VERSION;
+pub mod core;
+pub mod options;
+pub mod utils;
 
 #[no_mangle]
 pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion<'local>(
   env: JNIEnv<'local>,
   _: JClass<'local>,
 ) -> jstring {
-  utils::converter::string_to_jstring(&env, core::get_version().as_str())
+  utils::converter::string_to_jstring(&env, core::get_version())
 }
 
 #[no_mangle]
@@ -39,12 +39,10 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'l
   mut env: JNIEnv<'local>,
   _: JClass<'local>,
   code: jstring,
-  media_type_id: jint,
-  file_name: jstring,
+  options: jobject,
 ) -> jobject {
   let code = utils::converter::jstring_to_string(&mut env, code);
-  let file_name = utils::converter::jstring_to_string(&mut env, file_name);
-  let media_type = utils::converter::media_type_id_to_media_type(media_type_id);
-  core::transpile(code, media_type, file_name);
+  let options = options::TranspileOptions::from_jni_type(&mut env, options);
+  core::transpile(code, options);
   null_mut()
 }

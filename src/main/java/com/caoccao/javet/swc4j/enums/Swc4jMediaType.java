@@ -16,6 +16,13 @@
 
 package com.caoccao.javet.swc4j.enums;
 
+import java.util.stream.Stream;
+
+/**
+ * The enum Swc4j media type.
+ *
+ * @since 0.1.0
+ */
 public enum Swc4jMediaType {
     JavaScript(0),
     Jsx(1),
@@ -34,12 +41,36 @@ public enum Swc4jMediaType {
     SourceMap(14),
     Unknown(15);
 
+    private static final int LENGTH = 16;
+    private static final Swc4jMediaType[] TYPES = new Swc4jMediaType[LENGTH];
+
+    static {
+        Stream.of(values()).forEach(v -> TYPES[v.getId()] = v);
+    }
+
     private final int id;
 
     Swc4jMediaType(int id) {
         this.id = id;
     }
 
+    /**
+     * Parse swc4j media type.
+     *
+     * @param id the id
+     * @return the swc4j media type
+     * @since 0.1.0
+     */
+    public static Swc4jMediaType parse(int id) {
+        return id >= 0 && id < LENGTH ? TYPES[id] : Unknown;
+    }
+
+    /**
+     * Gets id.
+     *
+     * @return the id
+     * @since 0.1.0
+     */
     public int getId() {
         return id;
     }

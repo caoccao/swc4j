@@ -15,9 +15,9 @@
 * limitations under the License.
 */
 
-use swc4j::*;
+use swc4j::core::*;
 
 #[test]
-fn test_version() {
-  assert_eq!(VERSION, "0.1.0");
+fn test_get_version() {
+  assert_eq!(get_version(), "0.1.0");
 }

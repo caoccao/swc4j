@@ -17,13 +17,15 @@
 package com.caoccao.javet.swc4j.options;
 
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 public final class Swc4jTranspileOptions {
+    public static final String DEFAULT_FILE_NAME = "main.js";
     private String fileName;
     private Swc4jMediaType mediaType;
 
     public Swc4jTranspileOptions() {
-        setFileName(null);
+        setFileName(DEFAULT_FILE_NAME);
         setMediaType(Swc4jMediaType.JavaScript);
     }
 
@@ -36,12 +38,12 @@ public final class Swc4jTranspileOptions {
     }
 
     public Swc4jTranspileOptions setFileName(String fileName) {
-        this.fileName = fileName;
+        this.fileName = AssertionUtils.notNull(fileName, "File name");
         return this;
     }
 
     public Swc4jTranspileOptions setMediaType(Swc4jMediaType mediaType) {
-        this.mediaType = mediaType;
+        this.mediaType = AssertionUtils.notNull(mediaType, "Media type");
         return this;
     }
 }
