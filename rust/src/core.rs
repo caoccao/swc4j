@@ -22,9 +22,8 @@ use crate::{options, outputs};
 const VERSION: &'static str = "0.1.0";
 
 pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Result<outputs::TranspileOutput, String> {
-  let url = ModuleSpecifier::parse(&format!("file:///{}", options.file_name)).unwrap();
   match parse_module(ParseParams {
-    specifier: url.to_string(),
+    specifier: options.specifier,
     text_info: SourceTextInfo::from_string(code.to_string()),
     media_type: options.media_type,
     capture_tokens: false,

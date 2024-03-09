@@ -43,9 +43,9 @@ public class TestSwc4j {
                 "  return a + b;\n" +
                 "}\n";
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
-        String fileName = "abc.ts";
+        String fileName = "file:///abc.ts";
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
-                .setFileName(fileName)
+                .setSpecifier(fileName)
                 .setMediaType(Swc4jMediaType.TypeScript);
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
         assertNotNull(output);
@@ -61,9 +61,9 @@ public class TestSwc4j {
     @Test
     public void testTranspileWrongMediaType() {
         String code = "function add(a:number, b:number) { return a+b; }";
-        String fileName = "abc.ts";
+        String fileName = "file:///abc.ts";
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
-                .setFileName(fileName)
+                .setSpecifier(fileName)
                 .setMediaType(Swc4jMediaType.JavaScript);
         assertEquals(
                 "Expected ',', got ':' at file:///abc.ts:1:15\n" +

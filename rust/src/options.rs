@@ -25,8 +25,8 @@ use deno_ast::MediaType;
 use crate::converter;
 
 struct JniCalls {
-  pub jmethod_id_transpile_options_get_file_name: JMethodID,
   pub jmethod_id_transpile_options_get_media_type: JMethodID,
+  pub jmethod_id_transpile_options_get_specifier: JMethodID,
   pub jmethod_id_media_type_get_id: JMethodID,
 }
 unsafe impl Send for JniCalls {}
@@ -38,9 +38,6 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
   let jclass_transpile_options = env
     .find_class("com/caoccao/javet/swc4j/options/Swc4jTranspileOptions")
     .expect("Couldn't find class Swc4jTranspileOptions");
-  let jmethod_id_transpile_options_get_file_name = env
-    .get_method_id(&jclass_transpile_options, "getFileName", "()Ljava/lang/String;")
-    .expect("Couldn't find method Swc4jTranspileOptions.getFileName");
   let jmethod_id_transpile_options_get_media_type = env
     .get_method_id(
       &jclass_transpile_options,
@@ -48,6 +45,9 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
       "()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;",
     )
     .expect("Couldn't find method Swc4jTranspileOptions.getMediaType");
+  let jmethod_id_transpile_options_get_specifier = env
+    .get_method_id(&jclass_transpile_options, "getSpecifier", "()Ljava/lang/String;")
+    .expect("Couldn't find method Swc4jTranspileOptions.getSpecifier");
   let jclass_media_type = env
     .find_class("com/caoccao/javet/swc4j/enums/Swc4jMediaType")
     .expect("Couldn't find class Swc4jMediaType");
@@ -56,8 +56,8 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
     .expect("Couldn't find method Swc4jMediaType.getId");
   unsafe {
     JNI_CALLS = Some(JniCalls {
-      jmethod_id_transpile_options_get_file_name,
       jmethod_id_transpile_options_get_media_type,
+      jmethod_id_transpile_options_get_specifier: jmethod_id_transpile_options_get_specifier,
       jmethod_id_media_type_get_id,
     });
   }
@@ -69,23 +69,23 @@ pub trait FromJniType {
 
 #[derive(Debug)]
 pub struct TranspileOptions {
-  pub file_name: String,
   pub media_type: MediaType,
+  pub specifier: String,
 }
 
 impl FromJniType for TranspileOptions {
   fn from_jni_type<'local>(env: &mut JNIEnv<'local>, o: jobject) -> TranspileOptions {
     let o = unsafe { JObject::from_raw(o) };
-    let file_name = unsafe {
+    let specifier = unsafe {
       env.call_method_unchecked(
         o.as_ref(),
-        JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_get_file_name,
+        JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_get_specifier,
         ReturnType::Object,
         &[],
       )
     };
-    let file_name = unsafe { file_name.unwrap().as_jni().l };
-    let file_name = converter::jstring_to_string(env, file_name);
+    let specifier = unsafe { specifier.unwrap().as_jni().l };
+    let specifier = converter::jstring_to_string(env, specifier);
     // media_type
     let media_type = unsafe {
       env.call_method_unchecked(
@@ -107,6 +107,6 @@ impl FromJniType for TranspileOptions {
     let media_type = unsafe { media_type.unwrap().as_jni().i };
     let media_type = converter::media_type_id_to_media_type(media_type);
     // construct
-    TranspileOptions { file_name, media_type }
+    TranspileOptions { specifier, media_type }
   }
 }

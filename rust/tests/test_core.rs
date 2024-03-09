@@ -30,8 +30,8 @@ fn test_transpile_type_script_inline_source_map() {
   let expected_code = "function add(a, b) {\n  return a + b;\n}\n";
   let expected_source_map_prefix = "//# sourceMappingURL=data:application/json;base64,";
   let options = options::TranspileOptions {
-    file_name: "abc.ts".to_owned(),
     media_type: MediaType::TypeScript,
+    specifier: "file:///abc.ts".to_owned(),
   };
   let output = core::transpile(code.to_owned(), options);
   assert!(output.is_ok());
@@ -48,8 +48,8 @@ fn test_transpile_wrong_media_type() {
     + "  function add(a:number, b:number) { return a+b; }\n"
     + "                ~";
   let options = options::TranspileOptions {
-    file_name: "abc.ts".to_owned(),
     media_type: MediaType::JavaScript,
+    specifier: "file:///abc.ts".to_owned(),
   };
   let output = core::transpile(code.to_owned(), options);
   assert!(output.is_err());

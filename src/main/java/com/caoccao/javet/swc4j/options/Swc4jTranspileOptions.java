@@ -19,31 +19,72 @@ package com.caoccao.javet.swc4j.options;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
+/**
+ * The type Swc4j transpile options.
+ *
+ * @since 0.1.0
+ */
 public final class Swc4jTranspileOptions {
-    public static final String DEFAULT_FILE_NAME = "main.js";
-    private String fileName;
+    /**
+     * The constant DEFAULT_SPECIFIER.
+     *
+     * @since 0.1.0
+     */
+    public static final String DEFAULT_SPECIFIER = "file:///main.js";
     private Swc4jMediaType mediaType;
+    private String specifier;
 
+    /**
+     * Instantiates a new Swc4j transpile options.
+     *
+     * @since 0.1.0
+     */
     public Swc4jTranspileOptions() {
-        setFileName(DEFAULT_FILE_NAME);
+        setSpecifier(DEFAULT_SPECIFIER);
         setMediaType(Swc4jMediaType.JavaScript);
     }
 
-    public String getFileName() {
-        return fileName;
-    }
-
+    /**
+     * Gets Media type of the source text.
+     *
+     * @return the Media type of the source text
+     * @since 0.1.0
+     */
     public Swc4jMediaType getMediaType() {
         return mediaType;
     }
 
-    public Swc4jTranspileOptions setFileName(String fileName) {
-        this.fileName = AssertionUtils.notNull(fileName, "File name");
+    /**
+     * Gets Specifier of the source text.
+     *
+     * @return the Specifier of the source text
+     * @since 0.1.0
+     */
+    public String getSpecifier() {
+        return specifier;
+    }
+
+    /**
+     * Sets Media type of the source text.
+     *
+     * @param mediaType the Media type of the source text
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setMediaType(Swc4jMediaType mediaType) {
+        this.mediaType = AssertionUtils.notNull(mediaType, "Media type");
         return this;
     }
 
-    public Swc4jTranspileOptions setMediaType(Swc4jMediaType mediaType) {
-        this.mediaType = AssertionUtils.notNull(mediaType, "Media type");
+    /**
+     * Sets Specifier of the source text.
+     *
+     * @param specifier the Specifier of the source text
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setSpecifier(String specifier) {
+        this.specifier = AssertionUtils.notNull(specifier, "Specifier");
         return this;
     }
 }
