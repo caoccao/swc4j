@@ -16,30 +16,12 @@
 */
 
 use jni::objects::{JMethodID, JObject};
-use jni::signature::{Primitive, ReturnType};
 use jni::sys::jobject;
 use jni::JNIEnv;
 
 use deno_ast::MediaType;
 
-use crate::converter;
-
-macro_rules! jni_getter_as_boolean {
-  ($output:ident, $env:ident, $obj:ident, $method:expr) => {
-    let $output =
-      unsafe { $env.call_method_unchecked($obj.as_ref(), $method, ReturnType::Primitive(Primitive::Boolean), &[]) };
-    let $output = unsafe { $output.unwrap().as_jni().z };
-    let $output = converter::jboolean_to_bool($output);
-  };
-}
-
-macro_rules! jni_getter_as_string {
-  ($output:ident, $env:ident, $obj:ident, $method:expr) => {
-    let $output = unsafe { $env.call_method_unchecked($obj.as_ref(), $method, ReturnType::Object, &[]) };
-    let $output = unsafe { $output.unwrap().as_jni().l };
-    let $output = converter::jstring_to_string($env, $output);
-  };
-}
+use crate::{converter, jni_utils};
 
 struct JniCalls {
   pub jmethod_id_media_type_get_id: JMethodID,
@@ -180,131 +162,25 @@ pub struct TranspileOptions {
 impl FromJniType for TranspileOptions {
   fn from_jni_type<'local>(env: &mut JNIEnv<'local>, o: jobject) -> TranspileOptions {
     let o = unsafe { JObject::from_raw(o) };
-    // inline_source_map
-    jni_getter_as_boolean!(
-      inline_source_map,
-      env,
-      o,
-      JNI_CALLS
-        .as_ref()
-        .unwrap()
-        .jmethod_id_transpile_options_is_inline_source_map
-    );
-    // inline_sources
-    jni_getter_as_boolean!(
-      inline_sources,
-      env,
-      o,
-      JNI_CALLS
-        .as_ref()
-        .unwrap()
-        .jmethod_id_transpile_options_is_inline_sources
-    );
-    // jsx_automatic
-    jni_getter_as_boolean!(
-      jsx_automatic,
-      env,
-      o,
-      JNI_CALLS
-        .as_ref()
-        .unwrap()
-        .jmethod_id_transpile_options_is_jsx_automatic
-    );
-    // jsx_development
-    jni_getter_as_boolean!(
-      jsx_development,
-      env,
-      o,
-      JNI_CALLS
-        .as_ref()
-        .unwrap()
-        .jmethod_id_transpile_options_is_jsx_development
-    );
-    // jsx_factory
-    jni_getter_as_string!(
-      jsx_factory,
-      env,
-      o,
-      JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_get_jsx_factory
-    );
-    // jsx_fragment_factory
-    jni_getter_as_string!(
-      jsx_fragment_factory,
-      env,
-      o,
-      JNI_CALLS
-        .as_ref()
-        .unwrap()
-        .jmethod_id_transpile_options_get_jsx_fragment_factory
-    );
-    // jsx_import_source
-    let jsx_import_source = unsafe {
-      env.call_method_unchecked(
-        o.as_ref(),
-        JNI_CALLS
-          .as_ref()
-          .unwrap()
-          .jmethod_id_transpile_options_get_jsx_import_source,
-        ReturnType::Object,
-        &[],
-      )
-    };
-    let jsx_import_source = unsafe { jsx_import_source.unwrap().as_jni().l };
-    let jsx_import_source = converter::jstring_to_option_string(env, jsx_import_source);
-    // media_type
-    let media_type = unsafe {
-      env.call_method_unchecked(
-        o.as_ref(),
-        JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_get_media_type,
-        ReturnType::Object,
-        &[],
-      )
-    };
-    let media_type = unsafe { JObject::from_raw(media_type.unwrap().as_jni().l) };
-    let media_type = unsafe {
-      env.call_method_unchecked(
-        media_type.as_ref(),
-        JNI_CALLS.as_ref().unwrap().jmethod_id_media_type_get_id,
-        ReturnType::Primitive(Primitive::Int),
-        &[],
-      )
-    };
-    let media_type = unsafe { media_type.unwrap().as_jni().i };
+    let o = o.as_ref();
+    let jni_calls = unsafe { JNI_CALLS.as_ref().unwrap() };
+    let inline_source_map =
+      jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_inline_source_map);
+    let inline_sources = jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_inline_sources);
+    let jsx_automatic = jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_jsx_automatic);
+    let jsx_development = jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_jsx_development);
+    let jsx_factory = jni_utils::get_as_string(env, o, jni_calls.jmethod_id_transpile_options_get_jsx_factory);
+    let jsx_fragment_factory =
+      jni_utils::get_as_string(env, o, jni_calls.jmethod_id_transpile_options_get_jsx_fragment_factory);
+    let jsx_import_source =
+      jni_utils::get_as_optional_string(env, o, jni_calls.jmethod_id_transpile_options_get_jsx_import_source);
+    let media_type = jni_utils::get_as_jobject(env, o, jni_calls.jmethod_id_transpile_options_get_media_type);
+    let media_type = jni_utils::get_as_int(env, media_type.as_ref(), jni_calls.jmethod_id_media_type_get_id);
     let media_type = converter::media_type_id_to_media_type(media_type);
-    // source_map
-    jni_getter_as_boolean!(
-      source_map,
-      env,
-      o,
-      JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_is_source_map
-    );
-    // specifier
-    jni_getter_as_string!(
-      specifier,
-      env,
-      o,
-      JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_get_specifier
-    );
-    // transform_jsx
-    jni_getter_as_boolean!(
-      transform_jsx,
-      env,
-      o,
-      JNI_CALLS
-        .as_ref()
-        .unwrap()
-        .jmethod_id_transpile_options_is_transform_jsx
-    );
-    // precompile_jsx
-    jni_getter_as_boolean!(
-      precompile_jsx,
-      env,
-      o,
-      JNI_CALLS
-        .as_ref()
-        .unwrap()
-        .jmethod_id_transpile_options_is_precompile_jsx
-    );
+    let source_map = jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_source_map);
+    let specifier = jni_utils::get_as_string(env, o, jni_calls.jmethod_id_transpile_options_get_specifier);
+    let transform_jsx = jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_transform_jsx);
+    let precompile_jsx = jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_precompile_jsx);
     // construct
     TranspileOptions {
       inline_source_map,

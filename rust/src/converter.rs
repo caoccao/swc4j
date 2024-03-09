@@ -26,7 +26,7 @@ pub fn jboolean_to_bool(b: jboolean) -> bool {
   b != 0
 }
 
-pub fn jstring_to_option_string<'local>(env: &mut JNIEnv<'local>, s: jstring) -> Option<String> {
+pub fn jstring_to_optional_string<'local>(env: &mut JNIEnv<'local>, s: jstring) -> Option<String> {
   if s.is_null() {
     None
   } else {
@@ -40,7 +40,7 @@ pub fn jstring_to_option_string<'local>(env: &mut JNIEnv<'local>, s: jstring) ->
 }
 
 pub fn jstring_to_string<'local>(env: &mut JNIEnv<'local>, s: jstring) -> String {
-  match jstring_to_option_string(env, s) {
+  match jstring_to_optional_string(env, s) {
     Some(s) => s,
     None => "".to_owned(),
   }
