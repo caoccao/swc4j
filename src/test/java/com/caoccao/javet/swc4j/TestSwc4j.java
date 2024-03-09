@@ -42,7 +42,7 @@ public class TestSwc4j {
         String expectedCode = "function add(a, b) {\n" +
                 "  return a + b;\n" +
                 "}\n";
-        String expectedMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
+        String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         String fileName = "abc.ts";
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
                 .setFileName(fileName)
@@ -51,10 +51,10 @@ public class TestSwc4j {
         assertNotNull(output);
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
         assertEquals(
-                expectedMapPrefix,
+                expectedSourceMapPrefix,
                 output.getCode().substring(
                         expectedCode.length(),
-                        expectedCode.length() + expectedMapPrefix.length()));
+                        expectedCode.length() + expectedSourceMapPrefix.length()));
         assertNull(output.getSourceMap());
     }
 

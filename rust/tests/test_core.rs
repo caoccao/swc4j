@@ -15,9 +15,44 @@
 * limitations under the License.
 */
 
-use swc4j::core::*;
+use deno_ast::MediaType;
+
+use swc4j::*;
 
 #[test]
 fn test_get_version() {
-  assert_eq!(get_version(), "0.1.0");
+  assert_eq!(core::get_version(), "0.1.0");
+}
+
+#[test]
+fn test_transpile_type_script_inline_source_map() {
+  let code = "function add(a:number, b:number) { return a+b; }";
+  let expected_code = "function add(a, b) {\n  return a + b;\n}\n";
+  let expected_source_map_prefix = "//# sourceMappingURL=data:application/json;base64,";
+  let options = options::TranspileOptions {
+    file_name: "abc.ts".to_owned(),
+    media_type: MediaType::TypeScript,
+  };
+  let output = core::transpile(code.to_owned(), options);
+  assert!(output.is_ok());
+  let output_code = output.unwrap().code;
+  assert_eq!(expected_code, &output_code[0..expected_code.len()]);
+  assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
+}
+
+#[test]
+fn test_transpile_wrong_media_type() {
+  let code = "function add(a:number, b:number) { return a+b; }";
+  let expected_error = String::from("Expected ',', got ':' at file:///abc.ts:1:15\n")
+    + "\n"
+    + "  function add(a:number, b:number) { return a+b; }\n"
+    + "                ~";
+  let options = options::TranspileOptions {
+    file_name: "abc.ts".to_owned(),
+    media_type: MediaType::JavaScript,
+  };
+  let output = core::transpile(code.to_owned(), options);
+  assert!(output.is_err());
+  let output_error = output.err().unwrap();
+  assert_eq!(expected_error, output_error);
 }
