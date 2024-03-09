@@ -16,11 +16,15 @@
 */
 
 use jni::objects::JString;
-use jni::sys::jstring;
+use jni::sys::{jboolean, jstring};
 use jni::JNIEnv;
 use std::ptr::null_mut;
 
 use deno_media_type::MediaType;
+
+pub fn jboolean_to_bool(b: jboolean) -> bool {
+  b != 0
+}
 
 pub fn jstring_to_string<'local>(env: &mut JNIEnv<'local>, s: jstring) -> String {
   unsafe {

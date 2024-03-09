@@ -22,6 +22,8 @@ import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import org.junit.jupiter.api.Test;
 
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4j {
@@ -37,7 +39,7 @@ public class TestSwc4j {
     }
 
     @Test
-    public void testTranspileTypeScriptInlineSourceMap() throws Swc4jCoreException {
+    public void testTranspileTypeScriptWithInlineSourceMap() throws Swc4jCoreException {
         String code = "function add(a:number, b:number) { return a+b; }";
         String expectedCode = "function add(a, b) {\n" +
                 "  return a + b;\n" +
@@ -50,12 +52,36 @@ public class TestSwc4j {
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
         assertNotNull(output);
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
+        assertTrue(output.isModule());
         assertEquals(
                 expectedSourceMapPrefix,
                 output.getCode().substring(
                         expectedCode.length(),
                         expectedCode.length() + expectedSourceMapPrefix.length()));
         assertNull(output.getSourceMap());
+    }
+
+    @Test
+    public void testTranspileTypeScriptWithoutInlineSourceMap() throws Swc4jCoreException {
+        String code = "function add(a:number, b:number) { return a+b; }";
+        String expectedCode = "function add(a, b) {\n" +
+                "  return a + b;\n" +
+                "}\n";
+        String fileName = "file:///abc.ts";
+        String[] expectedProperties = new String[]{"version", "sources", "sourcesContent", fileName, "names", "mappings"};
+        Swc4jTranspileOptions options = new Swc4jTranspileOptions()
+                .setInlineSourceMap(false)
+                .setSpecifier(fileName)
+                .setMediaType(Swc4jMediaType.TypeScript)
+                .setSourceMap(true);
+        Swc4jTranspileOutput output = swc4j.transpile(code, options);
+        assertNotNull(output);
+        assertEquals(expectedCode, output.getCode());
+        assertTrue(output.isModule());
+        assertNotNull(output.getSourceMap());
+        Stream.of(expectedProperties).forEach(p -> assertTrue(
+                output.getSourceMap().contains("\"" + p + "\""),
+                p + " should exist in the source map"));
     }
 
     @Test
