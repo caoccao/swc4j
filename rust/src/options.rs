@@ -24,6 +24,23 @@ use deno_ast::MediaType;
 
 use crate::converter;
 
+macro_rules! jni_getter_as_boolean {
+  ($output:ident, $env:ident, $obj:ident, $method:expr) => {
+    let $output =
+      unsafe { $env.call_method_unchecked($obj.as_ref(), $method, ReturnType::Primitive(Primitive::Boolean), &[]) };
+    let $output = unsafe { $output.unwrap().as_jni().z };
+    let $output = converter::jboolean_to_bool($output);
+  };
+}
+
+macro_rules! jni_getter_as_string {
+  ($output:ident, $env:ident, $obj:ident, $method:expr) => {
+    let $output = unsafe { $env.call_method_unchecked($obj.as_ref(), $method, ReturnType::Object, &[]) };
+    let $output = unsafe { $output.unwrap().as_jni().l };
+    let $output = converter::jstring_to_string($env, $output);
+  };
+}
+
 struct JniCalls {
   pub jmethod_id_media_type_get_id: JMethodID,
   pub jmethod_id_transpile_options_get_media_type: JMethodID,
@@ -68,7 +85,11 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
     .get_method_id(&jclass_transpile_options, "getJsxFactory", "()Ljava/lang/String;")
     .expect("Couldn't find method Swc4jTranspileOptions.getJsxFactory");
   let jmethod_id_transpile_options_get_jsx_fragment_factory = env
-    .get_method_id(&jclass_transpile_options, "getJsxFragmentFactory", "()Ljava/lang/String;")
+    .get_method_id(
+      &jclass_transpile_options,
+      "getJsxFragmentFactory",
+      "()Ljava/lang/String;",
+    )
     .expect("Couldn't find method Swc4jTranspileOptions.getJsxFragmentFactory");
   let jmethod_id_transpile_options_get_jsx_import_source = env
     .get_method_id(&jclass_transpile_options, "getJsxImportSource", "()Ljava/lang/String;")
@@ -160,88 +181,70 @@ impl FromJniType for TranspileOptions {
   fn from_jni_type<'local>(env: &mut JNIEnv<'local>, o: jobject) -> TranspileOptions {
     let o = unsafe { JObject::from_raw(o) };
     // inline_source_map
-    let inline_source_map = unsafe {
-      env.call_method_unchecked(
-        o.as_ref(),
-        JNI_CALLS
-          .as_ref()
-          .unwrap()
-          .jmethod_id_transpile_options_is_inline_source_map,
-        ReturnType::Primitive(Primitive::Boolean),
-        &[],
-      )
-    };
-    let inline_source_map = unsafe { inline_source_map.unwrap().as_jni().z };
-    let inline_source_map = converter::jboolean_to_bool(inline_source_map);
+    jni_getter_as_boolean!(
+      inline_source_map,
+      env,
+      o,
+      JNI_CALLS
+        .as_ref()
+        .unwrap()
+        .jmethod_id_transpile_options_is_inline_source_map
+    );
     // inline_sources
-    let inline_sources = unsafe {
-      env.call_method_unchecked(
-        o.as_ref(),
-        JNI_CALLS
-          .as_ref()
-          .unwrap()
-          .jmethod_id_transpile_options_is_inline_sources,
-        ReturnType::Primitive(Primitive::Boolean),
-        &[],
-      )
-    };
-    let inline_sources = unsafe { inline_sources.unwrap().as_jni().z };
-    let inline_sources = converter::jboolean_to_bool(inline_sources);
+    jni_getter_as_boolean!(
+      inline_sources,
+      env,
+      o,
+      JNI_CALLS
+        .as_ref()
+        .unwrap()
+        .jmethod_id_transpile_options_is_inline_sources
+    );
     // jsx_automatic
-    let jsx_automatic = unsafe {
-      env.call_method_unchecked(
-        o.as_ref(),
-        JNI_CALLS
-          .as_ref()
-          .unwrap()
-          .jmethod_id_transpile_options_is_jsx_automatic,
-        ReturnType::Primitive(Primitive::Boolean),
-        &[],
-      )
-    };
-    let jsx_automatic = unsafe { jsx_automatic.unwrap().as_jni().z };
-    let jsx_automatic = converter::jboolean_to_bool(jsx_automatic);
+    jni_getter_as_boolean!(
+      jsx_automatic,
+      env,
+      o,
+      JNI_CALLS
+        .as_ref()
+        .unwrap()
+        .jmethod_id_transpile_options_is_jsx_automatic
+    );
     // jsx_development
-    let jsx_development = unsafe {
-      env.call_method_unchecked(
-        o.as_ref(),
-        JNI_CALLS
-          .as_ref()
-          .unwrap()
-          .jmethod_id_transpile_options_is_jsx_development,
-        ReturnType::Primitive(Primitive::Boolean),
-        &[],
-      )
-    };
-    let jsx_development = unsafe { jsx_development.unwrap().as_jni().z };
-    let jsx_development = converter::jboolean_to_bool(jsx_development);
+    jni_getter_as_boolean!(
+      jsx_development,
+      env,
+      o,
+      JNI_CALLS
+        .as_ref()
+        .unwrap()
+        .jmethod_id_transpile_options_is_jsx_development
+    );
     // jsx_factory
-    let jsx_factory = unsafe {
-      env.call_method_unchecked(
-        o.as_ref(),
-        JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_get_jsx_factory,
-        ReturnType::Object,
-        &[],
-      )
-    };
-    let jsx_factory = unsafe { jsx_factory.unwrap().as_jni().l };
-    let jsx_factory = converter::jstring_to_string(env, jsx_factory);
+    jni_getter_as_string!(
+      jsx_factory,
+      env,
+      o,
+      JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_get_jsx_factory
+    );
     // jsx_fragment_factory
-    let jsx_fragment_factory = unsafe {
-      env.call_method_unchecked(
-        o.as_ref(),
-        JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_get_jsx_fragment_factory,
-        ReturnType::Object,
-        &[],
-      )
-    };
-    let jsx_fragment_factory = unsafe { jsx_fragment_factory.unwrap().as_jni().l };
-    let jsx_fragment_factory = converter::jstring_to_string(env, jsx_fragment_factory);
+    jni_getter_as_string!(
+      jsx_fragment_factory,
+      env,
+      o,
+      JNI_CALLS
+        .as_ref()
+        .unwrap()
+        .jmethod_id_transpile_options_get_jsx_fragment_factory
+    );
     // jsx_import_source
     let jsx_import_source = unsafe {
       env.call_method_unchecked(
         o.as_ref(),
-        JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_get_jsx_import_source,
+        JNI_CALLS
+          .as_ref()
+          .unwrap()
+          .jmethod_id_transpile_options_get_jsx_import_source,
         ReturnType::Object,
         &[],
       )
@@ -269,55 +272,39 @@ impl FromJniType for TranspileOptions {
     let media_type = unsafe { media_type.unwrap().as_jni().i };
     let media_type = converter::media_type_id_to_media_type(media_type);
     // source_map
-    let source_map = unsafe {
-      env.call_method_unchecked(
-        o.as_ref(),
-        JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_is_source_map,
-        ReturnType::Primitive(Primitive::Boolean),
-        &[],
-      )
-    };
-    let source_map = unsafe { source_map.unwrap().as_jni().z };
-    let source_map = converter::jboolean_to_bool(source_map);
+    jni_getter_as_boolean!(
+      source_map,
+      env,
+      o,
+      JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_is_source_map
+    );
     // specifier
-    let specifier = unsafe {
-      env.call_method_unchecked(
-        o.as_ref(),
-        JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_get_specifier,
-        ReturnType::Object,
-        &[],
-      )
-    };
-    let specifier = unsafe { specifier.unwrap().as_jni().l };
-    let specifier = converter::jstring_to_string(env, specifier);
+    jni_getter_as_string!(
+      specifier,
+      env,
+      o,
+      JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_options_get_specifier
+    );
     // transform_jsx
-    let transform_jsx = unsafe {
-      env.call_method_unchecked(
-        o.as_ref(),
-        JNI_CALLS
-          .as_ref()
-          .unwrap()
-          .jmethod_id_transpile_options_is_transform_jsx,
-        ReturnType::Primitive(Primitive::Boolean),
-        &[],
-      )
-    };
-    let transform_jsx = unsafe { transform_jsx.unwrap().as_jni().z };
-    let transform_jsx = converter::jboolean_to_bool(transform_jsx);
+    jni_getter_as_boolean!(
+      transform_jsx,
+      env,
+      o,
+      JNI_CALLS
+        .as_ref()
+        .unwrap()
+        .jmethod_id_transpile_options_is_transform_jsx
+    );
     // precompile_jsx
-    let precompile_jsx = unsafe {
-      env.call_method_unchecked(
-        o.as_ref(),
-        JNI_CALLS
-          .as_ref()
-          .unwrap()
-          .jmethod_id_transpile_options_is_precompile_jsx,
-        ReturnType::Primitive(Primitive::Boolean),
-        &[],
-      )
-    };
-    let precompile_jsx = unsafe { precompile_jsx.unwrap().as_jni().z };
-    let precompile_jsx = converter::jboolean_to_bool(precompile_jsx);
+    jni_getter_as_boolean!(
+      precompile_jsx,
+      env,
+      o,
+      JNI_CALLS
+        .as_ref()
+        .unwrap()
+        .jmethod_id_transpile_options_is_precompile_jsx
+    );
     // construct
     TranspileOptions {
       inline_source_map,
