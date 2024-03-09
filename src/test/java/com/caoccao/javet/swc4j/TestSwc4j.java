@@ -56,7 +56,6 @@ public class TestSwc4j {
                 "export default App;\n";
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
-                .setSpecifier("file:///abc.ts")
                 .setJsxFactory("CustomJsxFactory.createElement")
                 .setMediaType(Swc4jMediaType.Jsx);
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
@@ -89,7 +88,6 @@ public class TestSwc4j {
                 "export default App;\n";
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
-                .setSpecifier("file:///abc.ts")
                 .setMediaType(Swc4jMediaType.Jsx);
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
         assertNotNull(output);
@@ -111,7 +109,6 @@ public class TestSwc4j {
                 "}\n";
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
-                .setSpecifier("file:///abc.ts")
                 .setMediaType(Swc4jMediaType.TypeScript);
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
         assertNotNull(output);
@@ -152,10 +149,9 @@ public class TestSwc4j {
     public void testTranspileWrongMediaType() {
         String code = "function add(a:number, b:number) { return a+b; }";
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
-                .setSpecifier("file:///abc.ts")
                 .setMediaType(Swc4jMediaType.JavaScript);
         assertEquals(
-                "Expected ',', got ':' at file:///abc.ts:1:15\n" +
+                "Expected ',', got ':' at file:///main.js:1:15\n" +
                         "\n" +
                         "  function add(a:number, b:number) { return a+b; }\n" +
                         "                ~",

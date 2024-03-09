@@ -159,6 +159,25 @@ pub struct TranspileOptions {
   pub precompile_jsx: bool,
 }
 
+impl Default for TranspileOptions {
+  fn default() -> Self {
+    TranspileOptions {
+      inline_source_map: true,
+      inline_sources: true,
+      jsx_automatic: false,
+      jsx_development: false,
+      jsx_factory: "React.createElement".into(),
+      jsx_fragment_factory: "React.Fragment".into(),
+      jsx_import_source: None,
+      media_type: MediaType::TypeScript,
+      precompile_jsx: false,
+      source_map: false,
+      specifier: "file:///main.js".to_owned(),
+      transform_jsx: true,
+    }
+  }
+}
+
 impl FromJniType for TranspileOptions {
   fn from_jni_type<'local>(env: &mut JNIEnv<'local>, o: jobject) -> TranspileOptions {
     let o = unsafe { JObject::from_raw(o) };

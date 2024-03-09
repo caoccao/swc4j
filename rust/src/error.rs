@@ -55,7 +55,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 
 pub fn throw_transpile_error<'local, 'a>(env: &mut JNIEnv<'local>, message: &'a str) {
   let message = jvalue {
-    l: converter::string_to_jstring(env, message),
+    l: converter::string_to_jstring(env, message).as_raw(),
   };
   let exception = unsafe {
     JThrowable::from_raw(

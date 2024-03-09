@@ -15,8 +15,8 @@
 * limitations under the License.
 */
 
-use jni::objects::{GlobalRef, JMethodID};
-use jni::sys::{jobject, jvalue};
+use jni::objects::{GlobalRef, JMethodID, JObject};
+use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use std::ptr::null_mut;
@@ -40,7 +40,11 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
     .new_global_ref(jclass_transpile_output)
     .expect("Couldn't globalize class Swc4jTranspileOutput");
   let jmethod_id_transpile_output_constructor = env
-    .get_method_id(&jclass_transpile_output, "<init>", "(Ljava/lang/String;Ljava/lang/String;Z)V")
+    .get_method_id(
+      &jclass_transpile_output,
+      "<init>",
+      "(Ljava/lang/String;Ljava/lang/String;Z)V",
+    )
     .expect("Couldn't find method Swc4jTranspileOutput.Swc4jTranspileOutput");
   unsafe {
     JNI_CALLS = Some(JniCalls {
@@ -51,7 +55,9 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 }
 
 pub trait ToJniType {
-  fn to_jni_type<'local>(&self, env: &mut JNIEnv<'local>) -> jobject;
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a;
 }
 
 #[derive(Debug)]
@@ -62,16 +68,19 @@ pub struct TranspileOutput {
 }
 
 impl ToJniType for TranspileOutput {
-  fn to_jni_type<'local>(&self, env: &mut JNIEnv<'local>) -> jobject {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
     let code = jvalue {
-      l: converter::string_to_jstring(env, &self.code),
+      l: converter::string_to_jstring(env, &self.code).as_raw(),
     };
     let module = jvalue {
       z: if self.module { 1u8 } else { 0u8 },
     };
     let source_map = jvalue {
       l: match &self.source_map {
-        Some(s) => converter::string_to_jstring(env, &s),
+        Some(s) => converter::string_to_jstring(env, &s).as_raw(),
         None => null_mut(),
       },
     };
@@ -83,7 +92,6 @@ impl ToJniType for TranspileOutput {
           &[code, source_map, module],
         )
         .expect("Couldn't create Swc4jTranspileOutput")
-        .as_raw()
     }
   }
 }

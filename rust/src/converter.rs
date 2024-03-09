@@ -18,7 +18,6 @@
 use jni::objects::JString;
 use jni::sys::{jboolean, jstring};
 use jni::JNIEnv;
-use std::ptr::null_mut;
 
 use deno_media_type::MediaType;
 
@@ -67,9 +66,12 @@ pub fn media_type_id_to_media_type(media_type_id: i32) -> MediaType {
   }
 }
 
-pub fn string_to_jstring<'local>(env: &JNIEnv<'local>, s: &'local str) -> jstring {
+pub fn string_to_jstring<'local, 'a>(env: &JNIEnv<'local>, s: &str) -> JString<'a>
+where
+  'local: 'a,
+{
   match env.new_string(s) {
-    Ok(s) => s.to_owned(),
-    Err(_) => null_mut(),
+    Ok(s) => s,
+    Err(_) => Default::default(),
   }
 }

@@ -47,7 +47,7 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion<'
   env: JNIEnv<'local>,
   _: JClass<'local>,
 ) -> jstring {
-  converter::string_to_jstring(&env, core::get_version())
+  converter::string_to_jstring(&env, core::get_version()).as_raw()
 }
 
 #[no_mangle]
@@ -60,10 +60,10 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'l
   let code = converter::jstring_to_string(&mut env, code);
   let options = options::TranspileOptions::from_jni_type(&mut env, options);
   match core::transpile(code, options) {
-    Ok(output) => output.to_jni_type(&mut env),
+    Ok(output) => output.to_jni_type(&mut env).as_raw(),
     Err(message) => {
       error::throw_transpile_error(&mut env, message.as_str());
       null_mut()
-    },
+    }
   }
 }
