@@ -31,11 +31,30 @@ public final class Swc4jTranspileOptions {
      * @since 0.1.0
      */
     public static final String DEFAULT_SPECIFIER = "file:///main.js";
+    /**
+     * The constant DEFAULT_JSX_FACTORY.
+     *
+     * @since 0.1.0
+     */
+    public static final String DEFAULT_JSX_FACTORY = "React.createElement";
+    /**
+     * The constant DEFAULT_JSX_FRAGMENT_FACTORY.
+     *
+     * @since 0.1.0
+     */
+    public static final String DEFAULT_JSX_FRAGMENT_FACTORY = "React.Fragment";
     private boolean inlineSourceMap;
     private boolean inlineSources;
+    private boolean jsxAutomatic;
+    private boolean jsxDevelopment;
+    private String jsxFactory;
+    private String jsxFragmentFactory;
+    private String jsxImportSource;
     private Swc4jMediaType mediaType;
+    private boolean precompileJsx;
     private boolean sourceMap;
     private String specifier;
+    private boolean transformJsx;
 
     /**
      * Instantiates a new Swc4j transpile options.
@@ -43,17 +62,56 @@ public final class Swc4jTranspileOptions {
      * @since 0.1.0
      */
     public Swc4jTranspileOptions() {
+        setJsxAutomatic(false);
+        setJsxDevelopment(false);
+        setJsxFactory(DEFAULT_JSX_FACTORY);
+        setJsxFragmentFactory(DEFAULT_JSX_FRAGMENT_FACTORY);
+        setJsxImportSource(null);
         setInlineSourceMap(true);
         setInlineSources(true);
-        setSpecifier(DEFAULT_SPECIFIER);
         setMediaType(Swc4jMediaType.JavaScript);
+        setPrecompileJsx(false);
         setSourceMap(false);
+        setSpecifier(DEFAULT_SPECIFIER);
+        setTransformJsx(true);
+    }
+
+    /**
+     * When transforming JSX, what value should be used for the JSX factory.
+     * Defaults to `React.createElement`.
+     *
+     * @return the jsx factory
+     * @since 0.1.0
+     */
+    public String getJsxFactory() {
+        return jsxFactory;
+    }
+
+    /**
+     * When transforming JSX, what value should be used for the JSX fragment.
+     * Defaults to `React.Fragment`.
+     *
+     * @return the jsx fragment factory
+     * @since 0.1.0
+     */
+    public String getJsxFragmentFactory() {
+        return jsxFragmentFactory;
+    }
+
+    /**
+     * The string module specifier to implicitly import JSX factories from when transpiling JSX.
+     *
+     * @return the jsx import source
+     * @since 0.1.0
+     */
+    public String getJsxImportSource() {
+        return jsxImportSource;
     }
 
     /**
      * Gets Media type of the source text.
      *
-     * @return the Media type of the source text
+     * @return the media type
      * @since 0.1.0
      */
     public Swc4jMediaType getMediaType() {
@@ -63,7 +121,7 @@ public final class Swc4jTranspileOptions {
     /**
      * Gets Specifier of the source text.
      *
-     * @return the Specifier of the source text
+     * @return the specifier
      * @since 0.1.0
      */
     public String getSpecifier() {
@@ -91,6 +149,40 @@ public final class Swc4jTranspileOptions {
     }
 
     /**
+     * `true` if the program should use an implicit JSX import source/the "new" JSX transforms.
+     *
+     * @return true : automatic, false : not automatic
+     * @since 0.1.0
+     */
+    public boolean isJsxAutomatic() {
+        return jsxAutomatic;
+    }
+
+    /**
+     * If JSX is automatic, if it is in development mode, meaning that it should
+     * import `jsx-dev-runtime` and transform JSX using `jsxDEV` import from the
+     * JSX import source as well as provide additional debug information to the
+     * JSX factory.
+     *
+     * @return true : development mode, false : not development mode
+     * @since 0.1.0
+     */
+    public boolean isJsxDevelopment() {
+        return jsxDevelopment;
+    }
+
+    /**
+     * Should JSX be precompiled into static strings that need to be concatenated
+     * with dynamic content. Defaults to `false`, mutually exclusive with `transform_jsx`.
+     *
+     * @return true : be precompiled, false : not be precompiled
+     * @since 0.1.0
+     */
+    public boolean isPrecompileJsx() {
+        return precompileJsx;
+    }
+
+    /**
      * Should a corresponding map string be created for the output.
      * This should be false if isInlineSourceMap() is true. Defaults to `false`.
      *
@@ -99,6 +191,16 @@ public final class Swc4jTranspileOptions {
      */
     public boolean isSourceMap() {
         return sourceMap;
+    }
+
+    /**
+     * Should JSX be transformed. Defaults to `true`.
+     *
+     * @return true : be transformed, false : not be transformed
+     * @since 0.1.0
+     */
+    public boolean isTransformJsx() {
+        return transformJsx;
     }
 
     /**
@@ -126,6 +228,66 @@ public final class Swc4jTranspileOptions {
     }
 
     /**
+     * Sets jsx automatic.
+     *
+     * @param jsxAutomatic the jsx automatic
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setJsxAutomatic(boolean jsxAutomatic) {
+        this.jsxAutomatic = jsxAutomatic;
+        return this;
+    }
+
+    /**
+     * Sets jsx development.
+     *
+     * @param jsxDevelopment the jsx development
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setJsxDevelopment(boolean jsxDevelopment) {
+        this.jsxDevelopment = jsxDevelopment;
+        return this;
+    }
+
+    /**
+     * Sets jsx factory.
+     *
+     * @param jsxFactory the jsx factory
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setJsxFactory(String jsxFactory) {
+        this.jsxFactory = AssertionUtils.notNull(jsxFactory, "Jsx factory");
+        return this;
+    }
+
+    /**
+     * Sets jsx fragment factory.
+     *
+     * @param jsxFragmentFactory the jsx fragment factory
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setJsxFragmentFactory(String jsxFragmentFactory) {
+        this.jsxFragmentFactory = AssertionUtils.notNull(jsxFragmentFactory, "Jsx fragment factory");
+        return this;
+    }
+
+    /**
+     * Sets jsx import source.
+     *
+     * @param jsxImportSource the jsx import source
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setJsxImportSource(String jsxImportSource) {
+        this.jsxImportSource = jsxImportSource;
+        return this;
+    }
+
+    /**
      * Sets Media type of the source text.
      *
      * @param mediaType the Media type of the source text
@@ -134,6 +296,18 @@ public final class Swc4jTranspileOptions {
      */
     public Swc4jTranspileOptions setMediaType(Swc4jMediaType mediaType) {
         this.mediaType = AssertionUtils.notNull(mediaType, "Media type");
+        return this;
+    }
+
+    /**
+     * Sets precompile jsx.
+     *
+     * @param precompileJsx the precompile jsx
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setPrecompileJsx(boolean precompileJsx) {
+        this.precompileJsx = precompileJsx;
         return this;
     }
 
@@ -158,6 +332,18 @@ public final class Swc4jTranspileOptions {
      */
     public Swc4jTranspileOptions setSpecifier(String specifier) {
         this.specifier = AssertionUtils.notNull(specifier, "Specifier");
+        return this;
+    }
+
+    /**
+     * Sets transform jsx.
+     *
+     * @param transformJsx the transform jsx
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setTransformJsx(boolean transformJsx) {
+        this.transformJsx = transformJsx;
         return this;
     }
 }

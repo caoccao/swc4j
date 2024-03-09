@@ -26,12 +26,23 @@ pub fn jboolean_to_bool(b: jboolean) -> bool {
   b != 0
 }
 
-pub fn jstring_to_string<'local>(env: &mut JNIEnv<'local>, s: jstring) -> String {
-  unsafe {
-    match env.get_string(&JString::from_raw(s)) {
-      Ok(s) => s.into(),
-      Err(_) => "".to_owned(),
+pub fn jstring_to_option_string<'local>(env: &mut JNIEnv<'local>, s: jstring) -> Option<String> {
+  if s.is_null() {
+    None
+  } else {
+    unsafe {
+      match env.get_string(&JString::from_raw(s)) {
+        Ok(s) => Some(s.into()),
+        Err(_) => None,
+      }
     }
+  }
+}
+
+pub fn jstring_to_string<'local>(env: &mut JNIEnv<'local>, s: jstring) -> String {
+  match jstring_to_option_string(env, s) {
+    Some(s) => s,
+    None => "".to_owned(),
   }
 }
 

@@ -25,6 +25,86 @@ fn test_get_version() {
 }
 
 #[test]
+fn test_transpile_jsx_with_custom_jsx_factory() {
+  let code = String::from("import React from 'react';\n")
+    + "import './App.css';\n"
+    + "function App() {\n"
+    + "    return (\n"
+    + "        <h1> Hello World! </h1>\n"
+    + "    );\n"
+    + "}\n"
+    + "export default App;";
+  let expected_code = String::from("import React from 'react';\n")
+    + "import './App.css';\n"
+    + "function App() {\n"
+    + "  return /*#__PURE__*/ CustomJsxFactory.createElement(\"h1\", null, \" Hello World! \");\n"
+    + "}\n"
+    + "export default App;\n";
+  let expected_source_map_prefix = "//# sourceMappingURL=data:application/json;base64,";
+  let options = options::TranspileOptions {
+    inline_source_map: true,
+    inline_sources: true,
+    jsx_automatic: false,
+    jsx_development: false,
+    jsx_factory: "CustomJsxFactory.createElement".into(),
+    jsx_fragment_factory: "React.Fragment".into(),
+    jsx_import_source: None,
+    media_type: MediaType::Jsx,
+    precompile_jsx: false,
+    source_map: false,
+    specifier: "file:///abc.ts".to_owned(),
+    transform_jsx: true,
+  };
+  let output = core::transpile(code.to_owned(), options);
+  assert!(output.is_ok());
+  let output = output.unwrap();
+  assert!(output.module);
+  let output_code = output.code;
+  assert_eq!(expected_code, &output_code[0..expected_code.len()]);
+  assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
+}
+
+#[test]
+fn test_transpile_jsx_with_default_options() {
+  let code = String::from("import React from 'react';\n")
+    + "import './App.css';\n"
+    + "function App() {\n"
+    + "    return (\n"
+    + "        <h1> Hello World! </h1>\n"
+    + "    );\n"
+    + "}\n"
+    + "export default App;";
+  let expected_code = String::from("import React from 'react';\n")
+    + "import './App.css';\n"
+    + "function App() {\n"
+    + "  return /*#__PURE__*/ React.createElement(\"h1\", null, \" Hello World! \");\n"
+    + "}\n"
+    + "export default App;\n";
+  let expected_source_map_prefix = "//# sourceMappingURL=data:application/json;base64,";
+  let options = options::TranspileOptions {
+    inline_source_map: true,
+    inline_sources: true,
+    jsx_automatic: false,
+    jsx_development: false,
+    jsx_factory: "React.createElement".into(),
+    jsx_fragment_factory: "React.Fragment".into(),
+    jsx_import_source: None,
+    media_type: MediaType::Jsx,
+    precompile_jsx: false,
+    source_map: false,
+    specifier: "file:///abc.ts".to_owned(),
+    transform_jsx: true,
+  };
+  let output = core::transpile(code.to_owned(), options);
+  assert!(output.is_ok());
+  let output = output.unwrap();
+  assert!(output.module);
+  let output_code = output.code;
+  assert_eq!(expected_code, &output_code[0..expected_code.len()]);
+  assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
+}
+
+#[test]
 fn test_transpile_type_script_with_inline_source_map() {
   let code = "function add(a:number, b:number) { return a+b; }";
   let expected_code = "function add(a, b) {\n  return a + b;\n}\n";
@@ -32,9 +112,16 @@ fn test_transpile_type_script_with_inline_source_map() {
   let options = options::TranspileOptions {
     inline_source_map: true,
     inline_sources: true,
+    jsx_automatic: false,
+    jsx_development: false,
+    jsx_factory: "React.createElement".into(),
+    jsx_fragment_factory: "React.Fragment".into(),
+    jsx_import_source: None,
     media_type: MediaType::TypeScript,
+    precompile_jsx: false,
     source_map: false,
     specifier: "file:///abc.ts".to_owned(),
+    transform_jsx: true,
   };
   let output = core::transpile(code.to_owned(), options);
   assert!(output.is_ok());
@@ -60,9 +147,16 @@ fn test_transpile_type_script_without_inline_source_map() {
   let options = options::TranspileOptions {
     inline_source_map: false,
     inline_sources: true,
+    jsx_automatic: false,
+    jsx_development: false,
+    jsx_factory: "React.createElement".into(),
+    jsx_fragment_factory: "React.Fragment".into(),
+    jsx_import_source: None,
     media_type: MediaType::TypeScript,
+    precompile_jsx: false,
     source_map: true,
     specifier: "file:///abc.ts".to_owned(),
+    transform_jsx: true,
   };
   let output = core::transpile(code.to_owned(), options);
   assert!(output.is_ok());
@@ -71,7 +165,9 @@ fn test_transpile_type_script_without_inline_source_map() {
   let output_code = output.code;
   assert_eq!(expected_code, output_code);
   let source_map = output.source_map.unwrap();
-  expected_properties.iter().for_each(|p| assert!(source_map.contains(p), "{} is not found", p));
+  expected_properties
+    .iter()
+    .for_each(|p| assert!(source_map.contains(p), "{} is not found", p));
 }
 
 #[test]
@@ -84,9 +180,16 @@ fn test_transpile_wrong_media_type() {
   let options = options::TranspileOptions {
     inline_source_map: true,
     inline_sources: true,
+    jsx_automatic: false,
+    jsx_development: false,
+    jsx_factory: "React.createElement".into(),
+    jsx_fragment_factory: "React.Fragment".into(),
+    jsx_import_source: None,
     media_type: MediaType::JavaScript,
+    precompile_jsx: false,
     source_map: false,
     specifier: "file:///abc.ts".to_owned(),
+    transform_jsx: true,
   };
   let output = core::transpile(code.to_owned(), options);
   assert!(output.is_err());
