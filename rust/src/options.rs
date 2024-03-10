@@ -142,12 +142,14 @@ struct JavaTranspileOptions {
   method_get_jsx_factory: JMethodID,
   method_get_jsx_fragment_factory: JMethodID,
   method_get_jsx_import_source: JMethodID,
+  method_is_capture_tokens: JMethodID,
   method_is_emit_metadata: JMethodID,
   method_is_inline_source_map: JMethodID,
   method_is_inline_sources: JMethodID,
   method_is_jsx_automatic: JMethodID,
   method_is_jsx_development: JMethodID,
   method_is_precompile_jsx: JMethodID,
+  method_is_scope_analysis: JMethodID,
   method_is_source_map: JMethodID,
   method_is_transform_jsx: JMethodID,
   method_is_var_decl_imports: JMethodID,
@@ -196,6 +198,9 @@ impl JavaTranspileOptions {
     let method_get_jsx_import_source = env
       .get_method_id(&class, "getJsxImportSource", "()Ljava/lang/String;")
       .expect("Couldn't find method Swc4jTranspileOptions.getJsxImportSource");
+    let method_is_capture_tokens = env
+      .get_method_id(&class, "isCaptureTokens", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isCaptureTokens");
     let method_is_emit_metadata = env
       .get_method_id(&class, "isEmitMetadata", "()Z")
       .expect("Couldn't find method Swc4jTranspileOptions.isEmitMetadata");
@@ -214,6 +219,9 @@ impl JavaTranspileOptions {
     let method_is_precompile_jsx = env
       .get_method_id(&class, "isPrecompileJsx", "()Z")
       .expect("Couldn't find method Swc4jTranspileOptions.isPrecompileJsx");
+    let method_is_scope_analysis = env
+      .get_method_id(&class, "isScopeAnalysis", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isScopeAnalysis");
     let method_is_source_map = env
       .get_method_id(&class, "isSourceMap", "()Z")
       .expect("Couldn't find method Swc4jTranspileOptions.isSourceMap");
@@ -232,12 +240,14 @@ impl JavaTranspileOptions {
       method_get_jsx_factory,
       method_get_jsx_fragment_factory,
       method_get_jsx_import_source,
+      method_is_capture_tokens,
       method_is_emit_metadata,
       method_is_inline_source_map,
       method_is_inline_sources,
       method_is_jsx_automatic,
       method_is_jsx_development,
       method_is_precompile_jsx,
+      method_is_scope_analysis,
       method_is_source_map,
       method_is_transform_jsx,
       method_is_var_decl_imports,
@@ -276,6 +286,10 @@ impl JavaTranspileOptions {
     jni_utils::get_as_string(env, obj, self.method_get_specifier)
   }
 
+  pub fn is_capture_tokens<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_capture_tokens)
+  }
+
   pub fn is_emit_metadata<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
     jni_utils::get_as_boolean(env, obj, self.method_is_emit_metadata)
   }
@@ -294,6 +308,10 @@ impl JavaTranspileOptions {
 
   pub fn is_jsx_development<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
     jni_utils::get_as_boolean(env, obj, self.method_is_jsx_development)
+  }
+
+  pub fn is_scope_analysis<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_scope_analysis)
   }
 
   pub fn is_source_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
@@ -333,6 +351,8 @@ pub trait FromJniType {
 
 #[derive(Debug)]
 pub struct TranspileOptions {
+  /// Whether to capture tokens or not.
+  pub capture_tokens: bool,
   /// When emitting a legacy decorator, also emit experimental decorator meta
   /// data.  Defaults to `false`.
   pub emit_metadata: bool,
@@ -364,6 +384,8 @@ pub struct TranspileOptions {
   pub jsx_import_source: Option<String>,
   /// Media type of the source text.
   pub media_type: MediaType,
+  /// Whether to apply swc's scope analysis.
+  pub scope_analysis: bool,
   /// Should a corresponding .map file be created for the output. This should be
   /// false if inline_source_map is true. Defaults to `false`.
   pub source_map: bool,
@@ -386,6 +408,7 @@ pub struct TranspileOptions {
 impl Default for TranspileOptions {
   fn default() -> Self {
     TranspileOptions {
+      capture_tokens: false,
       emit_metadata: false,
       imports_not_used_as_values: ImportsNotUsedAsValues::Remove,
       inline_source_map: true,
@@ -398,6 +421,7 @@ impl Default for TranspileOptions {
       media_type: MediaType::TypeScript,
       parse_mode: enums::ParseMode::Module,
       precompile_jsx: false,
+      scope_analysis: false,
       source_map: false,
       specifier: "file:///main.js".to_owned(),
       transform_jsx: true,
@@ -414,6 +438,7 @@ impl FromJniType for TranspileOptions {
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
     let java_transpiler_options = unsafe { JAVA_TRANSPILER_OPTIONS.as_ref().unwrap() };
+    let capture_tokens = java_transpiler_options.is_capture_tokens(env, obj);
     let emit_metadata = java_transpiler_options.is_emit_metadata(env, obj);
     let imports_not_used_as_values = java_transpiler_options.get_imports_not_used_as_values(env, obj);
     let imports_not_used_as_values = imports_not_used_as_values.as_ref();
@@ -429,6 +454,7 @@ impl FromJniType for TranspileOptions {
     let media_type = java_transpiler_options.get_media_type(env, obj);
     let media_type = media_type.as_ref();
     let media_type = java_media_type.get_media_type(env, media_type);
+    let scope_analysis = java_transpiler_options.is_scope_analysis(env, obj);
     let source_map = java_transpiler_options.is_source_map(env, obj);
     let specifier = java_transpiler_options.get_specifier(env, obj);
     let transform_jsx = java_transpiler_options.is_transform_jsx(env, obj);
@@ -438,6 +464,7 @@ impl FromJniType for TranspileOptions {
     let precompile_jsx = java_transpiler_options.is_precompile_jsx(env, obj);
     let var_decl_imports = java_transpiler_options.is_var_decl_imports(env, obj);
     TranspileOptions {
+      capture_tokens,
       emit_metadata,
       imports_not_used_as_values,
       inline_source_map,
@@ -448,6 +475,7 @@ impl FromJniType for TranspileOptions {
       jsx_fragment_factory,
       jsx_import_source,
       media_type,
+      scope_analysis,
       source_map,
       specifier,
       transform_jsx,

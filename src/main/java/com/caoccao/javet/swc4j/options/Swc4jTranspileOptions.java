@@ -45,6 +45,7 @@ public final class Swc4jTranspileOptions {
      * @since 0.1.0
      */
     public static final String DEFAULT_JSX_FRAGMENT_FACTORY = "React.Fragment";
+    private boolean captureTokens;
     private boolean emitMetadata;
     private Swc4jImportsNotUsedAsValues importsNotUsedAsValues;
     private boolean inlineSourceMap;
@@ -57,17 +58,18 @@ public final class Swc4jTranspileOptions {
     private Swc4jMediaType mediaType;
     private Swc4jParseMode parseMode;
     private boolean precompileJsx;
+    private boolean scopeAnalysis;
     private boolean sourceMap;
     private String specifier;
     private boolean transformJsx;
     private boolean varDeclImports;
-
     /**
      * Instantiates a new Swc4j transpile options.
      *
      * @since 0.1.0
      */
     public Swc4jTranspileOptions() {
+        setCaptureTokens(false);
         setEmitMetadata(false);
         setImportsNotUsedAsValues(Swc4jImportsNotUsedAsValues.Remove);
         setJsxAutomatic(false);
@@ -80,6 +82,7 @@ public final class Swc4jTranspileOptions {
         setMediaType(Swc4jMediaType.JavaScript);
         setParseMode(Swc4jParseMode.Module);
         setPrecompileJsx(false);
+        setScopeAnalysis(false);
         setSourceMap(false);
         setSpecifier(DEFAULT_SPECIFIER);
         setTransformJsx(true);
@@ -161,6 +164,16 @@ public final class Swc4jTranspileOptions {
     }
 
     /**
+     * Whether to capture tokens or not.
+     *
+     * @return true : capture tokens, false : not capture tokens
+     * @since 0.1.0
+     */
+    public boolean isCaptureTokens() {
+        return captureTokens;
+    }
+
+    /**
      * When emitting a legacy decorator, also emit experimental decorator meta data.
      * Defaults to `false`.
      *
@@ -226,6 +239,16 @@ public final class Swc4jTranspileOptions {
     }
 
     /**
+     * Whether to apply swc's scope analysis.
+     *
+     * @return true : scope analysis, false : not scope analysis
+     * @since 0.1.0
+     */
+    public boolean isScopeAnalysis() {
+        return scopeAnalysis;
+    }
+
+    /**
      * Should a corresponding map string be created for the output.
      * This should be false if isInlineSourceMap() is true. Defaults to `false`.
      *
@@ -257,6 +280,18 @@ public final class Swc4jTranspileOptions {
      */
     public boolean isVarDeclImports() {
         return varDeclImports;
+    }
+
+    /**
+     * Sets capture tokens.
+     *
+     * @param captureTokens the capture tokens
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setCaptureTokens(boolean captureTokens) {
+        this.captureTokens = captureTokens;
+        return this;
     }
 
     /**
@@ -400,6 +435,18 @@ public final class Swc4jTranspileOptions {
      */
     public Swc4jTranspileOptions setPrecompileJsx(boolean precompileJsx) {
         this.precompileJsx = precompileJsx;
+        return this;
+    }
+
+    /**
+     * Sets scope analysis.
+     *
+     * @param scopeAnalysis the scope analysis
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setScopeAnalysis(boolean scopeAnalysis) {
+        this.scopeAnalysis = scopeAnalysis;
         return this;
     }
 

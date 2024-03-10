@@ -26,9 +26,9 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
     specifier: options.specifier,
     text_info: SourceTextInfo::from_string(code),
     media_type: options.media_type,
-    capture_tokens: false,
+    capture_tokens: options.capture_tokens,
     maybe_syntax: None,
-    scope_analysis: false,
+    scope_analysis: options.scope_analysis,
   };
   let result = match options.parse_mode {
     enums::ParseMode::Script => parse_script(parse_params),
