@@ -50,10 +50,27 @@ public final class Swc4j {
         return Swc4jNative.coreGetVersion();
     }
 
+    /**
+     * Transpile.
+     *
+     * @param code the code
+     * @return the swc4j transpile output
+     * @throws Swc4jCoreException the swc4j core exception
+     * @since 0.1.0
+     */
     public Swc4jTranspileOutput transpile(String code) throws Swc4jCoreException {
         return transpile(code, new Swc4jTranspileOptions());
     }
 
+    /**
+     * Transpile.
+     *
+     * @param code    the code
+     * @param options the options
+     * @return the swc4j transpile output
+     * @throws Swc4jCoreException the swc4j core exception
+     * @since 0.1.0
+     */
     @SuppressWarnings("RedundantThrows")
     public Swc4jTranspileOutput transpile(String code, Swc4jTranspileOptions options) throws Swc4jCoreException {
         return (Swc4jTranspileOutput) Swc4jNative.coreTranspile(

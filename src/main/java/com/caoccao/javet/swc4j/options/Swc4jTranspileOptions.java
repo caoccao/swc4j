@@ -235,8 +235,9 @@ public final class Swc4jTranspileOptions {
 
     /**
      * Should import declarations be transformed to variable declarations using
-     * a dynamic import. This is useful for import & export declaration support
-     * in script contexts such as the Deno REPL.  Defaults to `false`.
+     * a dynamic import. This is useful for import and export declaration support
+     * in script contexts such as the Deno REPL.
+     * Defaults to `false`.
      *
      * @return true : transformed, false : not transformed
      * @since 0.1.0
