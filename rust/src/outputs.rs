@@ -23,34 +23,53 @@ use std::ptr::null_mut;
 
 use crate::converter;
 
-struct JniCalls {
-  pub jclass_transpile_output: GlobalRef,
-  pub jmethod_id_transpile_output_constructor: JMethodID,
+struct JavaTranspileOutput {
+  pub class: GlobalRef,
+  pub method_constructor: JMethodID,
 }
-unsafe impl Send for JniCalls {}
-unsafe impl Sync for JniCalls {}
+unsafe impl Send for JavaTranspileOutput {}
+unsafe impl Sync for JavaTranspileOutput {}
 
-static mut JNI_CALLS: Option<JniCalls> = None;
+impl JavaTranspileOutput {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/outputs/Swc4jTranspileOutput")
+      .expect("Couldn't find class Swc4jTranspileOutput");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jTranspileOutput");
+    let method_constructor = env
+      .get_method_id(&class, "<init>", "(Ljava/lang/String;Ljava/lang/String;Z)V")
+      .expect("Couldn't find method Swc4jTranspileOutput.Swc4jTranspileOutput");
+    JavaTranspileOutput {
+      class,
+      method_constructor,
+    }
+  }
+
+  pub fn create<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    code: jvalue,
+    module: jvalue,
+    source_map: jvalue,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe {
+      env
+        .new_object_unchecked(&self.class, self.method_constructor, &[code, source_map, module])
+        .expect("Couldn't create Swc4jTranspileOutput")
+    }
+  }
+}
+
+static mut JAVA_TRANSPILE_OUTPUT: Option<JavaTranspileOutput> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
-  let jclass_transpile_output = env
-    .find_class("com/caoccao/javet/swc4j/outputs/Swc4jTranspileOutput")
-    .expect("Couldn't find class Swc4jTranspileOutput");
-  let jclass_transpile_output = env
-    .new_global_ref(jclass_transpile_output)
-    .expect("Couldn't globalize class Swc4jTranspileOutput");
-  let jmethod_id_transpile_output_constructor = env
-    .get_method_id(
-      &jclass_transpile_output,
-      "<init>",
-      "(Ljava/lang/String;Ljava/lang/String;Z)V",
-    )
-    .expect("Couldn't find method Swc4jTranspileOutput.Swc4jTranspileOutput");
   unsafe {
-    JNI_CALLS = Some(JniCalls {
-      jclass_transpile_output,
-      jmethod_id_transpile_output_constructor,
-    });
+    JAVA_TRANSPILE_OUTPUT = Some(JavaTranspileOutput::new(env));
   }
 }
 
@@ -84,14 +103,6 @@ impl ToJniType for TranspileOutput {
         None => null_mut(),
       },
     };
-    unsafe {
-      env
-        .new_object_unchecked(
-          &JNI_CALLS.as_ref().unwrap().jclass_transpile_output,
-          JNI_CALLS.as_ref().unwrap().jmethod_id_transpile_output_constructor,
-          &[code, source_map, module],
-        )
-        .expect("Couldn't create Swc4jTranspileOutput")
-    }
+    unsafe { JAVA_TRANSPILE_OUTPUT.as_ref().unwrap() }.create(env, code, module, source_map)
   }
 }
