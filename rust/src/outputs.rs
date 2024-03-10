@@ -24,8 +24,8 @@ use std::ptr::null_mut;
 use crate::converter;
 
 struct JavaTranspileOutput {
-  pub class: GlobalRef,
-  pub method_constructor: JMethodID,
+  class: GlobalRef,
+  method_constructor: JMethodID,
 }
 unsafe impl Send for JavaTranspileOutput {}
 unsafe impl Sync for JavaTranspileOutput {}

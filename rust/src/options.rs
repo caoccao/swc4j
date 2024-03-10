@@ -15,7 +15,7 @@
 * limitations under the License.
 */
 
-use jni::objects::{JMethodID, JObject};
+use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::sys::jobject;
 use jni::JNIEnv;
 
@@ -23,96 +23,173 @@ use deno_ast::MediaType;
 
 use crate::{converter, jni_utils};
 
-struct JniCalls {
-  pub jmethod_id_media_type_get_id: JMethodID,
-  pub jmethod_id_transpile_options_get_media_type: JMethodID,
-  pub jmethod_id_transpile_options_get_specifier: JMethodID,
-  pub jmethod_id_transpile_options_get_jsx_factory: JMethodID,
-  pub jmethod_id_transpile_options_get_jsx_fragment_factory: JMethodID,
-  pub jmethod_id_transpile_options_get_jsx_import_source: JMethodID,
-  pub jmethod_id_transpile_options_is_inline_source_map: JMethodID,
-  pub jmethod_id_transpile_options_is_inline_sources: JMethodID,
-  pub jmethod_id_transpile_options_is_jsx_automatic: JMethodID,
-  pub jmethod_id_transpile_options_is_jsx_development: JMethodID,
-  pub jmethod_id_transpile_options_is_precompile_jsx: JMethodID,
-  pub jmethod_id_transpile_options_is_source_map: JMethodID,
-  pub jmethod_id_transpile_options_is_transform_jsx: JMethodID,
+struct JavaMediaType {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
 }
-unsafe impl Send for JniCalls {}
-unsafe impl Sync for JniCalls {}
+unsafe impl Send for JavaMediaType {}
+unsafe impl Sync for JavaMediaType {}
 
-static mut JNI_CALLS: Option<JniCalls> = None;
+impl JavaMediaType {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jMediaType")
+      .expect("Couldn't find class Swc4jMediaType");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jMediaType");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jMediaType.getId");
+    JavaMediaType { class, method_get_id }
+  }
+
+  pub fn get_media_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> MediaType {
+    converter::media_type_id_to_media_type(jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id))
+  }
+}
+
+struct JavaTranspileOptions {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_media_type: JMethodID,
+  method_get_specifier: JMethodID,
+  method_get_jsx_factory: JMethodID,
+  method_get_jsx_fragment_factory: JMethodID,
+  method_get_jsx_import_source: JMethodID,
+  method_is_inline_source_map: JMethodID,
+  method_is_inline_sources: JMethodID,
+  method_is_jsx_automatic: JMethodID,
+  method_is_jsx_development: JMethodID,
+  method_is_precompile_jsx: JMethodID,
+  method_is_source_map: JMethodID,
+  method_is_transform_jsx: JMethodID,
+}
+unsafe impl Send for JavaTranspileOptions {}
+unsafe impl Sync for JavaTranspileOptions {}
+
+impl JavaTranspileOptions {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/options/Swc4jTranspileOptions")
+      .expect("Couldn't find class Swc4jTranspileOptions");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jTranspileOptions");
+    let method_get_media_type = env
+      .get_method_id(
+        &class,
+        "getMediaType",
+        "()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getMediaType");
+    let method_get_specifier = env
+      .get_method_id(&class, "getSpecifier", "()Ljava/lang/String;")
+      .expect("Couldn't find method Swc4jTranspileOptions.getSpecifier");
+    let method_get_jsx_factory = env
+      .get_method_id(&class, "getJsxFactory", "()Ljava/lang/String;")
+      .expect("Couldn't find method Swc4jTranspileOptions.getJsxFactory");
+    let method_get_jsx_fragment_factory = env
+      .get_method_id(&class, "getJsxFragmentFactory", "()Ljava/lang/String;")
+      .expect("Couldn't find method Swc4jTranspileOptions.getJsxFragmentFactory");
+    let method_get_jsx_import_source = env
+      .get_method_id(&class, "getJsxImportSource", "()Ljava/lang/String;")
+      .expect("Couldn't find method Swc4jTranspileOptions.getJsxImportSource");
+    let method_is_inline_source_map = env
+      .get_method_id(&class, "isInlineSourceMap", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isInlineSourceMap");
+    let method_is_inline_sources = env
+      .get_method_id(&class, "isInlineSources", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isInlineSources");
+    let method_is_jsx_automatic = env
+      .get_method_id(&class, "isJsxAutomatic", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isJsxAutomatic");
+    let method_is_jsx_development = env
+      .get_method_id(&class, "isJsxDevelopment", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isJsxDevelopment");
+    let method_is_precompile_jsx = env
+      .get_method_id(&class, "isPrecompileJsx", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isPrecompileJsx");
+    let method_is_source_map = env
+      .get_method_id(&class, "isSourceMap", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isSourceMap");
+    let method_is_transform_jsx = env
+      .get_method_id(&class, "isTransformJsx", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isTransformJsx");
+    JavaTranspileOptions {
+      class,
+      method_get_media_type,
+      method_get_specifier,
+      method_get_jsx_factory,
+      method_get_jsx_fragment_factory,
+      method_get_jsx_import_source,
+      method_is_inline_source_map,
+      method_is_inline_sources,
+      method_is_jsx_automatic,
+      method_is_jsx_development,
+      method_is_precompile_jsx,
+      method_is_source_map,
+      method_is_transform_jsx,
+    }
+  }
+
+  pub fn get_jsx_factory<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> String {
+    jni_utils::get_as_string(env, obj, self.method_get_jsx_factory)
+  }
+
+  pub fn get_jsx_fragment_factory<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> String {
+    jni_utils::get_as_string(env, obj, self.method_get_jsx_fragment_factory)
+  }
+
+  pub fn get_jsx_import_source<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> Option<String> {
+    jni_utils::get_as_optional_string(env, obj, self.method_get_jsx_import_source)
+  }
+
+  pub fn get_media_type<'local, 'a, 'b>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> JObject<'b> {
+    jni_utils::get_as_jobject(env, obj, self.method_get_media_type)
+  }
+
+  pub fn get_specifier<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> String {
+    jni_utils::get_as_string(env, obj, self.method_get_specifier)
+  }
+
+  pub fn is_inline_source_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_inline_source_map)
+  }
+
+  pub fn is_inline_sources<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_inline_sources)
+  }
+
+  pub fn is_jsx_automatic<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_jsx_automatic)
+  }
+
+  pub fn is_jsx_development<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_jsx_development)
+  }
+
+  pub fn is_source_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_source_map)
+  }
+
+  pub fn is_transform_jsx<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_transform_jsx)
+  }
+
+  pub fn is_precompile_jsx<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_precompile_jsx)
+  }
+}
+
+static mut JAVA_MEDIA_TYPE: Option<JavaMediaType> = None;
+static mut JAVA_TRANSPILER_OPTIONS: Option<JavaTranspileOptions> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
-  let jclass_media_type = env
-    .find_class("com/caoccao/javet/swc4j/enums/Swc4jMediaType")
-    .expect("Couldn't find class Swc4jMediaType");
-  let jmethod_id_media_type_get_id = env
-    .get_method_id(&jclass_media_type, "getId", "()I")
-    .expect("Couldn't find method Swc4jMediaType.getId");
-  let jclass_transpile_options = env
-    .find_class("com/caoccao/javet/swc4j/options/Swc4jTranspileOptions")
-    .expect("Couldn't find class Swc4jTranspileOptions");
-  let jmethod_id_transpile_options_get_media_type = env
-    .get_method_id(
-      &jclass_transpile_options,
-      "getMediaType",
-      "()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;",
-    )
-    .expect("Couldn't find method Swc4jTranspileOptions.getMediaType");
-  let jmethod_id_transpile_options_get_specifier = env
-    .get_method_id(&jclass_transpile_options, "getSpecifier", "()Ljava/lang/String;")
-    .expect("Couldn't find method Swc4jTranspileOptions.getSpecifier");
-  let jmethod_id_transpile_options_get_jsx_factory = env
-    .get_method_id(&jclass_transpile_options, "getJsxFactory", "()Ljava/lang/String;")
-    .expect("Couldn't find method Swc4jTranspileOptions.getJsxFactory");
-  let jmethod_id_transpile_options_get_jsx_fragment_factory = env
-    .get_method_id(
-      &jclass_transpile_options,
-      "getJsxFragmentFactory",
-      "()Ljava/lang/String;",
-    )
-    .expect("Couldn't find method Swc4jTranspileOptions.getJsxFragmentFactory");
-  let jmethod_id_transpile_options_get_jsx_import_source = env
-    .get_method_id(&jclass_transpile_options, "getJsxImportSource", "()Ljava/lang/String;")
-    .expect("Couldn't find method Swc4jTranspileOptions.getJsxImportSource");
-  let jmethod_id_transpile_options_is_inline_source_map = env
-    .get_method_id(&jclass_transpile_options, "isInlineSourceMap", "()Z")
-    .expect("Couldn't find method Swc4jTranspileOptions.isInlineSourceMap");
-  let jmethod_id_transpile_options_is_inline_sources = env
-    .get_method_id(&jclass_transpile_options, "isInlineSources", "()Z")
-    .expect("Couldn't find method Swc4jTranspileOptions.isInlineSources");
-  let jmethod_id_transpile_options_is_jsx_automatic = env
-    .get_method_id(&jclass_transpile_options, "isJsxAutomatic", "()Z")
-    .expect("Couldn't find method Swc4jTranspileOptions.isJsxAutomatic");
-  let jmethod_id_transpile_options_is_jsx_development = env
-    .get_method_id(&jclass_transpile_options, "isJsxDevelopment", "()Z")
-    .expect("Couldn't find method Swc4jTranspileOptions.isJsxDevelopment");
-  let jmethod_id_transpile_options_is_precompile_jsx = env
-    .get_method_id(&jclass_transpile_options, "isPrecompileJsx", "()Z")
-    .expect("Couldn't find method Swc4jTranspileOptions.isPrecompileJsx");
-  let jmethod_id_transpile_options_is_source_map = env
-    .get_method_id(&jclass_transpile_options, "isSourceMap", "()Z")
-    .expect("Couldn't find method Swc4jTranspileOptions.isSourceMap");
-  let jmethod_id_transpile_options_is_transform_jsx = env
-    .get_method_id(&jclass_transpile_options, "isTransformJsx", "()Z")
-    .expect("Couldn't find method Swc4jTranspileOptions.isTransformJsx");
   unsafe {
-    JNI_CALLS = Some(JniCalls {
-      jmethod_id_media_type_get_id,
-      jmethod_id_transpile_options_get_media_type,
-      jmethod_id_transpile_options_get_specifier,
-      jmethod_id_transpile_options_get_jsx_factory,
-      jmethod_id_transpile_options_get_jsx_fragment_factory,
-      jmethod_id_transpile_options_get_jsx_import_source,
-      jmethod_id_transpile_options_is_inline_source_map,
-      jmethod_id_transpile_options_is_inline_sources,
-      jmethod_id_transpile_options_is_jsx_automatic,
-      jmethod_id_transpile_options_is_jsx_development,
-      jmethod_id_transpile_options_is_precompile_jsx,
-      jmethod_id_transpile_options_is_source_map,
-      jmethod_id_transpile_options_is_transform_jsx,
-    });
+    JAVA_MEDIA_TYPE = Some(JavaMediaType::new(env));
+    JAVA_TRANSPILER_OPTIONS = Some(JavaTranspileOptions::new(env));
   }
 }
 
@@ -179,28 +256,27 @@ impl Default for TranspileOptions {
 }
 
 impl FromJniType for TranspileOptions {
-  fn from_jni_type<'local>(env: &mut JNIEnv<'local>, o: jobject) -> TranspileOptions {
-    let o = unsafe { JObject::from_raw(o) };
-    let o = o.as_ref();
-    let jni_calls = unsafe { JNI_CALLS.as_ref().unwrap() };
-    let inline_source_map =
-      jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_inline_source_map);
-    let inline_sources = jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_inline_sources);
-    let jsx_automatic = jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_jsx_automatic);
-    let jsx_development = jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_jsx_development);
-    let jsx_factory = jni_utils::get_as_string(env, o, jni_calls.jmethod_id_transpile_options_get_jsx_factory);
+  fn from_jni_type<'local>(env: &mut JNIEnv<'local>, obj: jobject) -> TranspileOptions {
+    let obj = unsafe { JObject::from_raw(obj) };
+    let obj = obj.as_ref();
+    let java_transpiler_options = unsafe { JAVA_TRANSPILER_OPTIONS.as_ref().unwrap() };
+    let inline_source_map = java_transpiler_options.is_inline_source_map(env, obj);
+    let inline_sources = java_transpiler_options.is_inline_sources(env, obj);
+    let jsx_automatic = java_transpiler_options.is_jsx_automatic(env, obj);
+    let jsx_development = java_transpiler_options.is_jsx_development(env, obj);
+    let jsx_factory = java_transpiler_options.get_jsx_factory(env, obj);
     let jsx_fragment_factory =
-      jni_utils::get_as_string(env, o, jni_calls.jmethod_id_transpile_options_get_jsx_fragment_factory);
+      java_transpiler_options.get_jsx_fragment_factory(env, obj);
     let jsx_import_source =
-      jni_utils::get_as_optional_string(env, o, jni_calls.jmethod_id_transpile_options_get_jsx_import_source);
-    let media_type = jni_utils::get_as_jobject(env, o, jni_calls.jmethod_id_transpile_options_get_media_type);
-    let media_type = jni_utils::get_as_int(env, media_type.as_ref(), jni_calls.jmethod_id_media_type_get_id);
-    let media_type = converter::media_type_id_to_media_type(media_type);
-    let source_map = jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_source_map);
-    let specifier = jni_utils::get_as_string(env, o, jni_calls.jmethod_id_transpile_options_get_specifier);
-    let transform_jsx = jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_transform_jsx);
-    let precompile_jsx = jni_utils::get_as_boolean(env, o, jni_calls.jmethod_id_transpile_options_is_precompile_jsx);
-    // construct
+      java_transpiler_options.get_jsx_import_source(env, obj);
+    let media_type = java_transpiler_options.get_media_type(env, obj);
+    let media_type = media_type.as_ref();
+    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
+    let media_type = java_media_type.get_media_type(env, media_type);
+    let source_map = java_transpiler_options.is_source_map(env, obj);
+    let specifier = java_transpiler_options.get_specifier(env, obj);
+    let transform_jsx = java_transpiler_options.is_transform_jsx(env, obj);
+    let precompile_jsx = java_transpiler_options.is_precompile_jsx(env, obj);
     TranspileOptions {
       inline_source_map,
       inline_sources,
