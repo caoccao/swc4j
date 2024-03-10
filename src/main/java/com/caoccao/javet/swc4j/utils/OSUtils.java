@@ -16,8 +16,6 @@
 
 package com.caoccao.javet.swc4j.utils;
 
-import java.lang.management.ManagementFactory;
-
 /**
  * The type OS utils.
  *
@@ -45,17 +43,22 @@ public final class OSUtils {
     public static final String WORKING_DIRECTORY = System.getProperty("user.dir");
 
     static {
-        /* if defined ANDROID
-        PROCESS_ID = 1L;
-        /* end if */
-        /* if not defined ANDROID */
-        String processName = ManagementFactory.getRuntimeMXBean().getName();
-        int positionOfSeparator = processName.indexOf("@");
-        if (positionOfSeparator > 0) {
-            processName = processName.substring(0, positionOfSeparator);
+        long processId = 1L;
+        if (!IS_ANDROID) {
+            try {
+                Class<?> classManagementFactory = Class.forName("java.lang.management.ManagementFactory");
+                Class<?> classRuntimeMXBean = Class.forName("java.lang.management.RuntimeMXBean");
+                Object runtimeMXBean = classManagementFactory.getMethod("getRuntimeMXBean").invoke(null);
+                String processName = (String) classRuntimeMXBean.getMethod("getName").invoke(runtimeMXBean);
+                int positionOfSeparator = processName.indexOf("@");
+                if (positionOfSeparator > 0) {
+                    processName = processName.substring(0, positionOfSeparator);
+                }
+                processId = Long.parseLong(processName);
+            } catch (Throwable ignore) {
+            }
         }
-        PROCESS_ID = Long.parseLong(processName);
-        /* end if */
+        PROCESS_ID = processId;
     }
 
     private OSUtils() {
