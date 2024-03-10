@@ -17,10 +17,13 @@
 package com.caoccao.javet.swc4j;
 
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.stream.Stream;
 
@@ -122,8 +125,9 @@ public class TestSwc4j {
         assertNull(output.getSourceMap());
     }
 
-    @Test
-    public void testTranspileTypeScriptWithoutInlineSourceMap() throws Swc4jCoreException {
+    @ParameterizedTest
+    @EnumSource(Swc4jParseMode.class)
+    public void testTranspileTypeScriptWithoutInlineSourceMap(Swc4jParseMode parseMode) throws Swc4jCoreException {
         String code = "function add(a:number, b:number) { return a+b; }";
         String expectedCode = "function add(a, b) {\n" +
                 "  return a + b;\n" +
@@ -131,6 +135,7 @@ public class TestSwc4j {
         String specifier = "file:///abc.ts";
         String[] expectedProperties = new String[]{"version", "sources", "sourcesContent", specifier, "names", "mappings"};
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
+                .setParseMode(parseMode)
                 .setInlineSourceMap(false)
                 .setSpecifier(specifier)
                 .setMediaType(Swc4jMediaType.TypeScript)
@@ -138,7 +143,14 @@ public class TestSwc4j {
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
         assertNotNull(output);
         assertEquals(expectedCode, output.getCode());
-        assertTrue(output.isModule());
+        switch (parseMode) {
+            case Script:
+                assertFalse(output.isModule());
+                break;
+            default:
+                assertTrue(output.isModule());
+                break;
+        }
         assertNotNull(output.getSourceMap());
         Stream.of(expectedProperties).forEach(p -> assertTrue(
                 output.getSourceMap().contains("\"" + p + "\""),

@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.options;
 
 import com.caoccao.javet.swc4j.enums.Swc4jImportsNotUsedAsValues;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 /**
@@ -54,6 +55,7 @@ public final class Swc4jTranspileOptions {
     private String jsxFragmentFactory;
     private String jsxImportSource;
     private Swc4jMediaType mediaType;
+    private Swc4jParseMode parseMode;
     private boolean precompileJsx;
     private boolean sourceMap;
     private String specifier;
@@ -76,6 +78,7 @@ public final class Swc4jTranspileOptions {
         setInlineSourceMap(true);
         setInlineSources(true);
         setMediaType(Swc4jMediaType.JavaScript);
+        setParseMode(Swc4jParseMode.Module);
         setPrecompileJsx(false);
         setSourceMap(false);
         setSpecifier(DEFAULT_SPECIFIER);
@@ -135,6 +138,16 @@ public final class Swc4jTranspileOptions {
      */
     public Swc4jMediaType getMediaType() {
         return mediaType;
+    }
+
+    /**
+     * Gets parse mode.
+     *
+     * @return the parse mode
+     * @since 0.1.0
+     */
+    public Swc4jParseMode getParseMode() {
+        return parseMode;
     }
 
     /**
@@ -363,6 +376,18 @@ public final class Swc4jTranspileOptions {
      */
     public Swc4jTranspileOptions setMediaType(Swc4jMediaType mediaType) {
         this.mediaType = AssertionUtils.notNull(mediaType, "Media type");
+        return this;
+    }
+
+    /**
+     * Sets parse mode.
+     *
+     * @param parseMode the parse mode
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setParseMode(Swc4jParseMode parseMode) {
+        this.parseMode = AssertionUtils.notNull(parseMode, "Parse mode");
         return this;
     }
 

@@ -17,19 +17,24 @@
 
 use deno_ast::*;
 
-use crate::{options, outputs};
+use crate::{enums, options, outputs};
 
 const VERSION: &'static str = "0.1.0";
 
 pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Result<outputs::TranspileOutput, String> {
-  match parse_module(ParseParams {
+  let parse_params = ParseParams {
     specifier: options.specifier,
     text_info: SourceTextInfo::from_string(code),
     media_type: options.media_type,
     capture_tokens: false,
     maybe_syntax: None,
     scope_analysis: false,
-  }) {
+  };
+  let result = match options.parse_mode {
+    enums::ParseMode::Script => parse_script(parse_params),
+    _ => parse_module(parse_params),
+  };
+  match result {
     Ok(parsed_source) => {
       let emit_options = EmitOptions {
         emit_metadata: options.emit_metadata,

@@ -27,6 +27,7 @@ use std::ptr::null_mut;
 
 pub mod converter;
 pub mod core;
+pub mod enums;
 pub mod error;
 pub mod jni_utils;
 pub mod options;

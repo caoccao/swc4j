@@ -112,22 +112,30 @@ fn test_transpile_type_script_without_inline_source_map() {
     "names",
     "mappings",
   ];
-  let options = options::TranspileOptions {
-    inline_source_map: false,
-    source_map: true,
-    specifier: "file:///main.ts".to_owned(),
-    ..Default::default()
-  };
-  let output = core::transpile(code.to_owned(), options);
-  assert!(output.is_ok());
-  let output = output.unwrap();
-  assert!(output.module);
-  let output_code = output.code;
-  assert_eq!(expected_code, output_code);
-  let source_map = output.source_map.unwrap();
-  expected_properties
+  vec![enums::ParseMode::Module, enums::ParseMode::Script]
     .iter()
-    .for_each(|p| assert!(source_map.contains(p), "{} is not found", p));
+    .for_each(|parse_mode| {
+      let options = options::TranspileOptions {
+        inline_source_map: false,
+        parse_mode: parse_mode.clone(),
+        source_map: true,
+        specifier: "file:///main.ts".to_owned(),
+        ..Default::default()
+      };
+      let output = core::transpile(code.to_owned(), options);
+      assert!(output.is_ok());
+      let output = output.unwrap();
+      match parse_mode {
+        enums::ParseMode::Script => assert!(!output.module),
+        _ => assert!(output.module),
+      }
+      let output_code = output.code;
+      assert_eq!(expected_code, output_code);
+      let source_map = output.source_map.unwrap();
+      expected_properties
+        .iter()
+        .for_each(|p| assert!(source_map.contains(p), "{} is not found", p));
+    });
 }
 
 #[test]

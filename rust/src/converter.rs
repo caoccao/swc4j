@@ -19,18 +19,6 @@ use jni::objects::JString;
 use jni::sys::{jboolean, jstring};
 use jni::JNIEnv;
 
-use deno_ast::{ImportsNotUsedAsValues, MediaType};
-
-pub fn imports_not_used_as_values_id_to_imports_not_used_as_values(
-  imports_not_used_as_values_id: i32,
-) -> ImportsNotUsedAsValues {
-  match imports_not_used_as_values_id {
-    1 => ImportsNotUsedAsValues::Remove,
-    2 => ImportsNotUsedAsValues::Preserve,
-    _ => ImportsNotUsedAsValues::Error,
-  }
-}
-
 pub fn jboolean_to_bool(b: jboolean) -> bool {
   b != 0
 }
@@ -52,27 +40,6 @@ pub fn jstring_to_string<'local>(env: &mut JNIEnv<'local>, s: jstring) -> String
   match jstring_to_optional_string(env, s) {
     Some(s) => s,
     None => "".to_owned(),
-  }
-}
-
-pub fn media_type_id_to_media_type(media_type_id: i32) -> MediaType {
-  match media_type_id {
-    0 => MediaType::JavaScript,
-    1 => MediaType::Jsx,
-    2 => MediaType::Mjs,
-    3 => MediaType::Cjs,
-    4 => MediaType::TypeScript,
-    5 => MediaType::Mts,
-    6 => MediaType::Cts,
-    7 => MediaType::Dts,
-    8 => MediaType::Dmts,
-    9 => MediaType::Dcts,
-    10 => MediaType::Tsx,
-    11 => MediaType::Json,
-    12 => MediaType::Wasm,
-    13 => MediaType::TsBuildInfo,
-    14 => MediaType::SourceMap,
-    _ => MediaType::Unknown,
   }
 }
 

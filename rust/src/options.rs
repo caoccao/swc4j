@@ -21,7 +21,7 @@ use jni::JNIEnv;
 
 use deno_ast::{ImportsNotUsedAsValues, MediaType};
 
-use crate::{converter, jni_utils};
+use crate::{enums, jni_utils};
 
 struct JavaImportsNotUsedAsValues {
   #[allow(dead_code)]
@@ -50,11 +50,11 @@ impl JavaImportsNotUsedAsValues {
     env: &mut JNIEnv<'local>,
     obj: &JObject<'a>,
   ) -> ImportsNotUsedAsValues {
-    converter::imports_not_used_as_values_id_to_imports_not_used_as_values(jni_utils::get_as_int(
-      env,
-      obj.as_ref(),
-      self.method_get_id,
-    ))
+    match jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id) {
+      1 => ImportsNotUsedAsValues::Remove,
+      2 => ImportsNotUsedAsValues::Preserve,
+      _ => ImportsNotUsedAsValues::Error,
+    }
   }
 }
 
@@ -81,7 +81,54 @@ impl JavaMediaType {
   }
 
   pub fn get_media_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> MediaType {
-    converter::media_type_id_to_media_type(jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id))
+    match jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id) {
+      0 => MediaType::JavaScript,
+      1 => MediaType::Jsx,
+      2 => MediaType::Mjs,
+      3 => MediaType::Cjs,
+      4 => MediaType::TypeScript,
+      5 => MediaType::Mts,
+      6 => MediaType::Cts,
+      7 => MediaType::Dts,
+      8 => MediaType::Dmts,
+      9 => MediaType::Dcts,
+      10 => MediaType::Tsx,
+      11 => MediaType::Json,
+      12 => MediaType::Wasm,
+      13 => MediaType::TsBuildInfo,
+      14 => MediaType::SourceMap,
+      _ => MediaType::Unknown,
+    }
+  }
+}
+
+struct JavaParseMode {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+}
+unsafe impl Send for JavaParseMode {}
+unsafe impl Sync for JavaParseMode {}
+
+impl JavaParseMode {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jParseMode")
+      .expect("Couldn't find class Swc4jParseMode");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jParseMode");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jParseMode.getId");
+    JavaParseMode { class, method_get_id }
+  }
+
+  pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> enums::ParseMode {
+    match jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id) {
+      1 => enums::ParseMode::Script,
+      _ => enums::ParseMode::Module,
+    }
   }
 }
 
@@ -90,6 +137,7 @@ struct JavaTranspileOptions {
   class: GlobalRef,
   method_get_imports_not_used_as_values: JMethodID,
   method_get_media_type: JMethodID,
+  method_get_parse_mode: JMethodID,
   method_get_specifier: JMethodID,
   method_get_jsx_factory: JMethodID,
   method_get_jsx_fragment_factory: JMethodID,
@@ -129,6 +177,13 @@ impl JavaTranspileOptions {
         "()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getMediaType");
+    let method_get_parse_mode = env
+      .get_method_id(
+        &class,
+        "getParseMode",
+        "()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getParseMode");
     let method_get_specifier = env
       .get_method_id(&class, "getSpecifier", "()Ljava/lang/String;")
       .expect("Couldn't find method Swc4jTranspileOptions.getSpecifier");
@@ -172,6 +227,7 @@ impl JavaTranspileOptions {
       class,
       method_get_imports_not_used_as_values,
       method_get_media_type,
+      method_get_parse_mode,
       method_get_specifier,
       method_get_jsx_factory,
       method_get_jsx_fragment_factory,
@@ -210,6 +266,10 @@ impl JavaTranspileOptions {
 
   pub fn get_media_type<'local, 'a, 'b>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> JObject<'b> {
     jni_utils::get_as_jobject(env, obj, self.method_get_media_type)
+  }
+
+  pub fn get_parse_mode<'local, 'a, 'b>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> JObject<'b> {
+    jni_utils::get_as_jobject(env, obj, self.method_get_parse_mode)
   }
 
   pub fn get_specifier<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> String {
@@ -255,12 +315,14 @@ impl JavaTranspileOptions {
 
 static mut JAVA_IMPORTS_NOT_USED_AS_VALUES: Option<JavaImportsNotUsedAsValues> = None;
 static mut JAVA_MEDIA_TYPE: Option<JavaMediaType> = None;
+static mut JAVA_PARSE_MODE: Option<JavaParseMode> = None;
 static mut JAVA_TRANSPILER_OPTIONS: Option<JavaTranspileOptions> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
     JAVA_IMPORTS_NOT_USED_AS_VALUES = Some(JavaImportsNotUsedAsValues::new(env));
     JAVA_MEDIA_TYPE = Some(JavaMediaType::new(env));
+    JAVA_PARSE_MODE = Some(JavaParseMode::new(env));
     JAVA_TRANSPILER_OPTIONS = Some(JavaTranspileOptions::new(env));
   }
 }
@@ -309,6 +371,8 @@ pub struct TranspileOptions {
   pub specifier: String,
   /// Should JSX be transformed. Defaults to `true`.
   pub transform_jsx: bool,
+  /// Should the code to be parsed as Module or Script,
+  pub parse_mode: enums::ParseMode,
   /// Should JSX be precompiled into static strings that need to be concatenated
   /// with dynamic content. Defaults to `false`, mutually exclusive with
   /// `transform_jsx`.
@@ -332,6 +396,7 @@ impl Default for TranspileOptions {
       jsx_fragment_factory: "React.Fragment".into(),
       jsx_import_source: None,
       media_type: MediaType::TypeScript,
+      parse_mode: enums::ParseMode::Module,
       precompile_jsx: false,
       source_map: false,
       specifier: "file:///main.js".to_owned(),
@@ -347,6 +412,7 @@ impl FromJniType for TranspileOptions {
     let obj = obj.as_ref();
     let java_imports_not_used_as_values = unsafe { JAVA_IMPORTS_NOT_USED_AS_VALUES.as_ref().unwrap() };
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
+    let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
     let java_transpiler_options = unsafe { JAVA_TRANSPILER_OPTIONS.as_ref().unwrap() };
     let emit_metadata = java_transpiler_options.is_emit_metadata(env, obj);
     let imports_not_used_as_values = java_transpiler_options.get_imports_not_used_as_values(env, obj);
@@ -366,6 +432,9 @@ impl FromJniType for TranspileOptions {
     let source_map = java_transpiler_options.is_source_map(env, obj);
     let specifier = java_transpiler_options.get_specifier(env, obj);
     let transform_jsx = java_transpiler_options.is_transform_jsx(env, obj);
+    let parse_mode = java_transpiler_options.get_parse_mode(env, obj);
+    let parse_mode = parse_mode.as_ref();
+    let parse_mode = java_parse_mode.get_parse_mode(env, parse_mode);
     let precompile_jsx = java_transpiler_options.is_precompile_jsx(env, obj);
     let var_decl_imports = java_transpiler_options.is_var_decl_imports(env, obj);
     TranspileOptions {
@@ -382,6 +451,7 @@ impl FromJniType for TranspileOptions {
       source_map,
       specifier,
       transform_jsx,
+      parse_mode,
       precompile_jsx,
       var_decl_imports,
     }
