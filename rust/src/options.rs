@@ -58,6 +58,7 @@ struct JavaTranspileOptions {
   method_get_jsx_factory: JMethodID,
   method_get_jsx_fragment_factory: JMethodID,
   method_get_jsx_import_source: JMethodID,
+  method_is_emit_metadata: JMethodID,
   method_is_inline_source_map: JMethodID,
   method_is_inline_sources: JMethodID,
   method_is_jsx_automatic: JMethodID,
@@ -65,6 +66,7 @@ struct JavaTranspileOptions {
   method_is_precompile_jsx: JMethodID,
   method_is_source_map: JMethodID,
   method_is_transform_jsx: JMethodID,
+  method_is_var_decl_imports: JMethodID,
 }
 unsafe impl Send for JavaTranspileOptions {}
 unsafe impl Sync for JavaTranspileOptions {}
@@ -96,6 +98,9 @@ impl JavaTranspileOptions {
     let method_get_jsx_import_source = env
       .get_method_id(&class, "getJsxImportSource", "()Ljava/lang/String;")
       .expect("Couldn't find method Swc4jTranspileOptions.getJsxImportSource");
+    let method_is_emit_metadata = env
+      .get_method_id(&class, "isEmitMetadata", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isEmitMetadata");
     let method_is_inline_source_map = env
       .get_method_id(&class, "isInlineSourceMap", "()Z")
       .expect("Couldn't find method Swc4jTranspileOptions.isInlineSourceMap");
@@ -117,6 +122,9 @@ impl JavaTranspileOptions {
     let method_is_transform_jsx = env
       .get_method_id(&class, "isTransformJsx", "()Z")
       .expect("Couldn't find method Swc4jTranspileOptions.isTransformJsx");
+    let method_is_var_decl_imports = env
+      .get_method_id(&class, "isVarDeclImports", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isVarDeclImports");
     JavaTranspileOptions {
       class,
       method_get_media_type,
@@ -124,6 +132,7 @@ impl JavaTranspileOptions {
       method_get_jsx_factory,
       method_get_jsx_fragment_factory,
       method_get_jsx_import_source,
+      method_is_emit_metadata,
       method_is_inline_source_map,
       method_is_inline_sources,
       method_is_jsx_automatic,
@@ -131,6 +140,7 @@ impl JavaTranspileOptions {
       method_is_precompile_jsx,
       method_is_source_map,
       method_is_transform_jsx,
+      method_is_var_decl_imports,
     }
   }
 
@@ -152,6 +162,10 @@ impl JavaTranspileOptions {
 
   pub fn get_specifier<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> String {
     jni_utils::get_as_string(env, obj, self.method_get_specifier)
+  }
+
+  pub fn is_emit_metadata<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_emit_metadata)
   }
 
   pub fn is_inline_source_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
@@ -181,6 +195,10 @@ impl JavaTranspileOptions {
   pub fn is_precompile_jsx<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
     jni_utils::get_as_boolean(env, obj, self.method_is_precompile_jsx)
   }
+
+  pub fn is_var_decl_imports<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_var_decl_imports)
+  }
 }
 
 static mut JAVA_MEDIA_TYPE: Option<JavaMediaType> = None;
@@ -199,6 +217,9 @@ pub trait FromJniType {
 
 #[derive(Debug)]
 pub struct TranspileOptions {
+  /// When emitting a legacy decorator, also emit experimental decorator meta
+  /// data.  Defaults to `false`.
+  pub emit_metadata: bool,
   /// Should the source map be inlined in the emitted code file, or provided
   /// as a separate file.  Defaults to `true`.
   pub inline_source_map: bool,
@@ -234,11 +255,16 @@ pub struct TranspileOptions {
   /// with dynamic content. Defaults to `false`, mutually exclusive with
   /// `transform_jsx`.
   pub precompile_jsx: bool,
+  /// Should import declarations be transformed to variable declarations using
+  /// a dynamic import. This is useful for import & export declaration support
+  /// in script contexts such as the Deno REPL.  Defaults to `false`.
+  pub var_decl_imports: bool,
 }
 
 impl Default for TranspileOptions {
   fn default() -> Self {
     TranspileOptions {
+      emit_metadata: false,
       inline_source_map: true,
       inline_sources: true,
       jsx_automatic: false,
@@ -251,6 +277,7 @@ impl Default for TranspileOptions {
       source_map: false,
       specifier: "file:///main.js".to_owned(),
       transform_jsx: true,
+      var_decl_imports: false,
     }
   }
 }
@@ -260,15 +287,14 @@ impl FromJniType for TranspileOptions {
     let obj = unsafe { JObject::from_raw(obj) };
     let obj = obj.as_ref();
     let java_transpiler_options = unsafe { JAVA_TRANSPILER_OPTIONS.as_ref().unwrap() };
+    let emit_metadata = java_transpiler_options.is_emit_metadata(env, obj);
     let inline_source_map = java_transpiler_options.is_inline_source_map(env, obj);
     let inline_sources = java_transpiler_options.is_inline_sources(env, obj);
     let jsx_automatic = java_transpiler_options.is_jsx_automatic(env, obj);
     let jsx_development = java_transpiler_options.is_jsx_development(env, obj);
     let jsx_factory = java_transpiler_options.get_jsx_factory(env, obj);
-    let jsx_fragment_factory =
-      java_transpiler_options.get_jsx_fragment_factory(env, obj);
-    let jsx_import_source =
-      java_transpiler_options.get_jsx_import_source(env, obj);
+    let jsx_fragment_factory = java_transpiler_options.get_jsx_fragment_factory(env, obj);
+    let jsx_import_source = java_transpiler_options.get_jsx_import_source(env, obj);
     let media_type = java_transpiler_options.get_media_type(env, obj);
     let media_type = media_type.as_ref();
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
@@ -277,7 +303,9 @@ impl FromJniType for TranspileOptions {
     let specifier = java_transpiler_options.get_specifier(env, obj);
     let transform_jsx = java_transpiler_options.is_transform_jsx(env, obj);
     let precompile_jsx = java_transpiler_options.is_precompile_jsx(env, obj);
+    let var_decl_imports =java_transpiler_options.is_var_decl_imports(env, obj); 
     TranspileOptions {
+      emit_metadata,
       inline_source_map,
       inline_sources,
       jsx_automatic,
@@ -290,6 +318,7 @@ impl FromJniType for TranspileOptions {
       specifier,
       transform_jsx,
       precompile_jsx,
+      var_decl_imports,
     }
   }
 }

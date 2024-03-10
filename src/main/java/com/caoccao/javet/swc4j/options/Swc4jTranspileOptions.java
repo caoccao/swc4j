@@ -43,6 +43,7 @@ public final class Swc4jTranspileOptions {
      * @since 0.1.0
      */
     public static final String DEFAULT_JSX_FRAGMENT_FACTORY = "React.Fragment";
+    private boolean emitMetadata;
     private boolean inlineSourceMap;
     private boolean inlineSources;
     private boolean jsxAutomatic;
@@ -55,6 +56,7 @@ public final class Swc4jTranspileOptions {
     private boolean sourceMap;
     private String specifier;
     private boolean transformJsx;
+    private boolean varDeclImports;
 
     /**
      * Instantiates a new Swc4j transpile options.
@@ -62,6 +64,7 @@ public final class Swc4jTranspileOptions {
      * @since 0.1.0
      */
     public Swc4jTranspileOptions() {
+        setEmitMetadata(false);
         setJsxAutomatic(false);
         setJsxDevelopment(false);
         setJsxFactory(DEFAULT_JSX_FACTORY);
@@ -74,6 +77,7 @@ public final class Swc4jTranspileOptions {
         setSourceMap(false);
         setSpecifier(DEFAULT_SPECIFIER);
         setTransformJsx(true);
+        setVarDeclImports(false);
     }
 
     /**
@@ -126,6 +130,17 @@ public final class Swc4jTranspileOptions {
      */
     public String getSpecifier() {
         return specifier;
+    }
+
+    /**
+     * When emitting a legacy decorator, also emit experimental decorator meta data.
+     * Defaults to `false`.
+     *
+     * @return the boolean
+     * @since 0.1.0
+     */
+    public boolean isEmitMetadata() {
+        return emitMetadata;
     }
 
     /**
@@ -201,6 +216,30 @@ public final class Swc4jTranspileOptions {
      */
     public boolean isTransformJsx() {
         return transformJsx;
+    }
+
+    /**
+     * Should import declarations be transformed to variable declarations using
+     * a dynamic import. This is useful for import & export declaration support
+     * in script contexts such as the Deno REPL.  Defaults to `false`.
+     *
+     * @return true : transformed, false : not transformed
+     * @since 0.1.0
+     */
+    public boolean isVarDeclImports() {
+        return varDeclImports;
+    }
+
+    /**
+     * Sets emit metadata.
+     *
+     * @param emitMetadata the emit metadata
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setEmitMetadata(boolean emitMetadata) {
+        this.emitMetadata = emitMetadata;
+        return this;
     }
 
     /**
@@ -344,6 +383,18 @@ public final class Swc4jTranspileOptions {
      */
     public Swc4jTranspileOptions setTransformJsx(boolean transformJsx) {
         this.transformJsx = transformJsx;
+        return this;
+    }
+
+    /**
+     * Sets var decl imports.
+     *
+     * @param varDeclImports the var decl imports
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setVarDeclImports(boolean varDeclImports) {
+        this.varDeclImports = varDeclImports;
         return this;
     }
 }

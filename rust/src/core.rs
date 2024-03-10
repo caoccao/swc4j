@@ -32,7 +32,7 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
   }) {
     Ok(parsed_source) => {
       let emit_options = EmitOptions {
-        // emit_metadata: options.emit_metadata,
+        emit_metadata: options.emit_metadata,
         // imports_not_used_as_values: options.imports_not_used_as_values,
         inline_source_map: options.inline_source_map,
         inline_sources: options.inline_sources,
@@ -44,7 +44,7 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
         precompile_jsx: options.precompile_jsx,
         source_map: options.source_map,
         transform_jsx: options.transform_jsx,
-        // var_decl_imports: options.var_decl_imports,
+        var_decl_imports: options.var_decl_imports,
         ..Default::default()
       };
       match parsed_source.transpile(&emit_options) {
