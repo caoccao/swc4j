@@ -818,7 +818,6 @@ version = "0.1.0"
 dependencies = [
  "debug_print",
  "deno_ast",
- "deno_media_type",
  "jni",
 ]
 

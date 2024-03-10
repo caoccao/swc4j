@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.options;
 
+import com.caoccao.javet.swc4j.enums.Swc4jImportsNotUsedAsValues;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
@@ -44,6 +45,7 @@ public final class Swc4jTranspileOptions {
      */
     public static final String DEFAULT_JSX_FRAGMENT_FACTORY = "React.Fragment";
     private boolean emitMetadata;
+    private Swc4jImportsNotUsedAsValues importsNotUsedAsValues;
     private boolean inlineSourceMap;
     private boolean inlineSources;
     private boolean jsxAutomatic;
@@ -65,6 +67,7 @@ public final class Swc4jTranspileOptions {
      */
     public Swc4jTranspileOptions() {
         setEmitMetadata(false);
+        setImportsNotUsedAsValues(Swc4jImportsNotUsedAsValues.Remove);
         setJsxAutomatic(false);
         setJsxDevelopment(false);
         setJsxFactory(DEFAULT_JSX_FACTORY);
@@ -78,6 +81,18 @@ public final class Swc4jTranspileOptions {
         setSpecifier(DEFAULT_SPECIFIER);
         setTransformJsx(true);
         setVarDeclImports(false);
+    }
+
+    /**
+     * What to do with import statements that only import types i.e. whether to
+     * remove them (`Remove`), keep them as side-effect imports (`Preserve`)
+     * or error (`Error`). Defaults to `Remove`.
+     *
+     * @return the imports not used as values
+     * @since 0.1.0
+     */
+    public Swc4jImportsNotUsedAsValues getImportsNotUsedAsValues() {
+        return importsNotUsedAsValues;
     }
 
     /**
@@ -239,6 +254,18 @@ public final class Swc4jTranspileOptions {
      */
     public Swc4jTranspileOptions setEmitMetadata(boolean emitMetadata) {
         this.emitMetadata = emitMetadata;
+        return this;
+    }
+
+    /**
+     * Sets imports not used as values.
+     *
+     * @param importsNotUsedAsValues the imports not used as values
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOptions setImportsNotUsedAsValues(Swc4jImportsNotUsedAsValues importsNotUsedAsValues) {
+        this.importsNotUsedAsValues = AssertionUtils.notNull(importsNotUsedAsValues, "Imports not used as values");
         return this;
     }
 

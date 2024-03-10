@@ -19,9 +19,44 @@ use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::sys::jobject;
 use jni::JNIEnv;
 
-use deno_ast::MediaType;
+use deno_ast::{ImportsNotUsedAsValues, MediaType};
 
 use crate::{converter, jni_utils};
+
+struct JavaImportsNotUsedAsValues {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+}
+unsafe impl Send for JavaImportsNotUsedAsValues {}
+unsafe impl Sync for JavaImportsNotUsedAsValues {}
+
+impl JavaImportsNotUsedAsValues {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jImportsNotUsedAsValues")
+      .expect("Couldn't find class Swc4jImportsNotUsedAsValues");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jImportsNotUsedAsValues");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jImportsNotUsedAsValues.getId");
+    JavaImportsNotUsedAsValues { class, method_get_id }
+  }
+
+  pub fn get_imports_not_used_as_values<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'a>,
+  ) -> ImportsNotUsedAsValues {
+    converter::imports_not_used_as_values_id_to_imports_not_used_as_values(jni_utils::get_as_int(
+      env,
+      obj.as_ref(),
+      self.method_get_id,
+    ))
+  }
+}
 
 struct JavaMediaType {
   #[allow(dead_code)]
@@ -53,6 +88,7 @@ impl JavaMediaType {
 struct JavaTranspileOptions {
   #[allow(dead_code)]
   class: GlobalRef,
+  method_get_imports_not_used_as_values: JMethodID,
   method_get_media_type: JMethodID,
   method_get_specifier: JMethodID,
   method_get_jsx_factory: JMethodID,
@@ -79,6 +115,13 @@ impl JavaTranspileOptions {
     let class = env
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jTranspileOptions");
+    let method_get_imports_not_used_as_values = env
+      .get_method_id(
+        &class,
+        "getImportsNotUsedAsValues",
+        "()Lcom/caoccao/javet/swc4j/enums/Swc4jImportsNotUsedAsValues;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getImportsNotUsedAsValues");
     let method_get_media_type = env
       .get_method_id(
         &class,
@@ -127,6 +170,7 @@ impl JavaTranspileOptions {
       .expect("Couldn't find method Swc4jTranspileOptions.isVarDeclImports");
     JavaTranspileOptions {
       class,
+      method_get_imports_not_used_as_values,
       method_get_media_type,
       method_get_specifier,
       method_get_jsx_factory,
@@ -142,6 +186,14 @@ impl JavaTranspileOptions {
       method_is_transform_jsx,
       method_is_var_decl_imports,
     }
+  }
+
+  pub fn get_imports_not_used_as_values<'local, 'a, 'b>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'a>,
+  ) -> JObject<'b> {
+    jni_utils::get_as_jobject(env, obj, self.method_get_imports_not_used_as_values)
   }
 
   pub fn get_jsx_factory<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> String {
@@ -201,11 +253,13 @@ impl JavaTranspileOptions {
   }
 }
 
+static mut JAVA_IMPORTS_NOT_USED_AS_VALUES: Option<JavaImportsNotUsedAsValues> = None;
 static mut JAVA_MEDIA_TYPE: Option<JavaMediaType> = None;
 static mut JAVA_TRANSPILER_OPTIONS: Option<JavaTranspileOptions> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
+    JAVA_IMPORTS_NOT_USED_AS_VALUES = Some(JavaImportsNotUsedAsValues::new(env));
     JAVA_MEDIA_TYPE = Some(JavaMediaType::new(env));
     JAVA_TRANSPILER_OPTIONS = Some(JavaTranspileOptions::new(env));
   }
@@ -220,6 +274,10 @@ pub struct TranspileOptions {
   /// When emitting a legacy decorator, also emit experimental decorator meta
   /// data.  Defaults to `false`.
   pub emit_metadata: bool,
+  /// What to do with import statements that only import types i.e. whether to
+  /// remove them (`Remove`), keep them as side-effect imports (`Preserve`)
+  /// or error (`Error`). Defaults to `Remove`.
+  pub imports_not_used_as_values: ImportsNotUsedAsValues,
   /// Should the source map be inlined in the emitted code file, or provided
   /// as a separate file.  Defaults to `true`.
   pub inline_source_map: bool,
@@ -265,6 +323,7 @@ impl Default for TranspileOptions {
   fn default() -> Self {
     TranspileOptions {
       emit_metadata: false,
+      imports_not_used_as_values: ImportsNotUsedAsValues::Remove,
       inline_source_map: true,
       inline_sources: true,
       jsx_automatic: false,
@@ -286,8 +345,14 @@ impl FromJniType for TranspileOptions {
   fn from_jni_type<'local>(env: &mut JNIEnv<'local>, obj: jobject) -> TranspileOptions {
     let obj = unsafe { JObject::from_raw(obj) };
     let obj = obj.as_ref();
+    let java_imports_not_used_as_values = unsafe { JAVA_IMPORTS_NOT_USED_AS_VALUES.as_ref().unwrap() };
+    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let java_transpiler_options = unsafe { JAVA_TRANSPILER_OPTIONS.as_ref().unwrap() };
     let emit_metadata = java_transpiler_options.is_emit_metadata(env, obj);
+    let imports_not_used_as_values = java_transpiler_options.get_imports_not_used_as_values(env, obj);
+    let imports_not_used_as_values = imports_not_used_as_values.as_ref();
+    let imports_not_used_as_values =
+      java_imports_not_used_as_values.get_imports_not_used_as_values(env, imports_not_used_as_values);
     let inline_source_map = java_transpiler_options.is_inline_source_map(env, obj);
     let inline_sources = java_transpiler_options.is_inline_sources(env, obj);
     let jsx_automatic = java_transpiler_options.is_jsx_automatic(env, obj);
@@ -297,15 +362,15 @@ impl FromJniType for TranspileOptions {
     let jsx_import_source = java_transpiler_options.get_jsx_import_source(env, obj);
     let media_type = java_transpiler_options.get_media_type(env, obj);
     let media_type = media_type.as_ref();
-    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let media_type = java_media_type.get_media_type(env, media_type);
     let source_map = java_transpiler_options.is_source_map(env, obj);
     let specifier = java_transpiler_options.get_specifier(env, obj);
     let transform_jsx = java_transpiler_options.is_transform_jsx(env, obj);
     let precompile_jsx = java_transpiler_options.is_precompile_jsx(env, obj);
-    let var_decl_imports =java_transpiler_options.is_var_decl_imports(env, obj); 
+    let var_decl_imports = java_transpiler_options.is_var_decl_imports(env, obj);
     TranspileOptions {
       emit_metadata,
+      imports_not_used_as_values,
       inline_source_map,
       inline_sources,
       jsx_automatic,

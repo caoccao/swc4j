@@ -19,7 +19,17 @@ use jni::objects::JString;
 use jni::sys::{jboolean, jstring};
 use jni::JNIEnv;
 
-use deno_media_type::MediaType;
+use deno_ast::{ImportsNotUsedAsValues, MediaType};
+
+pub fn imports_not_used_as_values_id_to_imports_not_used_as_values(
+  imports_not_used_as_values_id: i32,
+) -> ImportsNotUsedAsValues {
+  match imports_not_used_as_values_id {
+    1 => ImportsNotUsedAsValues::Remove,
+    2 => ImportsNotUsedAsValues::Preserve,
+    _ => ImportsNotUsedAsValues::Error,
+  }
+}
 
 pub fn jboolean_to_bool(b: jboolean) -> bool {
   b != 0
