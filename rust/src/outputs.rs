@@ -39,7 +39,7 @@ impl JavaTranspileOutput {
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jTranspileOutput");
     let method_constructor = env
-      .get_method_id(&class, "<init>", "(Ljava/lang/String;Ljava/lang/String;Z)V")
+      .get_method_id(&class, "<init>", "(Ljava/lang/String;ZZLjava/lang/String;)V")
       .expect("Couldn't find method Swc4jTranspileOutput.Swc4jTranspileOutput");
     JavaTranspileOutput {
       class,
@@ -52,6 +52,7 @@ impl JavaTranspileOutput {
     env: &mut JNIEnv<'local>,
     code: jvalue,
     module: jvalue,
+    script: jvalue,
     source_map: jvalue,
   ) -> JObject<'a>
   where
@@ -59,7 +60,7 @@ impl JavaTranspileOutput {
   {
     unsafe {
       env
-        .new_object_unchecked(&self.class, self.method_constructor, &[code, source_map, module])
+        .new_object_unchecked(&self.class, self.method_constructor, &[code, module, script, source_map])
         .expect("Couldn't create Swc4jTranspileOutput")
     }
   }
@@ -83,6 +84,7 @@ pub trait ToJniType {
 pub struct TranspileOutput {
   pub code: String,
   pub module: bool,
+  pub script: bool,
   pub source_map: Option<String>,
 }
 
@@ -97,12 +99,15 @@ impl ToJniType for TranspileOutput {
     let module = jvalue {
       z: if self.module { 1u8 } else { 0u8 },
     };
+    let script = jvalue {
+      z: if self.script { 1u8 } else { 0u8 },
+    };
     let source_map = jvalue {
       l: match &self.source_map {
         Some(s) => converter::string_to_jstring(env, &s).as_raw(),
         None => null_mut(),
       },
     };
-    unsafe { JAVA_TRANSPILE_OUTPUT.as_ref().unwrap() }.create(env, code, module, source_map)
+    unsafe { JAVA_TRANSPILE_OUTPUT.as_ref().unwrap() }.create(env, code, module, script, source_map)
   }
 }

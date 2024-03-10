@@ -146,9 +146,11 @@ public class TestSwc4j {
         switch (parseMode) {
             case Script:
                 assertFalse(output.isModule());
+                assertTrue(output.isScript());
                 break;
             default:
                 assertTrue(output.isModule());
+                assertFalse(output.isScript());
                 break;
         }
         assertNotNull(output.getSourceMap());

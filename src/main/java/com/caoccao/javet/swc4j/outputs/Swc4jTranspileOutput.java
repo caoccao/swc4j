@@ -24,6 +24,7 @@ package com.caoccao.javet.swc4j.outputs;
 public final class Swc4jTranspileOutput {
     private String code;
     private boolean module;
+    private boolean script;
     private String sourceMap;
 
     /**
@@ -42,20 +43,22 @@ public final class Swc4jTranspileOutput {
      * @since 0.1.0
      */
     public Swc4jTranspileOutput(String code) {
-        this(code, null, false);
+        this(code, false, false, null);
     }
 
     /**
      * Instantiates a new Swc4j transpile output.
      *
      * @param code      the code
-     * @param sourceMap the source map
      * @param module    the module
+     * @param script    the script
+     * @param sourceMap the source map
      * @since 0.1.0
      */
-    public Swc4jTranspileOutput(String code, String sourceMap, boolean module) {
+    public Swc4jTranspileOutput(String code, boolean module, boolean script, String sourceMap) {
         setCode(code);
         setModule(module);
+        setScript(script);
         setSourceMap(sourceMap);
     }
 
@@ -82,11 +85,21 @@ public final class Swc4jTranspileOutput {
     /**
      * Gets if this source is a module.
      *
-     * @return the boolean
+     * @return true : module, false : not module
      * @since 0.1.0
      */
     public boolean isModule() {
         return module;
+    }
+
+    /**
+     * Gets if this source is a script.
+     *
+     * @return true : script, false : not script
+     * @since 0.1.0
+     */
+    public boolean isScript() {
+        return script;
     }
 
     /**
@@ -110,6 +123,18 @@ public final class Swc4jTranspileOutput {
      */
     public Swc4jTranspileOutput setModule(boolean module) {
         this.module = module;
+        return this;
+    }
+
+    /**
+     * Sets script.
+     *
+     * @param script the script
+     * @return the self
+     * @since 0.1.0
+     */
+    public Swc4jTranspileOutput setScript(boolean script) {
+        this.script = script;
         return this;
     }
 

@@ -38,7 +38,7 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
     Ok(parsed_source) => {
       let emit_options = EmitOptions {
         emit_metadata: options.emit_metadata,
-        // imports_not_used_as_values: options.imports_not_used_as_values,
+        imports_not_used_as_values: options.imports_not_used_as_values,
         inline_source_map: options.inline_source_map,
         inline_sources: options.inline_sources,
         jsx_automatic: options.jsx_automatic,
@@ -50,12 +50,12 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
         source_map: options.source_map,
         transform_jsx: options.transform_jsx,
         var_decl_imports: options.var_decl_imports,
-        ..Default::default()
       };
       match parsed_source.transpile(&emit_options) {
         Ok(transpiled_js_code) => Ok(outputs::TranspileOutput {
           code: transpiled_js_code.text,
           module: parsed_source.is_module(),
+          script: parsed_source.is_script(),
           source_map: transpiled_js_code.source_map,
         }),
         Err(e) => Err(e.to_string()),

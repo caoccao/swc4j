@@ -126,8 +126,14 @@ fn test_transpile_type_script_without_inline_source_map() {
       assert!(output.is_ok());
       let output = output.unwrap();
       match parse_mode {
-        enums::ParseMode::Script => assert!(!output.module),
-        _ => assert!(output.module),
+        enums::ParseMode::Script => {
+          assert!(!output.module);
+          assert!(output.script);
+        }
+        _ => {
+          assert!(output.module);
+          assert!(!output.script);
+        }
       }
       let output_code = output.code;
       assert_eq!(expected_code, output_code);
