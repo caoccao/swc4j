@@ -63,6 +63,11 @@ function add(a, b) {
 //# sourceMappingURL=data:application/json;base64,...
 ```
 
+## Docs
+
+* Tutorials (TODO)
+* [Release Notes](docs/RELEASE_NOTES.md)
+
 ## License
 
 [APACHE LICENSE, VERSION 2.0](LICENSE)
