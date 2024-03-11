@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jLibException;
 import com.caoccao.javet.swc4j.interfaces.ISwc4jLogger;
 import com.caoccao.javet.swc4j.utils.ArrayUtils;
 import com.caoccao.javet.swc4j.utils.OSUtils;
+import com.caoccao.javet.swc4j.utils.StringUtils;
 import com.caoccao.javet.swc4j.utils.Swc4jDefaultLogger;
 
 import java.io.File;
@@ -33,6 +34,10 @@ import java.text.MessageFormat;
  * @since 0.1.0
  */
 final class Swc4jLibLoader {
+    private static final String ANDROID_ABI_ARM = "armeabi-v7a";
+    private static final String ANDROID_ABI_ARM64 = "arm64-v8a";
+    private static final String ANDROID_ABI_X86 = "x86";
+    private static final String ANDROID_ABI_X86_64 = "x86_64";
     private static final String ARCH_ARM = "arm";
     private static final String ARCH_ARM64 = "arm64";
     private static final String ARCH_X86 = "x86";
@@ -44,6 +49,8 @@ final class Swc4jLibLoader {
     private static final String LIB_FILE_EXTENSION_MACOS = "dylib";
     private static final String LIB_FILE_EXTENSION_WINDOWS = "dll";
     private static final String LIB_FILE_NAME_FORMAT = "libswc4j-{0}-{1}.v.{2}.{3}";
+    private static final String LIB_FILE_NAME_FOR_ANDROID_FORMAT = "libswc4j-{0}.v.{1}.{2}";
+    private static final String LIB_FILE_NAME_PREFIX = "lib";
     private static final String LIB_NAME = "swc4j";
     private static final String LIB_VERSION = "0.1.0";
     private static final ISwc4jLogger LOGGER = new Swc4jDefaultLogger(Swc4jLibLoader.class.getName());
@@ -99,6 +106,21 @@ final class Swc4jLibLoader {
         }
     }
 
+    private String getAndroidABI() {
+        if (OSUtils.IS_ANDROID) {
+            if (OSUtils.IS_ARM) {
+                return ANDROID_ABI_ARM;
+            } else if (OSUtils.IS_ARM64) {
+                return ANDROID_ABI_ARM64;
+            } else if (OSUtils.IS_X86) {
+                return ANDROID_ABI_X86;
+            } else if (OSUtils.IS_X86_64) {
+                return ANDROID_ABI_X86_64;
+            }
+        }
+        return null;
+    }
+
     private String getFileExtension() {
         if (OSUtils.IS_WINDOWS) {
             return LIB_FILE_EXTENSION_WINDOWS;
@@ -122,12 +144,20 @@ final class Swc4jLibLoader {
         if (osArch == null) {
             throw Swc4jLibException.archNotSupported(OSUtils.OS_ARCH);
         }
-        return MessageFormat.format(
-                LIB_FILE_NAME_FORMAT,
-                osName,
-                osArch,
-                LIB_VERSION,
-                fileExtension);
+        if (OSUtils.IS_ANDROID) {
+            return MessageFormat.format(
+                    LIB_FILE_NAME_FOR_ANDROID_FORMAT,
+                    osName,
+                    LIB_VERSION,
+                    fileExtension);
+        } else {
+            return MessageFormat.format(
+                    LIB_FILE_NAME_FORMAT,
+                    osName,
+                    osArch,
+                    LIB_VERSION,
+                    fileExtension);
+        }
     }
 
     private String getOSArch() {
@@ -165,7 +195,9 @@ final class Swc4jLibLoader {
     }
 
     private String getResourceFileName() throws Swc4jLibException {
-        String resourceFileName = MessageFormat.format(RESOURCE_NAME_FORMAT, getLibFileName());
+        String resourceFileName = MessageFormat.format(RESOURCE_NAME_FORMAT, OSUtils.IS_ANDROID
+                ? StringUtils.join("/", LIB_FILE_NAME_PREFIX, getAndroidABI(), getLibFileName())
+                : getLibFileName());
         if (Swc4jNative.class.getResource(resourceFileName) == null) {
             throw Swc4jLibException.libNotFound(resourceFileName);
         }

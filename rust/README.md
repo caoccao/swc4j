@@ -1,10 +1,16 @@
 # swc4j Rust Library
 
+The swc4j Rust Library is the native library that wraps SWC and Deno AST providing the compilation and bundling features.
+
+This doc is a guide to how to build this library.
+
 ## Preparation
 
 ### Install Targets
 
 Follow the [Cross-compilation](https://rust-lang.github.io/rustup/cross-compilation.html) to add the following [supported platforms](https://doc.rust-lang.org/nightly/rustc/platform-support.html).
+
+Note: The Android build hasn't been implemented yet.
 
 ```sh
 # 64-bit MSVC (Windows 7+)
@@ -37,20 +43,46 @@ Install a proper Android NDK.
 ## Build
 
 ```sh
-# Windows
-cargo build --release --target x86_64-pc-windows-msvc
+# Windows Native
+cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o windows -a x86_64
+# Windows Cross-compile
+cargo build --release --target x86_64-pc-windows-msvc && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o windows -a x86_64
 
-# Linux
-cargo build --release --target x86_64-unknown-linux-gnu
-cargo build --release --target aarch64-unknown-linux-gnu
+# Linux Native
+cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o linux -a x86_64
+cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o linux -a arm64
+# Linux Cross-compile
+cargo build --release --target x86_64-unknown-linux-gnu && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o linux -a x86_64
+cargo build --release --target aarch64-unknown-linux-gnu && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o linux -a arm64
 
-# MacOS
-cargo build --release --target x86_64-apple-darwin
-cargo build --release --target aarch64-apple-darwin
+# MacOS Native
+cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o macos -a x86_64
+cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o macos -a arm64
+# MacOS Cross-compile
+cargo build --release --target x86_64-apple-darwin && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o macos -a x86_64
+cargo build --release --target aarch64-apple-darwin && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o macos -a arm64
 
-# Android
-cargo build --release --target i686-linux-android
-cargo build --release --target x86_64-linux-android
-cargo build --release --target armv7-linux-androideabi
-cargo build --release --target aarch64-linux-android
+# Android Cross-compile
+export PATH=${PATH}:${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin
+export AR=llvm-ar
+
+export CC=i686-linux-android24-clang
+export CXX=i686-linux-android24-clang++
+export RUSTFLAGS="-L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/14.0.6/lib/linux/i386 -L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/24 -C target-feature=+crt-static"
+cargo build --release --target i686-linux-android && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86
+
+export CC=x86_64-linux-android24-clang
+export CXX=x86_64-linux-android24-clang++
+export RUSTFLAGS="-L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/14.0.6/lib/linux/x86_64 -L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/24 -C target-feature=+crt-static"
+cargo build --release --target x86_64-linux-android && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86_64
+
+export CC=armv7a-linux-android24-clang
+export CXX=armv7a-linux-android24-clang++
+export RUSTFLAGS="-L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/14.0.6/lib/linux/arm -L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-android/24 -C target-feature=+crt-static"
+cargo build --release --target armv7-linux-androideabi && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm
+
+export CC=aarch64-linux-android24-clang
+export CXX=aarch64-linux-android24-clang++
+export RUSTFLAGS="-L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/14.0.6/lib/linux/aarch64 -L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/24 -C target-feature=+crt-static"
+cargo build --release --target aarch64-linux-android && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm64
 ```
