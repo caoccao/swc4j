@@ -34,35 +34,66 @@ const OS_CONFIG_MAP = {
     sourceName: NAME,
     targetName: `lib${NAME}`,
     ext: '.dll',
+    targets: {
+      'x86_64': 'x86_64-pc-windows-msvc',
+    }
   },
   'linux': {
     sourceName: `lib${NAME}`,
     targetName: `lib${NAME}`,
     ext: '.so',
+    targets: {
+      'x86_64': 'x86_64-unknown-linux-gnu',
+      'arm64': 'aarch64-unknown-linux-gnu',
+    }
+  },
+  'android': {
+    sourceName: `lib${NAME}`,
+    targetName: `lib${NAME}`,
+    ext: '.so',
+    targets: {
+      'x86': 'i686-linux-android',
+      'x86_64': 'x86_64-linux-android',
+      'arm': 'armv7-linux-androideabi',
+      'arm64': 'aarch64-linux-android',
+    }
   },
   'macos': {
     sourceName: `lib${NAME}`,
     targetName: `lib${NAME}`,
     ext: '.dylib',
+    targets: {
+      'x86_64': 'x86_64-apple-darwin',
+      'arm64': 'aarch64-apple-darwin',
+    }
   },
 }
 
 function copy(debug: boolean = false, os: string = 'windows', arch: string = 'x86_64'): number {
   if (!(os in OS_CONFIG_MAP)) {
-    console.error(`%c${os} is not supported.`, 'color: red')
-    return 1;
+    console.error(`%cOS ${os} is not supported.`, 'color: red')
+    return 1
   }
   const config = OS_CONFIG_MAP[os]
+  if (!(arch in config.targets)) {
+    console.error(`%cArch ${arch} is not supported.`, 'color: red')
+    return 1
+  }
+  const target = config.targets[arch]
   const scriptDirPath = path.dirname(path.fromFileUrl(import.meta.url))
-  const sourceDirPath = path.join(scriptDirPath, '../../rust/target', debug ? 'debug' : 'release')
-  const sourceFilePath = path.join(sourceDirPath, `${config.sourceName}${config.ext}`)
+  let sourceDirPath = path.join(scriptDirPath, '../../rust/target', target, debug ? 'debug' : 'release')
+  let sourceFilePath = path.join(sourceDirPath, `${config.sourceName}${config.ext}`)
+  if (!fs.existsSync(sourceFilePath)) {
+    sourceDirPath = path.join(scriptDirPath, '../../rust/target', debug ? 'debug' : 'release')
+    sourceFilePath = path.join(sourceDirPath, `${config.sourceName}${config.ext}`)
+  }
   if (!fs.existsSync(sourceFilePath)) {
     console.error(`%c${sourceFilePath} is not found.`, 'color: red')
-    return 1;
+    return 1
   }
   const targetDirPath = path.join(scriptDirPath, '../../src/main/resources')
   if (!fs.existsSync(targetDirPath)) {
-    Deno.mkdirSync(targetDirPath, { recursive: true });
+    Deno.mkdirSync(targetDirPath, { recursive: true })
   }
   const targetFilePath = path.join(targetDirPath, `${config.targetName}-${os}-${arch}.v.${VERSION}${config.ext}`)
   console.info(`Copy from ${sourceFilePath} to ${targetFilePath}.`)
@@ -101,7 +132,7 @@ if (args.help) {
     -a, --arch      CPU arch [x86, x86_64, arm, arm64] (default: x86_64)
     -d, --debug     Copy the debug lib (default: false)
     -h, --help      Print this help page
-    -o, --os        Operating system [windows, linux, macos] (default: windows)
+    -o, --os        Operating system [windows, linux, android, macos] (default: windows)
     -v, --version   Print version
   `)
 } else if (args.version) {
