@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import org.gradle.internal.os.OperatingSystem
+
 object Config {
     const val GROUP_ID = "com.caoccao.javet"
     const val NAME = "swc4j"
@@ -45,6 +47,10 @@ object Config {
     }
 
     object Projects {
+        const val JAVET = "com.caoccao.javet:javet:${Versions.JAVET}"
+        const val JAVET_LINUX_ARM64 = "com.caoccao.javet:javet-linux-arm64:${Versions.JAVET}"
+        const val JAVET_MACOS = "com.caoccao.javet:javet-macos:${Versions.JAVET}"
+
         // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
         const val JUNIT_JUPITER_API = "org.junit.jupiter:junit-jupiter-api:${Versions.JUNIT}"
 
@@ -57,8 +63,9 @@ object Config {
 
     object Versions {
         const val JAVA_VERSION = "1.8"
-        const val SWC4J = "0.1.0"
+        const val JAVET = "3.0.4"
         const val JUNIT = "5.10.1"
+        const val SWC4J = "0.1.0"
     }
 }
 
@@ -85,6 +92,15 @@ java {
 }
 
 dependencies {
+    val os = OperatingSystem.current()
+    val cpuArch = System.getProperty("os.arch")
+    if (os.isMacOsX) {
+        testImplementation(Config.Projects.JAVET_MACOS)
+    } else if (os.isLinux && (cpuArch == "aarch64" || cpuArch == "arm64")) {
+        testImplementation(Config.Projects.JAVET_LINUX_ARM64)
+    } else {
+        testImplementation(Config.Projects.JAVET)
+    }
     testImplementation(Config.Projects.JUNIT_JUPITER_API)
     testImplementation(Config.Projects.JUNIT_JUPITER_PARAMS)
     testRuntimeOnly(Config.Projects.JUNIT_JUPITER_ENGINE)

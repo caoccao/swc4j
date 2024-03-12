@@ -65,7 +65,7 @@ function add(a, b) {
 
 ## Docs
 
-* Tutorials (TODO)
+* [Tutorials](docs/tutorial/)
 * [Release Notes](docs/RELEASE_NOTES.md)
 
 ## License
