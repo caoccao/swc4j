@@ -70,6 +70,10 @@ function add(a, b) {
 * [Tutorials](docs/tutorials/)
 * [Release Notes](docs/RELEASE_NOTES.md)
 
+## Blog
+
+* [Run TypeScript Directly in Java](https://blog.caoccao.com/run-typescript-directly-in-java-82b7003b44b8)
+
 ## License
 
 [APACHE LICENSE, VERSION 2.0](LICENSE)
