@@ -6,6 +6,8 @@
 
 [swc4j](https://github.com/caoccao/swc4j) ([SWC](https://github.com/swc-project/swc) for Java) is an ultra-fast JavaScript and TypeScript compilation and bundling tool on JVM. It is part of the [Javet](https://github.com/caoccao/Javet) portfolio serving the processing of JavaScript and TypeScript code before the code is executed in Node.js or V8 on JVM.
 
+<img src="https://github.com/caoccao/swc4j/assets/17514279/5ddddfca-91fc-45dc-83fe-ee7731564b90" alt="swc4j and Javet" width="400"/>
+
 ## Features
 
 * Linux (x86_64) + MacOS (x86_64, arm64) + Windows (x86_64)
