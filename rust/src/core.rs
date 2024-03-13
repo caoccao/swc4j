@@ -19,7 +19,7 @@ use deno_ast::*;
 
 use crate::{enums, options, outputs};
 
-const VERSION: &'static str = "0.1.0";
+const VERSION: &'static str = "0.2.0";
 
 pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Result<outputs::TranspileOutput, String> {
   let parse_params = ParseParams {

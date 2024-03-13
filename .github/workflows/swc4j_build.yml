@@ -14,7 +14,7 @@ on:
       - "docs/**"
 
 env:
-  SWC4J_VERSION: 0.1.0
+  SWC4J_VERSION: 0.2.0
 
 jobs:
   build_swc4j_lib:

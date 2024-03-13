@@ -38,7 +38,7 @@ public class TestSwc4j {
 
     @Test
     public void testGetVersion() {
-        assertEquals("0.1.0", swc4j.getVersion());
+        assertEquals("0.2.0", swc4j.getVersion());
     }
 
     @Test
