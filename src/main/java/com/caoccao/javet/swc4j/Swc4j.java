@@ -17,7 +17,9 @@
 package com.caoccao.javet.swc4j;
 
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
+import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
+import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
@@ -48,6 +50,34 @@ public final class Swc4j {
      */
     public String getVersion() {
         return Swc4jNative.coreGetVersion();
+    }
+
+    /**
+     * Parse.
+     *
+     * @param code the code
+     * @return the swc4j parse output
+     * @throws Swc4jCoreException the swc4j core exception
+     * @since 0.1.0
+     */
+    public Swc4jParseOutput parse(String code) throws Swc4jCoreException {
+        return parse(code, new Swc4jParseOptions());
+    }
+
+    /**
+     * Parse.
+     *
+     * @param code    the code
+     * @param options the options
+     * @return the swc4j parse output
+     * @throws Swc4jCoreException the swc4j core exception
+     * @since 0.1.0
+     */
+    @SuppressWarnings("RedundantThrows")
+    public Swc4jParseOutput parse(String code, Swc4jParseOptions options) throws Swc4jCoreException {
+        return (Swc4jParseOutput) Swc4jNative.coreParse(
+                code,
+                AssertionUtils.notNull(options, "Options"));
     }
 
     /**

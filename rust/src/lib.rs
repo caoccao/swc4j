@@ -52,6 +52,17 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion<'
 }
 
 #[no_mangle]
+pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse<'local>(
+  _: JNIEnv<'local>,
+  _: JClass<'local>,
+  _: jstring,
+  _: jobject,
+) -> jobject {
+  // TODO
+  null_mut()
+}
+
+#[no_mangle]
 pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'local>(
   mut env: JNIEnv<'local>,
   _: JClass<'local>,
