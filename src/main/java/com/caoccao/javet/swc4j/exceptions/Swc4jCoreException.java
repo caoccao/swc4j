@@ -44,6 +44,17 @@ public final class Swc4jCoreException extends Swc4jException {
     }
 
     /**
+     * Parse error.
+     *
+     * @param message the message
+     * @return the swc4j core exception
+     * @since 0.1.0
+     */
+    public static Swc4jCoreException parseError(String message) {
+        return new Swc4jCoreException(message);
+    }
+
+    /**
      * Transpile error.
      *
      * @param message the message

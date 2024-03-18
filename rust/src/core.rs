@@ -21,6 +21,28 @@ use crate::{enums, options, outputs};
 
 const VERSION: &'static str = "0.2.0";
 
+pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<outputs::ParseOutput, String> {
+  let parse_params = ParseParams {
+    specifier: options.specifier,
+    text_info: SourceTextInfo::from_string(code),
+    media_type: options.media_type,
+    capture_tokens: options.capture_tokens,
+    maybe_syntax: None,
+    scope_analysis: options.scope_analysis,
+  };
+  let result = match options.parse_mode {
+    enums::ParseMode::Script => parse_script(parse_params),
+    _ => parse_module(parse_params),
+  };
+  match result {
+    Ok(parsed_source) => Ok(outputs::ParseOutput {
+      module: parsed_source.is_module(),
+      script: parsed_source.is_script(),
+    }),
+    Err(e) => Err(e.to_string()),
+  }
+}
+
 pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Result<outputs::TranspileOutput, String> {
   let parse_params = ParseParams {
     specifier: options.specifier,

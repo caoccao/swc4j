@@ -17,59 +17,113 @@
 
 use jni::objects::{GlobalRef, JStaticMethodID, JThrowable};
 use jni::signature::ReturnType;
-use jni::sys::{jvalue};
+use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use crate::converter;
 
-struct JniCalls {
-  pub jclass_core_exception: GlobalRef,
-  pub jmethod_id_core_exception_transpile_error: JStaticMethodID,
+struct JavaCoreException {
+  pub class: GlobalRef,
+  pub method_parse_error: JStaticMethodID,
+  pub method_transpile_error: JStaticMethodID,
 }
-unsafe impl Send for JniCalls {}
-unsafe impl Sync for JniCalls {}
+unsafe impl Send for JavaCoreException {}
+unsafe impl Sync for JavaCoreException {}
 
-static mut JNI_CALLS: Option<JniCalls> = None;
+impl JavaCoreException {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/exceptions/Swc4jCoreException")
+      .expect("Couldn't find class Swc4jCoreException");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jCoreException");
+    let method_parse_error = env
+      .get_static_method_id(
+        &class,
+        "parseError",
+        "(Ljava/lang/String;)Lcom/caoccao/javet/swc4j/exceptions/Swc4jCoreException;",
+      )
+      .expect("Couldn't find static method Swc4jCoreException.parseError");
+    let method_transpile_error = env
+      .get_static_method_id(
+        &class,
+        "transpileError",
+        "(Ljava/lang/String;)Lcom/caoccao/javet/swc4j/exceptions/Swc4jCoreException;",
+      )
+      .expect("Couldn't find static method Swc4jCoreException.transpileError");
+    JavaCoreException {
+      class,
+      method_parse_error,
+      method_transpile_error,
+    }
+  }
+
+  pub fn throw_parse_error<'local, 'a>(&self, env: &mut JNIEnv<'local>, message: &'a str) {
+    let message = jvalue {
+      l: converter::string_to_jstring(env, message).as_raw(),
+    };
+    let exception = unsafe {
+      JThrowable::from_raw(
+        env
+          .call_static_method_unchecked(
+            &self.class,
+            &self.method_parse_error,
+            ReturnType::Object,
+            &[message],
+          )
+          .expect("Couldn't create parse error")
+          .as_jni()
+          .l,
+      )
+    };
+    let _ = env.throw(exception);
+  }
+
+  pub fn throw_transpile_error<'local, 'a>(&self, env: &mut JNIEnv<'local>, message: &'a str) {
+    let message = jvalue {
+      l: converter::string_to_jstring(env, message).as_raw(),
+    };
+    let exception = unsafe {
+      JThrowable::from_raw(
+        env
+          .call_static_method_unchecked(
+            &self.class,
+            &self.method_transpile_error,
+            ReturnType::Object,
+            &[message],
+          )
+          .expect("Couldn't create transpile error")
+          .as_jni()
+          .l,
+      )
+    };
+    let _ = env.throw(exception);
+  }
+}
+
+static mut JAVA_CORE_EXCEPTION: Option<JavaCoreException> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
-  let jclass_core_exception = env
-    .find_class("com/caoccao/javet/swc4j/exceptions/Swc4jCoreException")
-    .expect("Couldn't find class Swc4jCoreException");
-  let jclass_core_exception = env
-    .new_global_ref(jclass_core_exception)
-    .expect("Couldn't globalize class Swc4jCoreException");
-  let jmethod_id_core_exception_transpile_error = env
-    .get_static_method_id(
-      &jclass_core_exception,
-      "transpileError",
-      "(Ljava/lang/String;)Lcom/caoccao/javet/swc4j/exceptions/Swc4jCoreException;",
-    )
-    .expect("Couldn't find static method Swc4jCoreException.transpileError");
   unsafe {
-    JNI_CALLS = Some(JniCalls {
-      jclass_core_exception,
-      jmethod_id_core_exception_transpile_error,
-    });
+    JAVA_CORE_EXCEPTION = Some(JavaCoreException::new(env));
+  }
+}
+
+pub fn throw_parse_error<'local, 'a>(env: &mut JNIEnv<'local>, message: &'a str) {
+  unsafe {
+    JAVA_CORE_EXCEPTION
+      .as_ref()
+      .unwrap()
+      .throw_parse_error(env, message);
   }
 }
 
 pub fn throw_transpile_error<'local, 'a>(env: &mut JNIEnv<'local>, message: &'a str) {
-  let message = jvalue {
-    l: converter::string_to_jstring(env, message).as_raw(),
-  };
-  let exception = unsafe {
-    JThrowable::from_raw(
-      env
-        .call_static_method_unchecked(
-          &JNI_CALLS.as_ref().unwrap().jclass_core_exception,
-          &JNI_CALLS.as_ref().unwrap().jmethod_id_core_exception_transpile_error,
-          ReturnType::Object,
-          &[message],
-        )
-        .expect("Couldn't create transpile error")
-        .as_jni()
-        .l,
-    )
-  };
-  let _ = env.throw(exception);
+  unsafe {
+    JAVA_CORE_EXCEPTION
+      .as_ref()
+      .unwrap()
+      .throw_transpile_error(env, message);
+  }
 }

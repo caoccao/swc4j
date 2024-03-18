@@ -53,13 +53,20 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion<'
 
 #[no_mangle]
 pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse<'local>(
-  _: JNIEnv<'local>,
+  mut env: JNIEnv<'local>,
   _: JClass<'local>,
-  _: jstring,
-  _: jobject,
+  code: jstring,
+  options: jobject,
 ) -> jobject {
-  // TODO
-  null_mut()
+  let code = converter::jstring_to_string(&mut env, code);
+  let options = options::ParseOptions::from_jni_type(&mut env, options);
+  match core::parse(code, options) {
+    Ok(output) => output.to_jni_type(&mut env).as_raw(),
+    Err(message) => {
+      error::throw_parse_error(&mut env, message.as_str());
+      null_mut()
+    }
+  }
 }
 
 #[no_mangle]

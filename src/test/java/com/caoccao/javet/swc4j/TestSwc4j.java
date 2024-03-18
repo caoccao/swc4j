@@ -19,7 +19,9 @@ package com.caoccao.javet.swc4j;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
+import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
+import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,7 +44,41 @@ public class TestSwc4j {
     }
 
     @Test
-    public void testTranspileJSXWithCustomJsxFactory() throws Swc4jCoreException {
+    public void testParseJsxWithDefaultOptions() throws Swc4jCoreException {
+        String code = "import React from 'react';\n" +
+                "import './App.css';\n" +
+                "function App() {\n" +
+                "    return (\n" +
+                "        <h1> Hello World! </h1>\n" +
+                "    );\n" +
+                "}\n" +
+                "export default App;";
+        Swc4jParseOptions options = new Swc4jParseOptions()
+                .setMediaType(Swc4jMediaType.Jsx);
+        Swc4jParseOutput output = swc4j.parse(code, options);
+        assertNotNull(output);
+        assertTrue(output.isModule());
+        assertFalse(output.isScript());
+    }
+
+    @Test
+    public void testParseWrongMediaType() {
+        String code = "function add(a:number, b:number) { return a+b; }";
+        Swc4jParseOptions options = new Swc4jParseOptions()
+                .setMediaType(Swc4jMediaType.JavaScript);
+        assertEquals(
+                "Expected ',', got ':' at file:///main.js:1:15\n" +
+                        "\n" +
+                        "  function add(a:number, b:number) { return a+b; }\n" +
+                        "                ~",
+                assertThrows(
+                        Swc4jCoreException.class,
+                        () -> swc4j.parse(code, options))
+                        .getMessage());
+    }
+
+    @Test
+    public void testTranspileJsxWithCustomJsxFactory() throws Swc4jCoreException {
         String code = "import React from 'react';\n" +
                 "import './App.css';\n" +
                 "function App() {\n" +
@@ -65,6 +101,7 @@ public class TestSwc4j {
         assertNotNull(output);
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
         assertTrue(output.isModule());
+        assertFalse(output.isScript());
         assertEquals(
                 expectedSourceMapPrefix,
                 output.getCode().substring(
@@ -74,7 +111,7 @@ public class TestSwc4j {
     }
 
     @Test
-    public void testTranspileJSXWithDefaultOptions() throws Swc4jCoreException {
+    public void testTranspileJsxWithDefaultOptions() throws Swc4jCoreException {
         String code = "import React from 'react';\n" +
                 "import './App.css';\n" +
                 "function App() {\n" +
@@ -96,6 +133,7 @@ public class TestSwc4j {
         assertNotNull(output);
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
         assertTrue(output.isModule());
+        assertFalse(output.isScript());
         assertEquals(
                 expectedSourceMapPrefix,
                 output.getCode().substring(
@@ -117,6 +155,7 @@ public class TestSwc4j {
         assertNotNull(output);
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
         assertTrue(output.isModule());
+        assertFalse(output.isScript());
         assertEquals(
                 expectedSourceMapPrefix,
                 output.getCode().substring(

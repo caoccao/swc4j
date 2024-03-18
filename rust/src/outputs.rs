@@ -23,6 +23,42 @@ use std::ptr::null_mut;
 
 use crate::converter;
 
+struct JavaParseOutput {
+  class: GlobalRef,
+  method_constructor: JMethodID,
+}
+unsafe impl Send for JavaParseOutput {}
+unsafe impl Sync for JavaParseOutput {}
+
+impl JavaParseOutput {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/outputs/Swc4jParseOutput")
+      .expect("Couldn't find class Swc4jParseOutput");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jParseOutput");
+    let method_constructor = env
+      .get_method_id(&class, "<init>", "(ZZ)V")
+      .expect("Couldn't find method Swc4jParseOutput.Swc4jParseOutput");
+    JavaParseOutput {
+      class,
+      method_constructor,
+    }
+  }
+
+  pub fn create<'local, 'a>(&self, env: &mut JNIEnv<'local>, module: jvalue, script: jvalue) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe {
+      env
+        .new_object_unchecked(&self.class, self.method_constructor, &[module, script])
+        .expect("Couldn't create Swc4jParseOutput")
+    }
+  }
+}
+
 struct JavaTranspileOutput {
   class: GlobalRef,
   method_constructor: JMethodID,
@@ -60,16 +96,22 @@ impl JavaTranspileOutput {
   {
     unsafe {
       env
-        .new_object_unchecked(&self.class, self.method_constructor, &[code, module, script, source_map])
+        .new_object_unchecked(
+          &self.class,
+          self.method_constructor,
+          &[code, module, script, source_map],
+        )
         .expect("Couldn't create Swc4jTranspileOutput")
     }
   }
 }
 
+static mut JAVA_PARSE_OUTPUT: Option<JavaParseOutput> = None;
 static mut JAVA_TRANSPILE_OUTPUT: Option<JavaTranspileOutput> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
+    JAVA_PARSE_OUTPUT = Some(JavaParseOutput::new(env));
     JAVA_TRANSPILE_OUTPUT = Some(JavaTranspileOutput::new(env));
   }
 }
@@ -78,6 +120,27 @@ pub trait ToJniType {
   fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
   where
     'local: 'a;
+}
+
+#[derive(Debug)]
+pub struct ParseOutput {
+  pub module: bool,
+  pub script: bool,
+}
+
+impl ToJniType for ParseOutput {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let module = jvalue {
+      z: if self.module { 1u8 } else { 0u8 },
+    };
+    let script = jvalue {
+      z: if self.script { 1u8 } else { 0u8 },
+    };
+    unsafe { JAVA_PARSE_OUTPUT.as_ref().unwrap() }.create(env, module, script)
+  }
 }
 
 #[derive(Debug)]

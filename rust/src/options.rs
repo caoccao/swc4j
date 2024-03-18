@@ -132,6 +132,80 @@ impl JavaParseMode {
   }
 }
 
+struct JavaParseOptions {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_media_type: JMethodID,
+  method_get_parse_mode: JMethodID,
+  method_get_specifier: JMethodID,
+  method_is_capture_tokens: JMethodID,
+  method_is_scope_analysis: JMethodID,
+}
+unsafe impl Send for JavaParseOptions {}
+unsafe impl Sync for JavaParseOptions {}
+
+impl JavaParseOptions {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/options/Swc4jParseOptions")
+      .expect("Couldn't find class Swc4jParseOptions");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jParseOptions");
+    let method_get_media_type = env
+      .get_method_id(
+        &class,
+        "getMediaType",
+        "()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getMediaType");
+    let method_get_parse_mode = env
+      .get_method_id(
+        &class,
+        "getParseMode",
+        "()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getParseMode");
+    let method_get_specifier = env
+      .get_method_id(&class, "getSpecifier", "()Ljava/lang/String;")
+      .expect("Couldn't find method Swc4jTranspileOptions.getSpecifier");
+    let method_is_capture_tokens = env
+      .get_method_id(&class, "isCaptureTokens", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isCaptureTokens");
+    let method_is_scope_analysis = env
+      .get_method_id(&class, "isScopeAnalysis", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isScopeAnalysis");
+    JavaParseOptions {
+      class,
+      method_get_media_type,
+      method_get_parse_mode,
+      method_get_specifier,
+      method_is_capture_tokens,
+      method_is_scope_analysis,
+    }
+  }
+
+  pub fn get_media_type<'local, 'a, 'b>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> JObject<'b> {
+    jni_utils::get_as_jobject(env, obj, self.method_get_media_type)
+  }
+
+  pub fn get_parse_mode<'local, 'a, 'b>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> JObject<'b> {
+    jni_utils::get_as_jobject(env, obj, self.method_get_parse_mode)
+  }
+
+  pub fn get_specifier<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> String {
+    jni_utils::get_as_string(env, obj, self.method_get_specifier)
+  }
+
+  pub fn is_capture_tokens<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_capture_tokens)
+  }
+
+  pub fn is_scope_analysis<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_scope_analysis)
+  }
+}
+
 struct JavaTranspileOptions {
   #[allow(dead_code)]
   class: GlobalRef,
@@ -334,19 +408,73 @@ impl JavaTranspileOptions {
 static mut JAVA_IMPORTS_NOT_USED_AS_VALUES: Option<JavaImportsNotUsedAsValues> = None;
 static mut JAVA_MEDIA_TYPE: Option<JavaMediaType> = None;
 static mut JAVA_PARSE_MODE: Option<JavaParseMode> = None;
-static mut JAVA_TRANSPILER_OPTIONS: Option<JavaTranspileOptions> = None;
+static mut JAVA_PARSE_OPTIONS: Option<JavaParseOptions> = None;
+static mut JAVA_TRANSPILE_OPTIONS: Option<JavaTranspileOptions> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
     JAVA_IMPORTS_NOT_USED_AS_VALUES = Some(JavaImportsNotUsedAsValues::new(env));
     JAVA_MEDIA_TYPE = Some(JavaMediaType::new(env));
     JAVA_PARSE_MODE = Some(JavaParseMode::new(env));
-    JAVA_TRANSPILER_OPTIONS = Some(JavaTranspileOptions::new(env));
+    JAVA_PARSE_OPTIONS = Some(JavaParseOptions::new(env));
+    JAVA_TRANSPILE_OPTIONS = Some(JavaTranspileOptions::new(env));
   }
 }
 
 pub trait FromJniType {
   fn from_jni_type<'local>(env: &mut JNIEnv<'local>, o: jobject) -> Self;
+}
+
+#[derive(Debug)]
+pub struct ParseOptions {
+  /// Whether to capture tokens or not.
+  pub capture_tokens: bool,
+  /// Media type of the source text.
+  pub media_type: MediaType,
+  /// Should the code to be parsed as Module or Script,
+  pub parse_mode: enums::ParseMode,
+  /// Whether to apply swc's scope analysis.
+  pub scope_analysis: bool,
+  /// Specifier of the source text.
+  pub specifier: String,
+}
+
+impl Default for ParseOptions {
+  fn default() -> Self {
+    ParseOptions {
+      capture_tokens: false,
+      media_type: MediaType::TypeScript,
+      parse_mode: enums::ParseMode::Module,
+      scope_analysis: false,
+      specifier: "file:///main.js".to_owned(),
+    }
+  }
+}
+
+impl FromJniType for ParseOptions {
+  fn from_jni_type<'local>(env: &mut JNIEnv<'local>, obj: jobject) -> ParseOptions {
+    let obj = unsafe { JObject::from_raw(obj) };
+    let obj = obj.as_ref();
+    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
+    let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
+    let java_parse_options = unsafe { JAVA_PARSE_OPTIONS.as_ref().unwrap() };
+    let capture_tokens = java_parse_options.is_capture_tokens(env, obj);
+    let media_type = java_parse_options.get_media_type(env, obj);
+    let media_type = media_type.as_ref();
+    let media_type = java_media_type.get_media_type(env, media_type);
+    let scope_analysis = java_parse_options.is_scope_analysis(env, obj);
+    let specifier = java_parse_options.get_specifier(env, obj);
+    let parse_mode = java_parse_options.get_parse_mode(env, obj);
+    let parse_mode = parse_mode.as_ref();
+    let parse_mode = java_parse_mode.get_parse_mode(env, parse_mode);
+    ParseOptions {
+      capture_tokens,
+      media_type,
+      parse_mode,
+      scope_analysis,
+      specifier,
+    }
+  }
 }
 
 #[derive(Debug)]
@@ -384,6 +512,12 @@ pub struct TranspileOptions {
   pub jsx_import_source: Option<String>,
   /// Media type of the source text.
   pub media_type: MediaType,
+  /// Should the code to be parsed as Module or Script,
+  pub parse_mode: enums::ParseMode,
+  /// Should JSX be precompiled into static strings that need to be concatenated
+  /// with dynamic content. Defaults to `false`, mutually exclusive with
+  /// `transform_jsx`.
+  pub precompile_jsx: bool,
   /// Whether to apply swc's scope analysis.
   pub scope_analysis: bool,
   /// Should a corresponding .map file be created for the output. This should be
@@ -393,12 +527,6 @@ pub struct TranspileOptions {
   pub specifier: String,
   /// Should JSX be transformed. Defaults to `true`.
   pub transform_jsx: bool,
-  /// Should the code to be parsed as Module or Script,
-  pub parse_mode: enums::ParseMode,
-  /// Should JSX be precompiled into static strings that need to be concatenated
-  /// with dynamic content. Defaults to `false`, mutually exclusive with
-  /// `transform_jsx`.
-  pub precompile_jsx: bool,
   /// Should import declarations be transformed to variable declarations using
   /// a dynamic import. This is useful for import & export declaration support
   /// in script contexts such as the Deno REPL.  Defaults to `false`.
@@ -437,7 +565,7 @@ impl FromJniType for TranspileOptions {
     let java_imports_not_used_as_values = unsafe { JAVA_IMPORTS_NOT_USED_AS_VALUES.as_ref().unwrap() };
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
-    let java_transpiler_options = unsafe { JAVA_TRANSPILER_OPTIONS.as_ref().unwrap() };
+    let java_transpiler_options = unsafe { JAVA_TRANSPILE_OPTIONS.as_ref().unwrap() };
     let capture_tokens = java_transpiler_options.is_capture_tokens(env, obj);
     let emit_metadata = java_transpiler_options.is_emit_metadata(env, obj);
     let imports_not_used_as_values = java_transpiler_options.get_imports_not_used_as_values(env, obj);
@@ -454,14 +582,14 @@ impl FromJniType for TranspileOptions {
     let media_type = java_transpiler_options.get_media_type(env, obj);
     let media_type = media_type.as_ref();
     let media_type = java_media_type.get_media_type(env, media_type);
-    let scope_analysis = java_transpiler_options.is_scope_analysis(env, obj);
-    let source_map = java_transpiler_options.is_source_map(env, obj);
-    let specifier = java_transpiler_options.get_specifier(env, obj);
-    let transform_jsx = java_transpiler_options.is_transform_jsx(env, obj);
     let parse_mode = java_transpiler_options.get_parse_mode(env, obj);
     let parse_mode = parse_mode.as_ref();
     let parse_mode = java_parse_mode.get_parse_mode(env, parse_mode);
     let precompile_jsx = java_transpiler_options.is_precompile_jsx(env, obj);
+    let scope_analysis = java_transpiler_options.is_scope_analysis(env, obj);
+    let source_map = java_transpiler_options.is_source_map(env, obj);
+    let specifier = java_transpiler_options.get_specifier(env, obj);
+    let transform_jsx = java_transpiler_options.is_transform_jsx(env, obj);
     let var_decl_imports = java_transpiler_options.is_var_decl_imports(env, obj);
     TranspileOptions {
       capture_tokens,
@@ -475,12 +603,12 @@ impl FromJniType for TranspileOptions {
       jsx_fragment_factory,
       jsx_import_source,
       media_type,
+      parse_mode,
+      precompile_jsx,
       scope_analysis,
       source_map,
       specifier,
       transform_jsx,
-      parse_mode,
-      precompile_jsx,
       var_decl_imports,
     }
   }

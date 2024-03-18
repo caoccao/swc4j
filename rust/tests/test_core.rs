@@ -25,6 +25,44 @@ fn test_get_version() {
 }
 
 #[test]
+fn test_parse_jsx_with_default_options() {
+  let code = String::from("import React from 'react';\n")
+    + "import './App.css';\n"
+    + "function App() {\n"
+    + "    return (\n"
+    + "        <h1> Hello World! </h1>\n"
+    + "    );\n"
+    + "}\n"
+    + "export default App;";
+  let options = options::ParseOptions {
+    media_type: MediaType::Jsx,
+    ..Default::default()
+  };
+  let output = core::parse(code.to_owned(), options);
+  assert!(output.is_ok());
+  let output = output.unwrap();
+  assert!(output.module);
+  assert!(!output.script);
+}
+
+#[test]
+fn test_parse_wrong_media_type() {
+  let code = "function add(a:number, b:number) { return a+b; }";
+  let expected_error = String::from("Expected ',', got ':' at file:///main.js:1:15\n")
+    + "\n"
+    + "  function add(a:number, b:number) { return a+b; }\n"
+    + "                ~";
+  let options = options::ParseOptions {
+    media_type: MediaType::JavaScript,
+    ..Default::default()
+  };
+  let output = core::parse(code.to_owned(), options);
+  assert!(output.is_err());
+  let output_error = output.err().unwrap();
+  assert_eq!(expected_error, output_error);
+}
+
+#[test]
 fn test_transpile_jsx_with_custom_jsx_factory() {
   let code = String::from("import React from 'react';\n")
     + "import './App.css';\n"
@@ -50,6 +88,7 @@ fn test_transpile_jsx_with_custom_jsx_factory() {
   assert!(output.is_ok());
   let output = output.unwrap();
   assert!(output.module);
+  assert!(!output.script);
   let output_code = output.code;
   assert_eq!(expected_code, &output_code[0..expected_code.len()]);
   assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
@@ -80,6 +119,7 @@ fn test_transpile_jsx_with_default_options() {
   assert!(output.is_ok());
   let output = output.unwrap();
   assert!(output.module);
+  assert!(!output.script);
   let output_code = output.code;
   assert_eq!(expected_code, &output_code[0..expected_code.len()]);
   assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
@@ -95,6 +135,7 @@ fn test_transpile_type_script_with_inline_source_map() {
   assert!(output.is_ok());
   let output = output.unwrap();
   assert!(output.module);
+  assert!(!output.script);
   let output_code = output.code;
   assert_eq!(expected_code, &output_code[0..expected_code.len()]);
   assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
