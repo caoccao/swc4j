@@ -21,15 +21,25 @@ package com.caoccao.javet.swc4j.outputs;
  *
  * @since 0.2.0
  */
-public final class Swc4jParseOutput {
-    private boolean module;
-    private boolean script;
+public class Swc4jParseOutput {
+    /**
+     * The Module.
+     *
+     * @since 0.2.0
+     */
+    protected boolean module;
+    /**
+     * The Script.
+     *
+     * @since 0.2.0
+     */
+    protected boolean script;
 
     /**
      * Instantiates a new Swc4j parse output.
      *
-     * @param module    the module
-     * @param script    the script
+     * @param module the module
+     * @param script the script
      * @since 0.2.0
      */
     public Swc4jParseOutput(boolean module, boolean script) {

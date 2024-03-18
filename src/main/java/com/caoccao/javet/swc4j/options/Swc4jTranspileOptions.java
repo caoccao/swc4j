@@ -26,13 +26,7 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
  *
  * @since 0.1.0
  */
-public final class Swc4jTranspileOptions {
-    /**
-     * The constant DEFAULT_SPECIFIER.
-     *
-     * @since 0.1.0
-     */
-    public static final String DEFAULT_SPECIFIER = "file:///main.js";
+public class Swc4jTranspileOptions extends Swc4jParseOptions {
     /**
      * The constant DEFAULT_JSX_FACTORY.
      *
@@ -45,31 +39,92 @@ public final class Swc4jTranspileOptions {
      * @since 0.1.0
      */
     public static final String DEFAULT_JSX_FRAGMENT_FACTORY = "React.Fragment";
-    private boolean captureTokens;
-    private boolean emitMetadata;
-    private Swc4jImportsNotUsedAsValues importsNotUsedAsValues;
-    private boolean inlineSourceMap;
-    private boolean inlineSources;
-    private boolean jsxAutomatic;
-    private boolean jsxDevelopment;
-    private String jsxFactory;
-    private String jsxFragmentFactory;
-    private String jsxImportSource;
-    private Swc4jMediaType mediaType;
-    private Swc4jParseMode parseMode;
-    private boolean precompileJsx;
-    private boolean scopeAnalysis;
-    private boolean sourceMap;
-    private String specifier;
-    private boolean transformJsx;
-    private boolean varDeclImports;
+    /**
+     * The Emit metadata.
+     *
+     * @since 0.1.0
+     */
+    protected boolean emitMetadata;
+    /**
+     * The Imports not used as values.
+     *
+     * @since 0.1.0
+     */
+    protected Swc4jImportsNotUsedAsValues importsNotUsedAsValues;
+    /**
+     * The Inline source map.
+     *
+     * @since 0.1.0
+     */
+    protected boolean inlineSourceMap;
+    /**
+     * The Inline sources.
+     *
+     * @since 0.1.0
+     */
+    protected boolean inlineSources;
+    /**
+     * The Jsx automatic.
+     *
+     * @since 0.1.0
+     */
+    protected boolean jsxAutomatic;
+    /**
+     * The Jsx development.
+     *
+     * @since 0.1.0
+     */
+    protected boolean jsxDevelopment;
+    /**
+     * The Jsx factory.
+     *
+     * @since 0.1.0
+     */
+    protected String jsxFactory;
+    /**
+     * The Jsx fragment factory.
+     *
+     * @since 0.1.0
+     */
+    protected String jsxFragmentFactory;
+    /**
+     * The Jsx import source.
+     *
+     * @since 0.1.0
+     */
+    protected String jsxImportSource;
+    /**
+     * The Precompile jsx.
+     *
+     * @since 0.1.0
+     */
+    protected boolean precompileJsx;
+    /**
+     * The Source map.
+     *
+     * @since 0.1.0
+     */
+    protected boolean sourceMap;
+    /**
+     * The Transform jsx.
+     *
+     * @since 0.1.0
+     */
+    protected boolean transformJsx;
+    /**
+     * The Var decl imports.
+     *
+     * @since 0.1.0
+     */
+    protected boolean varDeclImports;
+
     /**
      * Instantiates a new Swc4j transpile options.
      *
      * @since 0.1.0
      */
     public Swc4jTranspileOptions() {
-        setCaptureTokens(false);
+        super();
         setEmitMetadata(false);
         setImportsNotUsedAsValues(Swc4jImportsNotUsedAsValues.Remove);
         setJsxAutomatic(false);
@@ -79,12 +134,8 @@ public final class Swc4jTranspileOptions {
         setJsxImportSource(null);
         setInlineSourceMap(true);
         setInlineSources(true);
-        setMediaType(Swc4jMediaType.JavaScript);
-        setParseMode(Swc4jParseMode.Module);
         setPrecompileJsx(false);
-        setScopeAnalysis(false);
         setSourceMap(false);
-        setSpecifier(DEFAULT_SPECIFIER);
         setTransformJsx(true);
         setVarDeclImports(false);
     }
@@ -131,46 +182,6 @@ public final class Swc4jTranspileOptions {
      */
     public String getJsxImportSource() {
         return jsxImportSource;
-    }
-
-    /**
-     * Gets Media type of the source text.
-     *
-     * @return the media type
-     * @since 0.1.0
-     */
-    public Swc4jMediaType getMediaType() {
-        return mediaType;
-    }
-
-    /**
-     * Gets parse mode.
-     *
-     * @return the parse mode
-     * @since 0.1.0
-     */
-    public Swc4jParseMode getParseMode() {
-        return parseMode;
-    }
-
-    /**
-     * Gets Specifier of the source text.
-     *
-     * @return the specifier
-     * @since 0.1.0
-     */
-    public String getSpecifier() {
-        return specifier;
-    }
-
-    /**
-     * Whether to capture tokens or not.
-     *
-     * @return true : capture tokens, false : not capture tokens
-     * @since 0.1.0
-     */
-    public boolean isCaptureTokens() {
-        return captureTokens;
     }
 
     /**
@@ -239,16 +250,6 @@ public final class Swc4jTranspileOptions {
     }
 
     /**
-     * Whether to apply swc's scope analysis.
-     *
-     * @return true : scope analysis, false : not scope analysis
-     * @since 0.1.0
-     */
-    public boolean isScopeAnalysis() {
-        return scopeAnalysis;
-    }
-
-    /**
      * Should a corresponding map string be created for the output.
      * This should be false if isInlineSourceMap() is true. Defaults to `false`.
      *
@@ -289,8 +290,9 @@ public final class Swc4jTranspileOptions {
      * @return the self
      * @since 0.1.0
      */
+    @Override
     public Swc4jTranspileOptions setCaptureTokens(boolean captureTokens) {
-        this.captureTokens = captureTokens;
+        super.setCaptureTokens(captureTokens);
         return this;
     }
 
@@ -410,7 +412,7 @@ public final class Swc4jTranspileOptions {
      * @since 0.1.0
      */
     public Swc4jTranspileOptions setMediaType(Swc4jMediaType mediaType) {
-        this.mediaType = AssertionUtils.notNull(mediaType, "Media type");
+        super.setMediaType(mediaType);
         return this;
     }
 
@@ -422,7 +424,7 @@ public final class Swc4jTranspileOptions {
      * @since 0.1.0
      */
     public Swc4jTranspileOptions setParseMode(Swc4jParseMode parseMode) {
-        this.parseMode = AssertionUtils.notNull(parseMode, "Parse mode");
+        super.setParseMode(parseMode);
         return this;
     }
 
@@ -446,7 +448,7 @@ public final class Swc4jTranspileOptions {
      * @since 0.1.0
      */
     public Swc4jTranspileOptions setScopeAnalysis(boolean scopeAnalysis) {
-        this.scopeAnalysis = scopeAnalysis;
+        super.setScopeAnalysis(scopeAnalysis);
         return this;
     }
 
@@ -470,7 +472,7 @@ public final class Swc4jTranspileOptions {
      * @since 0.1.0
      */
     public Swc4jTranspileOptions setSpecifier(String specifier) {
-        this.specifier = AssertionUtils.notNull(specifier, "Specifier");
+        super.setSpecifier(specifier);
         return this;
     }
 

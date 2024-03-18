@@ -21,10 +21,8 @@ package com.caoccao.javet.swc4j.outputs;
  *
  * @since 0.1.0
  */
-public final class Swc4jTranspileOutput {
+public class Swc4jTranspileOutput extends Swc4jParseOutput {
     private String code;
-    private boolean module;
-    private boolean script;
     private String sourceMap;
 
     /**
@@ -56,9 +54,8 @@ public final class Swc4jTranspileOutput {
      * @since 0.1.0
      */
     public Swc4jTranspileOutput(String code, boolean module, boolean script, String sourceMap) {
+        super(module, script);
         setCode(code);
-        setModule(module);
-        setScript(script);
         setSourceMap(sourceMap);
     }
 
@@ -83,26 +80,6 @@ public final class Swc4jTranspileOutput {
     }
 
     /**
-     * Gets if this source is a module.
-     *
-     * @return true : module, false : not module
-     * @since 0.1.0
-     */
-    public boolean isModule() {
-        return module;
-    }
-
-    /**
-     * Gets if this source is a script.
-     *
-     * @return true : script, false : not script
-     * @since 0.1.0
-     */
-    public boolean isScript() {
-        return script;
-    }
-
-    /**
      * Sets code.
      *
      * @param code the code
@@ -122,7 +99,7 @@ public final class Swc4jTranspileOutput {
      * @since 0.1.0
      */
     public Swc4jTranspileOutput setModule(boolean module) {
-        this.module = module;
+        super.setModule(module);
         return this;
     }
 
@@ -134,7 +111,7 @@ public final class Swc4jTranspileOutput {
      * @since 0.1.0
      */
     public Swc4jTranspileOutput setScript(boolean script) {
-        this.script = script;
+        super.setScript(script);
         return this;
     }
 

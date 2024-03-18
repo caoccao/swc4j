@@ -25,18 +25,43 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
  *
  * @since 0.2.0
  */
-public final class Swc4jParseOptions {
+public class Swc4jParseOptions {
     /**
      * The constant DEFAULT_SPECIFIER.
      *
      * @since 0.2.0
      */
     public static final String DEFAULT_SPECIFIER = "file:///main.js";
-    private boolean captureTokens;
-    private Swc4jMediaType mediaType;
-    private Swc4jParseMode parseMode;
-    private boolean scopeAnalysis;
-    private String specifier;
+    /**
+     * The Capture tokens.
+     *
+     * @since 0.2.0
+     */
+    protected boolean captureTokens;
+    /**
+     * The Media type.
+     *
+     * @since 0.2.0
+     */
+    protected Swc4jMediaType mediaType;
+    /**
+     * The Parse mode.
+     *
+     * @since 0.2.0
+     */
+    protected Swc4jParseMode parseMode;
+    /**
+     * The Scope analysis.
+     *
+     * @since 0.2.0
+     */
+    protected boolean scopeAnalysis;
+    /**
+     * The Specifier.
+     *
+     * @since 0.2.0
+     */
+    protected String specifier;
 
     /**
      * Instantiates a new Swc4j parse options.
