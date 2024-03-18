@@ -35,10 +35,7 @@ pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<out
     _ => parse_module(parse_params),
   };
   match result {
-    Ok(parsed_source) => Ok(outputs::ParseOutput {
-      module: parsed_source.is_module(),
-      script: parsed_source.is_script(),
-    }),
+    Ok(parsed_source) => Ok(outputs::ParseOutput::new(parsed_source, options.capture_tokens)),
     Err(e) => Err(e.to_string()),
   }
 }

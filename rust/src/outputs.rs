@@ -19,6 +19,9 @@ use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
+use deno_ast::swc::parser::token::TokenAndSpan;
+use deno_ast::ParsedSource;
+
 use std::ptr::null_mut;
 
 use crate::converter;
@@ -126,6 +129,22 @@ pub trait ToJniType {
 pub struct ParseOutput {
   pub module: bool,
   pub script: bool,
+  pub tokens: Option<Vec<TokenAndSpan>>,
+}
+
+impl ParseOutput {
+  pub fn new(parsed_source: ParsedSource, capture_tokens: bool) -> ParseOutput {
+    let tokens = if capture_tokens {
+      Some(parsed_source.tokens().to_vec())
+    } else {
+      None
+    };
+    ParseOutput {
+      module: parsed_source.is_module(),
+      script: parsed_source.is_script(),
+      tokens,
+    }
+  }
 }
 
 impl ToJniType for ParseOutput {
