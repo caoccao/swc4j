@@ -15,8 +15,56 @@
 * limitations under the License.
 */
 
+pub use deno_ast::{ImportsNotUsedAsValues, MediaType};
+
+pub trait ParseById<T> {
+  fn parse_by_id(id: i32) -> T;
+}
+
+impl ParseById<ImportsNotUsedAsValues> for ImportsNotUsedAsValues {
+  fn parse_by_id(id: i32) -> ImportsNotUsedAsValues {
+    match id {
+      1 => ImportsNotUsedAsValues::Remove,
+      2 => ImportsNotUsedAsValues::Preserve,
+      _ => ImportsNotUsedAsValues::Error,
+    }
+  }
+}
+
+impl ParseById<MediaType> for MediaType {
+  fn parse_by_id(id: i32) -> MediaType {
+    match id {
+      0 => MediaType::JavaScript,
+      1 => MediaType::Jsx,
+      2 => MediaType::Mjs,
+      3 => MediaType::Cjs,
+      4 => MediaType::TypeScript,
+      5 => MediaType::Mts,
+      6 => MediaType::Cts,
+      7 => MediaType::Dts,
+      8 => MediaType::Dmts,
+      9 => MediaType::Dcts,
+      10 => MediaType::Tsx,
+      11 => MediaType::Json,
+      12 => MediaType::Wasm,
+      13 => MediaType::TsBuildInfo,
+      14 => MediaType::SourceMap,
+      _ => MediaType::Unknown,
+    }
+  }
+}
+
 #[derive(Debug, Copy, Clone)]
 pub enum ParseMode {
   Module,
   Script,
+}
+
+impl ParseById<ParseMode> for ParseMode {
+  fn parse_by_id(id: i32) -> ParseMode {
+    match id {
+      1 => ParseMode::Script,
+      _ => ParseMode::Module,
+    }
+  }
 }

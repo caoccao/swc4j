@@ -19,9 +19,7 @@ use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::sys::jobject;
 use jni::JNIEnv;
 
-use deno_ast::{ImportsNotUsedAsValues, MediaType};
-
-use crate::{enums, jni_utils};
+use crate::{enums::*, jni_utils};
 
 struct JavaImportsNotUsedAsValues {
   #[allow(dead_code)]
@@ -50,11 +48,8 @@ impl JavaImportsNotUsedAsValues {
     env: &mut JNIEnv<'local>,
     obj: &JObject<'a>,
   ) -> ImportsNotUsedAsValues {
-    match jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id) {
-      1 => ImportsNotUsedAsValues::Remove,
-      2 => ImportsNotUsedAsValues::Preserve,
-      _ => ImportsNotUsedAsValues::Error,
-    }
+    let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
+    ImportsNotUsedAsValues::parse_by_id(id)
   }
 }
 
@@ -81,24 +76,8 @@ impl JavaMediaType {
   }
 
   pub fn get_media_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> MediaType {
-    match jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id) {
-      0 => MediaType::JavaScript,
-      1 => MediaType::Jsx,
-      2 => MediaType::Mjs,
-      3 => MediaType::Cjs,
-      4 => MediaType::TypeScript,
-      5 => MediaType::Mts,
-      6 => MediaType::Cts,
-      7 => MediaType::Dts,
-      8 => MediaType::Dmts,
-      9 => MediaType::Dcts,
-      10 => MediaType::Tsx,
-      11 => MediaType::Json,
-      12 => MediaType::Wasm,
-      13 => MediaType::TsBuildInfo,
-      14 => MediaType::SourceMap,
-      _ => MediaType::Unknown,
-    }
+    let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
+    MediaType::parse_by_id(id)
   }
 }
 
@@ -124,11 +103,9 @@ impl JavaParseMode {
     JavaParseMode { class, method_get_id }
   }
 
-  pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> enums::ParseMode {
-    match jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id) {
-      1 => enums::ParseMode::Script,
-      _ => enums::ParseMode::Module,
-    }
+  pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> ParseMode {
+    let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
+    ParseMode::parse_by_id(id)
   }
 }
 
@@ -432,7 +409,7 @@ pub struct ParseOptions {
   /// Media type of the source text.
   pub media_type: MediaType,
   /// Should the code to be parsed as Module or Script,
-  pub parse_mode: enums::ParseMode,
+  pub parse_mode: ParseMode,
   /// Whether to apply swc's scope analysis.
   pub scope_analysis: bool,
   /// Specifier of the source text.
@@ -444,7 +421,7 @@ impl Default for ParseOptions {
     ParseOptions {
       capture_tokens: false,
       media_type: MediaType::TypeScript,
-      parse_mode: enums::ParseMode::Module,
+      parse_mode: ParseMode::Module,
       scope_analysis: false,
       specifier: "file:///main.js".to_owned(),
     }
@@ -513,7 +490,7 @@ pub struct TranspileOptions {
   /// Media type of the source text.
   pub media_type: MediaType,
   /// Should the code to be parsed as Module or Script,
-  pub parse_mode: enums::ParseMode,
+  pub parse_mode: ParseMode,
   /// Should JSX be precompiled into static strings that need to be concatenated
   /// with dynamic content. Defaults to `false`, mutually exclusive with
   /// `transform_jsx`.
@@ -547,7 +524,7 @@ impl Default for TranspileOptions {
       jsx_fragment_factory: "React.Fragment".into(),
       jsx_import_source: None,
       media_type: MediaType::TypeScript,
-      parse_mode: enums::ParseMode::Module,
+      parse_mode: ParseMode::Module,
       precompile_jsx: false,
       scope_analysis: false,
       source_map: false,
