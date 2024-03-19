@@ -22,8 +22,18 @@ package com.caoccao.javet.swc4j.outputs;
  * @since 0.1.0
  */
 public class Swc4jTranspileOutput extends Swc4jParseOutput {
-    private String code;
-    private String sourceMap;
+    /**
+     * The Code.
+     *
+     * @since 0.1.0
+     */
+    protected String code;
+    /**
+     * The Source map.
+     *
+     * @since 0.1.0
+     */
+    protected String sourceMap;
 
     /**
      * Instantiates a new Swc4j transpile output.
@@ -41,20 +51,21 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
      * @since 0.1.0
      */
     public Swc4jTranspileOutput(String code) {
-        this(code, false, false, null);
+        this(code, false, false, null, null);
     }
 
     /**
      * Instantiates a new Swc4j transpile output.
      *
-     * @param code      the code
-     * @param module    the module
-     * @param script    the script
-     * @param sourceMap the source map
+     * @param code       the code
+     * @param module     the module
+     * @param script     the script
+     * @param sourceMap  the source map
+     * @param sourceText the source text
      * @since 0.1.0
      */
-    public Swc4jTranspileOutput(String code, boolean module, boolean script, String sourceMap) {
-        super(module, script);
+    public Swc4jTranspileOutput(String code, boolean module, boolean script, String sourceMap, String sourceText) {
+        super(module, script, sourceText);
         setCode(code);
         setSourceMap(sourceMap);
     }
@@ -91,25 +102,13 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
         return this;
     }
 
-    /**
-     * Sets module.
-     *
-     * @param module the module
-     * @return the self
-     * @since 0.1.0
-     */
+    @Override
     public Swc4jTranspileOutput setModule(boolean module) {
         super.setModule(module);
         return this;
     }
 
-    /**
-     * Sets script.
-     *
-     * @param script the script
-     * @return the self
-     * @since 0.1.0
-     */
+    @Override
     public Swc4jTranspileOutput setScript(boolean script) {
         super.setScript(script);
         return this;
@@ -124,6 +123,12 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
      */
     public Swc4jTranspileOutput setSourceMap(String sourceMap) {
         this.sourceMap = sourceMap;
+        return this;
+    }
+
+    @Override
+    public Swc4jTranspileOutput setSourceText(String sourceText) {
+        super.setSourceText(sourceText);
         return this;
     }
 }

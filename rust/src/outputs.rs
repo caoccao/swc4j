@@ -20,11 +20,12 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use deno_ast::swc::parser::token::TokenAndSpan;
-use deno_ast::ParsedSource;
+use deno_ast::{ParsedSource, TranspiledSource};
 
 use std::ptr::null_mut;
 
 use crate::converter;
+use crate::options::*;
 
 struct JavaParseOutput {
   class: GlobalRef,
@@ -42,7 +43,7 @@ impl JavaParseOutput {
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jParseOutput");
     let method_constructor = env
-      .get_method_id(&class, "<init>", "(ZZ)V")
+      .get_method_id(&class, "<init>", "(ZZLjava/lang/String;)V")
       .expect("Couldn't find method Swc4jParseOutput.Swc4jParseOutput");
     JavaParseOutput {
       class,
@@ -50,13 +51,19 @@ impl JavaParseOutput {
     }
   }
 
-  pub fn create<'local, 'a>(&self, env: &mut JNIEnv<'local>, module: jvalue, script: jvalue) -> JObject<'a>
+  pub fn create<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    module: jvalue,
+    script: jvalue,
+    source_map: jvalue,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
     unsafe {
       env
-        .new_object_unchecked(&self.class, self.method_constructor, &[module, script])
+        .new_object_unchecked(&self.class, self.method_constructor, &[module, script, source_map])
         .expect("Couldn't create Swc4jParseOutput")
     }
   }
@@ -78,7 +85,11 @@ impl JavaTranspileOutput {
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jTranspileOutput");
     let method_constructor = env
-      .get_method_id(&class, "<init>", "(Ljava/lang/String;ZZLjava/lang/String;)V")
+      .get_method_id(
+        &class,
+        "<init>",
+        "(Ljava/lang/String;ZZLjava/lang/String;Ljava/lang/String;)V",
+      )
       .expect("Couldn't find method Swc4jTranspileOutput.Swc4jTranspileOutput");
     JavaTranspileOutput {
       class,
@@ -93,6 +104,7 @@ impl JavaTranspileOutput {
     module: jvalue,
     script: jvalue,
     source_map: jvalue,
+    source_text: jvalue,
   ) -> JObject<'a>
   where
     'local: 'a,
@@ -102,7 +114,7 @@ impl JavaTranspileOutput {
         .new_object_unchecked(
           &self.class,
           self.method_constructor,
-          &[code, module, script, source_map],
+          &[code, module, script, source_map, source_text],
         )
         .expect("Couldn't create Swc4jTranspileOutput")
     }
@@ -129,19 +141,24 @@ pub trait ToJniType {
 pub struct ParseOutput {
   pub module: bool,
   pub script: bool,
+  pub source_text: String,
   pub tokens: Option<Vec<TokenAndSpan>>,
 }
 
 impl ParseOutput {
-  pub fn new(parsed_source: ParsedSource, capture_tokens: bool) -> ParseOutput {
-    let tokens = if capture_tokens {
+  pub fn new(parse_options: &ParseOptions, parsed_source: &ParsedSource) -> ParseOutput {
+    let module = parsed_source.is_module();
+    let script = parsed_source.is_script();
+    let source_text = parsed_source.text_info().text().to_string();
+    let tokens = if parse_options.capture_tokens {
       Some(parsed_source.tokens().to_vec())
     } else {
       None
     };
     ParseOutput {
-      module: parsed_source.is_module(),
-      script: parsed_source.is_script(),
+      module,
+      script,
+      source_text,
       tokens,
     }
   }
@@ -158,7 +175,10 @@ impl ToJniType for ParseOutput {
     let script = jvalue {
       z: if self.script { 1u8 } else { 0u8 },
     };
-    unsafe { JAVA_PARSE_OUTPUT.as_ref().unwrap() }.create(env, module, script)
+    let source_text = jvalue {
+      l: converter::string_to_jstring(env, &self.source_text).as_raw(),
+    };
+    unsafe { JAVA_PARSE_OUTPUT.as_ref().unwrap() }.create(env, module, script, source_text)
   }
 }
 
@@ -168,6 +188,24 @@ pub struct TranspileOutput {
   pub module: bool,
   pub script: bool,
   pub source_map: Option<String>,
+  pub source_text: String,
+}
+
+impl TranspileOutput {
+  pub fn new(_: &TranspileOptions, parsed_source: &ParsedSource, transpiled_source: &TranspiledSource) -> TranspileOutput {
+    let code = transpiled_source.text.to_owned();
+    let module = parsed_source.is_module();
+    let script = parsed_source.is_script();
+    let source_map = transpiled_source.source_map.to_owned();
+    let source_text = parsed_source.text_info().text().to_string();
+    TranspileOutput {
+      code,
+      module,
+      script,
+      source_map,
+      source_text,
+    }
+  }
 }
 
 impl ToJniType for TranspileOutput {
@@ -190,6 +228,9 @@ impl ToJniType for TranspileOutput {
         None => null_mut(),
       },
     };
-    unsafe { JAVA_TRANSPILE_OUTPUT.as_ref().unwrap() }.create(env, code, module, script, source_map)
+    let source_text = jvalue {
+      l: converter::string_to_jstring(env, &self.source_text).as_raw(),
+    };
+    unsafe { JAVA_TRANSPILE_OUTPUT.as_ref().unwrap() }.create(env, code, module, script, source_map, source_text)
   }
 }

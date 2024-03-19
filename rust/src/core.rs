@@ -23,7 +23,7 @@ const VERSION: &'static str = "0.2.0";
 
 pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<outputs::ParseOutput, String> {
   let parse_params = ParseParams {
-    specifier: options.specifier,
+    specifier: options.specifier.to_owned(),
     text_info: SourceTextInfo::from_string(code),
     media_type: options.media_type,
     capture_tokens: options.capture_tokens,
@@ -35,14 +35,14 @@ pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<out
     _ => parse_module(parse_params),
   };
   match result {
-    Ok(parsed_source) => Ok(outputs::ParseOutput::new(parsed_source, options.capture_tokens)),
+    Ok(parsed_source) => Ok(outputs::ParseOutput::new(&options, &parsed_source)),
     Err(e) => Err(e.to_string()),
   }
 }
 
 pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Result<outputs::TranspileOutput, String> {
   let parse_params = ParseParams {
-    specifier: options.specifier,
+    specifier: options.specifier.to_owned(),
     text_info: SourceTextInfo::from_string(code),
     media_type: options.media_type,
     capture_tokens: options.capture_tokens,
@@ -57,26 +57,25 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
     Ok(parsed_source) => {
       let emit_options = EmitOptions {
         emit_metadata: options.emit_metadata,
-        imports_not_used_as_values: options.imports_not_used_as_values,
+        imports_not_used_as_values: options.imports_not_used_as_values.to_owned(),
         inline_source_map: options.inline_source_map,
         inline_sources: options.inline_sources,
         jsx_automatic: options.jsx_automatic,
         jsx_development: options.jsx_development,
-        jsx_factory: options.jsx_factory,
-        jsx_fragment_factory: options.jsx_fragment_factory,
-        jsx_import_source: options.jsx_import_source,
+        jsx_factory: options.jsx_factory.to_owned(),
+        jsx_fragment_factory: options.jsx_fragment_factory.to_owned(),
+        jsx_import_source: options.jsx_import_source.to_owned(),
         precompile_jsx: options.precompile_jsx,
         source_map: options.source_map,
         transform_jsx: options.transform_jsx,
         var_decl_imports: options.var_decl_imports,
       };
       match parsed_source.transpile(&emit_options) {
-        Ok(transpiled_js_code) => Ok(outputs::TranspileOutput {
-          code: transpiled_js_code.text,
-          module: parsed_source.is_module(),
-          script: parsed_source.is_script(),
-          source_map: transpiled_js_code.source_map,
-        }),
+        Ok(transpiled_source) => Ok(outputs::TranspileOutput::new(
+          &options,
+          &parsed_source,
+          &transpiled_source,
+        )),
         Err(e) => Err(e.to_string()),
       }
     }

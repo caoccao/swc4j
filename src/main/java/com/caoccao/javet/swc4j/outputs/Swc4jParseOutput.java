@@ -34,17 +34,35 @@ public class Swc4jParseOutput {
      * @since 0.2.0
      */
     protected boolean script;
+    /**
+     * The Source text.
+     *
+     * @since 0.2.0
+     */
+    protected String sourceText;
 
     /**
      * Instantiates a new Swc4j parse output.
      *
-     * @param module the module
-     * @param script the script
+     * @param module     the module
+     * @param script     the script
+     * @param sourceText the source text
      * @since 0.2.0
      */
-    public Swc4jParseOutput(boolean module, boolean script) {
+    public Swc4jParseOutput(boolean module, boolean script, String sourceText) {
         setModule(module);
         setScript(script);
+        setSourceText(sourceText);
+    }
+
+    /**
+     * Gets source text.
+     *
+     * @return the source text
+     * @since 0.2.0
+     */
+    public String getSourceText() {
+        return sourceText;
     }
 
     /**
@@ -88,6 +106,18 @@ public class Swc4jParseOutput {
      */
     public Swc4jParseOutput setScript(boolean script) {
         this.script = script;
+        return this;
+    }
+
+    /**
+     * Sets source text.
+     *
+     * @param sourceText the source text
+     * @return the self
+     * @since 0.2.0
+     */
+    public Swc4jParseOutput setSourceText(String sourceText) {
+        this.sourceText = sourceText;
         return this;
     }
 }

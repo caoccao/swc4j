@@ -59,6 +59,7 @@ public class TestSwc4j {
         assertNotNull(output);
         assertTrue(output.isModule());
         assertFalse(output.isScript());
+        assertEquals(code, output.getSourceText());
     }
 
     @Test
@@ -131,6 +132,7 @@ public class TestSwc4j {
                 .setMediaType(Swc4jMediaType.Jsx);
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
         assertNotNull(output);
+        assertEquals(code, output.getSourceText());
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
         assertTrue(output.isModule());
         assertFalse(output.isScript());
