@@ -15,23 +15,58 @@
 * limitations under the License.
 */
 
+use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID};
+use jni::signature::ReturnType;
+use jni::sys::jvalue;
+use jni::JNIEnv;
+
 pub use deno_ast::{ImportsNotUsedAsValues, MediaType};
 
-pub trait ParseById<T> {
+use crate::jni_utils;
+
+pub trait IdentifiableEnum<T> {
+  fn get_id(&self) -> i32;
   fn parse_by_id(id: i32) -> T;
 }
 
-impl ParseById<ImportsNotUsedAsValues> for ImportsNotUsedAsValues {
+impl IdentifiableEnum<ImportsNotUsedAsValues> for ImportsNotUsedAsValues {
+  fn get_id(&self) -> i32 {
+    match self {
+      ImportsNotUsedAsValues::Remove => 0,
+      ImportsNotUsedAsValues::Preserve => 1,
+      ImportsNotUsedAsValues::Error => 2,
+    }
+  }
   fn parse_by_id(id: i32) -> ImportsNotUsedAsValues {
     match id {
-      1 => ImportsNotUsedAsValues::Remove,
-      2 => ImportsNotUsedAsValues::Preserve,
+      0 => ImportsNotUsedAsValues::Remove,
+      1 => ImportsNotUsedAsValues::Preserve,
       _ => ImportsNotUsedAsValues::Error,
     }
   }
 }
 
-impl ParseById<MediaType> for MediaType {
+impl IdentifiableEnum<MediaType> for MediaType {
+  fn get_id(&self) -> i32 {
+    match self {
+      MediaType::JavaScript => 0,
+      MediaType::Jsx => 1,
+      MediaType::Mjs => 2,
+      MediaType::Cjs => 3,
+      MediaType::TypeScript => 4,
+      MediaType::Mts => 5,
+      MediaType::Cts => 6,
+      MediaType::Dts => 7,
+      MediaType::Dmts => 8,
+      MediaType::Dcts => 9,
+      MediaType::Tsx => 10,
+      MediaType::Json => 11,
+      MediaType::Wasm => 12,
+      MediaType::TsBuildInfo => 13,
+      MediaType::SourceMap => 14,
+      MediaType::Unknown => 15,
+    }
+  }
   fn parse_by_id(id: i32) -> MediaType {
     match id {
       0 => MediaType::JavaScript,
@@ -60,11 +95,138 @@ pub enum ParseMode {
   Script,
 }
 
-impl ParseById<ParseMode> for ParseMode {
+impl IdentifiableEnum<ParseMode> for ParseMode {
+  fn get_id(&self) -> i32 {
+    match self {
+      ParseMode::Module => 0,
+      ParseMode::Script => 1,
+    }
+  }
   fn parse_by_id(id: i32) -> ParseMode {
     match id {
-      1 => ParseMode::Script,
-      _ => ParseMode::Module,
+      0 => ParseMode::Module,
+      _ => ParseMode::Script,
     }
+  }
+}
+
+pub struct JavaImportsNotUsedAsValues {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+}
+unsafe impl Send for JavaImportsNotUsedAsValues {}
+unsafe impl Sync for JavaImportsNotUsedAsValues {}
+
+impl JavaImportsNotUsedAsValues {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jImportsNotUsedAsValues")
+      .expect("Couldn't find class Swc4jImportsNotUsedAsValues");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jImportsNotUsedAsValues");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jImportsNotUsedAsValues.getId");
+    JavaImportsNotUsedAsValues { class, method_get_id }
+  }
+
+  pub fn get_imports_not_used_as_values<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'a>,
+  ) -> ImportsNotUsedAsValues {
+    let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
+    ImportsNotUsedAsValues::parse_by_id(id)
+  }
+}
+
+pub struct JavaMediaType {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaMediaType {}
+unsafe impl Sync for JavaMediaType {}
+
+impl JavaMediaType {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jMediaType")
+      .expect("Couldn't find class Swc4jMediaType");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jMediaType");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jMediaType.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;")
+      .expect("Couldn't find method Swc4jMediaType.parse");
+    JavaMediaType {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn get_media_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> MediaType {
+    let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
+    MediaType::parse_by_id(id)
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a> {
+    let id = jvalue { i: id };
+    unsafe {
+      JObject::from_raw(
+        env
+          .call_static_method_unchecked(&self.class, self.method_parse, ReturnType::Object, &[id])
+          .expect("Object is expected")
+          .as_jni()
+          .l,
+      )
+    }
+  }
+}
+
+pub struct JavaParseMode {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+}
+unsafe impl Send for JavaParseMode {}
+unsafe impl Sync for JavaParseMode {}
+
+impl JavaParseMode {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jParseMode")
+      .expect("Couldn't find class Swc4jParseMode");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jParseMode");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jParseMode.getId");
+    JavaParseMode { class, method_get_id }
+  }
+
+  pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> ParseMode {
+    let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
+    ParseMode::parse_by_id(id)
+  }
+}
+
+pub static mut JAVA_IMPORTS_NOT_USED_AS_VALUES: Option<JavaImportsNotUsedAsValues> = None;
+pub static mut JAVA_MEDIA_TYPE: Option<JavaMediaType> = None;
+pub static mut JAVA_PARSE_MODE: Option<JavaParseMode> = None;
+
+pub fn init<'local>(env: &mut JNIEnv<'local>) {
+  unsafe {
+    JAVA_IMPORTS_NOT_USED_AS_VALUES = Some(JavaImportsNotUsedAsValues::new(env));
+    JAVA_MEDIA_TYPE = Some(JavaMediaType::new(env));
+    JAVA_PARSE_MODE = Some(JavaParseMode::new(env));
   }
 }

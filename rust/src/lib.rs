@@ -37,6 +37,7 @@ pub mod outputs;
 pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
   debug_println!("JNI_OnLoad()");
   let mut env = java_vm.get_env().expect("Cannot get JNI env");
+  enums::init(&mut env);
   error::init(&mut env);
   options::init(&mut env);
   outputs::init(&mut env);

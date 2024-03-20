@@ -25,6 +25,7 @@ use deno_ast::{ParsedSource, TranspiledSource};
 use std::ptr::null_mut;
 
 use crate::converter;
+use crate::enums::*;
 use crate::options::*;
 
 struct JavaParseOutput {
@@ -43,7 +44,11 @@ impl JavaParseOutput {
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jParseOutput");
     let method_constructor = env
-      .get_method_id(&class, "<init>", "(ZZLjava/lang/String;)V")
+      .get_method_id(
+        &class,
+        "<init>",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;)V",
+      )
       .expect("Couldn't find method Swc4jParseOutput.Swc4jParseOutput");
     JavaParseOutput {
       class,
@@ -54,6 +59,7 @@ impl JavaParseOutput {
   pub fn create<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    media_type: jvalue,
     module: jvalue,
     script: jvalue,
     source_map: jvalue,
@@ -63,7 +69,11 @@ impl JavaParseOutput {
   {
     unsafe {
       env
-        .new_object_unchecked(&self.class, self.method_constructor, &[module, script, source_map])
+        .new_object_unchecked(
+          &self.class,
+          self.method_constructor,
+          &[media_type, module, script, source_map],
+        )
         .expect("Couldn't create Swc4jParseOutput")
     }
   }
@@ -88,7 +98,7 @@ impl JavaTranspileOutput {
       .get_method_id(
         &class,
         "<init>",
-        "(Ljava/lang/String;ZZLjava/lang/String;Ljava/lang/String;)V",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/lang/String;)V",
       )
       .expect("Couldn't find method Swc4jTranspileOutput.Swc4jTranspileOutput");
     JavaTranspileOutput {
@@ -101,6 +111,7 @@ impl JavaTranspileOutput {
     &self,
     env: &mut JNIEnv<'local>,
     code: jvalue,
+    media_type: jvalue,
     module: jvalue,
     script: jvalue,
     source_map: jvalue,
@@ -114,7 +125,7 @@ impl JavaTranspileOutput {
         .new_object_unchecked(
           &self.class,
           self.method_constructor,
-          &[code, module, script, source_map, source_text],
+          &[code, media_type, module, script, source_map, source_text],
         )
         .expect("Couldn't create Swc4jTranspileOutput")
     }
@@ -139,6 +150,7 @@ pub trait ToJniType {
 
 #[derive(Debug)]
 pub struct ParseOutput {
+  pub media_type: MediaType,
   pub module: bool,
   pub script: bool,
   pub source_text: String,
@@ -147,6 +159,7 @@ pub struct ParseOutput {
 
 impl ParseOutput {
   pub fn new(parse_options: &ParseOptions, parsed_source: &ParsedSource) -> ParseOutput {
+    let media_type = parsed_source.media_type();
     let module = parsed_source.is_module();
     let script = parsed_source.is_script();
     let source_text = parsed_source.text_info().text().to_string();
@@ -156,6 +169,7 @@ impl ParseOutput {
       None
     };
     ParseOutput {
+      media_type,
       module,
       script,
       source_text,
@@ -169,6 +183,10 @@ impl ToJniType for ParseOutput {
   where
     'local: 'a,
   {
+    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
+    let media_type = jvalue {
+      l: java_media_type.parse(env, self.media_type.get_id()).as_raw(),
+    };
     let module = jvalue {
       z: if self.module { 1u8 } else { 0u8 },
     };
@@ -178,13 +196,14 @@ impl ToJniType for ParseOutput {
     let source_text = jvalue {
       l: converter::string_to_jstring(env, &self.source_text).as_raw(),
     };
-    unsafe { JAVA_PARSE_OUTPUT.as_ref().unwrap() }.create(env, module, script, source_text)
+    unsafe { JAVA_PARSE_OUTPUT.as_ref().unwrap() }.create(env, media_type, module, script, source_text)
   }
 }
 
 #[derive(Debug)]
 pub struct TranspileOutput {
   pub code: String,
+  pub media_type: MediaType,
   pub module: bool,
   pub script: bool,
   pub source_map: Option<String>,
@@ -192,14 +211,20 @@ pub struct TranspileOutput {
 }
 
 impl TranspileOutput {
-  pub fn new(_: &TranspileOptions, parsed_source: &ParsedSource, transpiled_source: &TranspiledSource) -> TranspileOutput {
+  pub fn new(
+    _: &TranspileOptions,
+    parsed_source: &ParsedSource,
+    transpiled_source: &TranspiledSource,
+  ) -> TranspileOutput {
     let code = transpiled_source.text.to_owned();
+    let media_type = parsed_source.media_type();
     let module = parsed_source.is_module();
     let script = parsed_source.is_script();
     let source_map = transpiled_source.source_map.to_owned();
     let source_text = parsed_source.text_info().text().to_string();
     TranspileOutput {
       code,
+      media_type,
       module,
       script,
       source_map,
@@ -216,6 +241,10 @@ impl ToJniType for TranspileOutput {
     let code = jvalue {
       l: converter::string_to_jstring(env, &self.code).as_raw(),
     };
+    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
+    let media_type = jvalue {
+      l: java_media_type.parse(env, self.media_type.get_id()).as_raw(),
+    };
     let module = jvalue {
       z: if self.module { 1u8 } else { 0u8 },
     };
@@ -231,6 +260,14 @@ impl ToJniType for TranspileOutput {
     let source_text = jvalue {
       l: converter::string_to_jstring(env, &self.source_text).as_raw(),
     };
-    unsafe { JAVA_TRANSPILE_OUTPUT.as_ref().unwrap() }.create(env, code, module, script, source_map, source_text)
+    unsafe { JAVA_TRANSPILE_OUTPUT.as_ref().unwrap() }.create(
+      env,
+      code,
+      media_type,
+      module,
+      script,
+      source_map,
+      source_text,
+    )
   }
 }

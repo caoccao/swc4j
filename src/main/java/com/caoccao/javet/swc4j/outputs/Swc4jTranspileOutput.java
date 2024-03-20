@@ -16,6 +16,8 @@
 
 package com.caoccao.javet.swc4j.outputs;
 
+import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+
 /**
  * The type Swc4j transpile output.
  *
@@ -38,34 +40,22 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
     /**
      * Instantiates a new Swc4j transpile output.
      *
-     * @since 0.1.0
-     */
-    public Swc4jTranspileOutput() {
-        this(null);
-    }
-
-    /**
-     * Instantiates a new Swc4j transpile output.
-     *
-     * @param code the code
-     * @since 0.1.0
-     */
-    public Swc4jTranspileOutput(String code) {
-        this(code, false, false, null, null);
-    }
-
-    /**
-     * Instantiates a new Swc4j transpile output.
-     *
      * @param code       the code
+     * @param mediaType  the media type
      * @param module     the module
      * @param script     the script
      * @param sourceMap  the source map
      * @param sourceText the source text
      * @since 0.1.0
      */
-    public Swc4jTranspileOutput(String code, boolean module, boolean script, String sourceMap, String sourceText) {
-        super(module, script, sourceText);
+    public Swc4jTranspileOutput(
+            String code,
+            Swc4jMediaType mediaType,
+            boolean module,
+            boolean script,
+            String sourceMap,
+            String sourceText) {
+        super(mediaType, module, script, sourceText);
         setCode(code);
         setSourceMap(sourceMap);
     }
@@ -99,6 +89,12 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
      */
     public Swc4jTranspileOutput setCode(String code) {
         this.code = code;
+        return this;
+    }
+
+    @Override
+    public Swc4jTranspileOutput setMediaType(Swc4jMediaType mediaType) {
+        super.setMediaType(mediaType);
         return this;
     }
 

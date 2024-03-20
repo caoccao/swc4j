@@ -16,12 +16,21 @@
 
 package com.caoccao.javet.swc4j.outputs;
 
+import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
+
 /**
  * The type Swc4j parse output.
  *
  * @since 0.2.0
  */
 public class Swc4jParseOutput {
+    /**
+     * The Media type.
+     *
+     * @since 0.2.0
+     */
+    protected Swc4jMediaType mediaType;
     /**
      * The Module.
      *
@@ -49,10 +58,21 @@ public class Swc4jParseOutput {
      * @param sourceText the source text
      * @since 0.2.0
      */
-    public Swc4jParseOutput(boolean module, boolean script, String sourceText) {
+    public Swc4jParseOutput(Swc4jMediaType mediaType, boolean module, boolean script, String sourceText) {
+        setMediaType(mediaType);
         setModule(module);
         setScript(script);
         setSourceText(sourceText);
+    }
+
+    /**
+     * Gets media type.
+     *
+     * @return the media type
+     * @since 0.2.0
+     */
+    public Swc4jMediaType getMediaType() {
+        return mediaType;
     }
 
     /**
@@ -83,6 +103,18 @@ public class Swc4jParseOutput {
      */
     public boolean isScript() {
         return script;
+    }
+
+    /**
+     * Sets media type.
+     *
+     * @param mediaType the media type
+     * @return the media type
+     * @since 0.2.0
+     */
+    public Swc4jParseOutput setMediaType(Swc4jMediaType mediaType) {
+        this.mediaType = AssertionUtils.notNull(mediaType, "Media type");
+        return this;
     }
 
     /**

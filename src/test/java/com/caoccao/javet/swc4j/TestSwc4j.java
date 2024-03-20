@@ -60,6 +60,7 @@ public class TestSwc4j {
         assertTrue(output.isModule());
         assertFalse(output.isScript());
         assertEquals(code, output.getSourceText());
+        assertEquals(Swc4jMediaType.Jsx, output.getMediaType());
     }
 
     @Test
@@ -136,6 +137,7 @@ public class TestSwc4j {
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
         assertTrue(output.isModule());
         assertFalse(output.isScript());
+        assertEquals(Swc4jMediaType.Jsx, output.getMediaType());
         assertEquals(
                 expectedSourceMapPrefix,
                 output.getCode().substring(
