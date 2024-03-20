@@ -45,6 +45,7 @@ fn test_parse_jsx_with_default_options() {
   let output = output.unwrap();
   assert!(output.module);
   assert!(!output.script);
+  assert_eq!(MediaType::Jsx, output.media_type);
 }
 
 #[test]
@@ -191,6 +192,7 @@ fn test_transpile_jsx_with_default_options() {
   let output = output.unwrap();
   assert!(output.module);
   assert!(!output.script);
+  assert_eq!(MediaType::Jsx, output.media_type);
   let output_code = output.code;
   assert_eq!(expected_code, &output_code[0..expected_code.len()]);
   assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));

@@ -177,16 +177,13 @@ impl JavaMediaType {
     MediaType::parse_by_id(id)
   }
 
-  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a> {
+  pub fn parse<'local>(&self, env: &mut JNIEnv<'local>, id: i32) -> jvalue {
     let id = jvalue { i: id };
     unsafe {
-      JObject::from_raw(
-        env
-          .call_static_method_unchecked(&self.class, self.method_parse, ReturnType::Object, &[id])
-          .expect("Object is expected")
-          .as_jni()
-          .l,
-      )
+      env
+        .call_static_method_unchecked(&self.class, self.method_parse, ReturnType::Object, &[id])
+        .expect("Object is expected")
+        .as_jni()
     }
   }
 }

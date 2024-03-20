@@ -184,9 +184,7 @@ impl ToJniType for ParseOutput {
     'local: 'a,
   {
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
-    let media_type = jvalue {
-      l: java_media_type.parse(env, self.media_type.get_id()).as_raw(),
-    };
+    let media_type = java_media_type.parse(env, self.media_type.get_id());
     let module = jvalue {
       z: if self.module { 1u8 } else { 0u8 },
     };
@@ -242,9 +240,7 @@ impl ToJniType for TranspileOutput {
       l: converter::string_to_jstring(env, &self.code).as_raw(),
     };
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
-    let media_type = jvalue {
-      l: java_media_type.parse(env, self.media_type.get_id()).as_raw(),
-    };
+    let media_type = java_media_type.parse(env, self.media_type.get_id());
     let module = jvalue {
       z: if self.module { 1u8 } else { 0u8 },
     };
