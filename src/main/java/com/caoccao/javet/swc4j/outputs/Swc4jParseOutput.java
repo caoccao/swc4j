@@ -16,8 +16,11 @@
 
 package com.caoccao.javet.swc4j.outputs;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAstToken;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
+
+import java.util.List;
 
 /**
  * The type Swc4j parse output.
@@ -49,20 +52,34 @@ public class Swc4jParseOutput {
      * @since 0.2.0
      */
     protected String sourceText;
+    /**
+     * The Tokens.
+     *
+     * @since 0.2.0
+     */
+    protected List<Swc4jAstToken> tokens;
 
     /**
      * Instantiates a new Swc4j parse output.
      *
+     * @param mediaType  the media type
      * @param module     the module
      * @param script     the script
      * @param sourceText the source text
+     * @param tokens     the tokens
      * @since 0.2.0
      */
-    public Swc4jParseOutput(Swc4jMediaType mediaType, boolean module, boolean script, String sourceText) {
+    public Swc4jParseOutput(
+            Swc4jMediaType mediaType,
+            boolean module,
+            boolean script,
+            String sourceText,
+            List<Swc4jAstToken> tokens) {
         setMediaType(mediaType);
         setModule(module);
         setScript(script);
         setSourceText(sourceText);
+        this.tokens = tokens;
     }
 
     /**
@@ -83,6 +100,16 @@ public class Swc4jParseOutput {
      */
     public String getSourceText() {
         return sourceText;
+    }
+
+    /**
+     * Gets tokens.
+     *
+     * @return the tokens
+     * @since 0.2.0
+     */
+    public List<Swc4jAstToken> getTokens() {
+        return tokens;
     }
 
     /**

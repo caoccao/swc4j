@@ -21,10 +21,10 @@ use jni::{JNIEnv, JavaVM};
 use options::FromJniType;
 
 use debug_print::debug_println;
-use outputs::ToJniType;
 use std::ffi::c_void;
 use std::ptr::null_mut;
 
+pub mod ast_utils;
 pub mod converter;
 pub mod core;
 pub mod enums;
@@ -33,12 +33,16 @@ pub mod jni_utils;
 pub mod options;
 pub mod outputs;
 
+use crate::jni_utils::ToJniType;
+
 #[no_mangle]
 pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
   debug_println!("JNI_OnLoad()");
   let mut env = java_vm.get_env().expect("Cannot get JNI env");
+  ast_utils::init(&mut env);
   enums::init(&mut env);
   error::init(&mut env);
+  jni_utils::init(&mut env);
   options::init(&mut env);
   outputs::init(&mut env);
   JNI_VERSION_1_8

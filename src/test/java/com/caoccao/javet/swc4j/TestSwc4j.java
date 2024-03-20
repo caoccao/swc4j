@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j;
 
+import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -61,6 +62,23 @@ public class TestSwc4j {
         assertFalse(output.isScript());
         assertEquals(code, output.getSourceText());
         assertEquals(Swc4jMediaType.Jsx, output.getMediaType());
+        assertNull(output.getTokens());
+    }
+
+    @Test
+    public void testParseTypeScriptWithCaptureTokens() throws Swc4jCoreException {
+        String code = "function add(a:number, b:number) { return a+b; }";
+        Swc4jParseOptions options = new Swc4jParseOptions()
+                .setMediaType(Swc4jMediaType.TypeScript)
+                .setCaptureTokens(true);
+        Swc4jParseOutput output = swc4j.parse(code, options);
+        assertNotNull(output);
+        assertTrue(output.isModule());
+        assertFalse(output.isScript());
+        assertNotNull(output.getTokens());
+        assertEquals(18, output.getTokens().size());
+        assertEquals(Swc4jAstTokenType.Function, output.getTokens().get(0).getType());
+        assertEquals(Swc4jAstTokenType.Return, output.getTokens().get(12).getType());
     }
 
     @Test

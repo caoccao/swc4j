@@ -20,6 +20,7 @@ use jni::signature::ReturnType;
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
+use deno_ast::swc::parser::token::Keyword;
 pub use deno_ast::{ImportsNotUsedAsValues, MediaType};
 
 use crate::jni_utils;
@@ -27,6 +28,217 @@ use crate::jni_utils;
 pub trait IdentifiableEnum<T> {
   fn get_id(&self) -> i32;
   fn parse_by_id(id: i32) -> T;
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum AstTokenType {
+  Unknown,    // 0
+  Await,      // 1
+  Break,      // 2
+  Case,       // 3
+  Catch,      // 4
+  Class,      // 5
+  Const,      // 6
+  Continue,   // 7
+  Debugger,   // 8
+  Default_,   // 9
+  Delete,     // 10
+  Do,         // 11
+  Else,       // 12
+  Export,     // 13
+  Extends,    // 14
+  Finally,    // 15
+  For,        // 16
+  Function,   // 17
+  If,         // 18
+  Import,     // 19
+  In,         // 20
+  InstanceOf, // 21
+  Let,        // 22
+  New,        // 23
+  Return,     // 24
+  Super,      // 25
+  Switch,     // 26
+  This,       // 27
+  Throw,      // 28
+  Try,        // 29
+  TypeOf,     // 30
+  Var,        // 31
+  Void,       // 32
+  While,      // 33
+  With,       // 34
+  Yield,      // 35
+}
+
+impl IdentifiableEnum<AstTokenType> for AstTokenType {
+  fn get_id(&self) -> i32 {
+    match self {
+      AstTokenType::Await => 1,
+      AstTokenType::Break => 2,
+      AstTokenType::Case => 3,
+      AstTokenType::Catch => 4,
+      AstTokenType::Class => 5,
+      AstTokenType::Const => 6,
+      AstTokenType::Continue => 7,
+      AstTokenType::Debugger => 8,
+      AstTokenType::Default_ => 9,
+      AstTokenType::Delete => 10,
+      AstTokenType::Do => 11,
+      AstTokenType::Else => 12,
+      AstTokenType::Export => 13,
+      AstTokenType::Extends => 14,
+      AstTokenType::Finally => 15,
+      AstTokenType::For => 16,
+      AstTokenType::Function => 17,
+      AstTokenType::If => 18,
+      AstTokenType::Import => 19,
+      AstTokenType::In => 20,
+      AstTokenType::InstanceOf => 21,
+      AstTokenType::Let => 22,
+      AstTokenType::New => 23,
+      AstTokenType::Return => 24,
+      AstTokenType::Super => 25,
+      AstTokenType::Switch => 26,
+      AstTokenType::This => 27,
+      AstTokenType::Throw => 28,
+      AstTokenType::Try => 29,
+      AstTokenType::TypeOf => 30,
+      AstTokenType::Var => 31,
+      AstTokenType::Void => 32,
+      AstTokenType::While => 33,
+      AstTokenType::With => 34,
+      AstTokenType::Yield => 35,
+      _ => 0,
+    }
+  }
+  fn parse_by_id(id: i32) -> AstTokenType {
+    match id {
+      1 => AstTokenType::Await,
+      2 => AstTokenType::Break,
+      3 => AstTokenType::Case,
+      4 => AstTokenType::Catch,
+      5 => AstTokenType::Class,
+      6 => AstTokenType::Const,
+      7 => AstTokenType::Continue,
+      8 => AstTokenType::Debugger,
+      9 => AstTokenType::Default_,
+      10 => AstTokenType::Delete,
+      11 => AstTokenType::Do,
+      12 => AstTokenType::Else,
+      13 => AstTokenType::Export,
+      14 => AstTokenType::Extends,
+      15 => AstTokenType::Finally,
+      16 => AstTokenType::For,
+      17 => AstTokenType::Function,
+      18 => AstTokenType::If,
+      19 => AstTokenType::Import,
+      20 => AstTokenType::In,
+      21 => AstTokenType::InstanceOf,
+      22 => AstTokenType::Let,
+      23 => AstTokenType::New,
+      24 => AstTokenType::Return,
+      25 => AstTokenType::Super,
+      26 => AstTokenType::Switch,
+      27 => AstTokenType::This,
+      28 => AstTokenType::Throw,
+      29 => AstTokenType::Try,
+      30 => AstTokenType::TypeOf,
+      31 => AstTokenType::Var,
+      32 => AstTokenType::Void,
+      33 => AstTokenType::While,
+      34 => AstTokenType::With,
+      35 => AstTokenType::Yield,
+      _ => AstTokenType::Unknown,
+    }
+  }
+}
+
+impl AstTokenType {
+  pub fn parse_by_keyword(keyword: &Keyword) -> AstTokenType {
+    match keyword {
+      Keyword::Await => AstTokenType::Await,
+      Keyword::Break => AstTokenType::Break,
+      Keyword::Case => AstTokenType::Case,
+      Keyword::Catch => AstTokenType::Catch,
+      Keyword::Class => AstTokenType::Class,
+      Keyword::Const => AstTokenType::Const,
+      Keyword::Continue => AstTokenType::Continue,
+      Keyword::Debugger => AstTokenType::Debugger,
+      Keyword::Default_ => AstTokenType::Default_,
+      Keyword::Delete => AstTokenType::Delete,
+      Keyword::Do => AstTokenType::Do,
+      Keyword::Else => AstTokenType::Else,
+      Keyword::Export => AstTokenType::Export,
+      Keyword::Extends => AstTokenType::Extends,
+      Keyword::Finally => AstTokenType::Finally,
+      Keyword::For => AstTokenType::For,
+      Keyword::Function => AstTokenType::Function,
+      Keyword::If => AstTokenType::If,
+      Keyword::Import => AstTokenType::Import,
+      Keyword::In => AstTokenType::In,
+      Keyword::InstanceOf => AstTokenType::InstanceOf,
+      Keyword::Let => AstTokenType::Let,
+      Keyword::New => AstTokenType::New,
+      Keyword::Return => AstTokenType::Return,
+      Keyword::Super => AstTokenType::Super,
+      Keyword::Switch => AstTokenType::Switch,
+      Keyword::This => AstTokenType::This,
+      Keyword::Throw => AstTokenType::Throw,
+      Keyword::Try => AstTokenType::Try,
+      Keyword::TypeOf => AstTokenType::TypeOf,
+      Keyword::Var => AstTokenType::Var,
+      Keyword::Void => AstTokenType::Void,
+      Keyword::While => AstTokenType::While,
+      Keyword::With => AstTokenType::With,
+      Keyword::Yield => AstTokenType::Yield,
+    }
+  }
+}
+
+pub struct JavaAstTokenType {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaAstTokenType {}
+unsafe impl Sync for JavaAstTokenType {}
+
+impl JavaAstTokenType {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jAstTokenType")
+      .expect("Couldn't find class Swc4jAstTokenType");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstTokenType");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstTokenType.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;")
+      .expect("Couldn't find static method Swc4jAstTokenType.parse");
+    JavaAstTokenType {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn get_ast_token_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> AstTokenType {
+    let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
+    AstTokenType::parse_by_id(id)
+  }
+
+  pub fn parse<'local>(&self, env: &mut JNIEnv<'local>, id: i32) -> jvalue {
+    let id = jvalue { i: id };
+    unsafe {
+      env
+        .call_static_method_unchecked(&self.class, self.method_parse, ReturnType::Object, &[id])
+        .expect("Object is expected")
+        .as_jni()
+    }
+  }
 }
 
 impl IdentifiableEnum<ImportsNotUsedAsValues> for ImportsNotUsedAsValues {
@@ -43,6 +255,38 @@ impl IdentifiableEnum<ImportsNotUsedAsValues> for ImportsNotUsedAsValues {
       1 => ImportsNotUsedAsValues::Preserve,
       _ => ImportsNotUsedAsValues::Error,
     }
+  }
+}
+
+pub struct JavaImportsNotUsedAsValues {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+}
+unsafe impl Send for JavaImportsNotUsedAsValues {}
+unsafe impl Sync for JavaImportsNotUsedAsValues {}
+
+impl JavaImportsNotUsedAsValues {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jImportsNotUsedAsValues")
+      .expect("Couldn't find class Swc4jImportsNotUsedAsValues");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jImportsNotUsedAsValues");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jImportsNotUsedAsValues.getId");
+    JavaImportsNotUsedAsValues { class, method_get_id }
+  }
+
+  pub fn get_imports_not_used_as_values<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'a>,
+  ) -> ImportsNotUsedAsValues {
+    let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
+    ImportsNotUsedAsValues::parse_by_id(id)
   }
 }
 
@@ -89,59 +333,6 @@ impl IdentifiableEnum<MediaType> for MediaType {
   }
 }
 
-#[derive(Debug, Copy, Clone)]
-pub enum ParseMode {
-  Module,
-  Script,
-}
-
-impl IdentifiableEnum<ParseMode> for ParseMode {
-  fn get_id(&self) -> i32 {
-    match self {
-      ParseMode::Module => 0,
-      ParseMode::Script => 1,
-    }
-  }
-  fn parse_by_id(id: i32) -> ParseMode {
-    match id {
-      0 => ParseMode::Module,
-      _ => ParseMode::Script,
-    }
-  }
-}
-
-pub struct JavaImportsNotUsedAsValues {
-  #[allow(dead_code)]
-  class: GlobalRef,
-  method_get_id: JMethodID,
-}
-unsafe impl Send for JavaImportsNotUsedAsValues {}
-unsafe impl Sync for JavaImportsNotUsedAsValues {}
-
-impl JavaImportsNotUsedAsValues {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
-    let class = env
-      .find_class("com/caoccao/javet/swc4j/enums/Swc4jImportsNotUsedAsValues")
-      .expect("Couldn't find class Swc4jImportsNotUsedAsValues");
-    let class = env
-      .new_global_ref(class)
-      .expect("Couldn't globalize class Swc4jImportsNotUsedAsValues");
-    let method_get_id = env
-      .get_method_id(&class, "getId", "()I")
-      .expect("Couldn't find method Swc4jImportsNotUsedAsValues.getId");
-    JavaImportsNotUsedAsValues { class, method_get_id }
-  }
-
-  pub fn get_imports_not_used_as_values<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'a>,
-  ) -> ImportsNotUsedAsValues {
-    let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
-    ImportsNotUsedAsValues::parse_by_id(id)
-  }
-}
-
 pub struct JavaMediaType {
   #[allow(dead_code)]
   class: GlobalRef,
@@ -164,7 +355,7 @@ impl JavaMediaType {
       .expect("Couldn't find method Swc4jMediaType.getId");
     let method_parse = env
       .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;")
-      .expect("Couldn't find method Swc4jMediaType.parse");
+      .expect("Couldn't find static method Swc4jMediaType.parse");
     JavaMediaType {
       class,
       method_get_id,
@@ -184,6 +375,27 @@ impl JavaMediaType {
         .call_static_method_unchecked(&self.class, self.method_parse, ReturnType::Object, &[id])
         .expect("Object is expected")
         .as_jni()
+    }
+  }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum ParseMode {
+  Module,
+  Script,
+}
+
+impl IdentifiableEnum<ParseMode> for ParseMode {
+  fn get_id(&self) -> i32 {
+    match self {
+      ParseMode::Module => 0,
+      ParseMode::Script => 1,
+    }
+  }
+  fn parse_by_id(id: i32) -> ParseMode {
+    match id {
+      0 => ParseMode::Module,
+      _ => ParseMode::Script,
     }
   }
 }
@@ -216,12 +428,14 @@ impl JavaParseMode {
   }
 }
 
+pub static mut JAVA_AST_TOKEN_TYPE: Option<JavaAstTokenType> = None;
 pub static mut JAVA_IMPORTS_NOT_USED_AS_VALUES: Option<JavaImportsNotUsedAsValues> = None;
 pub static mut JAVA_MEDIA_TYPE: Option<JavaMediaType> = None;
 pub static mut JAVA_PARSE_MODE: Option<JavaParseMode> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
+    JAVA_AST_TOKEN_TYPE = Some(JavaAstTokenType::new(env));
     JAVA_IMPORTS_NOT_USED_AS_VALUES = Some(JavaImportsNotUsedAsValues::new(env));
     JAVA_MEDIA_TYPE = Some(JavaMediaType::new(env));
     JAVA_PARSE_MODE = Some(JavaParseMode::new(env));

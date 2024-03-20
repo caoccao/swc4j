@@ -33,4 +33,10 @@ public final class AssertionUtils {
         }
         return value;
     }
+
+    public static void notTrue(boolean b, String message) {
+        if (!b) {
+            throw new IllegalArgumentException(message);
+        }
+    }
 }
