@@ -41,7 +41,7 @@ public enum Swc4jMediaType {
     SourceMap(14),
     Unknown(15);
 
-    private static final int LENGTH = 16;
+    private static final int LENGTH = values().length;
     private static final Swc4jMediaType[] TYPES = new Swc4jMediaType[LENGTH];
 
     static {

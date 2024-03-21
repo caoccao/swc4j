@@ -55,9 +55,14 @@ public enum Swc4jAstTokenType {
     Void(32, "void", true),
     While(33, "while", true),
     With(34, "with", true),
-    Yield(35, "yield", true);
+    Yield(35, "yield", true),
+    // Word
+    Null(36, "null", false),
+    True(37, "true", false),
+    False(38, "false", false),
+    ;
 
-    private static final int LENGTH = 36;
+    private static final int LENGTH = values().length;
     private static final Swc4jAstTokenType[] TYPES = new Swc4jAstTokenType[LENGTH];
 
     static {

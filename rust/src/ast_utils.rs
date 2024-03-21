@@ -37,7 +37,10 @@ use std::sync::Arc;
 pub struct JavaAstTokenFactory {
   #[allow(dead_code)]
   class: GlobalRef,
+  method_create_false: JStaticMethodID,
   method_create_keyword: JStaticMethodID,
+  method_create_null: JStaticMethodID,
+  method_create_true: JStaticMethodID,
   method_create_unknown: JStaticMethodID,
 }
 unsafe impl Send for JavaAstTokenFactory {}
@@ -51,13 +54,34 @@ impl JavaAstTokenFactory {
     let class = env
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jAstTokenFactory");
+    let method_create_false = env
+      .get_static_method_id(
+        &class,
+        "createFalse",
+        "(II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenFalse;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createFalse");
     let method_create_keyword = env
       .get_static_method_id(
         &class,
         "createKeyword",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;II)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenKeyword;",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenKeyword;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createKeyword");
+    let method_create_null = env
+      .get_static_method_id(
+        &class,
+        "createNull",
+        "(II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenNull;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createNull");
+    let method_create_true = env
+      .get_static_method_id(
+        &class,
+        "createTrue",
+        "(II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenTrue;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createTrue");
     let method_create_unknown = env
       .get_static_method_id(
         &class,
@@ -67,8 +91,31 @@ impl JavaAstTokenFactory {
       .expect("Couldn't find method Swc4jAstTokenFactory.createUnknown");
     JavaAstTokenFactory {
       class,
+      method_create_false,
       method_create_keyword,
+      method_create_null,
+      method_create_true,
       method_create_unknown,
+    }
+  }
+
+  pub fn create_false<'local, 'a>(&self, env: &mut JNIEnv<'local>, range: Range<usize>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_false,
+          ReturnType::Object,
+          &[start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstTokenFalse")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenFalse")
     }
   }
 
@@ -96,6 +143,46 @@ impl JavaAstTokenFactory {
         .expect("Couldn't create Swc4jAstTokenKeyword")
         .l()
         .expect("Couldn't convert Swc4jAstTokenKeyword")
+    }
+  }
+
+  pub fn create_null<'local, 'a>(&self, env: &mut JNIEnv<'local>, range: Range<usize>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_null,
+          ReturnType::Object,
+          &[start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstTokenNull")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenNull")
+    }
+  }
+
+  pub fn create_true<'local, 'a>(&self, env: &mut JNIEnv<'local>, range: Range<usize>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_true,
+          ReturnType::Object,
+          &[start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstTokenTrue")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenTrue")
     }
   }
 
@@ -183,9 +270,15 @@ pub fn token_and_spans_to_java_list<'local>(
             end: *byte_to_index_map.get(&byte_range.end).expect("Couldn't find end index"),
           };
           let ast_token = match &token_and_span.token {
-            Token::Word(Word::Keyword(keyword)) => {
-              java_ast_token_factory.create_keyword(env, AstTokenType::parse_by_keyword(&keyword), index_range)
-            }
+            Token::Word(word) => match word {
+              Word::Keyword(keyword) => {
+                java_ast_token_factory.create_keyword(env, AstTokenType::parse_by_keyword(&keyword), index_range)
+              }
+              Word::Null => java_ast_token_factory.create_null(env, index_range),
+              Word::True => java_ast_token_factory.create_true(env, index_range),
+              Word::False => java_ast_token_factory.create_false(env, index_range),
+              Word::Ident(ident) => java_ast_token_factory.create_unknown(env, &text, index_range),
+            },
             _ => java_ast_token_factory.create_unknown(env, &text, index_range),
           };
           java_array_list.add(env, &list, &ast_token);

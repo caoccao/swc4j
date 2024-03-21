@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j;
 
+import com.caoccao.javet.swc4j.ast.BaseSwc4jAstToken;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
@@ -37,6 +38,26 @@ public class TestSwc4j {
 
     public TestSwc4j() {
         swc4j = new Swc4j();
+    }
+
+    protected BaseSwc4jAstToken parseAndAssert(
+            String code,
+            Swc4jParseOptions options,
+            Swc4jAstTokenType type,
+            String text,
+            int startPosition,
+            int endPosition)
+            throws Swc4jCoreException {
+        Swc4jParseOutput output = swc4j.parse(code, options);
+        assertNotNull(output, code + " should be parsed successfully");
+        assertNotNull(output.getTokens(), code + " tokens shouldn't be null");
+        assertEquals(1, output.getTokens().size(), code + " token size should be 1");
+        BaseSwc4jAstToken token = output.getTokens().get(0);
+        assertEquals(type, token.getType(), code + " type should match");
+        assertEquals(text, token.getText(), code + " text should match");
+        assertEquals(startPosition, token.getStartPosition(), code + " start position should match");
+        assertEquals(endPosition, token.getEndPosition(), code + " end position should match");
+        return token;
     }
 
     @Test
@@ -67,22 +88,27 @@ public class TestSwc4j {
 
     @Test
     public void testParseTypeScriptWithCaptureTokens() throws Swc4jCoreException {
-        String code = "function add加法(a變量:number, b變量:number) { return a變量+b變量; }";
         Swc4jParseOptions options = new Swc4jParseOptions()
                 .setMediaType(Swc4jMediaType.TypeScript)
                 .setCaptureTokens(true);
-        Swc4jParseOutput output = swc4j.parse(code, options);
-        assertNotNull(output);
-        assertTrue(output.isModule());
-        assertFalse(output.isScript());
-        assertNotNull(output.getTokens());
-        assertEquals(18, output.getTokens().size());
-        assertEquals(Swc4jAstTokenType.Function, output.getTokens().get(0).getType());
-        assertEquals(Swc4jAstTokenType.Return, output.getTokens().get(12).getType());
-        output.getTokens().forEach(token ->
-                assertEquals(
-                        code.substring(token.getStartPosition(), token.getEndPosition()),
-                        token.getText()));
+        {
+            String code = "function add加法(a變量:number, b變量:number) { return a變量+b變量; }";
+            Swc4jParseOutput output = swc4j.parse(code, options);
+            assertNotNull(output);
+            assertTrue(output.isModule());
+            assertFalse(output.isScript());
+            assertNotNull(output.getTokens());
+            assertEquals(18, output.getTokens().size());
+            assertEquals(Swc4jAstTokenType.Function, output.getTokens().get(0).getType());
+            assertEquals(Swc4jAstTokenType.Return, output.getTokens().get(12).getType());
+            output.getTokens().forEach(token ->
+                    assertEquals(
+                            code.substring(token.getStartPosition(), token.getEndPosition()),
+                            token.getText()));
+        }
+        parseAndAssert("null", options, Swc4jAstTokenType.Null, "null", 0, 4);
+        parseAndAssert("true", options, Swc4jAstTokenType.True, "true", 0, 4);
+        parseAndAssert("false", options, Swc4jAstTokenType.False, "false", 0, 5);
     }
 
     @Test

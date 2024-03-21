@@ -30,7 +30,7 @@ public enum Swc4jImportsNotUsedAsValues {
     Preserve(1),
     Error(2);
 
-    private static final int LENGTH = 3;
+    private static final int LENGTH = values().length;
     private static final Swc4jImportsNotUsedAsValues[] TYPES = new Swc4jImportsNotUsedAsValues[LENGTH];
 
     static {

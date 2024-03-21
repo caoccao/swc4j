@@ -68,6 +68,7 @@ pub enum AstTokenType {
   While,      // 33
   With,       // 34
   Yield,      // 35
+  Null,       // 36
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -108,6 +109,7 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::While => 33,
       AstTokenType::With => 34,
       AstTokenType::Yield => 35,
+      AstTokenType::Null => 36,
       _ => 0,
     }
   }

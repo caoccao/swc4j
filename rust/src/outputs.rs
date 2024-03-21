@@ -140,7 +140,11 @@ impl JavaTranspileOutput {
     let source_text = jvalue {
       l: converter::string_to_jstring(env, &transpile_output.source_text).as_raw(),
     };
-    let tokens = jvalue { l: null_mut() };
+    let tokens = ast_utils::token_and_spans_to_java_list(
+      env,
+      &transpile_output.source_text.to_string(),
+      transpile_output.tokens.clone(),
+    );
     unsafe {
       env
         .new_object_unchecked(

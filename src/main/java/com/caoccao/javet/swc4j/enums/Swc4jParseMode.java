@@ -29,7 +29,7 @@ public enum Swc4jParseMode {
     Module(0),
     Script(1);
 
-    private static final int LENGTH = 2;
+    private static final int LENGTH = values().length;
     private static final Swc4jParseMode[] TYPES = new Swc4jParseMode[LENGTH];
 
     static {
