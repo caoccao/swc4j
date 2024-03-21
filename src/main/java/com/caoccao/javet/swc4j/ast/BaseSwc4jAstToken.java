@@ -18,31 +18,91 @@ package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
+/**
+ * The type Base swc4j ast token.
+ *
+ * @since 0.2.0
+ */
 public abstract class BaseSwc4jAstToken {
+    /**
+     * The End position of the token.
+     * It is zero-based.
+     *
+     * @since 0.2.0
+     */
     protected int endPosition;
+    /**
+     * The Start position of the token.
+     * It is zero-based.
+     *
+     * @since 0.2.0
+     */
     protected int startPosition;
 
+    /**
+     * Instantiates a new Base swc4j ast token.
+     *
+     * @param startPosition the start position
+     * @param endPosition   the end position
+     * @since 0.2.0
+     */
     public BaseSwc4jAstToken(int startPosition, int endPosition) {
         this.endPosition = endPosition;
         this.startPosition = startPosition;
     }
 
+    /**
+     * Gets end position.
+     *
+     * @return the end position
+     * @since 0.2.0
+     */
     public int getEndPosition() {
         return endPosition;
     }
 
+    /**
+     * Gets start position.
+     *
+     * @return the start position
+     * @since 0.2.0
+     */
     public int getStartPosition() {
         return startPosition;
     }
 
+    /**
+     * Gets text.
+     *
+     * @return the text
+     * @since 0.2.0
+     */
     public abstract String getText();
 
+    /**
+     * Gets type.
+     *
+     * @return the type
+     * @since 0.2.0
+     */
     public abstract Swc4jAstTokenType getType();
 
+    /**
+     * Sets end position.
+     *
+     * @param endPosition the end position
+     * @since 0.2.0
+     */
     public void setEndPosition(int endPosition) {
         this.endPosition = endPosition;
     }
 
+    /**
+     * Sets start position.
+     *
+     * @param startPosition the start position
+     * @since 0.2.0
+     */
     public void setStartPosition(int startPosition) {
         this.startPosition = startPosition;
     }

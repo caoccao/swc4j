@@ -16,9 +16,27 @@
 
 package com.caoccao.javet.swc4j.ast;
 
+/**
+ * The type Base swc4j ast token text.
+ *
+ * @since 0.2.0
+ */
 public abstract class BaseSwc4jAstTokenText extends BaseSwc4jAstToken {
+    /**
+     * The Text.
+     *
+     * @since 0.2.0
+     */
     protected final String text;
 
+    /**
+     * Instantiates a new Base swc4j ast token text.
+     *
+     * @param text          the text
+     * @param startPosition the start position
+     * @param endPosition   the end position
+     * @since 0.2.0
+     */
     public BaseSwc4jAstTokenText(String text, int startPosition, int endPosition) {
         super(startPosition, endPosition);
         this.text = text;

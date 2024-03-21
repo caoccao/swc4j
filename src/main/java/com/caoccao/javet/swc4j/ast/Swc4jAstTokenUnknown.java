@@ -18,7 +18,21 @@ package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
+/**
+ * The type Swc4j ast token unknown is a placeholder token.
+ * It shouldn't exist in the tokens. Otherwise, there are something missed in the implementation.
+ *
+ * @since 0.2.0
+ */
 public class Swc4jAstTokenUnknown extends BaseSwc4jAstTokenText {
+    /**
+     * Instantiates a new Swc4j ast token unknown.
+     *
+     * @param text          the text
+     * @param startPosition the start position
+     * @param endPosition   the end position
+     * @since 0.2.0
+     */
     public Swc4jAstTokenUnknown(String text, int startPosition, int endPosition) {
         super(text, startPosition, endPosition);
     }

@@ -19,9 +19,27 @@ package com.caoccao.javet.swc4j.ast;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
+/**
+ * The type Swc4j ast token keyword.
+ *
+ * @since 0.2.0
+ */
 public class Swc4jAstTokenKeyword extends BaseSwc4jAstToken {
+    /**
+     * The Type.
+     *
+     * @since 0.2.0
+     */
     protected final Swc4jAstTokenType type;
 
+    /**
+     * Instantiates a new Swc4j ast token keyword.
+     *
+     * @param type          the type
+     * @param startPosition the start position
+     * @param endPosition   the end position
+     * @since 0.2.0
+     */
     public Swc4jAstTokenKeyword(Swc4jAstTokenType type, int startPosition, int endPosition) {
         super(startPosition, endPosition);
         AssertionUtils.notNull(type, "Ast token type");

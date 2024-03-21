@@ -23,17 +23,15 @@ use jni::JNIEnv;
 use deno_ast::swc::{
   atoms::JsWord,
   common::source_map::Pos,
-  common::BytePos,
-  common::Spanned,
   parser::token::{IdentLike, Keyword, Token, TokenAndSpan, Word},
 };
 
-use crate::jni_utils::{ToJniType, JAVA_ARRAY_LIST};
+use crate::jni_utils::JAVA_ARRAY_LIST;
 use crate::{converter, enums::*};
 
+use std::collections::BTreeMap;
 use std::ops::Range;
 use std::ptr::null_mut;
-use std::slice::SliceIndex;
 use std::sync::Arc;
 
 pub struct JavaAstTokenFactory {
@@ -141,19 +139,54 @@ pub fn token_and_spans_to_java_list<'local>(
   jvalue {
     l: match token_and_spans {
       Some(token_and_spans) => {
+        // 1st pass: Prepare utf8_range map.
+        let mut byte_to_index_map: BTreeMap<usize, usize> = BTreeMap::new();
+        token_and_spans.iter().for_each(|token_and_span| {
+          [
+            token_and_span.span.lo().to_usize() - 1,
+            token_and_span.span.hi().to_usize() - 1,
+          ]
+          .into_iter()
+          .for_each(|position| {
+            if !byte_to_index_map.contains_key(&position) {
+              byte_to_index_map.insert(position, 0);
+            }
+          });
+        });
+        let mut utf8_byte_length: usize = 0;
+        let chars = source_text.chars();
+        let mut char_count = 0;
+        chars.for_each(|c| {
+          byte_to_index_map
+            .get_mut(&utf8_byte_length)
+            .map(|value| *value = char_count);
+          utf8_byte_length += c.len_utf8();
+          char_count += 1;
+        });
+        byte_to_index_map
+          .get_mut(&utf8_byte_length)
+          .map(|value| *value = char_count);
+        // 2nd pass: Process tokens and spans.
         let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
         let java_ast_token_factory = unsafe { JAVA_AST_TOKEN_FACTORY.as_ref().unwrap() };
         let list = java_array_list.create(env, token_and_spans.len());
         token_and_spans.iter().for_each(|token_and_span| {
-          let range = Range {
-            start: token_and_span.span.lo().to_u32() as usize - 1,
-            end: token_and_span.span.hi().to_u32() as usize - 1,
+          let byte_range = Range {
+            start: token_and_span.span.lo().to_usize() - 1,
+            end: token_and_span.span.hi().to_usize() - 1,
+          };
+          let text = &source_text[byte_range.to_owned()];
+          let index_range = Range {
+            start: *byte_to_index_map
+              .get(&byte_range.start)
+              .expect("Couldn't find start index"),
+            end: *byte_to_index_map.get(&byte_range.end).expect("Couldn't find end index"),
           };
           let ast_token = match &token_and_span.token {
             Token::Word(Word::Keyword(keyword)) => {
-              java_ast_token_factory.create_keyword(env, AstTokenType::parse_by_keyword(&keyword), range)
+              java_ast_token_factory.create_keyword(env, AstTokenType::parse_by_keyword(&keyword), index_range)
             }
-            _ => java_ast_token_factory.create_unknown(env, &source_text[range.to_owned()], range),
+            _ => java_ast_token_factory.create_unknown(env, &text, index_range),
           };
           java_array_list.add(env, &list, &ast_token);
         });

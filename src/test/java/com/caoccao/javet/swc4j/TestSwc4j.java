@@ -67,7 +67,7 @@ public class TestSwc4j {
 
     @Test
     public void testParseTypeScriptWithCaptureTokens() throws Swc4jCoreException {
-        String code = "function add(a:number, b:number) { return a+b; }";
+        String code = "function add加法(a變量:number, b變量:number) { return a變量+b變量; }";
         Swc4jParseOptions options = new Swc4jParseOptions()
                 .setMediaType(Swc4jMediaType.TypeScript)
                 .setCaptureTokens(true);
@@ -79,6 +79,10 @@ public class TestSwc4j {
         assertEquals(18, output.getTokens().size());
         assertEquals(Swc4jAstTokenType.Function, output.getTokens().get(0).getType());
         assertEquals(Swc4jAstTokenType.Return, output.getTokens().get(12).getType());
+        output.getTokens().forEach(token ->
+                assertEquals(
+                        code.substring(token.getStartPosition(), token.getEndPosition()),
+                        token.getText()));
     }
 
     @Test
