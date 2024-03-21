@@ -109,6 +109,7 @@ public class TestSwc4j {
         parseAndAssert("null", options, Swc4jAstTokenType.Null, "null", 0, 4);
         parseAndAssert("true", options, Swc4jAstTokenType.True, "true", 0, 4);
         parseAndAssert("false", options, Swc4jAstTokenType.False, "false", 0, 5);
+        parseAndAssert("as", options, Swc4jAstTokenType.IdentKnown, "as", 0, 2);
     }
 
     @Test

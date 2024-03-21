@@ -21,9 +21,9 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use deno_ast::swc::{
-  atoms::JsWord,
+  atoms::Atom,
   common::source_map::Pos,
-  parser::token::{IdentLike, Keyword, Token, TokenAndSpan, Word},
+  parser::token::{IdentLike, Token, TokenAndSpan, Word},
 };
 
 use crate::jni_utils::JAVA_ARRAY_LIST;
@@ -38,6 +38,7 @@ pub struct JavaAstTokenFactory {
   #[allow(dead_code)]
   class: GlobalRef,
   method_create_false: JStaticMethodID,
+  method_create_ident_known: JStaticMethodID,
   method_create_keyword: JStaticMethodID,
   method_create_null: JStaticMethodID,
   method_create_true: JStaticMethodID,
@@ -61,6 +62,13 @@ impl JavaAstTokenFactory {
         "(II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenFalse;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createFalse");
+    let method_create_ident_known = env
+      .get_static_method_id(
+        &class,
+        "createIdentKnown",
+        "(Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenIdentKnown;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createIdentKnown");
     let method_create_keyword = env
       .get_static_method_id(
         &class,
@@ -92,6 +100,7 @@ impl JavaAstTokenFactory {
     JavaAstTokenFactory {
       class,
       method_create_false,
+      method_create_ident_known,
       method_create_keyword,
       method_create_null,
       method_create_true,
@@ -116,6 +125,29 @@ impl JavaAstTokenFactory {
         .expect("Couldn't create Swc4jAstTokenFalse")
         .l()
         .expect("Couldn't convert Swc4jAstTokenFalse")
+    }
+  }
+
+  pub fn create_ident_known<'local, 'a>(&self, env: &mut JNIEnv<'local>, text: &str, range: Range<usize>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let text = jvalue {
+      l: converter::string_to_jstring(env, &text).as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_ident_known,
+          ReturnType::Object,
+          &[text, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstTokenIdentKnown")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenIdentKnown")
     }
   }
 
@@ -277,7 +309,12 @@ pub fn token_and_spans_to_java_list<'local>(
               Word::Null => java_ast_token_factory.create_null(env, index_range),
               Word::True => java_ast_token_factory.create_true(env, index_range),
               Word::False => java_ast_token_factory.create_false(env, index_range),
-              Word::Ident(ident) => java_ast_token_factory.create_unknown(env, &text, index_range),
+              Word::Ident(ident) => match ident {
+                IdentLike::Known(known_ident) => {
+                  java_ast_token_factory.create_ident_known(env, &Atom::from(*known_ident).as_str(), index_range)
+                }
+                IdentLike::Other(js_word) => java_ast_token_factory.create_unknown(env, &js_word.as_str(), index_range),
+              },
             },
             _ => java_ast_token_factory.create_unknown(env, &text, index_range),
           };
