@@ -19,34 +19,23 @@ package com.caoccao.javet.swc4j.ast;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
-public class Swc4jAstToken {
+public class Swc4jAstTokenKeyword extends BaseSwc4jAstToken {
     protected final Swc4jAstTokenType type;
-    protected int endPosition;
-    protected int startPosition;
 
-    public Swc4jAstToken(Swc4jAstTokenType type, int startPosition, int endPosition) {
-        this.endPosition = endPosition;
-        this.startPosition = startPosition;
-        this.type = AssertionUtils.notNull(type, "Ast token type");
+    public Swc4jAstTokenKeyword(Swc4jAstTokenType type, int startPosition, int endPosition) {
+        super(startPosition, endPosition);
+        AssertionUtils.notNull(type, "Ast token type");
+        AssertionUtils.notTrue(type.isKeyword(), "Keyword is expected");
+        this.type = type;
     }
 
-    public int getEndPosition() {
-        return endPosition;
+    @Override
+    public String getText() {
+        return type.getName();
     }
 
-    public int getStartPosition() {
-        return startPosition;
-    }
-
+    @Override
     public Swc4jAstTokenType getType() {
         return type;
-    }
-
-    public void setEndPosition(int endPosition) {
-        this.endPosition = endPosition;
-    }
-
-    public void setStartPosition(int startPosition) {
-        this.startPosition = startPosition;
     }
 }

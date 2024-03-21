@@ -15,7 +15,8 @@
 * limitations under the License.
 */
 
-use jni::objects::{GlobalRef, JMethodID, JObject};
+use jni::objects::{GlobalRef, JObject, JStaticMethodID};
+use jni::signature::ReturnType;
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
@@ -27,114 +28,133 @@ use deno_ast::swc::{
   parser::token::{IdentLike, Keyword, Token, TokenAndSpan, Word},
 };
 
-use crate::enums::*;
 use crate::jni_utils::{ToJniType, JAVA_ARRAY_LIST};
+use crate::{converter, enums::*};
 
+use std::ops::Range;
 use std::ptr::null_mut;
+use std::slice::SliceIndex;
 use std::sync::Arc;
 
-#[derive(Debug)]
-pub struct AstToken {
-  pub ast_token_type: AstTokenType,
-  pub end_position: i32,
-  pub start_position: i32,
-}
-
-impl ToJniType for AstToken {
-  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    unsafe { JAVA_AST_TOKEN.as_ref().unwrap() }.create(env, self.ast_token_type, self.start_position, self.end_position)
-  }
-}
-
-pub struct JavaAstToken {
+pub struct JavaAstTokenFactory {
   #[allow(dead_code)]
   class: GlobalRef,
-  method_constructor: JMethodID,
+  method_create_keyword: JStaticMethodID,
+  method_create_unknown: JStaticMethodID,
 }
-unsafe impl Send for JavaAstToken {}
-unsafe impl Sync for JavaAstToken {}
+unsafe impl Send for JavaAstTokenFactory {}
+unsafe impl Sync for JavaAstTokenFactory {}
 
-impl JavaAstToken {
+impl JavaAstTokenFactory {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/ast/Swc4jAstToken")
-      .expect("Couldn't find class Swc4jAstToken");
+      .find_class("com/caoccao/javet/swc4j/ast/Swc4jAstTokenFactory")
+      .expect("Couldn't find class Swc4jAstTokenFactory");
     let class = env
       .new_global_ref(class)
-      .expect("Couldn't globalize class Swc4jAstToken");
-    let method_constructor = env
-      .get_method_id(
+      .expect("Couldn't globalize class Swc4jAstTokenFactory");
+    let method_create_keyword = env
+      .get_static_method_id(
         &class,
-        "<init>",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;II)V",
+        "createKeyword",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;II)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenKeyword;",
       )
-      .expect("Couldn't find method Swc4jAstTokenType.Swc4jAstTokenType");
-    JavaAstToken {
+      .expect("Couldn't find method Swc4jAstTokenFactory.createKeyword");
+    let method_create_unknown = env
+      .get_static_method_id(
+        &class,
+        "createUnknown",
+        "(Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenUnknown;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createUnknown");
+    JavaAstTokenFactory {
       class,
-      method_constructor,
+      method_create_keyword,
+      method_create_unknown,
     }
   }
 
-  pub fn create<'local, 'a>(
+  pub fn create_keyword<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     ast_token_type: AstTokenType,
-    start_position: i32,
-    end_position: i32,
+    range: Range<usize>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_ast_token_type = unsafe { JAVA_AST_TOKEN_TYPE.as_ref().unwrap() };
     let ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
-    let start_position = jvalue {
-      i: start_position as i32,
-    };
-    let end_position = jvalue { i: end_position as i32 };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
     unsafe {
       env
-        .new_object_unchecked(
+        .call_static_method_unchecked(
           &self.class,
-          self.method_constructor,
+          self.method_create_keyword,
+          ReturnType::Object,
           &[ast_token_type, start_position, end_position],
         )
-        .expect("Couldn't create Swc4jTranspileOutput")
+        .expect("Couldn't create Swc4jAstTokenKeyword")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenKeyword")
+    }
+  }
+
+  pub fn create_unknown<'local, 'a>(&self, env: &mut JNIEnv<'local>, text: &str, range: Range<usize>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let text = jvalue {
+      l: converter::string_to_jstring(env, &text).as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_unknown,
+          ReturnType::Object,
+          &[text, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstTokenUnknown")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenUnknown")
     }
   }
 }
 
-pub static mut JAVA_AST_TOKEN: Option<JavaAstToken> = None;
+pub static mut JAVA_AST_TOKEN_FACTORY: Option<JavaAstTokenFactory> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
-    JAVA_AST_TOKEN = Some(JavaAstToken::new(env));
+    JAVA_AST_TOKEN_FACTORY = Some(JavaAstTokenFactory::new(env));
   }
 }
 
 pub fn token_and_spans_to_java_list<'local>(
   env: &mut JNIEnv<'local>,
+  source_text: &str,
   token_and_spans: Option<Arc<Vec<TokenAndSpan>>>,
 ) -> jvalue {
   jvalue {
     l: match token_and_spans {
       Some(token_and_spans) => {
         let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-        let java_ast_token = unsafe { JAVA_AST_TOKEN.as_ref().unwrap() };
+        let java_ast_token_factory = unsafe { JAVA_AST_TOKEN_FACTORY.as_ref().unwrap() };
         let list = java_array_list.create(env, token_and_spans.len());
         token_and_spans.iter().for_each(|token_and_span| {
-          let ast_token_type = match &token_and_span.token {
-            Token::Word(Word::Keyword(keyword)) => AstTokenType::parse_by_keyword(&keyword),
-            _ => AstTokenType::Unknown,
+          let range = Range {
+            start: token_and_span.span.lo().to_u32() as usize - 1,
+            end: token_and_span.span.hi().to_u32() as usize - 1,
           };
-          let ast_token = java_ast_token.create(
-            env,
-            ast_token_type,
-            token_and_span.span.lo().to_u32() as i32,
-            token_and_span.span.hi().to_u32() as i32,
-          );
+          let ast_token = match &token_and_span.token {
+            Token::Word(Word::Keyword(keyword)) => {
+              java_ast_token_factory.create_keyword(env, AstTokenType::parse_by_keyword(&keyword), range)
+            }
+            _ => java_ast_token_factory.create_unknown(env, &source_text[range.to_owned()], range),
+          };
           java_array_list.add(env, &list, &ast_token);
         });
         list.as_raw()

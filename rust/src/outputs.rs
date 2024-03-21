@@ -74,7 +74,8 @@ impl JavaParseOutput {
     let source_text = jvalue {
       l: converter::string_to_jstring(env, &parse_output.source_text).as_raw(),
     };
-    let tokens = ast_utils::token_and_spans_to_java_list(env, parse_output.tokens.clone());
+    let tokens =
+      ast_utils::token_and_spans_to_java_list(env, &parse_output.source_text.to_string(), parse_output.tokens.clone());
     unsafe {
       env
         .new_object_unchecked(
