@@ -60,7 +60,8 @@ public enum Swc4jAstTokenType {
     Null(36, "null", false),
     True(37, "true", false),
     False(38, "false", false),
-    IdentKnown(39, "_IdentKnown_", false),
+    IdentKnown(39, "$IdentKnown", false),
+    IdentOther(39, "$IdentOther", false),
     ;
 
     private static final int LENGTH = values().length;

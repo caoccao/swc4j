@@ -39,6 +39,7 @@ pub struct JavaAstTokenFactory {
   class: GlobalRef,
   method_create_false: JStaticMethodID,
   method_create_ident_known: JStaticMethodID,
+  method_create_ident_other: JStaticMethodID,
   method_create_keyword: JStaticMethodID,
   method_create_null: JStaticMethodID,
   method_create_true: JStaticMethodID,
@@ -83,6 +84,13 @@ impl JavaAstTokenFactory {
         "(II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenNull;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createNull");
+    let method_create_ident_other = env
+      .get_static_method_id(
+        &class,
+        "createIdentOther",
+        "(Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenIdentOther;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createIdentOther");
     let method_create_true = env
       .get_static_method_id(
         &class,
@@ -101,6 +109,7 @@ impl JavaAstTokenFactory {
       class,
       method_create_false,
       method_create_ident_known,
+      method_create_ident_other,
       method_create_keyword,
       method_create_null,
       method_create_true,
@@ -195,6 +204,29 @@ impl JavaAstTokenFactory {
         .expect("Couldn't create Swc4jAstTokenNull")
         .l()
         .expect("Couldn't convert Swc4jAstTokenNull")
+    }
+  }
+
+  pub fn create_ident_other<'local, 'a>(&self, env: &mut JNIEnv<'local>, text: &str, range: Range<usize>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let text = jvalue {
+      l: converter::string_to_jstring(env, &text).as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_ident_other,
+          ReturnType::Object,
+          &[text, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstTokenIdentOther")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenIdentOther")
     }
   }
 
@@ -313,7 +345,9 @@ pub fn token_and_spans_to_java_list<'local>(
                 IdentLike::Known(known_ident) => {
                   java_ast_token_factory.create_ident_known(env, &Atom::from(*known_ident).as_str(), index_range)
                 }
-                IdentLike::Other(js_word) => java_ast_token_factory.create_unknown(env, &js_word.as_str(), index_range),
+                IdentLike::Other(js_word) => {
+                  java_ast_token_factory.create_ident_other(env, &js_word.as_str(), index_range)
+                }
               },
             },
             _ => java_ast_token_factory.create_unknown(env, &text, index_range),

@@ -57,6 +57,7 @@ public class TestSwc4j {
         assertEquals(text, token.getText(), code + " text should match");
         assertEquals(startPosition, token.getStartPosition(), code + " start position should match");
         assertEquals(endPosition, token.getEndPosition(), code + " end position should match");
+        assertEquals(code.substring(startPosition, endPosition), token.getText(), code + " text should match");
         return token;
     }
 
@@ -110,6 +111,7 @@ public class TestSwc4j {
         parseAndAssert("true", options, Swc4jAstTokenType.True, "true", 0, 4);
         parseAndAssert("false", options, Swc4jAstTokenType.False, "false", 0, 5);
         parseAndAssert("as", options, Swc4jAstTokenType.IdentKnown, "as", 0, 2);
+        parseAndAssert("測試", options, Swc4jAstTokenType.IdentOther, "測試", 0, 2);
     }
 
     @Test

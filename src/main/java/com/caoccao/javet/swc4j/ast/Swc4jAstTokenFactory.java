@@ -54,6 +54,19 @@ public final class Swc4jAstTokenFactory {
     }
 
     /**
+     * Create ast token ident other.
+     *
+     * @param text          the text
+     * @param startPosition the start position
+     * @param endPosition   the end position
+     * @return the ast token ident other
+     * @since 0.2.0
+     */
+    public static Swc4jAstTokenIdentOther createIdentOther(String text, int startPosition, int endPosition) {
+        return new Swc4jAstTokenIdentOther(text, startPosition, endPosition);
+    }
+
+    /**
      * Create ast token keyword.
      *
      * @param type          the type
