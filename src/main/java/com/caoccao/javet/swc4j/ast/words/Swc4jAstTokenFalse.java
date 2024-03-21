@@ -14,31 +14,35 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.word;
+package com.caoccao.javet.swc4j.ast.words;
 
-import com.caoccao.javet.swc4j.ast.BaseSwc4jAstTokenText;
+import com.caoccao.javet.swc4j.ast.BaseSwc4jAstToken;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
 /**
- * The type Swc4j ast token ident other.
+ * The type Swc4j ast token false.
  *
  * @since 0.2.0
  */
-public class Swc4jAstTokenIdentOther extends BaseSwc4jAstTokenText {
+public class Swc4jAstTokenFalse extends BaseSwc4jAstToken {
     /**
-     * Instantiates a new Swc4j ast token ident other.
+     * Instantiates a new Swc4j ast token false.
      *
-     * @param text          the text
      * @param startPosition the start position
      * @param endPosition   the end position
      * @since 0.2.0
      */
-    public Swc4jAstTokenIdentOther(String text, int startPosition, int endPosition) {
-        super(text, startPosition, endPosition);
+    public Swc4jAstTokenFalse(int startPosition, int endPosition) {
+        super(startPosition, endPosition);
+    }
+
+    @Override
+    public String getText() {
+        return Swc4jAstTokenType.False.getName();
     }
 
     @Override
     public Swc4jAstTokenType getType() {
-        return Swc4jAstTokenType.IdentOther;
+        return Swc4jAstTokenType.False;
     }
 }

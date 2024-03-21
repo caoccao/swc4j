@@ -14,35 +14,47 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.word;
+package com.caoccao.javet.swc4j.ast.operators;
 
 import com.caoccao.javet.swc4j.ast.BaseSwc4jAstToken;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 /**
- * The type Swc4j ast token true.
+ * The type Swc4j ast token generic operator.
  *
  * @since 0.2.0
  */
-public class Swc4jAstTokenTrue extends BaseSwc4jAstToken {
+public class Swc4jAstTokenGenericOperator extends BaseSwc4jAstToken {
     /**
-     * Instantiates a new Swc4j ast token true.
+     * The Type.
      *
+     * @since 0.2.0
+     */
+    protected final Swc4jAstTokenType type;
+
+    /**
+     * Instantiates a new Swc4j ast token generic operator.
+     *
+     * @param type          the type
      * @param startPosition the start position
      * @param endPosition   the end position
      * @since 0.2.0
      */
-    public Swc4jAstTokenTrue(int startPosition, int endPosition) {
+    public Swc4jAstTokenGenericOperator(Swc4jAstTokenType type, int startPosition, int endPosition) {
         super(startPosition, endPosition);
+        AssertionUtils.notNull(type, "Ast token type");
+        AssertionUtils.notTrue(type.isOperator(), "Operator is expected");
+        this.type = type;
     }
 
     @Override
     public String getText() {
-        return Swc4jAstTokenType.True.getName();
+        return type.getName();
     }
 
     @Override
     public Swc4jAstTokenType getType() {
-        return Swc4jAstTokenType.True;
+        return type;
     }
 }

@@ -14,47 +14,31 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.word;
+package com.caoccao.javet.swc4j.ast.words;
 
-import com.caoccao.javet.swc4j.ast.BaseSwc4jAstToken;
+import com.caoccao.javet.swc4j.ast.BaseSwc4jAstTokenText;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
-import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 /**
- * The type Swc4j ast token keyword.
+ * The type Swc4j ast token ident other.
  *
  * @since 0.2.0
  */
-public class Swc4jAstTokenKeyword extends BaseSwc4jAstToken {
+public class Swc4jAstTokenIdentOther extends BaseSwc4jAstTokenText {
     /**
-     * The Type.
+     * Instantiates a new Swc4j ast token ident other.
      *
-     * @since 0.2.0
-     */
-    protected final Swc4jAstTokenType type;
-
-    /**
-     * Instantiates a new Swc4j ast token keyword.
-     *
-     * @param type          the type
+     * @param text          the text
      * @param startPosition the start position
      * @param endPosition   the end position
      * @since 0.2.0
      */
-    public Swc4jAstTokenKeyword(Swc4jAstTokenType type, int startPosition, int endPosition) {
-        super(startPosition, endPosition);
-        AssertionUtils.notNull(type, "Ast token type");
-        AssertionUtils.notTrue(type.isKeyword(), "Keyword is expected");
-        this.type = type;
-    }
-
-    @Override
-    public String getText() {
-        return type.getName();
+    public Swc4jAstTokenIdentOther(String text, int startPosition, int endPosition) {
+        super(text, startPosition, endPosition);
     }
 
     @Override
     public Swc4jAstTokenType getType() {
-        return type;
+        return Swc4jAstTokenType.IdentOther;
     }
 }

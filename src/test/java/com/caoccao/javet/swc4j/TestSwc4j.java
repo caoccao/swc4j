@@ -44,6 +44,8 @@ public class TestSwc4j {
             String code,
             Swc4jParseOptions options,
             Swc4jAstTokenType type,
+            int tokenIndex,
+            int tokenSize,
             String text,
             int startPosition,
             int endPosition)
@@ -51,8 +53,8 @@ public class TestSwc4j {
         Swc4jParseOutput output = swc4j.parse(code, options);
         assertNotNull(output, code + " should be parsed successfully");
         assertNotNull(output.getTokens(), code + " tokens shouldn't be null");
-        assertEquals(1, output.getTokens().size(), code + " token size should be 1");
-        BaseSwc4jAstToken token = output.getTokens().get(0);
+        assertEquals(tokenSize, output.getTokens().size(), code + " token size should be 1");
+        BaseSwc4jAstToken token = output.getTokens().get(tokenIndex);
         assertEquals(type, token.getType(), code + " type should match");
         assertEquals(text, token.getText(), code + " text should match");
         assertEquals(startPosition, token.getStartPosition(), code + " start position should match");
@@ -107,11 +109,12 @@ public class TestSwc4j {
                             code.substring(token.getStartPosition(), token.getEndPosition()),
                             token.getText()));
         }
-        parseAndAssert("null", options, Swc4jAstTokenType.Null, "null", 0, 4);
-        parseAndAssert("true", options, Swc4jAstTokenType.True, "true", 0, 4);
-        parseAndAssert("false", options, Swc4jAstTokenType.False, "false", 0, 5);
-        parseAndAssert("as", options, Swc4jAstTokenType.IdentKnown, "as", 0, 2);
-        parseAndAssert("測試", options, Swc4jAstTokenType.IdentOther, "測試", 0, 2);
+        parseAndAssert("null", options, Swc4jAstTokenType.Null, 0, 1, "null", 0, 4);
+        parseAndAssert("true", options, Swc4jAstTokenType.True, 0, 1, "true", 0, 4);
+        parseAndAssert("false", options, Swc4jAstTokenType.False, 0, 1, "false", 0, 5);
+        parseAndAssert("as", options, Swc4jAstTokenType.IdentKnown, 0, 1, "as", 0, 2);
+        parseAndAssert("測試", options, Swc4jAstTokenType.IdentOther, 0, 1, "測試", 0, 2);
+        parseAndAssert("() => {}", options, Swc4jAstTokenType.Arrow, 2, 5, "=>", 3, 5);
     }
 
     @Test

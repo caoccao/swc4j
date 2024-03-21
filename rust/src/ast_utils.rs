@@ -38,6 +38,7 @@ pub struct JavaAstTokenFactory {
   #[allow(dead_code)]
   class: GlobalRef,
   method_create_false: JStaticMethodID,
+  method_create_generic_operator: JStaticMethodID,
   method_create_ident_known: JStaticMethodID,
   method_create_ident_other: JStaticMethodID,
   method_create_keyword: JStaticMethodID,
@@ -60,42 +61,49 @@ impl JavaAstTokenFactory {
       .get_static_method_id(
         &class,
         "createFalse",
-        "(II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenFalse;",
+        "(II)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenFalse;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createFalse");
+    let method_create_generic_operator = env
+      .get_static_method_id(
+        &class,
+        "createGenericOperator",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;II)Lcom/caoccao/javet/swc4j/ast/operators/Swc4jAstTokenGenericOperator;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createGenericOperator");
     let method_create_ident_known = env
       .get_static_method_id(
         &class,
         "createIdentKnown",
-        "(Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenIdentKnown;",
+        "(Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenIdentKnown;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createIdentKnown");
     let method_create_keyword = env
       .get_static_method_id(
         &class,
         "createKeyword",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenKeyword;",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;II)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenKeyword;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createKeyword");
     let method_create_null = env
       .get_static_method_id(
         &class,
         "createNull",
-        "(II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenNull;",
+        "(II)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenNull;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createNull");
     let method_create_ident_other = env
       .get_static_method_id(
         &class,
         "createIdentOther",
-        "(Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenIdentOther;",
+        "(Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenIdentOther;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createIdentOther");
     let method_create_true = env
       .get_static_method_id(
         &class,
         "createTrue",
-        "(II)Lcom/caoccao/javet/swc4j/ast/word/Swc4jAstTokenTrue;",
+        "(II)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenTrue;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createTrue");
     let method_create_unknown = env
@@ -108,6 +116,7 @@ impl JavaAstTokenFactory {
     JavaAstTokenFactory {
       class,
       method_create_false,
+      method_create_generic_operator,
       method_create_ident_known,
       method_create_ident_other,
       method_create_keyword,
@@ -134,6 +143,33 @@ impl JavaAstTokenFactory {
         .expect("Couldn't create Swc4jAstTokenFalse")
         .l()
         .expect("Couldn't convert Swc4jAstTokenFalse")
+    }
+  }
+
+  pub fn create_generic_operator<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    ast_token_type: AstTokenType,
+    range: Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_token_type = unsafe { JAVA_AST_TOKEN_TYPE.as_ref().unwrap() };
+    let ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_generic_operator,
+          ReturnType::Object,
+          &[ast_token_type, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstTokenGenericOperator")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenGenericOperator")
     }
   }
 
@@ -350,6 +386,9 @@ pub fn token_and_spans_to_java_list<'local>(
                 }
               },
             },
+            Token::Arrow => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::Arrow, index_range)
+            }
             _ => java_ast_token_factory.create_unknown(env, &text, index_range),
           };
           java_array_list.add(env, &list, &ast_token);

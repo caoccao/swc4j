@@ -69,6 +69,11 @@ pub enum AstTokenType {
   With,       // 34
   Yield,      // 35
   Null,       // 36
+  True,       // 37
+  False,      // 38
+  IdentKnown, // 39
+  IdentOther, // 40
+  Arrow,      // 41
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -110,6 +115,11 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::With => 34,
       AstTokenType::Yield => 35,
       AstTokenType::Null => 36,
+      AstTokenType::True => 37,
+      AstTokenType::False => 38,
+      AstTokenType::IdentKnown => 39,
+      AstTokenType::IdentOther => 40,
+      AstTokenType::Arrow => 41,
       _ => 0,
     }
   }
@@ -150,6 +160,12 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       33 => AstTokenType::While,
       34 => AstTokenType::With,
       35 => AstTokenType::Yield,
+      36 => AstTokenType::Null,
+      37 => AstTokenType::True,
+      38 => AstTokenType::False,
+      39 => AstTokenType::IdentKnown,
+      40 => AstTokenType::IdentOther,
+      41 => AstTokenType::Arrow,
       _ => AstTokenType::Unknown,
     }
   }

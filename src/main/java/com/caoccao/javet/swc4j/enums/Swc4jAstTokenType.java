@@ -61,7 +61,9 @@ public enum Swc4jAstTokenType {
     True(37, "true", false),
     False(38, "false", false),
     IdentKnown(39, "$IdentKnown", false),
-    IdentOther(39, "$IdentOther", false),
+    IdentOther(40, "$IdentOther", false),
+    // Operator
+    Arrow(41, "=>", false, true),
     ;
 
     private static final int LENGTH = values().length;
@@ -74,11 +76,17 @@ public enum Swc4jAstTokenType {
     private final int id;
     private final boolean keyword;
     private final String name;
+    private final boolean operator;
 
     Swc4jAstTokenType(int id, String name, boolean keyword) {
+        this(id, name, keyword, false);
+    }
+
+    Swc4jAstTokenType(int id, String name, boolean keyword, boolean operator) {
         this.id = id;
         this.keyword = keyword;
         this.name = name;
+        this.operator = operator;
     }
 
     public static Swc4jAstTokenType parse(int id) {
@@ -95,5 +103,9 @@ public enum Swc4jAstTokenType {
 
     public boolean isKeyword() {
         return keyword;
+    }
+
+    public boolean isOperator() {
+        return operator;
     }
 }

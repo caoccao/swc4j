@@ -16,7 +16,8 @@
 
 package com.caoccao.javet.swc4j.ast;
 
-import com.caoccao.javet.swc4j.ast.word.*;
+import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenGenericOperator;
+import com.caoccao.javet.swc4j.ast.words.*;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
 /**
@@ -38,6 +39,19 @@ public final class Swc4jAstTokenFactory {
      */
     public static Swc4jAstTokenFalse createFalse(int startPosition, int endPosition) {
         return new Swc4jAstTokenFalse(startPosition, endPosition);
+    }
+
+    /**
+     * Create ast token generic operator.
+     *
+     * @param type          the type
+     * @param startPosition the start position
+     * @param endPosition   the end position
+     * @return the ast token generic operator
+     * @since 0.2.0
+     */
+    public static Swc4jAstTokenGenericOperator createGenericOperator(Swc4jAstTokenType type, int startPosition, int endPosition) {
+        return new Swc4jAstTokenGenericOperator(type, startPosition, endPosition);
     }
 
     /**
