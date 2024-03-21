@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -44,17 +45,29 @@ public class TestSwc4j {
             String code,
             Swc4jParseOptions options,
             Swc4jAstTokenType type,
-            int tokenIndex,
-            int tokenSize,
             String text,
             int startPosition,
             int endPosition)
             throws Swc4jCoreException {
+        return parseAndAssert(code, options, type, text, startPosition, endPosition, 0, 1);
+    }
+
+    protected BaseSwc4jAstToken parseAndAssert(
+            String code,
+            Swc4jParseOptions options,
+            Swc4jAstTokenType type,
+            String text,
+            int startPosition,
+            int endPosition,
+            int tokenIndex,
+            int tokenSize)
+            throws Swc4jCoreException {
         Swc4jParseOutput output = swc4j.parse(code, options);
         assertNotNull(output, code + " should be parsed successfully");
-        assertNotNull(output.getTokens(), code + " tokens shouldn't be null");
-        assertEquals(tokenSize, output.getTokens().size(), code + " token size should be 1");
-        BaseSwc4jAstToken token = output.getTokens().get(tokenIndex);
+        List<BaseSwc4jAstToken> tokens = output.getTokens();
+        assertNotNull(tokens, code + " tokens shouldn't be null");
+        assertEquals(tokenSize, tokens.size(), code + " token size should be 1");
+        BaseSwc4jAstToken token = tokens.get(tokenIndex);
         assertEquals(type, token.getType(), code + " type should match");
         assertEquals(text, token.getText(), code + " text should match");
         assertEquals(startPosition, token.getStartPosition(), code + " start position should match");
@@ -109,12 +122,13 @@ public class TestSwc4j {
                             code.substring(token.getStartPosition(), token.getEndPosition()),
                             token.getText()));
         }
-        parseAndAssert("null", options, Swc4jAstTokenType.Null, 0, 1, "null", 0, 4);
-        parseAndAssert("true", options, Swc4jAstTokenType.True, 0, 1, "true", 0, 4);
-        parseAndAssert("false", options, Swc4jAstTokenType.False, 0, 1, "false", 0, 5);
-        parseAndAssert("as", options, Swc4jAstTokenType.IdentKnown, 0, 1, "as", 0, 2);
-        parseAndAssert("測試", options, Swc4jAstTokenType.IdentOther, 0, 1, "測試", 0, 2);
-        parseAndAssert("() => {}", options, Swc4jAstTokenType.Arrow, 2, 5, "=>", 3, 5);
+        parseAndAssert("null", options, Swc4jAstTokenType.Null, "null", 0, 4);
+        parseAndAssert("true", options, Swc4jAstTokenType.True, "true", 0, 4);
+        parseAndAssert("false", options, Swc4jAstTokenType.False, "false", 0, 5);
+        parseAndAssert("as", options, Swc4jAstTokenType.IdentKnown, "as", 0, 2);
+        parseAndAssert("測試", options, Swc4jAstTokenType.IdentOther, "測試", 0, 2);
+        parseAndAssert("() => {}", options, Swc4jAstTokenType.Arrow, "=>", 3, 5, 2, 5);
+        parseAndAssert("class A { #abc; }", options, Swc4jAstTokenType.Hash, "#", 10, 11, 3, 7);
     }
 
     @Test

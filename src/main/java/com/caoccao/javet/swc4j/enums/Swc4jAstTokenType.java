@@ -64,6 +64,7 @@ public enum Swc4jAstTokenType {
     IdentOther(40, "$IdentOther", false),
     // Operator
     Arrow(41, "=>", false, true),
+    Hash(42, "#", false, true),
     ;
 
     private static final int LENGTH = values().length;

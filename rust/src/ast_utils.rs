@@ -386,9 +386,8 @@ pub fn token_and_spans_to_java_list<'local>(
                 }
               },
             },
-            Token::Arrow => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::Arrow, index_range)
-            }
+            Token::Arrow => java_ast_token_factory.create_generic_operator(env, AstTokenType::Arrow, index_range),
+            Token::Hash => java_ast_token_factory.create_generic_operator(env, AstTokenType::Hash, index_range),
             _ => java_ast_token_factory.create_unknown(env, &text, index_range),
           };
           java_array_list.add(env, &list, &ast_token);
