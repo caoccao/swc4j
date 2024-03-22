@@ -125,6 +125,42 @@ public class TestSwc4j {
                             code.substring(token.getStartPosition(), token.getEndPosition()),
                             token.getText()));
         }
+        // Keyword
+        parseAndAssert("await f()", options, Swc4jAstTokenType.Await, "await", 0, 5, 0, 4);
+        parseAndAssert("while (a) { break; }", options, Swc4jAstTokenType.Break, "break", 12, 17, 5, 8);
+        parseAndAssert("switch (a) { case 1: break; }", options, Swc4jAstTokenType.Case, "case", 13, 17, 5, 11);
+        parseAndAssert("try {} catch {}", options, Swc4jAstTokenType.Catch, "catch", 7, 12, 3, 6);
+        parseAndAssert("class A {}", options, Swc4jAstTokenType.Class, "class", 0, 5, 0, 4);
+        parseAndAssert("const a;", options, Swc4jAstTokenType.Const, "const", 0, 5, 0, 3);
+        parseAndAssert("for (;;) { continue; }", options, Swc4jAstTokenType.Continue, "continue", 11, 19, 6, 9);
+        parseAndAssert("debugger", options, Swc4jAstTokenType.Debugger, "debugger", 0, 8);
+        parseAndAssert("export default a;", options, Swc4jAstTokenType.Default, "default", 7, 14, 1, 4);
+        parseAndAssert("delete a.x;", options, Swc4jAstTokenType.Delete, "delete", 0, 6, 0, 5);
+        parseAndAssert("do {} while (a);", options, Swc4jAstTokenType.Do, "do", 0, 2, 0, 8);
+        parseAndAssert("if (a) {} else {}", options, Swc4jAstTokenType.Else, "else", 10, 14, 6, 9);
+        parseAndAssert("export default a;", options, Swc4jAstTokenType.Export, "export", 0, 6, 0, 4);
+        parseAndAssert("class A extends B {}", options, Swc4jAstTokenType.Extends, "extends", 8, 15, 2, 6);
+        parseAndAssert("try {} catch {} finally {}", options, Swc4jAstTokenType.Finally, "finally", 16, 23, 6, 9);
+        parseAndAssert("for (;;) {}", options, Swc4jAstTokenType.For, "for", 0, 3, 0, 7);
+        parseAndAssert("function a() {}", options, Swc4jAstTokenType.Function, "function", 0, 8, 0, 6);
+        parseAndAssert("if (a) {}", options, Swc4jAstTokenType.If, "if", 0, 2, 0, 6);
+        parseAndAssert("import a from 'b';", options, Swc4jAstTokenType.Import, "import", 0, 6, 0, 5);
+        parseAndAssert("a in b", options, Swc4jAstTokenType.In, "in", 2, 4, 1, 3);
+        parseAndAssert("a instanceof b", options, Swc4jAstTokenType.InstanceOf, "instanceof", 2, 12, 1, 3);
+        parseAndAssert("let a;", options, Swc4jAstTokenType.Let, "let", 0, 3, 0, 3);
+        parseAndAssert("new Date()", options, Swc4jAstTokenType.New, "new", 0, 3, 0, 4);
+        parseAndAssert("function a() { return 1; }", options, Swc4jAstTokenType.Return, "return", 15, 21, 5, 9);
+        parseAndAssert("function a() { super(); }", options, Swc4jAstTokenType.Super, "super", 15, 20, 5, 10);
+        parseAndAssert("switch (a) { case 1: break; }", options, Swc4jAstTokenType.Switch, "switch", 0, 6, 0, 11);
+        parseAndAssert("function a() { this.x; }", options, Swc4jAstTokenType.This, "this", 15, 19, 5, 10);
+        parseAndAssert("throw e;", options, Swc4jAstTokenType.Throw, "throw", 0, 5, 0, 3);
+        parseAndAssert("try {} catch {}", options, Swc4jAstTokenType.Try, "try", 0, 3, 0, 6);
+        parseAndAssert("typeof a", options, Swc4jAstTokenType.TypeOf, "typeof", 0, 6, 0, 2);
+        parseAndAssert("var a;", options, Swc4jAstTokenType.Var, "var", 0, 3, 0, 3);
+        parseAndAssert("void a", options, Swc4jAstTokenType.Void, "void", 0, 4, 0, 2);
+        parseAndAssert("while (a) {}", options, Swc4jAstTokenType.While, "while", 0, 5, 0, 6);
+        parseAndAssert("with (a) {}", options, Swc4jAstTokenType.With, "with", 0, 4, 0, 6);
+        parseAndAssert("function *a() { yield 1; }", options, Swc4jAstTokenType.Yield, "yield", 16, 21, 6, 10);
         parseAndAssert("null", options, Swc4jAstTokenType.Null, "null", 0, 4);
         parseAndAssert("true", options, Swc4jAstTokenType.True, "true", 0, 4);
         parseAndAssert("false", options, Swc4jAstTokenType.False, "false", 0, 5);

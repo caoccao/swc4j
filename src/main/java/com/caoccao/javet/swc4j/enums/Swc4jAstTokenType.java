@@ -41,7 +41,7 @@ public enum Swc4jAstTokenType {
     If(18, "if", Swc4jAstTokenSubType.Keyword),
     Import(19, "import", Swc4jAstTokenSubType.Keyword),
     In(20, "in", Swc4jAstTokenSubType.Keyword),
-    InstanceOf(21, "instanceOf", Swc4jAstTokenSubType.Keyword),
+    InstanceOf(21, "instanceof", Swc4jAstTokenSubType.Keyword),
     Let(22, "let", Swc4jAstTokenSubType.Keyword),
     New(23, "new", Swc4jAstTokenSubType.Keyword),
     Return(24, "return", Swc4jAstTokenSubType.Keyword),
