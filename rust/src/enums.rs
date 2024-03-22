@@ -75,6 +75,8 @@ pub enum AstTokenType {
   IdentOther, // 40
   Arrow,      // 41
   Hash,       // 42
+  At,         // 43
+  Dot,        // 44
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -122,6 +124,8 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::IdentOther => 40,
       AstTokenType::Arrow => 41,
       AstTokenType::Hash => 42,
+      AstTokenType::At => 43,
+      AstTokenType::Dot => 44,
       _ => 0,
     }
   }
@@ -169,6 +173,8 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       40 => AstTokenType::IdentOther,
       41 => AstTokenType::Arrow,
       42 => AstTokenType::Hash,
+      43 => AstTokenType::At,
+      44 => AstTokenType::Dot,
       _ => AstTokenType::Unknown,
     }
   }

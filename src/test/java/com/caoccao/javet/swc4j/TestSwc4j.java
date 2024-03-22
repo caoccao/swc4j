@@ -129,6 +129,7 @@ public class TestSwc4j {
         parseAndAssert("測試", options, Swc4jAstTokenType.IdentOther, "測試", 0, 2);
         parseAndAssert("() => {}", options, Swc4jAstTokenType.Arrow, "=>", 3, 5, 2, 5);
         parseAndAssert("class A { #abc; }", options, Swc4jAstTokenType.Hash, "#", 10, 11, 3, 7);
+        parseAndAssert("a.b", options, Swc4jAstTokenType.Dot, ".", 1, 2, 1, 3);
     }
 
     @Test

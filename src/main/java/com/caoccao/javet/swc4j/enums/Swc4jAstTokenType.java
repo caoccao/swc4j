@@ -65,6 +65,8 @@ public enum Swc4jAstTokenType {
     // Operator
     Arrow(41, "=>", false, true),
     Hash(42, "#", false, true),
+    At(43, "@", false, true),
+    Dot(44, ".", false, true),
     ;
 
     private static final int LENGTH = values().length;
