@@ -130,6 +130,10 @@ public class TestSwc4j {
         parseAndAssert("() => {}", options, Swc4jAstTokenType.Arrow, "=>", 3, 5, 2, 5);
         parseAndAssert("class A { #abc; }", options, Swc4jAstTokenType.Hash, "#", 10, 11, 3, 7);
         parseAndAssert("a.b", options, Swc4jAstTokenType.Dot, ".", 1, 2, 1, 3);
+        parseAndAssert("[...a]", options, Swc4jAstTokenType.DotDotDot, "...", 1, 4, 1, 4);
+        parseAndAssert("!true", options, Swc4jAstTokenType.Bang, "!", 0, 1, 0, 2);
+        parseAndAssert("a()", options, Swc4jAstTokenType.LParen, "(", 1, 2, 1, 3);
+        parseAndAssert("a()", options, Swc4jAstTokenType.RParen, ")", 2, 3, 2, 3);
     }
 
     @Test

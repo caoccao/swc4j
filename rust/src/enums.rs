@@ -77,6 +77,10 @@ pub enum AstTokenType {
   Hash,       // 42
   At,         // 43
   Dot,        // 44
+  DotDotDot,  // 45
+  Bang,       // 46
+  LParen,     // 47
+  RParen,     // 48
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -126,6 +130,10 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::Hash => 42,
       AstTokenType::At => 43,
       AstTokenType::Dot => 44,
+      AstTokenType::DotDotDot => 45,
+      AstTokenType::Bang => 46,
+      AstTokenType::LParen => 47,
+      AstTokenType::RParen => 48,
       _ => 0,
     }
   }
@@ -175,6 +183,10 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       42 => AstTokenType::Hash,
       43 => AstTokenType::At,
       44 => AstTokenType::Dot,
+      45 => AstTokenType::DotDotDot,
+      46 => AstTokenType::Bang,
+      47 => AstTokenType::LParen,
+      48 => AstTokenType::RParen,
       _ => AstTokenType::Unknown,
     }
   }
