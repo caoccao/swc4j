@@ -394,6 +394,10 @@ pub fn token_and_spans_to_java_list<'local>(
             Token::Bang => java_ast_token_factory.create_generic_operator(env, AstTokenType::Bang, index_range),
             Token::LParen => java_ast_token_factory.create_generic_operator(env, AstTokenType::LParen, index_range),
             Token::RParen => java_ast_token_factory.create_generic_operator(env, AstTokenType::RParen, index_range),
+            Token::LBracket => java_ast_token_factory.create_generic_operator(env, AstTokenType::LBracket, index_range),
+            Token::RBracket => java_ast_token_factory.create_generic_operator(env, AstTokenType::RBracket, index_range),
+            Token::LBrace => java_ast_token_factory.create_generic_operator(env, AstTokenType::LBrace, index_range),
+            Token::RBrace => java_ast_token_factory.create_generic_operator(env, AstTokenType::RBrace, index_range),
             _ => java_ast_token_factory.create_unknown(env, &text, index_range),
           };
           java_array_list.add(env, &list, &ast_token);

@@ -81,6 +81,10 @@ pub enum AstTokenType {
   Bang,       // 46
   LParen,     // 47
   RParen,     // 48
+  LBracket,   // 49
+  RBracket,   // 50
+  LBrace,     // 51
+  RBrace,     // 52
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -134,6 +138,10 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::Bang => 46,
       AstTokenType::LParen => 47,
       AstTokenType::RParen => 48,
+      AstTokenType::LBracket => 49,
+      AstTokenType::RBracket => 50,
+      AstTokenType::LBrace => 51,
+      AstTokenType::RBrace => 52,
       _ => 0,
     }
   }
@@ -187,6 +195,10 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       46 => AstTokenType::Bang,
       47 => AstTokenType::LParen,
       48 => AstTokenType::RParen,
+      49 => AstTokenType::LBracket,
+      50 => AstTokenType::RBracket,
+      51 => AstTokenType::LBrace,
+      52 => AstTokenType::RBrace,
       _ => AstTokenType::Unknown,
     }
   }
