@@ -20,7 +20,8 @@ use jni::signature::ReturnType;
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
-use deno_ast::swc::parser::token::Keyword;
+use deno_ast::swc::ast::AssignOp;
+use deno_ast::swc::parser::token::{BinOpToken, Keyword, Token};
 pub use deno_ast::{ImportsNotUsedAsValues, MediaType};
 
 use crate::jni_utils;
@@ -354,8 +355,84 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
 }
 
 impl AstTokenType {
-  pub fn parse_by_keyword(keyword: &Keyword) -> AstTokenType {
-    match keyword {
+  pub fn parse_by_assign_operator(token: &AssignOp) -> AstTokenType {
+    match token {
+      AssignOp::Assign => AstTokenType::Assign,
+      AssignOp::AddAssign => AstTokenType::AddAssign,
+      AssignOp::SubAssign => AstTokenType::SubAssign,
+      AssignOp::MulAssign => AstTokenType::MulAssign,
+      AssignOp::DivAssign => AstTokenType::DivAssign,
+      AssignOp::ModAssign => AstTokenType::ModAssign,
+      AssignOp::LShiftAssign => AstTokenType::LShiftAssign,
+      AssignOp::RShiftAssign => AstTokenType::RShiftAssign,
+      AssignOp::ZeroFillRShiftAssign => AstTokenType::ZeroFillRShiftAssign,
+      AssignOp::BitOrAssign => AstTokenType::BitOrAssign,
+      AssignOp::BitXorAssign => AstTokenType::BitXorAssign,
+      AssignOp::BitAndAssign => AstTokenType::BitAndAssign,
+      AssignOp::ExpAssign => AstTokenType::ExpAssign,
+      AssignOp::AndAssign => AstTokenType::AndAssign,
+      AssignOp::OrAssign => AstTokenType::OrAssign,
+      AssignOp::NullishAssign => AstTokenType::NullishAssign,
+    }
+  }
+
+  pub fn parse_by_binary_operator(token: &BinOpToken) -> AstTokenType {
+    match token {
+      BinOpToken::EqEq => AstTokenType::EqEq,
+      BinOpToken::NotEq => AstTokenType::NotEq,
+      BinOpToken::EqEqEq => AstTokenType::EqEqEq,
+      BinOpToken::NotEqEq => AstTokenType::NotEqEq,
+      BinOpToken::Lt => AstTokenType::Lt,
+      BinOpToken::LtEq => AstTokenType::LtEq,
+      BinOpToken::Gt => AstTokenType::Gt,
+      BinOpToken::GtEq => AstTokenType::GtEq,
+      BinOpToken::LShift => AstTokenType::LShift,
+      BinOpToken::RShift => AstTokenType::RShift,
+      BinOpToken::ZeroFillRShift => AstTokenType::ZeroFillRShift,
+      BinOpToken::Add => AstTokenType::Add,
+      BinOpToken::Sub => AstTokenType::Sub,
+      BinOpToken::Mul => AstTokenType::Mul,
+      BinOpToken::Div => AstTokenType::Div,
+      BinOpToken::Mod => AstTokenType::Mod,
+      BinOpToken::BitOr => AstTokenType::BitOr,
+      BinOpToken::BitXor => AstTokenType::BitXor,
+      BinOpToken::BitAnd => AstTokenType::BitAnd,
+      BinOpToken::Exp => AstTokenType::Exp,
+      BinOpToken::LogicalOr => AstTokenType::LogicalOr,
+      BinOpToken::LogicalAnd => AstTokenType::LogicalAnd,
+      BinOpToken::NullishCoalescing => AstTokenType::NullishCoalescing,
+    }
+  }
+
+  pub fn parse_by_generic_operator(token: &Token) -> AstTokenType {
+    match token {
+      Token::Arrow => AstTokenType::Arrow,
+      Token::Hash => AstTokenType::Hash,
+      Token::At => AstTokenType::At,
+      Token::Dot => AstTokenType::Dot,
+      Token::DotDotDot => AstTokenType::DotDotDot,
+      Token::Bang => AstTokenType::Bang,
+      Token::LParen => AstTokenType::LParen,
+      Token::RParen => AstTokenType::RParen,
+      Token::LBracket => AstTokenType::LBracket,
+      Token::RBracket => AstTokenType::RBracket,
+      Token::LBrace => AstTokenType::LBrace,
+      Token::RBrace => AstTokenType::RBrace,
+      Token::Semi => AstTokenType::Semi,
+      Token::Comma => AstTokenType::Comma,
+      Token::BackQuote => AstTokenType::BackQuote,
+      Token::Colon => AstTokenType::Colon,
+      Token::DollarLBrace => AstTokenType::DollarLBrace,
+      Token::QuestionMark => AstTokenType::QuestionMark,
+      Token::PlusPlus => AstTokenType::PlusPlus,
+      Token::MinusMinus => AstTokenType::MinusMinus,
+      Token::Tilde => AstTokenType::Tilde,
+      _ => AstTokenType::Unknown,
+    }
+  }
+
+  pub fn parse_by_keyword(token: &Keyword) -> AstTokenType {
+    match token {
       Keyword::Await => AstTokenType::Await,
       Keyword::Break => AstTokenType::Break,
       Keyword::Case => AstTokenType::Case,
