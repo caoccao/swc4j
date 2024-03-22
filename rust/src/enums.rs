@@ -70,11 +70,11 @@ pub enum AstTokenType {
   With,       // 34
   Yield,      // 35
   // Word
-  Null,         // 36
-  True,         // 37
-  False,        // 38
-  IdentKnown,   // 39
-  IdentOther,   // 40
+  Null,       // 36
+  True,       // 37
+  False,      // 38
+  IdentKnown, // 39
+  IdentOther, // 40
   // Operator - Generic
   Arrow,        // 41
   Hash,         // 42
@@ -97,6 +97,30 @@ pub enum AstTokenType {
   PlusPlus,     // 59
   MinusMinus,   // 60
   Tilde,        // 61
+  // Operator - Binary
+  EqEq,              // 62
+  NotEq,             // 63
+  EqEqEq,            // 64
+  NotEqEq,           // 65
+  Lt,                // 66
+  LtEq,              // 67
+  Gt,                // 68
+  GtEq,              // 69
+  LShift,            // 70
+  RShift,            // 71
+  ZeroFillRShift,    // 72
+  Add,               // 73
+  Sub,               // 74
+  Mul,               // 75
+  Div,               // 76
+  Mod,               // 77
+  BitOr,             // 78
+  BitXor,            // 79
+  BitAnd,            // 80
+  Exp,               // 81
+  LogicalOr,         // 82
+  LogicalAnd,        // 83
+  NullishCoalescing, // 84
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -163,6 +187,29 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::PlusPlus => 59,
       AstTokenType::MinusMinus => 60,
       AstTokenType::Tilde => 61,
+      AstTokenType::EqEq => 62,
+      AstTokenType::NotEq => 63,
+      AstTokenType::EqEqEq => 64,
+      AstTokenType::NotEqEq => 65,
+      AstTokenType::Lt => 66,
+      AstTokenType::LtEq => 67,
+      AstTokenType::Gt => 68,
+      AstTokenType::GtEq => 69,
+      AstTokenType::LShift => 70,
+      AstTokenType::RShift => 71,
+      AstTokenType::ZeroFillRShift => 72,
+      AstTokenType::Add => 73,
+      AstTokenType::Sub => 74,
+      AstTokenType::Mul => 75,
+      AstTokenType::Div => 76,
+      AstTokenType::Mod => 77,
+      AstTokenType::BitOr => 78,
+      AstTokenType::BitXor => 79,
+      AstTokenType::BitAnd => 80,
+      AstTokenType::Exp => 81,
+      AstTokenType::LogicalOr => 82,
+      AstTokenType::LogicalAnd => 83,
+      AstTokenType::NullishCoalescing => 84,
       _ => 0,
     }
   }
@@ -229,6 +276,29 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       59 => AstTokenType::PlusPlus,
       60 => AstTokenType::MinusMinus,
       61 => AstTokenType::Tilde,
+      62 => AstTokenType::EqEq,
+      63 => AstTokenType::NotEq,
+      64 => AstTokenType::EqEqEq,
+      65 => AstTokenType::NotEqEq,
+      66 => AstTokenType::Lt,
+      67 => AstTokenType::LtEq,
+      68 => AstTokenType::Gt,
+      69 => AstTokenType::GtEq,
+      70 => AstTokenType::LShift,
+      71 => AstTokenType::RShift,
+      72 => AstTokenType::ZeroFillRShift,
+      73 => AstTokenType::Add,
+      74 => AstTokenType::Sub,
+      75 => AstTokenType::Mul,
+      76 => AstTokenType::Div,
+      77 => AstTokenType::Mod,
+      78 => AstTokenType::BitOr,
+      79 => AstTokenType::BitXor,
+      80 => AstTokenType::BitAnd,
+      81 => AstTokenType::Exp,
+      82 => AstTokenType::LogicalOr,
+      83 => AstTokenType::LogicalAnd,
+      84 => AstTokenType::NullishCoalescing,
       _ => AstTokenType::Unknown,
     }
   }

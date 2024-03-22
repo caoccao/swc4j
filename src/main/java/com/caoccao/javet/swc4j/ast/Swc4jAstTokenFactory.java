@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast;
 
+import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenBinaryOperator;
 import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenGenericOperator;
 import com.caoccao.javet.swc4j.ast.words.*;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
@@ -27,6 +28,21 @@ import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
  */
 public final class Swc4jAstTokenFactory {
     private Swc4jAstTokenFactory() {
+    }
+
+    /**
+     * Create ast token binary operator.
+     *
+     * @param type           the type
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
+     * @return the ast token binary operator
+     * @since 0.2.0
+     */
+    public static Swc4jAstTokenBinaryOperator createBinaryOperator(
+            Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenBinaryOperator(type, startPosition, endPosition, lineBreakAhead);
     }
 
     /**

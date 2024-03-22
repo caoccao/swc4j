@@ -46,7 +46,7 @@ public class Swc4jAstTokenGenericOperator extends BaseSwc4jAstToken {
             Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
         super(startPosition, endPosition, lineBreakAhead);
         AssertionUtils.notNull(type, "Ast token type");
-        AssertionUtils.notTrue(type.isOperator(), "Operator is expected");
+        AssertionUtils.notTrue(type.getSubType().isGenericOperator(), "Generic operator is expected");
         this.type = type;
     }
 

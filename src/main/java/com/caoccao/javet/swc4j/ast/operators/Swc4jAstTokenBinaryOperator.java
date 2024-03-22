@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.words;
+package com.caoccao.javet.swc4j.ast.operators;
 
 import com.caoccao.javet.swc4j.ast.BaseSwc4jAstToken;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 /**
- * The type Swc4j ast token keyword.
+ * The type Swc4j ast token binary operator.
  *
  * @since 0.2.0
  */
-public class Swc4jAstTokenKeyword extends BaseSwc4jAstToken {
+public class Swc4jAstTokenBinaryOperator extends BaseSwc4jAstToken {
     /**
      * The Type.
      *
@@ -34,7 +34,7 @@ public class Swc4jAstTokenKeyword extends BaseSwc4jAstToken {
     protected final Swc4jAstTokenType type;
 
     /**
-     * Instantiates a new Swc4j ast token keyword.
+     * Instantiates a new Swc4j ast token binary operator.
      *
      * @param type           the type
      * @param startPosition  the start position
@@ -42,10 +42,11 @@ public class Swc4jAstTokenKeyword extends BaseSwc4jAstToken {
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstTokenKeyword(Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
+    public Swc4jAstTokenBinaryOperator(
+            Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
         super(startPosition, endPosition, lineBreakAhead);
         AssertionUtils.notNull(type, "Ast token type");
-        AssertionUtils.notTrue(type.getSubType().isKeyword(), "Keyword is expected");
+        AssertionUtils.notTrue(type.getSubType().isBinaryOperator(), "Binary operator is expected");
         this.type = type;
     }
 

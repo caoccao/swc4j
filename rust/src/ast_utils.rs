@@ -23,7 +23,7 @@ use jni::JNIEnv;
 use deno_ast::swc::{
   atoms::Atom,
   common::source_map::Pos,
-  parser::token::{IdentLike, Token, TokenAndSpan, Word},
+  parser::token::{BinOpToken, IdentLike, Token, TokenAndSpan, Word},
 };
 
 use crate::jni_utils::JAVA_ARRAY_LIST;
@@ -37,6 +37,7 @@ use std::sync::Arc;
 pub struct JavaAstTokenFactory {
   #[allow(dead_code)]
   class: GlobalRef,
+  method_create_binary_operator: JStaticMethodID,
   method_create_false: JStaticMethodID,
   method_create_generic_operator: JStaticMethodID,
   method_create_ident_known: JStaticMethodID,
@@ -57,6 +58,13 @@ impl JavaAstTokenFactory {
     let class = env
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jAstTokenFactory");
+    let method_create_binary_operator = env
+      .get_static_method_id(
+        &class,
+        "createBinaryOperator",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/ast/operators/Swc4jAstTokenBinaryOperator;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createBinaryOperator");
     let method_create_false = env
       .get_static_method_id(
         &class,
@@ -115,6 +123,7 @@ impl JavaAstTokenFactory {
       .expect("Couldn't find method Swc4jAstTokenFactory.createUnknown");
     JavaAstTokenFactory {
       class,
+      method_create_binary_operator,
       method_create_false,
       method_create_generic_operator,
       method_create_ident_known,
@@ -123,6 +132,37 @@ impl JavaAstTokenFactory {
       method_create_null,
       method_create_true,
       method_create_unknown,
+    }
+  }
+
+  pub fn create_binary_operator<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    ast_token_type: AstTokenType,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_token_type = unsafe { JAVA_AST_TOKEN_TYPE.as_ref().unwrap() };
+    let ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
+    unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_binary_operator,
+          ReturnType::Object,
+          &[ast_token_type, start_position, end_position, line_break_ahead],
+        )
+        .expect("Couldn't create Swc4jAstTokenBinaryOperator")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenBinaryOperator")
     }
   }
 
@@ -497,27 +537,122 @@ pub fn token_and_spans_to_java_list<'local>(
             Token::Comma => {
               java_ast_token_factory.create_generic_operator(env, AstTokenType::Comma, index_range, line_break_ahead)
             }
-            Token::BackQuote => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::BackQuote, index_range, line_break_ahead)
-            }
+            Token::BackQuote => java_ast_token_factory.create_generic_operator(
+              env,
+              AstTokenType::BackQuote,
+              index_range,
+              line_break_ahead,
+            ),
             Token::Colon => {
               java_ast_token_factory.create_generic_operator(env, AstTokenType::Colon, index_range, line_break_ahead)
             }
-            Token::DollarLBrace => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::DollarLBrace, index_range, line_break_ahead)
-            }
-            Token::QuestionMark => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::QuestionMark, index_range, line_break_ahead)
-            }
+            Token::DollarLBrace => java_ast_token_factory.create_generic_operator(
+              env,
+              AstTokenType::DollarLBrace,
+              index_range,
+              line_break_ahead,
+            ),
+            Token::QuestionMark => java_ast_token_factory.create_generic_operator(
+              env,
+              AstTokenType::QuestionMark,
+              index_range,
+              line_break_ahead,
+            ),
             Token::PlusPlus => {
               java_ast_token_factory.create_generic_operator(env, AstTokenType::PlusPlus, index_range, line_break_ahead)
             }
-            Token::MinusMinus => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::MinusMinus, index_range, line_break_ahead)
-            }
+            Token::MinusMinus => java_ast_token_factory.create_generic_operator(
+              env,
+              AstTokenType::MinusMinus,
+              index_range,
+              line_break_ahead,
+            ),
             Token::Tilde => {
               java_ast_token_factory.create_generic_operator(env, AstTokenType::Tilde, index_range, line_break_ahead)
             }
+            Token::BinOp(bin_op) => match bin_op {
+              BinOpToken::EqEq => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::EqEq, index_range, line_break_ahead)
+              }
+              BinOpToken::NotEq => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::NotEq, index_range, line_break_ahead)
+              }
+              BinOpToken::EqEqEq => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::EqEqEq, index_range, line_break_ahead)
+              }
+              BinOpToken::NotEqEq => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::NotEqEq, index_range, line_break_ahead)
+              }
+              BinOpToken::Lt => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::Lt, index_range, line_break_ahead)
+              }
+              BinOpToken::LtEq => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::LtEq, index_range, line_break_ahead)
+              }
+              BinOpToken::Gt => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::Gt, index_range, line_break_ahead)
+              }
+              BinOpToken::GtEq => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::GtEq, index_range, line_break_ahead)
+              }
+              BinOpToken::LShift => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::LShift, index_range, line_break_ahead)
+              }
+              BinOpToken::RShift => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::RShift, index_range, line_break_ahead)
+              }
+              BinOpToken::ZeroFillRShift => java_ast_token_factory.create_binary_operator(
+                env,
+                AstTokenType::ZeroFillRShift,
+                index_range,
+                line_break_ahead,
+              ),
+              BinOpToken::Add => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::Add, index_range, line_break_ahead)
+              }
+              BinOpToken::Sub => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::Sub, index_range, line_break_ahead)
+              }
+              BinOpToken::Mul => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::Mul, index_range, line_break_ahead)
+              }
+              BinOpToken::Div => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::Div, index_range, line_break_ahead)
+              }
+              BinOpToken::Mod => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::Mod, index_range, line_break_ahead)
+              }
+              BinOpToken::BitOr => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::BitOr, index_range, line_break_ahead)
+              }
+              BinOpToken::BitXor => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::BitXor, index_range, line_break_ahead)
+              }
+              BinOpToken::BitAnd => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::BitAnd, index_range, line_break_ahead)
+              }
+              BinOpToken::Exp => {
+                java_ast_token_factory.create_binary_operator(env, AstTokenType::Exp, index_range, line_break_ahead)
+              }
+              BinOpToken::LogicalOr => java_ast_token_factory.create_binary_operator(
+                env,
+                AstTokenType::LogicalOr,
+                index_range,
+                line_break_ahead,
+              ),
+              BinOpToken::LogicalAnd => java_ast_token_factory.create_binary_operator(
+                env,
+                AstTokenType::LogicalAnd,
+                index_range,
+                line_break_ahead,
+              ),
+              BinOpToken::NullishCoalescing => java_ast_token_factory.create_binary_operator(
+                env,
+                AstTokenType::NullishCoalescing,
+                index_range,
+                line_break_ahead,
+              ),
+            },
             _ => java_ast_token_factory.create_unknown(env, &text, index_range, line_break_ahead),
           };
           java_array_list.add(env, &list, &ast_token);

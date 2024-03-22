@@ -113,13 +113,14 @@ public class TestSwc4j {
             assertNotNull(output);
             assertTrue(output.isModule());
             assertFalse(output.isScript());
-            assertNotNull(output.getTokens());
-            assertEquals(18, output.getTokens().size());
-            assertEquals(Swc4jAstTokenType.Function, output.getTokens().get(0).getType());
-            assertTrue(output.getTokens().get(0).isLineBreakAhead());
-            assertEquals(Swc4jAstTokenType.Return, output.getTokens().get(12).getType());
-            assertFalse(output.getTokens().get(12).isLineBreakAhead());
-            output.getTokens().forEach(token ->
+            List<BaseSwc4jAstToken> tokens = output.getTokens();
+            assertNotNull(tokens);
+            assertEquals(18, tokens.size());
+            assertEquals(Swc4jAstTokenType.Function, tokens.get(0).getType());
+            assertTrue(tokens.get(0).isLineBreakAhead());
+            assertEquals(Swc4jAstTokenType.Return, tokens.get(12).getType());
+            assertFalse(tokens.get(12).isLineBreakAhead());
+            tokens.forEach(token ->
                     assertEquals(
                             code.substring(token.getStartPosition(), token.getEndPosition()),
                             token.getText()));
@@ -129,6 +130,7 @@ public class TestSwc4j {
         parseAndAssert("false", options, Swc4jAstTokenType.False, "false", 0, 5);
         parseAndAssert("as", options, Swc4jAstTokenType.IdentKnown, "as", 0, 2);
         parseAndAssert("測試", options, Swc4jAstTokenType.IdentOther, "測試", 0, 2);
+        // Operator - Generic
         parseAndAssert("() => {}", options, Swc4jAstTokenType.Arrow, "=>", 3, 5, 2, 5);
         parseAndAssert("class A { #abc; }", options, Swc4jAstTokenType.Hash, "#", 10, 11, 3, 7);
         parseAndAssert("a.b", options, Swc4jAstTokenType.Dot, ".", 1, 2, 1, 3);
@@ -149,6 +151,30 @@ public class TestSwc4j {
         parseAndAssert("a++", options, Swc4jAstTokenType.PlusPlus, "++", 1, 3, 1, 2);
         parseAndAssert("a--", options, Swc4jAstTokenType.MinusMinus, "--", 1, 3, 1, 2);
         parseAndAssert("~true", options, Swc4jAstTokenType.Tilde, "~", 0, 1, 0, 2);
+        // Operator - Binary
+        parseAndAssert("1 == 2", options, Swc4jAstTokenType.EqEq, "==", 2, 4, 1, 3);
+        parseAndAssert("1 != 2", options, Swc4jAstTokenType.NotEq, "!=", 2, 4, 1, 3);
+        parseAndAssert("1 === 2", options, Swc4jAstTokenType.EqEqEq, "===", 2, 5, 1, 3);
+        parseAndAssert("1 !== 2", options, Swc4jAstTokenType.NotEqEq, "!==", 2, 5, 1, 3);
+        parseAndAssert("1 < 2", options, Swc4jAstTokenType.Lt, "<", 2, 3, 1, 3);
+        parseAndAssert("1 <= 2", options, Swc4jAstTokenType.LtEq, "<=", 2, 4, 1, 3);
+        parseAndAssert("1 > 2", options, Swc4jAstTokenType.Gt, ">", 2, 3, 1, 3);
+        parseAndAssert("1 >= 2", options, Swc4jAstTokenType.GtEq, ">=", 2, 4, 1, 3);
+        parseAndAssert("1 << 2", options, Swc4jAstTokenType.LShift, "<<", 2, 4, 1, 3);
+        parseAndAssert("1 >> 2", options, Swc4jAstTokenType.RShift, ">>", 2, 4, 1, 3);
+        parseAndAssert("1 >>> 2", options, Swc4jAstTokenType.ZeroFillRShift, ">>>", 2, 5, 1, 3);
+        parseAndAssert("1 + 2", options, Swc4jAstTokenType.Add, "+", 2, 3, 1, 3);
+        parseAndAssert("1 - 2", options, Swc4jAstTokenType.Sub, "-", 2, 3, 1, 3);
+        parseAndAssert("1 * 2", options, Swc4jAstTokenType.Mul, "*", 2, 3, 1, 3);
+        parseAndAssert("1 / 2", options, Swc4jAstTokenType.Div, "/", 2, 3, 1, 3);
+        parseAndAssert("1 % 2", options, Swc4jAstTokenType.Mod, "%", 2, 3, 1, 3);
+        parseAndAssert("1 | 2", options, Swc4jAstTokenType.BitOr, "|", 2, 3, 1, 3);
+        parseAndAssert("1 ^ 2", options, Swc4jAstTokenType.BitXor, "^", 2, 3, 1, 3);
+        parseAndAssert("1 & 2", options, Swc4jAstTokenType.BitAnd, "&", 2, 3, 1, 3);
+        parseAndAssert("1 ** 2", options, Swc4jAstTokenType.Exp, "**", 2, 4, 1, 3);
+        parseAndAssert("1 || 2", options, Swc4jAstTokenType.LogicalOr, "||", 2, 4, 1, 3);
+        parseAndAssert("1 && 2", options, Swc4jAstTokenType.LogicalAnd, "&&", 2, 4, 1, 3);
+        parseAndAssert("1 ?? 2", options, Swc4jAstTokenType.NullishCoalescing, "??", 2, 4, 1, 3);
     }
 
     @Test
