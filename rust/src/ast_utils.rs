@@ -155,13 +155,16 @@ impl JavaAstTokenFactory {
     'local: 'a,
   {
     let java_ast_token_type = unsafe { JAVA_AST_TOKEN_TYPE.as_ref().unwrap() };
-    let ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
+    let java_ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
+    let ast_token_type = jvalue {
+      l: java_ast_token_type.as_raw(),
+    };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    unsafe {
+    let token = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -172,7 +175,11 @@ impl JavaAstTokenFactory {
         .expect("Couldn't create Swc4jAstTokenAssignOperator")
         .l()
         .expect("Couldn't convert Swc4jAstTokenAssignOperator")
-    }
+    };
+    env
+      .delete_local_ref(java_ast_token_type)
+      .expect("Couldn't delete local ast token type");
+    token
   }
 
   pub fn create_binary_operator<'local, 'a>(
@@ -186,13 +193,16 @@ impl JavaAstTokenFactory {
     'local: 'a,
   {
     let java_ast_token_type = unsafe { JAVA_AST_TOKEN_TYPE.as_ref().unwrap() };
-    let ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
+    let java_ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
+    let ast_token_type = jvalue {
+      l: java_ast_token_type.as_raw(),
+    };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    unsafe {
+    let token = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -203,7 +213,11 @@ impl JavaAstTokenFactory {
         .expect("Couldn't create Swc4jAstTokenBinaryOperator")
         .l()
         .expect("Couldn't convert Swc4jAstTokenBinaryOperator")
-    }
+    };
+    env
+      .delete_local_ref(java_ast_token_type)
+      .expect("Couldn't delete local ast token type");
+    token
   }
 
   pub fn create_false<'local, 'a>(
@@ -245,13 +259,16 @@ impl JavaAstTokenFactory {
     'local: 'a,
   {
     let java_ast_token_type = unsafe { JAVA_AST_TOKEN_TYPE.as_ref().unwrap() };
-    let ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
+    let java_ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
+    let ast_token_type = jvalue {
+      l: java_ast_token_type.as_raw(),
+    };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    unsafe {
+    let token = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -262,7 +279,11 @@ impl JavaAstTokenFactory {
         .expect("Couldn't create Swc4jAstTokenGenericOperator")
         .l()
         .expect("Couldn't convert Swc4jAstTokenGenericOperator")
-    }
+    };
+    env
+      .delete_local_ref(java_ast_token_type)
+      .expect("Couldn't delete local ast token type");
+    token
   }
 
   pub fn create_ident_known<'local, 'a>(
@@ -311,13 +332,16 @@ impl JavaAstTokenFactory {
     'local: 'a,
   {
     let java_ast_token_type = unsafe { JAVA_AST_TOKEN_TYPE.as_ref().unwrap() };
-    let ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
+    let java_ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
+    let ast_token_type = jvalue {
+      l: java_ast_token_type.as_raw(),
+    };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    unsafe {
+    let token = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -328,7 +352,11 @@ impl JavaAstTokenFactory {
         .expect("Couldn't create Swc4jAstTokenKeyword")
         .l()
         .expect("Couldn't convert Swc4jAstTokenKeyword")
-    }
+    };
+    env
+      .delete_local_ref(java_ast_token_type)
+      .expect("Couldn't delete local ast token type");
+    token
   }
 
   pub fn create_null<'local, 'a>(

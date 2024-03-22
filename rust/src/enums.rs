@@ -427,7 +427,7 @@ impl AstTokenType {
       Token::PlusPlus => AstTokenType::PlusPlus,
       Token::MinusMinus => AstTokenType::MinusMinus,
       Token::Tilde => AstTokenType::Tilde,
-      _ => AstTokenType::Unknown,
+      _ => panic!("Unexpected token {:?}", token),
     }
   }
 
@@ -507,13 +507,17 @@ impl JavaAstTokenType {
     AstTokenType::parse_by_id(id)
   }
 
-  pub fn parse<'local>(&self, env: &mut JNIEnv<'local>, id: i32) -> jvalue {
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
     let id = jvalue { i: id };
     unsafe {
       env
         .call_static_method_unchecked(&self.class, self.method_parse, ReturnType::Object, &[id])
         .expect("Object is expected")
-        .as_jni()
+        .l()
+        .expect("Couldn't convert to JObject")
     }
   }
 }
