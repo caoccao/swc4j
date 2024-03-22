@@ -32,61 +32,64 @@ pub trait IdentifiableEnum<T> {
 
 #[derive(Debug, Copy, Clone)]
 pub enum AstTokenType {
-  Unknown,    // 0
-  Await,      // 1
-  Break,      // 2
-  Case,       // 3
-  Catch,      // 4
-  Class,      // 5
-  Const,      // 6
-  Continue,   // 7
-  Debugger,   // 8
-  Default_,   // 9
-  Delete,     // 10
-  Do,         // 11
-  Else,       // 12
-  Export,     // 13
-  Extends,    // 14
-  Finally,    // 15
-  For,        // 16
-  Function,   // 17
-  If,         // 18
-  Import,     // 19
-  In,         // 20
-  InstanceOf, // 21
-  Let,        // 22
-  New,        // 23
-  Return,     // 24
-  Super,      // 25
-  Switch,     // 26
-  This,       // 27
-  Throw,      // 28
-  Try,        // 29
-  TypeOf,     // 30
-  Var,        // 31
-  Void,       // 32
-  While,      // 33
-  With,       // 34
-  Yield,      // 35
-  Null,       // 36
-  True,       // 37
-  False,      // 38
-  IdentKnown, // 39
-  IdentOther, // 40
-  Arrow,      // 41
-  Hash,       // 42
-  At,         // 43
-  Dot,        // 44
-  DotDotDot,  // 45
-  Bang,       // 46
-  LParen,     // 47
-  RParen,     // 48
-  LBracket,   // 49
-  RBracket,   // 50
-  LBrace,     // 51
-  RBrace,     // 52
-  Semi,       // 53
-  Comma,      // 54
+  Unknown,      // 0
+  Await,        // 1
+  Break,        // 2
+  Case,         // 3
+  Catch,        // 4
+  Class,        // 5
+  Const,        // 6
+  Continue,     // 7
+  Debugger,     // 8
+  Default_,     // 9
+  Delete,       // 10
+  Do,           // 11
+  Else,         // 12
+  Export,       // 13
+  Extends,      // 14
+  Finally,      // 15
+  For,          // 16
+  Function,     // 17
+  If,           // 18
+  Import,       // 19
+  In,           // 20
+  InstanceOf,   // 21
+  Let,          // 22
+  New,          // 23
+  Return,       // 24
+  Super,        // 25
+  Switch,       // 26
+  This,         // 27
+  Throw,        // 28
+  Try,          // 29
+  TypeOf,       // 30
+  Var,          // 31
+  Void,         // 32
+  While,        // 33
+  With,         // 34
+  Yield,        // 35
+  Null,         // 36
+  True,         // 37
+  False,        // 38
+  IdentKnown,   // 39
+  IdentOther,   // 40
+  Arrow,        // 41
+  Hash,         // 42
+  At,           // 43
+  Dot,          // 44
+  DotDotDot,    // 45
+  Bang,         // 46
+  LParen,       // 47
+  RParen,       // 48
+  LBracket,     // 49
+  RBracket,     // 50
+  LBrace,       // 51
+  RBrace,       // 52
+  Semi,         // 53
+  Comma,        // 54
+  BackQuote,    // 55
+  Colon,        // 56
+  DollarLBrace, // 57
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -146,6 +149,9 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::RBrace => 52,
       AstTokenType::Semi => 53,
       AstTokenType::Comma => 54,
+      AstTokenType::BackQuote => 55,
+      AstTokenType::Colon => 56,
+      AstTokenType::DollarLBrace => 57,
       _ => 0,
     }
   }
@@ -205,6 +211,9 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       52 => AstTokenType::RBrace,
       53 => AstTokenType::Semi,
       54 => AstTokenType::Comma,
+      55 => AstTokenType::BackQuote,
+      56 => AstTokenType::Colon,
+      57 => AstTokenType::DollarLBrace,
       _ => AstTokenType::Unknown,
     }
   }

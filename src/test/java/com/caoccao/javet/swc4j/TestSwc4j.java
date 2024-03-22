@@ -142,6 +142,9 @@ public class TestSwc4j {
         parseAndAssert("a={}", options, Swc4jAstTokenType.RBrace, "}", 3, 4, 3, 4);
         parseAndAssert(";", options, Swc4jAstTokenType.Semi, ";", 0, 1);
         parseAndAssert("let a, b;", options, Swc4jAstTokenType.Comma, ",", 5, 6, 2, 5);
+        parseAndAssert("``", options, Swc4jAstTokenType.BackQuote, "`", 0, 1, 0, 2);
+        parseAndAssert("a={b:c}", options, Swc4jAstTokenType.Colon, ":", 4, 5, 4, 7);
+        parseAndAssert("`${a}`", options, Swc4jAstTokenType.DollarLBrace, "${", 1, 3, 1, 5);
     }
 
     @Test

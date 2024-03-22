@@ -77,6 +77,9 @@ public enum Swc4jAstTokenType {
     RBrace(52, "}", false, true),
     Semi(53, ";", false, true),
     Comma(54, ",", false, true),
+    BackQuote(55, "`", false, true),
+    Colon(56, ":", false, true),
+    DollarLBrace(57, "${", false, true),
     ;
 
     private static final int LENGTH = values().length;
