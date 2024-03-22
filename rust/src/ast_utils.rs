@@ -569,84 +569,6 @@ pub fn token_and_spans_to_java_list<'local>(
                 }
               },
             },
-            Token::Arrow => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::Arrow, index_range, line_break_ahead)
-            }
-            Token::Hash => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::Hash, index_range, line_break_ahead)
-            }
-            Token::At => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::At, index_range, line_break_ahead)
-            }
-            Token::Dot => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::Dot, index_range, line_break_ahead)
-            }
-            Token::DotDotDot => java_ast_token_factory.create_generic_operator(
-              env,
-              AstTokenType::DotDotDot,
-              index_range,
-              line_break_ahead,
-            ),
-            Token::Bang => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::Bang, index_range, line_break_ahead)
-            }
-            Token::LParen => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::LParen, index_range, line_break_ahead)
-            }
-            Token::RParen => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::RParen, index_range, line_break_ahead)
-            }
-            Token::LBracket => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::LBracket, index_range, line_break_ahead)
-            }
-            Token::RBracket => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::RBracket, index_range, line_break_ahead)
-            }
-            Token::LBrace => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::LBrace, index_range, line_break_ahead)
-            }
-            Token::RBrace => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::RBrace, index_range, line_break_ahead)
-            }
-            Token::Semi => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::Semi, index_range, line_break_ahead)
-            }
-            Token::Comma => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::Comma, index_range, line_break_ahead)
-            }
-            Token::BackQuote => java_ast_token_factory.create_generic_operator(
-              env,
-              AstTokenType::BackQuote,
-              index_range,
-              line_break_ahead,
-            ),
-            Token::Colon => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::Colon, index_range, line_break_ahead)
-            }
-            Token::DollarLBrace => java_ast_token_factory.create_generic_operator(
-              env,
-              AstTokenType::DollarLBrace,
-              index_range,
-              line_break_ahead,
-            ),
-            Token::QuestionMark => java_ast_token_factory.create_generic_operator(
-              env,
-              AstTokenType::QuestionMark,
-              index_range,
-              line_break_ahead,
-            ),
-            Token::PlusPlus => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::PlusPlus, index_range, line_break_ahead)
-            }
-            Token::MinusMinus => java_ast_token_factory.create_generic_operator(
-              env,
-              AstTokenType::MinusMinus,
-              index_range,
-              line_break_ahead,
-            ),
-            Token::Tilde => {
-              java_ast_token_factory.create_generic_operator(env, AstTokenType::Tilde, index_range, line_break_ahead)
-            }
             Token::BinOp(bin_op) => java_ast_token_factory.create_binary_operator(
               env,
               AstTokenType::parse_by_binary_operator(bin_op),
@@ -659,7 +581,18 @@ pub fn token_and_spans_to_java_list<'local>(
               index_range,
               line_break_ahead,
             ),
-            _ => java_ast_token_factory.create_unknown(env, &text, index_range, line_break_ahead),
+            token => match &AstTokenType::parse_by_generic_operator(token) {
+              AstTokenType::Unknown => {
+                eprintln!("Unknown {:?}", token);
+                java_ast_token_factory.create_unknown(env, &text, index_range, line_break_ahead)
+              }
+              generic_operator_type => java_ast_token_factory.create_generic_operator(
+                env,
+                *generic_operator_type,
+                index_range,
+                line_break_ahead,
+              ),
+            },
           };
           java_array_list.add(env, &list, &ast_token);
           env

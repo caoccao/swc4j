@@ -427,7 +427,7 @@ impl AstTokenType {
       Token::PlusPlus => AstTokenType::PlusPlus,
       Token::MinusMinus => AstTokenType::MinusMinus,
       Token::Tilde => AstTokenType::Tilde,
-      _ => panic!("Unexpected token {:?}", token),
+      _ => AstTokenType::Unknown,
     }
   }
 
