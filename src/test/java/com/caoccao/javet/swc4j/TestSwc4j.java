@@ -175,6 +175,23 @@ public class TestSwc4j {
         parseAndAssert("1 || 2", options, Swc4jAstTokenType.LogicalOr, "||", 2, 4, 1, 3);
         parseAndAssert("1 && 2", options, Swc4jAstTokenType.LogicalAnd, "&&", 2, 4, 1, 3);
         parseAndAssert("1 ?? 2", options, Swc4jAstTokenType.NullishCoalescing, "??", 2, 4, 1, 3);
+        // Operator - Assign
+        parseAndAssert("1 = 2", options, Swc4jAstTokenType.Assign, "=", 2, 3, 1, 3);
+        parseAndAssert("1 += 2", options, Swc4jAstTokenType.AddAssign, "+=", 2, 4, 1, 3);
+        parseAndAssert("1 -= 2", options, Swc4jAstTokenType.SubAssign, "-=", 2, 4, 1, 3);
+        parseAndAssert("1 *= 2", options, Swc4jAstTokenType.MulAssign, "*=", 2, 4, 1, 3);
+        parseAndAssert("1 /= 2", options, Swc4jAstTokenType.DivAssign, "/=", 2, 4, 1, 3);
+        parseAndAssert("1 %= 2", options, Swc4jAstTokenType.ModAssign, "%=", 2, 4, 1, 3);
+        parseAndAssert("1 <<= 2", options, Swc4jAstTokenType.LShiftAssign, "<<=", 2, 5, 1, 3);
+        parseAndAssert("1 >>= 2", options, Swc4jAstTokenType.RShiftAssign, ">>=", 2, 5, 1, 3);
+        parseAndAssert("1 >>>= 2", options, Swc4jAstTokenType.ZeroFillRShiftAssign, ">>>=", 2, 6, 1, 3);
+        parseAndAssert("1 |= 2", options, Swc4jAstTokenType.BitOrAssign, "|=", 2, 4, 1, 3);
+        parseAndAssert("1 ^= 2", options, Swc4jAstTokenType.BitXorAssign, "^=", 2, 4, 1, 3);
+        parseAndAssert("1 &= 2", options, Swc4jAstTokenType.BitAndAssign, "&=", 2, 4, 1, 3);
+        parseAndAssert("1 **= 2", options, Swc4jAstTokenType.ExpAssign, "**=", 2, 5, 1, 3);
+        parseAndAssert("1 &&= 2", options, Swc4jAstTokenType.AndAssign, "&&=", 2, 5, 1, 3);
+        parseAndAssert("1 ||= 2", options, Swc4jAstTokenType.OrAssign, "||=", 2, 5, 1, 3);
+        parseAndAssert("1 ??= 2", options, Swc4jAstTokenType.NullishAssign, "??=", 2, 5, 1, 3);
     }
 
     @Test

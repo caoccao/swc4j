@@ -108,6 +108,23 @@ public enum Swc4jAstTokenType {
     LogicalOr(82, "||", Swc4jAstTokenSubType.BinaryOperator),
     LogicalAnd(83, "&&", Swc4jAstTokenSubType.BinaryOperator),
     NullishCoalescing(84, "??", Swc4jAstTokenSubType.BinaryOperator),
+    // Operator - Assign
+    Assign(85, "=", Swc4jAstTokenSubType.AssignOperator),
+    AddAssign(86, "+=", Swc4jAstTokenSubType.AssignOperator),
+    SubAssign(87, "-=", Swc4jAstTokenSubType.AssignOperator),
+    MulAssign(88, "*=", Swc4jAstTokenSubType.AssignOperator),
+    DivAssign(89, "/=", Swc4jAstTokenSubType.AssignOperator),
+    ModAssign(90, "%=", Swc4jAstTokenSubType.AssignOperator),
+    LShiftAssign(91, "<<=", Swc4jAstTokenSubType.AssignOperator),
+    RShiftAssign(92, ">>=", Swc4jAstTokenSubType.AssignOperator),
+    ZeroFillRShiftAssign(93, ">>>=", Swc4jAstTokenSubType.AssignOperator),
+    BitOrAssign(94, "|=", Swc4jAstTokenSubType.AssignOperator),
+    BitXorAssign(95, "^=", Swc4jAstTokenSubType.AssignOperator),
+    BitAndAssign(96, "&=", Swc4jAstTokenSubType.AssignOperator),
+    ExpAssign(97, "**=", Swc4jAstTokenSubType.AssignOperator),
+    AndAssign(98, "&&=", Swc4jAstTokenSubType.AssignOperator),
+    OrAssign(99, "||=", Swc4jAstTokenSubType.AssignOperator),
+    NullishAssign(100, "??=", Swc4jAstTokenSubType.AssignOperator),
     ;
 
     private static final int LENGTH = values().length;

@@ -21,6 +21,7 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use deno_ast::swc::{
+  ast::AssignOp,
   atoms::Atom,
   common::source_map::Pos,
   parser::token::{BinOpToken, IdentLike, Token, TokenAndSpan, Word},
@@ -37,6 +38,7 @@ use std::sync::Arc;
 pub struct JavaAstTokenFactory {
   #[allow(dead_code)]
   class: GlobalRef,
+  method_create_assign_operator: JStaticMethodID,
   method_create_binary_operator: JStaticMethodID,
   method_create_false: JStaticMethodID,
   method_create_generic_operator: JStaticMethodID,
@@ -58,6 +60,13 @@ impl JavaAstTokenFactory {
     let class = env
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jAstTokenFactory");
+    let method_create_assign_operator = env
+      .get_static_method_id(
+        &class,
+        "createAssignOperator",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/ast/operators/Swc4jAstTokenAssignOperator;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createAssignOperator");
     let method_create_binary_operator = env
       .get_static_method_id(
         &class,
@@ -123,6 +132,7 @@ impl JavaAstTokenFactory {
       .expect("Couldn't find method Swc4jAstTokenFactory.createUnknown");
     JavaAstTokenFactory {
       class,
+      method_create_assign_operator,
       method_create_binary_operator,
       method_create_false,
       method_create_generic_operator,
@@ -132,6 +142,37 @@ impl JavaAstTokenFactory {
       method_create_null,
       method_create_true,
       method_create_unknown,
+    }
+  }
+
+  pub fn create_assign_operator<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    ast_token_type: AstTokenType,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_token_type = unsafe { JAVA_AST_TOKEN_TYPE.as_ref().unwrap() };
+    let ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
+    unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_assign_operator,
+          ReturnType::Object,
+          &[ast_token_type, start_position, end_position, line_break_ahead],
+        )
+        .expect("Couldn't create Swc4jAstTokenAssignOperator")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenAssignOperator")
     }
   }
 
@@ -649,6 +690,101 @@ pub fn token_and_spans_to_java_list<'local>(
               BinOpToken::NullishCoalescing => java_ast_token_factory.create_binary_operator(
                 env,
                 AstTokenType::NullishCoalescing,
+                index_range,
+                line_break_ahead,
+              ),
+            },
+            Token::AssignOp(assign_op) => match assign_op {
+              AssignOp::Assign => {
+                java_ast_token_factory.create_assign_operator(env, AstTokenType::Assign, index_range, line_break_ahead)
+              }
+              AssignOp::AddAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::AddAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::SubAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::SubAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::MulAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::MulAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::DivAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::DivAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::ModAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::ModAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::LShiftAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::LShiftAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::RShiftAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::RShiftAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::ZeroFillRShiftAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::ZeroFillRShiftAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::BitOrAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::BitOrAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::BitXorAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::BitXorAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::BitAndAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::BitAndAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::ExpAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::ExpAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::AndAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::AndAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::OrAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::OrAssign,
+                index_range,
+                line_break_ahead,
+              ),
+              AssignOp::NullishAssign => java_ast_token_factory.create_assign_operator(
+                env,
+                AstTokenType::NullishAssign,
                 index_range,
                 line_break_ahead,
               ),

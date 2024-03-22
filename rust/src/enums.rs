@@ -121,6 +121,23 @@ pub enum AstTokenType {
   LogicalOr,         // 82
   LogicalAnd,        // 83
   NullishCoalescing, // 84
+  // Operator - Assign
+  Assign,               // 85
+  AddAssign,            // 86
+  SubAssign,            // 87
+  MulAssign,            // 88
+  DivAssign,            // 89
+  ModAssign,            // 90
+  LShiftAssign,         // 91
+  RShiftAssign,         // 92
+  ZeroFillRShiftAssign, // 93
+  BitOrAssign,          // 94
+  BitXorAssign,         // 95
+  BitAndAssign,         // 96
+  ExpAssign,            // 97
+  AndAssign,            // 98
+  OrAssign,             // 99
+  NullishAssign,        // 100
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -210,6 +227,22 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::LogicalOr => 82,
       AstTokenType::LogicalAnd => 83,
       AstTokenType::NullishCoalescing => 84,
+      AstTokenType::Assign => 85,
+      AstTokenType::AddAssign => 86,
+      AstTokenType::SubAssign => 87,
+      AstTokenType::MulAssign => 88,
+      AstTokenType::DivAssign => 89,
+      AstTokenType::ModAssign => 90,
+      AstTokenType::LShiftAssign => 91,
+      AstTokenType::RShiftAssign => 92,
+      AstTokenType::ZeroFillRShiftAssign => 93,
+      AstTokenType::BitOrAssign => 94,
+      AstTokenType::BitXorAssign => 95,
+      AstTokenType::BitAndAssign => 96,
+      AstTokenType::ExpAssign => 97,
+      AstTokenType::AndAssign => 98,
+      AstTokenType::OrAssign => 99,
+      AstTokenType::NullishAssign => 100,
       _ => 0,
     }
   }
@@ -299,6 +332,22 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       82 => AstTokenType::LogicalOr,
       83 => AstTokenType::LogicalAnd,
       84 => AstTokenType::NullishCoalescing,
+      85 => AstTokenType::Assign,
+      86 => AstTokenType::AddAssign,
+      87 => AstTokenType::SubAssign,
+      88 => AstTokenType::MulAssign,
+      89 => AstTokenType::DivAssign,
+      90 => AstTokenType::ModAssign,
+      91 => AstTokenType::LShiftAssign,
+      92 => AstTokenType::RShiftAssign,
+      93 => AstTokenType::ZeroFillRShiftAssign,
+      94 => AstTokenType::BitOrAssign,
+      95 => AstTokenType::BitXorAssign,
+      96 => AstTokenType::BitAndAssign,
+      97 => AstTokenType::ExpAssign,
+      98 => AstTokenType::AndAssign,
+      99 => AstTokenType::OrAssign,
+      100 => AstTokenType::NullishAssign,
       _ => AstTokenType::Unknown,
     }
   }
