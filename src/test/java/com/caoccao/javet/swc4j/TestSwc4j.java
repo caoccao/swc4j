@@ -116,7 +116,9 @@ public class TestSwc4j {
             assertNotNull(output.getTokens());
             assertEquals(18, output.getTokens().size());
             assertEquals(Swc4jAstTokenType.Function, output.getTokens().get(0).getType());
+            assertTrue(output.getTokens().get(0).isLineBreakAhead());
             assertEquals(Swc4jAstTokenType.Return, output.getTokens().get(12).getType());
+            assertFalse(output.getTokens().get(12).isLineBreakAhead());
             output.getTokens().forEach(token ->
                     assertEquals(
                             code.substring(token.getStartPosition(), token.getEndPosition()),

@@ -36,13 +36,15 @@ public class Swc4jAstTokenGenericOperator extends BaseSwc4jAstToken {
     /**
      * Instantiates a new Swc4j ast token generic operator.
      *
-     * @param type          the type
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param type           the type
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstTokenGenericOperator(Swc4jAstTokenType type, int startPosition, int endPosition) {
-        super(startPosition, endPosition);
+    public Swc4jAstTokenGenericOperator(
+            Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
+        super(startPosition, endPosition, lineBreakAhead);
         AssertionUtils.notNull(type, "Ast token type");
         AssertionUtils.notTrue(type.isOperator(), "Operator is expected");
         this.type = type;

@@ -28,12 +28,13 @@ public class Swc4jAstTokenTrue extends BaseSwc4jAstToken {
     /**
      * Instantiates a new Swc4j ast token true.
      *
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstTokenTrue(int startPosition, int endPosition) {
-        super(startPosition, endPosition);
+    public Swc4jAstTokenTrue(int startPosition, int endPosition, boolean lineBreakAhead) {
+        super(startPosition, endPosition, lineBreakAhead);
     }
 
     @Override

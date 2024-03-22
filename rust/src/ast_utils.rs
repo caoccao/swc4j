@@ -61,56 +61,56 @@ impl JavaAstTokenFactory {
       .get_static_method_id(
         &class,
         "createFalse",
-        "(II)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenFalse;",
+        "(IIZ)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenFalse;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createFalse");
     let method_create_generic_operator = env
       .get_static_method_id(
         &class,
         "createGenericOperator",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;II)Lcom/caoccao/javet/swc4j/ast/operators/Swc4jAstTokenGenericOperator;",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/ast/operators/Swc4jAstTokenGenericOperator;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createGenericOperator");
     let method_create_ident_known = env
       .get_static_method_id(
         &class,
         "createIdentKnown",
-        "(Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenIdentKnown;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenIdentKnown;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createIdentKnown");
     let method_create_keyword = env
       .get_static_method_id(
         &class,
         "createKeyword",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;II)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenKeyword;",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenKeyword;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createKeyword");
     let method_create_null = env
       .get_static_method_id(
         &class,
         "createNull",
-        "(II)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenNull;",
+        "(IIZ)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenNull;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createNull");
     let method_create_ident_other = env
       .get_static_method_id(
         &class,
         "createIdentOther",
-        "(Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenIdentOther;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenIdentOther;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createIdentOther");
     let method_create_true = env
       .get_static_method_id(
         &class,
         "createTrue",
-        "(II)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenTrue;",
+        "(IIZ)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenTrue;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createTrue");
     let method_create_unknown = env
       .get_static_method_id(
         &class,
         "createUnknown",
-        "(Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenUnknown;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenUnknown;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createUnknown");
     JavaAstTokenFactory {
@@ -126,19 +126,27 @@ impl JavaAstTokenFactory {
     }
   }
 
-  pub fn create_false<'local, 'a>(&self, env: &mut JNIEnv<'local>, range: Range<usize>) -> JObject<'a>
+  pub fn create_false<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
     unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
           self.method_create_false,
           ReturnType::Object,
-          &[start_position, end_position],
+          &[start_position, end_position, line_break_ahead],
         )
         .expect("Couldn't create Swc4jAstTokenFalse")
         .l()
@@ -151,6 +159,7 @@ impl JavaAstTokenFactory {
     env: &mut JNIEnv<'local>,
     ast_token_type: AstTokenType,
     range: Range<usize>,
+    line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
@@ -159,13 +168,16 @@ impl JavaAstTokenFactory {
     let ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
     unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
           self.method_create_generic_operator,
           ReturnType::Object,
-          &[ast_token_type, start_position, end_position],
+          &[ast_token_type, start_position, end_position, line_break_ahead],
         )
         .expect("Couldn't create Swc4jAstTokenGenericOperator")
         .l()
@@ -173,7 +185,13 @@ impl JavaAstTokenFactory {
     }
   }
 
-  pub fn create_ident_known<'local, 'a>(&self, env: &mut JNIEnv<'local>, text: &str, range: Range<usize>) -> JObject<'a>
+  pub fn create_ident_known<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    text: &str,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -182,13 +200,16 @@ impl JavaAstTokenFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
     unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
           self.method_create_ident_known,
           ReturnType::Object,
-          &[text, start_position, end_position],
+          &[text, start_position, end_position, line_break_ahead],
         )
         .expect("Couldn't create Swc4jAstTokenIdentKnown")
         .l()
@@ -201,6 +222,7 @@ impl JavaAstTokenFactory {
     env: &mut JNIEnv<'local>,
     ast_token_type: AstTokenType,
     range: Range<usize>,
+    line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
@@ -209,13 +231,16 @@ impl JavaAstTokenFactory {
     let ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
     unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
           self.method_create_keyword,
           ReturnType::Object,
-          &[ast_token_type, start_position, end_position],
+          &[ast_token_type, start_position, end_position, line_break_ahead],
         )
         .expect("Couldn't create Swc4jAstTokenKeyword")
         .l()
@@ -223,19 +248,27 @@ impl JavaAstTokenFactory {
     }
   }
 
-  pub fn create_null<'local, 'a>(&self, env: &mut JNIEnv<'local>, range: Range<usize>) -> JObject<'a>
+  pub fn create_null<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
     unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
           self.method_create_null,
           ReturnType::Object,
-          &[start_position, end_position],
+          &[start_position, end_position, line_break_ahead],
         )
         .expect("Couldn't create Swc4jAstTokenNull")
         .l()
@@ -243,7 +276,13 @@ impl JavaAstTokenFactory {
     }
   }
 
-  pub fn create_ident_other<'local, 'a>(&self, env: &mut JNIEnv<'local>, text: &str, range: Range<usize>) -> JObject<'a>
+  pub fn create_ident_other<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    text: &str,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -252,13 +291,16 @@ impl JavaAstTokenFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
     unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
           self.method_create_ident_other,
           ReturnType::Object,
-          &[text, start_position, end_position],
+          &[text, start_position, end_position, line_break_ahead],
         )
         .expect("Couldn't create Swc4jAstTokenIdentOther")
         .l()
@@ -266,19 +308,27 @@ impl JavaAstTokenFactory {
     }
   }
 
-  pub fn create_true<'local, 'a>(&self, env: &mut JNIEnv<'local>, range: Range<usize>) -> JObject<'a>
+  pub fn create_true<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
     unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
           self.method_create_true,
           ReturnType::Object,
-          &[start_position, end_position],
+          &[start_position, end_position, line_break_ahead],
         )
         .expect("Couldn't create Swc4jAstTokenTrue")
         .l()
@@ -286,7 +336,13 @@ impl JavaAstTokenFactory {
     }
   }
 
-  pub fn create_unknown<'local, 'a>(&self, env: &mut JNIEnv<'local>, text: &str, range: Range<usize>) -> JObject<'a>
+  pub fn create_unknown<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    text: &str,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -295,13 +351,16 @@ impl JavaAstTokenFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
     unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
           self.method_create_unknown,
           ReturnType::Object,
-          &[text, start_position, end_position],
+          &[text, start_position, end_position, line_break_ahead],
         )
         .expect("Couldn't create Swc4jAstTokenUnknown")
         .l()
@@ -362,6 +421,7 @@ pub fn token_and_spans_to_java_list<'local>(
             start: token_and_span.span.lo().to_usize() - 1,
             end: token_and_span.span.hi().to_usize() - 1,
           };
+          let line_break_ahead = token_and_span.had_line_break;
           let text = &source_text[byte_range.to_owned()];
           let index_range = Range {
             start: *byte_to_index_map
@@ -371,34 +431,67 @@ pub fn token_and_spans_to_java_list<'local>(
           };
           let ast_token = match &token_and_span.token {
             Token::Word(word) => match word {
-              Word::Keyword(keyword) => {
-                java_ast_token_factory.create_keyword(env, AstTokenType::parse_by_keyword(&keyword), index_range)
-              }
-              Word::Null => java_ast_token_factory.create_null(env, index_range),
-              Word::True => java_ast_token_factory.create_true(env, index_range),
-              Word::False => java_ast_token_factory.create_false(env, index_range),
+              Word::Keyword(keyword) => java_ast_token_factory.create_keyword(
+                env,
+                AstTokenType::parse_by_keyword(&keyword),
+                index_range,
+                line_break_ahead,
+              ),
+              Word::Null => java_ast_token_factory.create_null(env, index_range, line_break_ahead),
+              Word::True => java_ast_token_factory.create_true(env, index_range, line_break_ahead),
+              Word::False => java_ast_token_factory.create_false(env, index_range, line_break_ahead),
               Word::Ident(ident) => match ident {
-                IdentLike::Known(known_ident) => {
-                  java_ast_token_factory.create_ident_known(env, &Atom::from(*known_ident).as_str(), index_range)
-                }
+                IdentLike::Known(known_ident) => java_ast_token_factory.create_ident_known(
+                  env,
+                  &Atom::from(*known_ident).as_str(),
+                  index_range,
+                  line_break_ahead,
+                ),
                 IdentLike::Other(js_word) => {
-                  java_ast_token_factory.create_ident_other(env, &js_word.as_str(), index_range)
+                  java_ast_token_factory.create_ident_other(env, &js_word.as_str(), index_range, line_break_ahead)
                 }
               },
             },
-            Token::Arrow => java_ast_token_factory.create_generic_operator(env, AstTokenType::Arrow, index_range),
-            Token::Hash => java_ast_token_factory.create_generic_operator(env, AstTokenType::Hash, index_range),
-            Token::At => java_ast_token_factory.create_generic_operator(env, AstTokenType::At, index_range),
-            Token::Dot => java_ast_token_factory.create_generic_operator(env, AstTokenType::Dot, index_range),
-            Token::DotDotDot => java_ast_token_factory.create_generic_operator(env, AstTokenType::DotDotDot, index_range),
-            Token::Bang => java_ast_token_factory.create_generic_operator(env, AstTokenType::Bang, index_range),
-            Token::LParen => java_ast_token_factory.create_generic_operator(env, AstTokenType::LParen, index_range),
-            Token::RParen => java_ast_token_factory.create_generic_operator(env, AstTokenType::RParen, index_range),
-            Token::LBracket => java_ast_token_factory.create_generic_operator(env, AstTokenType::LBracket, index_range),
-            Token::RBracket => java_ast_token_factory.create_generic_operator(env, AstTokenType::RBracket, index_range),
-            Token::LBrace => java_ast_token_factory.create_generic_operator(env, AstTokenType::LBrace, index_range),
-            Token::RBrace => java_ast_token_factory.create_generic_operator(env, AstTokenType::RBrace, index_range),
-            _ => java_ast_token_factory.create_unknown(env, &text, index_range),
+            Token::Arrow => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::Arrow, index_range, line_break_ahead)
+            }
+            Token::Hash => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::Hash, index_range, line_break_ahead)
+            }
+            Token::At => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::At, index_range, line_break_ahead)
+            }
+            Token::Dot => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::Dot, index_range, line_break_ahead)
+            }
+            Token::DotDotDot => java_ast_token_factory.create_generic_operator(
+              env,
+              AstTokenType::DotDotDot,
+              index_range,
+              line_break_ahead,
+            ),
+            Token::Bang => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::Bang, index_range, line_break_ahead)
+            }
+            Token::LParen => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::LParen, index_range, line_break_ahead)
+            }
+            Token::RParen => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::RParen, index_range, line_break_ahead)
+            }
+            Token::LBracket => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::LBracket, index_range, line_break_ahead)
+            }
+            Token::RBracket => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::RBracket, index_range, line_break_ahead)
+            }
+            Token::LBrace => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::LBrace, index_range, line_break_ahead)
+            }
+            Token::RBrace => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::RBrace, index_range, line_break_ahead)
+            }
+            _ => java_ast_token_factory.create_unknown(env, &text, index_range, line_break_ahead),
           };
           java_array_list.add(env, &list, &ast_token);
         });

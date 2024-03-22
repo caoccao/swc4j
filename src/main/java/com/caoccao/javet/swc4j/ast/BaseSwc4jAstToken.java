@@ -32,6 +32,12 @@ public abstract class BaseSwc4jAstToken {
      */
     protected int endPosition;
     /**
+     * The Line break ahead.
+     *
+     * @since 0.2.0
+     */
+    protected boolean lineBreakAhead;
+    /**
      * The Start position of the token.
      * It is zero-based.
      *
@@ -42,12 +48,14 @@ public abstract class BaseSwc4jAstToken {
     /**
      * Instantiates a new Base swc4j ast token.
      *
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public BaseSwc4jAstToken(int startPosition, int endPosition) {
+    public BaseSwc4jAstToken(int startPosition, int endPosition, boolean lineBreakAhead) {
         this.endPosition = endPosition;
+        this.lineBreakAhead = lineBreakAhead;
         this.startPosition = startPosition;
     }
 
@@ -88,6 +96,16 @@ public abstract class BaseSwc4jAstToken {
     public abstract Swc4jAstTokenType getType();
 
     /**
+     * Is line break ahead.
+     *
+     * @return true : has a line break before the token, false : has no line break before the token
+     * @since 0.2.0
+     */
+    public boolean isLineBreakAhead() {
+        return lineBreakAhead;
+    }
+
+    /**
      * Sets end position.
      *
      * @param endPosition the end position
@@ -95,6 +113,16 @@ public abstract class BaseSwc4jAstToken {
      */
     public void setEndPosition(int endPosition) {
         this.endPosition = endPosition;
+    }
+
+    /**
+     * Sets line break ahead.
+     *
+     * @param lineBreakAhead the line break ahead
+     * @since 0.2.0
+     */
+    public void setLineBreakAhead(boolean lineBreakAhead) {
+        this.lineBreakAhead = lineBreakAhead;
     }
 
     /**

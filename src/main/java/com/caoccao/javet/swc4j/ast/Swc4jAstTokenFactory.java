@@ -32,101 +32,117 @@ public final class Swc4jAstTokenFactory {
     /**
      * Create ast token false.
      *
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @return the ast token false
      * @since 0.2.0
      */
-    public static Swc4jAstTokenFalse createFalse(int startPosition, int endPosition) {
-        return new Swc4jAstTokenFalse(startPosition, endPosition);
+    public static Swc4jAstTokenFalse createFalse(
+            int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenFalse(startPosition, endPosition, lineBreakAhead);
     }
 
     /**
      * Create ast token generic operator.
      *
-     * @param type          the type
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param type           the type
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @return the ast token generic operator
      * @since 0.2.0
      */
-    public static Swc4jAstTokenGenericOperator createGenericOperator(Swc4jAstTokenType type, int startPosition, int endPosition) {
-        return new Swc4jAstTokenGenericOperator(type, startPosition, endPosition);
+    public static Swc4jAstTokenGenericOperator createGenericOperator(
+            Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenGenericOperator(type, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
      * Create ast token ident known.
      *
-     * @param text          the text
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param text           the text
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @return the ast token ident known
      * @since 0.2.0
      */
-    public static Swc4jAstTokenIdentKnown createIdentKnown(String text, int startPosition, int endPosition) {
-        return new Swc4jAstTokenIdentKnown(text, startPosition, endPosition);
+    public static Swc4jAstTokenIdentKnown createIdentKnown(
+            String text, int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenIdentKnown(text, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
      * Create ast token ident other.
      *
-     * @param text          the text
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param text           the text
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @return the ast token ident other
      * @since 0.2.0
      */
-    public static Swc4jAstTokenIdentOther createIdentOther(String text, int startPosition, int endPosition) {
-        return new Swc4jAstTokenIdentOther(text, startPosition, endPosition);
+    public static Swc4jAstTokenIdentOther createIdentOther(
+            String text, int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenIdentOther(text, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
      * Create ast token keyword.
      *
-     * @param type          the type
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param type           the type
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @return the ast token keyword
      * @since 0.2.0
      */
-    public static Swc4jAstTokenKeyword createKeyword(Swc4jAstTokenType type, int startPosition, int endPosition) {
-        return new Swc4jAstTokenKeyword(type, startPosition, endPosition);
+    public static Swc4jAstTokenKeyword createKeyword(
+            Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenKeyword(type, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
      * Create ast token null.
      *
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @return the ast token null
      * @since 0.2.0
      */
-    public static Swc4jAstTokenNull createNull(int startPosition, int endPosition) {
-        return new Swc4jAstTokenNull(startPosition, endPosition);
+    public static Swc4jAstTokenNull createNull(
+            int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenNull(startPosition, endPosition, lineBreakAhead);
     }
 
     /**
      * Create ast token true.
      *
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @return the ast token true
      * @since 0.2.0
      */
-    public static Swc4jAstTokenTrue createTrue(int startPosition, int endPosition) {
-        return new Swc4jAstTokenTrue(startPosition, endPosition);
+    public static Swc4jAstTokenTrue createTrue(
+            int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenTrue(startPosition, endPosition, lineBreakAhead);
     }
 
     /**
      * Create ast token unknown.
      *
-     * @param text          the text
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param text           the text
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @return the ast token unknown
      * @since 0.2.0
      */
-    public static Swc4jAstTokenUnknown createUnknown(String text, int startPosition, int endPosition) {
-        return new Swc4jAstTokenUnknown(text, startPosition, endPosition);
+    public static Swc4jAstTokenUnknown createUnknown(
+            String text, int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenUnknown(text, startPosition, endPosition, lineBreakAhead);
     }
 }

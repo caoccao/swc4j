@@ -28,13 +28,14 @@ public class Swc4jAstTokenIdentOther extends BaseSwc4jAstTokenText {
     /**
      * Instantiates a new Swc4j ast token ident other.
      *
-     * @param text          the text
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param text           the text
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstTokenIdentOther(String text, int startPosition, int endPosition) {
-        super(text, startPosition, endPosition);
+    public Swc4jAstTokenIdentOther(String text, int startPosition, int endPosition, boolean lineBreakAhead) {
+        super(text, startPosition, endPosition, lineBreakAhead);
     }
 
     @Override

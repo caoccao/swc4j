@@ -32,13 +32,14 @@ public abstract class BaseSwc4jAstTokenText extends BaseSwc4jAstToken {
     /**
      * Instantiates a new Base swc4j ast token text.
      *
-     * @param text          the text
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param text           the text
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public BaseSwc4jAstTokenText(String text, int startPosition, int endPosition) {
-        super(startPosition, endPosition);
+    public BaseSwc4jAstTokenText(String text, int startPosition, int endPosition, boolean lineBreakAhead) {
+        super(startPosition, endPosition, lineBreakAhead);
         this.text = text;
     }
 

@@ -28,12 +28,13 @@ public class Swc4jAstTokenNull extends BaseSwc4jAstToken {
     /**
      * Instantiates a new Swc4j ast token null.
      *
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstTokenNull(int startPosition, int endPosition) {
-        super(startPosition, endPosition);
+    public Swc4jAstTokenNull(int startPosition, int endPosition, boolean lineBreakAhead) {
+        super(startPosition, endPosition, lineBreakAhead);
     }
 
     @Override
