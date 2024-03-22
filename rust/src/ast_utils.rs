@@ -276,15 +276,16 @@ impl JavaAstTokenFactory {
   where
     'local: 'a,
   {
+    let java_string = converter::string_to_jstring(env, &text);
     let text = jvalue {
-      l: converter::string_to_jstring(env, &text).as_raw(),
+      l: java_string.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    unsafe {
+    let token = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -295,7 +296,9 @@ impl JavaAstTokenFactory {
         .expect("Couldn't create Swc4jAstTokenIdentKnown")
         .l()
         .expect("Couldn't convert Swc4jAstTokenIdentKnown")
-    }
+    };
+    env.delete_local_ref(java_string).expect("Couldn't delete local ident");
+    token
   }
 
   pub fn create_keyword<'local, 'a>(
@@ -367,15 +370,16 @@ impl JavaAstTokenFactory {
   where
     'local: 'a,
   {
+    let java_string = converter::string_to_jstring(env, &text);
     let text = jvalue {
-      l: converter::string_to_jstring(env, &text).as_raw(),
+      l: java_string.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    unsafe {
+    let token = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -386,7 +390,9 @@ impl JavaAstTokenFactory {
         .expect("Couldn't create Swc4jAstTokenIdentOther")
         .l()
         .expect("Couldn't convert Swc4jAstTokenIdentOther")
-    }
+    };
+    env.delete_local_ref(java_string).expect("Couldn't delete local ident");
+    token
   }
 
   pub fn create_true<'local, 'a>(
@@ -427,15 +433,16 @@ impl JavaAstTokenFactory {
   where
     'local: 'a,
   {
+    let java_string = converter::string_to_jstring(env, &text);
     let text = jvalue {
-      l: converter::string_to_jstring(env, &text).as_raw(),
+      l: java_string.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    unsafe {
+    let token = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -446,7 +453,9 @@ impl JavaAstTokenFactory {
         .expect("Couldn't create Swc4jAstTokenUnknown")
         .l()
         .expect("Couldn't convert Swc4jAstTokenUnknown")
-    }
+    };
+    env.delete_local_ref(java_string).expect("Couldn't delete local text");
+    token
   }
 }
 
@@ -792,6 +801,9 @@ pub fn token_and_spans_to_java_list<'local>(
             _ => java_ast_token_factory.create_unknown(env, &text, index_range, line_break_ahead),
           };
           java_array_list.add(env, &list, &ast_token);
+          env
+            .delete_local_ref(ast_token)
+            .expect("Couldn't delete local ast token");
         });
         list.as_raw()
       }
