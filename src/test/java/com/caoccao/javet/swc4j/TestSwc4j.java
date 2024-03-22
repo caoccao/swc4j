@@ -314,6 +314,29 @@ public class TestSwc4j {
     }
 
     @Test
+    public void testTranspileTypeScriptWithCaptureTokens() throws Swc4jCoreException {
+        Swc4jTranspileOptions options = new Swc4jTranspileOptions()
+                .setMediaType(Swc4jMediaType.TypeScript)
+                .setCaptureTokens(true);
+        String code = "function add加法(a變量:number, b變量:number) { return a變量+b變量; }";
+        Swc4jTranspileOutput output = swc4j.transpile(code, options);
+        assertNotNull(output);
+        assertTrue(output.isModule());
+        assertFalse(output.isScript());
+        List<BaseSwc4jAstToken> tokens = output.getTokens();
+        assertNotNull(tokens);
+        assertEquals(18, tokens.size());
+        assertEquals(Swc4jAstTokenType.Function, tokens.get(0).getType());
+        assertTrue(tokens.get(0).isLineBreakAhead());
+        assertEquals(Swc4jAstTokenType.Return, tokens.get(12).getType());
+        assertFalse(tokens.get(12).isLineBreakAhead());
+        tokens.forEach(token ->
+                assertEquals(
+                        code.substring(token.getStartPosition(), token.getEndPosition()),
+                        token.getText()));
+    }
+
+    @Test
     public void testTranspileTypeScriptWithInlineSourceMap() throws Swc4jCoreException {
         String code = "function add(a:number, b:number) { return a+b; }";
         String expectedCode = "function add(a, b) {\n" +
