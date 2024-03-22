@@ -62,7 +62,7 @@ public enum Swc4jAstTokenType {
     False(38, "false", false),
     IdentKnown(39, "$IdentKnown", false),
     IdentOther(40, "$IdentOther", false),
-    // Operator
+    // Operator - Generic
     Arrow(41, "=>", false, true),
     Hash(42, "#", false, true),
     At(43, "@", false, true),
@@ -80,6 +80,10 @@ public enum Swc4jAstTokenType {
     BackQuote(55, "`", false, true),
     Colon(56, ":", false, true),
     DollarLBrace(57, "${", false, true),
+    QuestionMark(58, "?", false, true),
+    PlusPlus(59, "++", false, true),
+    MinusMinus(60, "--", false, true),
+    Tilde(61, "~", false, true),
     ;
 
     private static final int LENGTH = values().length;

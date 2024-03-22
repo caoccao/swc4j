@@ -32,47 +32,50 @@ pub trait IdentifiableEnum<T> {
 
 #[derive(Debug, Copy, Clone)]
 pub enum AstTokenType {
-  Unknown,      // 0
-  Await,        // 1
-  Break,        // 2
-  Case,         // 3
-  Catch,        // 4
-  Class,        // 5
-  Const,        // 6
-  Continue,     // 7
-  Debugger,     // 8
-  Default_,     // 9
-  Delete,       // 10
-  Do,           // 11
-  Else,         // 12
-  Export,       // 13
-  Extends,      // 14
-  Finally,      // 15
-  For,          // 16
-  Function,     // 17
-  If,           // 18
-  Import,       // 19
-  In,           // 20
-  InstanceOf,   // 21
-  Let,          // 22
-  New,          // 23
-  Return,       // 24
-  Super,        // 25
-  Switch,       // 26
-  This,         // 27
-  Throw,        // 28
-  Try,          // 29
-  TypeOf,       // 30
-  Var,          // 31
-  Void,         // 32
-  While,        // 33
-  With,         // 34
-  Yield,        // 35
+  Unknown, // 0
+  // Keyword
+  Await,      // 1
+  Break,      // 2
+  Case,       // 3
+  Catch,      // 4
+  Class,      // 5
+  Const,      // 6
+  Continue,   // 7
+  Debugger,   // 8
+  Default_,   // 9
+  Delete,     // 10
+  Do,         // 11
+  Else,       // 12
+  Export,     // 13
+  Extends,    // 14
+  Finally,    // 15
+  For,        // 16
+  Function,   // 17
+  If,         // 18
+  Import,     // 19
+  In,         // 20
+  InstanceOf, // 21
+  Let,        // 22
+  New,        // 23
+  Return,     // 24
+  Super,      // 25
+  Switch,     // 26
+  This,       // 27
+  Throw,      // 28
+  Try,        // 29
+  TypeOf,     // 30
+  Var,        // 31
+  Void,       // 32
+  While,      // 33
+  With,       // 34
+  Yield,      // 35
+  // Word
   Null,         // 36
   True,         // 37
   False,        // 38
   IdentKnown,   // 39
   IdentOther,   // 40
+  // Operator - Generic
   Arrow,        // 41
   Hash,         // 42
   At,           // 43
@@ -90,6 +93,10 @@ pub enum AstTokenType {
   BackQuote,    // 55
   Colon,        // 56
   DollarLBrace, // 57
+  QuestionMark, // 58
+  PlusPlus,     // 59
+  MinusMinus,   // 60
+  Tilde,        // 61
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -152,6 +159,10 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::BackQuote => 55,
       AstTokenType::Colon => 56,
       AstTokenType::DollarLBrace => 57,
+      AstTokenType::QuestionMark => 58,
+      AstTokenType::PlusPlus => 59,
+      AstTokenType::MinusMinus => 60,
+      AstTokenType::Tilde => 61,
       _ => 0,
     }
   }
@@ -214,6 +225,10 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       55 => AstTokenType::BackQuote,
       56 => AstTokenType::Colon,
       57 => AstTokenType::DollarLBrace,
+      58 => AstTokenType::QuestionMark,
+      59 => AstTokenType::PlusPlus,
+      60 => AstTokenType::MinusMinus,
+      61 => AstTokenType::Tilde,
       _ => AstTokenType::Unknown,
     }
   }

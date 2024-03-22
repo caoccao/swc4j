@@ -145,6 +145,10 @@ public class TestSwc4j {
         parseAndAssert("``", options, Swc4jAstTokenType.BackQuote, "`", 0, 1, 0, 2);
         parseAndAssert("a={b:c}", options, Swc4jAstTokenType.Colon, ":", 4, 5, 4, 7);
         parseAndAssert("`${a}`", options, Swc4jAstTokenType.DollarLBrace, "${", 1, 3, 1, 5);
+        parseAndAssert("a?.b", options, Swc4jAstTokenType.QuestionMark, "?", 1, 2, 1, 4);
+        parseAndAssert("a++", options, Swc4jAstTokenType.PlusPlus, "++", 1, 3, 1, 2);
+        parseAndAssert("a--", options, Swc4jAstTokenType.MinusMinus, "--", 1, 3, 1, 2);
+        parseAndAssert("~true", options, Swc4jAstTokenType.Tilde, "~", 0, 1, 0, 2);
     }
 
     @Test
