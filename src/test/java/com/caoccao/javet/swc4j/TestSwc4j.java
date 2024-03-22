@@ -140,6 +140,8 @@ public class TestSwc4j {
         parseAndAssert("a[0]", options, Swc4jAstTokenType.RBracket, "]", 3, 4, 3, 4);
         parseAndAssert("a={}", options, Swc4jAstTokenType.LBrace, "{", 2, 3, 2, 4);
         parseAndAssert("a={}", options, Swc4jAstTokenType.RBrace, "}", 3, 4, 3, 4);
+        parseAndAssert(";", options, Swc4jAstTokenType.Semi, ";", 0, 1);
+        parseAndAssert("let a, b;", options, Swc4jAstTokenType.Comma, ",", 5, 6, 2, 5);
     }
 
     @Test

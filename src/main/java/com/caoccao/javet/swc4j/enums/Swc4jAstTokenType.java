@@ -75,6 +75,8 @@ public enum Swc4jAstTokenType {
     RBracket(50, "]", false, true),
     LBrace(51, "{", false, true),
     RBrace(52, "}", false, true),
+    Semi(53, ";", false, true),
+    Comma(54, ",", false, true),
     ;
 
     private static final int LENGTH = values().length;

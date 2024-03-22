@@ -491,6 +491,12 @@ pub fn token_and_spans_to_java_list<'local>(
             Token::RBrace => {
               java_ast_token_factory.create_generic_operator(env, AstTokenType::RBrace, index_range, line_break_ahead)
             }
+            Token::Semi => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::Semi, index_range, line_break_ahead)
+            }
+            Token::Comma => {
+              java_ast_token_factory.create_generic_operator(env, AstTokenType::Comma, index_range, line_break_ahead)
+            }
             _ => java_ast_token_factory.create_unknown(env, &text, index_range, line_break_ahead),
           };
           java_array_list.add(env, &list, &ast_token);
