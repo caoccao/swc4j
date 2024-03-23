@@ -140,15 +140,20 @@ pub enum AstTokenType {
   OrAssign,             // 99
   NullishAssign,        // 100
   // Atom - Uni
-  Error, // 101
+  Shebang, // 101
+  Error,   // 102
   // Atom - Bi
-  Str, // 102
-  Num, // 103
-  BigInt, // 104
-  Template, // 105
-  Shebang, // 106
+  Str,      // 103
+  Num,      // 104
+  BigInt,   // 105
+  Template, // 106
   // Atom - Tri
   Regex, // 107
+  // Jsx
+  JSXTagStart, // 108
+  JSXTagEnd,   // 109
+  JSXTagName,  // 110
+  JSXTagText,  // 111
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -254,13 +259,17 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::AndAssign => 98,
       AstTokenType::OrAssign => 99,
       AstTokenType::NullishAssign => 100,
-      AstTokenType::Error => 101,
-      AstTokenType::Str => 102,
-      AstTokenType::Num => 103,
-      AstTokenType::BigInt => 104,
-      AstTokenType::Template => 105,
-      AstTokenType::Shebang => 106,
+      AstTokenType::Shebang => 101,
+      AstTokenType::Error => 102,
+      AstTokenType::Str => 103,
+      AstTokenType::Num => 104,
+      AstTokenType::BigInt => 105,
+      AstTokenType::Template => 106,
       AstTokenType::Regex => 107,
+      AstTokenType::JSXTagStart => 108,
+      AstTokenType::JSXTagEnd => 109,
+      AstTokenType::JSXTagName => 110,
+      AstTokenType::JSXTagText => 111,
       _ => 0,
     }
   }
@@ -366,13 +375,17 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       98 => AstTokenType::AndAssign,
       99 => AstTokenType::OrAssign,
       100 => AstTokenType::NullishAssign,
-      101 => AstTokenType::Error,
-      102 => AstTokenType::Str,
-      103 => AstTokenType::Num,
-      104 => AstTokenType::BigInt,
-      105 => AstTokenType::Template,
-      106 => AstTokenType::Shebang,
+      101 => AstTokenType::Shebang,
+      102 => AstTokenType::Error,
+      103 => AstTokenType::Str,
+      104 => AstTokenType::Num,
+      105 => AstTokenType::BigInt,
+      106 => AstTokenType::Template,
       107 => AstTokenType::Regex,
+      108 => AstTokenType::JSXTagStart,
+      109 => AstTokenType::JSXTagEnd,
+      110 => AstTokenType::JSXTagName,
+      111 => AstTokenType::JSXTagText,
       _ => AstTokenType::Unknown,
     }
   }
@@ -451,6 +464,8 @@ impl AstTokenType {
       Token::PlusPlus => AstTokenType::PlusPlus,
       Token::MinusMinus => AstTokenType::MinusMinus,
       Token::Tilde => AstTokenType::Tilde,
+      Token::JSXTagStart => AstTokenType::JSXTagStart,
+      Token::JSXTagEnd => AstTokenType::JSXTagEnd,
       _ => AstTokenType::Unknown,
     }
   }

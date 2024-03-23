@@ -46,6 +46,8 @@ pub struct JavaAstTokenFactory {
   method_create_generic_operator: JStaticMethodID,
   method_create_ident_known: JStaticMethodID,
   method_create_ident_other: JStaticMethodID,
+  method_create_jsx_tag_name: JStaticMethodID,
+  method_create_jsx_tag_text: JStaticMethodID,
   method_create_keyword: JStaticMethodID,
   method_create_null: JStaticMethodID,
   method_create_number: JStaticMethodID,
@@ -116,6 +118,20 @@ impl JavaAstTokenFactory {
         "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenIdentKnown;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createIdentKnown");
+    let method_create_jsx_tag_name = env
+      .get_static_method_id(
+        &class,
+        "createJsxName",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/atom/uni/Swc4jAstTokenJsxTagName;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createJsxTagName");
+    let method_create_jsx_tag_text = env
+      .get_static_method_id(
+        &class,
+        "createJsxText",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/atom/uni/Swc4jAstTokenJsxTagText;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createJsxTagText");
     let method_create_keyword = env
       .get_static_method_id(
         &class,
@@ -196,6 +212,8 @@ impl JavaAstTokenFactory {
       method_create_generic_operator,
       method_create_ident_known,
       method_create_ident_other,
+      method_create_jsx_tag_name,
+      method_create_jsx_tag_text,
       method_create_keyword,
       method_create_null,
       method_create_number,
@@ -462,6 +480,76 @@ impl JavaAstTokenFactory {
     token
   }
 
+  pub fn create_jsx_tag_name<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    text: &str,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_string = converter::string_to_jstring(env, &text);
+    let text = jvalue {
+      l: java_string.as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
+    let token = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_jsx_tag_name,
+          ReturnType::Object,
+          &[text, start_position, end_position, line_break_ahead],
+        )
+        .expect("Couldn't create Swc4jAstTokenJsxName")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenJsxName")
+    };
+    env.delete_local_ref(java_string).expect("Couldn't delete local text");
+    token
+  }
+
+  pub fn create_jsx_tag_text<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    text: &str,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_string = converter::string_to_jstring(env, &text);
+    let text = jvalue {
+      l: java_string.as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
+    let token = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_jsx_tag_text,
+          ReturnType::Object,
+          &[text, start_position, end_position, line_break_ahead],
+        )
+        .expect("Couldn't create Swc4jAstTokenJsxText")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenJsxText")
+    };
+    env.delete_local_ref(java_string).expect("Couldn't delete local text");
+    token
+  }
+
   pub fn create_keyword<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -689,8 +777,12 @@ impl JavaAstTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jAstTokenShebang")
     };
-    env.delete_local_ref(java_string_text).expect("Couldn't delete local text");
-    env.delete_local_ref(java_string_value).expect("Couldn't delete local value");
+    env
+      .delete_local_ref(java_string_text)
+      .expect("Couldn't delete local text");
+    env
+      .delete_local_ref(java_string_value)
+      .expect("Couldn't delete local value");
     token
   }
 
@@ -970,6 +1062,12 @@ pub fn token_and_spans_to_java_list<'local>(
             }
             Token::Error(error) => {
               java_ast_token_factory.create_error(env, &text, &error, index_range, line_break_ahead)
+            }
+            Token::JSXName { name } => {
+              java_ast_token_factory.create_jsx_tag_name(env, &name, index_range, line_break_ahead)
+            }
+            Token::JSXText { raw } => {
+              java_ast_token_factory.create_jsx_tag_text(env, &raw, index_range, line_break_ahead)
             }
             token => match &AstTokenType::parse_by_generic_operator(token) {
               AstTokenType::Unknown => {

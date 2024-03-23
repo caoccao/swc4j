@@ -131,10 +131,12 @@ public class TestSwc4j {
             assertTrue(tokens.get(0).isLineBreakAhead());
             assertEquals(Swc4jAstTokenType.Return, tokens.get(12).getType());
             assertFalse(tokens.get(12).isLineBreakAhead());
-            tokens.forEach(token ->
-                    assertEquals(
-                            code.substring(token.getStartPosition(), token.getEndPosition()),
-                            token.getText()));
+            tokens.forEach(token -> {
+                assertNotEquals(Swc4jAstTokenType.Unknown, token.getType());
+                assertEquals(
+                        code.substring(token.getStartPosition(), token.getEndPosition()),
+                        token.getText());
+            });
         }
         // Keyword
         parseAndAssert("await f()", options, Swc4jAstTokenType.Await, "await", 0, 5, 0, 4);
@@ -256,6 +258,12 @@ public class TestSwc4j {
         assertTokenValue("a ", parseAndAssert("`a ${b} c`", options, Swc4jAstTokenType.Template, "a ", 1, 3, 1, 7));
         parseAndAssert("`a ${b} c`", options, Swc4jAstTokenType.IdentOther, "b", 5, 6, 3, 7);
         assertTokenValue(" c", parseAndAssert("`a ${b} c`", options, Swc4jAstTokenType.Template, " c", 7, 9, 5, 7));
+        // Jsx
+        options.setMediaType(Swc4jMediaType.Jsx);
+        parseAndAssert("const a = <h1>b</h1>;", options, Swc4jAstTokenType.JsxTagStart, "<", 10, 11, 3, 12);
+        parseAndAssert("const a = <h1>b</h1>;", options, Swc4jAstTokenType.JsxTagEnd, ">", 13, 14, 5, 12);
+        parseAndAssert("const a = <h1>b</h1>;", options, Swc4jAstTokenType.JsxTagName, "h1", 11, 13, 4, 12);
+        parseAndAssert("const a = <h1>b</h1>;", options, Swc4jAstTokenType.JsxTagText, "b", 14, 15, 6, 12);
     }
 
     @Test

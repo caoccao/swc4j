@@ -126,15 +126,20 @@ public enum Swc4jAstTokenType {
     OrAssign(99, "||=", Swc4jAstTokenSubType.AssignOperator),
     NullishAssign(100, "??=", Swc4jAstTokenSubType.AssignOperator),
     // Atom - Uni
-    Error(101, "$Error", Swc4jAstTokenSubType.UniAtom),
+    Shebang(101, "$Shebang", Swc4jAstTokenSubType.UniAtom),
+    Error(102, "$Error", Swc4jAstTokenSubType.UniAtom),
     // Atom - Bi
-    Str(102, "$Str", Swc4jAstTokenSubType.BiAtom),
-    Num(103, "$Num", Swc4jAstTokenSubType.BiAtom),
-    BigInt(104, "$BigInt", Swc4jAstTokenSubType.BiAtom),
-    Template(105, "$Template", Swc4jAstTokenSubType.BiAtom),
-    Shebang(106, "$Shebang", Swc4jAstTokenSubType.BiAtom),
+    Str(103, "$Str", Swc4jAstTokenSubType.BiAtom),
+    Num(104, "$Num", Swc4jAstTokenSubType.BiAtom),
+    BigInt(105, "$BigInt", Swc4jAstTokenSubType.BiAtom),
+    Template(106, "$Template", Swc4jAstTokenSubType.BiAtom),
     // Atom - Tri
     Regex(107, "$Regex", Swc4jAstTokenSubType.TriAtom),
+    // Jsx
+    JsxTagStart(108, "<", Swc4jAstTokenSubType.GenericOperator),
+    JsxTagEnd(109, ">", Swc4jAstTokenSubType.GenericOperator),
+    JsxTagName(110, "$JsxTagName", Swc4jAstTokenSubType.UniAtom),
+    JsxTagText(111, "$JsxTagText", Swc4jAstTokenSubType.UniAtom),
     ;
 
     private static final int LENGTH = values().length;
