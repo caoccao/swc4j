@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j;
 
 import com.caoccao.javet.swc4j.ast.BaseSwc4jAstToken;
 import com.caoccao.javet.swc4j.ast.atom.bi.BaseSwc4jAstTokenBiAtom;
+import com.caoccao.javet.swc4j.ast.atom.tri.Swc4jAstTokenRegex;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
@@ -244,6 +245,9 @@ public class TestSwc4j {
         assertTokenValue(BigInteger.valueOf(1), parseAndAssert("a = 1n;", options, Swc4jAstTokenType.BigInt, "1n", 4, 6, 2, 4));
         assertTokenValue(BigInteger.valueOf(1), parseAndAssert("a = -1n;", options, Swc4jAstTokenType.BigInt, "1n", 5, 7, 3, 5));
         assertTokenValue(new BigInteger("1234567890123456789012345678901234567890"), parseAndAssert("a = 1234567890123456789012345678901234567890n;", options, Swc4jAstTokenType.BigInt, "1234567890123456789012345678901234567890n", 4, 45, 2, 4));
+        Swc4jAstTokenRegex astTokenRegex = (Swc4jAstTokenRegex) parseAndAssert("a = /x/ig;", options, Swc4jAstTokenType.Regex, "x/ig", 5, 9, 3, 5);
+        assertEquals("x", astTokenRegex.getValue());
+        assertEquals("ig", astTokenRegex.getFlags());
     }
 
     @Test

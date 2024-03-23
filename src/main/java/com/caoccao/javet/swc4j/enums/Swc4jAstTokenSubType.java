@@ -23,6 +23,7 @@ public enum Swc4jAstTokenSubType {
     GenericOperator,
     Keyword,
     ReservedWord,
+    TriAtom,
     UniAtom,
     Unknown,
     ;
@@ -53,6 +54,10 @@ public enum Swc4jAstTokenSubType {
 
     public boolean isReservedWord() {
         return this == ReservedWord;
+    }
+
+    public boolean isTriAtom() {
+        return this == TriAtom;
     }
 
     public boolean isUniAtom() {

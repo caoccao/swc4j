@@ -129,6 +129,8 @@ public enum Swc4jAstTokenType {
     Str(101, "$Str", Swc4jAstTokenSubType.BiAtom),
     Num(102, "$Num", Swc4jAstTokenSubType.BiAtom),
     BigInt(103, "$BigInt", Swc4jAstTokenSubType.BiAtom),
+    // Atom - Tri
+    Regex(104, "$Regex", Swc4jAstTokenSubType.TriAtom),
     ;
 
     private static final int LENGTH = values().length;

@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenBigInt;
 import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenNumber;
+import com.caoccao.javet.swc4j.ast.atom.tri.Swc4jAstTokenRegex;
 import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenString;
 import com.caoccao.javet.swc4j.ast.atom.uni.Swc4jAstTokenUnknown;
 import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenAssignOperator;
@@ -182,6 +183,23 @@ public final class Swc4jAstTokenFactory {
     public static Swc4jAstTokenNumber createNumber(
             String text, double value, int startPosition, int endPosition, boolean lineBreakAhead) {
         return new Swc4jAstTokenNumber(text, value, startPosition, endPosition, lineBreakAhead);
+    }
+
+    /**
+     * Create ast token regex.
+     *
+     * @param text           the text
+     * @param value          the value
+     * @param flags          the flags
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
+     * @return the ast token regex
+     * @since 0.2.0
+     */
+    public static Swc4jAstTokenRegex createRegex(
+            String text, String value, String flags, int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenRegex(text, value, flags, startPosition, endPosition, lineBreakAhead);
     }
 
     /**

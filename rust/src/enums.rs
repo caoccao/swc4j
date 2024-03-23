@@ -143,6 +143,7 @@ pub enum AstTokenType {
   Str, // 101
   Num, // 102
   BigInt, // 103
+  Regex, // 104
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -251,6 +252,7 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::Str => 101,
       AstTokenType::Num => 102,
       AstTokenType::BigInt => 103,
+      AstTokenType::Regex => 104,
       _ => 0,
     }
   }
@@ -359,6 +361,7 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       101 => AstTokenType::Str,
       102 => AstTokenType::Num,
       103 => AstTokenType::BigInt,
+      104 => AstTokenType::Regex,
       _ => AstTokenType::Unknown,
     }
   }
