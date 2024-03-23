@@ -248,6 +248,9 @@ public class TestSwc4j {
         Swc4jAstTokenRegex astTokenRegex = (Swc4jAstTokenRegex) parseAndAssert("a = /x/ig;", options, Swc4jAstTokenType.Regex, "x/ig", 5, 9, 3, 5);
         assertEquals("x", astTokenRegex.getValue());
         assertEquals("ig", astTokenRegex.getFlags());
+        assertTokenValue("a ", parseAndAssert("`a ${b} c`", options, Swc4jAstTokenType.Template, "a ", 1, 3, 1, 7));
+        parseAndAssert("`a ${b} c`", options, Swc4jAstTokenType.IdentOther, "b", 5, 6, 3, 7);
+        assertTokenValue(" c", parseAndAssert("`a ${b} c`", options, Swc4jAstTokenType.Template, " c", 7, 9, 5, 7));
     }
 
     @Test

@@ -49,6 +49,7 @@ pub struct JavaAstTokenFactory {
   method_create_number: JStaticMethodID,
   method_create_regex: JStaticMethodID,
   method_create_string: JStaticMethodID,
+  method_create_template: JStaticMethodID,
   method_create_true: JStaticMethodID,
   method_create_unknown: JStaticMethodID,
 }
@@ -147,6 +148,13 @@ impl JavaAstTokenFactory {
         "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/atom/bi/Swc4jAstTokenString;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createString");
+    let method_create_template = env
+      .get_static_method_id(
+        &class,
+        "createTemplate",
+        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/atom/bi/Swc4jAstTokenTemplate;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createTemplate");
     let method_create_true = env
       .get_static_method_id(
         &class,
@@ -174,6 +182,7 @@ impl JavaAstTokenFactory {
       method_create_null,
       method_create_number,
       method_create_regex,
+      method_create_template,
       method_create_string,
       method_create_true,
       method_create_unknown,
@@ -628,6 +637,54 @@ impl JavaAstTokenFactory {
     token
   }
 
+  pub fn create_template<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    text: &str,
+    value: Option<&str>,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_string_text = converter::string_to_jstring(env, &text);
+    let java_string_value = match value {
+      Some(value) => converter::string_to_jstring(env, &value),
+      None => Default::default(),
+    };
+    let text = jvalue {
+      l: java_string_text.as_raw(),
+    };
+    let value = jvalue {
+      l: java_string_value.as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
+    let token = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_template,
+          ReturnType::Object,
+          &[text, value, start_position, end_position, line_break_ahead],
+        )
+        .expect("Couldn't create Swc4jAstTokenTemplate")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenTemplate")
+    };
+    env
+      .delete_local_ref(java_string_text)
+      .expect("Couldn't delete local text");
+    env
+      .delete_local_ref(java_string_value)
+      .expect("Couldn't delete local value");
+    token
+  }
+
   pub fn create_true<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -796,8 +853,15 @@ pub fn token_and_spans_to_java_list<'local>(
             Token::BigInt { value: _, raw } => {
               java_ast_token_factory.create_bigint(env, &raw, index_range, line_break_ahead)
             }
-            Token::Regex (value, flags) => {
+            Token::Regex(value, flags) => {
               java_ast_token_factory.create_regex(env, &text, &value, &flags, index_range, line_break_ahead)
+            }
+            Token::Template { raw, cooked } => {
+              let cooked = match &cooked {
+                Ok(atom) => Some(atom.as_str()),
+                Err(_) => None,
+              };
+              java_ast_token_factory.create_template(env, &raw, cooked, index_range, line_break_ahead)
             }
             token => match &AstTokenType::parse_by_generic_operator(token) {
               AstTokenType::Unknown => {
