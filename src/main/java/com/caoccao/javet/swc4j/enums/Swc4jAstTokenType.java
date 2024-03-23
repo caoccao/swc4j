@@ -125,8 +125,9 @@ public enum Swc4jAstTokenType {
     AndAssign(98, "&&=", Swc4jAstTokenSubType.AssignOperator),
     OrAssign(99, "||=", Swc4jAstTokenSubType.AssignOperator),
     NullishAssign(100, "??=", Swc4jAstTokenSubType.AssignOperator),
-    // Atom - 2
+    // Atom - Bi
     Str(101, "$Str", Swc4jAstTokenSubType.BiAtom),
+    Num(102, "$Num", Swc4jAstTokenSubType.BiAtom),
     ;
 
     private static final int LENGTH = values().length;

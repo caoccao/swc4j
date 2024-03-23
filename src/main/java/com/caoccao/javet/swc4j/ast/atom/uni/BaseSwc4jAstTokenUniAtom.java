@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.atom;
+package com.caoccao.javet.swc4j.ast.atom.uni;
 
 import com.caoccao.javet.swc4j.ast.BaseSwc4jAstToken;
 
 /**
- * The type Base swc4j ast token atom.
+ * The type Base swc4j ast token uni atom.
  *
  * @since 0.2.0
  */
-public abstract class BaseSwc4jAstTokenAtom extends BaseSwc4jAstToken {
+public abstract class BaseSwc4jAstTokenUniAtom extends BaseSwc4jAstToken {
     /**
      * The Text.
      *
@@ -32,7 +32,7 @@ public abstract class BaseSwc4jAstTokenAtom extends BaseSwc4jAstToken {
     protected final String text;
 
     /**
-     * Instantiates a new Base swc4j ast token atom.
+     * Instantiates a new Base swc4j ast token uni atom.
      *
      * @param text           the text
      * @param startPosition  the start position
@@ -40,7 +40,7 @@ public abstract class BaseSwc4jAstTokenAtom extends BaseSwc4jAstToken {
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public BaseSwc4jAstTokenAtom(String text, int startPosition, int endPosition, boolean lineBreakAhead) {
+    public BaseSwc4jAstTokenUniAtom(String text, int startPosition, int endPosition, boolean lineBreakAhead) {
         super(startPosition, endPosition, lineBreakAhead);
         this.text = text;
     }

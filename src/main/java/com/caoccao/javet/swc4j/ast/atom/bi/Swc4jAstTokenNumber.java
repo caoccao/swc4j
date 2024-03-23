@@ -16,24 +16,16 @@
 
 package com.caoccao.javet.swc4j.ast.atom.bi;
 
-import com.caoccao.javet.swc4j.ast.atom.uni.BaseSwc4jAstTokenUniAtom;
+import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
 /**
- * The type Base swc4j ast token bi atom.
+ * The type Swc4j ast token number.
  *
- * @param <T> the type parameter
  * @since 0.2.0
  */
-public abstract class BaseSwc4jAstTokenBiAtom<T> extends BaseSwc4jAstTokenUniAtom {
+public class Swc4jAstTokenNumber extends BaseSwc4jAstTokenBiAtom<Double> {
     /**
-     * The Text.
-     *
-     * @since 0.2.0
-     */
-    protected final T value;
-
-    /**
-     * Instantiates a new Base swc4j ast token bi atom.
+     * Instantiates a new Swc4j ast token number.
      *
      * @param text           the text
      * @param value          the value
@@ -42,19 +34,12 @@ public abstract class BaseSwc4jAstTokenBiAtom<T> extends BaseSwc4jAstTokenUniAto
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public BaseSwc4jAstTokenBiAtom(
-            String text, T value, int startPosition, int endPosition, boolean lineBreakAhead) {
-        super(text, startPosition, endPosition, lineBreakAhead);
-        this.value = value;
+    public Swc4jAstTokenNumber(String text, Double value, int startPosition, int endPosition, boolean lineBreakAhead) {
+        super(text, value, startPosition, endPosition, lineBreakAhead);
     }
 
-    /**
-     * Gets value.
-     *
-     * @return the value
-     * @since 0.2.0
-     */
-    public T getValue() {
-        return value;
+    @Override
+    public Swc4jAstTokenType getType() {
+        return Swc4jAstTokenType.Str;
     }
 }

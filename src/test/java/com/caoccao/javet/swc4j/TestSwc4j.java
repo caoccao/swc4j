@@ -236,8 +236,10 @@ public class TestSwc4j {
         parseAndAssert("1 &&= 2", options, Swc4jAstTokenType.AndAssign, "&&=", 2, 5, 1, 3);
         parseAndAssert("1 ||= 2", options, Swc4jAstTokenType.OrAssign, "||=", 2, 5, 1, 3);
         parseAndAssert("1 ??= 2", options, Swc4jAstTokenType.NullishAssign, "??=", 2, 5, 1, 3);
-        // Atom - 2
+        // Atom - Bi
         assertTokenValue("x", parseAndAssert("a = 'x';", options, Swc4jAstTokenType.Str, "'x'", 4, 7, 2, 4));
+        assertTokenValue(1D, parseAndAssert("a = 1;", options, Swc4jAstTokenType.Str, "1", 4, 5, 2, 4));
+        assertTokenValue(1.23D, parseAndAssert("a = -1.23;", options, Swc4jAstTokenType.Str, "1.23", 5, 9, 3, 5));
     }
 
     @Test

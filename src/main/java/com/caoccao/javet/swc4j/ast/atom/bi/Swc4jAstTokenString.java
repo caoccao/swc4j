@@ -28,6 +28,7 @@ public class Swc4jAstTokenString extends BaseSwc4jAstTokenBiAtom<String> {
      * Instantiates a new Swc4j ast token string.
      *
      * @param text           the text
+     * @param value          the value
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead

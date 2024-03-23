@@ -45,6 +45,7 @@ pub struct JavaAstTokenFactory {
   method_create_ident_other: JStaticMethodID,
   method_create_keyword: JStaticMethodID,
   method_create_null: JStaticMethodID,
+  method_create_number: JStaticMethodID,
   method_create_string: JStaticMethodID,
   method_create_true: JStaticMethodID,
   method_create_unknown: JStaticMethodID,
@@ -116,6 +117,13 @@ impl JavaAstTokenFactory {
         "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenIdentOther;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createIdentOther");
+    let method_create_number = env
+      .get_static_method_id(
+        &class,
+        "createNumber",
+        "(Ljava/lang/String;DIIZ)Lcom/caoccao/javet/swc4j/ast/atom/bi/Swc4jAstTokenNumber;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createNumber");
     let method_create_string = env
       .get_static_method_id(
         &class,
@@ -147,6 +155,7 @@ impl JavaAstTokenFactory {
       method_create_ident_other,
       method_create_keyword,
       method_create_null,
+      method_create_number,
       method_create_string,
       method_create_true,
       method_create_unknown,
@@ -431,6 +440,43 @@ impl JavaAstTokenFactory {
     token
   }
 
+  pub fn create_number<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    text: &str,
+    value: f64,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_string = converter::string_to_jstring(env, &text);
+    let text = jvalue {
+      l: java_string.as_raw(),
+    };
+    let value = jvalue { d: value };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
+    let token = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_number,
+          ReturnType::Object,
+          &[text, value, start_position, end_position, line_break_ahead],
+        )
+        .expect("Couldn't create Swc4jAstTokenNumber")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenNumber")
+    };
+    env.delete_local_ref(java_string).expect("Couldn't delete local text");
+    token
+  }
+
   pub fn create_string<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -467,8 +513,12 @@ impl JavaAstTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jAstTokenString")
     };
-    env.delete_local_ref(java_string_text).expect("Couldn't delete local text");
-    env.delete_local_ref(java_string_value).expect("Couldn't delete local value");
+    env
+      .delete_local_ref(java_string_text)
+      .expect("Couldn't delete local text");
+    env
+      .delete_local_ref(java_string_value)
+      .expect("Couldn't delete local value");
     token
   }
 
@@ -633,6 +683,9 @@ pub fn token_and_spans_to_java_list<'local>(
             ),
             Token::Str { value, raw } => {
               java_ast_token_factory.create_string(env, &raw, &value, index_range, line_break_ahead)
+            }
+            Token::Num { value, raw } => {
+              java_ast_token_factory.create_number(env, &raw, *value, index_range, line_break_ahead)
             }
             token => match &AstTokenType::parse_by_generic_operator(token) {
               AstTokenType::Unknown => {

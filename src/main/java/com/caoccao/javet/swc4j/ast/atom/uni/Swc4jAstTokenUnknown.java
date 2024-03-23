@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.atom.uni;
 
-import com.caoccao.javet.swc4j.ast.atom.BaseSwc4jAstTokenAtom;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
 /**
@@ -25,7 +24,7 @@ import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
  *
  * @since 0.2.0
  */
-public class Swc4jAstTokenUnknown extends BaseSwc4jAstTokenAtom {
+public class Swc4jAstTokenUnknown extends BaseSwc4jAstTokenUniAtom {
     /**
      * Instantiates a new Swc4j ast token unknown.
      *
