@@ -155,7 +155,7 @@ impl JavaAstTokenFactory {
       .get_static_method_id(
         &class,
         "createShebang",
-        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/atom/bi/Swc4jAstTokenShebang;",
+        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/atom/uni/Swc4jAstTokenShebang;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createShebang");
     let method_create_string = env
@@ -331,7 +331,7 @@ impl JavaAstTokenFactory {
     'local: 'a,
   {
     let java_string_text = converter::string_to_jstring(env, &text);
-    let java_string_syntax_error = converter::string_to_jstring(env, &format!("{:?}", error.kind()));
+    let java_string_syntax_error = converter::string_to_jstring(env, &format!("{:?}", error));
     let text = jvalue {
       l: java_string_text.as_raw(),
     };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024. caoccao.com Sam Cao
+ * Copyright (c) 2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.atom.bi;
+package com.caoccao.javet.swc4j.ast.atom.uni;
 
-import com.caoccao.javet.swc4j.ast.atom.BaseSwc4jAstTokenBiAtom;
+import com.caoccao.javet.swc4j.ast.atom.BaseSwc4jAstTokenUniAtom;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
 /**
@@ -24,19 +24,35 @@ import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
  *
  * @since 0.2.0
  */
-public class Swc4jAstTokenShebang extends BaseSwc4jAstTokenBiAtom<String> {
+public class Swc4jAstTokenShebang extends BaseSwc4jAstTokenUniAtom {
+    /**
+     * The Shebang.
+     */
+    protected final String shebang;
+
     /**
      * Instantiates a new Swc4j ast token shebang.
      *
      * @param text           the text
-     * @param value          the value
+     * @param shebang        the shebang
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstTokenShebang(String text, String value, int startPosition, int endPosition, boolean lineBreakAhead) {
-        super(text, value, startPosition, endPosition, lineBreakAhead);
+    public Swc4jAstTokenShebang(String text, String shebang, int startPosition, int endPosition, boolean lineBreakAhead) {
+        super(text, startPosition, endPosition, lineBreakAhead);
+        this.shebang = shebang;
+    }
+
+    /**
+     * Gets shebang.
+     *
+     * @return the shebang
+     * @since 0.2.0
+     */
+    public String getShebang() {
+        return shebang;
     }
 
     @Override

@@ -16,13 +16,10 @@
 
 package com.caoccao.javet.swc4j.ast;
 
-import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenBigInt;
-import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenNumber;
-import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenString;
-import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenTemplate;
+import com.caoccao.javet.swc4j.ast.atom.bi.*;
 import com.caoccao.javet.swc4j.ast.atom.tri.Swc4jAstTokenRegex;
 import com.caoccao.javet.swc4j.ast.atom.uni.Swc4jAstTokenError;
-import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenShebang;
+import com.caoccao.javet.swc4j.ast.atom.uni.Swc4jAstTokenShebang;
 import com.caoccao.javet.swc4j.ast.atom.uni.Swc4jAstTokenUnknown;
 import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenAssignOperator;
 import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenBinaryOperator;
@@ -88,7 +85,7 @@ public final class Swc4jAstTokenFactory {
      * Create ast token error.
      *
      * @param text           the text
-     * @param syntaxError    the syntax error
+     * @param error          the error
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
@@ -96,8 +93,8 @@ public final class Swc4jAstTokenFactory {
      * @since 0.2.0
      */
     public static Swc4jAstTokenError createError(
-            String text, String syntaxError, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenError(text, syntaxError, startPosition, endPosition, lineBreakAhead);
+            String text, String error, int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenError(text, error, startPosition, endPosition, lineBreakAhead);
     }
 
     /**

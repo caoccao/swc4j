@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j;
 import com.caoccao.javet.swc4j.ast.BaseSwc4jAstToken;
 import com.caoccao.javet.swc4j.ast.atom.BaseSwc4jAstTokenBiAtom;
 import com.caoccao.javet.swc4j.ast.atom.tri.Swc4jAstTokenRegex;
+import com.caoccao.javet.swc4j.ast.atom.uni.Swc4jAstTokenShebang;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
@@ -238,6 +239,9 @@ public class TestSwc4j {
         parseAndAssert("1 &&= 2", options, Swc4jAstTokenType.AndAssign, "&&=", 2, 5, 1, 3);
         parseAndAssert("1 ||= 2", options, Swc4jAstTokenType.OrAssign, "||=", 2, 5, 1, 3);
         parseAndAssert("1 ??= 2", options, Swc4jAstTokenType.NullishAssign, "??=", 2, 5, 1, 3);
+        // Atom - Uni
+        Swc4jAstTokenShebang astTokenShebang = (Swc4jAstTokenShebang) parseAndAssert("#!/usr/bin/env -S -i node", options, Swc4jAstTokenType.Shebang, "#!/usr/bin/env -S -i node", 0, 25, 0, 1);
+        assertEquals("/usr/bin/env -S -i node", astTokenShebang.getShebang());
         // Atom - Bi
         assertTokenValue("x", parseAndAssert("a = 'x';", options, Swc4jAstTokenType.Str, "'x'", 4, 7, 2, 4));
         assertTokenValue(1D, parseAndAssert("a = 1;", options, Swc4jAstTokenType.Num, "1", 4, 5, 2, 4));
@@ -245,7 +249,6 @@ public class TestSwc4j {
         assertTokenValue(BigInteger.valueOf(1), parseAndAssert("a = 1n;", options, Swc4jAstTokenType.BigInt, "1n", 4, 6, 2, 4));
         assertTokenValue(BigInteger.valueOf(1), parseAndAssert("a = -1n;", options, Swc4jAstTokenType.BigInt, "1n", 5, 7, 3, 5));
         assertTokenValue(new BigInteger("1234567890123456789012345678901234567890"), parseAndAssert("a = 1234567890123456789012345678901234567890n;", options, Swc4jAstTokenType.BigInt, "1234567890123456789012345678901234567890n", 4, 45, 2, 4));
-        assertTokenValue("/usr/bin/env -S -i node", parseAndAssert("#!/usr/bin/env -S -i node", options, Swc4jAstTokenType.Shebang, "#!/usr/bin/env -S -i node", 0, 25, 0, 1));
         // Atom - Tri
         Swc4jAstTokenRegex astTokenRegex = (Swc4jAstTokenRegex) parseAndAssert("a = /x/ig;", options, Swc4jAstTokenType.Regex, "x/ig", 5, 9, 3, 5);
         assertEquals("x", astTokenRegex.getValue());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024. caoccao.com Sam Cao
+ * Copyright (c) 2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,35 +26,35 @@ import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
  */
 public class Swc4jAstTokenError extends BaseSwc4jAstTokenUniAtom {
     /**
-     * The Syntax error.
+     * The Error.
      *
      * @since 0.2.0
      */
-    protected final String syntaxError;
+    protected final String error;
 
     /**
      * Instantiates a new Swc4j ast token error.
      *
      * @param text           the text
-     * @param syntaxError    the syntax error
+     * @param error          the error
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstTokenError(String text, String syntaxError, int startPosition, int endPosition, boolean lineBreakAhead) {
+    public Swc4jAstTokenError(String text, String error, int startPosition, int endPosition, boolean lineBreakAhead) {
         super(text, startPosition, endPosition, lineBreakAhead);
-        this.syntaxError = syntaxError;
+        this.error = error;
     }
 
     /**
-     * Gets syntax error.
+     * Gets error.
      *
-     * @return the syntax error
+     * @return the error
      * @since 0.2.0
      */
-    public String getSyntaxError() {
-        return syntaxError;
+    public String getError() {
+        return error;
     }
 
     @Override
