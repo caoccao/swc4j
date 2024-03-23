@@ -29,6 +29,28 @@ public final class StringUtils {
     }
 
     /**
+     * Is empty.
+     *
+     * @param str the str
+     * @return true : empty, false : not empty
+     * @since 0.2.0
+     */
+    public static boolean isEmpty(String str) {
+        return str == null || str.isEmpty();
+    }
+
+    /**
+     * Is not empty.
+     *
+     * @param str the str
+     * @return true : not empty, false : empty
+     * @since 0.2.0
+     */
+    public static boolean isNotEmpty(String str) {
+        return str != null && !str.isEmpty();
+    }
+
+    /**
      * Join string.
      *
      * @param delimiter the delimiter

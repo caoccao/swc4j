@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
+import com.caoccao.javet.swc4j.utils.JsonUtils;
 
 /**
  * The type Base swc4j ast token.
@@ -133,5 +134,17 @@ public abstract class BaseSwc4jAstToken {
      */
     public void setStartPosition(int startPosition) {
         this.startPosition = startPosition;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{ \"lineBreakAhead\": ").append(lineBreakAhead);
+        sb.append(", \"start\": ").append(startPosition);
+        sb.append(", \"end\": ").append(endPosition);
+        sb.append(", \"type\": \"").append(getType().name()).append("\"");
+        sb.append(", \"text\": \"").append(JsonUtils.escape(getText())).append("\"");
+        sb.append(" }");
+        return sb.toString();
     }
 }
