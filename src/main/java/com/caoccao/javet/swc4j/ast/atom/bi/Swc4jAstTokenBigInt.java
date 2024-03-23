@@ -18,28 +18,29 @@ package com.caoccao.javet.swc4j.ast.atom.bi;
 
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
+import java.math.BigInteger;
+
 /**
  * The type Swc4j ast token number.
  *
  * @since 0.2.0
  */
-public class Swc4jAstTokenNumber extends BaseSwc4jAstTokenBiAtom<Double> {
+public class Swc4jAstTokenBigInt extends BaseSwc4jAstTokenBiAtom<BigInteger> {
     /**
      * Instantiates a new Swc4j ast token number.
      *
      * @param text           the text
-     * @param value          the value
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstTokenNumber(String text, Double value, int startPosition, int endPosition, boolean lineBreakAhead) {
-        super(text, value, startPosition, endPosition, lineBreakAhead);
+    public Swc4jAstTokenBigInt(String text, int startPosition, int endPosition, boolean lineBreakAhead) {
+        super(text, new BigInteger(text.substring(0, text.length() - 1)), startPosition, endPosition, lineBreakAhead);
     }
 
     @Override
     public Swc4jAstTokenType getType() {
-        return Swc4jAstTokenType.Num;
+        return Swc4jAstTokenType.BigInt;
     }
 }

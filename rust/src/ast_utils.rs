@@ -39,6 +39,7 @@ pub struct JavaAstTokenFactory {
   class: GlobalRef,
   method_create_assign_operator: JStaticMethodID,
   method_create_binary_operator: JStaticMethodID,
+  method_create_bigint: JStaticMethodID,
   method_create_false: JStaticMethodID,
   method_create_generic_operator: JStaticMethodID,
   method_create_ident_known: JStaticMethodID,
@@ -75,6 +76,13 @@ impl JavaAstTokenFactory {
         "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/ast/operators/Swc4jAstTokenBinaryOperator;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createBinaryOperator");
+    let method_create_bigint = env
+      .get_static_method_id(
+        &class,
+        "createBigInt",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/atom/bi/Swc4jAstTokenBigInt;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createBigInt");
     let method_create_false = env
       .get_static_method_id(
         &class,
@@ -149,6 +157,7 @@ impl JavaAstTokenFactory {
       class,
       method_create_assign_operator,
       method_create_binary_operator,
+      method_create_bigint,
       method_create_false,
       method_create_generic_operator,
       method_create_ident_known,
@@ -235,6 +244,41 @@ impl JavaAstTokenFactory {
     env
       .delete_local_ref(java_ast_token_type)
       .expect("Couldn't delete local ast token type");
+    token
+  }
+
+  pub fn create_bigint<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    text: &str,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_string = converter::string_to_jstring(env, &text);
+    let text = jvalue {
+      l: java_string.as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
+    let token = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_bigint,
+          ReturnType::Object,
+          &[text, start_position, end_position, line_break_ahead],
+        )
+        .expect("Couldn't create Swc4jAstTokenBigInt")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenBigInt")
+    };
+    env.delete_local_ref(java_string).expect("Couldn't delete local text");
     token
   }
 
@@ -686,6 +730,9 @@ pub fn token_and_spans_to_java_list<'local>(
             }
             Token::Num { value, raw } => {
               java_ast_token_factory.create_number(env, &raw, *value, index_range, line_break_ahead)
+            }
+            Token::BigInt { value: _, raw } => {
+              java_ast_token_factory.create_bigint(env, &raw, index_range, line_break_ahead)
             }
             token => match &AstTokenType::parse_by_generic_operator(token) {
               AstTokenType::Unknown => {

@@ -142,6 +142,7 @@ pub enum AstTokenType {
   // Atom - Bi
   Str, // 101
   Num, // 102
+  BigInt, // 103
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -249,6 +250,7 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::NullishAssign => 100,
       AstTokenType::Str => 101,
       AstTokenType::Num => 102,
+      AstTokenType::BigInt => 103,
       _ => 0,
     }
   }
@@ -356,6 +358,7 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       100 => AstTokenType::NullishAssign,
       101 => AstTokenType::Str,
       102 => AstTokenType::Num,
+      103 => AstTokenType::BigInt,
       _ => AstTokenType::Unknown,
     }
   }

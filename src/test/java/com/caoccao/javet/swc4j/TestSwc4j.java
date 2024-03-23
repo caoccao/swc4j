@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -238,8 +239,11 @@ public class TestSwc4j {
         parseAndAssert("1 ??= 2", options, Swc4jAstTokenType.NullishAssign, "??=", 2, 5, 1, 3);
         // Atom - Bi
         assertTokenValue("x", parseAndAssert("a = 'x';", options, Swc4jAstTokenType.Str, "'x'", 4, 7, 2, 4));
-        assertTokenValue(1D, parseAndAssert("a = 1;", options, Swc4jAstTokenType.Str, "1", 4, 5, 2, 4));
-        assertTokenValue(1.23D, parseAndAssert("a = -1.23;", options, Swc4jAstTokenType.Str, "1.23", 5, 9, 3, 5));
+        assertTokenValue(1D, parseAndAssert("a = 1;", options, Swc4jAstTokenType.Num, "1", 4, 5, 2, 4));
+        assertTokenValue(1.23D, parseAndAssert("a = -1.23;", options, Swc4jAstTokenType.Num, "1.23", 5, 9, 3, 5));
+        assertTokenValue(BigInteger.valueOf(1), parseAndAssert("a = 1n;", options, Swc4jAstTokenType.BigInt, "1n", 4, 6, 2, 4));
+        assertTokenValue(BigInteger.valueOf(1), parseAndAssert("a = -1n;", options, Swc4jAstTokenType.BigInt, "1n", 5, 7, 3, 5));
+        assertTokenValue(new BigInteger("1234567890123456789012345678901234567890"), parseAndAssert("a = 1234567890123456789012345678901234567890n;", options, Swc4jAstTokenType.BigInt, "1234567890123456789012345678901234567890n", 4, 45, 2, 4));
     }
 
     @Test
