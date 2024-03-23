@@ -16,6 +16,8 @@
 
 package com.caoccao.javet.swc4j.ast;
 
+import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenString;
+import com.caoccao.javet.swc4j.ast.atom.uni.Swc4jAstTokenUnknown;
 import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenAssignOperator;
 import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenBinaryOperator;
 import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenGenericOperator;
@@ -147,6 +149,22 @@ public final class Swc4jAstTokenFactory {
     public static Swc4jAstTokenNull createNull(
             int startPosition, int endPosition, boolean lineBreakAhead) {
         return new Swc4jAstTokenNull(startPosition, endPosition, lineBreakAhead);
+    }
+
+    /**
+     * Create ast token string.
+     *
+     * @param text           the text
+     * @param value          the value
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
+     * @return the ast token string
+     * @since 0.2.0
+     */
+    public static Swc4jAstTokenString createString(
+            String text, String value, int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenString(text, value, startPosition, endPosition, lineBreakAhead);
     }
 
     /**

@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j;
 
 import com.caoccao.javet.swc4j.ast.BaseSwc4jAstToken;
+import com.caoccao.javet.swc4j.ast.atom.bi.BaseSwc4jAstTokenBiAtom;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
@@ -39,6 +40,13 @@ public class TestSwc4j {
 
     public TestSwc4j() {
         swc4j = new Swc4j();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T> void assertTokenValue(T expectedValue, BaseSwc4jAstToken token) {
+        assertInstanceOf(BaseSwc4jAstTokenBiAtom.class, token);
+        BaseSwc4jAstTokenBiAtom<T> tokenTextAndValue = (BaseSwc4jAstTokenBiAtom<T>) token;
+        assertEquals(expectedValue, tokenTextAndValue.getValue());
     }
 
     protected BaseSwc4jAstToken parseAndAssert(
@@ -228,6 +236,8 @@ public class TestSwc4j {
         parseAndAssert("1 &&= 2", options, Swc4jAstTokenType.AndAssign, "&&=", 2, 5, 1, 3);
         parseAndAssert("1 ||= 2", options, Swc4jAstTokenType.OrAssign, "||=", 2, 5, 1, 3);
         parseAndAssert("1 ??= 2", options, Swc4jAstTokenType.NullishAssign, "??=", 2, 5, 1, 3);
+        // Atom - 2
+        assertTokenValue("x", parseAndAssert("a = 'x';", options, Swc4jAstTokenType.Str, "'x'", 4, 7, 2, 4));
     }
 
     @Test

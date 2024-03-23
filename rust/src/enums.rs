@@ -139,6 +139,8 @@ pub enum AstTokenType {
   AndAssign,            // 98
   OrAssign,             // 99
   NullishAssign,        // 100
+  // Atom - 2
+  Str, // 101
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -244,6 +246,7 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::AndAssign => 98,
       AstTokenType::OrAssign => 99,
       AstTokenType::NullishAssign => 100,
+      AstTokenType::Str => 101,
       _ => 0,
     }
   }
@@ -349,6 +352,7 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       98 => AstTokenType::AndAssign,
       99 => AstTokenType::OrAssign,
       100 => AstTokenType::NullishAssign,
+      101 => AstTokenType::Str,
       _ => AstTokenType::Unknown,
     }
   }

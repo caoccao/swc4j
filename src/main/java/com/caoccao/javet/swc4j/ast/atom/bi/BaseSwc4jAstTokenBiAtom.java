@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,32 +14,47 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast;
+package com.caoccao.javet.swc4j.ast.atom.bi;
 
-import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
+import com.caoccao.javet.swc4j.ast.atom.BaseSwc4jAstTokenAtom;
 
 /**
- * The type Swc4j ast token unknown is a placeholder token.
- * It shouldn't exist in the tokens. Otherwise, there are something missed in the implementation.
+ * The type Base swc4j ast token bi atom.
  *
+ * @param <T> the type parameter
  * @since 0.2.0
  */
-public class Swc4jAstTokenUnknown extends BaseSwc4jAstTokenText {
+public abstract class BaseSwc4jAstTokenBiAtom<T> extends BaseSwc4jAstTokenAtom {
     /**
-     * Instantiates a new Swc4j ast token unknown.
+     * The Text.
+     *
+     * @since 0.2.0
+     */
+    protected final T value;
+
+    /**
+     * Instantiates a new Base swc4j ast token bi atom.
      *
      * @param text           the text
+     * @param value          the value
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstTokenUnknown(String text, int startPosition, int endPosition, boolean lineBreakAhead) {
+    public BaseSwc4jAstTokenBiAtom(
+            String text, T value, int startPosition, int endPosition, boolean lineBreakAhead) {
         super(text, startPosition, endPosition, lineBreakAhead);
+        this.value = value;
     }
 
-    @Override
-    public Swc4jAstTokenType getType() {
-        return Swc4jAstTokenType.Unknown;
+    /**
+     * Gets value.
+     *
+     * @return the value
+     * @since 0.2.0
+     */
+    public T getValue() {
+        return value;
     }
 }

@@ -45,6 +45,7 @@ pub struct JavaAstTokenFactory {
   method_create_ident_other: JStaticMethodID,
   method_create_keyword: JStaticMethodID,
   method_create_null: JStaticMethodID,
+  method_create_string: JStaticMethodID,
   method_create_true: JStaticMethodID,
   method_create_unknown: JStaticMethodID,
 }
@@ -115,6 +116,13 @@ impl JavaAstTokenFactory {
         "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/words/Swc4jAstTokenIdentOther;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createIdentOther");
+    let method_create_string = env
+      .get_static_method_id(
+        &class,
+        "createString",
+        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/atom/bi/Swc4jAstTokenString;",
+      )
+      .expect("Couldn't find method Swc4jAstTokenFactory.createString");
     let method_create_true = env
       .get_static_method_id(
         &class,
@@ -126,7 +134,7 @@ impl JavaAstTokenFactory {
       .get_static_method_id(
         &class,
         "createUnknown",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenUnknown;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/atom/uni/Swc4jAstTokenUnknown;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createUnknown");
     JavaAstTokenFactory {
@@ -139,6 +147,7 @@ impl JavaAstTokenFactory {
       method_create_ident_other,
       method_create_keyword,
       method_create_null,
+      method_create_string,
       method_create_true,
       method_create_unknown,
     }
@@ -422,6 +431,47 @@ impl JavaAstTokenFactory {
     token
   }
 
+  pub fn create_string<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    text: &str,
+    value: &str,
+    range: Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_string_text = converter::string_to_jstring(env, &text);
+    let java_string_value = converter::string_to_jstring(env, &value);
+    let text = jvalue {
+      l: java_string_text.as_raw(),
+    };
+    let value = jvalue {
+      l: java_string_value.as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
+    let token = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_string,
+          ReturnType::Object,
+          &[text, value, start_position, end_position, line_break_ahead],
+        )
+        .expect("Couldn't create Swc4jAstTokenString")
+        .l()
+        .expect("Couldn't convert Swc4jAstTokenString")
+    };
+    env.delete_local_ref(java_string_text).expect("Couldn't delete local text");
+    env.delete_local_ref(java_string_value).expect("Couldn't delete local value");
+    token
+  }
+
   pub fn create_true<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -560,12 +610,12 @@ pub fn token_and_spans_to_java_list<'local>(
               Word::Ident(ident) => match ident {
                 IdentLike::Known(known_ident) => java_ast_token_factory.create_ident_known(
                   env,
-                  &Atom::from(*known_ident).as_str(),
+                  &Atom::from(*known_ident),
                   index_range,
                   line_break_ahead,
                 ),
                 IdentLike::Other(js_word) => {
-                  java_ast_token_factory.create_ident_other(env, &js_word.as_str(), index_range, line_break_ahead)
+                  java_ast_token_factory.create_ident_other(env, &js_word, index_range, line_break_ahead)
                 }
               },
             },
@@ -581,6 +631,9 @@ pub fn token_and_spans_to_java_list<'local>(
               index_range,
               line_break_ahead,
             ),
+            Token::Str { value, raw } => {
+              java_ast_token_factory.create_string(env, &raw, &value, index_range, line_break_ahead)
+            }
             token => match &AstTokenType::parse_by_generic_operator(token) {
               AstTokenType::Unknown => {
                 eprintln!("Unknown {:?}", token);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast;
+package com.caoccao.javet.swc4j.ast.atom;
+
+import com.caoccao.javet.swc4j.ast.BaseSwc4jAstToken;
 
 /**
- * The type Base swc4j ast token text.
+ * The type Base swc4j ast token atom.
  *
  * @since 0.2.0
  */
-public abstract class BaseSwc4jAstTokenText extends BaseSwc4jAstToken {
+public abstract class BaseSwc4jAstTokenAtom extends BaseSwc4jAstToken {
     /**
      * The Text.
      *
@@ -30,7 +32,7 @@ public abstract class BaseSwc4jAstTokenText extends BaseSwc4jAstToken {
     protected final String text;
 
     /**
-     * Instantiates a new Base swc4j ast token text.
+     * Instantiates a new Base swc4j ast token atom.
      *
      * @param text           the text
      * @param startPosition  the start position
@@ -38,7 +40,7 @@ public abstract class BaseSwc4jAstTokenText extends BaseSwc4jAstToken {
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public BaseSwc4jAstTokenText(String text, int startPosition, int endPosition, boolean lineBreakAhead) {
+    public BaseSwc4jAstTokenAtom(String text, int startPosition, int endPosition, boolean lineBreakAhead) {
         super(startPosition, endPosition, lineBreakAhead);
         this.text = text;
     }
