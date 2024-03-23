@@ -14,33 +14,51 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.atom.bi;
+package com.caoccao.javet.swc4j.ast.atom.uni;
 
-import com.caoccao.javet.swc4j.ast.atom.BaseSwc4jAstTokenBiAtom;
+import com.caoccao.javet.swc4j.ast.atom.BaseSwc4jAstTokenUniAtom;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
 /**
- * The type Swc4j ast token number.
+ * The type Swc4j ast token error.
  *
  * @since 0.2.0
  */
-public class Swc4jAstTokenNumber extends BaseSwc4jAstTokenBiAtom<Double> {
+public class Swc4jAstTokenError extends BaseSwc4jAstTokenUniAtom {
     /**
-     * Instantiates a new Swc4j ast token number.
+     * The Syntax error.
+     *
+     * @since 0.2.0
+     */
+    protected final String syntaxError;
+
+    /**
+     * Instantiates a new Swc4j ast token error.
      *
      * @param text           the text
-     * @param value          the value
+     * @param syntaxError    the syntax error
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstTokenNumber(String text, Double value, int startPosition, int endPosition, boolean lineBreakAhead) {
-        super(text, value, startPosition, endPosition, lineBreakAhead);
+    public Swc4jAstTokenError(String text, String syntaxError, int startPosition, int endPosition, boolean lineBreakAhead) {
+        super(text, startPosition, endPosition, lineBreakAhead);
+        this.syntaxError = syntaxError;
+    }
+
+    /**
+     * Gets syntax error.
+     *
+     * @return the syntax error
+     * @since 0.2.0
+     */
+    public String getSyntaxError() {
+        return syntaxError;
     }
 
     @Override
     public Swc4jAstTokenType getType() {
-        return Swc4jAstTokenType.Num;
+        return Swc4jAstTokenType.Error;
     }
 }

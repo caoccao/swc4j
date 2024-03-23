@@ -139,13 +139,16 @@ pub enum AstTokenType {
   AndAssign,            // 98
   OrAssign,             // 99
   NullishAssign,        // 100
+  // Atom - Uni
+  Error, // 101
   // Atom - Bi
-  Str, // 101
-  Num, // 102
-  BigInt, // 103
-  Template, // 104
+  Str, // 102
+  Num, // 103
+  BigInt, // 104
+  Template, // 105
+  Shebang, // 106
   // Atom - Tri
-  Regex, // 105
+  Regex, // 107
 }
 
 impl IdentifiableEnum<AstTokenType> for AstTokenType {
@@ -251,11 +254,13 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       AstTokenType::AndAssign => 98,
       AstTokenType::OrAssign => 99,
       AstTokenType::NullishAssign => 100,
-      AstTokenType::Str => 101,
-      AstTokenType::Num => 102,
-      AstTokenType::BigInt => 103,
-      AstTokenType::Template => 104,
-      AstTokenType::Regex => 105,
+      AstTokenType::Error => 101,
+      AstTokenType::Str => 102,
+      AstTokenType::Num => 103,
+      AstTokenType::BigInt => 104,
+      AstTokenType::Template => 105,
+      AstTokenType::Shebang => 106,
+      AstTokenType::Regex => 107,
       _ => 0,
     }
   }
@@ -361,11 +366,13 @@ impl IdentifiableEnum<AstTokenType> for AstTokenType {
       98 => AstTokenType::AndAssign,
       99 => AstTokenType::OrAssign,
       100 => AstTokenType::NullishAssign,
-      101 => AstTokenType::Str,
-      102 => AstTokenType::Num,
-      103 => AstTokenType::BigInt,
-      104 => AstTokenType::Template,
-      105 => AstTokenType::Regex,
+      101 => AstTokenType::Error,
+      102 => AstTokenType::Str,
+      103 => AstTokenType::Num,
+      104 => AstTokenType::BigInt,
+      105 => AstTokenType::Template,
+      106 => AstTokenType::Shebang,
+      107 => AstTokenType::Regex,
       _ => AstTokenType::Unknown,
     }
   }

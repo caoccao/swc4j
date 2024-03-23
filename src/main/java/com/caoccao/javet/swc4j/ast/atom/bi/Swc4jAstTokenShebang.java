@@ -14,39 +14,33 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.atom.uni;
+package com.caoccao.javet.swc4j.ast.atom.bi;
 
-import com.caoccao.javet.swc4j.ast.BaseSwc4jAstToken;
+import com.caoccao.javet.swc4j.ast.atom.BaseSwc4jAstTokenBiAtom;
+import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
 /**
- * The type Base swc4j ast token uni atom.
+ * The type Swc4j ast token shebang.
  *
  * @since 0.2.0
  */
-public abstract class BaseSwc4jAstTokenUniAtom extends BaseSwc4jAstToken {
+public class Swc4jAstTokenShebang extends BaseSwc4jAstTokenBiAtom<String> {
     /**
-     * The Text.
-     *
-     * @since 0.2.0
-     */
-    protected final String text;
-
-    /**
-     * Instantiates a new Base swc4j ast token uni atom.
+     * Instantiates a new Swc4j ast token shebang.
      *
      * @param text           the text
+     * @param value          the value
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public BaseSwc4jAstTokenUniAtom(String text, int startPosition, int endPosition, boolean lineBreakAhead) {
-        super(startPosition, endPosition, lineBreakAhead);
-        this.text = text;
+    public Swc4jAstTokenShebang(String text, String value, int startPosition, int endPosition, boolean lineBreakAhead) {
+        super(text, value, startPosition, endPosition, lineBreakAhead);
     }
 
     @Override
-    public String getText() {
-        return text;
+    public Swc4jAstTokenType getType() {
+        return Swc4jAstTokenType.Shebang;
     }
 }

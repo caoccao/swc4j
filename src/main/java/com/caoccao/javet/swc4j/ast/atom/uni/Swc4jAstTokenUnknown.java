@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.atom.uni;
 
+import com.caoccao.javet.swc4j.ast.atom.BaseSwc4jAstTokenUniAtom;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
 /**

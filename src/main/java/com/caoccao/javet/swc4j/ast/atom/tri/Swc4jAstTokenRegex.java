@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.atom.tri;
 
-import com.caoccao.javet.swc4j.ast.atom.bi.BaseSwc4jAstTokenBiAtom;
+import com.caoccao.javet.swc4j.ast.atom.BaseSwc4jAstTokenBiAtom;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
 /**

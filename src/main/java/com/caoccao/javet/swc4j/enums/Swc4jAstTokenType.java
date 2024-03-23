@@ -125,13 +125,16 @@ public enum Swc4jAstTokenType {
     AndAssign(98, "&&=", Swc4jAstTokenSubType.AssignOperator),
     OrAssign(99, "||=", Swc4jAstTokenSubType.AssignOperator),
     NullishAssign(100, "??=", Swc4jAstTokenSubType.AssignOperator),
+    // Atom - Uni
+    Error(101, "$Error", Swc4jAstTokenSubType.UniAtom),
     // Atom - Bi
-    Str(101, "$Str", Swc4jAstTokenSubType.BiAtom),
-    Num(102, "$Num", Swc4jAstTokenSubType.BiAtom),
-    BigInt(103, "$BigInt", Swc4jAstTokenSubType.BiAtom),
-    Template(104, "$Template", Swc4jAstTokenSubType.BiAtom),
+    Str(102, "$Str", Swc4jAstTokenSubType.BiAtom),
+    Num(103, "$Num", Swc4jAstTokenSubType.BiAtom),
+    BigInt(104, "$BigInt", Swc4jAstTokenSubType.BiAtom),
+    Template(105, "$Template", Swc4jAstTokenSubType.BiAtom),
+    Shebang(106, "$Shebang", Swc4jAstTokenSubType.BiAtom),
     // Atom - Tri
-    Regex(105, "$Regex", Swc4jAstTokenSubType.TriAtom),
+    Regex(107, "$Regex", Swc4jAstTokenSubType.TriAtom),
     ;
 
     private static final int LENGTH = values().length;

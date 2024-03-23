@@ -14,47 +14,39 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.atom.bi;
+package com.caoccao.javet.swc4j.ast.atom;
 
-import com.caoccao.javet.swc4j.ast.atom.uni.BaseSwc4jAstTokenUniAtom;
+import com.caoccao.javet.swc4j.ast.BaseSwc4jAstToken;
 
 /**
- * The type Base swc4j ast token bi atom.
+ * The type Base swc4j ast token uni atom.
  *
- * @param <T> the type parameter
  * @since 0.2.0
  */
-public abstract class BaseSwc4jAstTokenBiAtom<T> extends BaseSwc4jAstTokenUniAtom {
+public abstract class BaseSwc4jAstTokenUniAtom extends BaseSwc4jAstToken {
     /**
      * The Text.
      *
      * @since 0.2.0
      */
-    protected final T value;
+    protected final String text;
 
     /**
-     * Instantiates a new Base swc4j ast token bi atom.
+     * Instantiates a new Base swc4j ast token uni atom.
      *
      * @param text           the text
-     * @param value          the value
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public BaseSwc4jAstTokenBiAtom(
-            String text, T value, int startPosition, int endPosition, boolean lineBreakAhead) {
-        super(text, startPosition, endPosition, lineBreakAhead);
-        this.value = value;
+    public BaseSwc4jAstTokenUniAtom(String text, int startPosition, int endPosition, boolean lineBreakAhead) {
+        super(startPosition, endPosition, lineBreakAhead);
+        this.text = text;
     }
 
-    /**
-     * Gets value.
-     *
-     * @return the value
-     * @since 0.2.0
-     */
-    public T getValue() {
-        return value;
+    @Override
+    public String getText() {
+        return text;
     }
 }

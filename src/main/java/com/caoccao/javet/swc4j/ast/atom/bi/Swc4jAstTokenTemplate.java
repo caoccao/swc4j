@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.atom.bi;
 
+import com.caoccao.javet.swc4j.ast.atom.BaseSwc4jAstTokenBiAtom;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
 /**

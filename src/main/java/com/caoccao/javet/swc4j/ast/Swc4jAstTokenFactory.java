@@ -21,6 +21,8 @@ import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenNumber;
 import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenString;
 import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenTemplate;
 import com.caoccao.javet.swc4j.ast.atom.tri.Swc4jAstTokenRegex;
+import com.caoccao.javet.swc4j.ast.atom.uni.Swc4jAstTokenError;
+import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenShebang;
 import com.caoccao.javet.swc4j.ast.atom.uni.Swc4jAstTokenUnknown;
 import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenAssignOperator;
 import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenBinaryOperator;
@@ -80,6 +82,22 @@ public final class Swc4jAstTokenFactory {
     public static Swc4jAstTokenBinaryOperator createBinaryOperator(
             Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
         return new Swc4jAstTokenBinaryOperator(type, startPosition, endPosition, lineBreakAhead);
+    }
+
+    /**
+     * Create ast token error.
+     *
+     * @param text           the text
+     * @param syntaxError    the syntax error
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
+     * @return the ast token error
+     * @since 0.2.0
+     */
+    public static Swc4jAstTokenError createError(
+            String text, String syntaxError, int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenError(text, syntaxError, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
@@ -201,6 +219,22 @@ public final class Swc4jAstTokenFactory {
     public static Swc4jAstTokenRegex createRegex(
             String text, String value, String flags, int startPosition, int endPosition, boolean lineBreakAhead) {
         return new Swc4jAstTokenRegex(text, value, flags, startPosition, endPosition, lineBreakAhead);
+    }
+
+    /**
+     * Create ast token shebang.
+     *
+     * @param text           the text
+     * @param value          the value
+     * @param startPosition  the start position
+     * @param endPosition    the end position
+     * @param lineBreakAhead the line break ahead
+     * @return the ast token shebang
+     * @since 0.2.0
+     */
+    public static Swc4jAstTokenShebang createShebang(
+            String text, String value, int startPosition, int endPosition, boolean lineBreakAhead) {
+        return new Swc4jAstTokenShebang(text, value, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
