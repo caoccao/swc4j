@@ -16,9 +16,9 @@
 
 package com.caoccao.javet.swc4j;
 
-import com.caoccao.javet.swc4j.ast.Swc4jAstToken;
-import com.caoccao.javet.swc4j.ast.Swc4jAstTokenTextValue;
-import com.caoccao.javet.swc4j.ast.Swc4jAstTokenTextValueFlags;
+import com.caoccao.javet.swc4j.tokens.Swc4jAstToken;
+import com.caoccao.javet.swc4j.tokens.Swc4jAstTokenTextValue;
+import com.caoccao.javet.swc4j.tokens.Swc4jAstTokenTextValueFlags;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;

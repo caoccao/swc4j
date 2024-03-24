@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j.outputs;
 
-import com.caoccao.javet.swc4j.ast.Swc4jAstToken;
+import com.caoccao.javet.swc4j.tokens.Swc4jAstToken;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 

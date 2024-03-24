@@ -64,7 +64,7 @@ unsafe impl Sync for JavaAstTokenFactory {}
 impl JavaAstTokenFactory {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/ast/Swc4jAstTokenFactory")
+      .find_class("com/caoccao/javet/swc4j/tokens/Swc4jAstTokenFactory")
       .expect("Couldn't find class Swc4jAstTokenFactory");
     let class = env
       .new_global_ref(class)
@@ -73,133 +73,133 @@ impl JavaAstTokenFactory {
       .get_static_method_id(
         &class,
         "createAssignOperator",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstToken;",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstToken;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createAssignOperator");
     let method_create_binary_operator = env
       .get_static_method_id(
         &class,
         "createBinaryOperator",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstToken;",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstToken;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createBinaryOperator");
     let method_create_bigint = env
       .get_static_method_id(
         &class,
         "createBigInt",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenTextValue;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createBigInt");
     let method_create_error = env
       .get_static_method_id(
         &class,
         "createError",
-        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createError");
     let method_create_false = env
       .get_static_method_id(
         &class,
         "createFalse",
-        "(IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstToken;",
+        "(IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstToken;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createFalse");
     let method_create_generic_operator = env
       .get_static_method_id(
         &class,
         "createGenericOperator",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstToken;",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstToken;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createGenericOperator");
     let method_create_ident_known = env
       .get_static_method_id(
         &class,
         "createIdentKnown",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenText;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstTokenText;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createIdentKnown");
     let method_create_jsx_tag_name = env
       .get_static_method_id(
         &class,
         "createJsxTagName",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenText;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstTokenText;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createJsxTagName");
     let method_create_jsx_tag_text = env
       .get_static_method_id(
         &class,
         "createJsxTagText",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenText;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstTokenText;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createJsxTagText");
     let method_create_keyword = env
       .get_static_method_id(
         &class,
         "createKeyword",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstToken;",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstToken;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createKeyword");
     let method_create_null = env
       .get_static_method_id(
         &class,
         "createNull",
-        "(IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstToken;",
+        "(IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstToken;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createNull");
     let method_create_ident_other = env
       .get_static_method_id(
         &class,
         "createIdentOther",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenText;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstTokenText;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createIdentOther");
     let method_create_number = env
       .get_static_method_id(
         &class,
         "createNumber",
-        "(Ljava/lang/String;DIIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenTextValue;",
+        "(Ljava/lang/String;DIIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createNumber");
     let method_create_regex = env
       .get_static_method_id(
         &class,
         "createRegex",
-        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenTextValueFlags;",
+        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstTokenTextValueFlags;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createRegex");
     let method_create_shebang = env
       .get_static_method_id(
         &class,
         "createShebang",
-        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createShebang");
     let method_create_string = env
       .get_static_method_id(
         &class,
         "createString",
-        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createString");
     let method_create_template = env
       .get_static_method_id(
         &class,
         "createTemplate",
-        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createTemplate");
     let method_create_true = env
       .get_static_method_id(
         &class,
         "createTrue",
-        "(IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstToken;",
+        "(IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstToken;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createTrue");
     let method_create_unknown = env
       .get_static_method_id(
         &class,
         "createUnknown",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/Swc4jAstTokenText;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jAstTokenText;",
       )
       .expect("Couldn't find method Swc4jAstTokenFactory.createUnknown");
     JavaAstTokenFactory {
