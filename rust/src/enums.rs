@@ -139,15 +139,14 @@ pub enum AstTokenType {
   AndAssign,            // 98
   OrAssign,             // 99
   NullishAssign,        // 100
-  // Atom - Uni
+  // TextValue
   Shebang, // 101
   Error,   // 102
-  // Atom - Bi
   Str,      // 103
   Num,      // 104
   BigInt,   // 105
   Template, // 106
-  // Atom - Tri
+  // TextValueFlags
   Regex, // 107
   // Jsx
   JSXTagStart, // 108

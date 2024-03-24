@@ -17,47 +17,56 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.JsonUtils;
 
 /**
- * The type Base swc4j ast token.
+ * The type swc4j ast token.
  *
  * @since 0.2.0
  */
-public abstract class BaseSwc4jAstToken {
+public class Swc4jAstToken {
     /**
      * The End position of the token.
      * It is zero-based.
      *
      * @since 0.2.0
      */
-    protected int endPosition;
+    protected final int endPosition;
     /**
      * The Line break ahead.
      *
      * @since 0.2.0
      */
-    protected boolean lineBreakAhead;
+    protected final boolean lineBreakAhead;
     /**
      * The Start position of the token.
      * It is zero-based.
      *
      * @since 0.2.0
      */
-    protected int startPosition;
+    protected final int startPosition;
+    /**
+     * The token Type.
+     *
+     * @since 0.2.0
+     */
+    protected final Swc4jAstTokenType type;
 
     /**
-     * Instantiates a new Base swc4j ast token.
+     * Instantiates a new swc4j ast token.
      *
+     * @param type           the type
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public BaseSwc4jAstToken(int startPosition, int endPosition, boolean lineBreakAhead) {
+    public Swc4jAstToken(Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
         this.endPosition = endPosition;
         this.lineBreakAhead = lineBreakAhead;
         this.startPosition = startPosition;
+        this.type = AssertionUtils.notNull(type, "Ast token type");
     }
 
     /**
@@ -86,7 +95,9 @@ public abstract class BaseSwc4jAstToken {
      * @return the text
      * @since 0.2.0
      */
-    public abstract String getText();
+    public String getText() {
+        return getType().getName();
+    }
 
     /**
      * Gets type.
@@ -94,7 +105,9 @@ public abstract class BaseSwc4jAstToken {
      * @return the type
      * @since 0.2.0
      */
-    public abstract Swc4jAstTokenType getType();
+    public Swc4jAstTokenType getType() {
+        return type;
+    }
 
     /**
      * Is line break ahead.
@@ -106,43 +119,13 @@ public abstract class BaseSwc4jAstToken {
         return lineBreakAhead;
     }
 
-    /**
-     * Sets end position.
-     *
-     * @param endPosition the end position
-     * @since 0.2.0
-     */
-    public void setEndPosition(int endPosition) {
-        this.endPosition = endPosition;
-    }
-
-    /**
-     * Sets line break ahead.
-     *
-     * @param lineBreakAhead the line break ahead
-     * @since 0.2.0
-     */
-    public void setLineBreakAhead(boolean lineBreakAhead) {
-        this.lineBreakAhead = lineBreakAhead;
-    }
-
-    /**
-     * Sets start position.
-     *
-     * @param startPosition the start position
-     * @since 0.2.0
-     */
-    public void setStartPosition(int startPosition) {
-        this.startPosition = startPosition;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{ \"lineBreakAhead\": ").append(lineBreakAhead);
         sb.append(", \"start\": ").append(startPosition);
         sb.append(", \"end\": ").append(endPosition);
-        sb.append(", \"type\": \"").append(getType().name()).append("\"");
+        sb.append(", \"type\": \"").append(type.name()).append("\"");
         sb.append(", \"text\": \"").append(JsonUtils.escape(getText())).append("\"");
         sb.append(" }");
         return sb.toString();

@@ -18,13 +18,13 @@ package com.caoccao.javet.swc4j.enums;
 
 public enum Swc4jAstTokenSubType {
     AssignOperator,
-    BiAtom,
     BinaryOperator,
     GenericOperator,
     Keyword,
     ReservedWord,
-    TriAtom,
-    UniAtom,
+    Text,
+    TextValue,
+    TextValueFlags,
     Unknown,
     ;
 
@@ -33,7 +33,7 @@ public enum Swc4jAstTokenSubType {
     }
 
     public boolean isBiAtom() {
-        return this == BiAtom;
+        return this == TextValue;
     }
 
     public boolean isBinaryOperator() {
@@ -57,11 +57,11 @@ public enum Swc4jAstTokenSubType {
     }
 
     public boolean isTriAtom() {
-        return this == TriAtom;
+        return this == TextValueFlags;
     }
 
     public boolean isUniAtom() {
-        return this == UniAtom;
+        return this == Text;
     }
 
     public boolean isUnknown() {

@@ -16,17 +16,10 @@
 
 package com.caoccao.javet.swc4j.ast;
 
-import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenBigInt;
-import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenNumber;
-import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenString;
-import com.caoccao.javet.swc4j.ast.atom.bi.Swc4jAstTokenTemplate;
-import com.caoccao.javet.swc4j.ast.atom.tri.Swc4jAstTokenRegex;
-import com.caoccao.javet.swc4j.ast.atom.uni.*;
-import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenAssignOperator;
-import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenBinaryOperator;
-import com.caoccao.javet.swc4j.ast.operators.Swc4jAstTokenGenericOperator;
-import com.caoccao.javet.swc4j.ast.words.*;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
+
+import java.math.BigInteger;
 
 /**
  * The type Swc4j ast token factory.
@@ -47,9 +40,10 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token assign operator
      * @since 0.2.0
      */
-    public static Swc4jAstTokenAssignOperator createAssignOperator(
+    public static Swc4jAstToken createAssignOperator(
             Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenAssignOperator(type, startPosition, endPosition, lineBreakAhead);
+        AssertionUtils.notTrue(type.getSubType().isAssignOperator(), "Assign operator is expected");
+        return new Swc4jAstToken(type, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
@@ -62,9 +56,15 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token big int
      * @since 0.2.0
      */
-    public static Swc4jAstTokenBigInt createBigInt(
+    public static Swc4jAstTokenTextValue<BigInteger> createBigInt(
             String text, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenBigInt(text, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstTokenTextValue<>(
+                Swc4jAstTokenType.BigInt,
+                text,
+                new BigInteger(text.substring(0, text.length() - 1)),
+                startPosition,
+                endPosition,
+                lineBreakAhead);
     }
 
     /**
@@ -77,9 +77,10 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token binary operator
      * @since 0.2.0
      */
-    public static Swc4jAstTokenBinaryOperator createBinaryOperator(
+    public static Swc4jAstToken createBinaryOperator(
             Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenBinaryOperator(type, startPosition, endPosition, lineBreakAhead);
+        AssertionUtils.notTrue(type.getSubType().isBinaryOperator(), "Binary operator is expected");
+        return new Swc4jAstToken(type, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
@@ -93,9 +94,15 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token error
      * @since 0.2.0
      */
-    public static Swc4jAstTokenError createError(
+    public static Swc4jAstTokenTextValue<String> createError(
             String text, String error, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenError(text, error, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstTokenTextValue<>(
+                Swc4jAstTokenType.Error,
+                text,
+                error,
+                startPosition,
+                endPosition,
+                lineBreakAhead);
     }
 
     /**
@@ -107,9 +114,9 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token false
      * @since 0.2.0
      */
-    public static Swc4jAstTokenFalse createFalse(
+    public static Swc4jAstToken createFalse(
             int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenFalse(startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstToken(Swc4jAstTokenType.False, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
@@ -122,9 +129,10 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token generic operator
      * @since 0.2.0
      */
-    public static Swc4jAstTokenGenericOperator createGenericOperator(
+    public static Swc4jAstToken createGenericOperator(
             Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenGenericOperator(type, startPosition, endPosition, lineBreakAhead);
+        AssertionUtils.notTrue(type.getSubType().isGenericOperator(), "Generic operator is expected");
+        return new Swc4jAstToken(type, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
@@ -137,9 +145,9 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token ident known
      * @since 0.2.0
      */
-    public static Swc4jAstTokenIdentKnown createIdentKnown(
+    public static Swc4jAstTokenText createIdentKnown(
             String text, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenIdentKnown(text, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstTokenText(Swc4jAstTokenType.IdentKnown, text, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
@@ -152,39 +160,39 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token ident other
      * @since 0.2.0
      */
-    public static Swc4jAstTokenIdentOther createIdentOther(
+    public static Swc4jAstTokenText createIdentOther(
             String text, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenIdentOther(text, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstTokenText(Swc4jAstTokenType.IdentOther, text, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
-     * Create ast token jsx name.
+     * Create ast token jsx tag name.
      *
      * @param text           the text
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
-     * @return the ast token jsx name
+     * @return the ast token jsx tag name
      * @since 0.2.0
      */
-    public static Swc4jAstTokenJsxTagName createJsxName(
+    public static Swc4jAstTokenText createJsxTagName(
             String text, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenJsxTagName(text, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstTokenText(Swc4jAstTokenType.JsxTagName, text, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
-     * Create ast token jsx text.
+     * Create ast token jsx tag text.
      *
      * @param text           the text
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
-     * @return the ast token jsx text
+     * @return the ast token jsx tag text
      * @since 0.2.0
      */
-    public static Swc4jAstTokenJsxTagText createJsxText(
+    public static Swc4jAstTokenText createJsxTagText(
             String text, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenJsxTagText(text, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstTokenText(Swc4jAstTokenType.JsxTagText, text, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
@@ -197,9 +205,10 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token keyword
      * @since 0.2.0
      */
-    public static Swc4jAstTokenKeyword createKeyword(
+    public static Swc4jAstToken createKeyword(
             Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenKeyword(type, startPosition, endPosition, lineBreakAhead);
+        AssertionUtils.notTrue(type.getSubType().isKeyword(), "Keyword is expected");
+        return new Swc4jAstToken(type, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
@@ -211,9 +220,9 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token null
      * @since 0.2.0
      */
-    public static Swc4jAstTokenNull createNull(
+    public static Swc4jAstToken createNull(
             int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenNull(startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstToken(Swc4jAstTokenType.Null, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
@@ -227,9 +236,15 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token number
      * @since 0.2.0
      */
-    public static Swc4jAstTokenNumber createNumber(
+    public static Swc4jAstTokenTextValue<Double> createNumber(
             String text, double value, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenNumber(text, value, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstTokenTextValue<>(
+                Swc4jAstTokenType.Num,
+                text,
+                value,
+                startPosition,
+                endPosition,
+                lineBreakAhead);
     }
 
     /**
@@ -244,9 +259,10 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token regex
      * @since 0.2.0
      */
-    public static Swc4jAstTokenRegex createRegex(
+    public static Swc4jAstTokenTextValueFlags createRegex(
             String text, String value, String flags, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenRegex(text, value, flags, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstTokenTextValueFlags(
+                Swc4jAstTokenType.Regex, text, value, flags, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
@@ -260,9 +276,15 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token shebang
      * @since 0.2.0
      */
-    public static Swc4jAstTokenShebang createShebang(
+    public static Swc4jAstTokenTextValue<String> createShebang(
             String text, String value, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenShebang(text, value, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstTokenTextValue<>(
+                Swc4jAstTokenType.Shebang,
+                text,
+                value,
+                startPosition,
+                endPosition,
+                lineBreakAhead);
     }
 
     /**
@@ -276,9 +298,14 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token string
      * @since 0.2.0
      */
-    public static Swc4jAstTokenString createString(
+    public static Swc4jAstTokenTextValue<String> createString(
             String text, String value, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenString(text, value, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstTokenTextValue<>(
+                Swc4jAstTokenType.Str,
+                text,
+                value,
+                startPosition, endPosition,
+                lineBreakAhead);
     }
 
     /**
@@ -292,9 +319,15 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token template
      * @since 0.2.0
      */
-    public static Swc4jAstTokenTemplate createTemplate(
+    public static Swc4jAstTokenTextValue<String> createTemplate(
             String text, String value, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenTemplate(text, value, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstTokenTextValue<>(
+                Swc4jAstTokenType.Template,
+                text,
+                value,
+                startPosition,
+                endPosition,
+                lineBreakAhead);
     }
 
     /**
@@ -306,9 +339,9 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token true
      * @since 0.2.0
      */
-    public static Swc4jAstTokenTrue createTrue(
+    public static Swc4jAstToken createTrue(
             int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenTrue(startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstToken(Swc4jAstTokenType.True, startPosition, endPosition, lineBreakAhead);
     }
 
     /**
@@ -321,8 +354,8 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token unknown
      * @since 0.2.0
      */
-    public static Swc4jAstTokenUnknown createUnknown(
+    public static Swc4jAstTokenText createUnknown(
             String text, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenUnknown(text, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jAstTokenText(Swc4jAstTokenType.Unknown, text, startPosition, endPosition, lineBreakAhead);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,51 +14,51 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.atom.uni;
+package com.caoccao.javet.swc4j.ast;
 
-import com.caoccao.javet.swc4j.ast.atom.BaseSwc4jAstTokenUniAtom;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
 /**
- * The type Swc4j ast token error.
+ * The type Swc4j ast token text value flags.
  *
  * @since 0.2.0
  */
-public class Swc4jAstTokenError extends BaseSwc4jAstTokenUniAtom {
+public class Swc4jAstTokenTextValueFlags<T> extends Swc4jAstTokenTextValue<T> {
     /**
-     * The Error.
-     *
-     * @since 0.2.0
+     * The Flags.
      */
-    protected final String error;
+    protected final String flags;
 
     /**
-     * Instantiates a new Swc4j ast token error.
+     * Instantiates a new Swc4j ast token text value flags.
      *
      * @param text           the text
-     * @param error          the error
+     * @param value          the value
+     * @param flags          the flags
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstTokenError(String text, String error, int startPosition, int endPosition, boolean lineBreakAhead) {
-        super(text, startPosition, endPosition, lineBreakAhead);
-        this.error = error;
+    public Swc4jAstTokenTextValueFlags(
+            Swc4jAstTokenType type,
+            String text,
+            T value,
+            String flags,
+            int startPosition,
+            int endPosition,
+            boolean lineBreakAhead) {
+        super(type, text, value, startPosition, endPosition, lineBreakAhead);
+        this.flags = flags;
     }
 
     /**
-     * Gets error.
+     * Gets flags.
      *
-     * @return the error
+     * @return the flags
      * @since 0.2.0
      */
-    public String getError() {
-        return error;
-    }
-
-    @Override
-    public Swc4jAstTokenType getType() {
-        return Swc4jAstTokenType.Error;
+    public String getFlags() {
+        return flags;
     }
 }

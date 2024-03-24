@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,51 +14,45 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.atom.tri;
+package com.caoccao.javet.swc4j.ast;
 
-import com.caoccao.javet.swc4j.ast.atom.BaseSwc4jAstTokenBiAtom;
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 
 /**
- * The type Swc4j ast token regex.
+ * The type swc4j ast token text.
  *
  * @since 0.2.0
  */
-public class Swc4jAstTokenRegex extends BaseSwc4jAstTokenBiAtom<String> {
+public class Swc4jAstTokenText extends Swc4jAstToken {
     /**
-     * The Flags.
+     * The Text.
+     *
+     * @since 0.2.0
      */
-    protected final String flags;
+    protected final String text;
 
     /**
-     * Instantiates a new Swc4j ast token regex.
+     * Instantiates a new swc4j ast token text.
      *
+     * @param type           the type
      * @param text           the text
-     * @param value          the value
-     * @param flags          the flags
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstTokenRegex(
-            String text, String value, String flags, int startPosition, int endPosition, boolean lineBreakAhead) {
-        super(text, value, startPosition, endPosition, lineBreakAhead);
-        this.flags = flags;
-    }
-
-    /**
-     * Gets flags.
-     *
-     * @return the flags
-     * @since 0.2.0
-     */
-    public String getFlags() {
-        return flags;
+    public Swc4jAstTokenText(
+            Swc4jAstTokenType type,
+            String text,
+            int startPosition,
+            int endPosition,
+            boolean lineBreakAhead) {
+        super(type, startPosition, endPosition, lineBreakAhead);
+        this.text = text;
     }
 
     @Override
-    public Swc4jAstTokenType getType() {
-        return Swc4jAstTokenType.Regex;
+    public String getText() {
+        return text;
     }
 }
