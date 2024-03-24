@@ -28,6 +28,7 @@ struct JavaParseOptions {
   method_get_media_type: JMethodID,
   method_get_parse_mode: JMethodID,
   method_get_specifier: JMethodID,
+  method_is_capture_ast: JMethodID,
   method_is_capture_tokens: JMethodID,
   method_is_scope_analysis: JMethodID,
 }
@@ -59,6 +60,9 @@ impl JavaParseOptions {
     let method_get_specifier = env
       .get_method_id(&class, "getSpecifier", "()Ljava/lang/String;")
       .expect("Couldn't find method Swc4jTranspileOptions.getSpecifier");
+    let method_is_capture_ast = env
+      .get_method_id(&class, "isCaptureAst", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isCaptureAst");
     let method_is_capture_tokens = env
       .get_method_id(&class, "isCaptureTokens", "()Z")
       .expect("Couldn't find method Swc4jTranspileOptions.isCaptureTokens");
@@ -70,6 +74,7 @@ impl JavaParseOptions {
       method_get_media_type,
       method_get_parse_mode,
       method_get_specifier,
+      method_is_capture_ast,
       method_is_capture_tokens,
       method_is_scope_analysis,
     }
@@ -85,6 +90,10 @@ impl JavaParseOptions {
 
   pub fn get_specifier<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> String {
     jni_utils::get_as_string(env, obj, self.method_get_specifier)
+  }
+
+  pub fn is_capture_ast<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_capture_ast)
   }
 
   pub fn is_capture_tokens<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
@@ -106,6 +115,7 @@ struct JavaTranspileOptions {
   method_get_jsx_factory: JMethodID,
   method_get_jsx_fragment_factory: JMethodID,
   method_get_jsx_import_source: JMethodID,
+  method_is_capture_ast: JMethodID,
   method_is_capture_tokens: JMethodID,
   method_is_emit_metadata: JMethodID,
   method_is_inline_source_map: JMethodID,
@@ -162,6 +172,9 @@ impl JavaTranspileOptions {
     let method_get_jsx_import_source = env
       .get_method_id(&class, "getJsxImportSource", "()Ljava/lang/String;")
       .expect("Couldn't find method Swc4jTranspileOptions.getJsxImportSource");
+    let method_is_capture_ast = env
+      .get_method_id(&class, "isCaptureAst", "()Z")
+      .expect("Couldn't find method Swc4jTranspileOptions.isCaptureAst");
     let method_is_capture_tokens = env
       .get_method_id(&class, "isCaptureTokens", "()Z")
       .expect("Couldn't find method Swc4jTranspileOptions.isCaptureTokens");
@@ -204,6 +217,7 @@ impl JavaTranspileOptions {
       method_get_jsx_factory,
       method_get_jsx_fragment_factory,
       method_get_jsx_import_source,
+      method_is_capture_ast,
       method_is_capture_tokens,
       method_is_emit_metadata,
       method_is_inline_source_map,
@@ -248,6 +262,10 @@ impl JavaTranspileOptions {
 
   pub fn get_specifier<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> String {
     jni_utils::get_as_string(env, obj, self.method_get_specifier)
+  }
+
+  pub fn is_capture_ast<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
+    jni_utils::get_as_boolean(env, obj, self.method_is_capture_ast)
   }
 
   pub fn is_capture_tokens<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
@@ -311,6 +329,8 @@ pub trait FromJniType {
 
 #[derive(Debug)]
 pub struct ParseOptions {
+  /// Whether to capture ast or not.
+  pub capture_ast: bool,
   /// Whether to capture tokens or not.
   pub capture_tokens: bool,
   /// Media type of the source text.
@@ -326,6 +346,7 @@ pub struct ParseOptions {
 impl Default for ParseOptions {
   fn default() -> Self {
     ParseOptions {
+      capture_ast: false,
       capture_tokens: false,
       media_type: MediaType::TypeScript,
       parse_mode: ParseMode::Module,
@@ -342,6 +363,7 @@ impl FromJniType for ParseOptions {
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
     let java_parse_options = unsafe { JAVA_PARSE_OPTIONS.as_ref().unwrap() };
+    let capture_ast = java_parse_options.is_capture_ast(env, obj);
     let capture_tokens = java_parse_options.is_capture_tokens(env, obj);
     let media_type = java_parse_options.get_media_type(env, obj);
     let media_type = media_type.as_ref();
@@ -352,6 +374,7 @@ impl FromJniType for ParseOptions {
     let parse_mode = parse_mode.as_ref();
     let parse_mode = java_parse_mode.get_parse_mode(env, parse_mode);
     ParseOptions {
+      capture_ast,
       capture_tokens,
       media_type,
       parse_mode,
@@ -363,6 +386,8 @@ impl FromJniType for ParseOptions {
 
 #[derive(Debug)]
 pub struct TranspileOptions {
+  /// Whether to capture ast or not.
+  pub capture_ast: bool,
   /// Whether to capture tokens or not.
   pub capture_tokens: bool,
   /// When emitting a legacy decorator, also emit experimental decorator meta
@@ -420,6 +445,7 @@ pub struct TranspileOptions {
 impl Default for TranspileOptions {
   fn default() -> Self {
     TranspileOptions {
+      capture_ast: false,
       capture_tokens: false,
       emit_metadata: false,
       imports_not_used_as_values: ImportsNotUsedAsValues::Remove,
@@ -450,6 +476,7 @@ impl FromJniType for TranspileOptions {
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
     let java_transpiler_options = unsafe { JAVA_TRANSPILE_OPTIONS.as_ref().unwrap() };
+    let capture_ast = java_transpiler_options.is_capture_ast(env, obj);
     let capture_tokens = java_transpiler_options.is_capture_tokens(env, obj);
     let emit_metadata = java_transpiler_options.is_emit_metadata(env, obj);
     let imports_not_used_as_values = java_transpiler_options.get_imports_not_used_as_values(env, obj);
@@ -476,6 +503,7 @@ impl FromJniType for TranspileOptions {
     let transform_jsx = java_transpiler_options.is_transform_jsx(env, obj);
     let var_decl_imports = java_transpiler_options.is_var_decl_imports(env, obj);
     TranspileOptions {
+      capture_ast,
       capture_tokens,
       emit_metadata,
       imports_not_used_as_values,

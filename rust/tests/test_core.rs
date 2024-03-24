@@ -159,8 +159,8 @@ fn test_transpile_jsx_with_custom_jsx_factory() {
   let output = core::transpile(code.to_owned(), options);
   assert!(output.is_ok());
   let output = output.unwrap();
-  assert!(output.module);
-  assert!(!output.script);
+  assert!(output.parse_output.module);
+  assert!(!output.parse_output.script);
   let output_code = output.code;
   assert_eq!(expected_code, &output_code[0..expected_code.len()]);
   assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
@@ -190,9 +190,9 @@ fn test_transpile_jsx_with_default_options() {
   let output = core::transpile(code.to_owned(), options);
   assert!(output.is_ok());
   let output = output.unwrap();
-  assert!(output.module);
-  assert!(!output.script);
-  assert_eq!(MediaType::Jsx, output.media_type);
+  assert!(output.parse_output.module);
+  assert!(!output.parse_output.script);
+  assert_eq!(MediaType::Jsx, output.parse_output.media_type);
   let output_code = output.code;
   assert_eq!(expected_code, &output_code[0..expected_code.len()]);
   assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
@@ -207,8 +207,8 @@ fn test_transpile_type_script_with_inline_source_map() {
   let output = core::transpile(code.to_owned(), options);
   assert!(output.is_ok());
   let output = output.unwrap();
-  assert!(output.module);
-  assert!(!output.script);
+  assert!(output.parse_output.module);
+  assert!(!output.parse_output.script);
   let output_code = output.code;
   assert_eq!(expected_code, &output_code[0..expected_code.len()]);
   assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
@@ -241,12 +241,12 @@ fn test_transpile_type_script_without_inline_source_map() {
       let output = output.unwrap();
       match parse_mode {
         enums::ParseMode::Script => {
-          assert!(!output.module);
-          assert!(output.script);
+          assert!(!output.parse_output.module);
+          assert!(output.parse_output.script);
         }
         _ => {
-          assert!(output.module);
-          assert!(!output.script);
+          assert!(output.parse_output.module);
+          assert!(!output.parse_output.script);
         }
       }
       let output_code = output.code;

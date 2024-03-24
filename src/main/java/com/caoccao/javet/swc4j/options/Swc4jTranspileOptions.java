@@ -283,13 +283,12 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
         return varDeclImports;
     }
 
-    /**
-     * Sets capture tokens.
-     *
-     * @param captureTokens the capture tokens
-     * @return the self
-     * @since 0.1.0
-     */
+    @Override
+    public Swc4jTranspileOptions setCaptureAst(boolean captureAst) {
+        super.setCaptureAst(captureAst);
+        return this;
+    }
+
     @Override
     public Swc4jTranspileOptions setCaptureTokens(boolean captureTokens) {
         super.setCaptureTokens(captureTokens);

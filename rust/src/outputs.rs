@@ -15,21 +15,25 @@
 * limitations under the License.
 */
 
+use deno_ast::swc::common::source_map::Pos;
+use deno_ast::swc::common::Spanned;
 use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
+use deno_ast::swc::ast::Program;
 use deno_ast::swc::parser::token::TokenAndSpan;
 use deno_ast::{ParsedSource, TranspiledSource};
 
+use std::ops::Range;
 use std::ptr::null_mut;
 use std::sync::Arc;
 
-use crate::ast_utils;
 use crate::converter;
 use crate::enums::*;
 use crate::jni_utils::ToJniType;
 use crate::options::*;
+use crate::{ast_token_utils, ast_utils};
 
 struct JavaParseOutput {
   class: GlobalRef,
@@ -50,7 +54,7 @@ impl JavaParseOutput {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/util/List;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstModule;Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstScript;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/util/List;)V",
       )
       .expect("Couldn't find method Swc4jParseOutput.Swc4jParseOutput");
     JavaParseOutput {
@@ -63,6 +67,37 @@ impl JavaParseOutput {
   where
     'local: 'a,
   {
+    let java_ast_factory = unsafe { ast_utils::JAVA_AST_FACTORY.as_ref().unwrap() };
+    let ast_module = match &parse_output.program {
+      Some(arc_program) => match arc_program.as_module() {
+        Some(module) => {
+          let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
+          let range = Range {
+            start: module.span().lo().to_usize(),
+            end: module.span().hi().to_usize(),
+          };
+          java_ast_factory.create_module(env, shebang, range)
+        }
+        None => Default::default(),
+      },
+      None => Default::default(),
+    };
+    let ast_script = match &parse_output.program {
+      Some(arc_program) => match arc_program.as_script() {
+        Some(script) => {
+          let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
+          let range = Range {
+            start: script.span().lo().to_usize(),
+            end: script.span().hi().to_usize(),
+          };
+          java_ast_factory.create_script(env, shebang, range)
+        }
+        None => Default::default(),
+      },
+      None => Default::default(),
+    };
+    let ast_module = jvalue { l: ast_module.as_raw() };
+    let ast_script = jvalue { l: ast_script.as_raw() };
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let media_type = java_media_type.parse(env, parse_output.media_type.get_id());
     let module = jvalue {
@@ -74,14 +109,17 @@ impl JavaParseOutput {
     let source_text = jvalue {
       l: converter::string_to_jstring(env, &parse_output.source_text).as_raw(),
     };
-    let tokens =
-      ast_utils::token_and_spans_to_java_list(env, &parse_output.source_text.to_string(), parse_output.tokens.clone());
+    let tokens = ast_token_utils::token_and_spans_to_java_list(
+      env,
+      &parse_output.source_text.to_string(),
+      parse_output.tokens.clone(),
+    );
     unsafe {
       env
         .new_object_unchecked(
           &self.class,
           self.method_constructor,
-          &[media_type, module, script, source_text, tokens],
+          &[ast_module, ast_script, media_type, module, script, source_text, tokens],
         )
         .expect("Couldn't create Swc4jParseOutput")
     }
@@ -107,7 +145,7 @@ impl JavaTranspileOutput {
       .get_method_id(
         &class,
         "<init>",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/lang/String;Ljava/util/List;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstModule;Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstScript;Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/lang/String;Ljava/util/List;)V",
       )
       .expect("Couldn't find method Swc4jTranspileOutput.Swc4jTranspileOutput");
     JavaTranspileOutput {
@@ -120,16 +158,47 @@ impl JavaTranspileOutput {
   where
     'local: 'a,
   {
+    let java_ast_factory = unsafe { ast_utils::JAVA_AST_FACTORY.as_ref().unwrap() };
+    let ast_module = match &transpile_output.parse_output.program {
+      Some(arc_program) => match arc_program.as_module() {
+        Some(module) => {
+          let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
+          let range = Range {
+            start: module.span().lo().to_usize(),
+            end: module.span().hi().to_usize(),
+          };
+          java_ast_factory.create_module(env, shebang, range)
+        }
+        None => Default::default(),
+      },
+      None => Default::default(),
+    };
+    let ast_script = match &transpile_output.parse_output.program {
+      Some(arc_program) => match arc_program.as_script() {
+        Some(script) => {
+          let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
+          let range = Range {
+            start: script.span().lo().to_usize(),
+            end: script.span().hi().to_usize(),
+          };
+          java_ast_factory.create_script(env, shebang, range)
+        }
+        None => Default::default(),
+      },
+      None => Default::default(),
+    };
+    let ast_module = jvalue { l: ast_module.as_raw() };
+    let ast_script = jvalue { l: ast_script.as_raw() };
     let code = jvalue {
       l: converter::string_to_jstring(env, &transpile_output.code).as_raw(),
     };
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
-    let media_type = java_media_type.parse(env, transpile_output.media_type.get_id());
+    let media_type = java_media_type.parse(env, transpile_output.parse_output.media_type.get_id());
     let module = jvalue {
-      z: if transpile_output.module { 1u8 } else { 0u8 },
+      z: if transpile_output.parse_output.module { 1u8 } else { 0u8 },
     };
     let script = jvalue {
-      z: if transpile_output.script { 1u8 } else { 0u8 },
+      z: if transpile_output.parse_output.script { 1u8 } else { 0u8 },
     };
     let source_map = jvalue {
       l: match &transpile_output.source_map {
@@ -138,19 +207,29 @@ impl JavaTranspileOutput {
       },
     };
     let source_text = jvalue {
-      l: converter::string_to_jstring(env, &transpile_output.source_text).as_raw(),
+      l: converter::string_to_jstring(env, &transpile_output.parse_output.source_text).as_raw(),
     };
-    let tokens = ast_utils::token_and_spans_to_java_list(
+    let tokens = ast_token_utils::token_and_spans_to_java_list(
       env,
-      &transpile_output.source_text.to_string(),
-      transpile_output.tokens.clone(),
+      &transpile_output.parse_output.source_text.to_string(),
+      transpile_output.parse_output.tokens.clone(),
     );
     unsafe {
       env
         .new_object_unchecked(
           &self.class,
           self.method_constructor,
-          &[code, media_type, module, script, source_map, source_text, tokens],
+          &[
+            ast_module,
+            ast_script,
+            code,
+            media_type,
+            module,
+            script,
+            source_map,
+            source_text,
+            tokens,
+          ],
         )
         .expect("Couldn't create Swc4jTranspileOutput")
     }
@@ -171,6 +250,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 pub struct ParseOutput {
   pub media_type: MediaType,
   pub module: bool,
+  pub program: Option<Arc<Program>>,
   pub script: bool,
   pub source_text: String,
   pub tokens: Option<Arc<Vec<TokenAndSpan>>>,
@@ -180,6 +260,11 @@ impl ParseOutput {
   pub fn new(parse_options: &ParseOptions, parsed_source: &ParsedSource) -> ParseOutput {
     let media_type = parsed_source.media_type();
     let module = parsed_source.is_module();
+    let program = if parse_options.capture_ast {
+      Some(parsed_source.program())
+    } else {
+      None
+    };
     let script = parsed_source.is_script();
     let source_text = parsed_source.text_info().text().to_string();
     let tokens = if parse_options.capture_tokens {
@@ -190,6 +275,7 @@ impl ParseOutput {
     ParseOutput {
       media_type,
       module,
+      program,
       script,
       source_text,
       tokens,
@@ -209,12 +295,8 @@ impl ToJniType for ParseOutput {
 #[derive(Debug)]
 pub struct TranspileOutput {
   pub code: String,
-  pub media_type: MediaType,
-  pub module: bool,
-  pub script: bool,
+  pub parse_output: ParseOutput,
   pub source_map: Option<String>,
-  pub source_text: String,
-  pub tokens: Option<Arc<Vec<TokenAndSpan>>>,
 }
 
 impl TranspileOutput {
@@ -226,6 +308,11 @@ impl TranspileOutput {
     let code = transpiled_source.text.to_owned();
     let media_type = parsed_source.media_type();
     let module = parsed_source.is_module();
+    let program = if transpile_options.capture_ast {
+      Some(parsed_source.program())
+    } else {
+      None
+    };
     let script = parsed_source.is_script();
     let source_map = transpiled_source.source_map.to_owned();
     let source_text = parsed_source.text_info().text().to_string();
@@ -236,12 +323,15 @@ impl TranspileOutput {
     };
     TranspileOutput {
       code,
-      media_type,
-      module,
-      script,
+      parse_output: ParseOutput {
+        media_type,
+        module,
+        program,
+        script,
+        source_text,
+        tokens,
+      },
       source_map,
-      source_text,
-      tokens,
     }
   }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.tokens;
+package com.caoccao.javet.swc4j.ast.tokens;
 
 import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
 

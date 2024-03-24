@@ -16,9 +16,10 @@
 
 package com.caoccao.javet.swc4j.outputs;
 
-import com.caoccao.javet.swc4j.tokens.Swc4jAstToken;
+import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
+import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
+import com.caoccao.javet.swc4j.ast.tokens.Swc4jAstToken;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
-import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
 
@@ -28,6 +29,18 @@ import java.util.List;
  * @since 0.2.0
  */
 public class Swc4jParseOutput {
+    /**
+     * The Ast module.
+     *
+     * @since 0.2.0
+     */
+    protected Swc4jAstModule astModule;
+    /**
+     * The Ast script.
+     *
+     * @since 0.2.0
+     */
+    protected Swc4jAstScript astScript;
     /**
      * The Media type.
      *
@@ -70,16 +83,40 @@ public class Swc4jParseOutput {
      * @since 0.2.0
      */
     public Swc4jParseOutput(
+            Swc4jAstModule astModule,
+            Swc4jAstScript astScript,
             Swc4jMediaType mediaType,
             boolean module,
             boolean script,
             String sourceText,
             List<Swc4jAstToken> tokens) {
-        setMediaType(mediaType);
-        setModule(module);
-        setScript(script);
-        setSourceText(sourceText);
+        this.astModule = astModule;
+        this.astScript = astScript;
+        this.mediaType = mediaType;
+        this.module = module;
+        this.script = script;
+        this.sourceText = sourceText;
         this.tokens = tokens;
+    }
+
+    /**
+     * Gets ast module.
+     *
+     * @return the ast module
+     * @since 0.2.0
+     */
+    public Swc4jAstModule getAstModule() {
+        return astModule;
+    }
+
+    /**
+     * Gets ast script.
+     *
+     * @return the ast script
+     * @since 0.2.0
+     */
+    public Swc4jAstScript getAstScript() {
+        return astScript;
     }
 
     /**
@@ -130,53 +167,5 @@ public class Swc4jParseOutput {
      */
     public boolean isScript() {
         return script;
-    }
-
-    /**
-     * Sets media type.
-     *
-     * @param mediaType the media type
-     * @return the media type
-     * @since 0.2.0
-     */
-    public Swc4jParseOutput setMediaType(Swc4jMediaType mediaType) {
-        this.mediaType = AssertionUtils.notNull(mediaType, "Media type");
-        return this;
-    }
-
-    /**
-     * Sets module.
-     *
-     * @param module the module
-     * @return the self
-     * @since 0.2.0
-     */
-    public Swc4jParseOutput setModule(boolean module) {
-        this.module = module;
-        return this;
-    }
-
-    /**
-     * Sets script.
-     *
-     * @param script the script
-     * @return the self
-     * @since 0.2.0
-     */
-    public Swc4jParseOutput setScript(boolean script) {
-        this.script = script;
-        return this;
-    }
-
-    /**
-     * Sets source text.
-     *
-     * @param sourceText the source text
-     * @return the self
-     * @since 0.2.0
-     */
-    public Swc4jParseOutput setSourceText(String sourceText) {
-        this.sourceText = sourceText;
-        return this;
     }
 }

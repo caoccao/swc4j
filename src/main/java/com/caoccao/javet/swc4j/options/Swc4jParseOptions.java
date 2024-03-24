@@ -33,6 +33,12 @@ public class Swc4jParseOptions {
      */
     public static final String DEFAULT_SPECIFIER = "file:///main.js";
     /**
+     * The Capture ast.
+     *
+     * @since 0.2.0
+     */
+    protected boolean captureAst;
+    /**
      * The Capture tokens.
      *
      * @since 0.2.0
@@ -69,6 +75,7 @@ public class Swc4jParseOptions {
      * @since 0.2.0
      */
     public Swc4jParseOptions() {
+        setCaptureAst(false);
         setCaptureTokens(false);
         setMediaType(Swc4jMediaType.JavaScript);
         setParseMode(Swc4jParseMode.Module);
@@ -107,6 +114,16 @@ public class Swc4jParseOptions {
     }
 
     /**
+     * Is capture ast boolean.
+     *
+     * @return the boolean
+     * @since 0.2.0
+     */
+    public boolean isCaptureAst() {
+        return captureAst;
+    }
+
+    /**
      * Whether to capture tokens or not.
      *
      * @return true : capture tokens, false : not capture tokens
@@ -124,6 +141,18 @@ public class Swc4jParseOptions {
      */
     public boolean isScopeAnalysis() {
         return scopeAnalysis;
+    }
+
+    /**
+     * Sets capture ast.
+     *
+     * @param captureAst the capture ast
+     * @return the self
+     * @since 0.2.0
+     */
+    public Swc4jParseOptions setCaptureAst(boolean captureAst) {
+        this.captureAst = captureAst;
+        return this;
     }
 
     /**

@@ -16,7 +16,9 @@
 
 package com.caoccao.javet.swc4j.outputs;
 
-import com.caoccao.javet.swc4j.tokens.Swc4jAstToken;
+import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
+import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
+import com.caoccao.javet.swc4j.ast.tokens.Swc4jAstToken;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 
 import java.util.List;
@@ -53,6 +55,8 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
      * @since 0.1.0
      */
     public Swc4jTranspileOutput(
+            Swc4jAstModule astModule,
+            Swc4jAstScript astScript,
             String code,
             Swc4jMediaType mediaType,
             boolean module,
@@ -60,9 +64,9 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
             String sourceMap,
             String sourceText,
             List<Swc4jAstToken> tokens) {
-        super(mediaType, module, script, sourceText, tokens);
-        setCode(code);
-        setSourceMap(sourceMap);
+        super(astModule, astScript, mediaType, module, script, sourceText, tokens);
+        this.code = code;
+        this.sourceMap = sourceMap;
     }
 
     /**
@@ -83,53 +87,5 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
      */
     public String getSourceMap() {
         return sourceMap;
-    }
-
-    /**
-     * Sets code.
-     *
-     * @param code the code
-     * @return the self
-     * @since 0.1.0
-     */
-    public Swc4jTranspileOutput setCode(String code) {
-        this.code = code;
-        return this;
-    }
-
-    @Override
-    public Swc4jTranspileOutput setMediaType(Swc4jMediaType mediaType) {
-        super.setMediaType(mediaType);
-        return this;
-    }
-
-    @Override
-    public Swc4jTranspileOutput setModule(boolean module) {
-        super.setModule(module);
-        return this;
-    }
-
-    @Override
-    public Swc4jTranspileOutput setScript(boolean script) {
-        super.setScript(script);
-        return this;
-    }
-
-    /**
-     * Sets source map.
-     *
-     * @param sourceMap the source map
-     * @return the self
-     * @since 0.1.0
-     */
-    public Swc4jTranspileOutput setSourceMap(String sourceMap) {
-        this.sourceMap = sourceMap;
-        return this;
-    }
-
-    @Override
-    public Swc4jTranspileOutput setSourceText(String sourceText) {
-        super.setSourceText(sourceText);
-        return this;
     }
 }

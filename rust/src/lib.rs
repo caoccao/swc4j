@@ -25,6 +25,7 @@ use std::ffi::c_void;
 use std::ptr::null_mut;
 
 pub mod ast_utils;
+pub mod ast_token_utils;
 pub mod converter;
 pub mod core;
 pub mod enums;
@@ -40,6 +41,7 @@ pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
   debug_println!("JNI_OnLoad()");
   let mut env = java_vm.get_env().expect("Cannot get JNI env");
   ast_utils::init(&mut env);
+  ast_token_utils::init(&mut env);
   enums::init(&mut env);
   error::init(&mut env);
   jni_utils::init(&mut env);
