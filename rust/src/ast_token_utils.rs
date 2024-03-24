@@ -954,40 +954,13 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 
 pub fn token_and_spans_to_java_list<'local>(
   env: &mut JNIEnv<'local>,
+  byte_to_index_map: &BTreeMap<usize, usize>,
   source_text: &str,
   token_and_spans: Option<Arc<Vec<TokenAndSpan>>>,
 ) -> jvalue {
   jvalue {
     l: match token_and_spans {
       Some(token_and_spans) => {
-        // 1st pass: Prepare utf8_range map.
-        let mut byte_to_index_map: BTreeMap<usize, usize> = BTreeMap::new();
-        token_and_spans.iter().for_each(|token_and_span| {
-          [
-            token_and_span.span.lo().to_usize() - 1,
-            token_and_span.span.hi().to_usize() - 1,
-          ]
-          .into_iter()
-          .for_each(|position| {
-            if !byte_to_index_map.contains_key(&position) {
-              byte_to_index_map.insert(position, 0);
-            }
-          });
-        });
-        let mut utf8_byte_length: usize = 0;
-        let chars = source_text.chars();
-        let mut char_count = 0;
-        chars.for_each(|c| {
-          byte_to_index_map
-            .get_mut(&utf8_byte_length)
-            .map(|value| *value = char_count);
-          utf8_byte_length += c.len_utf8();
-          char_count += 1;
-        });
-        byte_to_index_map
-          .get_mut(&utf8_byte_length)
-          .map(|value| *value = char_count);
-        // 2nd pass: Process tokens and spans.
         let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
         let java_ast_token_factory = unsafe { JAVA_AST_TOKEN_FACTORY.as_ref().unwrap() };
         let list = java_array_list.create(env, token_and_spans.len());

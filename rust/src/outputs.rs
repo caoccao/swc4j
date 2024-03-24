@@ -25,6 +25,7 @@ use deno_ast::swc::ast::Program;
 use deno_ast::swc::parser::token::TokenAndSpan;
 use deno_ast::{ParsedSource, TranspiledSource};
 
+use std::collections::BTreeMap;
 use std::ops::Range;
 use std::ptr::null_mut;
 use std::sync::Arc;
@@ -67,6 +68,7 @@ impl JavaParseOutput {
   where
     'local: 'a,
   {
+    let byte_to_index_map = parse_output.get_byte_to_index_map();
     let java_ast_factory = unsafe { ast_utils::JAVA_AST_FACTORY.as_ref().unwrap() };
     let ast_module = match &parse_output.program {
       Some(arc_program) => match arc_program.as_module() {
@@ -111,6 +113,7 @@ impl JavaParseOutput {
     };
     let tokens = ast_token_utils::token_and_spans_to_java_list(
       env,
+      &byte_to_index_map,
       &parse_output.source_text.to_string(),
       parse_output.tokens.clone(),
     );
@@ -158,6 +161,7 @@ impl JavaTranspileOutput {
   where
     'local: 'a,
   {
+    let byte_to_index_map = transpile_output.parse_output.get_byte_to_index_map();
     let java_ast_factory = unsafe { ast_utils::JAVA_AST_FACTORY.as_ref().unwrap() };
     let ast_module = match &transpile_output.parse_output.program {
       Some(arc_program) => match arc_program.as_module() {
@@ -211,6 +215,7 @@ impl JavaTranspileOutput {
     };
     let tokens = ast_token_utils::token_and_spans_to_java_list(
       env,
+      &byte_to_index_map,
       &transpile_output.parse_output.source_text.to_string(),
       transpile_output.parse_output.tokens.clone(),
     );
@@ -257,7 +262,7 @@ pub struct ParseOutput {
 }
 
 impl ParseOutput {
-  pub fn new(parse_options: &ParseOptions, parsed_source: &ParsedSource) -> ParseOutput {
+  pub fn new(parse_options: &ParseOptions, parsed_source: &ParsedSource) -> Self {
     let media_type = parsed_source.media_type();
     let module = parsed_source.is_module();
     let program = if parse_options.capture_ast {
@@ -280,6 +285,41 @@ impl ParseOutput {
       source_text,
       tokens,
     }
+  }
+
+  pub fn get_byte_to_index_map(&self) -> BTreeMap<usize, usize> {
+    let mut byte_to_index_map: BTreeMap<usize, usize> = BTreeMap::new();
+    match &self.tokens {
+      Some(token_and_spans) => {
+        token_and_spans.iter().for_each(|token_and_span| {
+          [
+            token_and_span.span.lo().to_usize() - 1,
+            token_and_span.span.hi().to_usize() - 1,
+          ]
+          .into_iter()
+          .for_each(|position| {
+            if !byte_to_index_map.contains_key(&position) {
+              byte_to_index_map.insert(position, 0);
+            }
+          });
+        });
+      }
+      None => {}
+    }
+    let mut utf8_byte_length: usize = 0;
+    let chars = self.source_text.chars();
+    let mut char_count = 0;
+    chars.for_each(|c| {
+      byte_to_index_map
+        .get_mut(&utf8_byte_length)
+        .map(|value| *value = char_count);
+      utf8_byte_length += c.len_utf8();
+      char_count += 1;
+    });
+    byte_to_index_map
+      .get_mut(&utf8_byte_length)
+      .map(|value| *value = char_count);
+    byte_to_index_map
   }
 }
 
@@ -304,7 +344,7 @@ impl TranspileOutput {
     transpile_options: &TranspileOptions,
     parsed_source: &ParsedSource,
     transpiled_source: &TranspiledSource,
-  ) -> TranspileOutput {
+  ) -> Self {
     let code = transpiled_source.text.to_owned();
     let media_type = parsed_source.media_type();
     let module = parsed_source.is_module();
@@ -321,16 +361,17 @@ impl TranspileOutput {
     } else {
       None
     };
+    let parse_output = ParseOutput {
+      media_type,
+      module,
+      program,
+      script,
+      source_text,
+      tokens,
+    };
     TranspileOutput {
       code,
-      parse_output: ParseOutput {
-        media_type,
-        module,
-        program,
-        script,
-        source_text,
-        tokens,
-      },
+      parse_output,
       source_map,
     }
   }
