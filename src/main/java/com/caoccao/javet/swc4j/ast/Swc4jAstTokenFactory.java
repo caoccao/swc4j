@@ -259,9 +259,9 @@ public final class Swc4jAstTokenFactory {
      * @return the ast token regex
      * @since 0.2.0
      */
-    public static Swc4jAstTokenTextValueFlags createRegex(
+    public static Swc4jAstTokenTextValueFlags<String> createRegex(
             String text, String value, String flags, int startPosition, int endPosition, boolean lineBreakAhead) {
-        return new Swc4jAstTokenTextValueFlags(
+        return new Swc4jAstTokenTextValueFlags<>(
                 Swc4jAstTokenType.Regex, text, value, flags, startPosition, endPosition, lineBreakAhead);
     }
 
