@@ -125,8 +125,8 @@ public class TestSwc4j {
         assertFalse(output.isScript());
         assertNotNull(output.getAstModule());
         Swc4jAstModule module = output.getAstModule();
-        assertEquals(1, module.getStartPosition());
-        assertEquals(79, module.getEndPosition());
+        assertEquals(0, module.getStartPosition());
+        assertEquals(58, module.getEndPosition());
     }
 
     @SuppressWarnings("unchecked")

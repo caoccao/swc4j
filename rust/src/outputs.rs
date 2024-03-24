@@ -22,6 +22,7 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use deno_ast::swc::ast::Program;
+use deno_ast::swc::common::Span;
 use deno_ast::swc::parser::token::TokenAndSpan;
 use deno_ast::{ParsedSource, TranspiledSource};
 
@@ -75,8 +76,8 @@ impl JavaParseOutput {
         Some(module) => {
           let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
           let range = Range {
-            start: module.span().lo().to_usize(),
-            end: module.span().hi().to_usize(),
+            start: byte_to_index_map[&(module.span().lo().to_usize() - 1)],
+            end: byte_to_index_map[&(module.span().hi().to_usize() - 1)],
           };
           java_ast_factory.create_module(env, shebang, range)
         }
@@ -89,8 +90,8 @@ impl JavaParseOutput {
         Some(script) => {
           let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
           let range = Range {
-            start: script.span().lo().to_usize(),
-            end: script.span().hi().to_usize(),
+            start: byte_to_index_map[&(script.span().lo().to_usize() - 1)],
+            end: byte_to_index_map[&(script.span().hi().to_usize() - 1)],
           };
           java_ast_factory.create_script(env, shebang, range)
         }
@@ -168,8 +169,8 @@ impl JavaTranspileOutput {
         Some(module) => {
           let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
           let range = Range {
-            start: module.span().lo().to_usize(),
-            end: module.span().hi().to_usize(),
+            start: byte_to_index_map[&(module.span().lo().to_usize() - 1)],
+            end: byte_to_index_map[&(module.span().hi().to_usize() - 1)],
           };
           java_ast_factory.create_module(env, shebang, range)
         }
@@ -182,8 +183,8 @@ impl JavaTranspileOutput {
         Some(script) => {
           let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
           let range = Range {
-            start: script.span().lo().to_usize(),
-            end: script.span().hi().to_usize(),
+            start: byte_to_index_map[&(script.span().lo().to_usize() - 1)],
+            end: byte_to_index_map[&(script.span().hi().to_usize() - 1)],
           };
           java_ast_factory.create_script(env, shebang, range)
         }
@@ -288,24 +289,29 @@ impl ParseOutput {
   }
 
   pub fn get_byte_to_index_map(&self) -> BTreeMap<usize, usize> {
+    // Prepare the keys
     let mut byte_to_index_map: BTreeMap<usize, usize> = BTreeMap::new();
+    match &self.program {
+      Some(program) => {
+        if program.is_module() {
+          let module = program.as_module().unwrap();
+          self.put_span_to_byte_to_index_map(&module.span, &mut byte_to_index_map);
+        } else if program.is_script() {
+          let script = program.as_script().unwrap();
+          self.put_span_to_byte_to_index_map(&script.span, &mut byte_to_index_map);
+        }
+      }
+      None => {}
+    }
     match &self.tokens {
       Some(token_and_spans) => {
         token_and_spans.iter().for_each(|token_and_span| {
-          [
-            token_and_span.span.lo().to_usize() - 1,
-            token_and_span.span.hi().to_usize() - 1,
-          ]
-          .into_iter()
-          .for_each(|position| {
-            if !byte_to_index_map.contains_key(&position) {
-              byte_to_index_map.insert(position, 0);
-            }
-          });
+          self.put_span_to_byte_to_index_map(&token_and_span.span, &mut byte_to_index_map);
         });
       }
       None => {}
     }
+    // Fill the values
     let mut utf8_byte_length: usize = 0;
     let chars = self.source_text.chars();
     let mut char_count = 0;
@@ -320,6 +326,16 @@ impl ParseOutput {
       .get_mut(&utf8_byte_length)
       .map(|value| *value = char_count);
     byte_to_index_map
+  }
+
+  fn put_span_to_byte_to_index_map(&self, span: &Span, byte_to_index_map: &mut BTreeMap<usize, usize>) {
+    [span.lo().to_usize() - 1, span.hi().to_usize() - 1]
+      .into_iter()
+      .for_each(|position| {
+        if !byte_to_index_map.contains_key(&position) {
+          byte_to_index_map.insert(position, 0);
+        }
+      });
   }
 }
 
