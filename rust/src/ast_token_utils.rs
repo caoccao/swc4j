@@ -20,18 +20,16 @@ use jni::signature::ReturnType;
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
-use deno_ast::swc::{
-  atoms::Atom,
-  common::source_map::Pos,
-  parser::error::Error,
-  parser::token::{IdentLike, Token, TokenAndSpan, Word},
-};
+use deno_ast::swc::atoms::Atom;
+use deno_ast::swc::common::source_map::Pos;
+use deno_ast::swc::parser::error::Error;
+use deno_ast::swc::parser::token::{IdentLike, Token, TokenAndSpan, Word};
 
+use crate::ast_utils;
 use crate::converter;
 use crate::enums::*;
 use crate::jni_utils::JAVA_ARRAY_LIST;
 
-use std::collections::BTreeMap;
 use std::ops::Range;
 use std::ptr::null_mut;
 use std::sync::Arc;
@@ -954,7 +952,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 
 pub fn token_and_spans_to_java_list<'local>(
   env: &mut JNIEnv<'local>,
-  byte_to_index_map: &BTreeMap<usize, usize>,
+  byte_to_index_map: &ast_utils::ByteToIndexMap,
   source_text: &str,
   token_and_spans: Option<Arc<Vec<TokenAndSpan>>>,
 ) -> jvalue {
@@ -965,18 +963,12 @@ pub fn token_and_spans_to_java_list<'local>(
         let java_ast_token_factory = unsafe { JAVA_AST_TOKEN_FACTORY.as_ref().unwrap() };
         let list = java_array_list.create(env, token_and_spans.len());
         token_and_spans.iter().for_each(|token_and_span| {
-          let byte_range = Range {
+          let line_break_ahead = token_and_span.had_line_break;
+          let text = &source_text[Range {
             start: token_and_span.span.lo().to_usize() - 1,
             end: token_and_span.span.hi().to_usize() - 1,
-          };
-          let line_break_ahead = token_and_span.had_line_break;
-          let text = &source_text[byte_range.to_owned()];
-          let index_range = Range {
-            start: *byte_to_index_map
-              .get(&byte_range.start)
-              .expect("Couldn't find start index"),
-            end: *byte_to_index_map.get(&byte_range.end).expect("Couldn't find end index"),
-          };
+          }];
+          let index_range = byte_to_index_map.get_range_by_span(&token_and_span.span);
           let ast_token = match &token_and_span.token {
             Token::Word(word) => match word {
               Word::Keyword(keyword) => java_ast_token_factory.create_keyword(

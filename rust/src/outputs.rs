@@ -15,27 +15,24 @@
 * limitations under the License.
 */
 
-use deno_ast::swc::common::source_map::Pos;
+use deno_ast::swc::ast::Program;
 use deno_ast::swc::common::Spanned;
+use deno_ast::swc::parser::token::TokenAndSpan;
+use deno_ast::{ParsedSource, TranspiledSource};
+
 use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
-use deno_ast::swc::ast::Program;
-use deno_ast::swc::common::Span;
-use deno_ast::swc::parser::token::TokenAndSpan;
-use deno_ast::{ParsedSource, TranspiledSource};
-
-use std::collections::BTreeMap;
-use std::ops::Range;
 use std::ptr::null_mut;
 use std::sync::Arc;
 
+use crate::ast_token_utils;
+use crate::ast_utils;
 use crate::converter;
 use crate::enums::*;
 use crate::jni_utils::ToJniType;
 use crate::options::*;
-use crate::{ast_token_utils, ast_utils};
 
 struct JavaParseOutput {
   class: GlobalRef,
@@ -75,10 +72,7 @@ impl JavaParseOutput {
       Some(arc_program) => match arc_program.as_module() {
         Some(module) => {
           let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
-          let range = Range {
-            start: byte_to_index_map[&(module.span().lo().to_usize() - 1)],
-            end: byte_to_index_map[&(module.span().hi().to_usize() - 1)],
-          };
+          let range = byte_to_index_map.get_range_by_span(&module.span());
           java_ast_factory.create_module(env, shebang, range)
         }
         None => Default::default(),
@@ -89,10 +83,7 @@ impl JavaParseOutput {
       Some(arc_program) => match arc_program.as_script() {
         Some(script) => {
           let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
-          let range = Range {
-            start: byte_to_index_map[&(script.span().lo().to_usize() - 1)],
-            end: byte_to_index_map[&(script.span().hi().to_usize() - 1)],
-          };
+          let range = byte_to_index_map.get_range_by_span(&script.span());
           java_ast_factory.create_script(env, shebang, range)
         }
         None => Default::default(),
@@ -168,10 +159,7 @@ impl JavaTranspileOutput {
       Some(arc_program) => match arc_program.as_module() {
         Some(module) => {
           let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
-          let range = Range {
-            start: byte_to_index_map[&(module.span().lo().to_usize() - 1)],
-            end: byte_to_index_map[&(module.span().hi().to_usize() - 1)],
-          };
+          let range = byte_to_index_map.get_range_by_span(&module.span());
           java_ast_factory.create_module(env, shebang, range)
         }
         None => Default::default(),
@@ -182,10 +170,7 @@ impl JavaTranspileOutput {
       Some(arc_program) => match arc_program.as_script() {
         Some(script) => {
           let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
-          let range = Range {
-            start: byte_to_index_map[&(script.span().lo().to_usize() - 1)],
-            end: byte_to_index_map[&(script.span().hi().to_usize() - 1)],
-          };
+          let range = byte_to_index_map.get_range_by_span(&script.span());
           java_ast_factory.create_script(env, shebang, range)
         }
         None => Default::default(),
@@ -288,17 +273,17 @@ impl ParseOutput {
     }
   }
 
-  pub fn get_byte_to_index_map(&self) -> BTreeMap<usize, usize> {
-    // Prepare the keys
-    let mut byte_to_index_map: BTreeMap<usize, usize> = BTreeMap::new();
+  pub fn get_byte_to_index_map(&self) -> ast_utils::ByteToIndexMap {
+    // Register the keys
+    let mut byte_to_index_map = ast_utils::ByteToIndexMap::new();
     match &self.program {
       Some(program) => {
         if program.is_module() {
           let module = program.as_module().unwrap();
-          self.put_span_to_byte_to_index_map(&module.span, &mut byte_to_index_map);
+          byte_to_index_map.register_by_span(&module.span);
         } else if program.is_script() {
           let script = program.as_script().unwrap();
-          self.put_span_to_byte_to_index_map(&script.span, &mut byte_to_index_map);
+          byte_to_index_map.register_by_span(&script.span);
         }
       }
       None => {}
@@ -306,7 +291,7 @@ impl ParseOutput {
     match &self.tokens {
       Some(token_and_spans) => {
         token_and_spans.iter().for_each(|token_and_span| {
-          self.put_span_to_byte_to_index_map(&token_and_span.span, &mut byte_to_index_map);
+          byte_to_index_map.register_by_span(&token_and_span.span);
         });
       }
       None => {}
@@ -316,26 +301,12 @@ impl ParseOutput {
     let chars = self.source_text.chars();
     let mut char_count = 0;
     chars.for_each(|c| {
-      byte_to_index_map
-        .get_mut(&utf8_byte_length)
-        .map(|value| *value = char_count);
+      byte_to_index_map.update(&utf8_byte_length, char_count);
       utf8_byte_length += c.len_utf8();
       char_count += 1;
     });
+    byte_to_index_map.update(&utf8_byte_length, char_count);
     byte_to_index_map
-      .get_mut(&utf8_byte_length)
-      .map(|value| *value = char_count);
-    byte_to_index_map
-  }
-
-  fn put_span_to_byte_to_index_map(&self, span: &Span, byte_to_index_map: &mut BTreeMap<usize, usize>) {
-    [span.lo().to_usize() - 1, span.hi().to_usize() - 1]
-      .into_iter()
-      .for_each(|position| {
-        if !byte_to_index_map.contains_key(&position) {
-          byte_to_index_map.insert(position, 0);
-        }
-      });
   }
 }
 
