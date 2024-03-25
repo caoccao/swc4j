@@ -21,16 +21,10 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use crate::converter;
-use crate::jni_utils::JAVA_ARRAY_LIST;
-use crate::position_utils::ByteToIndexMap;
 
 use std::ops::Range;
-use std::sync::Arc;
 
-use deno_ast::swc::ast::*;
-use deno_ast::swc::common::Spanned;
-
-pub struct JavaAstFactory {
+struct JavaAstFactory {
   #[allow(dead_code)]
   class: GlobalRef,
   method_create_module: JStaticMethodID,
@@ -145,7 +139,7 @@ impl JavaAstFactory {
   }
 }
 
-pub static mut JAVA_AST_FACTORY: Option<JavaAstFactory> = None;
+static mut JAVA_AST_FACTORY: Option<JavaAstFactory> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
@@ -205,189 +199,207 @@ pub mod span {
   }
 }
 
-fn create_decl_var<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  byte_to_index_map: &ByteToIndexMap,
-  var_decl: &VarDecl,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-  let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-  let declare = var_decl.declare;
-  let kind = var_decl.kind;
-  let range = byte_to_index_map.get_range_by_span(&var_decl.span());
-  let java_decls = java_array_list.create(env, var_decl.decls.len());
-  var_decl.decls.iter().for_each(|var_declarator| {
-    let java_var_declarator = create_var_declarator(env, byte_to_index_map, var_declarator);
-    java_array_list.add(env, &java_decls, &java_var_declarator);
-    env
-      .delete_local_ref(java_var_declarator)
-      .expect("Couldn't delete local var declarator");
-  });
-  Default::default()
-}
+pub mod program {
+  use jni::objects::JObject;
+  use jni::JNIEnv;
 
-fn create_ident<'local, 'a>(env: &mut JNIEnv<'local>, byte_to_index_map: &ByteToIndexMap, ident: &Ident) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-  let range = byte_to_index_map.get_range_by_span(&ident.span());
-  let sym = ident.sym.as_str();
-  let optional = ident.optional;
-  Default::default()
-}
+  use crate::ast_utils::JAVA_AST_FACTORY;
+  use crate::jni_utils::JAVA_ARRAY_LIST;
+  use crate::position_utils::ByteToIndexMap;
 
-pub fn create_program<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  byte_to_index_map: &ByteToIndexMap,
-  program: &Option<Arc<Program>>,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match program {
-    Some(arc_program) => {
-      if arc_program.is_module() {
-        create_module(
-          env,
-          byte_to_index_map,
-          arc_program.as_module().expect("Couldn't get module"),
-        )
-      } else if arc_program.is_script() {
-        create_script(
-          env,
-          byte_to_index_map,
-          arc_program.as_script().expect("Couldn't get script"),
-        )
-      } else {
-        Default::default()
+  use std::sync::Arc;
+
+  use deno_ast::swc::ast::*;
+  use deno_ast::swc::common::Spanned;
+
+  fn create_decl_var<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    byte_to_index_map: &ByteToIndexMap,
+    var_decl: &VarDecl,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let declare = var_decl.declare;
+    let kind = var_decl.kind;
+    let range = byte_to_index_map.get_range_by_span(&var_decl.span());
+    let java_decls = java_array_list.create(env, var_decl.decls.len());
+    var_decl.decls.iter().for_each(|var_declarator| {
+      let java_var_declarator = create_var_declarator(env, byte_to_index_map, var_declarator);
+      java_array_list.add(env, &java_decls, &java_var_declarator);
+      env
+        .delete_local_ref(java_var_declarator)
+        .expect("Couldn't delete local var declarator");
+    });
+    Default::default()
+  }
+
+  fn create_ident<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    byte_to_index_map: &ByteToIndexMap,
+    ident: &Ident,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = byte_to_index_map.get_range_by_span(&ident.span());
+    let sym = ident.sym.as_str();
+    let optional = ident.optional;
+    Default::default()
+  }
+
+  pub fn create_program<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    byte_to_index_map: &ByteToIndexMap,
+    program: &Option<Arc<Program>>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match program {
+      Some(arc_program) => {
+        if arc_program.is_module() {
+          create_module(
+            env,
+            byte_to_index_map,
+            arc_program.as_module().expect("Couldn't get module"),
+          )
+        } else if arc_program.is_script() {
+          create_script(
+            env,
+            byte_to_index_map,
+            arc_program.as_script().expect("Couldn't get script"),
+          )
+        } else {
+          Default::default()
+        }
       }
+      None => Default::default(),
     }
-    None => Default::default(),
   }
-}
 
-fn create_module<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  byte_to_index_map: &ByteToIndexMap,
-  module: &Module,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-  let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
-  let range = byte_to_index_map.get_range_by_span(&module.span());
-  let body = create_module_body(env, byte_to_index_map, &module.body);
-  let java_module = java_ast_factory.create_module(env, &body, shebang, range);
-  env.delete_local_ref(body).expect("Couldn't delete local module body");
-  java_module
-}
+  fn create_module<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    byte_to_index_map: &ByteToIndexMap,
+    module: &Module,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
+    let range = byte_to_index_map.get_range_by_span(&module.span());
+    let body = create_module_body(env, byte_to_index_map, &module.body);
+    let java_module = java_ast_factory.create_module(env, &body, shebang, range);
+    env.delete_local_ref(body).expect("Couldn't delete local module body");
+    java_module
+  }
 
-fn create_module_body<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  byte_to_index_map: &ByteToIndexMap,
-  body: &Vec<ModuleItem>,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-  let java_body = java_array_list.create(env, body.len());
-  java_body
-}
+  fn create_module_body<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    byte_to_index_map: &ByteToIndexMap,
+    body: &Vec<ModuleItem>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_body = java_array_list.create(env, body.len());
+    java_body
+  }
 
-fn create_pat<'local, 'a>(env: &mut JNIEnv<'local>, byte_to_index_map: &ByteToIndexMap, pat: &Pat) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-  let range = byte_to_index_map.get_range_by_span(&pat.span());
-  match pat {
-    Pat::Ident(bingding_ident) => {
-      let java_id = create_ident(env, byte_to_index_map, &bingding_ident.id);
+  fn create_pat<'local, 'a>(env: &mut JNIEnv<'local>, byte_to_index_map: &ByteToIndexMap, pat: &Pat) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = byte_to_index_map.get_range_by_span(&pat.span());
+    match pat {
+      Pat::Ident(bingding_ident) => {
+        let java_id = create_ident(env, byte_to_index_map, &bingding_ident.id);
+      }
+      _ => {}
     }
-    _ => {}
+    Default::default()
   }
-  Default::default()
-}
 
-fn create_stmt<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  byte_to_index_map: &ByteToIndexMap,
-  statement: &Stmt,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match statement {
-    Stmt::Decl(decl) => create_stmt_decl(env, byte_to_index_map, &decl),
-    _ => Default::default(),
+  fn create_stmt<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    byte_to_index_map: &ByteToIndexMap,
+    statement: &Stmt,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match statement {
+      Stmt::Decl(decl) => create_stmt_decl(env, byte_to_index_map, &decl),
+      _ => Default::default(),
+    }
   }
-}
 
-fn create_stmt_decl<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  byte_to_index_map: &ByteToIndexMap,
-  decl: &Decl,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match decl {
-    Decl::Var(box_var_decl) => create_decl_var(env, byte_to_index_map, &box_var_decl),
-    _ => Default::default(),
+  fn create_stmt_decl<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    byte_to_index_map: &ByteToIndexMap,
+    decl: &Decl,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match decl {
+      Decl::Var(box_var_decl) => create_decl_var(env, byte_to_index_map, &box_var_decl),
+      _ => Default::default(),
+    }
   }
-}
 
-fn create_script<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  byte_to_index_map: &ByteToIndexMap,
-  script: &Script,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-  let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
-  let range = byte_to_index_map.get_range_by_span(&script.span());
-  let body = create_script_body(env, byte_to_index_map, &script.body);
-  let java_script = java_ast_factory.create_script(env, &body, shebang, range);
-  env.delete_local_ref(body).expect("Couldn't delete local script body");
-  java_script
-}
+  fn create_script<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    byte_to_index_map: &ByteToIndexMap,
+    script: &Script,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
+    let range = byte_to_index_map.get_range_by_span(&script.span());
+    let body = create_script_body(env, byte_to_index_map, &script.body);
+    let java_script = java_ast_factory.create_script(env, &body, shebang, range);
+    env.delete_local_ref(body).expect("Couldn't delete local script body");
+    java_script
+  }
 
-fn create_script_body<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  byte_to_index_map: &ByteToIndexMap,
-  body: &Vec<Stmt>,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-  let java_body = java_array_list.create(env, body.len());
-  body.into_iter().for_each(|stmt| {
-    let java_stmt = create_stmt(env, byte_to_index_map, stmt);
-    java_array_list.add(env, &java_body, &java_stmt);
-    env.delete_local_ref(java_stmt).expect("Couldn't delete local stmt");
-  });
-  java_body
-}
+  fn create_script_body<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    byte_to_index_map: &ByteToIndexMap,
+    body: &Vec<Stmt>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_body = java_array_list.create(env, body.len());
+    body.into_iter().for_each(|stmt| {
+      let java_stmt = create_stmt(env, byte_to_index_map, stmt);
+      java_array_list.add(env, &java_body, &java_stmt);
+      env.delete_local_ref(java_stmt).expect("Couldn't delete local stmt");
+    });
+    java_body
+  }
 
-fn create_var_declarator<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  byte_to_index_map: &ByteToIndexMap,
-  var_declarator: &VarDeclarator,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-  let range = byte_to_index_map.get_range_by_span(&var_declarator.span());
-  let java_name = create_pat(env, byte_to_index_map, &var_declarator.name);
-  Default::default()
+  fn create_var_declarator<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    byte_to_index_map: &ByteToIndexMap,
+    var_declarator: &VarDeclarator,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = byte_to_index_map.get_range_by_span(&var_declarator.span());
+    let java_name = create_pat(env, byte_to_index_map, &var_declarator.name);
+    Default::default()
+  }
 }

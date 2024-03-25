@@ -67,7 +67,7 @@ impl JavaParseOutput {
     'local: 'a,
   {
     let byte_to_index_map = parse_output.get_byte_to_index_map();
-    let program = ast_utils::create_program(env, &byte_to_index_map, &parse_output.program);
+    let program = ast_utils::program::create_program(env, &byte_to_index_map, &parse_output.program);
     let program = jvalue { l: program.as_raw() };
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let media_type = java_media_type.parse(env, parse_output.media_type.get_id());
@@ -131,7 +131,7 @@ impl JavaTranspileOutput {
     'local: 'a,
   {
     let byte_to_index_map = transpile_output.parse_output.get_byte_to_index_map();
-    let program = ast_utils::create_program(env, &byte_to_index_map, &transpile_output.parse_output.program);
+    let program = ast_utils::program::create_program(env, &byte_to_index_map, &transpile_output.parse_output.program);
     let program = jvalue { l: program.as_raw() };
     let code = jvalue {
       l: converter::string_to_jstring(env, &transpile_output.code).as_raw(),

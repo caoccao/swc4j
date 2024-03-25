@@ -34,7 +34,7 @@ use std::ops::Range;
 use std::ptr::null_mut;
 use std::sync::Arc;
 
-pub struct JavaAstTokenFactory {
+struct JavaAstTokenFactory {
   #[allow(dead_code)]
   class: GlobalRef,
   method_create_assign_operator: JStaticMethodID,
@@ -902,7 +902,7 @@ impl JavaAstTokenFactory {
   }
 }
 
-pub static mut JAVA_TOKEN_FACTORY: Option<JavaAstTokenFactory> = None;
+static mut JAVA_TOKEN_FACTORY: Option<JavaAstTokenFactory> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
