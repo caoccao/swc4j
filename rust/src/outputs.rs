@@ -32,6 +32,7 @@ use crate::converter;
 use crate::enums::*;
 use crate::jni_utils::ToJniType;
 use crate::options::*;
+use crate::position_utils::ByteToIndexMap;
 
 struct JavaParseOutput {
   class: GlobalRef,
@@ -230,9 +231,9 @@ impl ParseOutput {
     }
   }
 
-  pub fn get_byte_to_index_map(&self) -> ast_utils::ByteToIndexMap {
+  pub fn get_byte_to_index_map(&self) -> ByteToIndexMap {
     // Register the keys
-    let mut byte_to_index_map = ast_utils::ByteToIndexMap::new();
+    let mut byte_to_index_map = ByteToIndexMap::new();
     match &self.program {
       Some(program) => {
         if program.is_module() {
@@ -264,18 +265,18 @@ impl ParseOutput {
     byte_to_index_map
   }
 
-  fn register_decl(&self, byte_to_index_map: &mut ast_utils::ByteToIndexMap, decl: &Decl) {
+  fn register_decl(&self, byte_to_index_map: &mut ByteToIndexMap, decl: &Decl) {
     match decl {
       Decl::Var(var_decl) => self.register_var_decl(byte_to_index_map, var_decl.as_ref()),
       _ => {}
     };
   }
 
-  fn register_module(&self, byte_to_index_map: &mut ast_utils::ByteToIndexMap, module: &Module) {
+  fn register_module(&self, byte_to_index_map: &mut ByteToIndexMap, module: &Module) {
     byte_to_index_map.register_by_span(&module.span);
   }
 
-  fn register_script(&self, byte_to_index_map: &mut ast_utils::ByteToIndexMap, script: &Script) {
+  fn register_script(&self, byte_to_index_map: &mut ByteToIndexMap, script: &Script) {
     byte_to_index_map.register_by_span(&script.span);
     script
       .body
@@ -283,14 +284,14 @@ impl ParseOutput {
       .for_each(|stmt| self.register_stmt(byte_to_index_map, stmt))
   }
 
-  fn register_stmt(&self, byte_to_index_map: &mut ast_utils::ByteToIndexMap, stmt: &Stmt) {
+  fn register_stmt(&self, byte_to_index_map: &mut ByteToIndexMap, stmt: &Stmt) {
     match stmt {
       Stmt::Decl(decl) => self.register_decl(byte_to_index_map, decl),
       _ => {}
     };
   }
 
-  fn register_var_decl(&self, byte_to_index_map: &mut ast_utils::ByteToIndexMap, var_decl: &VarDecl) {
+  fn register_var_decl(&self, byte_to_index_map: &mut ByteToIndexMap, var_decl: &VarDecl) {
     byte_to_index_map.register_by_span(&var_decl.span);
     var_decl
       .decls
@@ -298,7 +299,7 @@ impl ParseOutput {
       .for_each(|var_declarator| self.register_var_declarator(byte_to_index_map, var_declarator));
   }
 
-  fn register_var_declarator(&self, byte_to_index_map: &mut ast_utils::ByteToIndexMap, var_declarator: &VarDeclarator) {
+  fn register_var_declarator(&self, byte_to_index_map: &mut ByteToIndexMap, var_declarator: &VarDeclarator) {
     byte_to_index_map.register_by_span(&var_declarator.span);
     // TODO
   }

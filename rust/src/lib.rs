@@ -25,7 +25,6 @@ use std::ffi::c_void;
 use std::ptr::null_mut;
 
 pub mod ast_utils;
-pub mod token_utils;
 pub mod converter;
 pub mod core;
 pub mod enums;
@@ -33,6 +32,8 @@ pub mod error;
 pub mod jni_utils;
 pub mod options;
 pub mod outputs;
+pub mod position_utils;
+pub mod token_utils;
 
 use crate::jni_utils::ToJniType;
 

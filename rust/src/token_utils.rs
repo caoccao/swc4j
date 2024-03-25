@@ -25,10 +25,10 @@ use deno_ast::swc::common::source_map::Pos;
 use deno_ast::swc::parser::error::Error;
 use deno_ast::swc::parser::token::{IdentLike, Token, TokenAndSpan, Word};
 
-use crate::ast_utils;
 use crate::converter;
 use crate::enums::*;
 use crate::jni_utils::JAVA_ARRAY_LIST;
+use crate::position_utils::ByteToIndexMap;
 
 use std::ops::Range;
 use std::ptr::null_mut;
@@ -952,7 +952,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 
 pub fn token_and_spans_to_java_list<'local>(
   env: &mut JNIEnv<'local>,
-  byte_to_index_map: &ast_utils::ByteToIndexMap,
+  byte_to_index_map: &ByteToIndexMap,
   source_text: &str,
   token_and_spans: Option<Arc<Vec<TokenAndSpan>>>,
 ) -> jvalue {
