@@ -33,7 +33,7 @@ public final class Swc4jTokenFactory {
     /**
      * Create token assign operator.
      *
-     * @param type           the type
+     * @param typeId         the type id
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
@@ -41,7 +41,8 @@ public final class Swc4jTokenFactory {
      * @since 0.2.0
      */
     public static Swc4jToken createAssignOperator(
-            Swc4jTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
+            int typeId, int startPosition, int endPosition, boolean lineBreakAhead) {
+        Swc4jTokenType type = Swc4jTokenType.parse(typeId);
         AssertionUtils.notTrue(type.getSubType().isAssignOperator(), "Assign operator is expected");
         return new Swc4jToken(type, startPosition, endPosition, lineBreakAhead);
     }
@@ -70,7 +71,7 @@ public final class Swc4jTokenFactory {
     /**
      * Create token binary operator.
      *
-     * @param type           the type
+     * @param typeId         the type id
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
@@ -78,7 +79,8 @@ public final class Swc4jTokenFactory {
      * @since 0.2.0
      */
     public static Swc4jToken createBinaryOperator(
-            Swc4jTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
+            int typeId, int startPosition, int endPosition, boolean lineBreakAhead) {
+        Swc4jTokenType type = Swc4jTokenType.parse(typeId);
         AssertionUtils.notTrue(type.getSubType().isBinaryOperator(), "Binary operator is expected");
         return new Swc4jToken(type, startPosition, endPosition, lineBreakAhead);
     }
@@ -122,7 +124,7 @@ public final class Swc4jTokenFactory {
     /**
      * Create token generic operator.
      *
-     * @param type           the type
+     * @param typeId         the type id
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
@@ -130,7 +132,8 @@ public final class Swc4jTokenFactory {
      * @since 0.2.0
      */
     public static Swc4jToken createGenericOperator(
-            Swc4jTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
+            int typeId, int startPosition, int endPosition, boolean lineBreakAhead) {
+        Swc4jTokenType type = Swc4jTokenType.parse(typeId);
         AssertionUtils.notTrue(type.getSubType().isGenericOperator(), "Generic operator is expected");
         return new Swc4jToken(type, startPosition, endPosition, lineBreakAhead);
     }
@@ -198,7 +201,7 @@ public final class Swc4jTokenFactory {
     /**
      * Create token keyword.
      *
-     * @param type           the type
+     * @param typeId         the type id
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
@@ -206,7 +209,8 @@ public final class Swc4jTokenFactory {
      * @since 0.2.0
      */
     public static Swc4jToken createKeyword(
-            Swc4jTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
+            int typeId, int startPosition, int endPosition, boolean lineBreakAhead) {
+        Swc4jTokenType type = Swc4jTokenType.parse(typeId);
         AssertionUtils.notTrue(type.getSubType().isKeyword(), "Keyword is expected");
         return new Swc4jToken(type, startPosition, endPosition, lineBreakAhead);
     }
