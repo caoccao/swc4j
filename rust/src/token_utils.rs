@@ -34,12 +34,13 @@ use std::ops::Range;
 use std::ptr::null_mut;
 use std::sync::Arc;
 
-struct JavaAstTokenFactory {
+/* JavaSwc4jTokenFactory Begin */
+struct JavaSwc4jTokenFactory {
   #[allow(dead_code)]
   class: GlobalRef,
   method_create_assign_operator: JStaticMethodID,
+  method_create_big_int: JStaticMethodID,
   method_create_binary_operator: JStaticMethodID,
-  method_create_bigint: JStaticMethodID,
   method_create_error: JStaticMethodID,
   method_create_false: JStaticMethodID,
   method_create_generic_operator: JStaticMethodID,
@@ -57,10 +58,10 @@ struct JavaAstTokenFactory {
   method_create_true: JStaticMethodID,
   method_create_unknown: JStaticMethodID,
 }
-unsafe impl Send for JavaAstTokenFactory {}
-unsafe impl Sync for JavaAstTokenFactory {}
+unsafe impl Send for JavaSwc4jTokenFactory {}
+unsafe impl Sync for JavaSwc4jTokenFactory {}
 
-impl JavaAstTokenFactory {
+impl JavaSwc4jTokenFactory {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
       .find_class("com/caoccao/javet/swc4j/tokens/Swc4jTokenFactory")
@@ -75,6 +76,13 @@ impl JavaAstTokenFactory {
         "(IIIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createAssignOperator");
+    let method_create_big_int = env
+      .get_static_method_id(
+        &class,
+        "createBigInt",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+      )
+      .expect("Couldn't find method Swc4jTokenFactory.createBigInt");
     let method_create_binary_operator = env
       .get_static_method_id(
         &class,
@@ -82,13 +90,6 @@ impl JavaAstTokenFactory {
         "(IIIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createBinaryOperator");
-    let method_create_bigint = env
-      .get_static_method_id(
-        &class,
-        "createBigInt",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
-      )
-      .expect("Couldn't find method Swc4jTokenFactory.createBigInt");
     let method_create_error = env
       .get_static_method_id(
         &class,
@@ -117,6 +118,13 @@ impl JavaAstTokenFactory {
         "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createIdentKnown");
+    let method_create_ident_other = env
+      .get_static_method_id(
+        &class,
+        "createIdentOther",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+      )
+      .expect("Couldn't find method Swc4jTokenFactory.createIdentOther");
     let method_create_jsx_tag_name = env
       .get_static_method_id(
         &class,
@@ -139,15 +147,12 @@ impl JavaAstTokenFactory {
       )
       .expect("Couldn't find method Swc4jTokenFactory.createKeyword");
     let method_create_null = env
-      .get_static_method_id(&class, "createNull", "(IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;")
-      .expect("Couldn't find method Swc4jTokenFactory.createNull");
-    let method_create_ident_other = env
       .get_static_method_id(
         &class,
-        "createIdentOther",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        "createNull",
+        "(IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
-      .expect("Couldn't find method Swc4jTokenFactory.createIdentOther");
+      .expect("Couldn't find method Swc4jTokenFactory.createNull");
     let method_create_number = env
       .get_static_method_id(
         &class,
@@ -184,7 +189,11 @@ impl JavaAstTokenFactory {
       )
       .expect("Couldn't find method Swc4jTokenFactory.createTemplate");
     let method_create_true = env
-      .get_static_method_id(&class, "createTrue", "(IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;")
+      .get_static_method_id(
+        &class,
+        "createTrue",
+        "(IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+      )
       .expect("Couldn't find method Swc4jTokenFactory.createTrue");
     let method_create_unknown = env
       .get_static_method_id(
@@ -193,11 +202,11 @@ impl JavaAstTokenFactory {
         "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createUnknown");
-    JavaAstTokenFactory {
+    JavaSwc4jTokenFactory {
       class,
       method_create_assign_operator,
+      method_create_big_int,
       method_create_binary_operator,
-      method_create_bigint,
       method_create_error,
       method_create_false,
       method_create_generic_operator,
@@ -209,13 +218,14 @@ impl JavaAstTokenFactory {
       method_create_null,
       method_create_number,
       method_create_regex,
-      method_create_template,
       method_create_shebang,
       method_create_string,
+      method_create_template,
       method_create_true,
       method_create_unknown,
     }
   }
+/* JavaSwc4jTokenFactory End */
 
   pub fn create_assign_operator<'local, 'a>(
     &self,
@@ -300,7 +310,7 @@ impl JavaAstTokenFactory {
       env
         .call_static_method_unchecked(
           &self.class,
-          self.method_create_bigint,
+          self.method_create_big_int,
           ReturnType::Object,
           &[text, start_position, end_position, line_break_ahead],
         )
@@ -902,11 +912,11 @@ impl JavaAstTokenFactory {
   }
 }
 
-static mut JAVA_TOKEN_FACTORY: Option<JavaAstTokenFactory> = None;
+static mut JAVA_TOKEN_FACTORY: Option<JavaSwc4jTokenFactory> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
-    JAVA_TOKEN_FACTORY = Some(JavaAstTokenFactory::new(env));
+    JAVA_TOKEN_FACTORY = Some(JavaSwc4jTokenFactory::new(env));
   }
 }
 

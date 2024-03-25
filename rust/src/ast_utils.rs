@@ -24,16 +24,17 @@ use crate::converter;
 
 use std::ops::Range;
 
-struct JavaAstFactory {
+/* JavaSwc4jAstFactory Begin */
+struct JavaSwc4jAstFactory {
   #[allow(dead_code)]
   class: GlobalRef,
   method_create_module: JStaticMethodID,
   method_create_script: JStaticMethodID,
 }
-unsafe impl Send for JavaAstFactory {}
-unsafe impl Sync for JavaAstFactory {}
+unsafe impl Send for JavaSwc4jAstFactory {}
+unsafe impl Sync for JavaSwc4jAstFactory {}
 
-impl JavaAstFactory {
+impl JavaSwc4jAstFactory {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
       .find_class("com/caoccao/javet/swc4j/ast/Swc4jAstFactory")
@@ -55,12 +56,13 @@ impl JavaAstFactory {
         "(Ljava/util/List;Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstScript;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createScript");
-    JavaAstFactory {
+    JavaSwc4jAstFactory {
       class,
       method_create_module,
       method_create_script,
     }
   }
+/* JavaSwc4jAstFactory End */
 
   pub fn create_module<'local, 'a>(
     &self,
@@ -139,11 +141,11 @@ impl JavaAstFactory {
   }
 }
 
-static mut JAVA_AST_FACTORY: Option<JavaAstFactory> = None;
+static mut JAVA_AST_FACTORY: Option<JavaSwc4jAstFactory> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
-    JAVA_AST_FACTORY = Some(JavaAstFactory::new(env));
+    JAVA_AST_FACTORY = Some(JavaSwc4jAstFactory::new(env));
   }
 }
 

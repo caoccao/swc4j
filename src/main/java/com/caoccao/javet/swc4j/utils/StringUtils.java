@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.utils;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
@@ -25,6 +26,13 @@ import java.util.StringJoiner;
  * @since 0.1.0
  */
 public final class StringUtils {
+    /**
+     * The constant EMPTY.
+     *
+     * @since 0.2.0
+     */
+    public static final String EMPTY = "";
+
     private StringUtils() {
     }
 
@@ -51,6 +59,47 @@ public final class StringUtils {
     }
 
     /**
+     * To snake case string.
+     *
+     * @param str the str
+     * @return the string
+     * @since 0.2.0
+     */
+    public static String toSnakeCase(String str) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        StringBuilder sb = new StringBuilder(str.length());
+        boolean isFirst = true;
+        for (char c : str.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                if (!isFirst) {
+                    sb.append('_');
+                }
+                sb.append(Character.toLowerCase(c));
+            } else {
+                sb.append(c);
+            }
+            isFirst = false;
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Join string.
+     *
+     * @param delimiter the delimiter
+     * @param elements  the elements
+     * @return the string
+     * @since 0.1.0
+     */
+    public static String join(CharSequence delimiter, List<String> elements) {
+        StringJoiner stringJoiner = new StringJoiner(Objects.requireNonNull(delimiter));
+        Objects.requireNonNull(elements).forEach(stringJoiner::add);
+        return stringJoiner.toString();
+    }
+
+    /**
      * Join string.
      *
      * @param delimiter the delimiter
@@ -59,10 +108,8 @@ public final class StringUtils {
      * @since 0.1.0
      */
     public static String join(CharSequence delimiter, CharSequence... elements) {
-        Objects.requireNonNull(delimiter);
-        Objects.requireNonNull(elements);
-        StringJoiner stringJoiner = new StringJoiner(delimiter);
-        for (CharSequence cs : elements) {
+        StringJoiner stringJoiner = new StringJoiner(Objects.requireNonNull(delimiter));
+        for (CharSequence cs : Objects.requireNonNull(elements)) {
             stringJoiner.add(cs);
         }
         return stringJoiner.toString();
