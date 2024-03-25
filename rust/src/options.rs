@@ -80,11 +80,17 @@ impl JavaParseOptions {
     }
   }
 
-  pub fn get_media_type<'local, 'a, 'b>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> JObject<'b> {
+  pub fn get_media_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
     jni_utils::get_as_jobject(env, obj, self.method_get_media_type)
   }
 
-  pub fn get_parse_mode<'local, 'a, 'b>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> JObject<'b> {
+  pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
     jni_utils::get_as_jobject(env, obj, self.method_get_parse_mode)
   }
 
@@ -232,11 +238,10 @@ impl JavaTranspileOptions {
     }
   }
 
-  pub fn get_imports_not_used_as_values<'local, 'a, 'b>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'a>,
-  ) -> JObject<'b> {
+  pub fn get_imports_not_used_as_values<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
     jni_utils::get_as_jobject(env, obj, self.method_get_imports_not_used_as_values)
   }
 
@@ -248,15 +253,21 @@ impl JavaTranspileOptions {
     jni_utils::get_as_string(env, obj, self.method_get_jsx_fragment_factory)
   }
 
-  pub fn get_jsx_import_source<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> Option<String> {
+  pub fn get_jsx_import_source<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Option<String> {
     jni_utils::get_as_optional_string(env, obj, self.method_get_jsx_import_source)
   }
 
-  pub fn get_media_type<'local, 'a, 'b>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> JObject<'b> {
+  pub fn get_media_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
     jni_utils::get_as_jobject(env, obj, self.method_get_media_type)
   }
 
-  pub fn get_parse_mode<'local, 'a, 'b>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> JObject<'b> {
+  pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
     jni_utils::get_as_jobject(env, obj, self.method_get_parse_mode)
   }
 

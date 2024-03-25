@@ -117,15 +117,16 @@ pub fn get_as_int<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, method: J
   }
 }
 
-pub fn get_as_jobject<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, method: JMethodID) -> JObject<'a> {
+pub fn get_as_jobject<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, method: JMethodID) -> JObject<'a>
+where
+  'local: 'a,
+{
   unsafe {
-    JObject::from_raw(
-      env
-        .call_method_unchecked(&obj, method, ReturnType::Object, &[])
-        .expect("Object is expected")
-        .as_jni()
-        .l,
-    )
+    env
+      .call_method_unchecked(&obj, method, ReturnType::Object, &[])
+      .expect("Object is expected")
+      .l()
+      .expect("Object is expected")
   }
 }
 
