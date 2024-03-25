@@ -15,8 +15,7 @@
 * limitations under the License.
 */
 
-use deno_ast::swc::ast::Program;
-use deno_ast::swc::common::Spanned;
+use deno_ast::swc::ast::*;
 use deno_ast::swc::parser::token::TokenAndSpan;
 use deno_ast::{ParsedSource, TranspiledSource};
 
@@ -67,29 +66,8 @@ impl JavaParseOutput {
     'local: 'a,
   {
     let byte_to_index_map = parse_output.get_byte_to_index_map();
-    let java_ast_factory = unsafe { ast_utils::JAVA_AST_FACTORY.as_ref().unwrap() };
-    let ast_module = match &parse_output.program {
-      Some(arc_program) => match arc_program.as_module() {
-        Some(module) => {
-          let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
-          let range = byte_to_index_map.get_range_by_span(&module.span());
-          java_ast_factory.create_module(env, shebang, range)
-        }
-        None => Default::default(),
-      },
-      None => Default::default(),
-    };
-    let ast_script = match &parse_output.program {
-      Some(arc_program) => match arc_program.as_script() {
-        Some(script) => {
-          let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
-          let range = byte_to_index_map.get_range_by_span(&script.span());
-          java_ast_factory.create_script(env, shebang, range)
-        }
-        None => Default::default(),
-      },
-      None => Default::default(),
-    };
+    let ast_module = ast_utils::create_module(env, &byte_to_index_map, &parse_output.program);
+    let ast_script = ast_utils::create_script(env, &byte_to_index_map, &parse_output.program);
     let ast_module = jvalue { l: ast_module.as_raw() };
     let ast_script = jvalue { l: ast_script.as_raw() };
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
@@ -154,29 +132,8 @@ impl JavaTranspileOutput {
     'local: 'a,
   {
     let byte_to_index_map = transpile_output.parse_output.get_byte_to_index_map();
-    let java_ast_factory = unsafe { ast_utils::JAVA_AST_FACTORY.as_ref().unwrap() };
-    let ast_module = match &transpile_output.parse_output.program {
-      Some(arc_program) => match arc_program.as_module() {
-        Some(module) => {
-          let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
-          let range = byte_to_index_map.get_range_by_span(&module.span());
-          java_ast_factory.create_module(env, shebang, range)
-        }
-        None => Default::default(),
-      },
-      None => Default::default(),
-    };
-    let ast_script = match &transpile_output.parse_output.program {
-      Some(arc_program) => match arc_program.as_script() {
-        Some(script) => {
-          let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
-          let range = byte_to_index_map.get_range_by_span(&script.span());
-          java_ast_factory.create_script(env, shebang, range)
-        }
-        None => Default::default(),
-      },
-      None => Default::default(),
-    };
+    let ast_module = ast_utils::create_module(env, &byte_to_index_map, &transpile_output.parse_output.program);
+    let ast_script = ast_utils::create_script(env, &byte_to_index_map, &transpile_output.parse_output.program);
     let ast_module = jvalue { l: ast_module.as_raw() };
     let ast_script = jvalue { l: ast_script.as_raw() };
     let code = jvalue {
@@ -279,11 +236,9 @@ impl ParseOutput {
     match &self.program {
       Some(program) => {
         if program.is_module() {
-          let module = program.as_module().unwrap();
-          byte_to_index_map.register_by_span(&module.span);
+          self.register_module(&mut byte_to_index_map, program.as_module().unwrap());
         } else if program.is_script() {
-          let script = program.as_script().unwrap();
-          byte_to_index_map.register_by_span(&script.span);
+          self.register_script(&mut byte_to_index_map, program.as_script().unwrap());
         }
       }
       None => {}
@@ -307,6 +262,45 @@ impl ParseOutput {
     });
     byte_to_index_map.update(&utf8_byte_length, char_count);
     byte_to_index_map
+  }
+
+  fn register_decl(&self, byte_to_index_map: &mut ast_utils::ByteToIndexMap, decl: &Decl) {
+    match decl {
+      Decl::Var(var_decl) => self.register_var_decl(byte_to_index_map, var_decl.as_ref()),
+      _ => {}
+    };
+  }
+
+  fn register_module(&self, byte_to_index_map: &mut ast_utils::ByteToIndexMap, module: &Module) {
+    byte_to_index_map.register_by_span(&module.span);
+  }
+
+  fn register_script(&self, byte_to_index_map: &mut ast_utils::ByteToIndexMap, script: &Script) {
+    byte_to_index_map.register_by_span(&script.span);
+    script
+      .body
+      .iter()
+      .for_each(|stmt| self.register_stmt(byte_to_index_map, stmt))
+  }
+
+  fn register_stmt(&self, byte_to_index_map: &mut ast_utils::ByteToIndexMap, stmt: &Stmt) {
+    match stmt {
+      Stmt::Decl(decl) => self.register_decl(byte_to_index_map, decl),
+      _ => {}
+    };
+  }
+
+  fn register_var_decl(&self, byte_to_index_map: &mut ast_utils::ByteToIndexMap, var_decl: &VarDecl) {
+    byte_to_index_map.register_by_span(&var_decl.span);
+    var_decl
+      .decls
+      .iter()
+      .for_each(|var_declarator| self.register_var_declarator(byte_to_index_map, var_declarator));
+  }
+
+  fn register_var_declarator(&self, byte_to_index_map: &mut ast_utils::ByteToIndexMap, var_declarator: &VarDeclarator) {
+    byte_to_index_map.register_by_span(&var_declarator.span);
+    // TODO
   }
 }
 

@@ -19,6 +19,8 @@ package com.caoccao.javet.swc4j.ast;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 
+import java.util.List;
+
 /**
  * The type Swc4j ast factory.
  *
@@ -31,26 +33,30 @@ public final class Swc4jAstFactory {
     /**
      * Create module ast module.
      *
+     * @param body          the body
      * @param shebang       the shebang
      * @param startPosition the start position
      * @param endPosition   the end position
      * @return the ast module
      * @since 0.2.0
      */
-    public static Swc4jAstModule createModule(String shebang, int startPosition, int endPosition) {
-        return new Swc4jAstModule(shebang, startPosition, endPosition);
+    public static Swc4jAstModule createModule(
+            List<BaseSwc4jAst> body, String shebang, int startPosition, int endPosition) {
+        return new Swc4jAstModule(body, shebang, startPosition, endPosition);
     }
 
     /**
      * Create module ast script.
      *
+     * @param body          the body
      * @param shebang       the shebang
      * @param startPosition the start position
      * @param endPosition   the end position
      * @return the ast script
      * @since 0.2.0
      */
-    public static Swc4jAstScript createScript(String shebang, int startPosition, int endPosition) {
-        return new Swc4jAstScript(shebang, startPosition, endPosition);
+    public static Swc4jAstScript createScript(
+            List<BaseSwc4jAst> body, String shebang, int startPosition, int endPosition) {
+        return new Swc4jAstScript(body, shebang, startPosition, endPosition);
     }
 }

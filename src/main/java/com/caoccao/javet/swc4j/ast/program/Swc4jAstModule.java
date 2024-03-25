@@ -16,7 +16,11 @@
 
 package com.caoccao.javet.swc4j.ast.program;
 
+import com.caoccao.javet.swc4j.ast.BaseSwc4jAst;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
+
+import java.util.List;
 
 /**
  * The type Swc4j ast module.
@@ -25,14 +29,33 @@ import com.caoccao.javet.swc4j.enums.Swc4jAstType;
  */
 public class Swc4jAstModule extends BaseSwc4jAstProgram {
     /**
+     * The Body.
+     *
+     * @since 0.2.0
+     */
+    protected final List<BaseSwc4jAst> body;
+
+    /**
      * Instantiates a new Swc4j ast module.
      *
+     * @param body          the body
      * @param shebang       the shebang
      * @param startPosition the start position
      * @param endPosition   the end position
      * @since 0.2.0
      */
-    public Swc4jAstModule(String shebang, int startPosition, int endPosition) {
+    public Swc4jAstModule(List<BaseSwc4jAst> body, String shebang, int startPosition, int endPosition) {
         super(Swc4jAstType.Module, shebang, startPosition, endPosition);
+        this.body = AssertionUtils.notNull(body, "Body");
+    }
+
+    /**
+     * Gets body.
+     *
+     * @return the body
+     * @since 0.2.0
+     */
+    public List<BaseSwc4jAst> getBody() {
+        return body;
     }
 }

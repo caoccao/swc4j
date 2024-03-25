@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j;
 
-import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
+import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.tokens.Swc4jAstToken;
 import com.caoccao.javet.swc4j.ast.tokens.Swc4jAstTokenTextValue;
 import com.caoccao.javet.swc4j.ast.tokens.Swc4jAstTokenTextValueFlags;
@@ -114,19 +114,21 @@ public class TestSwc4j {
     }
 
     @Test
-    public void testParseTypeScriptWithCaptureAst() throws Swc4jCoreException {
+    public void testParseTypeScriptAsScriptWithCaptureAst() throws Swc4jCoreException {
         Swc4jParseOptions options = new Swc4jParseOptions()
                 .setMediaType(Swc4jMediaType.TypeScript)
+                .setParseMode(Swc4jParseMode.Script)
                 .setCaptureAst(true);
-        String code = "function add加法(a變量:number, b變量:number) { return a變量+b變量; }";
+        String code = "let a";
         Swc4jParseOutput output = swc4j.parse(code, options);
         assertNotNull(output);
-        assertTrue(output.isModule());
-        assertFalse(output.isScript());
-        assertNotNull(output.getAstModule());
-        Swc4jAstModule module = output.getAstModule();
-        assertEquals(0, module.getStartPosition());
-        assertEquals(58, module.getEndPosition());
+        assertFalse(output.isModule());
+        assertTrue(output.isScript());
+        assertNotNull(output.getAstScript());
+        Swc4jAstScript script = output.getAstScript();
+        assertEquals(0, script.getStartPosition());
+        assertEquals(code.length(), script.getEndPosition());
+        assertNotNull(script.getBody());
     }
 
     @SuppressWarnings("unchecked")
