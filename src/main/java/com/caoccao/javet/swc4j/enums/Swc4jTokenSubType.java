@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j.enums;
 
-public enum Swc4jAstTokenSubType {
+public enum Swc4jTokenSubType {
     AssignOperator,
     BinaryOperator,
     GenericOperator,

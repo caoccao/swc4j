@@ -18,7 +18,7 @@ package com.caoccao.javet.swc4j.outputs;
 
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
-import com.caoccao.javet.swc4j.ast.tokens.Swc4jAstToken;
+import com.caoccao.javet.swc4j.tokens.Swc4jToken;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 
 import java.util.List;
@@ -70,7 +70,7 @@ public class Swc4jParseOutput {
      *
      * @since 0.2.0
      */
-    protected List<Swc4jAstToken> tokens;
+    protected List<Swc4jToken> tokens;
 
     /**
      * Instantiates a new Swc4j parse output.
@@ -89,7 +89,7 @@ public class Swc4jParseOutput {
             boolean module,
             boolean script,
             String sourceText,
-            List<Swc4jAstToken> tokens) {
+            List<Swc4jToken> tokens) {
         this.astModule = astModule;
         this.astScript = astScript;
         this.mediaType = mediaType;
@@ -145,7 +145,7 @@ public class Swc4jParseOutput {
      * @return the tokens
      * @since 0.2.0
      */
-    public List<Swc4jAstToken> getTokens() {
+    public List<Swc4jToken> getTokens() {
         return tokens;
     }
 

@@ -14,45 +14,53 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.tokens;
+package com.caoccao.javet.swc4j.tokens;
 
-import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
+import com.caoccao.javet.swc4j.enums.Swc4jTokenType;
 
 /**
- * The type swc4j ast token text.
+ * The type Base swc4j token text value.
  *
+ * @param <T> the type parameter
  * @since 0.2.0
  */
-public class Swc4jAstTokenText extends Swc4jAstToken {
+public class Swc4jTokenTextValue<T> extends Swc4jTokenText {
     /**
      * The Text.
      *
      * @since 0.2.0
      */
-    protected final String text;
+    protected final T value;
 
     /**
-     * Instantiates a new swc4j ast token text.
+     * Instantiates a new Base swc4j token text value.
      *
      * @param type           the type
      * @param text           the text
+     * @param value          the value
      * @param startPosition  the start position
      * @param endPosition    the end position
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstTokenText(
-            Swc4jAstTokenType type,
+    public Swc4jTokenTextValue(
+            Swc4jTokenType type,
             String text,
+            T value,
             int startPosition,
             int endPosition,
             boolean lineBreakAhead) {
-        super(type, startPosition, endPosition, lineBreakAhead);
-        this.text = text;
+        super(type, text, startPosition, endPosition, lineBreakAhead);
+        this.value = value;
     }
 
-    @Override
-    public String getText() {
-        return text;
+    /**
+     * Gets value.
+     *
+     * @return the value
+     * @since 0.2.0
+     */
+    public T getValue() {
+        return value;
     }
 }

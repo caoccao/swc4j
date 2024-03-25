@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.tokens;
+package com.caoccao.javet.swc4j.tokens;
 
-import com.caoccao.javet.swc4j.enums.Swc4jAstTokenType;
+import com.caoccao.javet.swc4j.enums.Swc4jTokenType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.JsonUtils;
 
 /**
- * The type swc4j ast token.
+ * The type swc4j token.
  *
  * @since 0.2.0
  */
-public class Swc4jAstToken {
+public class Swc4jToken {
     /**
      * The End position of the token.
      * It is zero-based.
@@ -51,10 +51,10 @@ public class Swc4jAstToken {
      *
      * @since 0.2.0
      */
-    protected final Swc4jAstTokenType type;
+    protected final Swc4jTokenType type;
 
     /**
-     * Instantiates a new swc4j ast token.
+     * Instantiates a new swc4j token.
      *
      * @param type           the type
      * @param startPosition  the start position
@@ -62,7 +62,7 @@ public class Swc4jAstToken {
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jAstToken(Swc4jAstTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
+    public Swc4jToken(Swc4jTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
         this.endPosition = endPosition;
         this.lineBreakAhead = lineBreakAhead;
         this.startPosition = startPosition;
@@ -105,7 +105,7 @@ public class Swc4jAstToken {
      * @return the type
      * @since 0.2.0
      */
-    public Swc4jAstTokenType getType() {
+    public Swc4jTokenType getType() {
         return type;
     }
 

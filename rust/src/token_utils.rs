@@ -63,144 +63,144 @@ unsafe impl Sync for JavaAstTokenFactory {}
 impl JavaAstTokenFactory {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/ast/tokens/Swc4jAstTokenFactory")
-      .expect("Couldn't find class Swc4jAstTokenFactory");
+      .find_class("com/caoccao/javet/swc4j/tokens/Swc4jTokenFactory")
+      .expect("Couldn't find class Swc4jTokenFactory");
     let class = env
       .new_global_ref(class)
-      .expect("Couldn't globalize class Swc4jAstTokenFactory");
+      .expect("Couldn't globalize class Swc4jTokenFactory");
     let method_create_assign_operator = env
       .get_static_method_id(
         &class,
         "createAssignOperator",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstToken;",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jTokenType;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createAssignOperator");
+      .expect("Couldn't find method Swc4jTokenFactory.createAssignOperator");
     let method_create_binary_operator = env
       .get_static_method_id(
         &class,
         "createBinaryOperator",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstToken;",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jTokenType;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createBinaryOperator");
+      .expect("Couldn't find method Swc4jTokenFactory.createBinaryOperator");
     let method_create_bigint = env
       .get_static_method_id(
         &class,
         "createBigInt",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstTokenTextValue;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createBigInt");
+      .expect("Couldn't find method Swc4jTokenFactory.createBigInt");
     let method_create_error = env
       .get_static_method_id(
         &class,
         "createError",
-        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createError");
+      .expect("Couldn't find method Swc4jTokenFactory.createError");
     let method_create_false = env
       .get_static_method_id(
         &class,
         "createFalse",
-        "(IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstToken;",
+        "(IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createFalse");
+      .expect("Couldn't find method Swc4jTokenFactory.createFalse");
     let method_create_generic_operator = env
       .get_static_method_id(
         &class,
         "createGenericOperator",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstToken;",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jTokenType;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createGenericOperator");
+      .expect("Couldn't find method Swc4jTokenFactory.createGenericOperator");
     let method_create_ident_known = env
       .get_static_method_id(
         &class,
         "createIdentKnown",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstTokenText;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createIdentKnown");
+      .expect("Couldn't find method Swc4jTokenFactory.createIdentKnown");
     let method_create_jsx_tag_name = env
       .get_static_method_id(
         &class,
         "createJsxTagName",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstTokenText;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createJsxTagName");
+      .expect("Couldn't find method Swc4jTokenFactory.createJsxTagName");
     let method_create_jsx_tag_text = env
       .get_static_method_id(
         &class,
         "createJsxTagText",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstTokenText;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createJsxTagText");
+      .expect("Couldn't find method Swc4jTokenFactory.createJsxTagText");
     let method_create_keyword = env
       .get_static_method_id(
         &class,
         "createKeyword",
-        "(Lcom/caoccao/javet/swc4j/enums/Swc4jAstTokenType;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstToken;",
+        "(Lcom/caoccao/javet/swc4j/enums/Swc4jTokenType;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createKeyword");
+      .expect("Couldn't find method Swc4jTokenFactory.createKeyword");
     let method_create_null = env
       .get_static_method_id(
         &class,
         "createNull",
-        "(IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstToken;",
+        "(IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createNull");
+      .expect("Couldn't find method Swc4jTokenFactory.createNull");
     let method_create_ident_other = env
       .get_static_method_id(
         &class,
         "createIdentOther",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstTokenText;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createIdentOther");
+      .expect("Couldn't find method Swc4jTokenFactory.createIdentOther");
     let method_create_number = env
       .get_static_method_id(
         &class,
         "createNumber",
-        "(Ljava/lang/String;DIIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstTokenTextValue;",
+        "(Ljava/lang/String;DIIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createNumber");
+      .expect("Couldn't find method Swc4jTokenFactory.createNumber");
     let method_create_regex = env
       .get_static_method_id(
         &class,
         "createRegex",
-        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstTokenTextValueFlags;",
+        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValueFlags;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createRegex");
+      .expect("Couldn't find method Swc4jTokenFactory.createRegex");
     let method_create_shebang = env
       .get_static_method_id(
         &class,
         "createShebang",
-        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createShebang");
+      .expect("Couldn't find method Swc4jTokenFactory.createShebang");
     let method_create_string = env
       .get_static_method_id(
         &class,
         "createString",
-        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createString");
+      .expect("Couldn't find method Swc4jTokenFactory.createString");
     let method_create_template = env
       .get_static_method_id(
         &class,
         "createTemplate",
-        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createTemplate");
+      .expect("Couldn't find method Swc4jTokenFactory.createTemplate");
     let method_create_true = env
       .get_static_method_id(
         &class,
         "createTrue",
-        "(IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstToken;",
+        "(IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createTrue");
+      .expect("Couldn't find method Swc4jTokenFactory.createTrue");
     let method_create_unknown = env
       .get_static_method_id(
         &class,
         "createUnknown",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/ast/tokens/Swc4jAstTokenText;",
+        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
-      .expect("Couldn't find method Swc4jAstTokenFactory.createUnknown");
+      .expect("Couldn't find method Swc4jTokenFactory.createUnknown");
     JavaAstTokenFactory {
       class,
       method_create_assign_operator,
@@ -228,17 +228,17 @@ impl JavaAstTokenFactory {
   pub fn create_assign_operator<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    ast_token_type: AstTokenType,
+    token_type: TokenType,
     range: Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_ast_token_type = unsafe { JAVA_AST_TOKEN_TYPE.as_ref().unwrap() };
-    let java_ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
-    let ast_token_type = jvalue {
-      l: java_ast_token_type.as_raw(),
+    let java_token_type = unsafe { JAVA_TOKEN_TYPE.as_ref().unwrap() };
+    let java_token_type = java_token_type.parse(env, token_type.get_id());
+    let token_type = jvalue {
+      l: java_token_type.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
@@ -251,14 +251,14 @@ impl JavaAstTokenFactory {
           &self.class,
           self.method_create_assign_operator,
           ReturnType::Object,
-          &[ast_token_type, start_position, end_position, line_break_ahead],
+          &[token_type, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenAssignOperator")
+        .expect("Couldn't create Swc4jTokenAssignOperator")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenAssignOperator")
+        .expect("Couldn't convert Swc4jTokenAssignOperator")
     };
     env
-      .delete_local_ref(java_ast_token_type)
+      .delete_local_ref(java_token_type)
       .expect("Couldn't delete local ast token type");
     token
   }
@@ -266,17 +266,17 @@ impl JavaAstTokenFactory {
   pub fn create_binary_operator<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    ast_token_type: AstTokenType,
+    token_type: TokenType,
     range: Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_ast_token_type = unsafe { JAVA_AST_TOKEN_TYPE.as_ref().unwrap() };
-    let java_ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
-    let ast_token_type = jvalue {
-      l: java_ast_token_type.as_raw(),
+    let java_token_type = unsafe { JAVA_TOKEN_TYPE.as_ref().unwrap() };
+    let java_token_type = java_token_type.parse(env, token_type.get_id());
+    let token_type = jvalue {
+      l: java_token_type.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
@@ -289,14 +289,14 @@ impl JavaAstTokenFactory {
           &self.class,
           self.method_create_binary_operator,
           ReturnType::Object,
-          &[ast_token_type, start_position, end_position, line_break_ahead],
+          &[token_type, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenBinaryOperator")
+        .expect("Couldn't create Swc4jTokenBinaryOperator")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenBinaryOperator")
+        .expect("Couldn't convert Swc4jTokenBinaryOperator")
     };
     env
-      .delete_local_ref(java_ast_token_type)
+      .delete_local_ref(java_token_type)
       .expect("Couldn't delete local ast token type");
     token
   }
@@ -328,9 +328,9 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[text, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenBigInt")
+        .expect("Couldn't create Swc4jTokenBigInt")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenBigInt")
+        .expect("Couldn't convert Swc4jTokenBigInt")
     };
     env.delete_local_ref(java_string).expect("Couldn't delete local text");
     token
@@ -368,9 +368,9 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[text, syntax_error, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenError")
+        .expect("Couldn't create Swc4jTokenError")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenError")
+        .expect("Couldn't convert Swc4jTokenError")
     };
     env
       .delete_local_ref(java_string_text)
@@ -400,26 +400,26 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenFalse")
+        .expect("Couldn't create Swc4jTokenFalse")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenFalse")
+        .expect("Couldn't convert Swc4jTokenFalse")
     }
   }
 
   pub fn create_generic_operator<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    ast_token_type: AstTokenType,
+    token_type: TokenType,
     range: Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_ast_token_type = unsafe { JAVA_AST_TOKEN_TYPE.as_ref().unwrap() };
-    let java_ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
-    let ast_token_type = jvalue {
-      l: java_ast_token_type.as_raw(),
+    let java_token_type = unsafe { JAVA_TOKEN_TYPE.as_ref().unwrap() };
+    let java_token_type = java_token_type.parse(env, token_type.get_id());
+    let token_type = jvalue {
+      l: java_token_type.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
@@ -432,14 +432,14 @@ impl JavaAstTokenFactory {
           &self.class,
           self.method_create_generic_operator,
           ReturnType::Object,
-          &[ast_token_type, start_position, end_position, line_break_ahead],
+          &[token_type, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenGenericOperator")
+        .expect("Couldn't create Swc4jTokenGenericOperator")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenGenericOperator")
+        .expect("Couldn't convert Swc4jTokenGenericOperator")
     };
     env
-      .delete_local_ref(java_ast_token_type)
+      .delete_local_ref(java_token_type)
       .expect("Couldn't delete local ast token type");
     token
   }
@@ -471,9 +471,9 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[text, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenIdentKnown")
+        .expect("Couldn't create Swc4jTokenIdentKnown")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenIdentKnown")
+        .expect("Couldn't convert Swc4jTokenIdentKnown")
     };
     env.delete_local_ref(java_string).expect("Couldn't delete local ident");
     token
@@ -506,9 +506,9 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[text, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenJsxName")
+        .expect("Couldn't create Swc4jTokenJsxName")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenJsxName")
+        .expect("Couldn't convert Swc4jTokenJsxName")
     };
     env.delete_local_ref(java_string).expect("Couldn't delete local text");
     token
@@ -541,9 +541,9 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[text, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenJsxText")
+        .expect("Couldn't create Swc4jTokenJsxText")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenJsxText")
+        .expect("Couldn't convert Swc4jTokenJsxText")
     };
     env.delete_local_ref(java_string).expect("Couldn't delete local text");
     token
@@ -552,17 +552,17 @@ impl JavaAstTokenFactory {
   pub fn create_keyword<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    ast_token_type: AstTokenType,
+    token_type: TokenType,
     range: Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_ast_token_type = unsafe { JAVA_AST_TOKEN_TYPE.as_ref().unwrap() };
-    let java_ast_token_type = java_ast_token_type.parse(env, ast_token_type.get_id());
-    let ast_token_type = jvalue {
-      l: java_ast_token_type.as_raw(),
+    let java_token_type = unsafe { JAVA_TOKEN_TYPE.as_ref().unwrap() };
+    let java_token_type = java_token_type.parse(env, token_type.get_id());
+    let token_type = jvalue {
+      l: java_token_type.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
@@ -575,14 +575,14 @@ impl JavaAstTokenFactory {
           &self.class,
           self.method_create_keyword,
           ReturnType::Object,
-          &[ast_token_type, start_position, end_position, line_break_ahead],
+          &[token_type, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenKeyword")
+        .expect("Couldn't create Swc4jTokenKeyword")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenKeyword")
+        .expect("Couldn't convert Swc4jTokenKeyword")
     };
     env
-      .delete_local_ref(java_ast_token_type)
+      .delete_local_ref(java_token_type)
       .expect("Couldn't delete local ast token type");
     token
   }
@@ -609,9 +609,9 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenNull")
+        .expect("Couldn't create Swc4jTokenNull")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenNull")
+        .expect("Couldn't convert Swc4jTokenNull")
     }
   }
 
@@ -642,9 +642,9 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[text, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenIdentOther")
+        .expect("Couldn't create Swc4jTokenIdentOther")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenIdentOther")
+        .expect("Couldn't convert Swc4jTokenIdentOther")
     };
     env.delete_local_ref(java_string).expect("Couldn't delete local ident");
     token
@@ -679,9 +679,9 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[text, value, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenNumber")
+        .expect("Couldn't create Swc4jTokenNumber")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenNumber")
+        .expect("Couldn't convert Swc4jTokenNumber")
     };
     env.delete_local_ref(java_string).expect("Couldn't delete local text");
     token
@@ -724,9 +724,9 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[text, value, flags, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenRegex")
+        .expect("Couldn't create Swc4jTokenRegex")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenRegex")
+        .expect("Couldn't convert Swc4jTokenRegex")
     };
     env
       .delete_local_ref(java_string_text)
@@ -772,9 +772,9 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[text, value, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenShebang")
+        .expect("Couldn't create Swc4jTokenShebang")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenShebang")
+        .expect("Couldn't convert Swc4jTokenShebang")
     };
     env
       .delete_local_ref(java_string_text)
@@ -817,9 +817,9 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[text, value, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenString")
+        .expect("Couldn't create Swc4jTokenString")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenString")
+        .expect("Couldn't convert Swc4jTokenString")
     };
     env
       .delete_local_ref(java_string_text)
@@ -865,9 +865,9 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[text, value, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenTemplate")
+        .expect("Couldn't create Swc4jTokenTemplate")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenTemplate")
+        .expect("Couldn't convert Swc4jTokenTemplate")
     };
     env
       .delete_local_ref(java_string_text)
@@ -900,9 +900,9 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenTrue")
+        .expect("Couldn't create Swc4jTokenTrue")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenTrue")
+        .expect("Couldn't convert Swc4jTokenTrue")
     }
   }
 
@@ -933,20 +933,20 @@ impl JavaAstTokenFactory {
           ReturnType::Object,
           &[text, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jAstTokenUnknown")
+        .expect("Couldn't create Swc4jTokenUnknown")
         .l()
-        .expect("Couldn't convert Swc4jAstTokenUnknown")
+        .expect("Couldn't convert Swc4jTokenUnknown")
     };
     env.delete_local_ref(java_string).expect("Couldn't delete local text");
     token
   }
 }
 
-pub static mut JAVA_AST_TOKEN_FACTORY: Option<JavaAstTokenFactory> = None;
+pub static mut JAVA_token_FACTORY: Option<JavaAstTokenFactory> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
-    JAVA_AST_TOKEN_FACTORY = Some(JavaAstTokenFactory::new(env));
+    JAVA_token_FACTORY = Some(JavaAstTokenFactory::new(env));
   }
 }
 
@@ -960,7 +960,7 @@ pub fn token_and_spans_to_java_list<'local>(
     l: match token_and_spans {
       Some(token_and_spans) => {
         let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-        let java_ast_token_factory = unsafe { JAVA_AST_TOKEN_FACTORY.as_ref().unwrap() };
+        let java_token_factory = unsafe { JAVA_token_FACTORY.as_ref().unwrap() };
         let list = java_array_list.create(env, token_and_spans.len());
         token_and_spans.iter().for_each(|token_and_span| {
           let line_break_ahead = token_and_span.had_line_break;
@@ -969,78 +969,78 @@ pub fn token_and_spans_to_java_list<'local>(
             end: token_and_span.span.hi().to_usize() - 1,
           }];
           let index_range = byte_to_index_map.get_range_by_span(&token_and_span.span);
-          let ast_token = match &token_and_span.token {
+          let token = match &token_and_span.token {
             Token::Word(word) => match word {
-              Word::Keyword(keyword) => java_ast_token_factory.create_keyword(
+              Word::Keyword(keyword) => java_token_factory.create_keyword(
                 env,
-                AstTokenType::parse_by_keyword(&keyword),
+                TokenType::parse_by_keyword(&keyword),
                 index_range,
                 line_break_ahead,
               ),
-              Word::Null => java_ast_token_factory.create_null(env, index_range, line_break_ahead),
-              Word::True => java_ast_token_factory.create_true(env, index_range, line_break_ahead),
-              Word::False => java_ast_token_factory.create_false(env, index_range, line_break_ahead),
+              Word::Null => java_token_factory.create_null(env, index_range, line_break_ahead),
+              Word::True => java_token_factory.create_true(env, index_range, line_break_ahead),
+              Word::False => java_token_factory.create_false(env, index_range, line_break_ahead),
               Word::Ident(ident) => match ident {
-                IdentLike::Known(known_ident) => java_ast_token_factory.create_ident_known(
+                IdentLike::Known(known_ident) => java_token_factory.create_ident_known(
                   env,
                   &Atom::from(*known_ident),
                   index_range,
                   line_break_ahead,
                 ),
                 IdentLike::Other(js_word) => {
-                  java_ast_token_factory.create_ident_other(env, &js_word, index_range, line_break_ahead)
+                  java_token_factory.create_ident_other(env, &js_word, index_range, line_break_ahead)
                 }
               },
             },
-            Token::BinOp(bin_op) => java_ast_token_factory.create_binary_operator(
+            Token::BinOp(bin_op) => java_token_factory.create_binary_operator(
               env,
-              AstTokenType::parse_by_binary_operator(bin_op),
+              TokenType::parse_by_binary_operator(bin_op),
               index_range,
               line_break_ahead,
             ),
-            Token::AssignOp(assign_op) => java_ast_token_factory.create_assign_operator(
+            Token::AssignOp(assign_op) => java_token_factory.create_assign_operator(
               env,
-              AstTokenType::parse_by_assign_operator(assign_op),
+              TokenType::parse_by_assign_operator(assign_op),
               index_range,
               line_break_ahead,
             ),
             Token::Str { value, raw } => {
-              java_ast_token_factory.create_string(env, &raw, &value, index_range, line_break_ahead)
+              java_token_factory.create_string(env, &raw, &value, index_range, line_break_ahead)
             }
             Token::Num { value, raw } => {
-              java_ast_token_factory.create_number(env, &raw, *value, index_range, line_break_ahead)
+              java_token_factory.create_number(env, &raw, *value, index_range, line_break_ahead)
             }
             Token::BigInt { value: _, raw } => {
-              java_ast_token_factory.create_bigint(env, &raw, index_range, line_break_ahead)
+              java_token_factory.create_bigint(env, &raw, index_range, line_break_ahead)
             }
             Token::Regex(value, flags) => {
-              java_ast_token_factory.create_regex(env, &text, &value, &flags, index_range, line_break_ahead)
+              java_token_factory.create_regex(env, &text, &value, &flags, index_range, line_break_ahead)
             }
             Token::Template { raw, cooked } => {
               let cooked = match &cooked {
                 Ok(atom) => Some(atom.as_str()),
                 Err(_) => None,
               };
-              java_ast_token_factory.create_template(env, &raw, cooked, index_range, line_break_ahead)
+              java_token_factory.create_template(env, &raw, cooked, index_range, line_break_ahead)
             }
             Token::Shebang(shebang) => {
-              java_ast_token_factory.create_shebang(env, &text, &shebang, index_range, line_break_ahead)
+              java_token_factory.create_shebang(env, &text, &shebang, index_range, line_break_ahead)
             }
             Token::Error(error) => {
-              java_ast_token_factory.create_error(env, &text, &error, index_range, line_break_ahead)
+              java_token_factory.create_error(env, &text, &error, index_range, line_break_ahead)
             }
             Token::JSXName { name } => {
-              java_ast_token_factory.create_jsx_tag_name(env, &name, index_range, line_break_ahead)
+              java_token_factory.create_jsx_tag_name(env, &name, index_range, line_break_ahead)
             }
             Token::JSXText { raw } => {
-              java_ast_token_factory.create_jsx_tag_text(env, &raw, index_range, line_break_ahead)
+              java_token_factory.create_jsx_tag_text(env, &raw, index_range, line_break_ahead)
             }
-            token => match &AstTokenType::parse_by_generic_operator(token) {
-              AstTokenType::Unknown => {
+            token => match &TokenType::parse_by_generic_operator(token) {
+              TokenType::Unknown => {
                 eprintln!("Unknown {:?}", token);
-                java_ast_token_factory.create_unknown(env, &text, index_range, line_break_ahead)
+                java_token_factory.create_unknown(env, &text, index_range, line_break_ahead)
               }
-              generic_operator_type => java_ast_token_factory.create_generic_operator(
+              generic_operator_type => java_token_factory.create_generic_operator(
                 env,
                 *generic_operator_type,
                 index_range,
@@ -1048,9 +1048,9 @@ pub fn token_and_spans_to_java_list<'local>(
               ),
             },
           };
-          java_array_list.add(env, &list, &ast_token);
+          java_array_list.add(env, &list, &token);
           env
-            .delete_local_ref(ast_token)
+            .delete_local_ref(token)
             .expect("Couldn't delete local ast token");
         });
         list.as_raw()

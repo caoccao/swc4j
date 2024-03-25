@@ -26,7 +26,7 @@ use jni::JNIEnv;
 use std::ptr::null_mut;
 use std::sync::Arc;
 
-use crate::ast_token_utils;
+use crate::token_utils;
 use crate::ast_utils;
 use crate::converter;
 use crate::enums::*;
@@ -81,7 +81,7 @@ impl JavaParseOutput {
     let source_text = jvalue {
       l: converter::string_to_jstring(env, &parse_output.source_text).as_raw(),
     };
-    let tokens = ast_token_utils::token_and_spans_to_java_list(
+    let tokens = token_utils::token_and_spans_to_java_list(
       env,
       &byte_to_index_map,
       &parse_output.source_text.to_string(),
@@ -156,7 +156,7 @@ impl JavaTranspileOutput {
     let source_text = jvalue {
       l: converter::string_to_jstring(env, &transpile_output.parse_output.source_text).as_raw(),
     };
-    let tokens = ast_token_utils::token_and_spans_to_java_list(
+    let tokens = token_utils::token_and_spans_to_java_list(
       env,
       &byte_to_index_map,
       &transpile_output.parse_output.source_text.to_string(),
