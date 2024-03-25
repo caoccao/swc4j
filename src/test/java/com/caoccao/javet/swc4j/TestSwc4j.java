@@ -17,17 +17,17 @@
 package com.caoccao.javet.swc4j;
 
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
-import com.caoccao.javet.swc4j.tokens.Swc4jToken;
-import com.caoccao.javet.swc4j.tokens.Swc4jTokenTextValue;
-import com.caoccao.javet.swc4j.tokens.Swc4jTokenTextValueFlags;
-import com.caoccao.javet.swc4j.enums.Swc4jTokenType;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
+import com.caoccao.javet.swc4j.enums.Swc4jTokenType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
+import com.caoccao.javet.swc4j.tokens.Swc4jToken;
+import com.caoccao.javet.swc4j.tokens.Swc4jTokenTextValue;
+import com.caoccao.javet.swc4j.tokens.Swc4jTokenTextValueFlags;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -124,8 +124,8 @@ public class TestSwc4j {
         assertNotNull(output);
         assertFalse(output.isModule());
         assertTrue(output.isScript());
-        assertNotNull(output.getAstScript());
-        Swc4jAstScript script = output.getAstScript();
+        assertNotNull(output.getProgram());
+        Swc4jAstScript script = (Swc4jAstScript) output.getProgram();
         assertEquals(0, script.getStartPosition());
         assertEquals(code.length(), script.getEndPosition());
         assertNotNull(script.getBody());

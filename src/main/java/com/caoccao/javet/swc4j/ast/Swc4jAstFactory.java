@@ -41,7 +41,7 @@ public final class Swc4jAstFactory {
      * @since 0.2.0
      */
     public static Swc4jAstModule createModule(
-            List<BaseSwc4jAst> body, String shebang, int startPosition, int endPosition) {
+            List<Swc4jAst> body, String shebang, int startPosition, int endPosition) {
         return new Swc4jAstModule(body, shebang, startPosition, endPosition);
     }
 
@@ -56,7 +56,7 @@ public final class Swc4jAstFactory {
      * @since 0.2.0
      */
     public static Swc4jAstScript createScript(
-            List<BaseSwc4jAst> body, String shebang, int startPosition, int endPosition) {
+            List<Swc4jAst> body, String shebang, int startPosition, int endPosition) {
         return new Swc4jAstScript(body, shebang, startPosition, endPosition);
     }
 }

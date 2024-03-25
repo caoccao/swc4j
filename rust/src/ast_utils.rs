@@ -153,6 +153,58 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
   }
 }
 
+pub mod span {
+  use crate::position_utils::ByteToIndexMap;
+  use deno_ast::swc::ast::*;
+
+  fn register_decl(byte_to_index_map: &mut ByteToIndexMap, decl: &Decl) {
+    match decl {
+      Decl::Var(var_decl) => register_var_decl(byte_to_index_map, var_decl.as_ref()),
+      _ => {}
+    };
+  }
+
+  fn register_module(byte_to_index_map: &mut ByteToIndexMap, module: &Module) {
+    byte_to_index_map.register_by_span(&module.span);
+  }
+
+  fn register_script(byte_to_index_map: &mut ByteToIndexMap, script: &Script) {
+    byte_to_index_map.register_by_span(&script.span);
+    script
+      .body
+      .iter()
+      .for_each(|stmt| register_stmt(byte_to_index_map, stmt))
+  }
+
+  fn register_stmt(byte_to_index_map: &mut ByteToIndexMap, stmt: &Stmt) {
+    match stmt {
+      Stmt::Decl(decl) => register_decl(byte_to_index_map, decl),
+      _ => {}
+    };
+  }
+
+  pub fn register_program(byte_to_index_map: &mut ByteToIndexMap, program: &Program) {
+    if program.is_module() {
+      register_module(byte_to_index_map, program.as_module().unwrap());
+    } else if program.is_script() {
+      register_script(byte_to_index_map, program.as_script().unwrap());
+    }
+  }
+
+  fn register_var_decl(byte_to_index_map: &mut ByteToIndexMap, var_decl: &VarDecl) {
+    byte_to_index_map.register_by_span(&var_decl.span);
+    var_decl
+      .decls
+      .iter()
+      .for_each(|var_declarator| register_var_declarator(byte_to_index_map, var_declarator));
+  }
+
+  fn register_var_declarator(byte_to_index_map: &mut ByteToIndexMap, var_declarator: &VarDeclarator) {
+    byte_to_index_map.register_by_span(&var_declarator.span);
+    // TODO
+  }
+}
+
 fn create_decl_var<'local, 'a>(
   env: &mut JNIEnv<'local>,
   byte_to_index_map: &ByteToIndexMap,
@@ -188,7 +240,7 @@ where
   Default::default()
 }
 
-pub fn create_module<'local, 'a>(
+pub fn create_program<'local, 'a>(
   env: &mut JNIEnv<'local>,
   byte_to_index_map: &ByteToIndexMap,
   program: &Option<Arc<Program>>,
@@ -197,20 +249,42 @@ where
   'local: 'a,
 {
   match program {
-    Some(arc_program) => match arc_program.as_module() {
-      Some(module) => {
-        let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-        let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
-        let range = byte_to_index_map.get_range_by_span(&module.span());
-        let body = create_module_body(env, byte_to_index_map, &module.body);
-        let java_module = java_ast_factory.create_module(env, &body, shebang, range);
-        env.delete_local_ref(body).expect("Couldn't delete local module body");
-        java_module
+    Some(arc_program) => {
+      if arc_program.is_module() {
+        create_module(
+          env,
+          byte_to_index_map,
+          arc_program.as_module().expect("Couldn't get module"),
+        )
+      } else if arc_program.is_script() {
+        create_script(
+          env,
+          byte_to_index_map,
+          arc_program.as_script().expect("Couldn't get script"),
+        )
+      } else {
+        Default::default()
       }
-      None => Default::default(),
-    },
+    }
     None => Default::default(),
   }
+}
+
+fn create_module<'local, 'a>(
+  env: &mut JNIEnv<'local>,
+  byte_to_index_map: &ByteToIndexMap,
+  module: &Module,
+) -> JObject<'a>
+where
+  'local: 'a,
+{
+  let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+  let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
+  let range = byte_to_index_map.get_range_by_span(&module.span());
+  let body = create_module_body(env, byte_to_index_map, &module.body);
+  let java_module = java_ast_factory.create_module(env, &body, shebang, range);
+  env.delete_local_ref(body).expect("Couldn't delete local module body");
+  java_module
 }
 
 fn create_module_body<'local, 'a>(
@@ -269,29 +343,21 @@ where
   }
 }
 
-pub fn create_script<'local, 'a>(
+fn create_script<'local, 'a>(
   env: &mut JNIEnv<'local>,
   byte_to_index_map: &ByteToIndexMap,
-  program: &Option<Arc<Program>>,
+  script: &Script,
 ) -> JObject<'a>
 where
   'local: 'a,
 {
-  match program {
-    Some(arc_program) => match arc_program.as_script() {
-      Some(script) => {
-        let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-        let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
-        let range = byte_to_index_map.get_range_by_span(&script.span());
-        let body = create_script_body(env, byte_to_index_map, &script.body);
-        let java_script = java_ast_factory.create_script(env, &body, shebang, range);
-        env.delete_local_ref(body).expect("Couldn't delete local script body");
-        java_script
-      }
-      None => Default::default(),
-    },
-    None => Default::default(),
-  }
+  let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+  let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
+  let range = byte_to_index_map.get_range_by_span(&script.span());
+  let body = create_script_body(env, byte_to_index_map, &script.body);
+  let java_script = java_ast_factory.create_script(env, &body, shebang, range);
+  env.delete_local_ref(body).expect("Couldn't delete local script body");
+  java_script
 }
 
 fn create_script_body<'local, 'a>(

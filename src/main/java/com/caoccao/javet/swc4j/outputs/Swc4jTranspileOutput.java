@@ -16,10 +16,9 @@
 
 package com.caoccao.javet.swc4j.outputs;
 
-import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
-import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
-import com.caoccao.javet.swc4j.tokens.Swc4jToken;
+import com.caoccao.javet.swc4j.ast.program.Swc4jAstProgram;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.tokens.Swc4jToken;
 
 import java.util.List;
 
@@ -55,8 +54,7 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
      * @since 0.1.0
      */
     public Swc4jTranspileOutput(
-            Swc4jAstModule astModule,
-            Swc4jAstScript astScript,
+            Swc4jAstProgram<?> program,
             String code,
             Swc4jMediaType mediaType,
             boolean module,
@@ -64,7 +62,7 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
             String sourceMap,
             String sourceText,
             List<Swc4jToken> tokens) {
-        super(astModule, astScript, mediaType, module, script, sourceText, tokens);
+        super(program, mediaType, module, script, sourceText, tokens);
         this.code = code;
         this.sourceMap = sourceMap;
     }

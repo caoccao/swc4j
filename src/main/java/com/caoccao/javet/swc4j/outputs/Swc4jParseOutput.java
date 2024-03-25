@@ -16,10 +16,10 @@
 
 package com.caoccao.javet.swc4j.outputs;
 
-import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
-import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
-import com.caoccao.javet.swc4j.tokens.Swc4jToken;
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.program.Swc4jAstProgram;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.tokens.Swc4jToken;
 
 import java.util.List;
 
@@ -29,18 +29,6 @@ import java.util.List;
  * @since 0.2.0
  */
 public class Swc4jParseOutput {
-    /**
-     * The Ast module.
-     *
-     * @since 0.2.0
-     */
-    protected Swc4jAstModule astModule;
-    /**
-     * The Ast script.
-     *
-     * @since 0.2.0
-     */
-    protected Swc4jAstScript astScript;
     /**
      * The Media type.
      *
@@ -53,6 +41,12 @@ public class Swc4jParseOutput {
      * @since 0.2.0
      */
     protected boolean module;
+    /**
+     * The Ast program.
+     *
+     * @since 0.2.0
+     */
+    protected Swc4jAstProgram<?> program;
     /**
      * The Script.
      *
@@ -77,46 +71,25 @@ public class Swc4jParseOutput {
      *
      * @param mediaType  the media type
      * @param module     the module
+     * @param program    the program
      * @param script     the script
      * @param sourceText the source text
      * @param tokens     the tokens
      * @since 0.2.0
      */
     public Swc4jParseOutput(
-            Swc4jAstModule astModule,
-            Swc4jAstScript astScript,
+            Swc4jAstProgram<?> program,
             Swc4jMediaType mediaType,
             boolean module,
             boolean script,
             String sourceText,
             List<Swc4jToken> tokens) {
-        this.astModule = astModule;
-        this.astScript = astScript;
         this.mediaType = mediaType;
         this.module = module;
+        this.program = program;
         this.script = script;
         this.sourceText = sourceText;
         this.tokens = tokens;
-    }
-
-    /**
-     * Gets ast module.
-     *
-     * @return the ast module
-     * @since 0.2.0
-     */
-    public Swc4jAstModule getAstModule() {
-        return astModule;
-    }
-
-    /**
-     * Gets ast script.
-     *
-     * @return the ast script
-     * @since 0.2.0
-     */
-    public Swc4jAstScript getAstScript() {
-        return astScript;
     }
 
     /**
@@ -127,6 +100,17 @@ public class Swc4jParseOutput {
      */
     public Swc4jMediaType getMediaType() {
         return mediaType;
+    }
+
+    /**
+     * Gets ast program.
+     *
+     * @return the ast program
+     * @since 0.2.0
+     */
+    @SuppressWarnings("unchecked")
+    public <AST extends Swc4jAst> Swc4jAstProgram<AST> getProgram() {
+        return (Swc4jAstProgram<AST>) program;
     }
 
     /**

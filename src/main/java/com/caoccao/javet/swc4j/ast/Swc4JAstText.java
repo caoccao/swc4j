@@ -14,44 +14,44 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.program;
+package com.caoccao.javet.swc4j.ast;
 
-import com.caoccao.javet.swc4j.ast.BaseSwc4jAst;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 
 /**
- * The type Swc4j ast program.
+ * The type Swc4j ast text.
  *
  * @since 0.2.0
  */
-public class BaseSwc4jAstProgram extends BaseSwc4jAst {
+public abstract class Swc4JAstText extends Swc4jAst {
     /**
-     * The Shebang.
+     * The Text.
      *
      * @since 0.2.0
      */
-    protected final String shebang;
+    protected final String text;
 
     /**
-     * Instantiates a new Swc4j ast program.
+     * Instantiates a new Swc4j ast text.
      *
-     * @param shebang       the shebang
+     * @param type          the type
+     * @param text          the text
      * @param startPosition the start position
      * @param endPosition   the end position
      * @since 0.2.0
      */
-    public BaseSwc4jAstProgram(Swc4jAstType type, String shebang, int startPosition, int endPosition) {
+    protected Swc4JAstText(Swc4jAstType type, String text, int startPosition, int endPosition) {
         super(type, startPosition, endPosition);
-        this.shebang = shebang;
+        this.text = text;
     }
 
     /**
-     * Gets shebang.
+     * Gets text.
      *
-     * @return the shebang
+     * @return the text
      * @since 0.2.0
      */
-    public String getShebang() {
-        return shebang;
+    public String getText() {
+        return text;
     }
 }

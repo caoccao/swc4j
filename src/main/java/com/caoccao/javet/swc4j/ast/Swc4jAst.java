@@ -19,11 +19,11 @@ package com.caoccao.javet.swc4j.ast;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 
 /**
- * The type Base Swc4j ast.
+ * The type Swc4j ast.
  *
  * @since 0.2.0
  */
-public abstract class BaseSwc4jAst {
+public abstract class Swc4jAst {
     /**
      * The End position.
      *
@@ -44,14 +44,14 @@ public abstract class BaseSwc4jAst {
     protected final Swc4jAstType type;
 
     /**
-     * Instantiates a new Base Swc4j ast.
+     * Instantiates a new Swc4j ast.
      *
      * @param type          the type
      * @param startPosition the start position
      * @param endPosition   the end position
      * @since 0.2.0
      */
-    public BaseSwc4jAst(Swc4jAstType type, int startPosition, int endPosition) {
+    protected Swc4jAst(Swc4jAstType type, int startPosition, int endPosition) {
         this.endPosition = endPosition;
         this.startPosition = startPosition;
         this.type = type;

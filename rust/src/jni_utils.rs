@@ -45,7 +45,7 @@ impl JavaArrayList {
     let class = env.new_global_ref(class).expect("Couldn't globalize class ArrayList");
     let method_constructor = env
       .get_method_id(&class, "<init>", "(I)V")
-      .expect("Couldn't find method ArrayList.ArrayList");
+      .expect("Couldn't find method ArrayList::new");
     let method_add = env
       .get_method_id(&class, "add", "(Ljava/lang/Object;)Z")
       .expect("Couldn't find method ArrayList.add");

@@ -16,9 +16,8 @@
 
 package com.caoccao.javet.swc4j.ast.program;
 
-import com.caoccao.javet.swc4j.ast.BaseSwc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
 
@@ -27,14 +26,7 @@ import java.util.List;
  *
  * @since 0.2.0
  */
-public class Swc4jAstScript extends BaseSwc4jAstProgram {
-    /**
-     * The Body.
-     *
-     * @since 0.2.0
-     */
-    protected final List<BaseSwc4jAst> body;
-
+public class Swc4jAstScript extends Swc4jAstProgram<Swc4jAst> {
     /**
      * Instantiates a new Swc4j ast script.
      *
@@ -44,18 +36,7 @@ public class Swc4jAstScript extends BaseSwc4jAstProgram {
      * @param endPosition   the end position
      * @since 0.2.0
      */
-    public Swc4jAstScript(List<BaseSwc4jAst> body, String shebang, int startPosition, int endPosition) {
-        super(Swc4jAstType.Script, shebang, startPosition, endPosition);
-        this.body = AssertionUtils.notNull(body, "Body");
-    }
-
-    /**
-     * Gets body.
-     *
-     * @return the body
-     * @since 0.2.0
-     */
-    public List<BaseSwc4jAst> getBody() {
-        return body;
+    public Swc4jAstScript(List<Swc4jAst> body, String shebang, int startPosition, int endPosition) {
+        super(Swc4jAstType.Script, body, shebang, startPosition, endPosition);
     }
 }

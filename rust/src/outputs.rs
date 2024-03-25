@@ -26,13 +26,13 @@ use jni::JNIEnv;
 use std::ptr::null_mut;
 use std::sync::Arc;
 
-use crate::token_utils;
 use crate::ast_utils;
 use crate::converter;
 use crate::enums::*;
 use crate::jni_utils::ToJniType;
 use crate::options::*;
 use crate::position_utils::ByteToIndexMap;
+use crate::token_utils;
 
 struct JavaParseOutput {
   class: GlobalRef,
@@ -53,9 +53,9 @@ impl JavaParseOutput {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstModule;Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstScript;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/util/List;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstProgram;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/util/List;)V",
       )
-      .expect("Couldn't find method Swc4jParseOutput.Swc4jParseOutput");
+      .expect("Couldn't find method Swc4jParseOutput::new");
     JavaParseOutput {
       class,
       method_constructor,
@@ -67,10 +67,8 @@ impl JavaParseOutput {
     'local: 'a,
   {
     let byte_to_index_map = parse_output.get_byte_to_index_map();
-    let ast_module = ast_utils::create_module(env, &byte_to_index_map, &parse_output.program);
-    let ast_script = ast_utils::create_script(env, &byte_to_index_map, &parse_output.program);
-    let ast_module = jvalue { l: ast_module.as_raw() };
-    let ast_script = jvalue { l: ast_script.as_raw() };
+    let program = ast_utils::create_program(env, &byte_to_index_map, &parse_output.program);
+    let program = jvalue { l: program.as_raw() };
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let media_type = java_media_type.parse(env, parse_output.media_type.get_id());
     let module = jvalue {
@@ -93,7 +91,7 @@ impl JavaParseOutput {
         .new_object_unchecked(
           &self.class,
           self.method_constructor,
-          &[ast_module, ast_script, media_type, module, script, source_text, tokens],
+          &[program, media_type, module, script, source_text, tokens],
         )
         .expect("Couldn't create Swc4jParseOutput")
     }
@@ -119,9 +117,9 @@ impl JavaTranspileOutput {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstModule;Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstScript;Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/lang/String;Ljava/util/List;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstProgram;Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/lang/String;Ljava/util/List;)V",
       )
-      .expect("Couldn't find method Swc4jTranspileOutput.Swc4jTranspileOutput");
+      .expect("Couldn't find method Swc4jTranspileOutput::new");
     JavaTranspileOutput {
       class,
       method_constructor,
@@ -133,10 +131,8 @@ impl JavaTranspileOutput {
     'local: 'a,
   {
     let byte_to_index_map = transpile_output.parse_output.get_byte_to_index_map();
-    let ast_module = ast_utils::create_module(env, &byte_to_index_map, &transpile_output.parse_output.program);
-    let ast_script = ast_utils::create_script(env, &byte_to_index_map, &transpile_output.parse_output.program);
-    let ast_module = jvalue { l: ast_module.as_raw() };
-    let ast_script = jvalue { l: ast_script.as_raw() };
+    let program = ast_utils::create_program(env, &byte_to_index_map, &transpile_output.parse_output.program);
+    let program = jvalue { l: program.as_raw() };
     let code = jvalue {
       l: converter::string_to_jstring(env, &transpile_output.code).as_raw(),
     };
@@ -169,8 +165,7 @@ impl JavaTranspileOutput {
           &self.class,
           self.method_constructor,
           &[
-            ast_module,
-            ast_script,
+            program,
             code,
             media_type,
             module,
@@ -236,11 +231,7 @@ impl ParseOutput {
     let mut byte_to_index_map = ByteToIndexMap::new();
     match &self.program {
       Some(program) => {
-        if program.is_module() {
-          self.register_module(&mut byte_to_index_map, program.as_module().unwrap());
-        } else if program.is_script() {
-          self.register_script(&mut byte_to_index_map, program.as_script().unwrap());
-        }
+        ast_utils::span::register_program(&mut byte_to_index_map, program);
       }
       None => {}
     }
@@ -263,45 +254,6 @@ impl ParseOutput {
     });
     byte_to_index_map.update(&utf8_byte_length, char_count);
     byte_to_index_map
-  }
-
-  fn register_decl(&self, byte_to_index_map: &mut ByteToIndexMap, decl: &Decl) {
-    match decl {
-      Decl::Var(var_decl) => self.register_var_decl(byte_to_index_map, var_decl.as_ref()),
-      _ => {}
-    };
-  }
-
-  fn register_module(&self, byte_to_index_map: &mut ByteToIndexMap, module: &Module) {
-    byte_to_index_map.register_by_span(&module.span);
-  }
-
-  fn register_script(&self, byte_to_index_map: &mut ByteToIndexMap, script: &Script) {
-    byte_to_index_map.register_by_span(&script.span);
-    script
-      .body
-      .iter()
-      .for_each(|stmt| self.register_stmt(byte_to_index_map, stmt))
-  }
-
-  fn register_stmt(&self, byte_to_index_map: &mut ByteToIndexMap, stmt: &Stmt) {
-    match stmt {
-      Stmt::Decl(decl) => self.register_decl(byte_to_index_map, decl),
-      _ => {}
-    };
-  }
-
-  fn register_var_decl(&self, byte_to_index_map: &mut ByteToIndexMap, var_decl: &VarDecl) {
-    byte_to_index_map.register_by_span(&var_decl.span);
-    var_decl
-      .decls
-      .iter()
-      .for_each(|var_declarator| self.register_var_declarator(byte_to_index_map, var_declarator));
-  }
-
-  fn register_var_declarator(&self, byte_to_index_map: &mut ByteToIndexMap, var_declarator: &VarDeclarator) {
-    byte_to_index_map.register_by_span(&var_declarator.span);
-    // TODO
   }
 }
 
