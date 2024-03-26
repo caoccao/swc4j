@@ -31,7 +31,7 @@ pub trait ToJniType {
 pub struct JavaArrayList {
   #[allow(dead_code)]
   class: GlobalRef,
-  method_constructor: JMethodID,
+  method_construct: JMethodID,
   method_add: JMethodID,
 }
 unsafe impl Send for JavaArrayList {}
@@ -43,7 +43,7 @@ impl JavaArrayList {
       .find_class("java/util/ArrayList")
       .expect("Couldn't find class ArrayList");
     let class = env.new_global_ref(class).expect("Couldn't globalize class ArrayList");
-    let method_constructor = env
+    let method_construct = env
       .get_method_id(&class, "<init>", "(I)V")
       .expect("Couldn't find method ArrayList::new");
     let method_add = env
@@ -51,12 +51,12 @@ impl JavaArrayList {
       .expect("Couldn't find method ArrayList.add");
     JavaArrayList {
       class,
-      method_constructor,
+      method_construct,
       method_add,
     }
   }
 
-  pub fn create<'local, 'a>(&self, env: &mut JNIEnv<'local>, initial_capacity: usize) -> JObject<'a>
+  pub fn construct<'local, 'a>(&self, env: &mut JNIEnv<'local>, initial_capacity: usize) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -65,8 +65,8 @@ impl JavaArrayList {
     };
     unsafe {
       env
-        .new_object_unchecked(&self.class, self.method_constructor, &[initial_capacity])
-        .expect("Couldn't create ArrayList")
+        .new_object_unchecked(&self.class, self.method_construct, &[initial_capacity])
+        .expect("Couldn't construct ArrayList")
     }
   }
 

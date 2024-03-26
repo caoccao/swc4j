@@ -36,7 +36,7 @@ use crate::token_utils;
 
 struct JavaParseOutput {
   class: GlobalRef,
-  method_constructor: JMethodID,
+  method_construct: JMethodID,
 }
 unsafe impl Send for JavaParseOutput {}
 unsafe impl Sync for JavaParseOutput {}
@@ -49,7 +49,7 @@ impl JavaParseOutput {
     let class = env
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jParseOutput");
-    let method_constructor = env
+    let method_construct = env
       .get_method_id(
         &class,
         "<init>",
@@ -58,11 +58,11 @@ impl JavaParseOutput {
       .expect("Couldn't find method Swc4jParseOutput::new");
     JavaParseOutput {
       class,
-      method_constructor,
+      method_construct,
     }
   }
 
-  pub fn create<'local, 'a>(&self, env: &mut JNIEnv<'local>, parse_output: &ParseOutput) -> JObject<'a>
+  pub fn construct<'local, 'a>(&self, env: &mut JNIEnv<'local>, parse_output: &ParseOutput) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -90,17 +90,17 @@ impl JavaParseOutput {
       env
         .new_object_unchecked(
           &self.class,
-          self.method_constructor,
+          self.method_construct,
           &[program, media_type, module, script, source_text, tokens],
         )
-        .expect("Couldn't create Swc4jParseOutput")
+        .expect("Couldn't construct Swc4jParseOutput")
     }
   }
 }
 
 struct JavaTranspileOutput {
   class: GlobalRef,
-  method_constructor: JMethodID,
+  method_construct: JMethodID,
 }
 unsafe impl Send for JavaTranspileOutput {}
 unsafe impl Sync for JavaTranspileOutput {}
@@ -113,7 +113,7 @@ impl JavaTranspileOutput {
     let class = env
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jTranspileOutput");
-    let method_constructor = env
+    let method_construct = env
       .get_method_id(
         &class,
         "<init>",
@@ -122,11 +122,11 @@ impl JavaTranspileOutput {
       .expect("Couldn't find method Swc4jTranspileOutput::new");
     JavaTranspileOutput {
       class,
-      method_constructor,
+      method_construct,
     }
   }
 
-  pub fn create<'local, 'a>(&self, env: &mut JNIEnv<'local>, transpile_output: &TranspileOutput) -> JObject<'a>
+  pub fn construct<'local, 'a>(&self, env: &mut JNIEnv<'local>, transpile_output: &TranspileOutput) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -163,7 +163,7 @@ impl JavaTranspileOutput {
       env
         .new_object_unchecked(
           &self.class,
-          self.method_constructor,
+          self.method_construct,
           &[
             program,
             code,
@@ -175,7 +175,7 @@ impl JavaTranspileOutput {
             tokens,
           ],
         )
-        .expect("Couldn't create Swc4jTranspileOutput")
+        .expect("Couldn't construct Swc4jTranspileOutput")
     }
   }
 }
@@ -262,7 +262,7 @@ impl ToJniType for ParseOutput {
   where
     'local: 'a,
   {
-    unsafe { JAVA_PARSE_OUTPUT.as_ref().unwrap() }.create(env, &self)
+    unsafe { JAVA_PARSE_OUTPUT.as_ref().unwrap() }.construct(env, &self)
   }
 }
 
@@ -316,6 +316,6 @@ impl ToJniType for TranspileOutput {
   where
     'local: 'a,
   {
-    unsafe { JAVA_TRANSPILE_OUTPUT.as_ref().unwrap() }.create(env, &self)
+    unsafe { JAVA_TRANSPILE_OUTPUT.as_ref().unwrap() }.construct(env, &self)
   }
 }

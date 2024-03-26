@@ -227,7 +227,7 @@ pub mod program {
     let declare = var_decl.declare;
     let kind = var_decl.kind;
     let range = byte_to_index_map.get_range_by_span(&var_decl.span());
-    let java_decls = java_array_list.create(env, var_decl.decls.len());
+    let java_decls = java_array_list.construct(env, var_decl.decls.len());
     var_decl.decls.iter().for_each(|var_declarator| {
       let java_var_declarator = create_var_declarator(env, byte_to_index_map, var_declarator);
       java_array_list.add(env, &java_decls, &java_var_declarator);
@@ -309,7 +309,7 @@ pub mod program {
     'local: 'a,
   {
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_body = java_array_list.create(env, body.len());
+    let java_body = java_array_list.construct(env, body.len());
     java_body
   }
 
@@ -382,7 +382,7 @@ pub mod program {
     'local: 'a,
   {
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_body = java_array_list.create(env, body.len());
+    let java_body = java_array_list.construct(env, body.len());
     body.into_iter().for_each(|stmt| {
       let java_stmt = create_stmt(env, byte_to_index_map, stmt);
       java_array_list.add(env, &java_body, &java_stmt);

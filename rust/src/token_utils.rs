@@ -931,7 +931,7 @@ pub fn token_and_spans_to_java_list<'local>(
       Some(token_and_spans) => {
         let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
         let java_token_factory = unsafe { JAVA_TOKEN_FACTORY.as_ref().unwrap() };
-        let list = java_array_list.create(env, token_and_spans.len());
+        let list = java_array_list.construct(env, token_and_spans.len());
         token_and_spans.iter().for_each(|token_and_span| {
           let line_break_ahead = token_and_span.had_line_break;
           let text = &source_text[Range {
