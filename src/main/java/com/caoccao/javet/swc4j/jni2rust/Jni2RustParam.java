@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast;
+package com.caoccao.javet.swc4j.jni2rust;
 
-import com.caoccao.javet.swc4j.jni2rust.Jni2Rust;
-import org.junit.jupiter.api.Test;
+import java.lang.annotation.*;
 
-import java.io.IOException;
+@Documented
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Jni2RustParam {
+    String name() default "";
 
-public class TestSwc4jAstFactory {
-    @Test
-    public void testCodeGen() throws IOException {
-        Jni2Rust<Swc4jAstFactory> jni2Rust = new Jni2Rust<>(Swc4jAstFactory.class);
-        jni2Rust.updateFile();
-    }
+    boolean optional() default false;
+
+    String postCall() default "";
+
+    String preCall() default "";
+
+    String rustType() default "";
 }

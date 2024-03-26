@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.utils;
+package com.caoccao.javet.swc4j.jni2rust;
 
+import com.caoccao.javet.swc4j.utils.SimpleMap;
+
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
-public final class ClassUtils {
-    private static final Map<String, String> PRIMITIVE_MAP = SimpleMap.of(
+public class Jni2RustOptions {
+    protected static final Map<String, String> DEFAULT_JAVA_TYPE_TO_JNI_TYPE_MAP = SimpleMap.of(
             "int", "I",
             "long", "J",
             "short", "S",
@@ -29,23 +31,13 @@ public final class ClassUtils {
             "boolean", "Z",
             "float", "F",
             "double", "D");
+    protected final Map<String, String> javaTypeToJniTypeMap;
 
-    private ClassUtils() {
+    public Jni2RustOptions() {
+        javaTypeToJniTypeMap = new HashMap<>(DEFAULT_JAVA_TYPE_TO_JNI_TYPE_MAP);
     }
 
-    public static String toJniClassName(String className) {
-        String jniClassName = PRIMITIVE_MAP.get(Objects.requireNonNull(className));
-        if (jniClassName == null) {
-            if (className.endsWith("[]")) {
-                String baseClassName = className.substring(0, className.length() - 2);
-                String jniBaseClassName = toJniClassName(baseClassName);
-                if (jniBaseClassName != null) {
-                    jniClassName = "[" + jniBaseClassName;
-                }
-            } else {
-                jniClassName = "L" + className.replace('.', '/') + ";";
-            }
-        }
-        return jniClassName;
+    public Map<String, String> getJavaTypeToJniTypeMap() {
+        return javaTypeToJniTypeMap;
     }
 }

@@ -110,6 +110,7 @@ afterEvaluate {
     tasks.withType(JavaCompile::class) {
         options.compilerArgs.add("-Xlint:unchecked")
         options.compilerArgs.add("-Xlint:deprecation")
+        options.compilerArgs.add("-parameters")
     }
 }
 

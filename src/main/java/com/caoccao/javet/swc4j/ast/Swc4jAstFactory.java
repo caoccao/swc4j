@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
+import com.caoccao.javet.swc4j.jni2rust.*;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ import java.util.List;
  *
  * @since 0.2.0
  */
+@Jni2RustClass(filePath = "rust/src/ast_utils.rs")
 public final class Swc4jAstFactory {
     private Swc4jAstFactory() {
     }
@@ -40,8 +42,12 @@ public final class Swc4jAstFactory {
      * @return the ast module
      * @since 0.2.0
      */
+    @Jni2RustMethod
     public static Swc4jAstModule createModule(
-            List<Swc4jAst> body, String shebang, int startPosition, int endPosition) {
+            List<Swc4jAst> body,
+            @Jni2RustParam(optional = true) String shebang,
+            @Jni2RustParam(rustType = "range: &Range<usize>", preCall = "jvalue { i: range.start as i32 }") int startPosition,
+            @Jni2RustParam(rustType = "range: &Range<usize>", preCall = "jvalue { i: range.end as i32 }") int endPosition) {
         return new Swc4jAstModule(body, shebang, startPosition, endPosition);
     }
 
@@ -55,6 +61,7 @@ public final class Swc4jAstFactory {
      * @return the ast script
      * @since 0.2.0
      */
+    @Jni2RustMethod(mode = Jni2RustMethodMode.Manual)
     public static Swc4jAstScript createScript(
             List<Swc4jAst> body, String shebang, int startPosition, int endPosition) {
         return new Swc4jAstScript(body, shebang, startPosition, endPosition);

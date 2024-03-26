@@ -62,14 +62,13 @@ impl JavaSwc4jAstFactory {
       method_create_script,
     }
   }
-/* JavaSwc4jAstFactory End */
 
   pub fn create_module<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     body: &JObject<'_>,
-    shebang: Option<String>,
-    range: Range<usize>,
+    shebang: &Option<String>,
+    range: &Range<usize>,
   ) -> JObject<'a>
   where
     'local: 'a,
@@ -84,7 +83,7 @@ impl JavaSwc4jAstFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let ast = unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -99,8 +98,9 @@ impl JavaSwc4jAstFactory {
     env
       .delete_local_ref(java_shebang)
       .expect("Couldn't delete local shebang");
-    ast
-  }
+    return_value
+}
+/* JavaSwc4jAstFactory End */
 
   pub fn create_script<'local, 'a>(
     &self,
@@ -295,7 +295,7 @@ pub mod program {
     let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
     let range = byte_to_index_map.get_range_by_span(&module.span());
     let body = create_module_body(env, byte_to_index_map, &module.body);
-    let java_module = java_ast_factory.create_module(env, &body, shebang, range);
+    let java_module = java_ast_factory.create_module(env, &body, &shebang, &range);
     env.delete_local_ref(body).expect("Couldn't delete local module body");
     java_module
   }
