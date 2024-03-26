@@ -91,9 +91,9 @@ impl JavaSwc4jAstFactory {
           ReturnType::Object,
           &[body, shebang, start_position, end_position],
         )
-        .expect("Couldn't create Swc4jAstModule")
+        .expect("Couldn't create Swc4jAstModule by create_module()")
         .l()
-        .expect("Couldn't convert Swc4jAstModule")
+        .expect("Couldn't convert Swc4jAstModule by create_module()")
     };
     env
       .delete_local_ref(java_shebang)
@@ -129,9 +129,9 @@ impl JavaSwc4jAstFactory {
           ReturnType::Object,
           &[body, shebang, start_position, end_position],
         )
-        .expect("Couldn't create Swc4jAstScript")
+        .expect("Couldn't create Swc4jAstScript by create_script()")
         .l()
-        .expect("Couldn't convert Swc4jAstScript")
+        .expect("Couldn't convert Swc4jAstScript by create_script()")
     };
     env
       .delete_local_ref(java_shebang)

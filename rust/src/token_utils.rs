@@ -225,88 +225,58 @@ impl JavaSwc4jTokenFactory {
       method_create_unknown,
     }
   }
-/* JavaSwc4jTokenFactory End */
 
   pub fn create_assign_operator<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    token_type: TokenType,
-    range: Range<usize>,
+    token_type: &TokenType,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let token_type = jvalue { i: token_type.get_id() };
+    let type_id = jvalue { i: token_type.get_id() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
           self.method_create_assign_operator,
           ReturnType::Object,
-          &[token_type, start_position, end_position, line_break_ahead],
+          &[type_id, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't call create_assign_operator")
+        .expect("Couldn't create Swc4jToken by create_assign_operator()")
         .l()
-        .expect("Couldn't convert create_assign_operator")
-    }
-  }
-
-  pub fn create_binary_operator<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    token_type: TokenType,
-    range: Range<usize>,
-    line_break_ahead: bool,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let token_type = jvalue { i: token_type.get_id() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
+        .expect("Couldn't convert Swc4jToken by create_assign_operator()")
     };
-    unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_binary_operator,
-          ReturnType::Object,
-          &[token_type, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenBinaryOperator")
-        .l()
-        .expect("Couldn't convert Swc4jTokenBinaryOperator")
-    }
+    return_value
   }
 
-  pub fn create_bigint<'local, 'a>(
+  pub fn create_big_int<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     text: &str,
-    range: Range<usize>,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_string = converter::string_to_jstring(env, &text);
+    let java_text = converter::string_to_jstring(env, &text);
     let text = jvalue {
-      l: java_string.as_raw(),
+      l: java_text.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let token = unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -314,12 +284,45 @@ impl JavaSwc4jTokenFactory {
           ReturnType::Object,
           &[text, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jTokenBigInt")
+        .expect("Couldn't create Swc4jTokenTextValue by create_big_int()")
         .l()
-        .expect("Couldn't convert Swc4jTokenBigInt")
+        .expect("Couldn't convert Swc4jTokenTextValue by create_big_int()")
     };
-    env.delete_local_ref(java_string).expect("Couldn't delete local text");
-    token
+    env
+      .delete_local_ref(java_text)
+      .expect("Couldn't delete local text");
+    return_value
+  }
+
+  pub fn create_binary_operator<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    token_type: &TokenType,
+    range: &Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let type_id = jvalue { i: token_type.get_id() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_binary_operator,
+          ReturnType::Object,
+          &[type_id, start_position, end_position, line_break_ahead],
+        )
+        .expect("Couldn't create Swc4jToken by create_binary_operator()")
+        .l()
+        .expect("Couldn't convert Swc4jToken by create_binary_operator()")
+    };
+    return_value
   }
 
   pub fn create_error<'local, 'a>(
@@ -327,47 +330,50 @@ impl JavaSwc4jTokenFactory {
     env: &mut JNIEnv<'local>,
     text: &str,
     error: &Error,
-    range: Range<usize>,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_string_text = converter::string_to_jstring(env, &text);
-    let java_string_syntax_error = converter::string_to_jstring(env, &format!("{:?}", error));
+    let java_text = converter::string_to_jstring(env, &text);
     let text = jvalue {
-      l: java_string_text.as_raw(),
+      l: java_text.as_raw(),
     };
-    let syntax_error = jvalue {
-      l: java_string_syntax_error.as_raw(),
+    let java_error = converter::string_to_jstring(env, &format!("{:?}", error));
+    let error = jvalue {
+      l: java_error.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let token = unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
           self.method_create_error,
           ReturnType::Object,
-          &[text, syntax_error, start_position, end_position, line_break_ahead],
+          &[text, error, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jTokenError")
+        .expect("Couldn't create Swc4jTokenTextValue by create_error()")
         .l()
-        .expect("Couldn't convert Swc4jTokenError")
+        .expect("Couldn't convert Swc4jTokenTextValue by create_error()")
     };
     env
-      .delete_local_ref(java_string_text)
+      .delete_local_ref(java_text)
       .expect("Couldn't delete local text");
-    token
+    env
+      .delete_local_ref(java_error)
+      .expect("Couldn't delete local error");
+    return_value
   }
 
   pub fn create_false<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    range: Range<usize>,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -378,7 +384,7 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -386,62 +392,64 @@ impl JavaSwc4jTokenFactory {
           ReturnType::Object,
           &[start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jTokenFalse")
+        .expect("Couldn't create Swc4jToken by create_false()")
         .l()
-        .expect("Couldn't convert Swc4jTokenFalse")
-    }
+        .expect("Couldn't convert Swc4jToken by create_false()")
+    };
+    return_value
   }
 
   pub fn create_generic_operator<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    token_type: TokenType,
-    range: Range<usize>,
+    token_type: &TokenType,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let token_type = jvalue { i: token_type.get_id() };
+    let type_id = jvalue { i: token_type.get_id() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
           self.method_create_generic_operator,
           ReturnType::Object,
-          &[token_type, start_position, end_position, line_break_ahead],
+          &[type_id, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jTokenGenericOperator")
+        .expect("Couldn't create Swc4jToken by create_generic_operator()")
         .l()
-        .expect("Couldn't convert Swc4jTokenGenericOperator")
-    }
+        .expect("Couldn't convert Swc4jToken by create_generic_operator()")
+    };
+    return_value
   }
 
   pub fn create_ident_known<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     text: &str,
-    range: Range<usize>,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_string = converter::string_to_jstring(env, &text);
+    let java_text = converter::string_to_jstring(env, &text);
     let text = jvalue {
-      l: java_string.as_raw(),
+      l: java_text.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let token = unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -449,162 +457,36 @@ impl JavaSwc4jTokenFactory {
           ReturnType::Object,
           &[text, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jTokenIdentKnown")
+        .expect("Couldn't create Swc4jTokenText by create_ident_known()")
         .l()
-        .expect("Couldn't convert Swc4jTokenIdentKnown")
+        .expect("Couldn't convert Swc4jTokenText by create_ident_known()")
     };
-    env.delete_local_ref(java_string).expect("Couldn't delete local ident");
-    token
-  }
-
-  pub fn create_jsx_tag_name<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    text: &str,
-    range: Range<usize>,
-    line_break_ahead: bool,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let java_string = converter::string_to_jstring(env, &text);
-    let text = jvalue {
-      l: java_string.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
-    let token = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_jsx_tag_name,
-          ReturnType::Object,
-          &[text, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenJsxName")
-        .l()
-        .expect("Couldn't convert Swc4jTokenJsxName")
-    };
-    env.delete_local_ref(java_string).expect("Couldn't delete local text");
-    token
-  }
-
-  pub fn create_jsx_tag_text<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    text: &str,
-    range: Range<usize>,
-    line_break_ahead: bool,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let java_string = converter::string_to_jstring(env, &text);
-    let text = jvalue {
-      l: java_string.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
-    let token = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_jsx_tag_text,
-          ReturnType::Object,
-          &[text, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenJsxText")
-        .l()
-        .expect("Couldn't convert Swc4jTokenJsxText")
-    };
-    env.delete_local_ref(java_string).expect("Couldn't delete local text");
-    token
-  }
-
-  pub fn create_keyword<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    token_type: TokenType,
-    range: Range<usize>,
-    line_break_ahead: bool,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let token_type = jvalue { i: token_type.get_id() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
-    unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_keyword,
-          ReturnType::Object,
-          &[token_type, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenKeyword")
-        .l()
-        .expect("Couldn't convert Swc4jTokenKeyword")
-    }
-  }
-
-  pub fn create_null<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    range: Range<usize>,
-    line_break_ahead: bool,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
-    unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_null,
-          ReturnType::Object,
-          &[start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenNull")
-        .l()
-        .expect("Couldn't convert Swc4jTokenNull")
-    }
+    env
+      .delete_local_ref(java_text)
+      .expect("Couldn't delete local text");
+    return_value
   }
 
   pub fn create_ident_other<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     text: &str,
-    range: Range<usize>,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_string = converter::string_to_jstring(env, &text);
+    let java_text = converter::string_to_jstring(env, &text);
     let text = jvalue {
-      l: java_string.as_raw(),
+      l: java_text.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let token = unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -612,12 +494,148 @@ impl JavaSwc4jTokenFactory {
           ReturnType::Object,
           &[text, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jTokenIdentOther")
+        .expect("Couldn't create Swc4jTokenText by create_ident_other()")
         .l()
-        .expect("Couldn't convert Swc4jTokenIdentOther")
+        .expect("Couldn't convert Swc4jTokenText by create_ident_other()")
     };
-    env.delete_local_ref(java_string).expect("Couldn't delete local ident");
-    token
+    env
+      .delete_local_ref(java_text)
+      .expect("Couldn't delete local text");
+    return_value
+  }
+
+  pub fn create_jsx_tag_name<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    text: &str,
+    range: &Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_text = converter::string_to_jstring(env, &text);
+    let text = jvalue {
+      l: java_text.as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_jsx_tag_name,
+          ReturnType::Object,
+          &[text, start_position, end_position, line_break_ahead],
+        )
+        .expect("Couldn't create Swc4jTokenText by create_jsx_tag_name()")
+        .l()
+        .expect("Couldn't convert Swc4jTokenText by create_jsx_tag_name()")
+    };
+    env
+      .delete_local_ref(java_text)
+      .expect("Couldn't delete local text");
+    return_value
+  }
+
+  pub fn create_jsx_tag_text<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    text: &str,
+    range: &Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_text = converter::string_to_jstring(env, &text);
+    let text = jvalue {
+      l: java_text.as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_jsx_tag_text,
+          ReturnType::Object,
+          &[text, start_position, end_position, line_break_ahead],
+        )
+        .expect("Couldn't create Swc4jTokenText by create_jsx_tag_text()")
+        .l()
+        .expect("Couldn't convert Swc4jTokenText by create_jsx_tag_text()")
+    };
+    env
+      .delete_local_ref(java_text)
+      .expect("Couldn't delete local text");
+    return_value
+  }
+
+  pub fn create_keyword<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    token_type: &TokenType,
+    range: &Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let type_id = jvalue { i: token_type.get_id() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_keyword,
+          ReturnType::Object,
+          &[type_id, start_position, end_position, line_break_ahead],
+        )
+        .expect("Couldn't create Swc4jToken by create_keyword()")
+        .l()
+        .expect("Couldn't convert Swc4jToken by create_keyword()")
+    };
+    return_value
+  }
+
+  pub fn create_null<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    range: &Range<usize>,
+    line_break_ahead: bool,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let line_break_ahead = jvalue {
+      z: line_break_ahead as u8,
+    };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_null,
+          ReturnType::Object,
+          &[start_position, end_position, line_break_ahead],
+        )
+        .expect("Couldn't create Swc4jToken by create_null()")
+        .l()
+        .expect("Couldn't convert Swc4jToken by create_null()")
+    };
+    return_value
   }
 
   pub fn create_number<'local, 'a>(
@@ -625,23 +643,25 @@ impl JavaSwc4jTokenFactory {
     env: &mut JNIEnv<'local>,
     text: &str,
     value: f64,
-    range: Range<usize>,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_string = converter::string_to_jstring(env, &text);
+    let java_text = converter::string_to_jstring(env, &text);
     let text = jvalue {
-      l: java_string.as_raw(),
+      l: java_text.as_raw(),
     };
-    let value = jvalue { d: value };
+    let value = jvalue {
+      d: value as f64,
+    };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let token = unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -649,12 +669,14 @@ impl JavaSwc4jTokenFactory {
           ReturnType::Object,
           &[text, value, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jTokenNumber")
+        .expect("Couldn't create Swc4jTokenTextValue by create_number()")
         .l()
-        .expect("Couldn't convert Swc4jTokenNumber")
+        .expect("Couldn't convert Swc4jTokenTextValue by create_number()")
     };
-    env.delete_local_ref(java_string).expect("Couldn't delete local text");
-    token
+    env
+      .delete_local_ref(java_text)
+      .expect("Couldn't delete local text");
+    return_value
   }
 
   pub fn create_regex<'local, 'a>(
@@ -663,30 +685,30 @@ impl JavaSwc4jTokenFactory {
     text: &str,
     value: &str,
     flags: &str,
-    range: Range<usize>,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_string_text = converter::string_to_jstring(env, &text);
-    let java_string_value = converter::string_to_jstring(env, &value);
-    let java_string_flags = converter::string_to_jstring(env, &flags);
+    let java_text = converter::string_to_jstring(env, &text);
     let text = jvalue {
-      l: java_string_text.as_raw(),
+      l: java_text.as_raw(),
     };
+    let java_value = converter::string_to_jstring(env, &value);
     let value = jvalue {
-      l: java_string_value.as_raw(),
+      l: java_value.as_raw(),
     };
+    let java_flags = converter::string_to_jstring(env, &flags);
     let flags = jvalue {
-      l: java_string_flags.as_raw(),
+      l: java_flags.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let token = unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -694,20 +716,20 @@ impl JavaSwc4jTokenFactory {
           ReturnType::Object,
           &[text, value, flags, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jTokenRegex")
+        .expect("Couldn't create Swc4jTokenTextValueFlags by create_regex()")
         .l()
-        .expect("Couldn't convert Swc4jTokenRegex")
+        .expect("Couldn't convert Swc4jTokenTextValueFlags by create_regex()")
     };
     env
-      .delete_local_ref(java_string_text)
+      .delete_local_ref(java_text)
       .expect("Couldn't delete local text");
     env
-      .delete_local_ref(java_string_value)
+      .delete_local_ref(java_value)
       .expect("Couldn't delete local value");
     env
-      .delete_local_ref(java_string_flags)
+      .delete_local_ref(java_flags)
       .expect("Couldn't delete local flags");
-    token
+    return_value
   }
 
   pub fn create_shebang<'local, 'a>(
@@ -715,26 +737,26 @@ impl JavaSwc4jTokenFactory {
     env: &mut JNIEnv<'local>,
     text: &str,
     value: &str,
-    range: Range<usize>,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_string_text = converter::string_to_jstring(env, &text);
-    let java_string_value = converter::string_to_jstring(env, &value);
+    let java_text = converter::string_to_jstring(env, &text);
     let text = jvalue {
-      l: java_string_text.as_raw(),
+      l: java_text.as_raw(),
     };
+    let java_value = converter::string_to_jstring(env, &value);
     let value = jvalue {
-      l: java_string_value.as_raw(),
+      l: java_value.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let token = unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -742,17 +764,17 @@ impl JavaSwc4jTokenFactory {
           ReturnType::Object,
           &[text, value, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jTokenShebang")
+        .expect("Couldn't create Swc4jTokenTextValue by create_shebang()")
         .l()
-        .expect("Couldn't convert Swc4jTokenShebang")
+        .expect("Couldn't convert Swc4jTokenTextValue by create_shebang()")
     };
     env
-      .delete_local_ref(java_string_text)
+      .delete_local_ref(java_text)
       .expect("Couldn't delete local text");
     env
-      .delete_local_ref(java_string_value)
+      .delete_local_ref(java_value)
       .expect("Couldn't delete local value");
-    token
+    return_value
   }
 
   pub fn create_string<'local, 'a>(
@@ -760,26 +782,26 @@ impl JavaSwc4jTokenFactory {
     env: &mut JNIEnv<'local>,
     text: &str,
     value: &str,
-    range: Range<usize>,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_string_text = converter::string_to_jstring(env, &text);
-    let java_string_value = converter::string_to_jstring(env, &value);
+    let java_text = converter::string_to_jstring(env, &text);
     let text = jvalue {
-      l: java_string_text.as_raw(),
+      l: java_text.as_raw(),
     };
+    let java_value = converter::string_to_jstring(env, &value);
     let value = jvalue {
-      l: java_string_value.as_raw(),
+      l: java_value.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let token = unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -787,47 +809,47 @@ impl JavaSwc4jTokenFactory {
           ReturnType::Object,
           &[text, value, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jTokenString")
+        .expect("Couldn't create Swc4jTokenTextValue by create_string()")
         .l()
-        .expect("Couldn't convert Swc4jTokenString")
+        .expect("Couldn't convert Swc4jTokenTextValue by create_string()")
     };
     env
-      .delete_local_ref(java_string_text)
+      .delete_local_ref(java_text)
       .expect("Couldn't delete local text");
     env
-      .delete_local_ref(java_string_value)
+      .delete_local_ref(java_value)
       .expect("Couldn't delete local value");
-    token
+    return_value
   }
 
   pub fn create_template<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     text: &str,
-    value: Option<&str>,
-    range: Range<usize>,
+    value: &Option<String>,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_string_text = converter::string_to_jstring(env, &text);
-    let java_string_value = match value {
+    let java_text = converter::string_to_jstring(env, &text);
+    let text = jvalue {
+      l: java_text.as_raw(),
+    };
+    let java_value = match &value {
       Some(value) => converter::string_to_jstring(env, &value),
       None => Default::default(),
     };
-    let text = jvalue {
-      l: java_string_text.as_raw(),
-    };
     let value = jvalue {
-      l: java_string_value.as_raw(),
+      l: java_value.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let token = unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -835,23 +857,23 @@ impl JavaSwc4jTokenFactory {
           ReturnType::Object,
           &[text, value, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jTokenTemplate")
+        .expect("Couldn't create Swc4jTokenTextValue by create_template()")
         .l()
-        .expect("Couldn't convert Swc4jTokenTemplate")
+        .expect("Couldn't convert Swc4jTokenTextValue by create_template()")
     };
     env
-      .delete_local_ref(java_string_text)
+      .delete_local_ref(java_text)
       .expect("Couldn't delete local text");
     env
-      .delete_local_ref(java_string_value)
+      .delete_local_ref(java_value)
       .expect("Couldn't delete local value");
-    token
+    return_value
   }
 
   pub fn create_true<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    range: Range<usize>,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -862,7 +884,7 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -870,32 +892,33 @@ impl JavaSwc4jTokenFactory {
           ReturnType::Object,
           &[start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jTokenTrue")
+        .expect("Couldn't create Swc4jToken by create_true()")
         .l()
-        .expect("Couldn't convert Swc4jTokenTrue")
-    }
+        .expect("Couldn't convert Swc4jToken by create_true()")
+    };
+    return_value
   }
 
   pub fn create_unknown<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     text: &str,
-    range: Range<usize>,
+    range: &Range<usize>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_string = converter::string_to_jstring(env, &text);
+    let java_text = converter::string_to_jstring(env, &text);
     let text = jvalue {
-      l: java_string.as_raw(),
+      l: java_text.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let token = unsafe {
+    let return_value = unsafe {
       env
         .call_static_method_unchecked(
           &self.class,
@@ -903,14 +926,17 @@ impl JavaSwc4jTokenFactory {
           ReturnType::Object,
           &[text, start_position, end_position, line_break_ahead],
         )
-        .expect("Couldn't create Swc4jTokenUnknown")
+        .expect("Couldn't create Swc4jTokenText by create_unknown()")
         .l()
-        .expect("Couldn't convert Swc4jTokenUnknown")
+        .expect("Couldn't convert Swc4jTokenText by create_unknown()")
     };
-    env.delete_local_ref(java_string).expect("Couldn't delete local text");
-    token
+    env
+      .delete_local_ref(java_text)
+      .expect("Couldn't delete local text");
+    return_value
   }
 }
+/* JavaSwc4jTokenFactory End */
 
 static mut JAVA_TOKEN_FACTORY: Option<JavaSwc4jTokenFactory> = None;
 
@@ -943,68 +969,68 @@ pub fn token_and_spans_to_java_list<'local>(
             Token::Word(word) => match word {
               Word::Keyword(keyword) => java_token_factory.create_keyword(
                 env,
-                TokenType::parse_by_keyword(&keyword),
-                index_range,
+                &TokenType::parse_by_keyword(&keyword),
+                &index_range,
                 line_break_ahead,
               ),
-              Word::Null => java_token_factory.create_null(env, index_range, line_break_ahead),
-              Word::True => java_token_factory.create_true(env, index_range, line_break_ahead),
-              Word::False => java_token_factory.create_false(env, index_range, line_break_ahead),
+              Word::Null => java_token_factory.create_null(env, &index_range, line_break_ahead),
+              Word::True => java_token_factory.create_true(env, &index_range, line_break_ahead),
+              Word::False => java_token_factory.create_false(env, &index_range, line_break_ahead),
               Word::Ident(ident) => match ident {
                 IdentLike::Known(known_ident) => {
-                  java_token_factory.create_ident_known(env, &Atom::from(*known_ident), index_range, line_break_ahead)
+                  java_token_factory.create_ident_known(env, &Atom::from(*known_ident), &index_range, line_break_ahead)
                 }
                 IdentLike::Other(js_word) => {
-                  java_token_factory.create_ident_other(env, &js_word, index_range, line_break_ahead)
+                  java_token_factory.create_ident_other(env, &js_word, &index_range, line_break_ahead)
                 }
               },
             },
             Token::BinOp(bin_op) => java_token_factory.create_binary_operator(
               env,
-              TokenType::parse_by_binary_operator(bin_op),
-              index_range,
+              &TokenType::parse_by_binary_operator(bin_op),
+              &index_range,
               line_break_ahead,
             ),
             Token::AssignOp(assign_op) => java_token_factory.create_assign_operator(
               env,
-              TokenType::parse_by_assign_operator(assign_op),
-              index_range,
+              &TokenType::parse_by_assign_operator(assign_op),
+              &index_range,
               line_break_ahead,
             ),
             Token::Str { value, raw } => {
-              java_token_factory.create_string(env, &raw, &value, index_range, line_break_ahead)
+              java_token_factory.create_string(env, &raw, &value, &index_range, line_break_ahead)
             }
             Token::Num { value, raw } => {
-              java_token_factory.create_number(env, &raw, *value, index_range, line_break_ahead)
+              java_token_factory.create_number(env, &raw, *value, &index_range, line_break_ahead)
             }
             Token::BigInt { value: _, raw } => {
-              java_token_factory.create_bigint(env, &raw, index_range, line_break_ahead)
+              java_token_factory.create_big_int(env, &raw, &index_range, line_break_ahead)
             }
             Token::Regex(value, flags) => {
-              java_token_factory.create_regex(env, &text, &value, &flags, index_range, line_break_ahead)
+              java_token_factory.create_regex(env, &text, &value, &flags, &index_range, line_break_ahead)
             }
             Token::Template { raw, cooked } => {
               let cooked = match &cooked {
-                Ok(atom) => Some(atom.as_str()),
+                Ok(atom) => Some(atom.as_str().to_owned()),
                 Err(_) => None,
               };
-              java_token_factory.create_template(env, &raw, cooked, index_range, line_break_ahead)
+              java_token_factory.create_template(env, &raw, &cooked, &index_range, line_break_ahead)
             }
             Token::Shebang(shebang) => {
-              java_token_factory.create_shebang(env, &text, &shebang, index_range, line_break_ahead)
+              java_token_factory.create_shebang(env, &text, &shebang, &index_range, line_break_ahead)
             }
-            Token::Error(error) => java_token_factory.create_error(env, &text, &error, index_range, line_break_ahead),
+            Token::Error(error) => java_token_factory.create_error(env, &text, &error, &index_range, line_break_ahead),
             Token::JSXName { name } => {
-              java_token_factory.create_jsx_tag_name(env, &name, index_range, line_break_ahead)
+              java_token_factory.create_jsx_tag_name(env, &name, &index_range, line_break_ahead)
             }
-            Token::JSXText { raw } => java_token_factory.create_jsx_tag_text(env, &raw, index_range, line_break_ahead),
+            Token::JSXText { raw } => java_token_factory.create_jsx_tag_text(env, &raw, &index_range, line_break_ahead),
             token => match &TokenType::parse_by_generic_operator(token) {
               TokenType::Unknown => {
                 eprintln!("Unknown {:?}", token);
-                java_token_factory.create_unknown(env, &text, index_range, line_break_ahead)
+                java_token_factory.create_unknown(env, &text, &index_range, line_break_ahead)
               }
               generic_operator_type => {
-                java_token_factory.create_generic_operator(env, *generic_operator_type, index_range, line_break_ahead)
+                java_token_factory.create_generic_operator(env, generic_operator_type, &index_range, line_break_ahead)
               }
             },
           };

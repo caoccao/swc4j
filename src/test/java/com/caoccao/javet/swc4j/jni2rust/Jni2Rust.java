@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.jni2rust;
 
+import com.caoccao.javet.swc4j.utils.ArrayUtils;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.OSUtils;
 import com.caoccao.javet.swc4j.utils.StringUtils;
@@ -117,22 +118,20 @@ public class Jni2Rust<T> {
                             }
                         } else {
                             String name = getParameterName(parameter);
-                            StringBuilder sb = new StringBuilder(name).append(": &");
-                            if (isOptional) {
-                                if (parameterType.isPrimitive()) {
-                                    // TODO
-                                } else if (parameterType == String.class) {
-                                    sb.append("Option<String>");
+                            StringBuilder sb = new StringBuilder(name).append(": ");
+                            if (parameterType.isPrimitive()) {
+                                sb.append(options.getJavaTypeToRustTypeMap().get(parameterType.getName()));
+                            } else if (parameterType == String.class) {
+                                if (isOptional) {
+                                    sb.append("&Option<String>");
                                 } else {
-                                    sb.append("Option<JObject>");
+                                    sb.append("&str");
                                 }
                             } else {
-                                if (parameterType.isPrimitive()) {
-                                    // TODO
-                                } else if (parameterType == String.class) {
-                                    sb.append("str");
+                                if (isOptional) {
+                                    sb.append("&Option<JObject>");
                                 } else {
-                                    sb.append("JObject<'_>");
+                                    sb.append("&JObject<'_>");
                                 }
                             }
                             rustType = sb.toString();
@@ -156,34 +155,39 @@ public class Jni2Rust<T> {
                         String name = getParameterName(parameter);
                         Class<?> parameterType = parameter.getType();
                         boolean isOptional = false;
-                        String preCall = null;
+                        String[] preCalls = null;
                         if (parameter.isAnnotationPresent(Jni2RustParam.class)) {
                             Jni2RustParam jni2RustParam = parameter.getAnnotation(Jni2RustParam.class);
                             isOptional = jni2RustParam.optional();
-                            if (StringUtils.isNotEmpty(jni2RustParam.preCall())) {
-                                preCall = jni2RustParam.preCall();
+                            if (ArrayUtils.isNotEmpty(jni2RustParam.preCalls())) {
+                                preCalls = jni2RustParam.preCalls();
                             }
                         }
-                        if (preCall == null) {
+                        if (ArrayUtils.isEmpty(preCalls)) {
                             if (parameterType.isPrimitive()) {
-                                // TODO
+                                lines.add(String.format("    let %s = jvalue {", name));
+                                lines.add(String.format("      %s: %s as %s,",
+                                        options.getJavaTypeToJniTypeMap().get(parameterType.getName()).toLowerCase(),
+                                        name,
+                                        options.getJavaTypeToJniCastTypeMap().get(parameterType.getName())));
+                                lines.add("    };");
                             } else if (parameterType == String.class) {
                                 if (isOptional) {
                                     lines.add(String.format("    let java_%s = match &%s {", name, name));
                                     lines.add(String.format("      Some(%s) => converter::string_to_jstring(env, &%s),", name, name));
                                     lines.add("      None => Default::default(),");
                                     lines.add("    };");
-                                    lines.add(String.format("    let %s = jvalue {", name));
-                                    lines.add(String.format("      l: java_%s.as_raw(),", name));
-                                    lines.add("    };");
                                 } else {
-                                    // TODO
+                                    lines.add(String.format("    let java_%s = converter::string_to_jstring(env, &%s);", name, name));
                                 }
+                                lines.add(String.format("    let %s = jvalue {", name));
+                                lines.add(String.format("      l: java_%s.as_raw(),", name));
+                                lines.add("    };");
                             } else {
                                 lines.add(String.format("    let %s = jvalue { l: %s.as_raw() };", name, name));
                             }
                         } else {
-                            lines.add(String.format("    let %s = %s;", name, preCall));
+                            Collections.addAll(lines, preCalls);
                         }
                     }
                     // call
@@ -205,34 +209,34 @@ public class Jni2Rust<T> {
                     } else if (isPrimitive) {
                         // TODO
                     } else {
-                        lines.add(String.format("        .expect(\"Couldn't create %s\")", method.getReturnType().getSimpleName()));
+                        lines.add(String.format("        .expect(\"Couldn't create %s by %s()\")",
+                                method.getReturnType().getSimpleName(),
+                                methodName));
                         lines.add("        .l()");
-                        lines.add(String.format("        .expect(\"Couldn't convert %s\")", method.getReturnType().getSimpleName()));
+                        lines.add(String.format("        .expect(\"Couldn't convert %s by %s()\")",
+                                method.getReturnType().getSimpleName(),
+                                methodName));
                     }
                     lines.add("    };");
                     // post-call
                     for (Parameter parameter : method.getParameters()) {
                         String name = getParameterName(parameter);
                         Class<?> parameterType = parameter.getType();
-                        boolean isOptional = false;
-                        String postCall = null;
+                        String[] postCalls = null;
                         if (parameter.isAnnotationPresent(Jni2RustParam.class)) {
                             Jni2RustParam jni2RustParam = parameter.getAnnotation(Jni2RustParam.class);
-                            isOptional = jni2RustParam.optional();
-                            if (StringUtils.isNotEmpty(jni2RustParam.postCall())) {
-                                postCall = jni2RustParam.postCall();
+                            if (ArrayUtils.isNotEmpty(jni2RustParam.postCalls())) {
+                                postCalls = jni2RustParam.postCalls();
                             }
                         }
-                        if (postCall == null) {
+                        if (ArrayUtils.isEmpty(postCalls)) {
                             if (parameterType == String.class) {
-                                if (isOptional) {
-                                    lines.add("    env");
-                                    lines.add(String.format("      .delete_local_ref(java_%s)", name));
-                                    lines.add(String.format("      .expect(\"Couldn't delete local %s\");", name));
-                                }
+                                lines.add("    env");
+                                lines.add(String.format("      .delete_local_ref(java_%s)", name));
+                                lines.add(String.format("      .expect(\"Couldn't delete local %s\");", name));
                             }
                         } else {
-                            lines.add(String.format("    %s;", postCall));
+                            Collections.addAll(lines, postCalls);
                         }
                     }
                     // return
@@ -380,10 +384,12 @@ public class Jni2Rust<T> {
         boolean manualMethodFound = Optional.ofNullable(constructor)
                 .map(method -> method.getAnnotation(Jni2RustMethod.class))
                 .map(annotation -> annotation.mode() == Jni2RustMethodMode.Manual)
+                .filter(found -> found)
                 .orElse(false);
         manualMethodFound = !manualMethodFound && methods.stream()
                 .map(method -> method.getAnnotation(Jni2RustMethod.class))
                 .map(annotation -> annotation.mode() == Jni2RustMethodMode.Manual)
+                .filter(found -> found)
                 .findFirst()
                 .orElse(false);
         completelyAuto = !manualMethodFound;

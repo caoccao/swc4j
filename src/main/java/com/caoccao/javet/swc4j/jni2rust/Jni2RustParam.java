@@ -26,9 +26,9 @@ public @interface Jni2RustParam {
 
     boolean optional() default false;
 
-    String postCall() default "";
+    String[] postCalls() default {};
 
-    String preCall() default "";
+    String[] preCalls() default {};
 
     String rustType() default "";
 }

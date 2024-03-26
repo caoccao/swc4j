@@ -20,7 +20,6 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 
 import java.util.List;
@@ -49,8 +48,8 @@ public final class Swc4jAstFactory {
     public static Swc4jAstModule createModule(
             List<Swc4jAst> body,
             @Jni2RustParam(optional = true) String shebang,
-            @Jni2RustParam(rustType = "range: &Range<usize>", preCall = "jvalue { i: range.start as i32 }") int startPosition,
-            @Jni2RustParam(rustType = "range: &Range<usize>", preCall = "jvalue { i: range.end as i32 }") int endPosition) {
+            @Jni2RustParam(rustType = "range: &Range<usize>", preCalls = "    let start_position = jvalue { i: range.start as i32 };") int startPosition,
+            @Jni2RustParam(rustType = "range: &Range<usize>", preCalls = "    let end_position = jvalue { i: range.end as i32 };") int endPosition) {
         return new Swc4jAstModule(body, shebang, startPosition, endPosition);
     }
 
@@ -68,8 +67,8 @@ public final class Swc4jAstFactory {
     public static Swc4jAstScript createScript(
             List<Swc4jAst> body,
             @Jni2RustParam(optional = true) String shebang,
-            @Jni2RustParam(rustType = "range: &Range<usize>", preCall = "jvalue { i: range.start as i32 }") int startPosition,
-            @Jni2RustParam(rustType = "range: &Range<usize>", preCall = "jvalue { i: range.end as i32 }") int endPosition) {
+            @Jni2RustParam(rustType = "range: &Range<usize>", preCalls = "    let start_position = jvalue { i: range.start as i32 };") int startPosition,
+            @Jni2RustParam(rustType = "range: &Range<usize>", preCalls = "    let end_position = jvalue { i: range.end as i32 };") int endPosition) {
         return new Swc4jAstScript(body, shebang, startPosition, endPosition);
     }
 }
