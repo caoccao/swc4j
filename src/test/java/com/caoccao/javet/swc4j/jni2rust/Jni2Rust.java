@@ -237,6 +237,7 @@ public class Jni2Rust<T> {
                     }
                     // return
                     lines.add("    return_value");
+                    lines.add("  }");
                 });
     }
 

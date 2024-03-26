@@ -18,7 +18,10 @@ package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
-import com.caoccao.javet.swc4j.jni2rust.*;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 
 import java.util.List;
 
@@ -61,9 +64,12 @@ public final class Swc4jAstFactory {
      * @return the ast script
      * @since 0.2.0
      */
-    @Jni2RustMethod(mode = Jni2RustMethodMode.Manual)
+    @Jni2RustMethod
     public static Swc4jAstScript createScript(
-            List<Swc4jAst> body, String shebang, int startPosition, int endPosition) {
+            List<Swc4jAst> body,
+            @Jni2RustParam(optional = true) String shebang,
+            @Jni2RustParam(rustType = "range: &Range<usize>", preCall = "jvalue { i: range.start as i32 }") int startPosition,
+            @Jni2RustParam(rustType = "range: &Range<usize>", preCall = "jvalue { i: range.end as i32 }") int endPosition) {
         return new Swc4jAstScript(body, shebang, startPosition, endPosition);
     }
 }
