@@ -14,11 +14,26 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.enums;
+package com.caoccao.javet.swc4j.ast.expr;
 
-public enum Swc4jAstType {
-    Ident,
-    Module,
-    Script,
-    VarDeclarator,
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.enums.Swc4jAstType;
+
+/**
+ * The type Swc4j ast expr.
+ *
+ * @since 0.2.0
+ */
+public abstract class Swc4jAstExpr extends Swc4jAst {
+    /**
+     * Instantiates a new Swc4j ast expr.
+     *
+     * @param type          the type
+     * @param startPosition the start position
+     * @param endPosition   the end position
+     * @since 0.2.0
+     */
+    protected Swc4jAstExpr(Swc4jAstType type, int startPosition, int endPosition) {
+        super(type, startPosition, endPosition);
+    }
 }

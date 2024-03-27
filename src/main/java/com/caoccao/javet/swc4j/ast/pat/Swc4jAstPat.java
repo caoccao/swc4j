@@ -14,44 +14,26 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast;
+package com.caoccao.javet.swc4j.ast.pat;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 
 /**
- * The type Swc4j ast text.
+ * The type Swc4j ast pat.
  *
  * @since 0.2.0
  */
-public abstract class Swc4JAstText extends Swc4jAst {
+public abstract class Swc4jAstPat extends Swc4jAst {
     /**
-     * The Text.
-     *
-     * @since 0.2.0
-     */
-    protected final String text;
-
-    /**
-     * Instantiates a new Swc4j ast text.
+     * Instantiates a new Swc4j ast pat.
      *
      * @param type          the type
-     * @param text          the text
      * @param startPosition the start position
      * @param endPosition   the end position
      * @since 0.2.0
      */
-    protected Swc4JAstText(Swc4jAstType type, String text, int startPosition, int endPosition) {
+    protected Swc4jAstPat(Swc4jAstType type, int startPosition, int endPosition) {
         super(type, startPosition, endPosition);
-        this.text = text;
-    }
-
-    /**
-     * Gets text.
-     *
-     * @return the text
-     * @since 0.2.0
-     */
-    public String getText() {
-        return text;
     }
 }

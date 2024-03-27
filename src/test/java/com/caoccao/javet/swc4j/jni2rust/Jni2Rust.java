@@ -150,7 +150,7 @@ public class Jni2Rust<T> {
                     } else if (isString) {
                         if (jni2RustMethod != null && jni2RustMethod.optional()) {
                             lines.add("  ) -> Option<String>");
-                        }else {
+                        } else {
                             lines.add("  ) -> String");
                         }
                     } else {
@@ -193,7 +193,16 @@ public class Jni2Rust<T> {
                                 lines.add(String.format("      l: java_%s.as_raw(),", name));
                                 lines.add("    };");
                             } else {
-                                lines.add(String.format("    let %s = jvalue { l: %s.as_raw() };", name, name));
+                                if (isOptional) {
+                                    lines.add(String.format("    let %s = jvalue {", name));
+                                    lines.add(String.format("      l: match %s {", name));
+                                    lines.add(String.format("        Some(%s) => %s.as_raw(),", name, name));
+                                    lines.add("        None => null_mut(),");
+                                    lines.add("      },");
+                                    lines.add("    };");
+                                } else {
+                                    lines.add(String.format("    let %s = jvalue { l: %s.as_raw() };", name, name));
+                                }
                             }
                         } else {
                             Collections.addAll(lines, preCalls);

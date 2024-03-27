@@ -20,7 +20,7 @@ use jni::signature::ReturnType;
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
-use deno_ast::swc::ast::AssignOp;
+use deno_ast::swc::ast::{AssignOp, VarDeclKind};
 use deno_ast::swc::parser::token::{BinOpToken, Keyword, Token};
 pub use deno_ast::{ImportsNotUsedAsValues, MediaType};
 
@@ -140,8 +140,8 @@ pub enum TokenType {
   OrAssign,             // 99
   NullishAssign,        // 100
   // TextValue
-  Shebang, // 101
-  Error,   // 102
+  Shebang,  // 101
+  Error,    // 102
   Str,      // 103
   Num,      // 104
   BigInt,   // 105
@@ -744,6 +744,23 @@ impl JavaParseMode {
   pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> ParseMode {
     let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
     ParseMode::parse_by_id(id)
+  }
+}
+
+impl IdentifiableEnum<VarDeclKind> for VarDeclKind {
+  fn get_id(&self) -> i32 {
+    match self {
+      VarDeclKind::Const => 0,
+      VarDeclKind::Let => 1,
+      VarDeclKind::Var => 2,
+    }
+  }
+  fn parse_by_id(id: i32) -> VarDeclKind {
+    match id {
+      1 => VarDeclKind::Let,
+      2 => VarDeclKind::Var,
+      _ => VarDeclKind::Const,
+    }
   }
 }
 

@@ -23,13 +23,17 @@ use jni::JNIEnv;
 use crate::converter;
 
 use std::ops::Range;
+use std::ptr::null_mut;
 
 /* JavaSwc4jAstFactory Begin */
 struct JavaSwc4jAstFactory {
   #[allow(dead_code)]
   class: GlobalRef,
+  method_create_ident: JStaticMethodID,
   method_create_module: JStaticMethodID,
   method_create_script: JStaticMethodID,
+  method_create_var_decl: JStaticMethodID,
+  method_create_var_declarator: JStaticMethodID,
 }
 unsafe impl Send for JavaSwc4jAstFactory {}
 unsafe impl Sync for JavaSwc4jAstFactory {}
@@ -42,6 +46,13 @@ impl JavaSwc4jAstFactory {
     let class = env
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jAstFactory");
+    let method_create_ident = env
+      .get_static_method_id(
+        &class,
+        "createIdent",
+        "(Ljava/lang/String;ZII)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstIdent;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createIdent");
     let method_create_module = env
       .get_static_method_id(
         &class,
@@ -56,11 +67,65 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstScript;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createScript");
+    let method_create_var_decl = env
+      .get_static_method_id(
+        &class,
+        "createVarDecl",
+        "(IZLjava/util/List;II)Lcom/caoccao/javet/swc4j/ast/stmt/decl/Swc4jAstVarDecl;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createVarDecl");
+    let method_create_var_declarator = env
+      .get_static_method_id(
+        &class,
+        "createVarDeclarator",
+        "(Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstPat;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstExpr;ZII)Lcom/caoccao/javet/swc4j/ast/stmt/decl/Swc4jAstVarDeclarator;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createVarDeclarator");
     JavaSwc4jAstFactory {
       class,
+      method_create_ident,
       method_create_module,
       method_create_script,
+      method_create_var_decl,
+      method_create_var_declarator,
     }
+  }
+
+  pub fn create_ident<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    sym: &str,
+    optional: bool,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_sym = converter::string_to_jstring(env, &sym);
+    let sym = jvalue {
+      l: java_sym.as_raw(),
+    };
+    let optional = jvalue {
+      z: optional as u8,
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_ident,
+          ReturnType::Object,
+          &[sym, optional, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstIdent by create_ident()")
+        .l()
+        .expect("Couldn't convert Swc4jAstIdent by create_ident()")
+    };
+    env
+      .delete_local_ref(java_sym)
+      .expect("Couldn't delete local sym");
+    return_value
   }
 
   pub fn create_module<'local, 'a>(
@@ -138,6 +203,79 @@ impl JavaSwc4jAstFactory {
       .expect("Couldn't delete local shebang");
     return_value
   }
+
+  pub fn create_var_decl<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    kind_id: i32,
+    declare: bool,
+    decls: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let kind_id = jvalue {
+      i: kind_id as i32,
+    };
+    let declare = jvalue {
+      z: declare as u8,
+    };
+    let decls = jvalue { l: decls.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_var_decl,
+          ReturnType::Object,
+          &[kind_id, declare, decls, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstVarDecl by create_var_decl()")
+        .l()
+        .expect("Couldn't convert Swc4jAstVarDecl by create_var_decl()")
+    };
+    return_value
+  }
+
+  pub fn create_var_declarator<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    name: &JObject<'_>,
+    init: &Option<JObject>,
+    definite: bool,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let name = jvalue { l: name.as_raw() };
+    let init = jvalue {
+      l: match init {
+        Some(init) => init.as_raw(),
+        None => null_mut(),
+      },
+    };
+    let definite = jvalue {
+      z: definite as u8,
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_var_declarator,
+          ReturnType::Object,
+          &[name, init, definite, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstVarDeclarator by create_var_declarator()")
+        .l()
+        .expect("Couldn't convert Swc4jAstVarDeclarator by create_var_declarator()")
+    };
+    return_value
+  }
 }
 /* JavaSwc4jAstFactory End */
 
@@ -206,6 +344,7 @@ pub mod program {
   use jni::JNIEnv;
 
   use crate::ast_utils::JAVA_AST_FACTORY;
+  use crate::enums::IdentifiableEnum;
   use crate::jni_utils::JAVA_ARRAY_LIST;
   use crate::position_utils::ByteToIndexMap;
 
@@ -213,30 +352,6 @@ pub mod program {
 
   use deno_ast::swc::ast::*;
   use deno_ast::swc::common::Spanned;
-
-  fn create_decl_var<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    byte_to_index_map: &ByteToIndexMap,
-    var_decl: &VarDecl,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let declare = var_decl.declare;
-    let kind = var_decl.kind;
-    let range = byte_to_index_map.get_range_by_span(&var_decl.span());
-    let java_decls = java_array_list.construct(env, var_decl.decls.len());
-    var_decl.decls.iter().for_each(|var_declarator| {
-      let java_var_declarator = create_var_declarator(env, byte_to_index_map, var_declarator);
-      java_array_list.add(env, &java_decls, &java_var_declarator);
-      env
-        .delete_local_ref(java_var_declarator)
-        .expect("Couldn't delete local var declarator");
-    });
-    Default::default()
-  }
 
   fn create_ident<'local, 'a>(
     env: &mut JNIEnv<'local>,
@@ -250,7 +365,7 @@ pub mod program {
     let range = byte_to_index_map.get_range_by_span(&ident.span());
     let sym = ident.sym.as_str();
     let optional = ident.optional;
-    Default::default()
+    java_ast_factory.create_ident(env, sym, optional, &range)
   }
 
   pub fn create_program<'local, 'a>(
@@ -351,7 +466,7 @@ pub mod program {
     'local: 'a,
   {
     match decl {
-      Decl::Var(box_var_decl) => create_decl_var(env, byte_to_index_map, &box_var_decl),
+      Decl::Var(box_var_decl) => create_var_decl(env, byte_to_index_map, &box_var_decl),
       _ => Default::default(),
     }
   }
@@ -391,6 +506,32 @@ pub mod program {
     java_body
   }
 
+  fn create_var_decl<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    byte_to_index_map: &ByteToIndexMap,
+    var_decl: &VarDecl,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let declare = var_decl.declare;
+    let kind_id = var_decl.kind.get_id();
+    let range = byte_to_index_map.get_range_by_span(&var_decl.span());
+    let java_decls = java_array_list.construct(env, var_decl.decls.len());
+    var_decl.decls.iter().for_each(|var_declarator| {
+      let java_var_declarator = create_var_declarator(env, byte_to_index_map, var_declarator);
+      java_array_list.add(env, &java_decls, &java_var_declarator);
+      env
+        .delete_local_ref(java_var_declarator)
+        .expect("Couldn't delete local var declarator");
+    });
+    let return_value = java_ast_factory.create_var_decl(env, kind_id, declare, &java_decls, &range);
+    env.delete_local_ref(java_decls).expect("Couldn't delete local decls");
+    return_value
+  }
+
   fn create_var_declarator<'local, 'a>(
     env: &mut JNIEnv<'local>,
     byte_to_index_map: &ByteToIndexMap,
@@ -400,8 +541,12 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let definite = var_declarator.definite;
+    let init: Option<JObject> = None; // TODO
+    let name = create_pat(env, byte_to_index_map, &var_declarator.name);
     let range = byte_to_index_map.get_range_by_span(&var_declarator.span());
-    let java_name = create_pat(env, byte_to_index_map, &var_declarator.name);
-    Default::default()
+    let return_value = java_ast_factory.create_var_declarator(env, &name, &init, definite, &range);
+    env.delete_local_ref(name).expect("Couldn't delete local name");
+    return_value
   }
 }
