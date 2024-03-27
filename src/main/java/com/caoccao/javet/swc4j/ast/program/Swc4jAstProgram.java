@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -56,7 +57,7 @@ public abstract class Swc4jAstProgram<AST extends Swc4jAst> extends Swc4jAst {
         super(type, startPosition, endPosition);
         this.body = AssertionUtils.notNull(body, "Body");
         this.shebang = shebang;
-        body.forEach(node -> node.setParent(this));
+        updateParent();
     }
 
     /**
@@ -67,6 +68,11 @@ public abstract class Swc4jAstProgram<AST extends Swc4jAst> extends Swc4jAst {
      */
     public List<AST> getBody() {
         return body;
+    }
+
+    @Override
+    public List<Swc4jAst> getChildren() {
+        return new ArrayList<>(body);
     }
 
     /**

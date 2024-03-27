@@ -16,10 +16,14 @@
 
 package com.caoccao.javet.swc4j.ast.pat;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.SimpleList;
+
+import java.util.List;
 
 /**
  * The type Swc4j ast ident.
@@ -58,8 +62,12 @@ public class Swc4jAstBindingIdent extends Swc4jAstPat {
         this.id = AssertionUtils.notNull(id, "Id");
 //        this.typeAnn = AssertionUtils.notNull(typeAnn, "Type annotation");
         this.typeAnn = typeAnn;
-        id.setParent(this);
-//        typeAnn.setParent(this);
+        updateParent();
+    }
+
+    @Override
+    public List<Swc4jAst> getChildren() {
+        return SimpleList.of(id, typeAnn);
     }
 
     /**

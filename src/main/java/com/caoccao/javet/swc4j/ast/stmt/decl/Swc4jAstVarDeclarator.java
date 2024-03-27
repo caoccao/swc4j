@@ -16,10 +16,14 @@
 
 package com.caoccao.javet.swc4j.ast.stmt.decl;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstPat;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.SimpleList;
+
+import java.util.List;
 
 /**
  * The type Swc4j ast var declarator.
@@ -67,8 +71,12 @@ public class Swc4jAstVarDeclarator extends Swc4jAstDecl {
 //        this.init = AssertionUtils.notNull(init, "Init");
         this.init = init;
         this.name = AssertionUtils.notNull(name, "Name");
-//        init.setParent(this);
-        name.setParent(this);
+        updateParent();
+    }
+
+    @Override
+    public List<Swc4jAst> getChildren() {
+        return SimpleList.of(init, name);
     }
 
     /**

@@ -16,9 +16,11 @@
 
 package com.caoccao.javet.swc4j.ast.stmt.decl;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,7 +68,12 @@ public class Swc4jAstVarDecl extends Swc4jAstDecl {
         this.declare = declare;
         this.decls = AssertionUtils.notNull(decls, "Decls");
         this.kind = AssertionUtils.notNull(kind, "Kind");
-        decls.forEach(decl -> decl.setParent(this));
+        updateParent();
+    }
+
+    @Override
+    public List<Swc4jAst> getChildren() {
+        return new ArrayList<>(decls);
     }
 
     /**

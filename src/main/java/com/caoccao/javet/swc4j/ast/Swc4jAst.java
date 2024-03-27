@@ -18,6 +18,9 @@ package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 
+import java.util.List;
+import java.util.Objects;
+
 /**
  * The type Swc4j ast.
  *
@@ -63,6 +66,13 @@ public abstract class Swc4jAst {
         this.startPosition = startPosition;
         this.type = type;
     }
+
+    /**
+     * Gets children.
+     *
+     * @return the children
+     */
+    public abstract List<Swc4jAst> getChildren();
 
     /**
      * Gets end position.
@@ -112,5 +122,16 @@ public abstract class Swc4jAst {
      */
     public void setParent(Swc4jAst parent) {
         this.parent = parent;
+    }
+
+    /**
+     * Update parent.
+     *
+     * @since 0.2.0
+     */
+    protected void updateParent() {
+        getChildren().stream()
+                .filter(Objects::nonNull)
+                .forEach(node -> node.setParent(this));
     }
 }

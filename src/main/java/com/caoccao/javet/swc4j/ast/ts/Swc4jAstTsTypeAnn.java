@@ -18,6 +18,9 @@ package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.utils.SimpleList;
+
+import java.util.List;
 
 /**
  * The type Swc4j ast ts type ann.
@@ -37,5 +40,10 @@ public class Swc4jAstTsTypeAnn extends Swc4jAst {
      */
     protected Swc4jAstTsTypeAnn(Swc4jAstType type, int startPosition, int endPosition) {
         super(type, startPosition, endPosition);
+    }
+
+    @Override
+    public List<Swc4jAst> getChildren() {
+        return SimpleList.of();
     }
 }
