@@ -430,11 +430,14 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let range = byte_to_index_map.get_range_by_span(&binding_ident.span());
     let java_id = create_ident(env, byte_to_index_map, &binding_ident.id);
-    let type_ann: JObject<'_> = Default::default(); // TODO
-    let return_value = java_ast_factory.create_binding_ident(env, &java_id, &type_ann, &range);
+    let java_type_ann: JObject<'_> = Default::default(); // TODO
+    let return_value = java_ast_factory.create_binding_ident(env, &java_id, &java_type_ann, &range);
     env
       .delete_local_ref(java_id)
       .expect("Couldn't delete local binding ident");
+    env
+      .delete_local_ref(java_type_ann)
+      .expect("Couldn't delete local type annotation");
     return_value
   }
 
@@ -474,9 +477,11 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
     let range = byte_to_index_map.get_range_by_span(&module.span());
-    let body = create_module_body(env, byte_to_index_map, &module.body);
-    let java_module = java_ast_factory.create_module(env, &body, &shebang, &range);
-    env.delete_local_ref(body).expect("Couldn't delete local module body");
+    let java_body = create_module_body(env, byte_to_index_map, &module.body);
+    let java_module = java_ast_factory.create_module(env, &java_body, &shebang, &range);
+    env
+      .delete_local_ref(java_body)
+      .expect("Couldn't delete local module body");
     java_module
   }
 
@@ -490,6 +495,7 @@ pub mod program {
   {
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
     let java_body = java_array_list.construct(env, body.len());
+    // TODO
     java_body
   }
 
@@ -572,9 +578,11 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
     let range = byte_to_index_map.get_range_by_span(&script.span());
-    let body = create_script_body(env, byte_to_index_map, &script.body);
-    let java_script = java_ast_factory.create_script(env, &body, &shebang, &range);
-    env.delete_local_ref(body).expect("Couldn't delete local script body");
+    let java_body = create_script_body(env, byte_to_index_map, &script.body);
+    let java_script = java_ast_factory.create_script(env, &java_body, &shebang, &range);
+    env
+      .delete_local_ref(java_body)
+      .expect("Couldn't delete local script body");
     java_script
   }
 
@@ -632,14 +640,18 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let definite = var_declarator.definite;
-    let init: Option<JObject> = match &var_declarator.init {
+    let java_option_init: Option<JObject> = match &var_declarator.init {
       Some(box_expr) => Some(create_expr(env, byte_to_index_map, &box_expr.as_ref())),
       None => None,
     };
-    let name = create_pat(env, byte_to_index_map, &var_declarator.name);
+    let java_name = create_pat(env, byte_to_index_map, &var_declarator.name);
     let range = byte_to_index_map.get_range_by_span(&var_declarator.span());
-    let return_value = java_ast_factory.create_var_declarator(env, &name, &init, definite, &range);
-    env.delete_local_ref(name).expect("Couldn't delete local name");
+    let return_value = java_ast_factory.create_var_declarator(env, &java_name, &java_option_init, definite, &range);
+    match java_option_init {
+      Some(java_init) => env.delete_local_ref(java_init).expect("Couldn't delete local init"),
+      None => {}
+    }
+    env.delete_local_ref(java_name).expect("Couldn't delete local name");
     return_value
   }
 }
