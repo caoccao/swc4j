@@ -18,6 +18,8 @@ package com.caoccao.javet.swc4j.options;
 
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 /**
@@ -25,6 +27,7 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
  *
  * @since 0.2.0
  */
+@Jni2RustClass(filePath = "rust/src/options.rs")
 public class Swc4jParseOptions {
     /**
      * The constant DEFAULT_SPECIFIER.
@@ -89,6 +92,7 @@ public class Swc4jParseOptions {
      * @return the media type
      * @since 0.2.0
      */
+    @Jni2RustMethod
     public Swc4jMediaType getMediaType() {
         return mediaType;
     }
@@ -99,6 +103,7 @@ public class Swc4jParseOptions {
      * @return the parse mode
      * @since 0.2.0
      */
+    @Jni2RustMethod
     public Swc4jParseMode getParseMode() {
         return parseMode;
     }
@@ -109,6 +114,7 @@ public class Swc4jParseOptions {
      * @return the specifier
      * @since 0.2.0
      */
+    @Jni2RustMethod
     public String getSpecifier() {
         return specifier;
     }
@@ -119,6 +125,7 @@ public class Swc4jParseOptions {
      * @return the boolean
      * @since 0.2.0
      */
+    @Jni2RustMethod
     public boolean isCaptureAst() {
         return captureAst;
     }
@@ -129,6 +136,7 @@ public class Swc4jParseOptions {
      * @return true : capture tokens, false : not capture tokens
      * @since 0.2.0
      */
+    @Jni2RustMethod
     public boolean isCaptureTokens() {
         return captureTokens;
     }
@@ -139,6 +147,7 @@ public class Swc4jParseOptions {
      * @return true : scope analysis, false : not scope analysis
      * @since 0.2.0
      */
+    @Jni2RustMethod
     public boolean isScopeAnalysis() {
         return scopeAnalysis;
     }

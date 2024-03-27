@@ -74,22 +74,30 @@ public class Jni2Rust<T> {
     protected void getCodeMethods(List<String> lines) {
         methods.stream()
                 .filter(method -> !AnnotationUtils.isAnnotationPresent(method, Jni2RustMethod.class)
-                        || (AnnotationUtils.getAnnotation(method, Jni2RustMethod.class).mode() == Jni2RustMethodMode.Auto))
+                        || (Objects.requireNonNull(AnnotationUtils.getAnnotation(method, Jni2RustMethod.class)).mode()
+                        == Jni2RustMethodMode.Auto))
                 .forEach(method -> {
+                    Jni2RustMethod jni2RustMethod = AnnotationUtils.getAnnotation(method, Jni2RustMethod.class);
+                    boolean isStatic = Modifier.isStatic(method.getModifiers());
                     boolean isPrimitive = method.getReturnType().isPrimitive();
+                    boolean isString = method.getReturnType() == String.class;
                     boolean isVoid = method.getReturnType() == Void.class;
                     String methodName = getExecutableName(method);
+                    String returnTypeName = method.getReturnType().getSimpleName();
                     List<String> parameterNames = Stream.of(method.getParameters())
                             .map(this::getParameterName)
                             .collect(Collectors.toList());
                     lines.add(StringUtils.EMPTY);
-                    if (isVoid || isPrimitive) {
+                    if (isVoid || isPrimitive || isString) {
                         lines.add(String.format("  pub fn %s<'local>(", methodName));
                     } else {
                         lines.add(String.format("  pub fn %s<'local, 'a>(", methodName));
                     }
                     lines.add("    &self,");
                     lines.add("    env: &mut JNIEnv<'local>,");
+                    if (!isStatic) {
+                        lines.add("    obj: &JObject<'_>,");
+                    }
                     Set<String> rustTypeSet = new HashSet<>();
                     for (Parameter parameter : method.getParameters()) {
                         Class<?> parameterType = parameter.getType();
@@ -98,7 +106,7 @@ public class Jni2Rust<T> {
                         String rustType = null;
                         if (AnnotationUtils.isAnnotationPresent(parameter, Jni2RustParam.class)) {
                             Jni2RustParam jni2RustParam = AnnotationUtils.getAnnotation(parameter, Jni2RustParam.class);
-                            isOptional = jni2RustParam.optional();
+                            isOptional = Objects.requireNonNull(jni2RustParam).optional();
                             if (StringUtils.isNotEmpty(jni2RustParam.rustType())) {
                                 isCustomRustType = true;
                                 rustType = jni2RustParam.rustType();
@@ -137,7 +145,14 @@ public class Jni2Rust<T> {
                     if (isVoid) {
                         lines.add("  )");
                     } else if (isPrimitive) {
-                        // TODO
+                        lines.add(String.format("  ) -> %s",
+                                options.getJavaTypeToRustTypeMap().get(method.getReturnType().getName())));
+                    } else if (isString) {
+                        if (jni2RustMethod != null && jni2RustMethod.optional()) {
+                            lines.add("  ) -> Option<String>");
+                        }else {
+                            lines.add("  ) -> String");
+                        }
                     } else {
                         lines.add("  ) -> JObject<'a>");
                         lines.add("  where");
@@ -152,7 +167,7 @@ public class Jni2Rust<T> {
                         String[] preCalls = null;
                         if (AnnotationUtils.isAnnotationPresent(parameter, Jni2RustParam.class)) {
                             Jni2RustParam jni2RustParam = AnnotationUtils.getAnnotation(parameter, Jni2RustParam.class);
-                            isOptional = jni2RustParam.optional();
+                            isOptional = Objects.requireNonNull(jni2RustParam).optional();
                             if (ArrayUtils.isNotEmpty(jni2RustParam.preCalls())) {
                                 preCalls = jni2RustParam.preCalls();
                             }
@@ -161,7 +176,7 @@ public class Jni2Rust<T> {
                             if (parameterType.isPrimitive()) {
                                 lines.add(String.format("    let %s = jvalue {", name));
                                 lines.add(String.format("      %s: %s as %s,",
-                                        options.getJavaTypeToJniTypeMap().get(parameterType.getName()).toLowerCase(),
+                                        options.getJavaTypeToJniSimpleTypeMap().get(parameterType.getName()).toLowerCase(),
                                         name,
                                         options.getJavaTypeToJniCastTypeMap().get(parameterType.getName())));
                                 lines.add("    };");
@@ -187,31 +202,48 @@ public class Jni2Rust<T> {
                     // call
                     lines.add("    let return_value = unsafe {");
                     lines.add("      env");
-                    if (Modifier.isStatic(method.getModifiers())) {
+                    if (isStatic) {
                         lines.add("        .call_static_method_unchecked(");
                         lines.add("          &self.class,");
                     } else {
                         lines.add("        .call_method_unchecked(");
-                        // TODO
+                        lines.add("          obj,");
                     }
                     lines.add(String.format("          self.method_%s,", methodName));
-                    lines.add("          ReturnType::Object,");
+                    if (isVoid) {
+                        lines.add("          ReturnType::Primitive(Primitive::Void),");
+                    } else if (isPrimitive) {
+                        lines.add(String.format("          ReturnType::Primitive(Primitive::%s),",
+                                options.getJavaTypeToJniFullTypeMap().get(method.getReturnType().getName())));
+                    } else {
+                        lines.add("          ReturnType::Object,");
+                    }
                     lines.add(String.format("          &[%s],", StringUtils.join(", ", parameterNames)));
                     lines.add("        )");
                     if (isVoid) {
                         // TODO
-                    } else if (isPrimitive) {
-                        // TODO
                     } else {
                         lines.add(String.format("        .expect(\"Couldn't create %s by %s()\")",
-                                method.getReturnType().getSimpleName(),
+                                returnTypeName,
                                 methodName));
-                        lines.add("        .l()");
+                        if (isPrimitive) {
+                            lines.add(String.format("        .%s()",
+                                    options.getJavaTypeToJniSimpleTypeMap().get(method.getReturnType().getName()).toLowerCase()));
+                        } else {
+                            lines.add("        .l()");
+                        }
                         lines.add(String.format("        .expect(\"Couldn't convert %s by %s()\")",
-                                method.getReturnType().getSimpleName(),
+                                returnTypeName,
                                 methodName));
                     }
                     lines.add("    };");
+                    if (isString) {
+                        if (jni2RustMethod != null && jni2RustMethod.optional()) {
+                            lines.add("    let return_value = converter::jstring_to_optional_string(env, return_value.as_raw());");
+                        } else {
+                            lines.add("    let return_value = converter::jstring_to_string(env, return_value.as_raw());");
+                        }
+                    }
                     // post-call
                     for (Parameter parameter : method.getParameters()) {
                         String name = getParameterName(parameter);
@@ -219,7 +251,7 @@ public class Jni2Rust<T> {
                         String[] postCalls = null;
                         if (AnnotationUtils.isAnnotationPresent(parameter, Jni2RustParam.class)) {
                             Jni2RustParam jni2RustParam = AnnotationUtils.getAnnotation(parameter, Jni2RustParam.class);
-                            if (ArrayUtils.isNotEmpty(jni2RustParam.postCalls())) {
+                            if (ArrayUtils.isNotEmpty(Objects.requireNonNull(jni2RustParam).postCalls())) {
                                 postCalls = jni2RustParam.postCalls();
                             }
                         }
@@ -327,7 +359,7 @@ public class Jni2Rust<T> {
     protected String getExecutableName(Executable executable) {
         String executableName = null;
         if (AnnotationUtils.isAnnotationPresent(executable, Jni2RustMethod.class)) {
-            executableName = AnnotationUtils.getAnnotation(executable, Jni2RustMethod.class).name();
+            executableName = Objects.requireNonNull(AnnotationUtils.getAnnotation(executable, Jni2RustMethod.class)).name();
         }
         if (StringUtils.isEmpty(executableName)) {
             executableName = StringUtils.toSnakeCase(executable.getName());
@@ -350,7 +382,7 @@ public class Jni2Rust<T> {
     protected String getParameterName(Parameter parameter) {
         String parameterName = null;
         if (AnnotationUtils.isAnnotationPresent(parameter, Jni2RustParam.class)) {
-            parameterName = AnnotationUtils.getAnnotation(parameter, Jni2RustParam.class).name();
+            parameterName = Objects.requireNonNull(AnnotationUtils.getAnnotation(parameter, Jni2RustParam.class)).name();
         }
         if (StringUtils.isEmpty(parameterName)) {
             parameterName = StringUtils.toSnakeCase(parameter.getName());
@@ -359,7 +391,7 @@ public class Jni2Rust<T> {
     }
 
     protected String getSignature(String javaType) {
-        String jniType = options.getJavaTypeToJniTypeMap().get(Objects.requireNonNull(javaType));
+        String jniType = options.getJavaTypeToJniSimpleTypeMap().get(Objects.requireNonNull(javaType));
         if (jniType == null) {
             if (javaType.endsWith("[]")) {
                 String baseJavaType = javaType.substring(0, javaType.length() - 2);
@@ -409,6 +441,7 @@ public class Jni2Rust<T> {
                 .orElse(false);
         manualMethodFound = manualMethodFound || methods.stream()
                 .map(method -> AnnotationUtils.getAnnotation(method, Jni2RustMethod.class))
+                .filter(Objects::nonNull)
                 .map(annotation -> annotation.mode() == Jni2RustMethodMode.Manual)
                 .filter(found -> found)
                 .findFirst()

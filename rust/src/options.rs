@@ -16,13 +16,16 @@
 */
 
 use jni::objects::{GlobalRef, JMethodID, JObject};
+use jni::signature::{Primitive, ReturnType};
 use jni::sys::jobject;
 use jni::JNIEnv;
 
+use crate::converter;
 use crate::enums::*;
 use crate::jni_utils;
 
-struct JavaParseOptions {
+/* JavaSwc4jParseOptions Begin */
+struct JavaSwc4jParseOptions {
   #[allow(dead_code)]
   class: GlobalRef,
   method_get_media_type: JMethodID,
@@ -32,10 +35,10 @@ struct JavaParseOptions {
   method_is_capture_tokens: JMethodID,
   method_is_scope_analysis: JMethodID,
 }
-unsafe impl Send for JavaParseOptions {}
-unsafe impl Sync for JavaParseOptions {}
+unsafe impl Send for JavaSwc4jParseOptions {}
+unsafe impl Sync for JavaSwc4jParseOptions {}
 
-impl JavaParseOptions {
+impl JavaSwc4jParseOptions {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
       .find_class("com/caoccao/javet/swc4j/options/Swc4jParseOptions")
@@ -49,27 +52,43 @@ impl JavaParseOptions {
         "getMediaType",
         "()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;",
       )
-      .expect("Couldn't find method Swc4jTranspileOptions.getMediaType");
+      .expect("Couldn't find method Swc4jParseOptions.getMediaType");
     let method_get_parse_mode = env
       .get_method_id(
         &class,
         "getParseMode",
         "()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;",
       )
-      .expect("Couldn't find method Swc4jTranspileOptions.getParseMode");
+      .expect("Couldn't find method Swc4jParseOptions.getParseMode");
     let method_get_specifier = env
-      .get_method_id(&class, "getSpecifier", "()Ljava/lang/String;")
-      .expect("Couldn't find method Swc4jTranspileOptions.getSpecifier");
+      .get_method_id(
+        &class,
+        "getSpecifier",
+        "()Ljava/lang/String;",
+      )
+      .expect("Couldn't find method Swc4jParseOptions.getSpecifier");
     let method_is_capture_ast = env
-      .get_method_id(&class, "isCaptureAst", "()Z")
-      .expect("Couldn't find method Swc4jTranspileOptions.isCaptureAst");
+      .get_method_id(
+        &class,
+        "isCaptureAst",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jParseOptions.isCaptureAst");
     let method_is_capture_tokens = env
-      .get_method_id(&class, "isCaptureTokens", "()Z")
-      .expect("Couldn't find method Swc4jTranspileOptions.isCaptureTokens");
+      .get_method_id(
+        &class,
+        "isCaptureTokens",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jParseOptions.isCaptureTokens");
     let method_is_scope_analysis = env
-      .get_method_id(&class, "isScopeAnalysis", "()Z")
-      .expect("Couldn't find method Swc4jTranspileOptions.isScopeAnalysis");
-    JavaParseOptions {
+      .get_method_id(
+        &class,
+        "isScopeAnalysis",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jParseOptions.isScopeAnalysis");
+    JavaSwc4jParseOptions {
       class,
       method_get_media_type,
       method_get_parse_mode,
@@ -80,47 +99,150 @@ impl JavaParseOptions {
     }
   }
 
-  pub fn get_media_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+  pub fn get_media_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
-    jni_utils::get_as_jobject(env, obj, self.method_get_media_type)
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_get_media_type,
+          ReturnType::Object,
+          &[],
+        )
+        .expect("Couldn't create Swc4jMediaType by get_media_type()")
+        .l()
+        .expect("Couldn't convert Swc4jMediaType by get_media_type()")
+    };
+    return_value
   }
 
-  pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+  pub fn get_parse_mode<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
-    jni_utils::get_as_jobject(env, obj, self.method_get_parse_mode)
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_get_parse_mode,
+          ReturnType::Object,
+          &[],
+        )
+        .expect("Couldn't create Swc4jParseMode by get_parse_mode()")
+        .l()
+        .expect("Couldn't convert Swc4jParseMode by get_parse_mode()")
+    };
+    return_value
   }
 
-  pub fn get_specifier<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> String {
-    jni_utils::get_as_string(env, obj, self.method_get_specifier)
+  pub fn get_specifier<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> String
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_get_specifier,
+          ReturnType::Object,
+          &[],
+        )
+        .expect("Couldn't create String by get_specifier()")
+        .l()
+        .expect("Couldn't convert String by get_specifier()")
+    };
+    let return_value = converter::jstring_to_string(env, return_value.as_raw());
+    return_value
   }
 
-  pub fn is_capture_ast<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_capture_ast)
+  pub fn is_capture_ast<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_capture_ast,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_capture_ast()")
+        .z()
+        .expect("Couldn't convert boolean by is_capture_ast()")
+    };
+    return_value
   }
 
-  pub fn is_capture_tokens<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_capture_tokens)
+  pub fn is_capture_tokens<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_capture_tokens,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_capture_tokens()")
+        .z()
+        .expect("Couldn't convert boolean by is_capture_tokens()")
+    };
+    return_value
   }
 
-  pub fn is_scope_analysis<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_scope_analysis)
+  pub fn is_scope_analysis<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_scope_analysis,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_scope_analysis()")
+        .z()
+        .expect("Couldn't convert boolean by is_scope_analysis()")
+    };
+    return_value
   }
 }
+/* JavaSwc4jParseOptions End */
 
-struct JavaTranspileOptions {
+/* JavaSwc4jTranspileOptions Begin */
+struct JavaSwc4jTranspileOptions {
   #[allow(dead_code)]
   class: GlobalRef,
   method_get_imports_not_used_as_values: JMethodID,
-  method_get_media_type: JMethodID,
-  method_get_parse_mode: JMethodID,
-  method_get_specifier: JMethodID,
   method_get_jsx_factory: JMethodID,
   method_get_jsx_fragment_factory: JMethodID,
   method_get_jsx_import_source: JMethodID,
+  method_get_media_type: JMethodID,
+  method_get_parse_mode: JMethodID,
+  method_get_specifier: JMethodID,
   method_is_capture_ast: JMethodID,
   method_is_capture_tokens: JMethodID,
   method_is_emit_metadata: JMethodID,
@@ -134,10 +256,10 @@ struct JavaTranspileOptions {
   method_is_transform_jsx: JMethodID,
   method_is_var_decl_imports: JMethodID,
 }
-unsafe impl Send for JavaTranspileOptions {}
-unsafe impl Sync for JavaTranspileOptions {}
+unsafe impl Send for JavaSwc4jTranspileOptions {}
+unsafe impl Sync for JavaSwc4jTranspileOptions {}
 
-impl JavaTranspileOptions {
+impl JavaSwc4jTranspileOptions {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
       .find_class("com/caoccao/javet/swc4j/options/Swc4jTranspileOptions")
@@ -152,6 +274,27 @@ impl JavaTranspileOptions {
         "()Lcom/caoccao/javet/swc4j/enums/Swc4jImportsNotUsedAsValues;",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getImportsNotUsedAsValues");
+    let method_get_jsx_factory = env
+      .get_method_id(
+        &class,
+        "getJsxFactory",
+        "()Ljava/lang/String;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getJsxFactory");
+    let method_get_jsx_fragment_factory = env
+      .get_method_id(
+        &class,
+        "getJsxFragmentFactory",
+        "()Ljava/lang/String;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getJsxFragmentFactory");
+    let method_get_jsx_import_source = env
+      .get_method_id(
+        &class,
+        "getJsxImportSource",
+        "()Ljava/lang/String;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getJsxImportSource");
     let method_get_media_type = env
       .get_method_id(
         &class,
@@ -167,62 +310,105 @@ impl JavaTranspileOptions {
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getParseMode");
     let method_get_specifier = env
-      .get_method_id(&class, "getSpecifier", "()Ljava/lang/String;")
+      .get_method_id(
+        &class,
+        "getSpecifier",
+        "()Ljava/lang/String;",
+      )
       .expect("Couldn't find method Swc4jTranspileOptions.getSpecifier");
-    let method_get_jsx_factory = env
-      .get_method_id(&class, "getJsxFactory", "()Ljava/lang/String;")
-      .expect("Couldn't find method Swc4jTranspileOptions.getJsxFactory");
-    let method_get_jsx_fragment_factory = env
-      .get_method_id(&class, "getJsxFragmentFactory", "()Ljava/lang/String;")
-      .expect("Couldn't find method Swc4jTranspileOptions.getJsxFragmentFactory");
-    let method_get_jsx_import_source = env
-      .get_method_id(&class, "getJsxImportSource", "()Ljava/lang/String;")
-      .expect("Couldn't find method Swc4jTranspileOptions.getJsxImportSource");
     let method_is_capture_ast = env
-      .get_method_id(&class, "isCaptureAst", "()Z")
+      .get_method_id(
+        &class,
+        "isCaptureAst",
+        "()Z",
+      )
       .expect("Couldn't find method Swc4jTranspileOptions.isCaptureAst");
     let method_is_capture_tokens = env
-      .get_method_id(&class, "isCaptureTokens", "()Z")
+      .get_method_id(
+        &class,
+        "isCaptureTokens",
+        "()Z",
+      )
       .expect("Couldn't find method Swc4jTranspileOptions.isCaptureTokens");
     let method_is_emit_metadata = env
-      .get_method_id(&class, "isEmitMetadata", "()Z")
+      .get_method_id(
+        &class,
+        "isEmitMetadata",
+        "()Z",
+      )
       .expect("Couldn't find method Swc4jTranspileOptions.isEmitMetadata");
     let method_is_inline_source_map = env
-      .get_method_id(&class, "isInlineSourceMap", "()Z")
+      .get_method_id(
+        &class,
+        "isInlineSourceMap",
+        "()Z",
+      )
       .expect("Couldn't find method Swc4jTranspileOptions.isInlineSourceMap");
     let method_is_inline_sources = env
-      .get_method_id(&class, "isInlineSources", "()Z")
+      .get_method_id(
+        &class,
+        "isInlineSources",
+        "()Z",
+      )
       .expect("Couldn't find method Swc4jTranspileOptions.isInlineSources");
     let method_is_jsx_automatic = env
-      .get_method_id(&class, "isJsxAutomatic", "()Z")
+      .get_method_id(
+        &class,
+        "isJsxAutomatic",
+        "()Z",
+      )
       .expect("Couldn't find method Swc4jTranspileOptions.isJsxAutomatic");
     let method_is_jsx_development = env
-      .get_method_id(&class, "isJsxDevelopment", "()Z")
+      .get_method_id(
+        &class,
+        "isJsxDevelopment",
+        "()Z",
+      )
       .expect("Couldn't find method Swc4jTranspileOptions.isJsxDevelopment");
     let method_is_precompile_jsx = env
-      .get_method_id(&class, "isPrecompileJsx", "()Z")
+      .get_method_id(
+        &class,
+        "isPrecompileJsx",
+        "()Z",
+      )
       .expect("Couldn't find method Swc4jTranspileOptions.isPrecompileJsx");
     let method_is_scope_analysis = env
-      .get_method_id(&class, "isScopeAnalysis", "()Z")
+      .get_method_id(
+        &class,
+        "isScopeAnalysis",
+        "()Z",
+      )
       .expect("Couldn't find method Swc4jTranspileOptions.isScopeAnalysis");
     let method_is_source_map = env
-      .get_method_id(&class, "isSourceMap", "()Z")
+      .get_method_id(
+        &class,
+        "isSourceMap",
+        "()Z",
+      )
       .expect("Couldn't find method Swc4jTranspileOptions.isSourceMap");
     let method_is_transform_jsx = env
-      .get_method_id(&class, "isTransformJsx", "()Z")
+      .get_method_id(
+        &class,
+        "isTransformJsx",
+        "()Z",
+      )
       .expect("Couldn't find method Swc4jTranspileOptions.isTransformJsx");
     let method_is_var_decl_imports = env
-      .get_method_id(&class, "isVarDeclImports", "()Z")
+      .get_method_id(
+        &class,
+        "isVarDeclImports",
+        "()Z",
+      )
       .expect("Couldn't find method Swc4jTranspileOptions.isVarDeclImports");
-    JavaTranspileOptions {
+    JavaSwc4jTranspileOptions {
       class,
       method_get_imports_not_used_as_values,
-      method_get_media_type,
-      method_get_parse_mode,
-      method_get_specifier,
       method_get_jsx_factory,
       method_get_jsx_fragment_factory,
       method_get_jsx_import_source,
+      method_get_media_type,
+      method_get_parse_mode,
+      method_get_specifier,
       method_is_capture_ast,
       method_is_capture_tokens,
       method_is_emit_metadata,
@@ -238,99 +424,424 @@ impl JavaTranspileOptions {
     }
   }
 
-  pub fn get_imports_not_used_as_values<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+  pub fn get_imports_not_used_as_values<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
-    jni_utils::get_as_jobject(env, obj, self.method_get_imports_not_used_as_values)
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_get_imports_not_used_as_values,
+          ReturnType::Object,
+          &[],
+        )
+        .expect("Couldn't create Swc4jImportsNotUsedAsValues by get_imports_not_used_as_values()")
+        .l()
+        .expect("Couldn't convert Swc4jImportsNotUsedAsValues by get_imports_not_used_as_values()")
+    };
+    return_value
   }
 
-  pub fn get_jsx_factory<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> String {
-    jni_utils::get_as_string(env, obj, self.method_get_jsx_factory)
+  pub fn get_jsx_factory<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> String
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_get_jsx_factory,
+          ReturnType::Object,
+          &[],
+        )
+        .expect("Couldn't create String by get_jsx_factory()")
+        .l()
+        .expect("Couldn't convert String by get_jsx_factory()")
+    };
+    let return_value = converter::jstring_to_string(env, return_value.as_raw());
+    return_value
   }
 
-  pub fn get_jsx_fragment_factory<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> String {
-    jni_utils::get_as_string(env, obj, self.method_get_jsx_fragment_factory)
+  pub fn get_jsx_fragment_factory<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> String
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_get_jsx_fragment_factory,
+          ReturnType::Object,
+          &[],
+        )
+        .expect("Couldn't create String by get_jsx_fragment_factory()")
+        .l()
+        .expect("Couldn't convert String by get_jsx_fragment_factory()")
+    };
+    let return_value = converter::jstring_to_string(env, return_value.as_raw());
+    return_value
   }
 
-  pub fn get_jsx_import_source<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Option<String> {
-    jni_utils::get_as_optional_string(env, obj, self.method_get_jsx_import_source)
+  pub fn get_jsx_import_source<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Option<String>
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_get_jsx_import_source,
+          ReturnType::Object,
+          &[],
+        )
+        .expect("Couldn't create String by get_jsx_import_source()")
+        .l()
+        .expect("Couldn't convert String by get_jsx_import_source()")
+    };
+    let return_value = converter::jstring_to_optional_string(env, return_value.as_raw());
+    return_value
   }
 
-  pub fn get_media_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+  pub fn get_media_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
-    jni_utils::get_as_jobject(env, obj, self.method_get_media_type)
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_get_media_type,
+          ReturnType::Object,
+          &[],
+        )
+        .expect("Couldn't create Swc4jMediaType by get_media_type()")
+        .l()
+        .expect("Couldn't convert Swc4jMediaType by get_media_type()")
+    };
+    return_value
   }
 
-  pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+  pub fn get_parse_mode<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
-    jni_utils::get_as_jobject(env, obj, self.method_get_parse_mode)
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_get_parse_mode,
+          ReturnType::Object,
+          &[],
+        )
+        .expect("Couldn't create Swc4jParseMode by get_parse_mode()")
+        .l()
+        .expect("Couldn't convert Swc4jParseMode by get_parse_mode()")
+    };
+    return_value
   }
 
-  pub fn get_specifier<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> String {
-    jni_utils::get_as_string(env, obj, self.method_get_specifier)
+  pub fn get_specifier<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> String
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_get_specifier,
+          ReturnType::Object,
+          &[],
+        )
+        .expect("Couldn't create String by get_specifier()")
+        .l()
+        .expect("Couldn't convert String by get_specifier()")
+    };
+    let return_value = converter::jstring_to_string(env, return_value.as_raw());
+    return_value
   }
 
-  pub fn is_capture_ast<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_capture_ast)
+  pub fn is_capture_ast<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_capture_ast,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_capture_ast()")
+        .z()
+        .expect("Couldn't convert boolean by is_capture_ast()")
+    };
+    return_value
   }
 
-  pub fn is_capture_tokens<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_capture_tokens)
+  pub fn is_capture_tokens<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_capture_tokens,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_capture_tokens()")
+        .z()
+        .expect("Couldn't convert boolean by is_capture_tokens()")
+    };
+    return_value
   }
 
-  pub fn is_emit_metadata<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_emit_metadata)
+  pub fn is_emit_metadata<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_emit_metadata,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_emit_metadata()")
+        .z()
+        .expect("Couldn't convert boolean by is_emit_metadata()")
+    };
+    return_value
   }
 
-  pub fn is_inline_source_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_inline_source_map)
+  pub fn is_inline_source_map<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_inline_source_map,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_inline_source_map()")
+        .z()
+        .expect("Couldn't convert boolean by is_inline_source_map()")
+    };
+    return_value
   }
 
-  pub fn is_inline_sources<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_inline_sources)
+  pub fn is_inline_sources<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_inline_sources,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_inline_sources()")
+        .z()
+        .expect("Couldn't convert boolean by is_inline_sources()")
+    };
+    return_value
   }
 
-  pub fn is_jsx_automatic<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_jsx_automatic)
+  pub fn is_jsx_automatic<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_jsx_automatic,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_jsx_automatic()")
+        .z()
+        .expect("Couldn't convert boolean by is_jsx_automatic()")
+    };
+    return_value
   }
 
-  pub fn is_jsx_development<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_jsx_development)
+  pub fn is_jsx_development<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_jsx_development,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_jsx_development()")
+        .z()
+        .expect("Couldn't convert boolean by is_jsx_development()")
+    };
+    return_value
   }
 
-  pub fn is_scope_analysis<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_scope_analysis)
+  pub fn is_precompile_jsx<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_precompile_jsx,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_precompile_jsx()")
+        .z()
+        .expect("Couldn't convert boolean by is_precompile_jsx()")
+    };
+    return_value
   }
 
-  pub fn is_source_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_source_map)
+  pub fn is_scope_analysis<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_scope_analysis,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_scope_analysis()")
+        .z()
+        .expect("Couldn't convert boolean by is_scope_analysis()")
+    };
+    return_value
   }
 
-  pub fn is_transform_jsx<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_transform_jsx)
+  pub fn is_source_map<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_source_map,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_source_map()")
+        .z()
+        .expect("Couldn't convert boolean by is_source_map()")
+    };
+    return_value
   }
 
-  pub fn is_precompile_jsx<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_precompile_jsx)
+  pub fn is_transform_jsx<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_transform_jsx,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_transform_jsx()")
+        .z()
+        .expect("Couldn't convert boolean by is_transform_jsx()")
+    };
+    return_value
   }
 
-  pub fn is_var_decl_imports<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> bool {
-    jni_utils::get_as_boolean(env, obj, self.method_is_var_decl_imports)
+  pub fn is_var_decl_imports<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = unsafe {
+      env
+        .call_method_unchecked(
+          obj,
+          self.method_is_var_decl_imports,
+          ReturnType::Primitive(Primitive::Boolean),
+          &[],
+        )
+        .expect("Couldn't create boolean by is_var_decl_imports()")
+        .z()
+        .expect("Couldn't convert boolean by is_var_decl_imports()")
+    };
+    return_value
   }
 }
+/* JavaSwc4jTranspileOptions End */
 
-static mut JAVA_PARSE_OPTIONS: Option<JavaParseOptions> = None;
-static mut JAVA_TRANSPILE_OPTIONS: Option<JavaTranspileOptions> = None;
+static mut JAVA_PARSE_OPTIONS: Option<JavaSwc4jParseOptions> = None;
+static mut JAVA_TRANSPILE_OPTIONS: Option<JavaSwc4jTranspileOptions> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
-    JAVA_PARSE_OPTIONS = Some(JavaParseOptions::new(env));
-    JAVA_TRANSPILE_OPTIONS = Some(JavaTranspileOptions::new(env));
+    JAVA_PARSE_OPTIONS = Some(JavaSwc4jParseOptions::new(env));
+    JAVA_TRANSPILE_OPTIONS = Some(JavaSwc4jTranspileOptions::new(env));
   }
 }
 

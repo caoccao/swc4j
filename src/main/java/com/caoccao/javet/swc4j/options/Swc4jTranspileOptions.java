@@ -19,6 +19,8 @@ package com.caoccao.javet.swc4j.options;
 import com.caoccao.javet.swc4j.enums.Swc4jImportsNotUsedAsValues;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 /**
@@ -26,6 +28,7 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
  *
  * @since 0.1.0
  */
+@Jni2RustClass(filePath = "rust/src/options.rs")
 public class Swc4jTranspileOptions extends Swc4jParseOptions {
     /**
      * The constant DEFAULT_JSX_FACTORY.
@@ -148,6 +151,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return the imports not used as values
      * @since 0.1.0
      */
+    @Jni2RustMethod
     public Swc4jImportsNotUsedAsValues getImportsNotUsedAsValues() {
         return importsNotUsedAsValues;
     }
@@ -159,6 +163,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return the jsx factory
      * @since 0.1.0
      */
+    @Jni2RustMethod
     public String getJsxFactory() {
         return jsxFactory;
     }
@@ -170,6 +175,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return the jsx fragment factory
      * @since 0.1.0
      */
+    @Jni2RustMethod
     public String getJsxFragmentFactory() {
         return jsxFragmentFactory;
     }
@@ -180,6 +186,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return the jsx import source
      * @since 0.1.0
      */
+    @Jni2RustMethod(optional = true)
     public String getJsxImportSource() {
         return jsxImportSource;
     }
@@ -191,6 +198,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return the boolean
      * @since 0.1.0
      */
+    @Jni2RustMethod
     public boolean isEmitMetadata() {
         return emitMetadata;
     }
@@ -201,6 +209,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return true : source map is inlined, false : source map is separated
      * @since 0.1.0
      */
+    @Jni2RustMethod
     public boolean isInlineSourceMap() {
         return inlineSourceMap;
     }
@@ -211,6 +220,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return true : source is inlined, false : source is not inlined
      * @since 0.1.0
      */
+    @Jni2RustMethod
     public boolean isInlineSources() {
         return inlineSources;
     }
@@ -221,6 +231,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return true : automatic, false : not automatic
      * @since 0.1.0
      */
+    @Jni2RustMethod
     public boolean isJsxAutomatic() {
         return jsxAutomatic;
     }
@@ -234,6 +245,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return true : development mode, false : not development mode
      * @since 0.1.0
      */
+    @Jni2RustMethod
     public boolean isJsxDevelopment() {
         return jsxDevelopment;
     }
@@ -245,6 +257,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return true : be precompiled, false : not be precompiled
      * @since 0.1.0
      */
+    @Jni2RustMethod
     public boolean isPrecompileJsx() {
         return precompileJsx;
     }
@@ -256,6 +269,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return true : source map string is separated, false : source map string is not separated
      * @since 0.1.0
      */
+    @Jni2RustMethod
     public boolean isSourceMap() {
         return sourceMap;
     }
@@ -266,6 +280,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return true : be transformed, false : not be transformed
      * @since 0.1.0
      */
+    @Jni2RustMethod
     public boolean isTransformJsx() {
         return transformJsx;
     }
@@ -279,6 +294,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return true : transformed, false : not transformed
      * @since 0.1.0
      */
+    @Jni2RustMethod
     public boolean isVarDeclImports() {
         return varDeclImports;
     }

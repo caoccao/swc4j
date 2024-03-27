@@ -31,7 +31,16 @@ public class Jni2RustOptions {
             "boolean", "u8",
             "float", "f32",
             "double", "f64");
-    protected static final Map<String, String> DEFAULT_JAVA_TYPE_TO_JNI_TYPE_MAP = SimpleMap.of(
+    protected static final Map<String, String> DEFAULT_JAVA_TYPE_TO_JNI_FULL_TYPE_MAP = SimpleMap.of(
+            "int", "Int",
+            "long", "Long",
+            "short", "Short",
+            "char", "Char",
+            "byte", "Byte",
+            "boolean", "Boolean",
+            "float", "Float",
+            "double", "Double");
+    protected static final Map<String, String> DEFAULT_JAVA_TYPE_TO_JNI_SIMPLE_TYPE_MAP = SimpleMap.of(
             "int", "I",
             "long", "J",
             "short", "S",
@@ -50,12 +59,14 @@ public class Jni2RustOptions {
             "float", "f32",
             "double", "f64");
     protected final Map<String, String> javaTypeToJniCastTypeMap;
-    protected final Map<String, String> javaTypeToJniTypeMap;
+    protected final Map<String, String> javaTypeToJniFullTypeMap;
+    protected final Map<String, String> javaTypeToJniSimpleTypeMap;
     protected final Map<String, String> javaTypeToRustTypeMap;
 
     public Jni2RustOptions() {
         javaTypeToJniCastTypeMap = new HashMap<>(DEFAULT_JAVA_TYPE_TO_JNI_CAST_TYPE_MAP);
-        javaTypeToJniTypeMap = new HashMap<>(DEFAULT_JAVA_TYPE_TO_JNI_TYPE_MAP);
+        javaTypeToJniFullTypeMap = new HashMap<>(DEFAULT_JAVA_TYPE_TO_JNI_FULL_TYPE_MAP);
+        javaTypeToJniSimpleTypeMap = new HashMap<>(DEFAULT_JAVA_TYPE_TO_JNI_SIMPLE_TYPE_MAP);
         javaTypeToRustTypeMap = new HashMap<>(DEFAULT_JAVA_TYPE_TO_RUST_TYPE_MAP);
     }
 
@@ -63,8 +74,12 @@ public class Jni2RustOptions {
         return javaTypeToJniCastTypeMap;
     }
 
-    public Map<String, String> getJavaTypeToJniTypeMap() {
-        return javaTypeToJniTypeMap;
+    public Map<String, String> getJavaTypeToJniFullTypeMap() {
+        return javaTypeToJniFullTypeMap;
+    }
+
+    public Map<String, String> getJavaTypeToJniSimpleTypeMap() {
+        return javaTypeToJniSimpleTypeMap;
     }
 
     public Map<String, String> getJavaTypeToRustTypeMap() {
