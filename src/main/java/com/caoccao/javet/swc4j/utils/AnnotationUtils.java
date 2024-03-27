@@ -18,16 +18,25 @@ package com.caoccao.javet.swc4j.utils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.HashMap;
+import java.util.Map;
 
+@SuppressWarnings("unchecked")
 public final class AnnotationUtils {
+    private static final Map<AnnotatedElement, Annotation> ANNOTATION_MAP = new HashMap<>();
+
     private AnnotationUtils() {
     }
 
     public static <A extends Annotation> A getAnnotation(
             AnnotatedElement annotatedElement,
             Class<A> annotationClass) {
+        if (ANNOTATION_MAP.containsKey(annotatedElement)) {
+            return (A) ANNOTATION_MAP.get(annotatedElement);
+        }
         A annotation = annotatedElement.getAnnotation(annotationClass);
         if (annotation != null) {
+            ANNOTATION_MAP.put(annotatedElement, annotation);
             return annotation;
         }
         if (annotatedElement.getClass() != Class.class) {
@@ -41,19 +50,9 @@ public final class AnnotationUtils {
         return null;
     }
 
-    public static boolean isAnnotationPresent(
+    public static <A extends Annotation> boolean isAnnotationPresent(
             AnnotatedElement annotatedElement,
-            Class<? extends Annotation> annotationClass) {
-        if (annotatedElement.isAnnotationPresent(annotationClass)) {
-            return true;
-        }
-        if (annotatedElement.getClass() != Class.class) {
-            for (Annotation declaredAnnotation : annotatedElement.getAnnotations()) {
-                if (isAnnotationPresent(declaredAnnotation.annotationType(), annotationClass)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+            Class<A> annotationClass) {
+        return getAnnotation(annotatedElement, annotationClass) != null;
     }
 }
