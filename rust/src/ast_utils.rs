@@ -329,79 +329,217 @@ pub mod span {
   use crate::position_utils::ByteToIndexMap;
   use deno_ast::swc::ast::*;
 
-  fn register_decl(byte_to_index_map: &mut ByteToIndexMap, decl: &Decl) {
-    match decl {
-      Decl::Var(var_decl) => register_var_decl(byte_to_index_map, var_decl.as_ref()),
+  fn register_block_stmt(map: &mut ByteToIndexMap, node: &BlockStmt) {
+    map.register_by_span(&node.span);
+    node.stmts.iter().for_each(|stmt| register_stmt(map, stmt));
+  }
+
+  fn register_class(map: &mut ByteToIndexMap, node: &Class) {
+    map.register_by_span(&node.span);
+    node
+      .decorators
+      .iter()
+      .for_each(|decorator| register_decorator(map, decorator));
+    node
+      .body
+      .iter()
+      .for_each(|class_member| register_class_member(map, class_member));
+    node
+      .super_class
+      .as_ref()
+      .map(|box_expr| register_expr(map, &box_expr.as_ref()));
+    node
+      .type_params
+      .as_ref()
+      .map(|box_ts_type_param_decl| register_ts_type_param_decl(map, &box_ts_type_param_decl.as_ref()));
+    node.super_type_params.as_ref().map(|box_ts_type_param_instantiation| {
+      register_ts_type_param_instantiation(map, &box_ts_type_param_instantiation.as_ref())
+    });
+    node
+      .implements
+      .iter()
+      .for_each(|ts_expr_with_type_args| register_ts_expr_with_type_args(map, &ts_expr_with_type_args));
+  }
+
+  fn register_class_decl(map: &mut ByteToIndexMap, node: &ClassDecl) {
+    register_ident(map, &node.ident);
+    register_class(map, &node.class.as_ref());
+  }
+
+  fn register_class_member(map: &mut ByteToIndexMap, node: &ClassMember) {
+    match node {
+      ClassMember::Constructor(constructor) => register_constructor(map, constructor),
+      ClassMember::Method(class_method) => register_class_method(map, class_method),
+      ClassMember::PrivateMethod(private_method) => register_private_method(map, private_method),
+      ClassMember::ClassProp(class_prop) => register_class_prop(map, class_prop),
+      ClassMember::PrivateProp(private_prop) => register_private_prop(map, private_prop),
+      ClassMember::TsIndexSignature(ts_index_signature) => register_ts_index_signature(map, ts_index_signature),
+      _ => {}
+    }
+    // TODO
+  }
+
+  fn register_class_method(map: &mut ByteToIndexMap, node: &ClassMethod) {
+    map.register_by_span(&node.span);
+    register_prop_name(map, &node.key);
+    register_function(map, &node.function);
+    // TODO
+  }
+
+  fn register_class_prop(map: &mut ByteToIndexMap, node: &ClassProp) {
+    map.register_by_span(&node.span);
+    register_prop_name(map, &node.key);
+    // TODO
+  }
+
+  fn register_constructor(map: &mut ByteToIndexMap, node: &Constructor) {
+    map.register_by_span(&node.span);
+    register_prop_name(map, &node.key);
+    node
+      .params
+      .iter()
+      .for_each(|param_or_ts_param_prop| register_param_or_ts_param_prop(map, param_or_ts_param_prop));
+    node
+      .body
+      .as_ref()
+      .map(|block_stmt| register_block_stmt(map, block_stmt));
+  }
+
+  fn register_decl(map: &mut ByteToIndexMap, node: &Decl) {
+    match node {
+      Decl::Class(class_decl) => register_class_decl(map, &class_decl),
+      Decl::Var(var_decl) => register_var_decl(map, var_decl.as_ref()),
       _ => {}
     };
   }
 
-  fn register_ident(byte_to_index_map: &mut ByteToIndexMap, ident: &Ident) {
-    byte_to_index_map.register_by_span(&ident.span);
+  fn register_decorator(map: &mut ByteToIndexMap, node: &Decorator) {
+    map.register_by_span(&node.span);
+    register_expr(map, &node.expr.as_ref());
   }
 
-  fn register_module(byte_to_index_map: &mut ByteToIndexMap, module: &Module) {
-    byte_to_index_map.register_by_span(&module.span);
-    module
+  fn register_function(map: &mut ByteToIndexMap, node: &Function) {
+    map.register_by_span(&node.span);
+    // TODO
+  }
+
+  fn register_expr(map: &mut ByteToIndexMap, node: &Expr) {
+    // TODO
+  }
+
+  fn register_ident(map: &mut ByteToIndexMap, node: &Ident) {
+    map.register_by_span(&node.span);
+  }
+
+  fn register_module(map: &mut ByteToIndexMap, node: &Module) {
+    map.register_by_span(&node.span);
+    node
       .body
       .iter()
-      .for_each(|module_item| register_module_item(byte_to_index_map, &module_item));
+      .for_each(|module_item| register_module_item(map, &module_item));
   }
 
-  fn register_module_decl(byte_to_index_map: &mut ByteToIndexMap, module_decl: &ModuleDecl) {
-    match module_decl {
+  fn register_module_decl(map: &mut ByteToIndexMap, node: &ModuleDecl) {
+    match node {
       _ => {} // TODO
     }
   }
 
-  fn register_module_item(byte_to_index_map: &mut ByteToIndexMap, module_item: &ModuleItem) {
-    match module_item {
-      ModuleItem::ModuleDecl(module_decl) => register_module_decl(byte_to_index_map, &module_decl),
-      ModuleItem::Stmt(stmt) => register_stmt(byte_to_index_map, &stmt),
+  fn register_module_item(map: &mut ByteToIndexMap, node: &ModuleItem) {
+    match node {
+      ModuleItem::ModuleDecl(module_decl) => register_module_decl(map, &module_decl),
+      ModuleItem::Stmt(stmt) => register_stmt(map, &stmt),
     }
   }
 
-  fn register_pat(byte_to_index_map: &mut ByteToIndexMap, pat: &Pat) {
-    match &pat {
-      Pat::Ident(binding_ident) => register_ident(byte_to_index_map, &binding_ident.id),
+  fn register_param_or_ts_param_prop(map: &mut ByteToIndexMap, node: &ParamOrTsParamProp) {
+    // TODO
+  }
+
+  fn register_pat(map: &mut ByteToIndexMap, node: &Pat) {
+    match &node {
+      Pat::Ident(binding_ident) => register_ident(map, &binding_ident.id),
       _ => {}
     }
+    // TODO
   }
 
-  fn register_script(byte_to_index_map: &mut ByteToIndexMap, script: &Script) {
-    byte_to_index_map.register_by_span(&script.span);
-    script
-      .body
-      .iter()
-      .for_each(|stmt| register_stmt(byte_to_index_map, stmt))
+  fn register_private_method(map: &mut ByteToIndexMap, node: &PrivateMethod) {
+    map.register_by_span(&node.span);
+    register_private_name(map, &node.key);
+    register_function(map, &node.function);
+    // TODO
   }
 
-  fn register_stmt(byte_to_index_map: &mut ByteToIndexMap, stmt: &Stmt) {
-    match stmt {
-      Stmt::Decl(decl) => register_decl(byte_to_index_map, decl),
+  fn register_private_name(map: &mut ByteToIndexMap, node: &PrivateName) {
+    map.register_by_span(&node.span);
+    register_ident(map, &node.id);
+  }
+
+  fn register_private_prop(map: &mut ByteToIndexMap, node: &PrivateProp) {
+    map.register_by_span(&node.span);
+    register_private_name(map, &node.key);
+    // TODO
+  }
+
+  pub fn register_program(map: &mut ByteToIndexMap, node: &Program) {
+    match node {
+      Program::Module(module) => register_module(map, module),
+      Program::Script(script) => register_script(map, script),
+    }
+  }
+
+  fn register_prop_name(map: &mut ByteToIndexMap, node: &PropName) {
+    // TODO
+  }
+
+  fn register_script(map: &mut ByteToIndexMap, node: &Script) {
+    map.register_by_span(&node.span);
+    node.body.iter().for_each(|stmt| register_stmt(map, stmt))
+  }
+
+  fn register_stmt(map: &mut ByteToIndexMap, node: &Stmt) {
+    match node {
+      Stmt::Decl(decl) => register_decl(map, decl),
       _ => {}
     };
   }
 
-  pub fn register_program(byte_to_index_map: &mut ByteToIndexMap, program: &Program) {
-    if program.is_module() {
-      register_module(byte_to_index_map, program.as_module().unwrap());
-    } else if program.is_script() {
-      register_script(byte_to_index_map, program.as_script().unwrap());
-    }
+  fn register_ts_expr_with_type_args(map: &mut ByteToIndexMap, node: &TsExprWithTypeArgs) {
+    map.register_by_span(&node.span);
+    register_expr(map, &node.expr);
+    node
+      .type_args
+      .as_ref()
+      .map(|ts_type_param_instantiation| register_ts_type_param_instantiation(map, &ts_type_param_instantiation));
   }
 
-  fn register_var_decl(byte_to_index_map: &mut ByteToIndexMap, var_decl: &VarDecl) {
-    byte_to_index_map.register_by_span(&var_decl.span);
-    var_decl
+  fn register_ts_index_signature(map: &mut ByteToIndexMap, node: &TsIndexSignature) {
+    map.register_by_span(&node.span);
+    // TODO
+  }
+
+  fn register_ts_type_param_decl(map: &mut ByteToIndexMap, node: &TsTypeParamDecl) {
+    map.register_by_span(&node.span);
+    // TODO
+  }
+
+  fn register_ts_type_param_instantiation(map: &mut ByteToIndexMap, node: &TsTypeParamInstantiation) {
+    map.register_by_span(&node.span);
+    // TODO
+  }
+
+  fn register_var_decl(map: &mut ByteToIndexMap, node: &VarDecl) {
+    map.register_by_span(&node.span);
+    node
       .decls
       .iter()
-      .for_each(|var_declarator| register_var_declarator(byte_to_index_map, var_declarator));
+      .for_each(|var_declarator| register_var_declarator(map, var_declarator));
   }
 
-  fn register_var_declarator(byte_to_index_map: &mut ByteToIndexMap, var_declarator: &VarDeclarator) {
-    byte_to_index_map.register_by_span(&var_declarator.span);
-    register_pat(byte_to_index_map, &var_declarator.name);
+  fn register_var_declarator(map: &mut ByteToIndexMap, node: &VarDeclarator) {
+    map.register_by_span(&node.span);
+    register_pat(map, &node.name);
   }
 }
 
@@ -421,15 +559,15 @@ pub mod program {
 
   fn create_binding_ident<'local, 'a>(
     env: &mut JNIEnv<'local>,
-    byte_to_index_map: &ByteToIndexMap,
+    map: &ByteToIndexMap,
     binding_ident: &BindingIdent,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let range = byte_to_index_map.get_range_by_span(&binding_ident.span());
-    let java_id = create_ident(env, byte_to_index_map, &binding_ident.id);
+    let range = map.get_range_by_span(&binding_ident.span());
+    let java_id = create_ident(env, map, &binding_ident.id);
     let java_type_ann: JObject<'_> = Default::default(); // TODO
     let return_value = java_ast_factory.create_binding_ident(env, &java_id, &java_type_ann, &range);
     env
@@ -441,43 +579,35 @@ pub mod program {
     return_value
   }
 
-  fn create_expr<'local, 'a>(env: &mut JNIEnv<'local>, byte_to_index_map: &ByteToIndexMap, expr: &Expr) -> JObject<'a>
+  fn create_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, expr: &Expr) -> JObject<'a>
   where
     'local: 'a,
   {
     match expr {
-      Expr::Ident(ident) => create_ident(env, byte_to_index_map, &ident),
+      Expr::Ident(ident) => create_ident(env, map, &ident),
       _ => Default::default(),
     }
   }
 
-  fn create_ident<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    byte_to_index_map: &ByteToIndexMap,
-    ident: &Ident,
-  ) -> JObject<'a>
+  fn create_ident<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, ident: &Ident) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let range = byte_to_index_map.get_range_by_span(&ident.span());
+    let range = map.get_range_by_span(&ident.span());
     let sym = ident.sym.as_str();
     let optional = ident.optional;
     java_ast_factory.create_ident(env, sym, optional, &range)
   }
 
-  fn create_module<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    byte_to_index_map: &ByteToIndexMap,
-    module: &Module,
-  ) -> JObject<'a>
+  fn create_module<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, module: &Module) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
-    let range = byte_to_index_map.get_range_by_span(&module.span());
-    let java_body = create_module_body(env, byte_to_index_map, &module.body);
+    let range = map.get_range_by_span(&module.span());
+    let java_body = create_module_body(env, map, &module.body);
     let java_module = java_ast_factory.create_module(env, &java_body, &shebang, &range);
     env
       .delete_local_ref(java_body)
@@ -487,7 +617,7 @@ pub mod program {
 
   fn create_module_body<'local, 'a>(
     env: &mut JNIEnv<'local>,
-    byte_to_index_map: &ByteToIndexMap,
+    map: &ByteToIndexMap,
     body: &Vec<ModuleItem>,
   ) -> JObject<'a>
   where
@@ -499,86 +629,61 @@ pub mod program {
     java_body
   }
 
-  fn create_pat<'local, 'a>(env: &mut JNIEnv<'local>, byte_to_index_map: &ByteToIndexMap, pat: &Pat) -> JObject<'a>
+  fn create_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, pat: &Pat) -> JObject<'a>
   where
     'local: 'a,
   {
     match pat {
-      Pat::Ident(bingding_ident) => create_binding_ident(env, byte_to_index_map, &bingding_ident),
+      Pat::Ident(bingding_ident) => create_binding_ident(env, map, &bingding_ident),
       _ => Default::default(),
     }
   }
 
   pub fn create_program<'local, 'a>(
     env: &mut JNIEnv<'local>,
-    byte_to_index_map: &ByteToIndexMap,
+    map: &ByteToIndexMap,
     program: &Option<Arc<Program>>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
     match program {
-      Some(arc_program) => {
-        if arc_program.is_module() {
-          create_module(
-            env,
-            byte_to_index_map,
-            arc_program.as_module().expect("Couldn't get module"),
-          )
-        } else if arc_program.is_script() {
-          create_script(
-            env,
-            byte_to_index_map,
-            arc_program.as_script().expect("Couldn't get script"),
-          )
-        } else {
-          Default::default()
-        }
-      }
+      Some(arc_program) => match arc_program.as_ref() {
+        Program::Module(module) => create_module(env, map, module),
+        Program::Script(script) => create_script(env, map, script),
+      },
       None => Default::default(),
     }
   }
 
-  fn create_stmt<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    byte_to_index_map: &ByteToIndexMap,
-    statement: &Stmt,
-  ) -> JObject<'a>
+  fn create_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, statement: &Stmt) -> JObject<'a>
   where
     'local: 'a,
   {
     match statement {
-      Stmt::Decl(decl) => create_stmt_decl(env, byte_to_index_map, &decl),
+      Stmt::Decl(decl) => create_stmt_decl(env, map, &decl),
       _ => Default::default(),
     }
   }
 
-  fn create_stmt_decl<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    byte_to_index_map: &ByteToIndexMap,
-    decl: &Decl,
-  ) -> JObject<'a>
+  fn create_stmt_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, decl: &Decl) -> JObject<'a>
   where
     'local: 'a,
   {
     match decl {
-      Decl::Var(box_var_decl) => create_var_decl(env, byte_to_index_map, &box_var_decl),
+      Decl::Var(box_var_decl) => create_var_decl(env, map, &box_var_decl),
       _ => Default::default(),
     }
   }
 
-  fn create_script<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    byte_to_index_map: &ByteToIndexMap,
-    script: &Script,
-  ) -> JObject<'a>
+  fn create_script<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, script: &Script) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
-    let range = byte_to_index_map.get_range_by_span(&script.span());
-    let java_body = create_script_body(env, byte_to_index_map, &script.body);
+    let range = map.get_range_by_span(&script.span());
+    let java_body = create_script_body(env, map, &script.body);
     let java_script = java_ast_factory.create_script(env, &java_body, &shebang, &range);
     env
       .delete_local_ref(java_body)
@@ -586,29 +691,21 @@ pub mod program {
     java_script
   }
 
-  fn create_script_body<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    byte_to_index_map: &ByteToIndexMap,
-    body: &Vec<Stmt>,
-  ) -> JObject<'a>
+  fn create_script_body<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, body: &Vec<Stmt>) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
     let java_body = java_array_list.construct(env, body.len());
     body.into_iter().for_each(|stmt| {
-      let java_stmt = create_stmt(env, byte_to_index_map, stmt);
+      let java_stmt = create_stmt(env, map, stmt);
       java_array_list.add(env, &java_body, &java_stmt);
       env.delete_local_ref(java_stmt).expect("Couldn't delete local stmt");
     });
     java_body
   }
 
-  fn create_var_decl<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    byte_to_index_map: &ByteToIndexMap,
-    var_decl: &VarDecl,
-  ) -> JObject<'a>
+  fn create_var_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, var_decl: &VarDecl) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -616,10 +713,10 @@ pub mod program {
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
     let declare = var_decl.declare;
     let kind_id = var_decl.kind.get_id();
-    let range = byte_to_index_map.get_range_by_span(&var_decl.span());
+    let range = map.get_range_by_span(&var_decl.span());
     let java_decls = java_array_list.construct(env, var_decl.decls.len());
     var_decl.decls.iter().for_each(|var_declarator| {
-      let java_var_declarator = create_var_declarator(env, byte_to_index_map, var_declarator);
+      let java_var_declarator = create_var_declarator(env, map, var_declarator);
       java_array_list.add(env, &java_decls, &java_var_declarator);
       env
         .delete_local_ref(java_var_declarator)
@@ -632,7 +729,7 @@ pub mod program {
 
   fn create_var_declarator<'local, 'a>(
     env: &mut JNIEnv<'local>,
-    byte_to_index_map: &ByteToIndexMap,
+    map: &ByteToIndexMap,
     var_declarator: &VarDeclarator,
   ) -> JObject<'a>
   where
@@ -640,16 +737,17 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let definite = var_declarator.definite;
-    let java_option_init: Option<JObject> = match &var_declarator.init {
-      Some(box_expr) => Some(create_expr(env, byte_to_index_map, &box_expr.as_ref())),
-      None => None,
-    };
-    let java_name = create_pat(env, byte_to_index_map, &var_declarator.name);
-    let range = byte_to_index_map.get_range_by_span(&var_declarator.span());
+    let java_option_init: Option<JObject> = var_declarator
+      .init
+      .as_ref()
+      .map(|box_expr| create_expr(env, map, box_expr.as_ref()));
+    let java_name = create_pat(env, map, &var_declarator.name);
+    let range = map.get_range_by_span(&var_declarator.span());
     let return_value = java_ast_factory.create_var_declarator(env, &java_name, &java_option_init, definite, &range);
-    match java_option_init {
-      Some(java_init) => env.delete_local_ref(java_init).expect("Couldn't delete local init"),
-      None => {}
+    if java_option_init.is_some() {
+      env
+        .delete_local_ref(java_option_init.unwrap())
+        .expect("Couldn't delete local init");
     }
     env.delete_local_ref(java_name).expect("Couldn't delete local name");
     return_value
