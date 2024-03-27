@@ -34,14 +34,16 @@ use crate::options::*;
 use crate::position_utils::ByteToIndexMap;
 use crate::token_utils;
 
-struct JavaParseOutput {
+/* JavaSwc4jParseOutput Begin */
+struct JavaSwc4jParseOutput {
+  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
-unsafe impl Send for JavaParseOutput {}
-unsafe impl Sync for JavaParseOutput {}
+unsafe impl Send for JavaSwc4jParseOutput {}
+unsafe impl Sync for JavaSwc4jParseOutput {}
 
-impl JavaParseOutput {
+impl JavaSwc4jParseOutput {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
       .find_class("com/caoccao/javet/swc4j/outputs/Swc4jParseOutput")
@@ -56,11 +58,12 @@ impl JavaParseOutput {
         "(Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstProgram;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/util/List;)V",
       )
       .expect("Couldn't find method Swc4jParseOutput::new");
-    JavaParseOutput {
+    JavaSwc4jParseOutput {
       class,
       method_construct,
     }
   }
+/* JavaSwc4jParseOutput End */
 
   pub fn construct<'local, 'a>(&self, env: &mut JNIEnv<'local>, parse_output: &ParseOutput) -> JObject<'a>
   where
@@ -98,14 +101,16 @@ impl JavaParseOutput {
   }
 }
 
-struct JavaTranspileOutput {
+/* JavaSwc4jTranspileOutput Begin */
+struct JavaSwc4jTranspileOutput {
+  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
-unsafe impl Send for JavaTranspileOutput {}
-unsafe impl Sync for JavaTranspileOutput {}
+unsafe impl Send for JavaSwc4jTranspileOutput {}
+unsafe impl Sync for JavaSwc4jTranspileOutput {}
 
-impl JavaTranspileOutput {
+impl JavaSwc4jTranspileOutput {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
       .find_class("com/caoccao/javet/swc4j/outputs/Swc4jTranspileOutput")
@@ -120,11 +125,12 @@ impl JavaTranspileOutput {
         "(Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstProgram;Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/lang/String;Ljava/util/List;)V",
       )
       .expect("Couldn't find method Swc4jTranspileOutput::new");
-    JavaTranspileOutput {
+    JavaSwc4jTranspileOutput {
       class,
       method_construct,
     }
   }
+/* JavaSwc4jTranspileOutput End */
 
   pub fn construct<'local, 'a>(&self, env: &mut JNIEnv<'local>, transpile_output: &TranspileOutput) -> JObject<'a>
   where
@@ -180,13 +186,13 @@ impl JavaTranspileOutput {
   }
 }
 
-static mut JAVA_PARSE_OUTPUT: Option<JavaParseOutput> = None;
-static mut JAVA_TRANSPILE_OUTPUT: Option<JavaTranspileOutput> = None;
+static mut JAVA_PARSE_OUTPUT: Option<JavaSwc4jParseOutput> = None;
+static mut JAVA_TRANSPILE_OUTPUT: Option<JavaSwc4jTranspileOutput> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
-    JAVA_PARSE_OUTPUT = Some(JavaParseOutput::new(env));
-    JAVA_TRANSPILE_OUTPUT = Some(JavaTranspileOutput::new(env));
+    JAVA_PARSE_OUTPUT = Some(JavaSwc4jParseOutput::new(env));
+    JAVA_TRANSPILE_OUTPUT = Some(JavaSwc4jTranspileOutput::new(env));
   }
 }
 

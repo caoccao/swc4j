@@ -20,10 +20,7 @@ import com.caoccao.javet.swc4j.utils.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -81,7 +78,7 @@ public class Jni2Rust<T> {
                 .forEach(method -> {
                     boolean isPrimitive = method.getReturnType().isPrimitive();
                     boolean isVoid = method.getReturnType() == Void.class;
-                    String methodName = getMethodName(method);
+                    String methodName = getExecutableName(method);
                     List<String> parameterNames = Stream.of(method.getParameters())
                             .map(this::getParameterName)
                             .collect(Collectors.toList());
@@ -250,30 +247,54 @@ public class Jni2Rust<T> {
         lines.add("    let class = env");
         lines.add("      .new_global_ref(class)");
         lines.add(String.format("      .expect(\"Couldn't globalize class %s\");", clazz.getSimpleName()));
-        methods.forEach(method -> {
-            String methodName = getMethodName(method);
-            lines.add(String.format("    let method_%s = env", methodName));
-            if (Modifier.isStatic(method.getModifiers())) {
+        List<Executable> executables = new ArrayList<>();
+        if (constructor != null) {
+            executables.add(constructor);
+        }
+        executables.addAll(methods);
+        executables.forEach(executable -> {
+            String executableName = getExecutableName(executable);
+            if (executable instanceof Method) {
+                lines.add(String.format("    let method_%s = env", executableName));
+            } else if (executable instanceof Constructor) {
+                lines.add("    let method_construct = env");
+            }
+            if (Modifier.isStatic(executable.getModifiers())) {
                 lines.add("      .get_static_method_id(");
             } else {
                 lines.add("      .get_method_id(");
             }
             lines.add("        &class,");
-            lines.add(String.format("        \"%s\",", method.getName()));
+            if (executable instanceof Method) {
+                lines.add(String.format("        \"%s\",", executable.getName()));
+            } else if (executable instanceof Constructor) {
+                lines.add("        \"<init>\",");
+            }
             StringBuilder sb = new StringBuilder("(");
-            for (Class<?> parameterClass : method.getParameterTypes()) {
+            for (Class<?> parameterClass : executable.getParameterTypes()) {
                 sb.append(getSignature(parameterClass.getName()));
             }
             sb.append(")");
-            sb.append(getSignature(method.getReturnType().getName()));
+            if (executable instanceof Method) {
+                sb.append(getSignature(((Method) executable).getReturnType().getName()));
+            } else if (executable instanceof Constructor) {
+                sb.append("V");
+            }
             lines.add(String.format("        \"%s\",", sb));
             lines.add("      )");
-            lines.add(String.format("      .expect(\"Couldn't find method %s.%s\");", clazz.getSimpleName(), method.getName()));
+            if (executable instanceof Method) {
+                lines.add(String.format("      .expect(\"Couldn't find method %s.%s\");", clazz.getSimpleName(), executable.getName()));
+            } else if (executable instanceof Constructor) {
+                lines.add(String.format("      .expect(\"Couldn't find method %s::new\");", clazz.getSimpleName()));
+            }
         });
         lines.add(String.format("    %s {", structName));
         lines.add("      class,");
+        if (constructor != null) {
+            lines.add("      method_construct,");
+        }
         methods.stream()
-                .map(this::getMethodName)
+                .map(this::getExecutableName)
                 .forEach(methodName -> lines.add(String.format("      method_%s,", methodName)));
         lines.add("    }");
         lines.add("  }");
@@ -283,8 +304,11 @@ public class Jni2Rust<T> {
         lines.add(String.format("struct %s {", structName));
         lines.add("  #[allow(dead_code)]");
         lines.add("  class: GlobalRef,");
+        if (constructor != null) {
+            lines.add("  method_construct: JMethodID,");
+        }
         methods.forEach(method -> {
-            String methodName = getMethodName(method);
+            String methodName = getExecutableName(method);
             if (Modifier.isStatic(method.getModifiers())) {
                 lines.add(String.format("  method_%s: JStaticMethodID,", methodName));
             } else {
@@ -300,19 +324,19 @@ public class Jni2Rust<T> {
         return constructor;
     }
 
-    public String getFilePath() {
-        return filePath;
+    protected String getExecutableName(Executable executable) {
+        String executableName = null;
+        if (AnnotationUtils.isAnnotationPresent(executable, Jni2RustMethod.class)) {
+            executableName = AnnotationUtils.getAnnotation(executable, Jni2RustMethod.class).name();
+        }
+        if (StringUtils.isEmpty(executableName)) {
+            executableName = StringUtils.toSnakeCase(executable.getName());
+        }
+        return executableName;
     }
 
-    protected String getMethodName(Method method) {
-        String methodName = null;
-        if (AnnotationUtils.isAnnotationPresent(method, Jni2RustMethod.class)) {
-            methodName = AnnotationUtils.getAnnotation(method, Jni2RustMethod.class).name();
-        }
-        if (StringUtils.isEmpty(methodName)) {
-            methodName = StringUtils.toSnakeCase(method.getName());
-        }
-        return methodName;
+    public String getFilePath() {
+        return filePath;
     }
 
     public List<Method> getMethods() {
@@ -383,7 +407,7 @@ public class Jni2Rust<T> {
                 .map(annotation -> annotation.mode() == Jni2RustMethodMode.Manual)
                 .filter(found -> found)
                 .orElse(false);
-        manualMethodFound = !manualMethodFound && methods.stream()
+        manualMethodFound = manualMethodFound || methods.stream()
                 .map(method -> AnnotationUtils.getAnnotation(method, Jni2RustMethod.class))
                 .map(annotation -> annotation.mode() == Jni2RustMethodMode.Manual)
                 .filter(found -> found)

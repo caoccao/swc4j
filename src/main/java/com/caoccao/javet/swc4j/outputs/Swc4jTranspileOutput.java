@@ -18,6 +18,9 @@ package com.caoccao.javet.swc4j.outputs;
 
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstProgram;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
 import com.caoccao.javet.swc4j.tokens.Swc4jToken;
 
 import java.util.List;
@@ -27,19 +30,20 @@ import java.util.List;
  *
  * @since 0.1.0
  */
+@Jni2RustClass(filePath = "rust/src/outputs.rs")
 public class Swc4jTranspileOutput extends Swc4jParseOutput {
     /**
      * The Code.
      *
      * @since 0.1.0
      */
-    protected String code;
+    protected final String code;
     /**
      * The Source map.
      *
      * @since 0.1.0
      */
-    protected String sourceMap;
+    protected final String sourceMap;
 
     /**
      * Instantiates a new Swc4j transpile output.
@@ -53,6 +57,7 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
      * @param tokens     the tokens
      * @since 0.1.0
      */
+    @Jni2RustMethod(mode = Jni2RustMethodMode.Manual)
     public Swc4jTranspileOutput(
             Swc4jAstProgram<?> program,
             String code,

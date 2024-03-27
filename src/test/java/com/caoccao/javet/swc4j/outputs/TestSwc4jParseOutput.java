@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.jni2rust;
+package com.caoccao.javet.swc4j.outputs;
 
-import java.lang.annotation.*;
+import com.caoccao.javet.swc4j.jni2rust.Jni2Rust;
+import org.junit.jupiter.api.Test;
 
-@Documented
-@Inherited
-@Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Jni2RustMethod {
-    Jni2RustMethodMode mode() default Jni2RustMethodMode.Auto;
+import java.io.IOException;
 
-    String name() default "";
+public class TestSwc4jParseOutput {
+    @Test
+    public void testCodeGen() throws IOException {
+        Jni2Rust<Swc4jParseOutput> jni2Rust = new Jni2Rust<>(Swc4jParseOutput.class);
+        jni2Rust.updateFile();
+    }
 }

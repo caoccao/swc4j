@@ -19,6 +19,9 @@ package com.caoccao.javet.swc4j.outputs;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstProgram;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
 import com.caoccao.javet.swc4j.tokens.Swc4jToken;
 
 import java.util.List;
@@ -28,43 +31,44 @@ import java.util.List;
  *
  * @since 0.2.0
  */
+@Jni2RustClass(filePath = "rust/src/outputs.rs")
 public class Swc4jParseOutput {
     /**
      * The Media type.
      *
      * @since 0.2.0
      */
-    protected Swc4jMediaType mediaType;
+    protected final Swc4jMediaType mediaType;
     /**
      * The Module.
      *
      * @since 0.2.0
      */
-    protected boolean module;
+    protected final boolean module;
     /**
      * The Ast program.
      *
      * @since 0.2.0
      */
-    protected Swc4jAstProgram<?> program;
+    protected final Swc4jAstProgram<? extends Swc4jAst> program;
     /**
      * The Script.
      *
      * @since 0.2.0
      */
-    protected boolean script;
+    protected final boolean script;
     /**
      * The Source text.
      *
      * @since 0.2.0
      */
-    protected String sourceText;
+    protected final String sourceText;
     /**
      * The Tokens.
      *
      * @since 0.2.0
      */
-    protected List<Swc4jToken> tokens;
+    protected final List<Swc4jToken> tokens;
 
     /**
      * Instantiates a new Swc4j parse output.
@@ -77,8 +81,9 @@ public class Swc4jParseOutput {
      * @param tokens     the tokens
      * @since 0.2.0
      */
+    @Jni2RustMethod(mode = Jni2RustMethodMode.Manual)
     public Swc4jParseOutput(
-            Swc4jAstProgram<?> program,
+            Swc4jAstProgram<? extends Swc4jAst> program,
             Swc4jMediaType mediaType,
             boolean module,
             boolean script,
