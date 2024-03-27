@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.stmt.decl;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstPat;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 /**
  * The type Swc4j ast var declarator.
@@ -63,8 +64,11 @@ public class Swc4jAstVarDeclarator extends Swc4jAstDecl {
             int endPosition) {
         super(Swc4jAstType.VarDeclarator, startPosition, endPosition);
         this.definite = definite;
+//        this.init = AssertionUtils.notNull(init, "Init");
         this.init = init;
-        this.name = name;
+        this.name = AssertionUtils.notNull(name, "Name");
+//        init.setParent(this);
+        name.setParent(this);
     }
 
     /**

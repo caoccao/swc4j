@@ -17,7 +17,12 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.BaseTestSuite;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
+import com.caoccao.javet.swc4j.ast.stmt.decl.Swc4jAstVarDecl;
+import com.caoccao.javet.swc4j.ast.stmt.decl.Swc4jAstVarDeclKind;
+import com.caoccao.javet.swc4j.ast.stmt.decl.Swc4jAstVarDeclarator;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -44,5 +49,9 @@ public class TestSwc4jAst extends BaseTestSuite {
         assertEquals(0, script.getStartPosition());
         assertEquals(code.length(), script.getEndPosition());
         assertNotNull(script.getBody());
+        Swc4jAstVarDecl varDecl = (Swc4jAstVarDecl) script.getBody().get(0);
+        assertEquals(Swc4jAstVarDeclKind.Let, varDecl.getKind());
+        Swc4jAstVarDeclarator varDeclarator = varDecl.getDecls().get(0);
+        assertEquals("a", ((Swc4jAstBindingIdent) varDeclarator.getName()).getId().getSym());
     }
 }

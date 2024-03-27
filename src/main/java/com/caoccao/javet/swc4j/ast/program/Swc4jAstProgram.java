@@ -56,6 +56,7 @@ public abstract class Swc4jAstProgram<AST extends Swc4jAst> extends Swc4jAst {
         super(type, startPosition, endPosition);
         this.body = AssertionUtils.notNull(body, "Body");
         this.shebang = shebang;
+        body.forEach(node -> node.setParent(this));
     }
 
     /**

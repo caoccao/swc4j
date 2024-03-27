@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024. caoccao.com Sam Cao
+ * Copyright (c) 2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.pat;
+package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 
-public class Swc4jAstIdent extends Swc4jAst {
-    protected final boolean optional;
-    protected final String sym;
+/**
+ * The type Swc4j ast ts type ann.
+ *
+ * @since 0.2.0
+ */
+public class Swc4jAstTsTypeAnn extends Swc4jAst {
+    // TODO
 
-    public Swc4jAstIdent(String sym, boolean optional, int startPosition, int endPosition) {
-        super(Swc4jAstType.Ident, startPosition, endPosition);
-        this.optional = optional;
-        this.sym = sym;
-    }
-
-    public String getSym() {
-        return sym;
-    }
-
-    public boolean isOptional() {
-        return optional;
+    /**
+     * Instantiates a new Swc4j ast ts type ann.
+     *
+     * @param type          the type
+     * @param startPosition the start position
+     * @param endPosition   the end position
+     * @since 0.2.0
+     */
+    protected Swc4jAstTsTypeAnn(Swc4jAstType type, int startPosition, int endPosition) {
+        super(type, startPosition, endPosition);
     }
 }

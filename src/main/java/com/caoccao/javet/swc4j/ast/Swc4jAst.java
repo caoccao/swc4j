@@ -42,6 +42,12 @@ public abstract class Swc4jAst {
      * @since 0.2.0
      */
     protected final Swc4jAstType type;
+    /**
+     * The Parent.
+     *
+     * @since 0.2.0
+     */
+    protected Swc4jAst parent;
 
     /**
      * Instantiates a new Swc4j ast.
@@ -53,6 +59,7 @@ public abstract class Swc4jAst {
      */
     protected Swc4jAst(Swc4jAstType type, int startPosition, int endPosition) {
         this.endPosition = endPosition;
+        parent = null;
         this.startPosition = startPosition;
         this.type = type;
     }
@@ -65,6 +72,16 @@ public abstract class Swc4jAst {
      */
     public int getEndPosition() {
         return endPosition;
+    }
+
+    /**
+     * Gets parent.
+     *
+     * @return the parent
+     * @since 0.2.0
+     */
+    public Swc4jAst getParent() {
+        return parent;
     }
 
     /**
@@ -85,5 +102,15 @@ public abstract class Swc4jAst {
      */
     public Swc4jAstType getType() {
         return type;
+    }
+
+    /**
+     * Sets parent.
+     *
+     * @param parent the parent
+     * @since 0.2.0
+     */
+    public void setParent(Swc4jAst parent) {
+        this.parent = parent;
     }
 }

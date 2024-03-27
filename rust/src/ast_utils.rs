@@ -29,6 +29,7 @@ use std::ptr::null_mut;
 struct JavaSwc4jAstFactory {
   #[allow(dead_code)]
   class: GlobalRef,
+  method_create_binding_ident: JStaticMethodID,
   method_create_ident: JStaticMethodID,
   method_create_module: JStaticMethodID,
   method_create_script: JStaticMethodID,
@@ -46,11 +47,18 @@ impl JavaSwc4jAstFactory {
     let class = env
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jAstFactory");
+    let method_create_binding_ident = env
+      .get_static_method_id(
+        &class,
+        "createBindingIdent",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;II)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstBindingIdent;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createBindingIdent");
     let method_create_ident = env
       .get_static_method_id(
         &class,
         "createIdent",
-        "(Ljava/lang/String;ZII)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstIdent;",
+        "(Ljava/lang/String;ZII)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createIdent");
     let method_create_module = env
@@ -83,12 +91,42 @@ impl JavaSwc4jAstFactory {
       .expect("Couldn't find method Swc4jAstFactory.createVarDeclarator");
     JavaSwc4jAstFactory {
       class,
+      method_create_binding_ident,
       method_create_ident,
       method_create_module,
       method_create_script,
       method_create_var_decl,
       method_create_var_declarator,
     }
+  }
+
+  pub fn create_binding_ident<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    id: &JObject<'_>,
+    type_ann: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = jvalue { l: id.as_raw() };
+    let type_ann = jvalue { l: type_ann.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_binding_ident,
+          ReturnType::Object,
+          &[id, type_ann, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstBindingIdent by create_binding_ident()")
+        .l()
+        .expect("Couldn't convert Swc4jAstBindingIdent by create_binding_ident()")
+    };
+    return_value
   }
 
   pub fn create_ident<'local, 'a>(
@@ -298,8 +336,36 @@ pub mod span {
     };
   }
 
+  fn register_ident(byte_to_index_map: &mut ByteToIndexMap, ident: &Ident) {
+    byte_to_index_map.register_by_span(&ident.span);
+  }
+
   fn register_module(byte_to_index_map: &mut ByteToIndexMap, module: &Module) {
     byte_to_index_map.register_by_span(&module.span);
+    module
+      .body
+      .iter()
+      .for_each(|module_item| register_module_item(byte_to_index_map, &module_item));
+  }
+
+  fn register_module_decl(byte_to_index_map: &mut ByteToIndexMap, module_decl: &ModuleDecl) {
+    match module_decl {
+      _ => {} // TODO
+    }
+  }
+
+  fn register_module_item(byte_to_index_map: &mut ByteToIndexMap, module_item: &ModuleItem) {
+    match module_item {
+      ModuleItem::ModuleDecl(module_decl) => register_module_decl(byte_to_index_map, &module_decl),
+      ModuleItem::Stmt(stmt) => register_stmt(byte_to_index_map, &stmt),
+    }
+  }
+
+  fn register_pat(byte_to_index_map: &mut ByteToIndexMap, pat: &Pat) {
+    match &pat {
+      Pat::Ident(binding_ident) => register_ident(byte_to_index_map, &binding_ident.id),
+      _ => {}
+    }
   }
 
   fn register_script(byte_to_index_map: &mut ByteToIndexMap, script: &Script) {
@@ -335,7 +401,7 @@ pub mod span {
 
   fn register_var_declarator(byte_to_index_map: &mut ByteToIndexMap, var_declarator: &VarDeclarator) {
     byte_to_index_map.register_by_span(&var_declarator.span);
-    // TODO
+    register_pat(byte_to_index_map, &var_declarator.name);
   }
 }
 
@@ -353,6 +419,35 @@ pub mod program {
   use deno_ast::swc::ast::*;
   use deno_ast::swc::common::Spanned;
 
+  fn create_binding_ident<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    byte_to_index_map: &ByteToIndexMap,
+    binding_ident: &BindingIdent,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = byte_to_index_map.get_range_by_span(&binding_ident.span());
+    let java_id = create_ident(env, byte_to_index_map, &binding_ident.id);
+    let type_ann: JObject<'_> = Default::default(); // TODO
+    let return_value = java_ast_factory.create_binding_ident(env, &java_id, &type_ann, &range);
+    env
+      .delete_local_ref(java_id)
+      .expect("Couldn't delete local binding ident");
+    return_value
+  }
+
+  fn create_expr<'local, 'a>(env: &mut JNIEnv<'local>, byte_to_index_map: &ByteToIndexMap, expr: &Expr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match expr {
+      Expr::Ident(ident) => create_ident(env, byte_to_index_map, &ident),
+      _ => Default::default(),
+    }
+  }
+
   fn create_ident<'local, 'a>(
     env: &mut JNIEnv<'local>,
     byte_to_index_map: &ByteToIndexMap,
@@ -366,36 +461,6 @@ pub mod program {
     let sym = ident.sym.as_str();
     let optional = ident.optional;
     java_ast_factory.create_ident(env, sym, optional, &range)
-  }
-
-  pub fn create_program<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    byte_to_index_map: &ByteToIndexMap,
-    program: &Option<Arc<Program>>,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match program {
-      Some(arc_program) => {
-        if arc_program.is_module() {
-          create_module(
-            env,
-            byte_to_index_map,
-            arc_program.as_module().expect("Couldn't get module"),
-          )
-        } else if arc_program.is_script() {
-          create_script(
-            env,
-            byte_to_index_map,
-            arc_program.as_script().expect("Couldn't get script"),
-          )
-        } else {
-          Default::default()
-        }
-      }
-      None => Default::default(),
-    }
   }
 
   fn create_module<'local, 'a>(
@@ -432,15 +497,40 @@ pub mod program {
   where
     'local: 'a,
   {
-    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let range = byte_to_index_map.get_range_by_span(&pat.span());
     match pat {
-      Pat::Ident(bingding_ident) => {
-        let java_id = create_ident(env, byte_to_index_map, &bingding_ident.id);
-      }
-      _ => {}
+      Pat::Ident(bingding_ident) => create_binding_ident(env, byte_to_index_map, &bingding_ident),
+      _ => Default::default(),
     }
-    Default::default()
+  }
+
+  pub fn create_program<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    byte_to_index_map: &ByteToIndexMap,
+    program: &Option<Arc<Program>>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match program {
+      Some(arc_program) => {
+        if arc_program.is_module() {
+          create_module(
+            env,
+            byte_to_index_map,
+            arc_program.as_module().expect("Couldn't get module"),
+          )
+        } else if arc_program.is_script() {
+          create_script(
+            env,
+            byte_to_index_map,
+            arc_program.as_script().expect("Couldn't get script"),
+          )
+        } else {
+          Default::default()
+        }
+      }
+      None => Default::default(),
+    }
   }
 
   fn create_stmt<'local, 'a>(
@@ -542,7 +632,10 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let definite = var_declarator.definite;
-    let init: Option<JObject> = None; // TODO
+    let init: Option<JObject> = match &var_declarator.init {
+      Some(box_expr) => Some(create_expr(env, byte_to_index_map, &box_expr.as_ref())),
+      None => None,
+    };
     let name = create_pat(env, byte_to_index_map, &var_declarator.name);
     let range = byte_to_index_map.get_range_by_span(&var_declarator.span());
     let return_value = java_ast_factory.create_var_declarator(env, &name, &init, definite, &range);

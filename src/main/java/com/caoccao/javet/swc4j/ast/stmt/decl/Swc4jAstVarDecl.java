@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.stmt.decl;
 
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
 
@@ -63,8 +64,9 @@ public class Swc4jAstVarDecl extends Swc4jAstDecl {
             int endPosition) {
         super(Swc4jAstType.VarDeclarator, startPosition, endPosition);
         this.declare = declare;
-        this.decls = decls;
-        this.kind = kind;
+        this.decls = AssertionUtils.notNull(decls, "Decls");
+        this.kind = AssertionUtils.notNull(kind, "Kind");
+        decls.forEach(decl -> decl.setParent(this));
     }
 
     /**
