@@ -17,9 +17,7 @@
 package com.caoccao.javet.swc4j.tokens;
 
 import com.caoccao.javet.swc4j.enums.Swc4jTokenType;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.math.BigInteger;
@@ -31,12 +29,6 @@ import java.math.BigInteger;
  */
 @Jni2RustClass(filePath = "rust/src/token_utils.rs")
 public final class Swc4jTokenFactory {
-    private static final String END_POSITION_PRE_CALLS = "    let end_position = jvalue { i: range.end as i32 };";
-    private static final String POSITION_RUST_TYPE = "range: &Range<usize>";
-    private static final String START_POSITION_PRE_CALLS = "    let start_position = jvalue { i: range.start as i32 };";
-    private static final String TOKEN_TYPE_PRE_CALLS = "    let type_id = jvalue { i: token_type.get_id() };";
-    private static final String TOKEN_TYPE_RUST_TYPE = "token_type: &TokenType";
-
     private Swc4jTokenFactory() {
     }
 
@@ -52,9 +44,9 @@ public final class Swc4jTokenFactory {
      */
     @Jni2RustMethod
     public static Swc4jToken createAssignOperator(
-            @Jni2RustParam(rustType = TOKEN_TYPE_RUST_TYPE, preCalls = TOKEN_TYPE_PRE_CALLS) int typeId,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamTokenType int typeId,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         Swc4jTokenType type = Swc4jTokenType.parse(typeId);
         AssertionUtils.notTrue(type.getSubType().isAssignOperator(), "Assign operator is expected");
@@ -74,8 +66,8 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jTokenTextValue<BigInteger> createBigInt(
             String text,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValue<>(
                 Swc4jTokenType.BigInt,
@@ -98,9 +90,9 @@ public final class Swc4jTokenFactory {
      */
     @Jni2RustMethod
     public static Swc4jToken createBinaryOperator(
-            @Jni2RustParam(rustType = TOKEN_TYPE_RUST_TYPE, preCalls = TOKEN_TYPE_PRE_CALLS) int typeId,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamTokenType int typeId,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         Swc4jTokenType type = Swc4jTokenType.parse(typeId);
         AssertionUtils.notTrue(type.getSubType().isBinaryOperator(), "Binary operator is expected");
@@ -129,8 +121,8 @@ public final class Swc4jTokenFactory {
                             "      l: java_error.as_raw(),",
                             "    };",
                     }) String error,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValue<>(
                 Swc4jTokenType.Error,
@@ -152,8 +144,8 @@ public final class Swc4jTokenFactory {
      */
     @Jni2RustMethod
     public static Swc4jToken createFalse(
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jToken(Swc4jTokenType.False, startPosition, endPosition, lineBreakAhead);
     }
@@ -170,9 +162,9 @@ public final class Swc4jTokenFactory {
      */
     @Jni2RustMethod
     public static Swc4jToken createGenericOperator(
-            @Jni2RustParam(rustType = TOKEN_TYPE_RUST_TYPE, preCalls = TOKEN_TYPE_PRE_CALLS) int typeId,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamTokenType int typeId,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         Swc4jTokenType type = Swc4jTokenType.parse(typeId);
         AssertionUtils.notTrue(type.getSubType().isGenericOperator(), "Generic operator is expected");
@@ -192,8 +184,8 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jTokenText createIdentKnown(
             String text,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jTokenText(Swc4jTokenType.IdentKnown, text, startPosition, endPosition, lineBreakAhead);
     }
@@ -211,8 +203,8 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jTokenText createIdentOther(
             String text,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jTokenText(Swc4jTokenType.IdentOther, text, startPosition, endPosition, lineBreakAhead);
     }
@@ -230,8 +222,8 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jTokenText createJsxTagName(
             String text,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jTokenText(Swc4jTokenType.JsxTagName, text, startPosition, endPosition, lineBreakAhead);
     }
@@ -249,8 +241,8 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jTokenText createJsxTagText(
             String text,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jTokenText(Swc4jTokenType.JsxTagText, text, startPosition, endPosition, lineBreakAhead);
     }
@@ -267,9 +259,9 @@ public final class Swc4jTokenFactory {
      */
     @Jni2RustMethod
     public static Swc4jToken createKeyword(
-            @Jni2RustParam(rustType = TOKEN_TYPE_RUST_TYPE, preCalls = TOKEN_TYPE_PRE_CALLS) int typeId,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamTokenType int typeId,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         Swc4jTokenType type = Swc4jTokenType.parse(typeId);
         AssertionUtils.notTrue(type.getSubType().isKeyword(), "Keyword is expected");
@@ -287,8 +279,8 @@ public final class Swc4jTokenFactory {
      */
     @Jni2RustMethod
     public static Swc4jToken createNull(
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jToken(Swc4jTokenType.Null, startPosition, endPosition, lineBreakAhead);
     }
@@ -308,8 +300,8 @@ public final class Swc4jTokenFactory {
     public static Swc4jTokenTextValue<Double> createNumber(
             String text,
             double value,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValue<>(
                 Swc4jTokenType.Num,
@@ -337,8 +329,8 @@ public final class Swc4jTokenFactory {
             String text,
             String value,
             String flags,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValueFlags<>(
                 Swc4jTokenType.Regex, text, value, flags, startPosition, endPosition, lineBreakAhead);
@@ -359,8 +351,8 @@ public final class Swc4jTokenFactory {
     public static Swc4jTokenTextValue<String> createShebang(
             String text,
             String value,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValue<>(
                 Swc4jTokenType.Shebang,
@@ -386,8 +378,8 @@ public final class Swc4jTokenFactory {
     public static Swc4jTokenTextValue<String> createString(
             String text,
             String value,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValue<>(
                 Swc4jTokenType.Str,
@@ -412,8 +404,8 @@ public final class Swc4jTokenFactory {
     public static Swc4jTokenTextValue<String> createTemplate(
             String text,
             @Jni2RustParam(optional = true) String value,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValue<>(
                 Swc4jTokenType.Template,
@@ -435,8 +427,8 @@ public final class Swc4jTokenFactory {
      */
     @Jni2RustMethod
     public static Swc4jToken createTrue(
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jToken(Swc4jTokenType.True, startPosition, endPosition, lineBreakAhead);
     }
@@ -454,8 +446,8 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jTokenText createUnknown(
             String text,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = START_POSITION_PRE_CALLS) int startPosition,
-            @Jni2RustParam(rustType = POSITION_RUST_TYPE, preCalls = END_POSITION_PRE_CALLS) int endPosition,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition,
             boolean lineBreakAhead) {
         return new Swc4jTokenText(Swc4jTokenType.Unknown, text, startPosition, endPosition, lineBreakAhead);
     }

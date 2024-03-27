@@ -19,7 +19,8 @@ package com.caoccao.javet.swc4j.jni2rust;
 import java.lang.annotation.*;
 
 @Documented
-@Target(ElementType.PARAMETER)
+@Inherited
+@Target({ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Jni2RustParam {
     String name() default "";

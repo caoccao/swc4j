@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.jni2rust;
 import java.lang.annotation.*;
 
 @Documented
+@Inherited
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Jni2RustMethod {

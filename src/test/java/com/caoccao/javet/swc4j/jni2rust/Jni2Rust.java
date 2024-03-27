@@ -16,10 +16,7 @@
 
 package com.caoccao.javet.swc4j.jni2rust;
 
-import com.caoccao.javet.swc4j.utils.ArrayUtils;
-import com.caoccao.javet.swc4j.utils.AssertionUtils;
-import com.caoccao.javet.swc4j.utils.OSUtils;
-import com.caoccao.javet.swc4j.utils.StringUtils;
+import com.caoccao.javet.swc4j.utils.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -79,8 +76,8 @@ public class Jni2Rust<T> {
 
     protected void getCodeMethods(List<String> lines) {
         methods.stream()
-                .filter(method -> !method.isAnnotationPresent(Jni2RustMethod.class)
-                        || (method.getAnnotation(Jni2RustMethod.class).mode() == Jni2RustMethodMode.Auto))
+                .filter(method -> !AnnotationUtils.isAnnotationPresent(method, Jni2RustMethod.class)
+                        || (AnnotationUtils.getAnnotation(method, Jni2RustMethod.class).mode() == Jni2RustMethodMode.Auto))
                 .forEach(method -> {
                     boolean isPrimitive = method.getReturnType().isPrimitive();
                     boolean isVoid = method.getReturnType() == Void.class;
@@ -102,8 +99,8 @@ public class Jni2Rust<T> {
                         boolean isOptional = false;
                         boolean isCustomRustType = false;
                         String rustType = null;
-                        if (parameter.isAnnotationPresent(Jni2RustParam.class)) {
-                            Jni2RustParam jni2RustParam = parameter.getAnnotation(Jni2RustParam.class);
+                        if (AnnotationUtils.isAnnotationPresent(parameter, Jni2RustParam.class)) {
+                            Jni2RustParam jni2RustParam = AnnotationUtils.getAnnotation(parameter, Jni2RustParam.class);
                             isOptional = jni2RustParam.optional();
                             if (StringUtils.isNotEmpty(jni2RustParam.rustType())) {
                                 isCustomRustType = true;
@@ -156,8 +153,8 @@ public class Jni2Rust<T> {
                         Class<?> parameterType = parameter.getType();
                         boolean isOptional = false;
                         String[] preCalls = null;
-                        if (parameter.isAnnotationPresent(Jni2RustParam.class)) {
-                            Jni2RustParam jni2RustParam = parameter.getAnnotation(Jni2RustParam.class);
+                        if (AnnotationUtils.isAnnotationPresent(parameter, Jni2RustParam.class)) {
+                            Jni2RustParam jni2RustParam = AnnotationUtils.getAnnotation(parameter, Jni2RustParam.class);
                             isOptional = jni2RustParam.optional();
                             if (ArrayUtils.isNotEmpty(jni2RustParam.preCalls())) {
                                 preCalls = jni2RustParam.preCalls();
@@ -223,8 +220,8 @@ public class Jni2Rust<T> {
                         String name = getParameterName(parameter);
                         Class<?> parameterType = parameter.getType();
                         String[] postCalls = null;
-                        if (parameter.isAnnotationPresent(Jni2RustParam.class)) {
-                            Jni2RustParam jni2RustParam = parameter.getAnnotation(Jni2RustParam.class);
+                        if (AnnotationUtils.isAnnotationPresent(parameter, Jni2RustParam.class)) {
+                            Jni2RustParam jni2RustParam = AnnotationUtils.getAnnotation(parameter, Jni2RustParam.class);
                             if (ArrayUtils.isNotEmpty(jni2RustParam.postCalls())) {
                                 postCalls = jni2RustParam.postCalls();
                             }
@@ -309,8 +306,8 @@ public class Jni2Rust<T> {
 
     protected String getMethodName(Method method) {
         String methodName = null;
-        if (method.isAnnotationPresent(Jni2RustMethod.class)) {
-            methodName = method.getAnnotation(Jni2RustMethod.class).name();
+        if (AnnotationUtils.isAnnotationPresent(method, Jni2RustMethod.class)) {
+            methodName = AnnotationUtils.getAnnotation(method, Jni2RustMethod.class).name();
         }
         if (StringUtils.isEmpty(methodName)) {
             methodName = StringUtils.toSnakeCase(method.getName());
@@ -328,8 +325,8 @@ public class Jni2Rust<T> {
 
     protected String getParameterName(Parameter parameter) {
         String parameterName = null;
-        if (parameter.isAnnotationPresent(Jni2RustParam.class)) {
-            parameterName = parameter.getAnnotation(Jni2RustParam.class).name();
+        if (AnnotationUtils.isAnnotationPresent(parameter, Jni2RustParam.class)) {
+            parameterName = AnnotationUtils.getAnnotation(parameter, Jni2RustParam.class).name();
         }
         if (StringUtils.isEmpty(parameterName)) {
             parameterName = StringUtils.toSnakeCase(parameter.getName());
@@ -358,7 +355,7 @@ public class Jni2Rust<T> {
     }
 
     protected void init() {
-        Jni2RustClass jni2RustClass = clazz.getAnnotation(Jni2RustClass.class);
+        Jni2RustClass jni2RustClass = AnnotationUtils.getAnnotation(clazz, Jni2RustClass.class);
         // filePath and structName
         setFilePath(null);
         setStructName(PREFIX_NAME + clazz.getSimpleName());
@@ -372,22 +369,22 @@ public class Jni2Rust<T> {
         }
         // constructor
         constructor = (Constructor<T>) Stream.of(clazz.getConstructors())
-                .filter(method -> method.isAnnotationPresent(Jni2RustMethod.class))
+                .filter(method -> AnnotationUtils.isAnnotationPresent(method, Jni2RustMethod.class))
                 .findFirst()
                 .orElse(null);
         // methods
         methods.clear();
         Stream.of(clazz.getMethods())
-                .filter(method -> method.isAnnotationPresent(Jni2RustMethod.class))
+                .filter(method -> AnnotationUtils.isAnnotationPresent(method, Jni2RustMethod.class))
                 .sorted(Comparator.comparing(Method::getName))
                 .forEach(methods::add);
         boolean manualMethodFound = Optional.ofNullable(constructor)
-                .map(method -> method.getAnnotation(Jni2RustMethod.class))
+                .map(method -> AnnotationUtils.getAnnotation(method, Jni2RustMethod.class))
                 .map(annotation -> annotation.mode() == Jni2RustMethodMode.Manual)
                 .filter(found -> found)
                 .orElse(false);
         manualMethodFound = !manualMethodFound && methods.stream()
-                .map(method -> method.getAnnotation(Jni2RustMethod.class))
+                .map(method -> AnnotationUtils.getAnnotation(method, Jni2RustMethod.class))
                 .map(annotation -> annotation.mode() == Jni2RustMethodMode.Manual)
                 .filter(found -> found)
                 .findFirst()

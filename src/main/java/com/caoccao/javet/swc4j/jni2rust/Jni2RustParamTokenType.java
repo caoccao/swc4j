@@ -20,10 +20,10 @@ import java.lang.annotation.*;
 
 @Documented
 @Inherited
-@Target(ElementType.TYPE)
+@Target({ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Jni2RustClass {
-    String filePath() default "";
-
-    String name() default "";
+@Jni2RustParam(
+        rustType = "token_type: &TokenType",
+        preCalls = "    let type_id = jvalue { i: token_type.get_id() };")
+public @interface Jni2RustParamTokenType {
 }

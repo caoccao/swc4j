@@ -20,10 +20,10 @@ import java.lang.annotation.*;
 
 @Documented
 @Inherited
-@Target(ElementType.TYPE)
+@Target({ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Jni2RustClass {
-    String filePath() default "";
-
-    String name() default "";
+@Jni2RustParam(
+        rustType = "range: &Range<usize>",
+        preCalls = "    let start_position = jvalue { i: range.start as i32 };")
+public @interface Jni2RustParamStartPosition {
 }
