@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -59,33 +60,6 @@ public final class StringUtils {
     }
 
     /**
-     * To snake case string.
-     *
-     * @param str the str
-     * @return the string
-     * @since 0.2.0
-     */
-    public static String toSnakeCase(String str) {
-        if (isEmpty(str)) {
-            return str;
-        }
-        StringBuilder sb = new StringBuilder(str.length());
-        boolean isFirst = true;
-        for (char c : str.toCharArray()) {
-            if (Character.isUpperCase(c)) {
-                if (!isFirst) {
-                    sb.append('_');
-                }
-                sb.append(Character.toLowerCase(c));
-            } else {
-                sb.append(c);
-            }
-            isFirst = false;
-        }
-        return sb.toString();
-    }
-
-    /**
      * Join string.
      *
      * @param delimiter the delimiter
@@ -113,5 +87,54 @@ public final class StringUtils {
             stringJoiner.add(cs);
         }
         return stringJoiner.toString();
+    }
+
+    /**
+     * To snake case string.
+     *
+     * @param str the str
+     * @return the string
+     * @since 0.2.0
+     */
+    public static String toSnakeCase(String str) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        List<String> tokens = new ArrayList<>();
+        int startIndex = 0;
+        int index = 0;
+        int uppercaseCount = 0;
+        for (char c : str.toCharArray()) {
+            if (Character.isLetterOrDigit(c)) {
+                if (Character.isUpperCase(c)) {
+                    if (uppercaseCount == 0) {
+                        if (startIndex < index) {
+                            tokens.add(str.substring(startIndex, index));
+                        }
+                        startIndex = index;
+                    }
+                    ++uppercaseCount;
+                } else {
+                    if (uppercaseCount > 1) {
+                        if (startIndex < index - 1) {
+                            tokens.add(str.substring(startIndex, index - 1).toLowerCase());
+                            uppercaseCount = 1;
+                        }
+                        startIndex = index - 1;
+                    }
+                }
+            } else {
+                if (startIndex < index) {
+                    tokens.add(str.substring(startIndex, index).toLowerCase());
+                }
+                uppercaseCount = 0;
+                startIndex = index + 1;
+            }
+            ++index;
+        }
+        if (startIndex < str.length()) {
+            tokens.add(str.substring(startIndex).toLowerCase());
+        }
+        return join("_", tokens);
     }
 }

@@ -15,12 +15,10 @@
 * limitations under the License.
 */
 
-use jni::objects::{GlobalRef, JClass, JMethodID, JObject};
+use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID};
 use jni::signature::{Primitive, ReturnType};
 use jni::sys::jvalue;
 use jni::JNIEnv;
-
-use crate::converter;
 
 macro_rules! delete_local_ref {
   ($env: ident, $name: expr) => {
@@ -137,9 +135,60 @@ pub fn call_as_int<'local>(
 ) -> i32 {
   unsafe {
     env
-      .call_method_unchecked(&obj, method, ReturnType::Primitive(Primitive::Int), &[])
+      .call_method_unchecked(&obj, method, ReturnType::Primitive(Primitive::Int), args)
       .expect(&format!("Couldn't call {}", name))
       .i()
       .expect(&format!("Couldn't convert {} to int", name))
+  }
+}
+
+pub fn call_static_as_boolean<'local>(
+  env: &mut JNIEnv<'local>,
+  class: &GlobalRef,
+  method: &JStaticMethodID,
+  args: &[jvalue],
+  name: &str,
+) -> bool {
+  unsafe {
+    env
+      .call_static_method_unchecked(class, method, ReturnType::Primitive(Primitive::Boolean), args)
+      .expect(&format!("Couldn't call {}", name))
+      .z()
+      .expect(&format!("Couldn't convert {} to bool", name))
+  }
+}
+
+pub fn call_static_as_int<'local>(
+  env: &mut JNIEnv<'local>,
+  class: &GlobalRef,
+  method: &JStaticMethodID,
+  args: &[jvalue],
+  name: &str,
+) -> i32 {
+  unsafe {
+    env
+      .call_static_method_unchecked(class, method, ReturnType::Primitive(Primitive::Int), args)
+      .expect(&format!("Couldn't call {}", name))
+      .i()
+      .expect(&format!("Couldn't convert {} to int", name))
+  }
+}
+
+pub fn call_static_as_object<'local, 'a>(
+  env: &mut JNIEnv<'local>,
+  class: &GlobalRef,
+  method: &JStaticMethodID,
+  args: &[jvalue],
+  name: &str,
+) -> JObject<'a>
+where
+  'local: 'a,
+{
+  unsafe {
+    env
+      .call_static_method_unchecked(class, method, ReturnType::Object, args)
+      .expect(&format!("Couldn't call {}", name))
+      .l()
+      .expect(&format!("Couldn't convert {} to object", name))
   }
 }

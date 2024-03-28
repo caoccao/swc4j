@@ -74,6 +74,7 @@ impl JavaSwc4jParseOutput {
     let program = jvalue { l: program.as_raw() };
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let media_type = java_media_type.parse(env, parse_output.media_type.get_id());
+    let media_type = jvalue { l: media_type.as_raw() };
     let module = jvalue {
       z: if parse_output.module { 1u8 } else { 0u8 },
     };
@@ -142,6 +143,7 @@ impl JavaSwc4jTranspileOutput {
     };
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let media_type = java_media_type.parse(env, transpile_output.parse_output.media_type.get_id());
+    let media_type = jvalue { l: media_type.as_raw() };
     let module = jvalue {
       z: if transpile_output.parse_output.module { 1u8 } else { 0u8 },
     };

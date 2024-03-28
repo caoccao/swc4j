@@ -21,6 +21,7 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use crate::converter;
+use crate::jni_utils::call_static_as_object;
 
 struct JavaCoreException {
   pub class: GlobalRef,
@@ -63,20 +64,8 @@ impl JavaCoreException {
     let message = jvalue {
       l: converter::string_to_jstring(env, message).as_raw(),
     };
-    let exception = unsafe {
-      JThrowable::from_raw(
-        env
-          .call_static_method_unchecked(
-            &self.class,
-            &self.method_parse_error,
-            ReturnType::Object,
-            &[message],
-          )
-          .expect("Couldn't create parse error")
-          .as_jni()
-          .l,
-      )
-    };
+    let exception = call_static_as_object(env, &self.class, &self.method_parse_error, &[message], "parseError()");
+    let exception = unsafe { JThrowable::from_raw(exception.as_raw()) };
     let _ = env.throw(exception);
   }
 
@@ -84,20 +73,14 @@ impl JavaCoreException {
     let message = jvalue {
       l: converter::string_to_jstring(env, message).as_raw(),
     };
-    let exception = unsafe {
-      JThrowable::from_raw(
-        env
-          .call_static_method_unchecked(
-            &self.class,
-            &self.method_transpile_error,
-            ReturnType::Object,
-            &[message],
-          )
-          .expect("Couldn't create transpile error")
-          .as_jni()
-          .l,
-      )
-    };
+    let exception = call_static_as_object(
+      env,
+      &self.class,
+      &self.method_transpile_error,
+      &[message],
+      "transpileError()",
+    );
+    let exception = unsafe { JThrowable::from_raw(exception.as_raw()) };
     let _ = env.throw(exception);
   }
 }
@@ -112,10 +95,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 
 pub fn throw_parse_error<'local, 'a>(env: &mut JNIEnv<'local>, message: &'a str) {
   unsafe {
-    JAVA_CORE_EXCEPTION
-      .as_ref()
-      .unwrap()
-      .throw_parse_error(env, message);
+    JAVA_CORE_EXCEPTION.as_ref().unwrap().throw_parse_error(env, message);
   }
 }
 

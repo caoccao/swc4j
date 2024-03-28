@@ -16,7 +16,6 @@
 */
 
 use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID};
-use jni::signature::ReturnType;
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
@@ -24,7 +23,7 @@ use deno_ast::swc::ast::{AssignOp, VarDeclKind};
 use deno_ast::swc::parser::token::{BinOpToken, Keyword, Token};
 pub use deno_ast::{ImportsNotUsedAsValues, MediaType};
 
-use crate::jni_utils::call_as_int;
+use crate::jni_utils::{call_as_int, call_static_as_object};
 
 pub trait IdentifiableEnum<T> {
   fn get_id(&self) -> i32;
@@ -550,13 +549,7 @@ impl JavaTokenType {
     'local: 'a,
   {
     let id = jvalue { i: id };
-    unsafe {
-      env
-        .call_static_method_unchecked(&self.class, self.method_parse, ReturnType::Object, &[id])
-        .expect("Object is expected")
-        .l()
-        .expect("Couldn't convert to JObject")
-    }
+    call_static_as_object(env, &self.class, &self.method_parse, &[id], "parse()")
   }
 }
 
@@ -687,14 +680,12 @@ impl JavaMediaType {
     MediaType::parse_by_id(id)
   }
 
-  pub fn parse<'local>(&self, env: &mut JNIEnv<'local>, id: i32) -> jvalue {
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
     let id = jvalue { i: id };
-    unsafe {
-      env
-        .call_static_method_unchecked(&self.class, self.method_parse, ReturnType::Object, &[id])
-        .expect("Object is expected")
-        .as_jni()
-    }
+    call_static_as_object(env, &self.class, &self.method_parse, &[id], "parse()")
   }
 }
 

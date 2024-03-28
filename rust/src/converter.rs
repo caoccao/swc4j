@@ -16,7 +16,7 @@
 */
 
 use jni::objects::JString;
-use jni::sys::{jboolean, jstring};
+use jni::sys::jstring;
 use jni::JNIEnv;
 
 pub fn jstring_to_optional_string<'local>(env: &mut JNIEnv<'local>, s: jstring) -> Option<String> {

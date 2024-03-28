@@ -22,7 +22,6 @@ use jni::JNIEnv;
 
 use crate::converter;
 use crate::enums::*;
-use crate::jni_utils;
 
 /* JavaSwc4jParseOptions Begin */
 struct JavaSwc4jParseOptions {
