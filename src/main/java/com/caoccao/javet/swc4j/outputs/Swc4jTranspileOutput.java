@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j.outputs;
 
-import com.caoccao.javet.swc4j.ast.program.Swc4jAstProgram;
+import com.caoccao.javet.swc4j.ast.program.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
@@ -59,7 +59,7 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
      */
     @Jni2RustMethod(mode = Jni2RustMethodMode.Manual)
     public Swc4jTranspileOutput(
-            Swc4jAstProgram<?> program,
+            ISwc4jAstProgram<? extends com.caoccao.javet.swc4j.ast.Swc4jAst> program,
             String code,
             Swc4jMediaType mediaType,
             boolean module,

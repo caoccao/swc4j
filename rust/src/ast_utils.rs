@@ -1323,9 +1323,7 @@ pub mod program {
     let java_name = create_pat(env, map, &var_declarator.name);
     let range = map.get_range_by_span(&var_declarator.span());
     let return_value = java_ast_factory.create_var_declarator(env, &java_name, &java_option_init, definite, &range);
-    if java_option_init.is_some() {
-      delete_local_ref!(env, java_option_init.unwrap());
-    }
+    java_option_init.map(|j| delete_local_ref!(env, j));
     delete_local_ref!(env, java_name);
     return_value
   }

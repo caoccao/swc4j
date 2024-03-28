@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.stmt.decl;
 
-import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstPat;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
@@ -75,7 +75,7 @@ public class Swc4jAstVarDeclarator extends Swc4jAstDecl {
     }
 
     @Override
-    public List<Swc4jAst> getChildren() {
+    public List<ISwc4jAst> getChildren() {
         return SimpleList.of(init, name);
     }
 

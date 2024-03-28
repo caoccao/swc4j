@@ -90,7 +90,7 @@ public final class Swc4jAstFactory {
      */
     @Jni2RustMethod
     public static Swc4jAstModule createModule(
-            List<Swc4jAst> body,
+            List<ISwc4jAst> body,
             @Jni2RustParam(optional = true) String shebang,
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
@@ -109,7 +109,7 @@ public final class Swc4jAstFactory {
      */
     @Jni2RustMethod
     public static Swc4jAstScript createScript(
-            List<Swc4jAst> body,
+            List<ISwc4jAst> body,
             @Jni2RustParam(optional = true) String shebang,
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {

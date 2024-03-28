@@ -14,37 +14,32 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.ts;
+package com.caoccao.javet.swc4j.ast.program;
 
 import com.caoccao.javet.swc4j.ast.ISwc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
 /**
- * The type Swc4j ast ts type ann.
+ * The interface Swc4j ast program.
  *
+ * @param <AST> the type parameter
  * @since 0.2.0
  */
-public class Swc4jAstTsTypeAnn extends Swc4jAst {
-    // TODO
-
+public interface ISwc4jAstProgram<AST extends ISwc4jAst> extends ISwc4jAst {
     /**
-     * Instantiates a new Swc4j ast ts type ann.
+     * Gets body.
      *
-     * @param type          the type
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @return the body
      * @since 0.2.0
      */
-    protected Swc4jAstTsTypeAnn(Swc4jAstType type, int startPosition, int endPosition) {
-        super(type, startPosition, endPosition);
-    }
+    List<AST> getBody();
 
-    @Override
-    public List<ISwc4jAst> getChildren() {
-        return SimpleList.of();
-    }
+    /**
+     * Gets shebang.
+     *
+     * @return the shebang
+     * @since 0.2.0
+     */
+    String getShebang();
 }

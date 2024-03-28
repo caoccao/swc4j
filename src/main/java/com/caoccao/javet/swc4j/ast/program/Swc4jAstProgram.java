@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.program;
 
+import com.caoccao.javet.swc4j.ast.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -29,7 +30,9 @@ import java.util.List;
  * @param <AST> the type parameter
  * @since 0.2.0
  */
-public abstract class Swc4jAstProgram<AST extends Swc4jAst> extends Swc4jAst {
+public abstract class Swc4jAstProgram<AST extends ISwc4jAst>
+        extends Swc4jAst
+        implements ISwc4jAstProgram<AST> {
     /**
      * The Body.
      *
@@ -60,27 +63,17 @@ public abstract class Swc4jAstProgram<AST extends Swc4jAst> extends Swc4jAst {
         updateParent();
     }
 
-    /**
-     * Gets body.
-     *
-     * @return the body
-     * @since 0.2.0
-     */
+    @Override
     public List<AST> getBody() {
         return body;
     }
 
     @Override
-    public List<Swc4jAst> getChildren() {
+    public List<ISwc4jAst> getChildren() {
         return new ArrayList<>(body);
     }
 
-    /**
-     * Gets shebang.
-     *
-     * @return the shebang
-     * @since 0.2.0
-     */
+    @Override
     public String getShebang() {
         return shebang;
     }

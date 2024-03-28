@@ -16,8 +16,8 @@
 
 package com.caoccao.javet.swc4j.outputs;
 
-import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.program.Swc4jAstProgram;
+import com.caoccao.javet.swc4j.ast.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.program.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
@@ -50,7 +50,7 @@ public class Swc4jParseOutput {
      *
      * @since 0.2.0
      */
-    protected final Swc4jAstProgram<? extends Swc4jAst> program;
+    protected final ISwc4jAstProgram<? extends ISwc4jAst> program;
     /**
      * The Script.
      *
@@ -73,9 +73,9 @@ public class Swc4jParseOutput {
     /**
      * Instantiates a new Swc4j parse output.
      *
+     * @param program    the program
      * @param mediaType  the media type
      * @param module     the module
-     * @param program    the program
      * @param script     the script
      * @param sourceText the source text
      * @param tokens     the tokens
@@ -83,7 +83,7 @@ public class Swc4jParseOutput {
      */
     @Jni2RustMethod(mode = Jni2RustMethodMode.Manual)
     public Swc4jParseOutput(
-            Swc4jAstProgram<? extends Swc4jAst> program,
+            ISwc4jAstProgram<? extends ISwc4jAst> program,
             Swc4jMediaType mediaType,
             boolean module,
             boolean script,
@@ -113,9 +113,8 @@ public class Swc4jParseOutput {
      * @return the ast program
      * @since 0.2.0
      */
-    @SuppressWarnings("unchecked")
-    public <AST extends Swc4jAst> Swc4jAstProgram<AST> getProgram() {
-        return (Swc4jAstProgram<AST>) program;
+    public ISwc4jAstProgram<? extends ISwc4jAst> getProgram() {
+        return program;
     }
 
     /**

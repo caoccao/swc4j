@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.expr;
 
-import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.ISwc4jAst;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -64,7 +64,7 @@ public class Swc4jAstIdent extends Swc4jAstExpr {
     }
 
     @Override
-    public List<Swc4jAst> getChildren() {
+    public List<ISwc4jAst> getChildren() {
         return SimpleList.of();
     }
 

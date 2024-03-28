@@ -18,7 +18,6 @@ package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -26,7 +25,7 @@ import java.util.Objects;
  *
  * @since 0.2.0
  */
-public abstract class Swc4jAst {
+public abstract class Swc4jAst implements ISwc4jAst {
     /**
      * The End position.
      *
@@ -50,7 +49,7 @@ public abstract class Swc4jAst {
      *
      * @since 0.2.0
      */
-    protected Swc4jAst parent;
+    protected ISwc4jAst parent;
 
     /**
      * Instantiates a new Swc4j ast.
@@ -67,60 +66,28 @@ public abstract class Swc4jAst {
         this.type = type;
     }
 
-    /**
-     * Gets children.
-     *
-     * @return the children
-     */
-    public abstract List<Swc4jAst> getChildren();
-
-    /**
-     * Gets end position.
-     *
-     * @return the end position
-     * @since 0.2.0
-     */
+    @Override
     public int getEndPosition() {
         return endPosition;
     }
 
-    /**
-     * Gets parent.
-     *
-     * @return the parent
-     * @since 0.2.0
-     */
-    public Swc4jAst getParent() {
+    @Override
+    public ISwc4jAst getParent() {
         return parent;
     }
 
-    /**
-     * Gets start position.
-     *
-     * @return the start position
-     * @since 0.2.0
-     */
+    @Override
     public int getStartPosition() {
         return startPosition;
     }
 
-    /**
-     * Gets ast type.
-     *
-     * @return the ast type
-     * @since 0.2.0
-     */
+    @Override
     public Swc4jAstType getType() {
         return type;
     }
 
-    /**
-     * Sets parent.
-     *
-     * @param parent the parent
-     * @since 0.2.0
-     */
-    public void setParent(Swc4jAst parent) {
+    @Override
+    public void setParent(ISwc4jAst parent) {
         this.parent = parent;
     }
 
