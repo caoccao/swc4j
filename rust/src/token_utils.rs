@@ -27,7 +27,7 @@ use deno_ast::swc::parser::token::{IdentLike, Token, TokenAndSpan, Word};
 
 use crate::converter;
 use crate::enums::*;
-use crate::jni_utils::JAVA_ARRAY_LIST;
+use crate::jni_utils::{delete_local_ref, JAVA_ARRAY_LIST};
 use crate::position_utils::ByteToIndexMap;
 
 use std::ops::Range;
@@ -288,9 +288,7 @@ impl JavaSwc4jTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jTokenTextValue by create_big_int()")
     };
-    env
-      .delete_local_ref(java_text)
-      .expect("Couldn't delete local text");
+    delete_local_ref!(env, java_text);
     return_value
   }
 
@@ -361,12 +359,8 @@ impl JavaSwc4jTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jTokenTextValue by create_error()")
     };
-    env
-      .delete_local_ref(java_text)
-      .expect("Couldn't delete local text");
-    env
-      .delete_local_ref(java_error)
-      .expect("Couldn't delete local error");
+    delete_local_ref!(env, java_text);
+    delete_local_ref!(env, java_error);
     return_value
   }
 
@@ -461,9 +455,7 @@ impl JavaSwc4jTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jTokenText by create_ident_known()")
     };
-    env
-      .delete_local_ref(java_text)
-      .expect("Couldn't delete local text");
+    delete_local_ref!(env, java_text);
     return_value
   }
 
@@ -498,9 +490,7 @@ impl JavaSwc4jTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jTokenText by create_ident_other()")
     };
-    env
-      .delete_local_ref(java_text)
-      .expect("Couldn't delete local text");
+    delete_local_ref!(env, java_text);
     return_value
   }
 
@@ -535,9 +525,7 @@ impl JavaSwc4jTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jTokenText by create_jsx_tag_name()")
     };
-    env
-      .delete_local_ref(java_text)
-      .expect("Couldn't delete local text");
+    delete_local_ref!(env, java_text);
     return_value
   }
 
@@ -572,9 +560,7 @@ impl JavaSwc4jTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jTokenText by create_jsx_tag_text()")
     };
-    env
-      .delete_local_ref(java_text)
-      .expect("Couldn't delete local text");
+    delete_local_ref!(env, java_text);
     return_value
   }
 
@@ -673,9 +659,7 @@ impl JavaSwc4jTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jTokenTextValue by create_number()")
     };
-    env
-      .delete_local_ref(java_text)
-      .expect("Couldn't delete local text");
+    delete_local_ref!(env, java_text);
     return_value
   }
 
@@ -720,15 +704,9 @@ impl JavaSwc4jTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jTokenTextValueFlags by create_regex()")
     };
-    env
-      .delete_local_ref(java_text)
-      .expect("Couldn't delete local text");
-    env
-      .delete_local_ref(java_value)
-      .expect("Couldn't delete local value");
-    env
-      .delete_local_ref(java_flags)
-      .expect("Couldn't delete local flags");
+    delete_local_ref!(env, java_text);
+    delete_local_ref!(env, java_value);
+    delete_local_ref!(env, java_flags);
     return_value
   }
 
@@ -768,12 +746,8 @@ impl JavaSwc4jTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jTokenTextValue by create_shebang()")
     };
-    env
-      .delete_local_ref(java_text)
-      .expect("Couldn't delete local text");
-    env
-      .delete_local_ref(java_value)
-      .expect("Couldn't delete local value");
+    delete_local_ref!(env, java_text);
+    delete_local_ref!(env, java_value);
     return_value
   }
 
@@ -813,12 +787,8 @@ impl JavaSwc4jTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jTokenTextValue by create_string()")
     };
-    env
-      .delete_local_ref(java_text)
-      .expect("Couldn't delete local text");
-    env
-      .delete_local_ref(java_value)
-      .expect("Couldn't delete local value");
+    delete_local_ref!(env, java_text);
+    delete_local_ref!(env, java_value);
     return_value
   }
 
@@ -861,12 +831,8 @@ impl JavaSwc4jTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jTokenTextValue by create_template()")
     };
-    env
-      .delete_local_ref(java_text)
-      .expect("Couldn't delete local text");
-    env
-      .delete_local_ref(java_value)
-      .expect("Couldn't delete local value");
+    delete_local_ref!(env, java_text);
+    delete_local_ref!(env, java_value);
     return_value
   }
 
@@ -930,9 +896,7 @@ impl JavaSwc4jTokenFactory {
         .l()
         .expect("Couldn't convert Swc4jTokenText by create_unknown()")
     };
-    env
-      .delete_local_ref(java_text)
-      .expect("Couldn't delete local text");
+    delete_local_ref!(env, java_text);
     return_value
   }
 }
@@ -1035,7 +999,7 @@ pub fn token_and_spans_to_java_list<'local>(
             },
           };
           java_array_list.add(env, &list, &token);
-          env.delete_local_ref(token).expect("Couldn't delete local ast token");
+          delete_local_ref!(env, token);
         });
         list.as_raw()
       }

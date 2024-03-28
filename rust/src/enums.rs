@@ -24,7 +24,7 @@ use deno_ast::swc::ast::{AssignOp, VarDeclKind};
 use deno_ast::swc::parser::token::{BinOpToken, Keyword, Token};
 pub use deno_ast::{ImportsNotUsedAsValues, MediaType};
 
-use crate::jni_utils;
+use crate::jni_utils::call_as_int;
 
 pub trait IdentifiableEnum<T> {
   fn get_id(&self) -> i32;
@@ -541,7 +541,7 @@ impl JavaTokenType {
   }
 
   pub fn get_token_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> TokenType {
-    let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
+    let id = call_as_int(env, obj.as_ref(), self.method_get_id, &[], "getId()");
     TokenType::parse_by_id(id)
   }
 
@@ -604,7 +604,7 @@ impl JavaImportsNotUsedAsValues {
     env: &mut JNIEnv<'local>,
     obj: &JObject<'a>,
   ) -> ImportsNotUsedAsValues {
-    let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
+    let id = call_as_int(env, obj.as_ref(), self.method_get_id, &[], "getId()");
     ImportsNotUsedAsValues::parse_by_id(id)
   }
 }
@@ -683,7 +683,7 @@ impl JavaMediaType {
   }
 
   pub fn get_media_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> MediaType {
-    let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
+    let id = call_as_int(env, obj.as_ref(), self.method_get_id, &[], "getId()");
     MediaType::parse_by_id(id)
   }
 
@@ -742,7 +742,7 @@ impl JavaParseMode {
   }
 
   pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> ParseMode {
-    let id = jni_utils::get_as_int(env, obj.as_ref(), self.method_get_id);
+    let id = call_as_int(env, obj.as_ref(), self.method_get_id, &[], "getId()");
     ParseMode::parse_by_id(id)
   }
 }

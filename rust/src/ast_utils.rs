@@ -21,6 +21,7 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use crate::converter;
+use crate::jni_utils::delete_local_ref;
 
 use std::ops::Range;
 use std::ptr::null_mut;
@@ -160,9 +161,7 @@ impl JavaSwc4jAstFactory {
         .l()
         .expect("Couldn't convert Swc4jAstIdent by create_ident()")
     };
-    env
-      .delete_local_ref(java_sym)
-      .expect("Couldn't delete local sym");
+    delete_local_ref!(env, java_sym);
     return_value
   }
 
@@ -198,9 +197,7 @@ impl JavaSwc4jAstFactory {
         .l()
         .expect("Couldn't convert Swc4jAstModule by create_module()")
     };
-    env
-      .delete_local_ref(java_shebang)
-      .expect("Couldn't delete local shebang");
+    delete_local_ref!(env, java_shebang);
     return_value
   }
 
@@ -236,9 +233,7 @@ impl JavaSwc4jAstFactory {
         .l()
         .expect("Couldn't convert Swc4jAstScript by create_script()")
     };
-    env
-      .delete_local_ref(java_shebang)
-      .expect("Couldn't delete local shebang");
+    delete_local_ref!(env, java_shebang);
     return_value
   }
 
@@ -549,7 +544,7 @@ pub mod program {
 
   use crate::ast_utils::JAVA_AST_FACTORY;
   use crate::enums::IdentifiableEnum;
-  use crate::jni_utils::JAVA_ARRAY_LIST;
+  use crate::jni_utils::{delete_local_ref, JAVA_ARRAY_LIST};
   use crate::position_utils::ByteToIndexMap;
 
   use std::sync::Arc;
@@ -570,12 +565,8 @@ pub mod program {
     let java_id = create_ident(env, map, &binding_ident.id);
     let java_type_ann: JObject<'_> = Default::default(); // TODO
     let return_value = java_ast_factory.create_binding_ident(env, &java_id, &java_type_ann, &range);
-    env
-      .delete_local_ref(java_id)
-      .expect("Couldn't delete local binding ident");
-    env
-      .delete_local_ref(java_type_ann)
-      .expect("Couldn't delete local type annotation");
+    delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_type_ann);
     return_value
   }
 
@@ -609,9 +600,7 @@ pub mod program {
     let range = map.get_range_by_span(&module.span());
     let java_body = create_module_body(env, map, &module.body);
     let java_module = java_ast_factory.create_module(env, &java_body, &shebang, &range);
-    env
-      .delete_local_ref(java_body)
-      .expect("Couldn't delete local module body");
+    delete_local_ref!(env, java_body);
     java_module
   }
 
@@ -685,9 +674,7 @@ pub mod program {
     let range = map.get_range_by_span(&script.span());
     let java_body = create_script_body(env, map, &script.body);
     let java_script = java_ast_factory.create_script(env, &java_body, &shebang, &range);
-    env
-      .delete_local_ref(java_body)
-      .expect("Couldn't delete local script body");
+    delete_local_ref!(env, java_body);
     java_script
   }
 
@@ -700,7 +687,7 @@ pub mod program {
     body.into_iter().for_each(|stmt| {
       let java_stmt = create_stmt(env, map, stmt);
       java_array_list.add(env, &java_body, &java_stmt);
-      env.delete_local_ref(java_stmt).expect("Couldn't delete local stmt");
+      delete_local_ref!(env, java_stmt);
     });
     java_body
   }
@@ -718,12 +705,10 @@ pub mod program {
     var_decl.decls.iter().for_each(|var_declarator| {
       let java_var_declarator = create_var_declarator(env, map, var_declarator);
       java_array_list.add(env, &java_decls, &java_var_declarator);
-      env
-        .delete_local_ref(java_var_declarator)
-        .expect("Couldn't delete local var declarator");
+      delete_local_ref!(env, java_var_declarator);
     });
     let return_value = java_ast_factory.create_var_decl(env, kind_id, declare, &java_decls, &range);
-    env.delete_local_ref(java_decls).expect("Couldn't delete local decls");
+    delete_local_ref!(env, java_decls);
     return_value
   }
 
@@ -745,11 +730,9 @@ pub mod program {
     let range = map.get_range_by_span(&var_declarator.span());
     let return_value = java_ast_factory.create_var_declarator(env, &java_name, &java_option_init, definite, &range);
     if java_option_init.is_some() {
-      env
-        .delete_local_ref(java_option_init.unwrap())
-        .expect("Couldn't delete local init");
+      delete_local_ref!(env, java_option_init.unwrap());
     }
-    env.delete_local_ref(java_name).expect("Couldn't delete local name");
+    delete_local_ref!(env, java_name);
     return_value
   }
 }

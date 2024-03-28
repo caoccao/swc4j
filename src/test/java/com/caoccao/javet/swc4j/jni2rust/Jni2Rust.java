@@ -266,9 +266,7 @@ public class Jni2Rust<T> {
                         }
                         if (ArrayUtils.isEmpty(postCalls)) {
                             if (parameterType == String.class) {
-                                lines.add("    env");
-                                lines.add(String.format("      .delete_local_ref(java_%s)", name));
-                                lines.add(String.format("      .expect(\"Couldn't delete local %s\");", name));
+                                lines.add(String.format("    delete_local_ref!(env, java_%s);", name));
                             }
                         } else {
                             Collections.addAll(lines, postCalls);
@@ -480,7 +478,7 @@ public class Jni2Rust<T> {
 
     public boolean updateFile() throws IOException {
         String startSign = String.format("\n/* %s Begin */\n", structName);
-        String endSign = String.format("\n/* %s End */\n", structName);
+        String endSign = String.format("/* %s End */\n", structName);
         File file = new File(OSUtils.WORKING_DIRECTORY, filePath);
         AssertionUtils.notTrue(file.exists(), file.getAbsolutePath() + " is not found");
         AssertionUtils.notTrue(file.canRead(), file.getAbsolutePath() + " is not readable");
@@ -495,6 +493,7 @@ public class Jni2Rust<T> {
         StringBuilder sb = new StringBuilder(fileContent.length());
         sb.append(fileContent, 0, startPosition);
         sb.append(getCode());
+        sb.append("\n");
         sb.append(fileContent, endPosition, fileContent.length());
         byte[] newBuffer = sb.toString().getBytes(StandardCharsets.UTF_8);
         if (!Arrays.equals(originalBuffer, newBuffer)) {

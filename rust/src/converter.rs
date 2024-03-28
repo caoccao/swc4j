@@ -19,10 +19,6 @@ use jni::objects::JString;
 use jni::sys::{jboolean, jstring};
 use jni::JNIEnv;
 
-pub fn jboolean_to_bool(b: jboolean) -> bool {
-  b != 0
-}
-
 pub fn jstring_to_optional_string<'local>(env: &mut JNIEnv<'local>, s: jstring) -> Option<String> {
   if s.is_null() {
     None

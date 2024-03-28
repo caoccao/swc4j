@@ -15,12 +15,21 @@
 * limitations under the License.
 */
 
-use jni::objects::{GlobalRef, JMethodID, JObject};
+use jni::objects::{GlobalRef, JClass, JMethodID, JObject};
 use jni::signature::{Primitive, ReturnType};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use crate::converter;
+
+macro_rules! delete_local_ref {
+  ($env: ident, $name: expr) => {
+    $env
+      .delete_local_ref($name)
+      .expect(&format!("Couldn't delete local {}", stringify!($name)));
+  };
+}
+pub(crate) use delete_local_ref;
 
 pub trait ToJniType {
   fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
@@ -63,28 +72,18 @@ impl JavaArrayList {
     let initial_capacity = jvalue {
       i: initial_capacity as i32,
     };
-    unsafe {
-      env
-        .new_object_unchecked(&self.class, self.method_construct, &[initial_capacity])
-        .expect("Couldn't construct ArrayList")
-    }
+    call_as_construct(
+      env,
+      &self.class,
+      &self.method_construct,
+      &[initial_capacity],
+      "ArrayList",
+    )
   }
 
   pub fn add<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> bool {
     let element = jvalue { l: element.as_raw() };
-    let b = unsafe {
-      env
-        .call_method_unchecked(
-          &obj,
-          self.method_add,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[element],
-        )
-        .expect("boolean is expected")
-        .as_jni()
-        .z
-    };
-    converter::jboolean_to_bool(b)
+    call_as_boolean(env, obj, &self.method_add, &[element], "add()")
   }
 }
 
@@ -96,62 +95,51 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
   }
 }
 
-pub fn get_as_boolean<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, method: JMethodID) -> bool {
-  let b = unsafe {
-    env
-      .call_method_unchecked(&obj, method, ReturnType::Primitive(Primitive::Boolean), &[])
-      .expect("boolean is expected")
-      .as_jni()
-      .z
-  };
-  converter::jboolean_to_bool(b)
-}
-
-pub fn get_as_int<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, method: JMethodID) -> i32 {
+pub fn call_as_boolean<'local>(
+  env: &mut JNIEnv<'local>,
+  obj: &JObject<'_>,
+  method: &JMethodID,
+  args: &[jvalue],
+  name: &str,
+) -> bool {
   unsafe {
     env
-      .call_method_unchecked(&obj, method, ReturnType::Primitive(Primitive::Int), &[])
-      .expect("int is expected")
-      .as_jni()
-      .i
+      .call_method_unchecked(&obj, method, ReturnType::Primitive(Primitive::Boolean), args)
+      .expect(&format!("Couldn't call {}", name))
+      .z()
+      .expect(&format!("Couldn't convert {} to bool", name))
   }
 }
 
-pub fn get_as_jobject<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, method: JMethodID) -> JObject<'a>
+pub fn call_as_construct<'local, 'a>(
+  env: &mut JNIEnv<'local>,
+  class: &GlobalRef,
+  method: &JMethodID,
+  args: &[jvalue],
+  name: &str,
+) -> JObject<'a>
 where
   'local: 'a,
 {
   unsafe {
     env
-      .call_method_unchecked(&obj, method, ReturnType::Object, &[])
-      .expect("Object is expected")
-      .l()
-      .expect("Object is expected")
+      .new_object_unchecked(class, *method, args)
+      .expect(&format!("Couldn't construct {}", name))
   }
 }
 
-pub fn get_as_optional_string<'local>(
+pub fn call_as_int<'local>(
   env: &mut JNIEnv<'local>,
   obj: &JObject<'_>,
   method: JMethodID,
-) -> Option<String> {
-  let s = unsafe {
+  args: &[jvalue],
+  name: &str,
+) -> i32 {
+  unsafe {
     env
-      .call_method_unchecked(&obj, method, ReturnType::Object, &[])
-      .expect("String is expected")
-      .as_jni()
-      .l
-  };
-  converter::jstring_to_optional_string(env, s)
-}
-
-pub fn get_as_string<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, method: JMethodID) -> String {
-  let s = unsafe {
-    env
-      .call_method_unchecked(&obj, method, ReturnType::Object, &[])
-      .expect("String is expected")
-      .as_jni()
-      .l
-  };
-  converter::jstring_to_string(env, s)
+      .call_method_unchecked(&obj, method, ReturnType::Primitive(Primitive::Int), &[])
+      .expect(&format!("Couldn't call {}", name))
+      .i()
+      .expect(&format!("Couldn't convert {} to int", name))
+  }
 }

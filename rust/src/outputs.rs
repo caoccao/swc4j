@@ -29,7 +29,7 @@ use std::sync::Arc;
 use crate::ast_utils;
 use crate::converter;
 use crate::enums::*;
-use crate::jni_utils::ToJniType;
+use crate::jni_utils::{call_as_construct, ToJniType};
 use crate::options::*;
 use crate::position_utils::ByteToIndexMap;
 use crate::token_utils;
@@ -89,15 +89,13 @@ impl JavaSwc4jParseOutput {
       &parse_output.source_text.to_string(),
       parse_output.tokens.clone(),
     );
-    unsafe {
-      env
-        .new_object_unchecked(
-          &self.class,
-          self.method_construct,
-          &[program, media_type, module, script, source_text, tokens],
-        )
-        .expect("Couldn't construct Swc4jParseOutput")
-    }
+    call_as_construct(
+      env,
+      &self.class,
+      &self.method_construct,
+      &[program, media_type, module, script, source_text, tokens],
+      "Swc4jParseOutput",
+    )
   }
 }
 
@@ -165,24 +163,22 @@ impl JavaSwc4jTranspileOutput {
       &transpile_output.parse_output.source_text.to_string(),
       transpile_output.parse_output.tokens.clone(),
     );
-    unsafe {
-      env
-        .new_object_unchecked(
-          &self.class,
-          self.method_construct,
-          &[
-            program,
-            code,
-            media_type,
-            module,
-            script,
-            source_map,
-            source_text,
-            tokens,
-          ],
-        )
-        .expect("Couldn't construct Swc4jTranspileOutput")
-    }
+    call_as_construct(
+      env,
+      &self.class,
+      &self.method_construct,
+      &[
+        program,
+        code,
+        media_type,
+        module,
+        script,
+        source_map,
+        source_text,
+        tokens,
+      ],
+      "Swc4jTranspileOutput",
+    )
   }
 }
 
