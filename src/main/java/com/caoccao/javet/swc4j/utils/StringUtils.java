@@ -103,22 +103,22 @@ public final class StringUtils {
         List<String> tokens = new ArrayList<>();
         int startIndex = 0;
         int index = 0;
-        int uppercaseCount = 0;
+        int upperCaseCount = 0;
         for (char c : str.toCharArray()) {
             if (Character.isLetterOrDigit(c)) {
                 if (Character.isUpperCase(c)) {
-                    if (uppercaseCount == 0) {
+                    if (upperCaseCount == 0) {
                         if (startIndex < index) {
                             tokens.add(str.substring(startIndex, index));
                         }
                         startIndex = index;
                     }
-                    ++uppercaseCount;
+                    ++upperCaseCount;
                 } else {
-                    if (uppercaseCount > 1) {
+                    if (upperCaseCount > 1) {
                         if (startIndex < index - 1) {
                             tokens.add(str.substring(startIndex, index - 1).toLowerCase());
-                            uppercaseCount = 1;
+                            upperCaseCount = 1;
                         }
                         startIndex = index - 1;
                     }
@@ -127,7 +127,7 @@ public final class StringUtils {
                 if (startIndex < index) {
                     tokens.add(str.substring(startIndex, index).toLowerCase());
                 }
-                uppercaseCount = 0;
+                upperCaseCount = 0;
                 startIndex = index + 1;
             }
             ++index;
