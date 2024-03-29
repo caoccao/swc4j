@@ -77,6 +77,21 @@ public final class Swc4jAstFactory {
     }
 
     /**
+     * Create empty stmt.
+     *
+     * @param startPosition the start position
+     * @param endPosition   the end position
+     * @return the ast empty stmt
+     * @since 0.2.0
+     */
+    @Jni2RustMethod
+    public static Swc4jAstEmptyStmt createEmptyStmt(
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstEmptyStmt(startPosition, endPosition);
+    }
+
+    /**
      * Create expr stmt.
      *
      * @param expr          the expr

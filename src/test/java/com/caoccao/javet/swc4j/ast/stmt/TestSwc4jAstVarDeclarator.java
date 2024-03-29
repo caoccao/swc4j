@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.stmt.decl;
+package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclKind;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
+import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,7 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
         assertEquals(Swc4jAstVarDeclKind.Let, varDecl.getKind());
         Swc4jAstVarDeclarator varDeclarator = varDecl.getDecls().get(0);
         Swc4jAstBindingIdent name = (Swc4jAstBindingIdent) varDeclarator.getName();
+        assertEquals(Swc4jAstType.BindingIdent, name.getType());
         assertEquals("a變量", name.getId().getSym());
         assertEquals(4, name.getStartPosition());
         assertEquals(7, name.getEndPosition());
