@@ -20,33 +20,24 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class Swc4jAstBlockStmt
+public class Swc4jAstDebuggerStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
-    protected final List<ISwc4jAstStmt> stmts;
-
-    public Swc4jAstBlockStmt(List<ISwc4jAstStmt> stmts, int startPosition, int endPosition) {
+    public Swc4jAstDebuggerStmt(int startPosition, int endPosition) {
         super(startPosition, endPosition);
-        this.stmts = AssertionUtils.notNull(stmts, "Stmts");
-        updateParent();
     }
 
     @Override
     public List<ISwc4jAst> getChildren() {
-        return new ArrayList<>(stmts);
-    }
-
-    public List<ISwc4jAstStmt> getStmts() {
-        return stmts;
+        return SimpleList.of();
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.BlockStmt;
+        return Swc4jAstType.DebuggerStmt;
     }
 }

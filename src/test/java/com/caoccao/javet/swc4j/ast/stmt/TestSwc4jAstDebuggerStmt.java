@@ -25,17 +25,16 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TestSwc4jAstBlockStmt extends BaseTestSuiteSwc4jAst {
+public class TestSwc4jAstDebuggerStmt extends BaseTestSuiteSwc4jAst {
     @Test
     public void testEmpty() throws Swc4jCoreException {
-        String code = "{}";
+        String code = "debugger;";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         Swc4jAstScript script = (Swc4jAstScript) output.getProgram();
         assertNotNull(script.getBody());
-        Swc4jAstBlockStmt blockStmt = (Swc4jAstBlockStmt) script.getBody().get(0);
-        assertEquals(Swc4jAstType.BlockStmt, blockStmt.getType());
-        assertTrue(blockStmt.getStmts().isEmpty());
-        assertEquals(0, blockStmt.getStartPosition());
-        assertEquals(2, blockStmt.getEndPosition());
+        Swc4jAstDebuggerStmt debuggerStmt = (Swc4jAstDebuggerStmt) script.getBody().get(0);
+        assertEquals(Swc4jAstType.DebuggerStmt, debuggerStmt.getType());
+        assertEquals(0, debuggerStmt.getStartPosition());
+        assertEquals(9, debuggerStmt.getEndPosition());
     }
 }

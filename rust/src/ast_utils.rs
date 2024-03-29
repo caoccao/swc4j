@@ -32,6 +32,7 @@ struct JavaSwc4jAstFactory {
   class: GlobalRef,
   method_create_binding_ident: JStaticMethodID,
   method_create_block_stmt: JStaticMethodID,
+  method_create_debugger_stmt: JStaticMethodID,
   method_create_empty_stmt: JStaticMethodID,
   method_create_expr_stmt: JStaticMethodID,
   method_create_ident: JStaticMethodID,
@@ -65,6 +66,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;II)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBlockStmt");
+    let method_create_debugger_stmt = env
+      .get_static_method_id(
+        &class,
+        "createDebuggerStmt",
+        "(II)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstDebuggerStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createDebuggerStmt");
     let method_create_empty_stmt = env
       .get_static_method_id(
         &class,
@@ -118,6 +126,7 @@ impl JavaSwc4jAstFactory {
       class,
       method_create_binding_ident,
       method_create_block_stmt,
+      method_create_debugger_stmt,
       method_create_empty_stmt,
       method_create_expr_stmt,
       method_create_ident,
@@ -185,6 +194,31 @@ impl JavaSwc4jAstFactory {
         .expect("Couldn't create Swc4jAstBlockStmt by create_block_stmt()")
         .l()
         .expect("Couldn't convert Swc4jAstBlockStmt by create_block_stmt()")
+    };
+    return_value
+  }
+
+  pub fn create_debugger_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_debugger_stmt,
+          ReturnType::Object,
+          &[start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstDebuggerStmt by create_debugger_stmt()")
+        .l()
+        .expect("Couldn't convert Swc4jAstDebuggerStmt by create_debugger_stmt()")
     };
     return_value
   }
@@ -2041,6 +2075,16 @@ pub mod program {
     }
   }
 
+  fn create_debugger_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &DebuggerStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let return_value = java_ast_factory.create_debugger_stmt(env, &range);
+    return_value
+  }
+
   fn create_empty_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &EmptyStmt) -> JObject<'a>
   where
     'local: 'a,
@@ -2149,6 +2193,7 @@ pub mod program {
     match node {
       Stmt::Block(node) => create_block_stmt(env, map, &node),
       Stmt::Empty(node) => create_empty_stmt(env, map, &node),
+      Stmt::Debugger(node) => create_debugger_stmt(env, map, &node),
       Stmt::Decl(node) => create_decl(env, map, &node),
       Stmt::Expr(node) => create_expr_stmt(env, map, &node),
       _ => Default::default(),

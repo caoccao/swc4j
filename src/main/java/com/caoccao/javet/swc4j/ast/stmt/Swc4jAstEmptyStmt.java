@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class Swc4jAstEmptyStmt
 
     @Override
     public List<ISwc4jAst> getChildren() {
-        return null;
+        return SimpleList.of();
     }
 
     @Override

@@ -77,6 +77,21 @@ public final class Swc4jAstFactory {
     }
 
     /**
+     * Create debugger stmt.
+     *
+     * @param startPosition the start position
+     * @param endPosition   the end position
+     * @return the ast debugger stmt
+     * @since 0.2.0
+     */
+    @Jni2RustMethod
+    public static Swc4jAstDebuggerStmt createDebuggerStmt(
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstDebuggerStmt(startPosition, endPosition);
+    }
+
+    /**
      * Create empty stmt.
      *
      * @param startPosition the start position
