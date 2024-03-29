@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.enums;
 
 public enum Swc4jAstType {
     BindingIdent,
+    BlockStmt,
     ExprStmt,
     Ident,
     Module,

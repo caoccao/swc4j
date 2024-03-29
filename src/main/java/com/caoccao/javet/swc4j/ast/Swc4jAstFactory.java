@@ -24,10 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclKind;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
+import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.jni2rust.*;
 
@@ -63,12 +60,30 @@ public final class Swc4jAstFactory {
     }
 
     /**
+     * Create block stmt.
+     *
+     * @param stmts         the stmts
+     * @param startPosition the start position
+     * @param endPosition   the end position
+     * @return the ast block stmt
+     * @since 0.2.0
+     */
+    @Jni2RustMethod
+    public static Swc4jAstBlockStmt createBlockStmt(
+            List<ISwc4jAstStmt> stmts,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstBlockStmt(stmts, startPosition, endPosition);
+    }
+
+    /**
      * Create expr stmt.
      *
      * @param expr          the expr
      * @param startPosition the start position
      * @param endPosition   the end position
      * @return the ast expr stmt
+     * @since 0.2.0
      */
     @Jni2RustMethod
     public static Swc4jAstExprStmt createExprStmt(

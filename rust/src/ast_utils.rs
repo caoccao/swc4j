@@ -31,6 +31,7 @@ struct JavaSwc4jAstFactory {
   #[allow(dead_code)]
   class: GlobalRef,
   method_create_binding_ident: JStaticMethodID,
+  method_create_block_stmt: JStaticMethodID,
   method_create_expr_stmt: JStaticMethodID,
   method_create_ident: JStaticMethodID,
   method_create_module: JStaticMethodID,
@@ -56,6 +57,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;II)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstBindingIdent;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBindingIdent");
+    let method_create_block_stmt = env
+      .get_static_method_id(
+        &class,
+        "createBlockStmt",
+        "(Ljava/util/List;II)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createBlockStmt");
     let method_create_expr_stmt = env
       .get_static_method_id(
         &class,
@@ -101,6 +109,7 @@ impl JavaSwc4jAstFactory {
     JavaSwc4jAstFactory {
       class,
       method_create_binding_ident,
+      method_create_block_stmt,
       method_create_expr_stmt,
       method_create_ident,
       method_create_module,
@@ -140,6 +149,33 @@ impl JavaSwc4jAstFactory {
         .expect("Couldn't create Swc4jAstBindingIdent by create_binding_ident()")
         .l()
         .expect("Couldn't convert Swc4jAstBindingIdent by create_binding_ident()")
+    };
+    return_value
+  }
+
+  pub fn create_block_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    stmts: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let stmts = jvalue { l: stmts.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_block_stmt,
+          ReturnType::Object,
+          &[stmts, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstBlockStmt by create_block_stmt()")
+        .l()
+        .expect("Couldn't convert Swc4jAstBlockStmt by create_block_stmt()")
     };
     return_value
   }
@@ -1913,7 +1949,6 @@ pub mod span {
 
 pub mod program {
   use jni::objects::JObject;
-  use jni::sys::jvalue;
   use jni::JNIEnv;
 
   use crate::ast_utils::JAVA_AST_FACTORY;
@@ -1924,7 +1959,6 @@ pub mod program {
   use std::sync::Arc;
 
   use deno_ast::swc::ast::*;
-  use deno_ast::swc::common::Spanned;
 
   fn create_binding_ident<'local, 'a>(
     env: &mut JNIEnv<'local>,
@@ -1941,6 +1975,24 @@ pub mod program {
     let return_value = java_ast_factory.create_binding_ident(env, &java_id, &java_type_ann, &range);
     delete_local_ref!(env, java_id);
     java_type_ann.map(|j| delete_local_ref!(env, j));
+    return_value
+  }
+
+  fn create_block_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BlockStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_stmts = java_array_list.construct(env, node.stmts.len());
+    node.stmts.iter().for_each(|node| {
+      let java_stmt = create_stmt(env, map, node);
+      java_array_list.add(env, &java_stmts, &java_stmt);
+      delete_local_ref!(env, java_stmt);
+    });
+    let return_value = java_ast_factory.create_block_stmt(env, &java_stmts, &range);
+    delete_local_ref!(env, java_stmts);
     return_value
   }
 
@@ -1999,9 +2051,9 @@ pub mod program {
     let range = map.get_range_by_span(&node.span);
     let java_body = java_array_list.construct(env, node.body.len());
     node.body.iter().for_each(|node| {
-      let java_stmt = create_module_item(env, map, node);
-      java_array_list.add(env, &java_body, &java_stmt);
-      delete_local_ref!(env, java_stmt);
+      let java_module_item = create_module_item(env, map, node);
+      java_array_list.add(env, &java_body, &java_module_item);
+      delete_local_ref!(env, java_module_item);
     });
     let java_module = java_ast_factory.create_module(env, &java_body, &shebang, &range);
     delete_local_ref!(env, java_body);
@@ -2051,8 +2103,9 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      Stmt::Expr(node) => create_expr_stmt(env, map, &node),
+      Stmt::Block(node) => create_block_stmt(env, map, &node),
       Stmt::Decl(node) => create_decl(env, map, &node),
+      Stmt::Expr(node) => create_expr_stmt(env, map, &node),
       _ => Default::default(),
       // TODO
     }
