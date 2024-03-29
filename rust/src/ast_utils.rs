@@ -372,7 +372,7 @@ pub mod span {
     node
       .type_params
       .as_ref()
-      .map(|node| register_ts_type_param_decl(map, node.as_ref()));
+      .map(|node| register_ts_type_param_decl(map, node));
     node.return_type.as_ref().map(|node| register_ts_type_ann(map, node));
   }
 
@@ -442,6 +442,11 @@ pub mod span {
       Callee::Import(node) => register_import(map, node),
       Callee::Expr(node) => register_expr(map, node),
     }
+  }
+
+  fn register_catch_clause(map: &mut ByteToIndexMap, node: &CatchClause) {
+    node.param.as_ref().map(|node| register_pat(map, node));
+    register_block_stmt(map, &node.body);
   }
 
   fn register_class(map: &mut ByteToIndexMap, node: &Class) {
@@ -1315,6 +1320,16 @@ pub mod span {
     register_ts_type(map, &node.type_ann);
   }
 
+  fn register_ts_call_signature_decl(map: &mut ByteToIndexMap, node: &TsCallSignatureDecl) {
+    map.register_by_span(&node.span);
+    node.params.iter().for_each(|node| register_ts_fn_param(map, node));
+    node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
+    node
+      .type_params
+      .as_ref()
+      .map(|node| register_ts_type_param_decl(map, node));
+  }
+
   fn register_ts_conditional_type(map: &mut ByteToIndexMap, node: &TsConditionalType) {
     map.register_by_span(&node.span);
     register_ts_type(map, &node.check_type);
@@ -1326,6 +1341,16 @@ pub mod span {
   fn register_ts_const_assertion(map: &mut ByteToIndexMap, node: &TsConstAssertion) {
     map.register_by_span(&node.span);
     register_expr(map, &node.expr);
+  }
+
+  fn register_ts_construct_signature_decl(map: &mut ByteToIndexMap, node: &TsConstructSignatureDecl) {
+    map.register_by_span(&node.span);
+    node.params.iter().for_each(|node| register_ts_fn_param(map, node));
+    node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
+    node
+      .type_params
+      .as_ref()
+      .map(|node| register_ts_type_param_decl(map, node));
   }
 
   fn register_ts_constructor_type(map: &mut ByteToIndexMap, node: &TsConstructorType) {
@@ -1409,6 +1434,12 @@ pub mod span {
     }
   }
 
+  fn register_ts_getter_signature(map: &mut ByteToIndexMap, node: &TsGetterSignature) {
+    map.register_by_span(&node.span);
+    register_expr(map, &node.key);
+    node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
+  }
+
   fn register_ts_import_equals_decl(map: &mut ByteToIndexMap, node: &TsImportEqualsDecl) {
     map.register_by_span(&node.span);
     register_ident(map, &node.id);
@@ -1419,7 +1450,10 @@ pub mod span {
     map.register_by_span(&node.span);
     register_str(map, &node.arg);
     node.qualifier.as_ref().map(|node| register_ts_entity_name(map, node));
-    node.type_args.as_ref().map(|node| register_ts_type_param_instantiation(map, node));
+    node
+      .type_args
+      .as_ref()
+      .map(|node| register_ts_type_param_instantiation(map, node));
   }
 
   fn register_ts_index_signature(map: &mut ByteToIndexMap, node: &TsIndexSignature) {
@@ -1458,6 +1492,11 @@ pub mod span {
     register_ts_interface_body(map, &node.body);
   }
 
+  fn register_ts_intersection_type(map: &mut ByteToIndexMap, node: &TsIntersectionType) {
+    map.register_by_span(&node.span);
+    node.types.iter().for_each(|node| register_ts_type(map, node));
+  }
+
   fn register_ts_instantiation(map: &mut ByteToIndexMap, node: &TsInstantiation) {
     map.register_by_span(&node.span);
     register_expr(map, &node.expr);
@@ -1488,6 +1527,17 @@ pub mod span {
     register_ts_type_param(map, &node.type_param);
     node.name_type.as_ref().map(|node| register_ts_type(map, node));
     node.type_ann.as_ref().map(|node| register_ts_type(map, node));
+  }
+
+  fn register_ts_method_signature(map: &mut ByteToIndexMap, node: &TsMethodSignature) {
+    map.register_by_span(&node.span);
+    register_expr(map, &node.key);
+    node.params.iter().for_each(|node| register_ts_fn_param(map, node));
+    node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
+    node
+      .type_params
+      .as_ref()
+      .map(|node| register_ts_type_param_decl(map, node));
   }
 
   fn register_ts_module_block(map: &mut ByteToIndexMap, node: &TsModuleBlock) {
@@ -1561,6 +1611,18 @@ pub mod span {
     register_ts_type(map, &node.type_ann);
   }
 
+  fn register_ts_property_signature(map: &mut ByteToIndexMap, node: &TsPropertySignature) {
+    map.register_by_span(&node.span);
+    register_expr(map, &node.key);
+    node.init.as_ref().map(|node| register_expr(map, node));
+    node.params.iter().for_each(|node| register_ts_fn_param(map, node));
+    node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
+    node
+      .type_params
+      .as_ref()
+      .map(|node| register_ts_type_param_decl(map, node));
+  }
+
   fn register_ts_qualified_name(map: &mut ByteToIndexMap, node: &TsQualifiedName) {
     register_ts_entity_name(map, &node.left);
     register_ident(map, &node.right);
@@ -1577,8 +1639,21 @@ pub mod span {
     register_ts_type(map, &node.type_ann);
   }
 
+  fn register_ts_setter_signature(map: &mut ByteToIndexMap, node: &TsSetterSignature) {
+    map.register_by_span(&node.span);
+    register_expr(map, &node.key);
+    register_ts_fn_param(map, &node.param);
+  }
+
   fn register_ts_this_type(map: &mut ByteToIndexMap, node: &TsThisType) {
     map.register_by_span(&node.span);
+  }
+
+  fn register_ts_this_type_or_ident(map: &mut ByteToIndexMap, node: &TsThisTypeOrIdent) {
+    match node {
+      TsThisTypeOrIdent::TsThisType(node) => register_ts_this_type(map, node),
+      TsThisTypeOrIdent::Ident(node) => register_ident(map, node),
+    }
   }
 
   fn register_ts_tpl_lit_type(map: &mut ByteToIndexMap, node: &TsTplLitType) {
@@ -1614,62 +1689,93 @@ pub mod span {
 
   fn register_ts_type_alias_decl(map: &mut ByteToIndexMap, node: &TsTypeAliasDecl) {
     map.register_by_span(&node.span);
-    // TODO
+    register_ident(map, &node.id);
+    node
+      .type_params
+      .as_ref()
+      .map(|node| register_ts_type_param_decl(map, node.as_ref()));
+    register_ts_type(map, &node.type_ann);
   }
 
   fn register_ts_type_ann(map: &mut ByteToIndexMap, node: &TsTypeAnn) {
     map.register_by_span(&node.span);
-    // TODO
+    register_ts_type(map, &node.type_ann);
   }
 
   fn register_ts_type_assertion(map: &mut ByteToIndexMap, node: &TsTypeAssertion) {
     map.register_by_span(&node.span);
-    // TODO
+    register_expr(map, &node.expr);
+    register_ts_type(map, &node.type_ann);
   }
 
   fn register_ts_type_element(map: &mut ByteToIndexMap, node: &TsTypeElement) {
-    // TODO
+    match node {
+      TsTypeElement::TsCallSignatureDecl(node) => register_ts_call_signature_decl(map, node),
+      TsTypeElement::TsConstructSignatureDecl(node) => register_ts_construct_signature_decl(map, node),
+      TsTypeElement::TsPropertySignature(node) => register_ts_property_signature(map, node),
+      TsTypeElement::TsGetterSignature(node) => register_ts_getter_signature(map, node),
+      TsTypeElement::TsSetterSignature(node) => register_ts_setter_signature(map, node),
+      TsTypeElement::TsMethodSignature(node) => register_ts_method_signature(map, node),
+      TsTypeElement::TsIndexSignature(node) => register_ts_index_signature(map, node),
+    }
   }
 
   fn register_ts_type_lit(map: &mut ByteToIndexMap, node: &TsTypeLit) {
     map.register_by_span(&node.span);
-    // TODO
+    node.members.iter().for_each(|node| register_ts_type_element(map, node));
   }
 
   fn register_ts_type_operator(map: &mut ByteToIndexMap, node: &TsTypeOperator) {
     map.register_by_span(&node.span);
-    // TODO
+    register_ts_type(map, &node.type_ann);
   }
 
   fn register_ts_type_param(map: &mut ByteToIndexMap, node: &TsTypeParam) {
     map.register_by_span(&node.span);
     register_ident(map, &node.name);
-    // TODO
+    node.constraint.as_ref().map(|node| register_ts_type(map, node));
+    node.default.as_ref().map(|node| register_ts_type(map, node));
   }
 
   fn register_ts_type_param_decl(map: &mut ByteToIndexMap, node: &TsTypeParamDecl) {
     map.register_by_span(&node.span);
-    // TODO
+    node.params.iter().for_each(|node| register_ts_type_param(map, node));
   }
 
   fn register_ts_type_param_instantiation(map: &mut ByteToIndexMap, node: &TsTypeParamInstantiation) {
     map.register_by_span(&node.span);
-    // TODO
+    node.params.iter().for_each(|node| register_ts_type(map, node));
   }
 
   fn register_ts_type_predicate(map: &mut ByteToIndexMap, node: &TsTypePredicate) {
     map.register_by_span(&node.span);
-    // TODO
+    register_ts_this_type_or_ident(map, &node.param_name);
+    node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
   }
 
   fn register_ts_type_query(map: &mut ByteToIndexMap, node: &TsTypeQuery) {
     map.register_by_span(&node.span);
-    // TODO
+    register_ts_type_query_expr(map, &node.expr_name);
+    node
+      .type_args
+      .as_ref()
+      .map(|node| register_ts_type_param_instantiation(map, &node));
+  }
+
+  fn register_ts_type_query_expr(map: &mut ByteToIndexMap, node: &TsTypeQueryExpr) {
+    match node {
+      TsTypeQueryExpr::TsEntityName(node) => register_ts_entity_name(map, node),
+      TsTypeQueryExpr::Import(node) => register_ts_import_type(map, node),
+    }
   }
 
   fn register_ts_type_ref(map: &mut ByteToIndexMap, node: &TsTypeRef) {
     map.register_by_span(&node.span);
-    // TODO
+    register_ts_entity_name(map, &node.type_name);
+    node
+      .type_params
+      .as_ref()
+      .map(|node| register_ts_type_param_instantiation(map, node));
   }
 
   fn register_ts_tuple_element(map: &mut ByteToIndexMap, node: &TsTupleElement) {
@@ -1680,26 +1786,39 @@ pub mod span {
 
   fn register_ts_tuple_type(map: &mut ByteToIndexMap, node: &TsTupleType) {
     map.register_by_span(&node.span);
-    node.elem_types.iter().for_each(|node| register_ts_tuple_element(map, node));
+    node
+      .elem_types
+      .iter()
+      .for_each(|node| register_ts_tuple_element(map, node));
+  }
+
+  fn register_ts_union_type(map: &mut ByteToIndexMap, node: &TsUnionType) {
+    map.register_by_span(&node.span);
+    node.types.iter().for_each(|node| register_ts_type(map, node));
   }
 
   fn register_ts_union_or_intersection_type(map: &mut ByteToIndexMap, node: &TsUnionOrIntersectionType) {
-    // TODO
+    match node {
+      TsUnionOrIntersectionType::TsUnionType(node) => register_ts_union_type(map, node),
+      TsUnionOrIntersectionType::TsIntersectionType(node) => register_ts_intersection_type(map, node),
+    }
   }
 
   fn register_try_stmt(map: &mut ByteToIndexMap, node: &TryStmt) {
     map.register_by_span(&node.span);
-    // TODO
+    register_block_stmt(map, &node.block);
+    node.handler.as_ref().map(|node| register_catch_clause(map, node));
+    node.finalizer.as_ref().map(|node| register_block_stmt(map, node));
   }
 
   fn register_unary_expr(map: &mut ByteToIndexMap, node: &UnaryExpr) {
     map.register_by_span(&node.span);
-    // TODO
+    register_expr(map, &node.arg);
   }
 
   fn register_update_expr(map: &mut ByteToIndexMap, node: &UpdateExpr) {
     map.register_by_span(&node.span);
-    // TODO
+    register_expr(map, &node.arg);
   }
 
   fn register_using_decl(map: &mut ByteToIndexMap, node: &UsingDecl) {
@@ -1738,7 +1857,7 @@ pub mod span {
 
   fn register_yield_expr(map: &mut ByteToIndexMap, node: &YieldExpr) {
     map.register_by_span(&node.span);
-    // TODO
+    node.arg.as_ref().map(|node| register_expr(map, node));
   }
 }
 
