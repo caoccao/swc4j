@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.program;
 
-import com.caoccao.javet.swc4j.ast.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.List;
  *
  * @since 0.2.0
  */
-public class Swc4jAstModule extends Swc4jAstProgram<ISwc4jAst> {
+public class Swc4jAstModule extends Swc4jAstProgram<ISwc4jAstModuleItem> {
     /**
      * Instantiates a new Swc4j ast module.
      *
@@ -36,7 +36,12 @@ public class Swc4jAstModule extends Swc4jAstProgram<ISwc4jAst> {
      * @param endPosition   the end position
      * @since 0.2.0
      */
-    public Swc4jAstModule(List<ISwc4jAst> body, String shebang, int startPosition, int endPosition) {
-        super(Swc4jAstType.Module, body, shebang, startPosition, endPosition);
+    public Swc4jAstModule(List<ISwc4jAstModuleItem> body, String shebang, int startPosition, int endPosition) {
+        super(body, shebang, startPosition, endPosition);
+    }
+
+    @Override
+    public Swc4jAstType getType() {
+        return Swc4jAstType.Module;
     }
 }

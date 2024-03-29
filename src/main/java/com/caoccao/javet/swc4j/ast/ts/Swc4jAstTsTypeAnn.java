@@ -16,8 +16,9 @@
 
 package com.caoccao.javet.swc4j.ast.ts;
 
-import com.caoccao.javet.swc4j.ast.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -29,22 +30,32 @@ import java.util.List;
  * @since 0.2.0
  */
 public class Swc4jAstTsTypeAnn extends Swc4jAst {
-    // TODO
+    protected final ISwc4jAstTsType typeAnn;
 
     /**
      * Instantiates a new Swc4j ast ts type ann.
      *
-     * @param type          the type
      * @param startPosition the start position
      * @param endPosition   the end position
      * @since 0.2.0
      */
-    protected Swc4jAstTsTypeAnn(Swc4jAstType type, int startPosition, int endPosition) {
-        super(type, startPosition, endPosition);
+    protected Swc4jAstTsTypeAnn(ISwc4jAstTsType typeAnn, int startPosition, int endPosition) {
+        super(startPosition, endPosition);
+        this.typeAnn = typeAnn;
+        updateParent();
     }
 
     @Override
     public List<ISwc4jAst> getChildren() {
-        return SimpleList.of();
+        return SimpleList.of(typeAnn);
+    }
+
+    @Override
+    public Swc4jAstType getType() {
+        return Swc4jAstType.TsTypeAnn;
+    }
+
+    public ISwc4jAstTsType getTypeAnn() {
+        return typeAnn;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,32 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.program;
+package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.ast.ISwc4jAst;
-
-import java.util.List;
-
-/**
- * The interface Swc4j ast program.
- *
- * @param <AST> the type parameter
- * @since 0.2.0
- */
-public interface ISwc4jAstProgram<AST extends ISwc4jAst> extends ISwc4jAst {
-    /**
-     * Gets body.
-     *
-     * @return the body
-     * @since 0.2.0
-     */
-    List<AST> getBody();
-
-    /**
-     * Gets shebang.
-     *
-     * @return the shebang
-     * @since 0.2.0
-     */
-    String getShebang();
+public interface ISwc4jAstExpr extends ISwc4jAst {
 }

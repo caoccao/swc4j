@@ -55,7 +55,7 @@ impl JavaSwc4jParseOutput {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/program/ISwc4jAstProgram;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/util/List;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstProgram;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/util/List;)V",
       )
       .expect("Couldn't find method Swc4jParseOutput::new");
     JavaSwc4jParseOutput {
@@ -121,7 +121,7 @@ impl JavaSwc4jTranspileOutput {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/program/ISwc4jAstProgram;Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/lang/String;Ljava/util/List;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstProgram;Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/lang/String;Ljava/util/List;)V",
       )
       .expect("Couldn't find method Swc4jTranspileOutput::new");
     JavaSwc4jTranspileOutput {

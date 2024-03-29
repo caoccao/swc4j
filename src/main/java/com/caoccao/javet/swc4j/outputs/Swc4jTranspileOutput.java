@@ -16,8 +16,8 @@
 
 package com.caoccao.javet.swc4j.outputs;
 
-import com.caoccao.javet.swc4j.ast.ISwc4jAst;
-import com.caoccao.javet.swc4j.ast.program.ISwc4jAstProgram;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.stmt.decl;
+package com.caoccao.javet.swc4j.ast.stmt;
 
-import com.caoccao.javet.swc4j.ast.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
@@ -28,7 +30,9 @@ import java.util.List;
  *
  * @since 0.2.0
  */
-public class Swc4jAstVarDecl extends Swc4jAstDecl {
+public class Swc4jAstVarDecl
+        extends Swc4jAst
+        implements ISwc4jAstDecl {
     /**
      * The Declare.
      *
@@ -64,7 +68,7 @@ public class Swc4jAstVarDecl extends Swc4jAstDecl {
             List<Swc4jAstVarDeclarator> decls,
             int startPosition,
             int endPosition) {
-        super(Swc4jAstType.VarDeclarator, startPosition, endPosition);
+        super(startPosition, endPosition);
         this.declare = declare;
         this.decls = AssertionUtils.notNull(decls, "Decls");
         this.kind = AssertionUtils.notNull(kind, "Kind");
@@ -94,6 +98,11 @@ public class Swc4jAstVarDecl extends Swc4jAstDecl {
      */
     public Swc4jAstVarDeclKind getKind() {
         return kind;
+    }
+
+    @Override
+    public Swc4jAstType getType() {
+        return Swc4jAstType.VarDecl;
     }
 
     /**

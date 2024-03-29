@@ -24,7 +24,7 @@ macro_rules! delete_local_ref {
   ($env: ident, $name: expr) => {
     $env
       .delete_local_ref($name)
-      .expect(&format!("Couldn't delete local {}", stringify!($name)));
+      .expect(&format!("Couldn't delete local {}", stringify!($name)))
   };
 }
 pub(crate) use delete_local_ref;

@@ -31,6 +31,7 @@ struct JavaSwc4jAstFactory {
   #[allow(dead_code)]
   class: GlobalRef,
   method_create_binding_ident: JStaticMethodID,
+  method_create_expr_stmt: JStaticMethodID,
   method_create_ident: JStaticMethodID,
   method_create_module: JStaticMethodID,
   method_create_script: JStaticMethodID,
@@ -55,6 +56,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;II)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstBindingIdent;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBindingIdent");
+    let method_create_expr_stmt = env
+      .get_static_method_id(
+        &class,
+        "createExprStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstExprStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createExprStmt");
     let method_create_ident = env
       .get_static_method_id(
         &class,
@@ -80,19 +88,20 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createVarDecl",
-        "(IZLjava/util/List;II)Lcom/caoccao/javet/swc4j/ast/stmt/decl/Swc4jAstVarDecl;",
+        "(IZLjava/util/List;II)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstVarDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createVarDecl");
     let method_create_var_declarator = env
       .get_static_method_id(
         &class,
         "createVarDeclarator",
-        "(Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstPat;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstExpr;ZII)Lcom/caoccao/javet/swc4j/ast/stmt/decl/Swc4jAstVarDeclarator;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZII)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstVarDeclarator;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createVarDeclarator");
     JavaSwc4jAstFactory {
       class,
       method_create_binding_ident,
+      method_create_expr_stmt,
       method_create_ident,
       method_create_module,
       method_create_script,
@@ -105,14 +114,19 @@ impl JavaSwc4jAstFactory {
     &self,
     env: &mut JNIEnv<'local>,
     id: &JObject<'_>,
-    type_ann: &JObject<'_>,
+    type_ann: &Option<JObject>,
     range: &Range<usize>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
     let id = jvalue { l: id.as_raw() };
-    let type_ann = jvalue { l: type_ann.as_raw() };
+    let type_ann = jvalue {
+      l: match type_ann {
+        Some(type_ann) => type_ann.as_raw(),
+        None => null_mut(),
+      },
+    };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
     let return_value = unsafe {
@@ -126,6 +140,33 @@ impl JavaSwc4jAstFactory {
         .expect("Couldn't create Swc4jAstBindingIdent by create_binding_ident()")
         .l()
         .expect("Couldn't convert Swc4jAstBindingIdent by create_binding_ident()")
+    };
+    return_value
+  }
+
+  pub fn create_expr_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = jvalue { l: expr.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_expr_stmt,
+          ReturnType::Object,
+          &[expr, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstExprStmt by create_expr_stmt()")
+        .l()
+        .expect("Couldn't convert Swc4jAstExprStmt by create_expr_stmt()")
     };
     return_value
   }
@@ -445,6 +486,7 @@ pub mod span {
   }
 
   fn register_catch_clause(map: &mut ByteToIndexMap, node: &CatchClause) {
+    map.register_by_span(&node.span);
     node.param.as_ref().map(|node| register_pat(map, node));
     register_block_stmt(map, &node.body);
   }
@@ -469,11 +511,13 @@ pub mod span {
   }
 
   fn register_class_decl(map: &mut ByteToIndexMap, node: &ClassDecl) {
+    // No span.
     register_ident(map, &node.ident);
     register_class(map, &node.class);
   }
 
   fn register_class_expr(map: &mut ByteToIndexMap, node: &ClassExpr) {
+    // No span.
     node.ident.as_ref().map(|node| register_ident(map, node));
     register_class(map, &node.class);
   }
@@ -674,11 +718,13 @@ pub mod span {
   }
 
   fn register_fn_decl(map: &mut ByteToIndexMap, node: &FnDecl) {
+    // No span.
     register_ident(map, &node.ident);
     register_function(map, &node.function);
   }
 
   fn register_fn_expr(map: &mut ByteToIndexMap, node: &FnExpr) {
+    // No span.
     node.ident.as_ref().map(|node| register_ident(map, node));
     register_function(map, &node.function);
   }
@@ -884,11 +930,13 @@ pub mod span {
   }
 
   fn register_jsx_member_expr(map: &mut ByteToIndexMap, node: &JSXMemberExpr) {
+    // No span.
     register_jsx_object(map, &node.obj);
     register_ident(map, &node.prop);
   }
 
   fn register_jsx_namespaced_name(map: &mut ByteToIndexMap, node: &JSXNamespacedName) {
+    // No span.
     register_ident(map, &node.name);
     register_ident(map, &node.ns);
   }
@@ -980,6 +1028,7 @@ pub mod span {
   }
 
   fn register_method_prop(map: &mut ByteToIndexMap, node: &MethodProp) {
+    // No span.
     register_prop_name(map, &node.key);
     register_function(map, &node.function);
   }
@@ -1624,6 +1673,7 @@ pub mod span {
   }
 
   fn register_ts_qualified_name(map: &mut ByteToIndexMap, node: &TsQualifiedName) {
+    // No span.
     register_ts_entity_name(map, &node.left);
     register_ident(map, &node.right);
   }
@@ -1863,6 +1913,7 @@ pub mod span {
 
 pub mod program {
   use jni::objects::JObject;
+  use jni::sys::jvalue;
   use jni::JNIEnv;
 
   use crate::ast_utils::JAVA_AST_FACTORY;
@@ -1878,88 +1929,115 @@ pub mod program {
   fn create_binding_ident<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
-    binding_ident: &BindingIdent,
+    node: &BindingIdent,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let range = map.get_range_by_span(&binding_ident.span());
-    let java_id = create_ident(env, map, &binding_ident.id);
-    let java_type_ann: JObject<'_> = Default::default(); // TODO
+    let range = map.get_range_by_span(&node.span);
+    let java_id = create_ident(env, map, &node.id);
+    let java_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
     let return_value = java_ast_factory.create_binding_ident(env, &java_id, &java_type_ann, &range);
     delete_local_ref!(env, java_id);
-    delete_local_ref!(env, java_type_ann);
+    java_type_ann.map(|j| delete_local_ref!(env, j));
     return_value
   }
 
-  fn create_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, expr: &Expr) -> JObject<'a>
+  fn create_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Decl) -> JObject<'a>
   where
     'local: 'a,
   {
-    match expr {
-      Expr::Ident(node) => create_ident(env, map, &node),
+    match node {
+      Decl::Var(node) => create_var_decl(env, map, &node),
       _ => Default::default(),
+      // TODO
     }
   }
 
-  fn create_ident<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, ident: &Ident) -> JObject<'a>
+  fn create_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Expr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      Expr::Ident(node) => create_ident(env, map, &node),
+      _ => Default::default(),
+      // TODO
+    }
+  }
+
+  fn create_expr_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ExprStmt) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let range = map.get_range_by_span(&ident.span());
-    let sym = ident.sym.as_str();
-    let optional = ident.optional;
+    let range = map.get_range_by_span(&node.span);
+    let java_expr = create_expr(env, map, &node.expr);
+    let return_value = java_ast_factory.create_expr_stmt(env, &java_expr, &range);
+    delete_local_ref!(env, java_expr);
+    return_value
+  }
+
+  fn create_ident<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Ident) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let sym = node.sym.as_str();
+    let optional = node.optional;
     java_ast_factory.create_ident(env, sym, optional, &range)
   }
 
-  fn create_module<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, module: &Module) -> JObject<'a>
+  fn create_module<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Module) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let shebang: Option<String> = module.shebang.to_owned().map(|s| s.to_string());
-    let range = map.get_range_by_span(&module.span());
-    let java_body = create_module_body(env, map, &module.body);
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let shebang: Option<String> = node.shebang.to_owned().map(|s| s.to_string());
+    let range = map.get_range_by_span(&node.span);
+    let java_body = java_array_list.construct(env, node.body.len());
+    node.body.iter().for_each(|node| {
+      let java_stmt = create_module_item(env, map, node);
+      java_array_list.add(env, &java_body, &java_stmt);
+      delete_local_ref!(env, java_stmt);
+    });
     let java_module = java_ast_factory.create_module(env, &java_body, &shebang, &range);
     delete_local_ref!(env, java_body);
     java_module
   }
 
-  fn create_module_body<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    map: &ByteToIndexMap,
-    body: &Vec<ModuleItem>,
-  ) -> JObject<'a>
+  fn create_module_item<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ModuleItem) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_body = java_array_list.construct(env, body.len());
-    // TODO
-    java_body
+    match node {
+      _ => Default::default(),
+      // TODO
+    }
   }
 
-  fn create_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, pat: &Pat) -> JObject<'a>
+  fn create_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Pat) -> JObject<'a>
   where
     'local: 'a,
   {
-    match pat {
+    match node {
       Pat::Ident(node) => create_binding_ident(env, map, &node),
       _ => Default::default(),
+      // TODO
     }
   }
 
   pub fn create_program<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
-    program: &Option<Arc<Program>>,
+    node: &Option<Arc<Program>>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    match program {
+    match node {
       Some(node) => match node.as_ref() {
         Program::Module(node) => create_module(env, map, node),
         Program::Script(node) => create_script(env, map, node),
@@ -1968,64 +2046,48 @@ pub mod program {
     }
   }
 
-  fn create_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, statement: &Stmt) -> JObject<'a>
+  fn create_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Stmt) -> JObject<'a>
   where
     'local: 'a,
   {
-    match statement {
-      Stmt::Decl(node) => create_stmt_decl(env, map, &node),
+    match node {
+      Stmt::Expr(node) => create_expr_stmt(env, map, &node),
+      Stmt::Decl(node) => create_decl(env, map, &node),
       _ => Default::default(),
+      // TODO
     }
   }
 
-  fn create_stmt_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, decl: &Decl) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match decl {
-      Decl::Var(node) => create_var_decl(env, map, &node),
-      _ => Default::default(),
-    }
-  }
-
-  fn create_script<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, script: &Script) -> JObject<'a>
+  fn create_script<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Script) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let shebang: Option<String> = script.shebang.to_owned().map(|s| s.to_string());
-    let range = map.get_range_by_span(&script.span());
-    let java_body = create_script_body(env, map, &script.body);
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let shebang: Option<String> = node.shebang.to_owned().map(|s| s.to_string());
+    let range = map.get_range_by_span(&node.span);
+    let java_body = java_array_list.construct(env, node.body.len());
+    node.body.iter().for_each(|node| {
+      let java_stmt = create_stmt(env, map, node);
+      java_array_list.add(env, &java_body, &java_stmt);
+      delete_local_ref!(env, java_stmt);
+    });
     let java_script = java_ast_factory.create_script(env, &java_body, &shebang, &range);
     delete_local_ref!(env, java_body);
     java_script
   }
 
-  fn create_script_body<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, body: &Vec<Stmt>) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_body = java_array_list.construct(env, body.len());
-    body.into_iter().for_each(|node| {
-      let java_stmt = create_stmt(env, map, node);
-      java_array_list.add(env, &java_body, &java_stmt);
-      delete_local_ref!(env, java_stmt);
-    });
-    java_body
-  }
-
-  fn create_var_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, var_decl: &VarDecl) -> JObject<'a>
+  fn create_var_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &VarDecl) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let declare = var_decl.declare;
-    let kind_id = var_decl.kind.get_id();
-    let range = map.get_range_by_span(&var_decl.span());
-    let java_decls = java_array_list.construct(env, var_decl.decls.len());
-    var_decl.decls.iter().for_each(|node| {
+    let declare = node.declare;
+    let kind_id = node.kind.get_id();
+    let range = map.get_range_by_span(&node.span);
+    let java_decls = java_array_list.construct(env, node.decls.len());
+    node.decls.iter().for_each(|node| {
       let java_var_declarator = create_var_declarator(env, map, node);
       java_array_list.add(env, &java_decls, &java_var_declarator);
       delete_local_ref!(env, java_var_declarator);
@@ -2035,22 +2097,27 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_type_ann<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeAnn) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    Default::default()
+  }
+
   fn create_var_declarator<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
-    var_declarator: &VarDeclarator,
+    node: &VarDeclarator,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let definite = var_declarator.definite;
-    let java_option_init: Option<JObject> = var_declarator
-      .init
-      .as_ref()
-      .map(|node| create_expr(env, map, node.as_ref()));
-    let java_name = create_pat(env, map, &var_declarator.name);
-    let range = map.get_range_by_span(&var_declarator.span());
+    let definite = node.definite;
+    let java_option_init: Option<JObject> = node.init.as_ref().map(|node| create_expr(env, map, node.as_ref()));
+    let java_name = create_pat(env, map, &node.name);
+    let range = map.get_range_by_span(&node.span);
     let return_value = java_ast_factory.create_var_declarator(env, &java_name, &java_option_init, definite, &range);
     java_option_init.map(|j| delete_local_ref!(env, j));
     delete_local_ref!(env, java_name);

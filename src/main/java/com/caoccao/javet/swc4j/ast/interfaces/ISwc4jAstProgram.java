@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,30 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast;
+package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.jni2rust.Jni2Rust;
-import org.junit.jupiter.api.Test;
+import java.util.List;
 
-import java.io.IOException;
+/**
+ * The interface Swc4j ast program.
+ *
+ * @param <AST> the type parameter
+ * @since 0.2.0
+ */
+public interface ISwc4jAstProgram<AST extends ISwc4jAst> extends ISwc4jAst {
+    /**
+     * Gets body.
+     *
+     * @return the body
+     * @since 0.2.0
+     */
+    List<AST> getBody();
 
-public class TestSwc4jAstFactory {
-    @Test
-    public void testCodeGen() throws IOException {
-        Jni2Rust<Swc4jAstFactory> jni2Rust = new Jni2Rust<>(Swc4jAstFactory.class);
-        jni2Rust.updateFile();
-    }
+    /**
+     * Gets shebang.
+     *
+     * @return the shebang
+     * @since 0.2.0
+     */
+    String getShebang();
 }

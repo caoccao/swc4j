@@ -16,8 +16,10 @@
 
 package com.caoccao.javet.swc4j.ast.pat;
 
-import com.caoccao.javet.swc4j.ast.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -30,7 +32,9 @@ import java.util.List;
  *
  * @since 0.2.0
  */
-public class Swc4jAstBindingIdent extends Swc4jAstPat {
+public class Swc4jAstBindingIdent
+        extends Swc4jAst
+        implements ISwc4jAstPat {
     /**
      * The Id.
      *
@@ -58,9 +62,8 @@ public class Swc4jAstBindingIdent extends Swc4jAstPat {
             Swc4jAstTsTypeAnn typeAnn,
             int startPosition,
             int endPosition) {
-        super(Swc4jAstType.Ident, startPosition, endPosition);
+        super(startPosition, endPosition);
         this.id = AssertionUtils.notNull(id, "Id");
-//        this.typeAnn = AssertionUtils.notNull(typeAnn, "Type annotation");
         this.typeAnn = typeAnn;
         updateParent();
     }
@@ -78,6 +81,11 @@ public class Swc4jAstBindingIdent extends Swc4jAstPat {
      */
     public Swc4jAstIdent getId() {
         return id;
+    }
+
+    @Override
+    public Swc4jAstType getType() {
+        return Swc4jAstType.BindingIdent;
     }
 
     /**

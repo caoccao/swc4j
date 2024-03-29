@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast;
 
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 
 import java.util.Objects;
 
@@ -39,12 +39,6 @@ public abstract class Swc4jAst implements ISwc4jAst {
      */
     protected final int startPosition;
     /**
-     * The Ast type.
-     *
-     * @since 0.2.0
-     */
-    protected final Swc4jAstType type;
-    /**
      * The Parent.
      *
      * @since 0.2.0
@@ -54,16 +48,14 @@ public abstract class Swc4jAst implements ISwc4jAst {
     /**
      * Instantiates a new Swc4j ast.
      *
-     * @param type          the type
      * @param startPosition the start position
      * @param endPosition   the end position
      * @since 0.2.0
      */
-    protected Swc4jAst(Swc4jAstType type, int startPosition, int endPosition) {
+    protected Swc4jAst(int startPosition, int endPosition) {
         this.endPosition = endPosition;
         parent = null;
         this.startPosition = startPosition;
-        this.type = type;
     }
 
     @Override
@@ -79,11 +71,6 @@ public abstract class Swc4jAst implements ISwc4jAst {
     @Override
     public int getStartPosition() {
         return startPosition;
-    }
-
-    @Override
-    public Swc4jAstType getType() {
-        return type;
     }
 
     @Override

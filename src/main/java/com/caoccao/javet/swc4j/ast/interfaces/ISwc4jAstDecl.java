@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.outputs;
+package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.jni2rust.Jni2Rust;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-
-public class TestSwc4jParseOutput {
-    @Test
-    public void testCodeGen() throws IOException {
-        Jni2Rust<Swc4jParseOutput> jni2Rust = new Jni2Rust<>(Swc4jParseOutput.class);
-        jni2Rust.updateFile();
-    }
+public interface ISwc4jAstDecl extends ISwc4jAstStmt {
 }

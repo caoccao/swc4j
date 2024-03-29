@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.stmt.decl;
+package com.caoccao.javet.swc4j.ast.stmt;
 
-import com.caoccao.javet.swc4j.ast.ISwc4jAst;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.pat.Swc4jAstPat;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -30,7 +32,9 @@ import java.util.List;
  *
  * @since 0.2.0
  */
-public class Swc4jAstVarDeclarator extends Swc4jAstDecl {
+public class Swc4jAstVarDeclarator
+        extends Swc4jAst
+        implements ISwc4jAstDecl {
     /**
      * The Definite.
      *
@@ -42,13 +46,13 @@ public class Swc4jAstVarDeclarator extends Swc4jAstDecl {
      *
      * @since 0.2.0
      */
-    protected final Swc4jAstExpr init;
+    protected final ISwc4jAstExpr init;
     /**
      * The Name.
      *
      * @since 0.2.0
      */
-    protected final Swc4jAstPat name;
+    protected final ISwc4jAstPat name;
 
     /**
      * Instantiates a new Swc4j ast var declarator.
@@ -61,12 +65,12 @@ public class Swc4jAstVarDeclarator extends Swc4jAstDecl {
      * @since 0.2.0
      */
     public Swc4jAstVarDeclarator(
-            Swc4jAstPat name,
-            Swc4jAstExpr init,
+            ISwc4jAstPat name,
+            ISwc4jAstExpr init,
             boolean definite,
             int startPosition,
             int endPosition) {
-        super(Swc4jAstType.VarDeclarator, startPosition, endPosition);
+        super(startPosition, endPosition);
         this.definite = definite;
 //        this.init = AssertionUtils.notNull(init, "Init");
         this.init = init;
@@ -85,7 +89,7 @@ public class Swc4jAstVarDeclarator extends Swc4jAstDecl {
      * @return the init
      * @since 0.2.0
      */
-    public Swc4jAstExpr getInit() {
+    public ISwc4jAstExpr getInit() {
         return init;
     }
 
@@ -95,8 +99,13 @@ public class Swc4jAstVarDeclarator extends Swc4jAstDecl {
      * @return the name
      * @since 0.2.0
      */
-    public Swc4jAstPat getName() {
+    public ISwc4jAstPat getName() {
         return name;
+    }
+
+    @Override
+    public Swc4jAstType getType() {
+        return Swc4jAstType.VarDeclarator;
     }
 
     /**
