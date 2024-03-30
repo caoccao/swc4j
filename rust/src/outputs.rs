@@ -70,7 +70,7 @@ impl JavaSwc4jParseOutput {
     'local: 'a,
   {
     let byte_to_index_map = parse_output.get_byte_to_index_map();
-    let program = ast_utils::program::create_program(env, &byte_to_index_map, &parse_output.program);
+    let program = ast_utils::program::enum_create_program(env, &byte_to_index_map, &parse_output.program);
     let program = jvalue { l: program.as_raw() };
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let media_type = java_media_type.parse(env, parse_output.media_type.get_id());
@@ -136,7 +136,7 @@ impl JavaSwc4jTranspileOutput {
     'local: 'a,
   {
     let byte_to_index_map = transpile_output.parse_output.get_byte_to_index_map();
-    let program = ast_utils::program::create_program(env, &byte_to_index_map, &transpile_output.parse_output.program);
+    let program = ast_utils::program::enum_create_program(env, &byte_to_index_map, &transpile_output.parse_output.program);
     let program = jvalue { l: program.as_raw() };
     let code = jvalue {
       l: converter::string_to_jstring(env, &transpile_output.code).as_raw(),
@@ -235,7 +235,7 @@ impl ParseOutput {
     let mut byte_to_index_map = ByteToIndexMap::new();
     match &self.program {
       Some(program) => {
-        ast_utils::span::register_program(&mut byte_to_index_map, program);
+        ast_utils::span::enum_register_program(&mut byte_to_index_map, program);
       }
       None => {}
     }

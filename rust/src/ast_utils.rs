@@ -770,27 +770,494 @@ pub mod span {
   use crate::position_utils::ByteToIndexMap;
   use deno_ast::swc::ast::*;
 
+  fn enum_register_block_stmt_or_expr(map: &mut ByteToIndexMap, node: &BlockStmtOrExpr) {
+    match node {
+      BlockStmtOrExpr::BlockStmt(node) => register_block_stmt(map, node),
+      BlockStmtOrExpr::Expr(node) => enum_register_expr(map, node),
+    }
+  }
+
+  fn enum_register_callee(map: &mut ByteToIndexMap, node: &Callee) {
+    match node {
+      Callee::Super(node) => register_super(map, node),
+      Callee::Import(node) => register_import(map, node),
+      Callee::Expr(node) => enum_register_expr(map, node),
+    }
+  }
+
+  fn enum_register_class_member(map: &mut ByteToIndexMap, node: &ClassMember) {
+    match node {
+      ClassMember::Constructor(node) => register_constructor(map, node),
+      ClassMember::Method(node) => register_class_method(map, node),
+      ClassMember::PrivateMethod(node) => register_private_method(map, node),
+      ClassMember::ClassProp(node) => register_class_prop(map, node),
+      ClassMember::PrivateProp(node) => register_private_prop(map, node),
+      ClassMember::TsIndexSignature(node) => register_ts_index_signature(map, node),
+      ClassMember::Empty(node) => register_empty_stmt(map, node),
+      ClassMember::StaticBlock(node) => register_static_block(map, node),
+      ClassMember::AutoAccessor(node) => register_auto_accessor(map, node),
+    }
+  }
+
+  fn enum_register_decl(map: &mut ByteToIndexMap, node: &Decl) {
+    match node {
+      Decl::Class(node) => register_class_decl(map, &node),
+      Decl::Fn(node) => register_fn_decl(map, &node),
+      Decl::Var(node) => register_var_decl(map, node.as_ref()),
+      Decl::Using(node) => register_using_decl(map, &node.as_ref()),
+      Decl::TsInterface(node) => register_ts_interface_decl(map, &node.as_ref()),
+      Decl::TsTypeAlias(node) => register_ts_type_alias_decl(map, &node.as_ref()),
+      Decl::TsEnum(node) => register_ts_enum_decl(map, &node.as_ref()),
+      Decl::TsModule(node) => register_ts_module_decl(map, &node.as_ref()),
+    };
+  }
+
+  fn enum_register_default_decl(map: &mut ByteToIndexMap, node: &DefaultDecl) {
+    match node {
+      DefaultDecl::Class(node) => register_class_expr(map, node),
+      DefaultDecl::Fn(node) => register_fn_expr(map, node),
+      DefaultDecl::TsInterfaceDecl(node) => register_ts_interface_decl(map, node),
+    }
+  }
+
+  fn enum_register_export_specifier(map: &mut ByteToIndexMap, node: &ExportSpecifier) {
+    match node {
+      ExportSpecifier::Namespace(node) => register_export_namespace_specifier(map, node),
+      ExportSpecifier::Default(node) => register_export_default_specifier(map, node),
+      ExportSpecifier::Named(node) => register_export_named_specifier(map, node),
+    }
+  }
+
+  fn enum_register_expr(map: &mut ByteToIndexMap, node: &Expr) {
+    match node {
+      Expr::This(node) => register_this_expr(map, node),
+      Expr::Array(node) => register_array_lit(map, node),
+      Expr::Object(node) => register_object_lit(map, node),
+      Expr::Fn(node) => register_fn_expr(map, node),
+      Expr::Unary(node) => register_unary_expr(map, node),
+      Expr::Update(node) => register_update_expr(map, node),
+      Expr::Bin(node) => register_bin_expr(map, node),
+      Expr::Assign(node) => register_assign_expr(map, node),
+      Expr::Member(node) => register_member_expr(map, node),
+      Expr::SuperProp(node) => register_super_prop_expr(map, node),
+      Expr::Cond(node) => register_cond_expr(map, node),
+      Expr::Call(node) => register_call_expr(map, node),
+      Expr::New(node) => register_new_expr(map, node),
+      Expr::Seq(node) => register_seq_expr(map, node),
+      Expr::Ident(node) => register_ident(map, node),
+      Expr::Lit(node) => enum_register_lit(map, node),
+      Expr::Tpl(node) => register_tpl(map, node),
+      Expr::TaggedTpl(node) => register_tagged_tpl(map, node),
+      Expr::Arrow(node) => register_arrow_expr(map, node),
+      Expr::Class(node) => register_class_expr(map, node),
+      Expr::Yield(node) => register_yield_expr(map, node),
+      Expr::MetaProp(node) => register_meta_prop_expr(map, node),
+      Expr::Await(node) => register_await_expr(map, node),
+      Expr::Paren(node) => register_paren_expr(map, node),
+      Expr::JSXMember(node) => register_jsx_member_expr(map, node),
+      Expr::JSXNamespacedName(node) => register_jsx_namespaced_name(map, node),
+      Expr::JSXEmpty(node) => register_jsx_empty_expr(map, node),
+      Expr::JSXElement(node) => register_jsx_element(map, node),
+      Expr::JSXFragment(node) => register_jsx_fragment(map, node),
+      Expr::TsTypeAssertion(node) => register_ts_type_assertion(map, node),
+      Expr::TsConstAssertion(node) => register_ts_const_assertion(map, node),
+      Expr::TsNonNull(node) => register_ts_non_null_expr(map, node),
+      Expr::TsAs(node) => register_ts_as_expr(map, node),
+      Expr::TsInstantiation(node) => register_ts_instantiation(map, node),
+      Expr::TsSatisfies(node) => register_ts_satisfies_expr(map, node),
+      Expr::PrivateName(node) => register_private_name(map, node),
+      Expr::OptChain(node) => register_opt_chain_expr(map, node),
+      Expr::Invalid(node) => register_invalid(map, node),
+    }
+  }
+
+  fn enum_register_for_head(map: &mut ByteToIndexMap, node: &ForHead) {
+    match node {
+      ForHead::VarDecl(node) => register_var_decl(map, node),
+      ForHead::UsingDecl(node) => register_using_decl(map, node),
+      ForHead::Pat(node) => enum_register_pat(map, node),
+    }
+  }
+
+  fn enum_register_import_specifier(map: &mut ByteToIndexMap, node: &ImportSpecifier) {
+    match node {
+      ImportSpecifier::Named(node) => register_import_named_specifier(map, node),
+      ImportSpecifier::Default(node) => register_import_default_specifier(map, node),
+      ImportSpecifier::Namespace(node) => register_import_star_as_specifier(map, node),
+    }
+  }
+
+  fn enum_register_jsx_attr_name(map: &mut ByteToIndexMap, node: &JSXAttrName) {
+    match node {
+      JSXAttrName::Ident(node) => register_ident(map, node),
+      JSXAttrName::JSXNamespacedName(node) => register_jsx_namespaced_name(map, node),
+    }
+  }
+
+  fn enum_register_jsx_attr_or_spread(map: &mut ByteToIndexMap, node: &JSXAttrOrSpread) {
+    match node {
+      JSXAttrOrSpread::JSXAttr(node) => register_jsx_attr(map, node),
+      JSXAttrOrSpread::SpreadElement(node) => register_spread_element(map, node),
+    }
+  }
+
+  fn enum_register_jsx_attr_value(map: &mut ByteToIndexMap, node: &JSXAttrValue) {
+    match node {
+      JSXAttrValue::Lit(node) => enum_register_lit(map, node),
+      JSXAttrValue::JSXExprContainer(node) => register_jsx_expr_container(map, node),
+      JSXAttrValue::JSXElement(node) => register_jsx_element(map, node),
+      JSXAttrValue::JSXFragment(node) => register_jsx_fragment(map, node),
+    }
+  }
+
+  fn enum_register_jsx_element_child(map: &mut ByteToIndexMap, node: &JSXElementChild) {
+    match node {
+      JSXElementChild::JSXText(node) => register_jsx_text(map, node),
+      JSXElementChild::JSXExprContainer(node) => register_jsx_expr_container(map, node),
+      JSXElementChild::JSXSpreadChild(node) => register_jsx_spread_child(map, node),
+      JSXElementChild::JSXElement(node) => register_jsx_element(map, node),
+      JSXElementChild::JSXFragment(node) => register_jsx_fragment(map, node),
+    }
+  }
+
+  fn enum_register_jsx_element_name(map: &mut ByteToIndexMap, node: &JSXElementName) {
+    match node {
+      JSXElementName::Ident(node) => register_ident(map, node),
+      JSXElementName::JSXMemberExpr(node) => register_jsx_member_expr(map, node),
+      JSXElementName::JSXNamespacedName(node) => register_jsx_namespaced_name(map, node),
+    }
+  }
+
+  fn enum_register_jsx_expr(map: &mut ByteToIndexMap, node: &JSXExpr) {
+    match node {
+      JSXExpr::JSXEmptyExpr(node) => register_jsx_empty_expr(map, node),
+      JSXExpr::Expr(node) => enum_register_expr(map, node),
+    }
+  }
+
+  fn enum_register_jsx_object(map: &mut ByteToIndexMap, node: &JSXObject) {
+    match node {
+      JSXObject::JSXMemberExpr(node) => register_jsx_member_expr(map, node),
+      JSXObject::Ident(node) => register_ident(map, node),
+    }
+  }
+
+  fn enum_register_key(map: &mut ByteToIndexMap, node: &Key) {
+    match node {
+      Key::Private(node) => register_private_name(map, node),
+      Key::Public(node) => enum_register_prop_name(map, node),
+    }
+  }
+
+  fn enum_register_lit(map: &mut ByteToIndexMap, node: &Lit) {
+    match node {
+      Lit::Str(node) => register_str(map, node),
+      Lit::Bool(node) => register_bool(map, node),
+      Lit::Null(node) => register_null(map, node),
+      Lit::Num(node) => register_number(map, node),
+      Lit::BigInt(node) => register_big_int(map, node),
+      Lit::Regex(node) => register_regex(map, node),
+      Lit::JSXText(node) => register_jsx_text(map, node),
+    }
+  }
+
+  fn enum_register_member_prop(map: &mut ByteToIndexMap, node: &MemberProp) {
+    match node {
+      MemberProp::Ident(node) => register_ident(map, node),
+      MemberProp::PrivateName(node) => register_private_name(map, node),
+      MemberProp::Computed(node) => register_computed_prop_name(map, node),
+    }
+  }
+
+  fn enum_register_module_decl(map: &mut ByteToIndexMap, node: &ModuleDecl) {
+    match node {
+      ModuleDecl::Import(node) => register_import_decl(map, node),
+      ModuleDecl::ExportDecl(node) => register_export_decl(map, node),
+      ModuleDecl::ExportNamed(node) => register_named_export(map, node),
+      ModuleDecl::ExportDefaultDecl(node) => register_export_default_decl(map, node),
+      ModuleDecl::ExportDefaultExpr(node) => register_export_default_expr(map, node),
+      ModuleDecl::ExportAll(node) => register_export_all(map, node),
+      ModuleDecl::TsImportEquals(node) => register_ts_import_equals_decl(map, node),
+      ModuleDecl::TsExportAssignment(node) => register_ts_export_assignment(map, node),
+      ModuleDecl::TsNamespaceExport(node) => register_ts_namespace_export_decl(map, node),
+    }
+  }
+
+  fn enum_register_module_export_name(map: &mut ByteToIndexMap, node: &ModuleExportName) {
+    match node {
+      ModuleExportName::Ident(node) => register_ident(map, node),
+      ModuleExportName::Str(node) => register_str(map, node),
+    }
+  }
+
+  fn enum_register_module_item(map: &mut ByteToIndexMap, node: &ModuleItem) {
+    match node {
+      ModuleItem::ModuleDecl(node) => enum_register_module_decl(map, &node),
+      ModuleItem::Stmt(node) => enum_register_stmt(map, &node),
+    }
+  }
+
+  fn enum_register_object_pat_prop(map: &mut ByteToIndexMap, node: &ObjectPatProp) {
+    match node {
+      ObjectPatProp::KeyValue(node) => register_key_value_pat_prop(map, node),
+      ObjectPatProp::Assign(node) => register_assign_pat_prop(map, node),
+      ObjectPatProp::Rest(node) => register_rest_pat(map, node),
+    }
+  }
+
+  fn enum_register_opt_chain_base(map: &mut ByteToIndexMap, node: &OptChainBase) {
+    match node {
+      OptChainBase::Member(node) => register_member_expr(map, node),
+      OptChainBase::Call(node) => register_opt_call(map, node),
+    }
+  }
+
+  fn enum_register_param_or_ts_param_prop(map: &mut ByteToIndexMap, node: &ParamOrTsParamProp) {
+    match node {
+      ParamOrTsParamProp::TsParamProp(node) => register_ts_param_prop(map, node),
+      ParamOrTsParamProp::Param(node) => register_param(map, node),
+    }
+  }
+
+  fn enum_register_pat(map: &mut ByteToIndexMap, node: &Pat) {
+    match &node {
+      Pat::Ident(node) => register_binding_ident(map, node),
+      Pat::Array(node) => register_array_pat(map, node),
+      Pat::Rest(node) => register_rest_pat(map, node),
+      Pat::Object(node) => register_object_pat(map, node),
+      Pat::Assign(node) => register_assign_pat(map, node),
+      Pat::Invalid(node) => register_invalid(map, node),
+      Pat::Expr(node) => enum_register_expr(map, node),
+    }
+  }
+
+  fn enum_register_pat_or_expr(map: &mut ByteToIndexMap, node: &PatOrExpr) {
+    match node {
+      PatOrExpr::Expr(node) => enum_register_expr(map, node),
+      PatOrExpr::Pat(node) => enum_register_pat(map, node),
+    }
+  }
+
+  pub fn enum_register_program(map: &mut ByteToIndexMap, node: &Program) {
+    match node {
+      Program::Module(node) => register_module(map, node),
+      Program::Script(node) => register_script(map, node),
+    }
+  }
+
+  fn enum_register_prop(map: &mut ByteToIndexMap, node: &Prop) {
+    match node {
+      Prop::Shorthand(node) => register_ident(map, node),
+      Prop::KeyValue(node) => register_key_value_prop(map, node),
+      Prop::Assign(node) => register_assign_prop(map, node),
+      Prop::Getter(node) => register_getter_prop(map, node),
+      Prop::Setter(node) => register_setter_prop(map, node),
+      Prop::Method(node) => register_method_prop(map, node),
+    }
+  }
+
+  fn enum_register_prop_name(map: &mut ByteToIndexMap, node: &PropName) {
+    match node {
+      PropName::Ident(node) => register_ident(map, node),
+      PropName::Str(node) => register_str(map, node),
+      PropName::Num(node) => register_number(map, node),
+      PropName::Computed(node) => register_computed_prop_name(map, node),
+      PropName::BigInt(node) => register_big_int(map, node),
+    }
+  }
+
+  fn enum_register_prop_or_spread(map: &mut ByteToIndexMap, node: &PropOrSpread) {
+    match node {
+      PropOrSpread::Spread(node) => register_spread_element(map, node),
+      PropOrSpread::Prop(node) => enum_register_prop(map, node),
+    }
+  }
+
+  fn enum_register_stmt(map: &mut ByteToIndexMap, node: &Stmt) {
+    match node {
+      Stmt::Block(node) => register_block_stmt(map, node),
+      Stmt::Empty(node) => register_empty_stmt(map, node),
+      Stmt::Debugger(node) => register_debugger_stmt(map, node),
+      Stmt::With(node) => register_with_stmt(map, node),
+      Stmt::Return(node) => register_return_stmt(map, node),
+      Stmt::Labeled(node) => register_labeled_stmt(map, node),
+      Stmt::Break(node) => register_break_stmt(map, node),
+      Stmt::Continue(node) => register_continue_stmt(map, node),
+      Stmt::If(node) => register_if_stmt(map, node),
+      Stmt::Switch(node) => register_switch_stmt(map, node),
+      Stmt::Throw(node) => register_throw_stmt(map, node),
+      Stmt::Try(node) => register_try_stmt(map, node),
+      Stmt::While(node) => register_while_stmt(map, node),
+      Stmt::DoWhile(node) => register_do_while_stmt(map, node),
+      Stmt::For(node) => register_for_stmt(map, node),
+      Stmt::ForIn(node) => register_for_in_stmt(map, node),
+      Stmt::ForOf(node) => register_for_of_stmt(map, node),
+      Stmt::Decl(node) => enum_register_decl(map, node),
+      Stmt::Expr(node) => register_expr_stmt(map, node),
+    };
+  }
+
+  fn enum_register_super_prop(map: &mut ByteToIndexMap, node: &SuperProp) {
+    match node {
+      SuperProp::Ident(node) => register_ident(map, node),
+      SuperProp::Computed(node) => register_computed_prop_name(map, node),
+    }
+  }
+
+  fn enum_register_ts_entity_name(map: &mut ByteToIndexMap, node: &TsEntityName) {
+    match node {
+      TsEntityName::TsQualifiedName(node) => register_ts_qualified_name(map, node),
+      TsEntityName::Ident(node) => register_ident(map, node),
+    }
+  }
+
+  fn enum_register_ts_enum_member_id(map: &mut ByteToIndexMap, node: &TsEnumMemberId) {
+    match node {
+      TsEnumMemberId::Ident(node) => register_ident(map, node),
+      TsEnumMemberId::Str(node) => register_str(map, node),
+    }
+  }
+
+  fn enum_register_ts_fn_or_constructor_type(map: &mut ByteToIndexMap, node: &TsFnOrConstructorType) {
+    match node {
+      TsFnOrConstructorType::TsFnType(node) => register_ts_fn_type(map, node),
+      TsFnOrConstructorType::TsConstructorType(node) => register_ts_constructor_type(map, node),
+    }
+  }
+
+  fn enum_register_ts_fn_param(map: &mut ByteToIndexMap, node: &TsFnParam) {
+    match node {
+      TsFnParam::Ident(node) => register_binding_ident(map, node),
+      TsFnParam::Array(node) => register_array_pat(map, node),
+      TsFnParam::Rest(node) => register_rest_pat(map, node),
+      TsFnParam::Object(node) => register_object_pat(map, node),
+    }
+  }
+
+  fn enum_register_ts_lit(map: &mut ByteToIndexMap, node: &TsLit) {
+    match node {
+      TsLit::Number(node) => register_number(map, node),
+      TsLit::Str(node) => register_str(map, node),
+      TsLit::Bool(node) => register_bool(map, node),
+      TsLit::BigInt(node) => register_big_int(map, node),
+      TsLit::Tpl(node) => register_ts_tpl_lit_type(map, node),
+    }
+  }
+
+  fn enum_register_ts_module_name(map: &mut ByteToIndexMap, node: &TsModuleName) {
+    match node {
+      TsModuleName::Ident(node) => register_ident(map, node),
+      TsModuleName::Str(node) => register_str(map, node),
+    }
+  }
+
+  fn enum_register_ts_module_ref(map: &mut ByteToIndexMap, node: &TsModuleRef) {
+    match node {
+      TsModuleRef::TsEntityName(node) => enum_register_ts_entity_name(map, node),
+      TsModuleRef::TsExternalModuleRef(node) => register_ts_external_module_ref(map, node),
+    }
+  }
+
+  fn enum_register_ts_namespace_body(map: &mut ByteToIndexMap, node: &TsNamespaceBody) {
+    match node {
+      TsNamespaceBody::TsModuleBlock(node) => register_ts_module_block(map, node),
+      TsNamespaceBody::TsNamespaceDecl(node) => register_ts_namespace_decl(map, node),
+    }
+  }
+
+  fn enum_register_ts_param_prop_param(map: &mut ByteToIndexMap, node: &TsParamPropParam) {
+    match node {
+      TsParamPropParam::Ident(node) => register_binding_ident(map, node),
+      TsParamPropParam::Assign(node) => register_assign_pat(map, node),
+    }
+  }
+
+  fn enum_register_ts_this_type_or_ident(map: &mut ByteToIndexMap, node: &TsThisTypeOrIdent) {
+    match node {
+      TsThisTypeOrIdent::TsThisType(node) => register_ts_this_type(map, node),
+      TsThisTypeOrIdent::Ident(node) => register_ident(map, node),
+    }
+  }
+
+  fn enum_register_ts_type(map: &mut ByteToIndexMap, node: &TsType) {
+    match node {
+      TsType::TsKeywordType(node) => register_ts_keyword_type(map, node),
+      TsType::TsThisType(node) => register_ts_this_type(map, node),
+      TsType::TsFnOrConstructorType(node) => enum_register_ts_fn_or_constructor_type(map, node),
+      TsType::TsTypeRef(node) => register_ts_type_ref(map, node),
+      TsType::TsTypeQuery(node) => register_ts_type_query(map, node),
+      TsType::TsTypeLit(node) => register_ts_type_lit(map, node),
+      TsType::TsArrayType(node) => register_ts_array_type(map, node),
+      TsType::TsTupleType(node) => register_ts_tuple_type(map, node),
+      TsType::TsOptionalType(node) => register_ts_optional_type(map, node),
+      TsType::TsRestType(node) => register_ts_rest_type(map, node),
+      TsType::TsUnionOrIntersectionType(node) => enum_register_ts_union_or_intersection_type(map, node),
+      TsType::TsConditionalType(node) => register_ts_conditional_type(map, node),
+      TsType::TsInferType(node) => register_ts_infer_type(map, node),
+      TsType::TsParenthesizedType(node) => register_ts_parenthesized_type(map, node),
+      TsType::TsTypeOperator(node) => register_ts_type_operator(map, node),
+      TsType::TsIndexedAccessType(node) => register_ts_indexed_access_type(map, node),
+      TsType::TsMappedType(node) => register_ts_mapped_type(map, node),
+      TsType::TsLitType(node) => register_ts_lit_type(map, node),
+      TsType::TsTypePredicate(node) => register_ts_type_predicate(map, node),
+      TsType::TsImportType(node) => register_ts_import_type(map, node),
+    }
+  }
+
+  fn enum_register_ts_type_element(map: &mut ByteToIndexMap, node: &TsTypeElement) {
+    match node {
+      TsTypeElement::TsCallSignatureDecl(node) => register_ts_call_signature_decl(map, node),
+      TsTypeElement::TsConstructSignatureDecl(node) => register_ts_construct_signature_decl(map, node),
+      TsTypeElement::TsPropertySignature(node) => register_ts_property_signature(map, node),
+      TsTypeElement::TsGetterSignature(node) => register_ts_getter_signature(map, node),
+      TsTypeElement::TsSetterSignature(node) => register_ts_setter_signature(map, node),
+      TsTypeElement::TsMethodSignature(node) => register_ts_method_signature(map, node),
+      TsTypeElement::TsIndexSignature(node) => register_ts_index_signature(map, node),
+    }
+  }
+
+  fn enum_register_ts_type_query_expr(map: &mut ByteToIndexMap, node: &TsTypeQueryExpr) {
+    match node {
+      TsTypeQueryExpr::TsEntityName(node) => enum_register_ts_entity_name(map, node),
+      TsTypeQueryExpr::Import(node) => register_ts_import_type(map, node),
+    }
+  }
+
+  fn enum_register_ts_union_or_intersection_type(map: &mut ByteToIndexMap, node: &TsUnionOrIntersectionType) {
+    match node {
+      TsUnionOrIntersectionType::TsUnionType(node) => register_ts_union_type(map, node),
+      TsUnionOrIntersectionType::TsIntersectionType(node) => register_ts_intersection_type(map, node),
+    }
+  }
+
+  fn enum_register_var_decl_or_expr(map: &mut ByteToIndexMap, node: &VarDeclOrExpr) {
+    match node {
+      VarDeclOrExpr::VarDecl(node) => register_var_decl(map, node),
+      VarDeclOrExpr::Expr(node) => enum_register_expr(map, node),
+    }
+  }
+
   fn register_assign_expr(map: &mut ByteToIndexMap, node: &AssignExpr) {
     map.register_by_span(&node.span);
-    register_pat_or_expr(map, &node.left);
-    register_expr(map, &node.right);
+    enum_register_pat_or_expr(map, &node.left);
+    enum_register_expr(map, &node.right);
   }
 
   fn register_assign_pat(map: &mut ByteToIndexMap, node: &AssignPat) {
     map.register_by_span(&node.span);
-    register_pat(map, &node.left);
-    register_expr(map, &node.right);
+    enum_register_pat(map, &node.left);
+    enum_register_expr(map, &node.right);
   }
 
   fn register_assign_pat_prop(map: &mut ByteToIndexMap, node: &AssignPatProp) {
     map.register_by_span(&node.span);
     register_ident(map, &node.key);
-    node.value.as_ref().map(|node| register_expr(map, node));
+    node.value.as_ref().map(|node| enum_register_expr(map, node));
   }
 
   fn register_assign_prop(map: &mut ByteToIndexMap, node: &AssignProp) {
     register_ident(map, &node.key);
-    register_expr(map, &node.value);
+    enum_register_expr(map, &node.value);
   }
 
   fn register_array_lit(map: &mut ByteToIndexMap, node: &ArrayLit) {
@@ -798,7 +1265,7 @@ pub mod span {
     node.elems.iter().for_each(|node| {
       node.as_ref().map(|node| {
         node.spread.as_ref().map(|node| map.register_by_span(node));
-        register_expr(map, &node.expr);
+        enum_register_expr(map, &node.expr);
       });
     });
   }
@@ -806,15 +1273,15 @@ pub mod span {
   fn register_array_pat(map: &mut ByteToIndexMap, node: &ArrayPat) {
     map.register_by_span(&node.span);
     node.elems.iter().for_each(|node| {
-      node.as_ref().map(|node| register_pat(map, node));
+      node.as_ref().map(|node| enum_register_pat(map, node));
     });
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
   }
 
   fn register_arrow_expr(map: &mut ByteToIndexMap, node: &ArrowExpr) {
     map.register_by_span(&node.span);
-    node.params.iter().for_each(|node| register_pat(map, node));
-    register_block_stmt_or_expr(map, node.body.as_ref());
+    node.params.iter().for_each(|node| enum_register_pat(map, node));
+    enum_register_block_stmt_or_expr(map, node.body.as_ref());
     node
       .type_params
       .as_ref()
@@ -824,15 +1291,15 @@ pub mod span {
 
   fn register_auto_accessor(map: &mut ByteToIndexMap, node: &AutoAccessor) {
     map.register_by_span(&node.span);
-    register_key(map, &node.key);
-    node.value.as_ref().map(|node| register_expr(map, node));
+    enum_register_key(map, &node.key);
+    node.value.as_ref().map(|node| enum_register_expr(map, node));
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
     node.decorators.iter().for_each(|node| register_decorator(map, node));
   }
 
   fn register_await_expr(map: &mut ByteToIndexMap, node: &AwaitExpr) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.arg);
+    enum_register_expr(map, &node.arg);
   }
 
   fn register_big_int(map: &mut ByteToIndexMap, node: &BigInt) {
@@ -841,8 +1308,8 @@ pub mod span {
 
   fn register_bin_expr(map: &mut ByteToIndexMap, node: &BinExpr) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.left);
-    register_expr(map, &node.right);
+    enum_register_expr(map, &node.left);
+    enum_register_expr(map, &node.right);
   }
 
   fn register_binding_ident(map: &mut ByteToIndexMap, node: &BindingIdent) {
@@ -853,14 +1320,7 @@ pub mod span {
 
   fn register_block_stmt(map: &mut ByteToIndexMap, node: &BlockStmt) {
     map.register_by_span(&node.span);
-    node.stmts.iter().for_each(|node| register_stmt(map, node));
-  }
-
-  fn register_block_stmt_or_expr(map: &mut ByteToIndexMap, node: &BlockStmtOrExpr) {
-    match node {
-      BlockStmtOrExpr::BlockStmt(node) => register_block_stmt(map, node),
-      BlockStmtOrExpr::Expr(node) => register_expr(map, node),
-    }
+    node.stmts.iter().for_each(|node| enum_register_stmt(map, node));
   }
 
   fn register_bool(map: &mut ByteToIndexMap, node: &Bool) {
@@ -874,7 +1334,7 @@ pub mod span {
 
   fn register_call_expr(map: &mut ByteToIndexMap, node: &CallExpr) {
     map.register_by_span(&node.span);
-    register_callee(map, &node.callee);
+    enum_register_callee(map, &node.callee);
     node.args.iter().for_each(|node| register_expr_or_spread(map, node));
     node
       .type_args
@@ -882,25 +1342,17 @@ pub mod span {
       .map(|node| register_ts_type_param_instantiation(map, &node));
   }
 
-  fn register_callee(map: &mut ByteToIndexMap, node: &Callee) {
-    match node {
-      Callee::Super(node) => register_super(map, node),
-      Callee::Import(node) => register_import(map, node),
-      Callee::Expr(node) => register_expr(map, node),
-    }
-  }
-
   fn register_catch_clause(map: &mut ByteToIndexMap, node: &CatchClause) {
     map.register_by_span(&node.span);
-    node.param.as_ref().map(|node| register_pat(map, node));
+    node.param.as_ref().map(|node| enum_register_pat(map, node));
     register_block_stmt(map, &node.body);
   }
 
   fn register_class(map: &mut ByteToIndexMap, node: &Class) {
     map.register_by_span(&node.span);
     node.decorators.iter().for_each(|node| register_decorator(map, node));
-    node.body.iter().for_each(|node| register_class_member(map, node));
-    node.super_class.as_ref().map(|node| register_expr(map, &node.as_ref()));
+    node.body.iter().for_each(|node| enum_register_class_member(map, node));
+    node.super_class.as_ref().map(|node| enum_register_expr(map, &node.as_ref()));
     node
       .type_params
       .as_ref()
@@ -927,53 +1379,39 @@ pub mod span {
     register_class(map, &node.class);
   }
 
-  fn register_class_member(map: &mut ByteToIndexMap, node: &ClassMember) {
-    match node {
-      ClassMember::Constructor(node) => register_constructor(map, node),
-      ClassMember::Method(node) => register_class_method(map, node),
-      ClassMember::PrivateMethod(node) => register_private_method(map, node),
-      ClassMember::ClassProp(node) => register_class_prop(map, node),
-      ClassMember::PrivateProp(node) => register_private_prop(map, node),
-      ClassMember::TsIndexSignature(node) => register_ts_index_signature(map, node),
-      ClassMember::Empty(node) => register_empty_stmt(map, node),
-      ClassMember::StaticBlock(node) => register_static_block(map, node),
-      ClassMember::AutoAccessor(node) => register_auto_accessor(map, node),
-    }
-  }
-
   fn register_class_method(map: &mut ByteToIndexMap, node: &ClassMethod) {
     map.register_by_span(&node.span);
-    register_prop_name(map, &node.key);
+    enum_register_prop_name(map, &node.key);
     register_function(map, &node.function);
   }
 
   fn register_class_prop(map: &mut ByteToIndexMap, node: &ClassProp) {
     map.register_by_span(&node.span);
-    register_prop_name(map, &node.key);
-    node.value.as_ref().map(|node| register_expr(map, node));
+    enum_register_prop_name(map, &node.key);
+    node.value.as_ref().map(|node| enum_register_expr(map, node));
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
     node.decorators.iter().for_each(|node| register_decorator(map, node));
   }
 
   fn register_computed_prop_name(map: &mut ByteToIndexMap, node: &ComputedPropName) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr);
+    enum_register_expr(map, &node.expr);
   }
 
   fn register_cond_expr(map: &mut ByteToIndexMap, node: &CondExpr) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.test);
-    register_expr(map, &node.cons);
-    register_expr(map, &node.alt);
+    enum_register_expr(map, &node.test);
+    enum_register_expr(map, &node.cons);
+    enum_register_expr(map, &node.alt);
   }
 
   fn register_constructor(map: &mut ByteToIndexMap, node: &Constructor) {
     map.register_by_span(&node.span);
-    register_prop_name(map, &node.key);
+    enum_register_prop_name(map, &node.key);
     node
       .params
       .iter()
-      .for_each(|node| register_param_or_ts_param_prop(map, node));
+      .for_each(|node| enum_register_param_or_ts_param_prop(map, node));
     node.body.as_ref().map(|node| register_block_stmt(map, node));
   }
 
@@ -986,36 +1424,15 @@ pub mod span {
     map.register_by_span(&node.span);
   }
 
-  fn register_decl(map: &mut ByteToIndexMap, node: &Decl) {
-    match node {
-      Decl::Class(node) => register_class_decl(map, &node),
-      Decl::Fn(node) => register_fn_decl(map, &node),
-      Decl::Var(node) => register_var_decl(map, node.as_ref()),
-      Decl::Using(node) => register_using_decl(map, &node.as_ref()),
-      Decl::TsInterface(node) => register_ts_interface_decl(map, &node.as_ref()),
-      Decl::TsTypeAlias(node) => register_ts_type_alias_decl(map, &node.as_ref()),
-      Decl::TsEnum(node) => register_ts_enum_decl(map, &node.as_ref()),
-      Decl::TsModule(node) => register_ts_module_decl(map, &node.as_ref()),
-    };
-  }
-
   fn register_decorator(map: &mut ByteToIndexMap, node: &Decorator) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr.as_ref());
-  }
-
-  fn register_default_decl(map: &mut ByteToIndexMap, node: &DefaultDecl) {
-    match node {
-      DefaultDecl::Class(node) => register_class_expr(map, node),
-      DefaultDecl::Fn(node) => register_fn_expr(map, node),
-      DefaultDecl::TsInterfaceDecl(node) => register_ts_interface_decl(map, node),
-    }
+    enum_register_expr(map, &node.expr.as_ref());
   }
 
   fn register_do_while_stmt(map: &mut ByteToIndexMap, node: &DoWhileStmt) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.test);
-    register_stmt(map, &node.body);
+    enum_register_expr(map, &node.test);
+    enum_register_stmt(map, &node.body);
   }
 
   fn register_empty_stmt(map: &mut ByteToIndexMap, node: &EmptyStmt) {
@@ -1030,17 +1447,17 @@ pub mod span {
 
   fn register_export_decl(map: &mut ByteToIndexMap, node: &ExportDecl) {
     map.register_by_span(&node.span);
-    register_decl(map, &node.decl);
+    enum_register_decl(map, &node.decl);
   }
 
   fn register_export_default_decl(map: &mut ByteToIndexMap, node: &ExportDefaultDecl) {
     map.register_by_span(&node.span);
-    register_default_decl(map, &node.decl);
+    enum_register_default_decl(map, &node.decl);
   }
 
   fn register_export_default_expr(map: &mut ByteToIndexMap, node: &ExportDefaultExpr) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr);
+    enum_register_expr(map, &node.expr);
   }
 
   fn register_export_default_specifier(map: &mut ByteToIndexMap, node: &ExportDefaultSpecifier) {
@@ -1049,77 +1466,26 @@ pub mod span {
 
   fn register_export_named_specifier(map: &mut ByteToIndexMap, node: &ExportNamedSpecifier) {
     map.register_by_span(&node.span);
-    register_module_export_name(map, &node.orig);
+    enum_register_module_export_name(map, &node.orig);
     node
       .exported
       .as_ref()
-      .map(|node| register_module_export_name(map, node));
+      .map(|node| enum_register_module_export_name(map, node));
   }
 
   fn register_export_namespace_specifier(map: &mut ByteToIndexMap, node: &ExportNamespaceSpecifier) {
     map.register_by_span(&node.span);
-    register_module_export_name(map, &node.name);
-  }
-
-  fn register_export_specifier(map: &mut ByteToIndexMap, node: &ExportSpecifier) {
-    match node {
-      ExportSpecifier::Namespace(node) => register_export_namespace_specifier(map, node),
-      ExportSpecifier::Default(node) => register_export_default_specifier(map, node),
-      ExportSpecifier::Named(node) => register_export_named_specifier(map, node),
-    }
-  }
-
-  fn register_expr(map: &mut ByteToIndexMap, node: &Expr) {
-    match node {
-      Expr::This(node) => register_this_expr(map, node),
-      Expr::Array(node) => register_array_lit(map, node),
-      Expr::Object(node) => register_object_lit(map, node),
-      Expr::Fn(node) => register_fn_expr(map, node),
-      Expr::Unary(node) => register_unary_expr(map, node),
-      Expr::Update(node) => register_update_expr(map, node),
-      Expr::Bin(node) => register_bin_expr(map, node),
-      Expr::Assign(node) => register_assign_expr(map, node),
-      Expr::Member(node) => register_member_expr(map, node),
-      Expr::SuperProp(node) => register_super_prop_expr(map, node),
-      Expr::Cond(node) => register_cond_expr(map, node),
-      Expr::Call(node) => register_call_expr(map, node),
-      Expr::New(node) => register_new_expr(map, node),
-      Expr::Seq(node) => register_seq_expr(map, node),
-      Expr::Ident(node) => register_ident(map, node),
-      Expr::Lit(node) => register_lit(map, node),
-      Expr::Tpl(node) => register_tpl(map, node),
-      Expr::TaggedTpl(node) => register_tagged_tpl(map, node),
-      Expr::Arrow(node) => register_arrow_expr(map, node),
-      Expr::Class(node) => register_class_expr(map, node),
-      Expr::Yield(node) => register_yield_expr(map, node),
-      Expr::MetaProp(node) => register_meta_prop_expr(map, node),
-      Expr::Await(node) => register_await_expr(map, node),
-      Expr::Paren(node) => register_paren_expr(map, node),
-      Expr::JSXMember(node) => register_jsx_member_expr(map, node),
-      Expr::JSXNamespacedName(node) => register_jsx_namespaced_name(map, node),
-      Expr::JSXEmpty(node) => register_jsx_empty_expr(map, node),
-      Expr::JSXElement(node) => register_jsx_element(map, node),
-      Expr::JSXFragment(node) => register_jsx_fragment(map, node),
-      Expr::TsTypeAssertion(node) => register_ts_type_assertion(map, node),
-      Expr::TsConstAssertion(node) => register_ts_const_assertion(map, node),
-      Expr::TsNonNull(node) => register_ts_non_null_expr(map, node),
-      Expr::TsAs(node) => register_ts_as_expr(map, node),
-      Expr::TsInstantiation(node) => register_ts_instantiation(map, node),
-      Expr::TsSatisfies(node) => register_ts_satisfies_expr(map, node),
-      Expr::PrivateName(node) => register_private_name(map, node),
-      Expr::OptChain(node) => register_opt_chain_expr(map, node),
-      Expr::Invalid(node) => register_invalid(map, node),
-    }
+    enum_register_module_export_name(map, &node.name);
   }
 
   fn register_expr_or_spread(map: &mut ByteToIndexMap, node: &ExprOrSpread) {
     node.spread.as_ref().map(|node| map.register_by_span(node));
-    register_expr(map, &node.expr);
+    enum_register_expr(map, &node.expr);
   }
 
   fn register_expr_stmt(map: &mut ByteToIndexMap, node: &ExprStmt) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr);
+    enum_register_expr(map, &node.expr);
   }
 
   fn register_fn_decl(map: &mut ByteToIndexMap, node: &FnDecl) {
@@ -1134,34 +1500,26 @@ pub mod span {
     register_function(map, &node.function);
   }
 
-  fn register_for_head(map: &mut ByteToIndexMap, node: &ForHead) {
-    match node {
-      ForHead::VarDecl(node) => register_var_decl(map, node),
-      ForHead::UsingDecl(node) => register_using_decl(map, node),
-      ForHead::Pat(node) => register_pat(map, node),
-    }
-  }
-
   fn register_for_in_stmt(map: &mut ByteToIndexMap, node: &ForInStmt) {
     map.register_by_span(&node.span);
-    register_for_head(map, &node.left);
-    register_expr(map, &node.right);
-    register_stmt(map, &node.body);
+    enum_register_for_head(map, &node.left);
+    enum_register_expr(map, &node.right);
+    enum_register_stmt(map, &node.body);
   }
 
   fn register_for_of_stmt(map: &mut ByteToIndexMap, node: &ForOfStmt) {
     map.register_by_span(&node.span);
-    register_for_head(map, &node.left);
-    register_expr(map, &node.right);
-    register_stmt(map, &node.body);
+    enum_register_for_head(map, &node.left);
+    enum_register_expr(map, &node.right);
+    enum_register_stmt(map, &node.body);
   }
 
   fn register_for_stmt(map: &mut ByteToIndexMap, node: &ForStmt) {
     map.register_by_span(&node.span);
-    node.init.as_ref().map(|node| register_var_decl_or_expr(map, node));
-    node.test.as_ref().map(|node| register_expr(map, node));
-    node.update.as_ref().map(|node| register_expr(map, node));
-    register_stmt(map, &node.body);
+    node.init.as_ref().map(|node| enum_register_var_decl_or_expr(map, node));
+    node.test.as_ref().map(|node| enum_register_expr(map, node));
+    node.update.as_ref().map(|node| enum_register_expr(map, node));
+    enum_register_stmt(map, &node.body);
   }
 
   fn register_function(map: &mut ByteToIndexMap, node: &Function) {
@@ -1178,7 +1536,7 @@ pub mod span {
 
   fn register_getter_prop(map: &mut ByteToIndexMap, node: &GetterProp) {
     map.register_by_span(&node.span);
-    register_prop_name(map, &node.key);
+    enum_register_prop_name(map, &node.key);
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
     node.body.as_ref().map(|node| register_block_stmt(map, node));
   }
@@ -1189,9 +1547,9 @@ pub mod span {
 
   fn register_if_stmt(map: &mut ByteToIndexMap, node: &IfStmt) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.test);
-    register_stmt(map, &node.cons);
-    node.alt.as_ref().map(|node| register_stmt(map, node));
+    enum_register_expr(map, &node.test);
+    enum_register_stmt(map, &node.cons);
+    node.alt.as_ref().map(|node| enum_register_stmt(map, node));
   }
 
   fn register_import(map: &mut ByteToIndexMap, node: &Import) {
@@ -1203,7 +1561,7 @@ pub mod span {
     node
       .specifiers
       .iter()
-      .for_each(|node| register_import_specifier(map, node));
+      .for_each(|node| enum_register_import_specifier(map, node));
     register_str(map, &node.src);
     node.with.as_ref().map(|node| register_object_lit(map, node));
   }
@@ -1219,15 +1577,7 @@ pub mod span {
     node
       .imported
       .as_ref()
-      .map(|node| register_module_export_name(map, node));
-  }
-
-  fn register_import_specifier(map: &mut ByteToIndexMap, node: &ImportSpecifier) {
-    match node {
-      ImportSpecifier::Named(node) => register_import_named_specifier(map, node),
-      ImportSpecifier::Default(node) => register_import_default_specifier(map, node),
-      ImportSpecifier::Namespace(node) => register_import_star_as_specifier(map, node),
-    }
+      .map(|node| enum_register_module_export_name(map, node));
   }
 
   fn register_import_star_as_specifier(map: &mut ByteToIndexMap, node: &ImportStarAsSpecifier) {
@@ -1241,36 +1591,13 @@ pub mod span {
 
   fn register_jsx_attr(map: &mut ByteToIndexMap, node: &JSXAttr) {
     map.register_by_span(&node.span);
-    register_jsx_attr_name(map, &node.name);
-    node.value.as_ref().map(|node| register_jsx_attr_value(map, node));
-  }
-
-  fn register_jsx_attr_name(map: &mut ByteToIndexMap, node: &JSXAttrName) {
-    match node {
-      JSXAttrName::Ident(node) => register_ident(map, node),
-      JSXAttrName::JSXNamespacedName(node) => register_jsx_namespaced_name(map, node),
-    }
-  }
-
-  fn register_jsx_attr_or_spread(map: &mut ByteToIndexMap, node: &JSXAttrOrSpread) {
-    match node {
-      JSXAttrOrSpread::JSXAttr(node) => register_jsx_attr(map, node),
-      JSXAttrOrSpread::SpreadElement(node) => register_spread_element(map, node),
-    }
-  }
-
-  fn register_jsx_attr_value(map: &mut ByteToIndexMap, node: &JSXAttrValue) {
-    match node {
-      JSXAttrValue::Lit(node) => register_lit(map, node),
-      JSXAttrValue::JSXExprContainer(node) => register_jsx_expr_container(map, node),
-      JSXAttrValue::JSXElement(node) => register_jsx_element(map, node),
-      JSXAttrValue::JSXFragment(node) => register_jsx_fragment(map, node),
-    }
+    enum_register_jsx_attr_name(map, &node.name);
+    node.value.as_ref().map(|node| enum_register_jsx_attr_value(map, node));
   }
 
   fn register_jsx_closing_element(map: &mut ByteToIndexMap, node: &JSXClosingElement) {
     map.register_by_span(&node.span);
-    register_jsx_element_name(map, &node.name);
+    enum_register_jsx_element_name(map, &node.name);
   }
 
   fn register_jsx_closing_fragment(map: &mut ByteToIndexMap, node: &JSXClosingFragment) {
@@ -1283,45 +1610,20 @@ pub mod span {
     node
       .children
       .iter()
-      .for_each(|node| register_jsx_element_child(map, node));
+      .for_each(|node| enum_register_jsx_element_child(map, node));
     node
       .closing
       .as_ref()
       .map(|node| register_jsx_closing_element(map, node));
   }
 
-  fn register_jsx_element_child(map: &mut ByteToIndexMap, node: &JSXElementChild) {
-    match node {
-      JSXElementChild::JSXText(node) => register_jsx_text(map, node),
-      JSXElementChild::JSXExprContainer(node) => register_jsx_expr_container(map, node),
-      JSXElementChild::JSXSpreadChild(node) => register_jsx_spread_child(map, node),
-      JSXElementChild::JSXElement(node) => register_jsx_element(map, node),
-      JSXElementChild::JSXFragment(node) => register_jsx_fragment(map, node),
-    }
-  }
-
-  fn register_jsx_element_name(map: &mut ByteToIndexMap, node: &JSXElementName) {
-    match node {
-      JSXElementName::Ident(node) => register_ident(map, node),
-      JSXElementName::JSXMemberExpr(node) => register_jsx_member_expr(map, node),
-      JSXElementName::JSXNamespacedName(node) => register_jsx_namespaced_name(map, node),
-    }
-  }
-
   fn register_jsx_empty_expr(map: &mut ByteToIndexMap, node: &JSXEmptyExpr) {
     map.register_by_span(&node.span);
   }
 
-  fn register_jsx_expr(map: &mut ByteToIndexMap, node: &JSXExpr) {
-    match node {
-      JSXExpr::JSXEmptyExpr(node) => register_jsx_empty_expr(map, node),
-      JSXExpr::Expr(node) => register_expr(map, node),
-    }
-  }
-
   fn register_jsx_expr_container(map: &mut ByteToIndexMap, node: &JSXExprContainer) {
     map.register_by_span(&node.span);
-    register_jsx_expr(map, &node.expr);
+    enum_register_jsx_expr(map, &node.expr);
   }
 
   fn register_jsx_fragment(map: &mut ByteToIndexMap, node: &JSXFragment) {
@@ -1330,13 +1632,13 @@ pub mod span {
     node
       .children
       .iter()
-      .for_each(|node| register_jsx_element_child(map, node));
+      .for_each(|node| enum_register_jsx_element_child(map, node));
     register_jsx_closing_fragment(map, &node.closing);
   }
 
   fn register_jsx_member_expr(map: &mut ByteToIndexMap, node: &JSXMemberExpr) {
     // No span.
-    register_jsx_object(map, &node.obj);
+    enum_register_jsx_object(map, &node.obj);
     register_ident(map, &node.prop);
   }
 
@@ -1346,20 +1648,13 @@ pub mod span {
     register_ident(map, &node.ns);
   }
 
-  fn register_jsx_object(map: &mut ByteToIndexMap, node: &JSXObject) {
-    match node {
-      JSXObject::JSXMemberExpr(node) => register_jsx_member_expr(map, node),
-      JSXObject::Ident(node) => register_ident(map, node),
-    }
-  }
-
   fn register_jsx_opening_element(map: &mut ByteToIndexMap, node: &JSXOpeningElement) {
     map.register_by_span(&node.span);
-    register_jsx_element_name(map, &node.name);
+    enum_register_jsx_element_name(map, &node.name);
     node
       .attrs
       .iter()
-      .for_each(|node| register_jsx_attr_or_spread(map, node));
+      .for_each(|node| enum_register_jsx_attr_or_spread(map, node));
     node
       .type_args
       .as_ref()
@@ -1372,60 +1667,33 @@ pub mod span {
 
   fn register_jsx_spread_child(map: &mut ByteToIndexMap, node: &JSXSpreadChild) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr);
+    enum_register_expr(map, &node.expr);
   }
 
   fn register_jsx_text(map: &mut ByteToIndexMap, node: &JSXText) {
     map.register_by_span(&node.span);
   }
 
-  fn register_key(map: &mut ByteToIndexMap, node: &Key) {
-    match node {
-      Key::Private(node) => register_private_name(map, node),
-      Key::Public(node) => register_prop_name(map, node),
-    }
-  }
-
   fn register_key_value_pat_prop(map: &mut ByteToIndexMap, node: &KeyValuePatProp) {
-    register_prop_name(map, &node.key);
-    register_pat(map, &node.value);
+    enum_register_prop_name(map, &node.key);
+    enum_register_pat(map, &node.value);
   }
 
   fn register_key_value_prop(map: &mut ByteToIndexMap, node: &KeyValueProp) {
-    register_prop_name(map, &node.key);
-    register_expr(map, &node.value);
+    enum_register_prop_name(map, &node.key);
+    enum_register_expr(map, &node.value);
   }
 
   fn register_labeled_stmt(map: &mut ByteToIndexMap, node: &LabeledStmt) {
     map.register_by_span(&node.span);
     register_ident(map, &node.label);
-    register_stmt(map, &node.body);
-  }
-
-  fn register_lit(map: &mut ByteToIndexMap, node: &Lit) {
-    match node {
-      Lit::Str(node) => register_str(map, node),
-      Lit::Bool(node) => register_bool(map, node),
-      Lit::Null(node) => register_null(map, node),
-      Lit::Num(node) => register_number(map, node),
-      Lit::BigInt(node) => register_big_int(map, node),
-      Lit::Regex(node) => register_regex(map, node),
-      Lit::JSXText(node) => register_jsx_text(map, node),
-    }
+    enum_register_stmt(map, &node.body);
   }
 
   fn register_member_expr(map: &mut ByteToIndexMap, node: &MemberExpr) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.obj);
-    register_member_prop(map, &node.prop);
-  }
-
-  fn register_member_prop(map: &mut ByteToIndexMap, node: &MemberProp) {
-    match node {
-      MemberProp::Ident(node) => register_ident(map, node),
-      MemberProp::PrivateName(node) => register_private_name(map, node),
-      MemberProp::Computed(node) => register_computed_prop_name(map, node),
-    }
+    enum_register_expr(map, &node.obj);
+    enum_register_member_prop(map, &node.prop);
   }
 
   fn register_meta_prop_expr(map: &mut ByteToIndexMap, node: &MetaPropExpr) {
@@ -1434,41 +1702,13 @@ pub mod span {
 
   fn register_method_prop(map: &mut ByteToIndexMap, node: &MethodProp) {
     // No span.
-    register_prop_name(map, &node.key);
+    enum_register_prop_name(map, &node.key);
     register_function(map, &node.function);
   }
 
   fn register_module(map: &mut ByteToIndexMap, node: &Module) {
     map.register_by_span(&node.span);
-    node.body.iter().for_each(|node| register_module_item(map, &node));
-  }
-
-  fn register_module_decl(map: &mut ByteToIndexMap, node: &ModuleDecl) {
-    match node {
-      ModuleDecl::Import(node) => register_import_decl(map, node),
-      ModuleDecl::ExportDecl(node) => register_export_decl(map, node),
-      ModuleDecl::ExportNamed(node) => register_named_export(map, node),
-      ModuleDecl::ExportDefaultDecl(node) => register_export_default_decl(map, node),
-      ModuleDecl::ExportDefaultExpr(node) => register_export_default_expr(map, node),
-      ModuleDecl::ExportAll(node) => register_export_all(map, node),
-      ModuleDecl::TsImportEquals(node) => register_ts_import_equals_decl(map, node),
-      ModuleDecl::TsExportAssignment(node) => register_ts_export_assignment(map, node),
-      ModuleDecl::TsNamespaceExport(node) => register_ts_namespace_export_decl(map, node),
-    }
-  }
-
-  fn register_module_export_name(map: &mut ByteToIndexMap, node: &ModuleExportName) {
-    match node {
-      ModuleExportName::Ident(node) => register_ident(map, node),
-      ModuleExportName::Str(node) => register_str(map, node),
-    }
-  }
-
-  fn register_module_item(map: &mut ByteToIndexMap, node: &ModuleItem) {
-    match node {
-      ModuleItem::ModuleDecl(node) => register_module_decl(map, &node),
-      ModuleItem::Stmt(node) => register_stmt(map, &node),
-    }
+    node.body.iter().for_each(|node| enum_register_module_item(map, &node));
   }
 
   fn register_named_export(map: &mut ByteToIndexMap, node: &NamedExport) {
@@ -1476,14 +1716,14 @@ pub mod span {
     node
       .specifiers
       .iter()
-      .for_each(|node| register_export_specifier(map, node));
+      .for_each(|node| enum_register_export_specifier(map, node));
     node.src.as_ref().map(|node| register_str(map, node));
     node.with.as_ref().map(|node| register_object_lit(map, node));
   }
 
   fn register_new_expr(map: &mut ByteToIndexMap, node: &NewExpr) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.callee);
+    enum_register_expr(map, &node.callee);
     node
       .args
       .as_ref()
@@ -1504,26 +1744,18 @@ pub mod span {
 
   fn register_object_lit(map: &mut ByteToIndexMap, node: &ObjectLit) {
     map.register_by_span(&node.span);
-    node.props.iter().for_each(|node| register_prop_or_spread(map, node));
+    node.props.iter().for_each(|node| enum_register_prop_or_spread(map, node));
   }
 
   fn register_object_pat(map: &mut ByteToIndexMap, node: &ObjectPat) {
     map.register_by_span(&node.span);
-    node.props.iter().for_each(|node| register_object_pat_prop(map, node));
+    node.props.iter().for_each(|node| enum_register_object_pat_prop(map, node));
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-  }
-
-  fn register_object_pat_prop(map: &mut ByteToIndexMap, node: &ObjectPatProp) {
-    match node {
-      ObjectPatProp::KeyValue(node) => register_key_value_pat_prop(map, node),
-      ObjectPatProp::Assign(node) => register_assign_pat_prop(map, node),
-      ObjectPatProp::Rest(node) => register_rest_pat(map, node),
-    }
   }
 
   fn register_opt_call(map: &mut ByteToIndexMap, node: &OptCall) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.callee);
+    enum_register_expr(map, &node.callee);
     node.args.iter().for_each(|node| register_expr_or_spread(map, node));
     node
       .type_args
@@ -1531,53 +1763,20 @@ pub mod span {
       .map(|node| register_ts_type_param_instantiation(map, &node));
   }
 
-  fn register_opt_chain_base(map: &mut ByteToIndexMap, node: &OptChainBase) {
-    match node {
-      OptChainBase::Member(node) => register_member_expr(map, node),
-      OptChainBase::Call(node) => register_opt_call(map, node),
-    }
-  }
-
   fn register_opt_chain_expr(map: &mut ByteToIndexMap, node: &OptChainExpr) {
     map.register_by_span(&node.span);
-    register_opt_chain_base(map, &node.base);
+    enum_register_opt_chain_base(map, &node.base);
   }
 
   fn register_param(map: &mut ByteToIndexMap, node: &Param) {
     map.register_by_span(&node.span);
     node.decorators.iter().for_each(|node| register_decorator(map, node));
-    register_pat(map, &node.pat);
-  }
-
-  fn register_param_or_ts_param_prop(map: &mut ByteToIndexMap, node: &ParamOrTsParamProp) {
-    match node {
-      ParamOrTsParamProp::TsParamProp(node) => register_ts_param_prop(map, node),
-      ParamOrTsParamProp::Param(node) => register_param(map, node),
-    }
+    enum_register_pat(map, &node.pat);
   }
 
   fn register_paren_expr(map: &mut ByteToIndexMap, node: &ParenExpr) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr);
-  }
-
-  fn register_pat(map: &mut ByteToIndexMap, node: &Pat) {
-    match &node {
-      Pat::Ident(node) => register_binding_ident(map, node),
-      Pat::Array(node) => register_array_pat(map, node),
-      Pat::Rest(node) => register_rest_pat(map, node),
-      Pat::Object(node) => register_object_pat(map, node),
-      Pat::Assign(node) => register_assign_pat(map, node),
-      Pat::Invalid(node) => register_invalid(map, node),
-      Pat::Expr(node) => register_expr(map, node),
-    }
-  }
-
-  fn register_pat_or_expr(map: &mut ByteToIndexMap, node: &PatOrExpr) {
-    match node {
-      PatOrExpr::Expr(node) => register_expr(map, node),
-      PatOrExpr::Pat(node) => register_pat(map, node),
-    }
+    enum_register_expr(map, &node.expr);
   }
 
   fn register_private_method(map: &mut ByteToIndexMap, node: &PrivateMethod) {
@@ -1594,44 +1793,9 @@ pub mod span {
   fn register_private_prop(map: &mut ByteToIndexMap, node: &PrivateProp) {
     map.register_by_span(&node.span);
     register_private_name(map, &node.key);
-    node.value.as_ref().map(|node| register_expr(map, node));
+    node.value.as_ref().map(|node| enum_register_expr(map, node));
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
     node.decorators.iter().for_each(|node| register_decorator(map, node));
-  }
-
-  pub fn register_program(map: &mut ByteToIndexMap, node: &Program) {
-    match node {
-      Program::Module(node) => register_module(map, node),
-      Program::Script(node) => register_script(map, node),
-    }
-  }
-
-  fn register_prop(map: &mut ByteToIndexMap, node: &Prop) {
-    match node {
-      Prop::Shorthand(node) => register_ident(map, node),
-      Prop::KeyValue(node) => register_key_value_prop(map, node),
-      Prop::Assign(node) => register_assign_prop(map, node),
-      Prop::Getter(node) => register_getter_prop(map, node),
-      Prop::Setter(node) => register_setter_prop(map, node),
-      Prop::Method(node) => register_method_prop(map, node),
-    }
-  }
-
-  fn register_prop_name(map: &mut ByteToIndexMap, node: &PropName) {
-    match node {
-      PropName::Ident(node) => register_ident(map, node),
-      PropName::Str(node) => register_str(map, node),
-      PropName::Num(node) => register_number(map, node),
-      PropName::Computed(node) => register_computed_prop_name(map, node),
-      PropName::BigInt(node) => register_big_int(map, node),
-    }
-  }
-
-  fn register_prop_or_spread(map: &mut ByteToIndexMap, node: &PropOrSpread) {
-    match node {
-      PropOrSpread::Spread(node) => register_spread_element(map, node),
-      PropOrSpread::Prop(node) => register_prop(map, node),
-    }
   }
 
   fn register_regex(map: &mut ByteToIndexMap, node: &Regex) {
@@ -1641,64 +1805,40 @@ pub mod span {
   fn register_rest_pat(map: &mut ByteToIndexMap, node: &RestPat) {
     map.register_by_span(&node.span);
     map.register_by_span(&node.dot3_token);
-    register_pat(map, &node.arg);
+    enum_register_pat(map, &node.arg);
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
   }
 
   fn register_return_stmt(map: &mut ByteToIndexMap, node: &ReturnStmt) {
     map.register_by_span(&node.span);
-    node.arg.as_ref().map(|node| register_expr(map, node));
+    node.arg.as_ref().map(|node| enum_register_expr(map, node));
   }
 
   fn register_script(map: &mut ByteToIndexMap, node: &Script) {
     map.register_by_span(&node.span);
-    node.body.iter().for_each(|node| register_stmt(map, node))
+    node.body.iter().for_each(|node| enum_register_stmt(map, node))
   }
 
   fn register_seq_expr(map: &mut ByteToIndexMap, node: &SeqExpr) {
     map.register_by_span(&node.span);
-    node.exprs.iter().for_each(|node| register_expr(map, node));
+    node.exprs.iter().for_each(|node| enum_register_expr(map, node));
   }
 
   fn register_setter_prop(map: &mut ByteToIndexMap, node: &SetterProp) {
     map.register_by_span(&node.span);
-    register_prop_name(map, &node.key);
-    register_pat(map, &node.param);
+    enum_register_prop_name(map, &node.key);
+    enum_register_pat(map, &node.param);
     node.body.as_ref().map(|node| register_block_stmt(map, node));
   }
 
   fn register_spread_element(map: &mut ByteToIndexMap, node: &SpreadElement) {
     map.register_by_span(&node.dot3_token);
-    register_expr(map, &node.expr);
+    enum_register_expr(map, &node.expr);
   }
 
   fn register_static_block(map: &mut ByteToIndexMap, node: &StaticBlock) {
     map.register_by_span(&node.span);
     register_block_stmt(map, &node.body);
-  }
-
-  fn register_stmt(map: &mut ByteToIndexMap, node: &Stmt) {
-    match node {
-      Stmt::Block(node) => register_block_stmt(map, node),
-      Stmt::Empty(node) => register_empty_stmt(map, node),
-      Stmt::Debugger(node) => register_debugger_stmt(map, node),
-      Stmt::With(node) => register_with_stmt(map, node),
-      Stmt::Return(node) => register_return_stmt(map, node),
-      Stmt::Labeled(node) => register_labeled_stmt(map, node),
-      Stmt::Break(node) => register_break_stmt(map, node),
-      Stmt::Continue(node) => register_continue_stmt(map, node),
-      Stmt::If(node) => register_if_stmt(map, node),
-      Stmt::Switch(node) => register_switch_stmt(map, node),
-      Stmt::Throw(node) => register_throw_stmt(map, node),
-      Stmt::Try(node) => register_try_stmt(map, node),
-      Stmt::While(node) => register_while_stmt(map, node),
-      Stmt::DoWhile(node) => register_do_while_stmt(map, node),
-      Stmt::For(node) => register_for_stmt(map, node),
-      Stmt::ForIn(node) => register_for_in_stmt(map, node),
-      Stmt::ForOf(node) => register_for_of_stmt(map, node),
-      Stmt::Decl(node) => register_decl(map, node),
-      Stmt::Expr(node) => register_expr_stmt(map, node),
-    };
   }
 
   fn register_str(map: &mut ByteToIndexMap, node: &Str) {
@@ -1709,34 +1849,27 @@ pub mod span {
     map.register_by_span(&node.span);
   }
 
-  fn register_super_prop(map: &mut ByteToIndexMap, node: &SuperProp) {
-    match node {
-      SuperProp::Ident(node) => register_ident(map, node),
-      SuperProp::Computed(node) => register_computed_prop_name(map, node),
-    }
-  }
-
   fn register_super_prop_expr(map: &mut ByteToIndexMap, node: &SuperPropExpr) {
     map.register_by_span(&node.span);
     register_super(map, &node.obj);
-    register_super_prop(map, &node.prop);
+    enum_register_super_prop(map, &node.prop);
   }
 
   fn register_switch_case(map: &mut ByteToIndexMap, node: &SwitchCase) {
     map.register_by_span(&node.span);
-    node.test.as_ref().map(|node| register_expr(map, node));
-    node.cons.iter().for_each(|node| register_stmt(map, node));
+    node.test.as_ref().map(|node| enum_register_expr(map, node));
+    node.cons.iter().for_each(|node| enum_register_stmt(map, node));
   }
 
   fn register_switch_stmt(map: &mut ByteToIndexMap, node: &SwitchStmt) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.discriminant);
+    enum_register_expr(map, &node.discriminant);
     node.cases.iter().for_each(|node| register_switch_case(map, node));
   }
 
   fn register_tagged_tpl(map: &mut ByteToIndexMap, node: &TaggedTpl) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.tag);
+    enum_register_expr(map, &node.tag);
     node
       .type_params
       .as_ref()
@@ -1750,12 +1883,12 @@ pub mod span {
 
   fn register_throw_stmt(map: &mut ByteToIndexMap, node: &ThrowStmt) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.arg);
+    enum_register_expr(map, &node.arg);
   }
 
   fn register_tpl(map: &mut ByteToIndexMap, node: &Tpl) {
     map.register_by_span(&node.span);
-    node.exprs.iter().for_each(|node| register_expr(map, node));
+    node.exprs.iter().for_each(|node| enum_register_expr(map, node));
     node.quasis.iter().for_each(|node| register_tpl_element(map, node));
   }
 
@@ -1765,18 +1898,18 @@ pub mod span {
 
   fn register_ts_array_type(map: &mut ByteToIndexMap, node: &TsArrayType) {
     map.register_by_span(&node.span);
-    register_ts_type(map, &node.elem_type);
+    enum_register_ts_type(map, &node.elem_type);
   }
 
   fn register_ts_as_expr(map: &mut ByteToIndexMap, node: &TsAsExpr) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr);
-    register_ts_type(map, &node.type_ann);
+    enum_register_expr(map, &node.expr);
+    enum_register_ts_type(map, &node.type_ann);
   }
 
   fn register_ts_call_signature_decl(map: &mut ByteToIndexMap, node: &TsCallSignatureDecl) {
     map.register_by_span(&node.span);
-    node.params.iter().for_each(|node| register_ts_fn_param(map, node));
+    node.params.iter().for_each(|node| enum_register_ts_fn_param(map, node));
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
     node
       .type_params
@@ -1786,20 +1919,20 @@ pub mod span {
 
   fn register_ts_conditional_type(map: &mut ByteToIndexMap, node: &TsConditionalType) {
     map.register_by_span(&node.span);
-    register_ts_type(map, &node.check_type);
-    register_ts_type(map, &node.extends_type);
-    register_ts_type(map, &node.true_type);
-    register_ts_type(map, &node.false_type);
+    enum_register_ts_type(map, &node.check_type);
+    enum_register_ts_type(map, &node.extends_type);
+    enum_register_ts_type(map, &node.true_type);
+    enum_register_ts_type(map, &node.false_type);
   }
 
   fn register_ts_const_assertion(map: &mut ByteToIndexMap, node: &TsConstAssertion) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr);
+    enum_register_expr(map, &node.expr);
   }
 
   fn register_ts_construct_signature_decl(map: &mut ByteToIndexMap, node: &TsConstructSignatureDecl) {
     map.register_by_span(&node.span);
-    node.params.iter().for_each(|node| register_ts_fn_param(map, node));
+    node.params.iter().for_each(|node| enum_register_ts_fn_param(map, node));
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
     node
       .type_params
@@ -1809,19 +1942,12 @@ pub mod span {
 
   fn register_ts_constructor_type(map: &mut ByteToIndexMap, node: &TsConstructorType) {
     map.register_by_span(&node.span);
-    node.params.iter().for_each(|node| register_ts_fn_param(map, node));
+    node.params.iter().for_each(|node| enum_register_ts_fn_param(map, node));
     node
       .type_params
       .as_ref()
       .map(|node| register_ts_type_param_decl(map, node));
     register_ts_type_ann(map, &node.type_ann);
-  }
-
-  fn register_ts_entity_name(map: &mut ByteToIndexMap, node: &TsEntityName) {
-    match node {
-      TsEntityName::TsQualifiedName(node) => register_ts_qualified_name(map, node),
-      TsEntityName::Ident(node) => register_ident(map, node),
-    }
   }
 
   fn register_ts_enum_decl(map: &mut ByteToIndexMap, node: &TsEnumDecl) {
@@ -1832,20 +1958,13 @@ pub mod span {
 
   fn register_ts_enum_member(map: &mut ByteToIndexMap, node: &TsEnumMember) {
     map.register_by_span(&node.span);
-    register_ts_enum_member_id(map, &node.id);
-    node.init.as_ref().map(|node| register_expr(map, node));
-  }
-
-  fn register_ts_enum_member_id(map: &mut ByteToIndexMap, node: &TsEnumMemberId) {
-    match node {
-      TsEnumMemberId::Ident(node) => register_ident(map, node),
-      TsEnumMemberId::Str(node) => register_str(map, node),
-    }
+    enum_register_ts_enum_member_id(map, &node.id);
+    node.init.as_ref().map(|node| enum_register_expr(map, node));
   }
 
   fn register_ts_export_assignment(map: &mut ByteToIndexMap, node: &TsExportAssignment) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr);
+    enum_register_expr(map, &node.expr);
   }
 
   fn register_ts_external_module_ref(map: &mut ByteToIndexMap, node: &TsExternalModuleRef) {
@@ -1855,23 +1974,16 @@ pub mod span {
 
   fn register_ts_expr_with_type_args(map: &mut ByteToIndexMap, node: &TsExprWithTypeArgs) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr);
+    enum_register_expr(map, &node.expr);
     node
       .type_args
       .as_ref()
       .map(|node| register_ts_type_param_instantiation(map, &node));
   }
 
-  fn register_ts_fn_or_constructor_type(map: &mut ByteToIndexMap, node: &TsFnOrConstructorType) {
-    match node {
-      TsFnOrConstructorType::TsFnType(node) => register_ts_fn_type(map, node),
-      TsFnOrConstructorType::TsConstructorType(node) => register_ts_constructor_type(map, node),
-    }
-  }
-
   fn register_ts_fn_type(map: &mut ByteToIndexMap, node: &TsFnType) {
     map.register_by_span(&node.span);
-    node.params.iter().for_each(|node| register_ts_fn_param(map, node));
+    node.params.iter().for_each(|node| enum_register_ts_fn_param(map, node));
     node
       .type_params
       .as_ref()
@@ -1879,31 +1991,22 @@ pub mod span {
     register_ts_type_ann(map, &node.type_ann);
   }
 
-  fn register_ts_fn_param(map: &mut ByteToIndexMap, node: &TsFnParam) {
-    match node {
-      TsFnParam::Ident(node) => register_binding_ident(map, node),
-      TsFnParam::Array(node) => register_array_pat(map, node),
-      TsFnParam::Rest(node) => register_rest_pat(map, node),
-      TsFnParam::Object(node) => register_object_pat(map, node),
-    }
-  }
-
   fn register_ts_getter_signature(map: &mut ByteToIndexMap, node: &TsGetterSignature) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.key);
+    enum_register_expr(map, &node.key);
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
   }
 
   fn register_ts_import_equals_decl(map: &mut ByteToIndexMap, node: &TsImportEqualsDecl) {
     map.register_by_span(&node.span);
     register_ident(map, &node.id);
-    register_ts_module_ref(map, &node.module_ref);
+    enum_register_ts_module_ref(map, &node.module_ref);
   }
 
   fn register_ts_import_type(map: &mut ByteToIndexMap, node: &TsImportType) {
     map.register_by_span(&node.span);
     register_str(map, &node.arg);
-    node.qualifier.as_ref().map(|node| register_ts_entity_name(map, node));
+    node.qualifier.as_ref().map(|node| enum_register_ts_entity_name(map, node));
     node
       .type_args
       .as_ref()
@@ -1912,14 +2015,14 @@ pub mod span {
 
   fn register_ts_index_signature(map: &mut ByteToIndexMap, node: &TsIndexSignature) {
     map.register_by_span(&node.span);
-    node.params.iter().for_each(|node| register_ts_fn_param(map, node));
+    node.params.iter().for_each(|node| enum_register_ts_fn_param(map, node));
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
   }
 
   fn register_ts_indexed_access_type(map: &mut ByteToIndexMap, node: &TsIndexedAccessType) {
     map.register_by_span(&node.span);
-    register_ts_type(map, &node.obj_type);
-    register_ts_type(map, &node.index_type);
+    enum_register_ts_type(map, &node.obj_type);
+    enum_register_ts_type(map, &node.index_type);
   }
 
   fn register_ts_infer_type(map: &mut ByteToIndexMap, node: &TsInferType) {
@@ -1929,7 +2032,7 @@ pub mod span {
 
   fn register_ts_interface_body(map: &mut ByteToIndexMap, node: &TsInterfaceBody) {
     map.register_by_span(&node.span);
-    node.body.iter().for_each(|node| register_ts_type_element(map, node));
+    node.body.iter().for_each(|node| enum_register_ts_type_element(map, node));
   }
 
   fn register_ts_interface_decl(map: &mut ByteToIndexMap, node: &TsInterfaceDecl) {
@@ -1948,12 +2051,12 @@ pub mod span {
 
   fn register_ts_intersection_type(map: &mut ByteToIndexMap, node: &TsIntersectionType) {
     map.register_by_span(&node.span);
-    node.types.iter().for_each(|node| register_ts_type(map, node));
+    node.types.iter().for_each(|node| enum_register_ts_type(map, node));
   }
 
   fn register_ts_instantiation(map: &mut ByteToIndexMap, node: &TsInstantiation) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr);
+    enum_register_expr(map, &node.expr);
     register_ts_type_param_instantiation(map, &node.type_args);
   }
 
@@ -1961,32 +2064,22 @@ pub mod span {
     map.register_by_span(&node.span);
   }
 
-  fn register_ts_lit(map: &mut ByteToIndexMap, node: &TsLit) {
-    match node {
-      TsLit::Number(node) => register_number(map, node),
-      TsLit::Str(node) => register_str(map, node),
-      TsLit::Bool(node) => register_bool(map, node),
-      TsLit::BigInt(node) => register_big_int(map, node),
-      TsLit::Tpl(node) => register_ts_tpl_lit_type(map, node),
-    }
-  }
-
   fn register_ts_lit_type(map: &mut ByteToIndexMap, node: &TsLitType) {
     map.register_by_span(&node.span);
-    register_ts_lit(map, &node.lit);
+    enum_register_ts_lit(map, &node.lit);
   }
 
   fn register_ts_mapped_type(map: &mut ByteToIndexMap, node: &TsMappedType) {
     map.register_by_span(&node.span);
     register_ts_type_param(map, &node.type_param);
-    node.name_type.as_ref().map(|node| register_ts_type(map, node));
-    node.type_ann.as_ref().map(|node| register_ts_type(map, node));
+    node.name_type.as_ref().map(|node| enum_register_ts_type(map, node));
+    node.type_ann.as_ref().map(|node| enum_register_ts_type(map, node));
   }
 
   fn register_ts_method_signature(map: &mut ByteToIndexMap, node: &TsMethodSignature) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.key);
-    node.params.iter().for_each(|node| register_ts_fn_param(map, node));
+    enum_register_expr(map, &node.key);
+    node.params.iter().for_each(|node| enum_register_ts_fn_param(map, node));
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
     node
       .type_params
@@ -1996,40 +2089,19 @@ pub mod span {
 
   fn register_ts_module_block(map: &mut ByteToIndexMap, node: &TsModuleBlock) {
     map.register_by_span(&node.span);
-    node.body.iter().for_each(|node| register_module_item(map, node));
+    node.body.iter().for_each(|node| enum_register_module_item(map, node));
   }
 
   fn register_ts_module_decl(map: &mut ByteToIndexMap, node: &TsModuleDecl) {
     map.register_by_span(&node.span);
-    register_ts_module_name(map, &node.id);
-    node.body.as_ref().map(|node| register_ts_namespace_body(map, node));
-  }
-
-  fn register_ts_module_name(map: &mut ByteToIndexMap, node: &TsModuleName) {
-    match node {
-      TsModuleName::Ident(node) => register_ident(map, node),
-      TsModuleName::Str(node) => register_str(map, node),
-    }
-  }
-
-  fn register_ts_module_ref(map: &mut ByteToIndexMap, node: &TsModuleRef) {
-    match node {
-      TsModuleRef::TsEntityName(node) => register_ts_entity_name(map, node),
-      TsModuleRef::TsExternalModuleRef(node) => register_ts_external_module_ref(map, node),
-    }
-  }
-
-  fn register_ts_namespace_body(map: &mut ByteToIndexMap, node: &TsNamespaceBody) {
-    match node {
-      TsNamespaceBody::TsModuleBlock(node) => register_ts_module_block(map, node),
-      TsNamespaceBody::TsNamespaceDecl(node) => register_ts_namespace_decl(map, node),
-    }
+    enum_register_ts_module_name(map, &node.id);
+    node.body.as_ref().map(|node| enum_register_ts_namespace_body(map, node));
   }
 
   fn register_ts_namespace_decl(map: &mut ByteToIndexMap, node: &TsNamespaceDecl) {
     map.register_by_span(&node.span);
     register_ident(map, &node.id);
-    register_ts_namespace_body(map, &node.body);
+    enum_register_ts_namespace_body(map, &node.body);
   }
 
   fn register_ts_namespace_export_decl(map: &mut ByteToIndexMap, node: &TsNamespaceExportDecl) {
@@ -2039,37 +2111,30 @@ pub mod span {
 
   fn register_ts_non_null_expr(map: &mut ByteToIndexMap, node: &TsNonNullExpr) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr);
+    enum_register_expr(map, &node.expr);
   }
 
   fn register_ts_optional_type(map: &mut ByteToIndexMap, node: &TsOptionalType) {
     map.register_by_span(&node.span);
-    register_ts_type(map, &node.type_ann);
+    enum_register_ts_type(map, &node.type_ann);
   }
 
   fn register_ts_param_prop(map: &mut ByteToIndexMap, node: &TsParamProp) {
     map.register_by_span(&node.span);
     node.decorators.iter().for_each(|node| register_decorator(map, node));
-    register_ts_param_prop_param(map, &node.param);
-  }
-
-  fn register_ts_param_prop_param(map: &mut ByteToIndexMap, node: &TsParamPropParam) {
-    match node {
-      TsParamPropParam::Ident(node) => register_binding_ident(map, node),
-      TsParamPropParam::Assign(node) => register_assign_pat(map, node),
-    }
+    enum_register_ts_param_prop_param(map, &node.param);
   }
 
   fn register_ts_parenthesized_type(map: &mut ByteToIndexMap, node: &TsParenthesizedType) {
     map.register_by_span(&node.span);
-    register_ts_type(map, &node.type_ann);
+    enum_register_ts_type(map, &node.type_ann);
   }
 
   fn register_ts_property_signature(map: &mut ByteToIndexMap, node: &TsPropertySignature) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.key);
-    node.init.as_ref().map(|node| register_expr(map, node));
-    node.params.iter().for_each(|node| register_ts_fn_param(map, node));
+    enum_register_expr(map, &node.key);
+    node.init.as_ref().map(|node| enum_register_expr(map, node));
+    node.params.iter().for_each(|node| enum_register_ts_fn_param(map, node));
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
     node
       .type_params
@@ -2079,67 +2144,35 @@ pub mod span {
 
   fn register_ts_qualified_name(map: &mut ByteToIndexMap, node: &TsQualifiedName) {
     // No span.
-    register_ts_entity_name(map, &node.left);
+    enum_register_ts_entity_name(map, &node.left);
     register_ident(map, &node.right);
   }
 
   fn register_ts_rest_type(map: &mut ByteToIndexMap, node: &TsRestType) {
     map.register_by_span(&node.span);
-    register_ts_type(map, &node.type_ann);
+    enum_register_ts_type(map, &node.type_ann);
   }
 
   fn register_ts_satisfies_expr(map: &mut ByteToIndexMap, node: &TsSatisfiesExpr) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr);
-    register_ts_type(map, &node.type_ann);
+    enum_register_expr(map, &node.expr);
+    enum_register_ts_type(map, &node.type_ann);
   }
 
   fn register_ts_setter_signature(map: &mut ByteToIndexMap, node: &TsSetterSignature) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.key);
-    register_ts_fn_param(map, &node.param);
+    enum_register_expr(map, &node.key);
+    enum_register_ts_fn_param(map, &node.param);
   }
 
   fn register_ts_this_type(map: &mut ByteToIndexMap, node: &TsThisType) {
     map.register_by_span(&node.span);
   }
 
-  fn register_ts_this_type_or_ident(map: &mut ByteToIndexMap, node: &TsThisTypeOrIdent) {
-    match node {
-      TsThisTypeOrIdent::TsThisType(node) => register_ts_this_type(map, node),
-      TsThisTypeOrIdent::Ident(node) => register_ident(map, node),
-    }
-  }
-
   fn register_ts_tpl_lit_type(map: &mut ByteToIndexMap, node: &TsTplLitType) {
     map.register_by_span(&node.span);
-    node.types.iter().for_each(|node| register_ts_type(map, node));
+    node.types.iter().for_each(|node| enum_register_ts_type(map, node));
     node.quasis.iter().for_each(|node| register_tpl_element(map, node));
-  }
-
-  fn register_ts_type(map: &mut ByteToIndexMap, node: &TsType) {
-    match node {
-      TsType::TsKeywordType(node) => register_ts_keyword_type(map, node),
-      TsType::TsThisType(node) => register_ts_this_type(map, node),
-      TsType::TsFnOrConstructorType(node) => register_ts_fn_or_constructor_type(map, node),
-      TsType::TsTypeRef(node) => register_ts_type_ref(map, node),
-      TsType::TsTypeQuery(node) => register_ts_type_query(map, node),
-      TsType::TsTypeLit(node) => register_ts_type_lit(map, node),
-      TsType::TsArrayType(node) => register_ts_array_type(map, node),
-      TsType::TsTupleType(node) => register_ts_tuple_type(map, node),
-      TsType::TsOptionalType(node) => register_ts_optional_type(map, node),
-      TsType::TsRestType(node) => register_ts_rest_type(map, node),
-      TsType::TsUnionOrIntersectionType(node) => register_ts_union_or_intersection_type(map, node),
-      TsType::TsConditionalType(node) => register_ts_conditional_type(map, node),
-      TsType::TsInferType(node) => register_ts_infer_type(map, node),
-      TsType::TsParenthesizedType(node) => register_ts_parenthesized_type(map, node),
-      TsType::TsTypeOperator(node) => register_ts_type_operator(map, node),
-      TsType::TsIndexedAccessType(node) => register_ts_indexed_access_type(map, node),
-      TsType::TsMappedType(node) => register_ts_mapped_type(map, node),
-      TsType::TsLitType(node) => register_ts_lit_type(map, node),
-      TsType::TsTypePredicate(node) => register_ts_type_predicate(map, node),
-      TsType::TsImportType(node) => register_ts_import_type(map, node),
-    }
   }
 
   fn register_ts_type_alias_decl(map: &mut ByteToIndexMap, node: &TsTypeAliasDecl) {
@@ -2149,47 +2182,35 @@ pub mod span {
       .type_params
       .as_ref()
       .map(|node| register_ts_type_param_decl(map, node.as_ref()));
-    register_ts_type(map, &node.type_ann);
+    enum_register_ts_type(map, &node.type_ann);
   }
 
   fn register_ts_type_ann(map: &mut ByteToIndexMap, node: &TsTypeAnn) {
     map.register_by_span(&node.span);
-    register_ts_type(map, &node.type_ann);
+    enum_register_ts_type(map, &node.type_ann);
   }
 
   fn register_ts_type_assertion(map: &mut ByteToIndexMap, node: &TsTypeAssertion) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.expr);
-    register_ts_type(map, &node.type_ann);
-  }
-
-  fn register_ts_type_element(map: &mut ByteToIndexMap, node: &TsTypeElement) {
-    match node {
-      TsTypeElement::TsCallSignatureDecl(node) => register_ts_call_signature_decl(map, node),
-      TsTypeElement::TsConstructSignatureDecl(node) => register_ts_construct_signature_decl(map, node),
-      TsTypeElement::TsPropertySignature(node) => register_ts_property_signature(map, node),
-      TsTypeElement::TsGetterSignature(node) => register_ts_getter_signature(map, node),
-      TsTypeElement::TsSetterSignature(node) => register_ts_setter_signature(map, node),
-      TsTypeElement::TsMethodSignature(node) => register_ts_method_signature(map, node),
-      TsTypeElement::TsIndexSignature(node) => register_ts_index_signature(map, node),
-    }
+    enum_register_expr(map, &node.expr);
+    enum_register_ts_type(map, &node.type_ann);
   }
 
   fn register_ts_type_lit(map: &mut ByteToIndexMap, node: &TsTypeLit) {
     map.register_by_span(&node.span);
-    node.members.iter().for_each(|node| register_ts_type_element(map, node));
+    node.members.iter().for_each(|node| enum_register_ts_type_element(map, node));
   }
 
   fn register_ts_type_operator(map: &mut ByteToIndexMap, node: &TsTypeOperator) {
     map.register_by_span(&node.span);
-    register_ts_type(map, &node.type_ann);
+    enum_register_ts_type(map, &node.type_ann);
   }
 
   fn register_ts_type_param(map: &mut ByteToIndexMap, node: &TsTypeParam) {
     map.register_by_span(&node.span);
     register_ident(map, &node.name);
-    node.constraint.as_ref().map(|node| register_ts_type(map, node));
-    node.default.as_ref().map(|node| register_ts_type(map, node));
+    node.constraint.as_ref().map(|node| enum_register_ts_type(map, node));
+    node.default.as_ref().map(|node| enum_register_ts_type(map, node));
   }
 
   fn register_ts_type_param_decl(map: &mut ByteToIndexMap, node: &TsTypeParamDecl) {
@@ -2199,34 +2220,27 @@ pub mod span {
 
   fn register_ts_type_param_instantiation(map: &mut ByteToIndexMap, node: &TsTypeParamInstantiation) {
     map.register_by_span(&node.span);
-    node.params.iter().for_each(|node| register_ts_type(map, node));
+    node.params.iter().for_each(|node| enum_register_ts_type(map, node));
   }
 
   fn register_ts_type_predicate(map: &mut ByteToIndexMap, node: &TsTypePredicate) {
     map.register_by_span(&node.span);
-    register_ts_this_type_or_ident(map, &node.param_name);
+    enum_register_ts_this_type_or_ident(map, &node.param_name);
     node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
   }
 
   fn register_ts_type_query(map: &mut ByteToIndexMap, node: &TsTypeQuery) {
     map.register_by_span(&node.span);
-    register_ts_type_query_expr(map, &node.expr_name);
+    enum_register_ts_type_query_expr(map, &node.expr_name);
     node
       .type_args
       .as_ref()
       .map(|node| register_ts_type_param_instantiation(map, &node));
   }
 
-  fn register_ts_type_query_expr(map: &mut ByteToIndexMap, node: &TsTypeQueryExpr) {
-    match node {
-      TsTypeQueryExpr::TsEntityName(node) => register_ts_entity_name(map, node),
-      TsTypeQueryExpr::Import(node) => register_ts_import_type(map, node),
-    }
-  }
-
   fn register_ts_type_ref(map: &mut ByteToIndexMap, node: &TsTypeRef) {
     map.register_by_span(&node.span);
-    register_ts_entity_name(map, &node.type_name);
+    enum_register_ts_entity_name(map, &node.type_name);
     node
       .type_params
       .as_ref()
@@ -2235,8 +2249,8 @@ pub mod span {
 
   fn register_ts_tuple_element(map: &mut ByteToIndexMap, node: &TsTupleElement) {
     map.register_by_span(&node.span);
-    node.label.as_ref().map(|node| register_pat(map, node));
-    register_ts_type(map, &node.ty);
+    node.label.as_ref().map(|node| enum_register_pat(map, node));
+    enum_register_ts_type(map, &node.ty);
   }
 
   fn register_ts_tuple_type(map: &mut ByteToIndexMap, node: &TsTupleType) {
@@ -2249,14 +2263,7 @@ pub mod span {
 
   fn register_ts_union_type(map: &mut ByteToIndexMap, node: &TsUnionType) {
     map.register_by_span(&node.span);
-    node.types.iter().for_each(|node| register_ts_type(map, node));
-  }
-
-  fn register_ts_union_or_intersection_type(map: &mut ByteToIndexMap, node: &TsUnionOrIntersectionType) {
-    match node {
-      TsUnionOrIntersectionType::TsUnionType(node) => register_ts_union_type(map, node),
-      TsUnionOrIntersectionType::TsIntersectionType(node) => register_ts_intersection_type(map, node),
-    }
+    node.types.iter().for_each(|node| enum_register_ts_type(map, node));
   }
 
   fn register_try_stmt(map: &mut ByteToIndexMap, node: &TryStmt) {
@@ -2268,12 +2275,12 @@ pub mod span {
 
   fn register_unary_expr(map: &mut ByteToIndexMap, node: &UnaryExpr) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.arg);
+    enum_register_expr(map, &node.arg);
   }
 
   fn register_update_expr(map: &mut ByteToIndexMap, node: &UpdateExpr) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.arg);
+    enum_register_expr(map, &node.arg);
   }
 
   fn register_using_decl(map: &mut ByteToIndexMap, node: &UsingDecl) {
@@ -2286,33 +2293,26 @@ pub mod span {
     node.decls.iter().for_each(|node| register_var_declarator(map, node));
   }
 
-  fn register_var_decl_or_expr(map: &mut ByteToIndexMap, node: &VarDeclOrExpr) {
-    match node {
-      VarDeclOrExpr::VarDecl(node) => register_var_decl(map, node),
-      VarDeclOrExpr::Expr(node) => register_expr(map, node),
-    }
-  }
-
   fn register_var_declarator(map: &mut ByteToIndexMap, node: &VarDeclarator) {
     map.register_by_span(&node.span);
-    register_pat(map, &node.name);
+    enum_register_pat(map, &node.name);
   }
 
   fn register_while_stmt(map: &mut ByteToIndexMap, node: &WhileStmt) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.test);
-    register_stmt(map, &node.body);
+    enum_register_expr(map, &node.test);
+    enum_register_stmt(map, &node.body);
   }
 
   fn register_with_stmt(map: &mut ByteToIndexMap, node: &WithStmt) {
     map.register_by_span(&node.span);
-    register_expr(map, &node.obj);
-    register_stmt(map, &node.body);
+    enum_register_expr(map, &node.obj);
+    enum_register_stmt(map, &node.body);
   }
 
   fn register_yield_expr(map: &mut ByteToIndexMap, node: &YieldExpr) {
     map.register_by_span(&node.span);
-    node.arg.as_ref().map(|node| register_expr(map, node));
+    node.arg.as_ref().map(|node| enum_register_expr(map, node));
   }
 }
 
@@ -2367,7 +2367,7 @@ pub mod program {
     let range = map.get_range_by_span(&node.span);
     let java_stmts = java_array_list.construct(env, node.stmts.len());
     node.stmts.iter().for_each(|node| {
-      let java_stmt = create_stmt(env, map, node);
+      let java_stmt = enum_create_stmt(env, map, node);
       java_array_list.add(env, &java_stmts, &java_stmt);
       delete_local_ref!(env, java_stmt);
     });
@@ -2384,17 +2384,6 @@ pub mod program {
     let range = map.get_range_by_span(&node.span);
     let value = node.value;
     java_ast_factory.create_bool(env, value, &range)
-  }
-
-  fn create_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Decl) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match node {
-      Decl::Var(node) => create_var_decl(env, map, &node),
-      default => panic!("Decl {:?}", default),
-      // TODO
-    }
   }
 
   fn create_debugger_stmt<'local, 'a>(
@@ -2419,26 +2408,13 @@ pub mod program {
     java_ast_factory.create_empty_stmt(env, &range)
   }
 
-  fn create_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Expr) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match node {
-      Expr::Unary(node) => create_unary_expr(env, map, &node),
-      Expr::Ident(node) => create_ident(env, map, &node),
-      Expr::Lit(node) => create_lit(env, map, &node),
-      default => panic!("Expr {:?}", default),
-      // TODO
-    }
-  }
-
   fn create_expr_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ExprStmt) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let range = map.get_range_by_span(&node.span);
-    let java_expr = create_expr(env, map, &node.expr);
+    let java_expr = enum_create_expr(env, map, &node.expr);
     let return_value = java_ast_factory.create_expr_stmt(env, &java_expr, &range);
     delete_local_ref!(env, java_expr);
     return_value
@@ -2455,22 +2431,6 @@ pub mod program {
     java_ast_factory.create_ident(env, sym, optional, &range)
   }
 
-  fn create_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Lit) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match node {
-      Lit::Str(node) => create_str(env, map, node),
-      Lit::Bool(node) => create_bool(env, map, node),
-      Lit::Null(node) => create_null(env, map, node),
-      Lit::Num(node) => create_number(env, map, node),
-      Lit::BigInt(node) => create_big_int(env, map, node),
-      Lit::Regex(node) => create_regex(env, map, node),
-      default => panic!("Lit {:?}", default),
-      // TODO
-    }
-  }
-
   fn create_module<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Module) -> JObject<'a>
   where
     'local: 'a,
@@ -2481,24 +2441,13 @@ pub mod program {
     let range = map.get_range_by_span(&node.span);
     let java_body = java_array_list.construct(env, node.body.len());
     node.body.iter().for_each(|node| {
-      let java_module_item = create_module_item(env, map, node);
+      let java_module_item = enum_create_module_item(env, map, node);
       java_array_list.add(env, &java_body, &java_module_item);
       delete_local_ref!(env, java_module_item);
     });
     let java_module = java_ast_factory.create_module(env, &java_body, &shebang, &range);
     delete_local_ref!(env, java_body);
     java_module
-  }
-
-  fn create_module_item<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ModuleItem) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match node {
-      ModuleItem::Stmt(node) => create_stmt(env, map, node),
-      default => panic!("ModuleItem {:?}", default),
-      // TODO
-    }
   }
 
   fn create_null<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Null) -> JObject<'a>
@@ -2519,34 +2468,6 @@ pub mod program {
     let value = node.value;
     let raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
     java_ast_factory.create_number(env, value, &raw, &range)
-  }
-
-  fn create_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Pat) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match node {
-      Pat::Ident(node) => create_binding_ident(env, map, &node),
-      default => panic!("Pat {:?}", default),
-      // TODO
-    }
-  }
-
-  pub fn create_program<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    map: &ByteToIndexMap,
-    node: &Option<Arc<Program>>,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match node {
-      Some(node) => match node.as_ref() {
-        Program::Module(node) => create_module(env, map, node),
-        Program::Script(node) => create_script(env, map, node),
-      },
-      None => Default::default(),
-    }
   }
 
   fn create_regex<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Regex) -> JObject<'a>
@@ -2570,28 +2491,13 @@ pub mod program {
     let range = map.get_range_by_span(&node.span);
     let java_body = java_array_list.construct(env, node.body.len());
     node.body.iter().for_each(|node| {
-      let java_stmt = create_stmt(env, map, node);
+      let java_stmt = enum_create_stmt(env, map, node);
       java_array_list.add(env, &java_body, &java_stmt);
       delete_local_ref!(env, java_stmt);
     });
     let java_script = java_ast_factory.create_script(env, &java_body, &shebang, &range);
     delete_local_ref!(env, java_body);
     java_script
-  }
-
-  fn create_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Stmt) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match node {
-      Stmt::Block(node) => create_block_stmt(env, map, &node),
-      Stmt::Empty(node) => create_empty_stmt(env, map, &node),
-      Stmt::Debugger(node) => create_debugger_stmt(env, map, &node),
-      Stmt::Decl(node) => create_decl(env, map, &node),
-      Stmt::Expr(node) => create_expr_stmt(env, map, &node),
-      default => panic!("Stmt {:?}", default),
-      // TODO
-    }
   }
 
   fn create_str<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Str) -> JObject<'a>
@@ -2640,7 +2546,7 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let range = map.get_range_by_span(&node.span);
     let op = node.op.get_id();
-    let arg = create_expr(env, map, &node.arg);
+    let arg = enum_create_expr(env, map, &node.arg);
     let return_value = java_ast_factory.create_unary_expr(env, op, &arg, &range);
     delete_local_ref!(env, arg);
     return_value
@@ -2656,12 +2562,106 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let definite = node.definite;
-    let java_option_init: Option<JObject> = node.init.as_ref().map(|node| create_expr(env, map, node.as_ref()));
-    let java_name = create_pat(env, map, &node.name);
+    let java_option_init: Option<JObject> = node.init.as_ref().map(|node| enum_create_expr(env, map, node.as_ref()));
+    let java_name = enum_create_pat(env, map, &node.name);
     let range = map.get_range_by_span(&node.span);
     let return_value = java_ast_factory.create_var_declarator(env, &java_name, &java_option_init, definite, &range);
     java_option_init.map(|j| delete_local_ref!(env, j));
     delete_local_ref!(env, java_name);
     return_value
+  }
+
+  fn enum_create_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Decl) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      Decl::Var(node) => create_var_decl(env, map, &node),
+      default => panic!("Decl {:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Expr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      Expr::Unary(node) => create_unary_expr(env, map, &node),
+      Expr::Ident(node) => create_ident(env, map, &node),
+      Expr::Lit(node) => enum_create_lit(env, map, &node),
+      default => panic!("Expr {:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Lit) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      Lit::Str(node) => create_str(env, map, node),
+      Lit::Bool(node) => create_bool(env, map, node),
+      Lit::Null(node) => create_null(env, map, node),
+      Lit::Num(node) => create_number(env, map, node),
+      Lit::BigInt(node) => create_big_int(env, map, node),
+      Lit::Regex(node) => create_regex(env, map, node),
+      default => panic!("Lit {:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_module_item<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ModuleItem) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      ModuleItem::Stmt(node) => enum_create_stmt(env, map, node),
+      default => panic!("ModuleItem {:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Pat) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      Pat::Ident(node) => create_binding_ident(env, map, &node),
+      default => panic!("Pat {:?}", default),
+      // TODO
+    }
+  }
+
+  pub fn enum_create_program<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &Option<Arc<Program>>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      Some(node) => match node.as_ref() {
+        Program::Module(node) => create_module(env, map, node),
+        Program::Script(node) => create_script(env, map, node),
+      },
+      None => Default::default(),
+    }
+  }
+
+  fn enum_create_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Stmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      Stmt::Block(node) => create_block_stmt(env, map, &node),
+      Stmt::Empty(node) => create_empty_stmt(env, map, &node),
+      Stmt::Debugger(node) => create_debugger_stmt(env, map, &node),
+      Stmt::Decl(node) => enum_create_decl(env, map, &node),
+      Stmt::Expr(node) => create_expr_stmt(env, map, &node),
+      default => panic!("Stmt {:?}", default),
+      // TODO
+    }
   }
 }
