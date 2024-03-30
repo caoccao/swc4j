@@ -17,13 +17,13 @@
 package com.caoccao.javet.swc4j.ast.lit;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBigInt;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBigInt;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
@@ -38,18 +38,13 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
         String code = "1234567890123456789012345678901234567890n";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) script.getBody().get(0);
-        assertEquals(script, exprStmt.getParent());
-        assertEquals(0, exprStmt.getStartPosition());
-        assertEquals(41, exprStmt.getEndPosition());
-        Swc4jAstBigInt bigInt = (Swc4jAstBigInt) exprStmt.getExpr();
-        assertEquals(exprStmt, bigInt.getParent());
-        assertEquals(Swc4jAstType.Number, bigInt.getType());
+        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
+                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 41);
+        Swc4jAstBigInt bigInt = (Swc4jAstBigInt) assertAst(
+                exprStmt, exprStmt.getExpr(), Swc4jAstType.BigInt, 0, 41);
         assertEquals("1234567890123456789012345678901234567890n", bigInt.getRaw());
         assertEquals("1234567890123456789012345678901234567890", bigInt.getValue().toString());
         assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
-        assertEquals(0, bigInt.getStartPosition());
-        assertEquals(41, bigInt.getEndPosition());
     }
 
     @Test
@@ -57,23 +52,16 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
         String code = "-1n";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) script.getBody().get(0);
-        assertEquals(script, exprStmt.getParent());
-        assertEquals(0, exprStmt.getStartPosition());
-        assertEquals(3, exprStmt.getEndPosition());
-        Swc4jAstUnaryExpr unaryExpr = (Swc4jAstUnaryExpr) exprStmt.getExpr();
-        assertEquals(exprStmt, unaryExpr.getParent());
-        assertEquals(0, unaryExpr.getStartPosition());
-        assertEquals(3, unaryExpr.getEndPosition());
+        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
+                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 3);
+        Swc4jAstUnaryExpr unaryExpr = (Swc4jAstUnaryExpr) assertAst(
+                exprStmt, exprStmt.getExpr(), Swc4jAstType.UnaryExpr, 0, 3);
         assertEquals(Swc4jAstUnaryOp.Minus, unaryExpr.getOp());
-        Swc4jAstBigInt bigInt = (Swc4jAstBigInt) unaryExpr.getArg();
-        assertEquals(unaryExpr, bigInt.getParent());
-        assertEquals(Swc4jAstType.Number, bigInt.getType());
+        Swc4jAstBigInt bigInt = (Swc4jAstBigInt) assertAst(
+                unaryExpr, unaryExpr.getArg(), Swc4jAstType.BigInt, 1, 3);
         assertEquals("1n", bigInt.getRaw());
         assertEquals(BigInteger.ONE, bigInt.getValue());
         assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
-        assertEquals(1, bigInt.getStartPosition());
-        assertEquals(3, bigInt.getEndPosition());
     }
 
     @Test
@@ -81,23 +69,16 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
         String code = "+1n";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) script.getBody().get(0);
-        assertEquals(script, exprStmt.getParent());
-        assertEquals(0, exprStmt.getStartPosition());
-        assertEquals(3, exprStmt.getEndPosition());
-        Swc4jAstUnaryExpr unaryExpr = (Swc4jAstUnaryExpr) exprStmt.getExpr();
-        assertEquals(exprStmt, unaryExpr.getParent());
-        assertEquals(0, unaryExpr.getStartPosition());
-        assertEquals(3, unaryExpr.getEndPosition());
+        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
+                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 3);
+        Swc4jAstUnaryExpr unaryExpr = (Swc4jAstUnaryExpr) assertAst(
+                exprStmt, exprStmt.getExpr(), Swc4jAstType.UnaryExpr, 0, 3);
         assertEquals(Swc4jAstUnaryOp.Plus, unaryExpr.getOp());
-        Swc4jAstBigInt bigInt = (Swc4jAstBigInt) unaryExpr.getArg();
-        assertEquals(unaryExpr, bigInt.getParent());
-        assertEquals(Swc4jAstType.Number, bigInt.getType());
+        Swc4jAstBigInt bigInt = (Swc4jAstBigInt) assertAst(
+                unaryExpr, unaryExpr.getArg(), Swc4jAstType.BigInt, 1, 3);
         assertEquals("1n", bigInt.getRaw());
         assertEquals(BigInteger.ONE, bigInt.getValue());
         assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
-        assertEquals(1, bigInt.getStartPosition());
-        assertEquals(3, bigInt.getEndPosition());
     }
 
     @Test
@@ -105,17 +86,12 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
         String code = "0n";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) script.getBody().get(0);
-        assertEquals(script, exprStmt.getParent());
-        assertEquals(0, exprStmt.getStartPosition());
-        assertEquals(2, exprStmt.getEndPosition());
-        Swc4jAstBigInt bigInt = (Swc4jAstBigInt) exprStmt.getExpr();
-        assertEquals(exprStmt, bigInt.getParent());
-        assertEquals(Swc4jAstType.Number, bigInt.getType());
+        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
+                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 2);
+        Swc4jAstBigInt bigInt = (Swc4jAstBigInt) assertAst(
+                exprStmt, exprStmt.getExpr(), Swc4jAstType.BigInt, 0, 2);
         assertEquals("0n", bigInt.getRaw());
         assertEquals(BigInteger.ZERO, bigInt.getValue());
         assertEquals(Swc4jAstBigIntSign.NoSign, bigInt.getSign());
-        assertEquals(0, bigInt.getStartPosition());
-        assertEquals(2, bigInt.getEndPosition());
     }
 }

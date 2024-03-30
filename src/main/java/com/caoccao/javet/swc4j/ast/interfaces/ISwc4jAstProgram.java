@@ -35,7 +35,7 @@ public interface ISwc4jAstProgram<AST extends ISwc4jAst> extends ISwc4jAst {
      * @since 0.2.0
      */
     default Swc4jAstModule asModule() {
-        return (Swc4jAstModule) this;
+        return (this instanceof Swc4jAstModule) ? (Swc4jAstModule) this : null;
     }
 
     /**
@@ -45,7 +45,7 @@ public interface ISwc4jAstProgram<AST extends ISwc4jAst> extends ISwc4jAst {
      * @since 0.2.0
      */
     default Swc4jAstScript asScript() {
-        return (Swc4jAstScript) this;
+        return (this instanceof Swc4jAstScript) ? (Swc4jAstScript) this : null;
     }
 
     /**

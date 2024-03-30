@@ -17,13 +17,11 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
-import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstDebuggerStmt extends BaseTestSuiteSwc4jAst {
     @Test
@@ -31,10 +29,6 @@ public class TestSwc4jAstDebuggerStmt extends BaseTestSuiteSwc4jAst {
         String code = "debugger;";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstDebuggerStmt debuggerStmt = (Swc4jAstDebuggerStmt) script.getBody().get(0);
-        assertEquals(script, debuggerStmt.getParent());
-        assertEquals(Swc4jAstType.DebuggerStmt, debuggerStmt.getType());
-        assertEquals(0, debuggerStmt.getStartPosition());
-        assertEquals(9, debuggerStmt.getEndPosition());
+        assertAst(script, script.getBody().get(0), Swc4jAstType.DebuggerStmt, 0, 9);
     }
 }

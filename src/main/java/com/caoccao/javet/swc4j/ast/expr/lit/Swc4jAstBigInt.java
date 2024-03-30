@@ -51,7 +51,7 @@ public class Swc4jAstBigInt
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.Number;
+        return Swc4jAstType.BigInt;
     }
 
     public BigInteger getValue() {

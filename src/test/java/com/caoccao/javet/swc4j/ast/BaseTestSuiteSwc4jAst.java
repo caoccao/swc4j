@@ -17,9 +17,13 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.BaseTestSuite;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
     protected Swc4jParseOptions tsModuleOptions;
@@ -35,5 +39,18 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
                 .setMediaType(Swc4jMediaType.TypeScript)
                 .setParseMode(Swc4jParseMode.Script)
                 .setCaptureAst(true);
+    }
+
+    protected <AST extends ISwc4jAst> AST assertAst(
+            ISwc4jAst parentNode,
+            AST node,
+            Swc4jAstType type,
+            int startPosition,
+            int endPosition) {
+        assertEquals(parentNode, node.getParent());
+        assertEquals(type, node.getType());
+        assertEquals(startPosition, node.getStartPosition());
+        assertEquals(endPosition, node.getEndPosition());
+        return node;
     }
 }

@@ -17,9 +17,9 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
@@ -39,16 +39,13 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
         assertEquals(0, script.getStartPosition());
         assertEquals(code.length(), script.getEndPosition());
         assertNotNull(script.getBody());
-        Swc4jAstVarDecl varDecl = (Swc4jAstVarDecl) script.getBody().get(0);
-        assertEquals(script, varDecl.getParent());
+        Swc4jAstVarDecl varDecl = (Swc4jAstVarDecl) assertAst(
+                script, script.getBody().get(0), Swc4jAstType.VarDecl, 0, 7);
         assertEquals(Swc4jAstVarDeclKind.Let, varDecl.getKind());
-        Swc4jAstVarDeclarator varDeclarator = varDecl.getDecls().get(0);
-        assertEquals(varDecl, varDeclarator.getParent());
-        Swc4jAstBindingIdent name = (Swc4jAstBindingIdent) varDeclarator.getName();
-        assertEquals(varDeclarator, name.getParent());
-        assertEquals(Swc4jAstType.BindingIdent, name.getType());
+        Swc4jAstVarDeclarator varDeclarator = assertAst(
+                varDecl, varDecl.getDecls().get(0), Swc4jAstType.VarDeclarator, 4, 7);
+        Swc4jAstBindingIdent name = (Swc4jAstBindingIdent) assertAst(
+                varDeclarator, varDeclarator.getName(), Swc4jAstType.BindingIdent, 4, 7);
         assertEquals("a變量", name.getId().getSym());
-        assertEquals(4, name.getStartPosition());
-        assertEquals(7, name.getEndPosition());
     }
 }

@@ -17,13 +17,13 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
-import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSwc4jAstBlockStmt extends BaseTestSuiteSwc4jAst {
     @Test
@@ -31,11 +31,8 @@ public class TestSwc4jAstBlockStmt extends BaseTestSuiteSwc4jAst {
         String code = "{}";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstBlockStmt blockStmt = (Swc4jAstBlockStmt) script.getBody().get(0);
-        assertEquals(script, blockStmt.getParent());
-        assertEquals(Swc4jAstType.BlockStmt, blockStmt.getType());
+        Swc4jAstBlockStmt blockStmt = (Swc4jAstBlockStmt) assertAst(
+                script, script.getBody().get(0), Swc4jAstType.BlockStmt, 0, 2);
         assertTrue(blockStmt.getStmts().isEmpty());
-        assertEquals(0, blockStmt.getStartPosition());
-        assertEquals(2, blockStmt.getEndPosition());
     }
 }
