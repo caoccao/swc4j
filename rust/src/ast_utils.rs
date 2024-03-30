@@ -32,6 +32,7 @@ struct JavaSwc4jAstFactory {
   class: GlobalRef,
   method_create_binding_ident: JStaticMethodID,
   method_create_block_stmt: JStaticMethodID,
+  method_create_bool: JStaticMethodID,
   method_create_debugger_stmt: JStaticMethodID,
   method_create_empty_stmt: JStaticMethodID,
   method_create_expr_stmt: JStaticMethodID,
@@ -67,6 +68,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;II)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBlockStmt");
+    let method_create_bool = env
+      .get_static_method_id(
+        &class,
+        "createBool",
+        "(ZII)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBool;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createBool");
     let method_create_debugger_stmt = env
       .get_static_method_id(
         &class,
@@ -134,6 +142,7 @@ impl JavaSwc4jAstFactory {
       class,
       method_create_binding_ident,
       method_create_block_stmt,
+      method_create_bool,
       method_create_debugger_stmt,
       method_create_empty_stmt,
       method_create_expr_stmt,
@@ -203,6 +212,35 @@ impl JavaSwc4jAstFactory {
         .expect("Couldn't create Swc4jAstBlockStmt by create_block_stmt()")
         .l()
         .expect("Couldn't convert Swc4jAstBlockStmt by create_block_stmt()")
+    };
+    return_value
+  }
+
+  pub fn create_bool<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    value: bool,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let value = jvalue {
+      z: value as u8,
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_bool,
+          ReturnType::Object,
+          &[value, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstBool by create_bool()")
+        .l()
+        .expect("Couldn't convert Swc4jAstBool by create_bool()")
     };
     return_value
   }
@@ -2113,6 +2151,16 @@ pub mod program {
     return_value
   }
 
+  fn create_bool<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Bool) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let value = node.value;
+    java_ast_factory.create_bool(env, value, &range)
+  }
+
   fn create_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Decl) -> JObject<'a>
   where
     'local: 'a,
@@ -2187,6 +2235,7 @@ pub mod program {
   {
     match node {
       Lit::Str(node) => create_str(env, map, node),
+      Lit::Bool(node) => create_bool(env, map, node),
       _ => Default::default(),
       // TODO
     }
