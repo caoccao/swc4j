@@ -16,14 +16,10 @@
 
 package com.caoccao.javet.swc4j.ast.expr;
 
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
-import com.caoccao.javet.swc4j.utils.SimpleList;
-
-import java.util.List;
 
 /**
  * The type Swc4j ast ident.
@@ -65,11 +61,6 @@ public class Swc4jAstIdent
         super(startPosition, endPosition);
         this.optional = optional;
         this.sym = AssertionUtils.notNull(sym, "sym");
-    }
-
-    @Override
-    public List<ISwc4jAst> getChildren() {
-        return SimpleList.of();
     }
 
     /**

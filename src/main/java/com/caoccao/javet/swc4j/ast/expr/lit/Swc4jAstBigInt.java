@@ -18,15 +18,13 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
-import com.caoccao.javet.swc4j.utils.SimpleList;
 import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.math.BigInteger;
-import java.util.List;
 
 public class Swc4jAstBigInt
         extends Swc4jAst
@@ -41,11 +39,6 @@ public class Swc4jAstBigInt
         this.sign = AssertionUtils.notNull(sign, "Sign");
         this.raw = raw;
         this.value = StringUtils.isEmpty(raw) ? BigInteger.ZERO : new BigInteger(raw.substring(0, raw.length() - 1));
-    }
-
-    @Override
-    public List<ISwc4jAst> getChildren() {
-        return SimpleList.of();
     }
 
     public String getRaw() {

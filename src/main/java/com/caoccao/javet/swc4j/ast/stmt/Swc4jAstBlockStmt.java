@@ -17,9 +17,8 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.ArrayList;
@@ -33,17 +32,13 @@ public class Swc4jAstBlockStmt
 
     public Swc4jAstBlockStmt(List<ISwc4jAstStmt> stmts, int startPosition, int endPosition) {
         super(startPosition, endPosition);
-        this.stmts = AssertionUtils.notNull(stmts, "Stmts");
+        this.stmts = Collections.unmodifiableList(AssertionUtils.notNull(stmts, "Stmts"));
+        children = Collections.unmodifiableList(new ArrayList<>(stmts));
         updateParent();
     }
 
-    @Override
-    public List<ISwc4jAst> getChildren() {
-        return new ArrayList<>(stmts);
-    }
-
     public List<ISwc4jAstStmt> getStmts() {
-        return Collections.unmodifiableList(stmts);
+        return stmts;
     }
 
     @Override

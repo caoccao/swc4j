@@ -16,10 +16,9 @@
 
 package com.caoccao.javet.swc4j.ast.stmt;
 
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.ArrayList;
@@ -71,14 +70,10 @@ public class Swc4jAstVarDecl
             int endPosition) {
         super(startPosition, endPosition);
         this.declare = declare;
-        this.decls = AssertionUtils.notNull(decls, "Decls");
+        this.decls = Collections.unmodifiableList(AssertionUtils.notNull(decls, "Decls"));
         this.kind = AssertionUtils.notNull(kind, "Kind");
+        children = Collections.unmodifiableList(new ArrayList<>(decls));
         updateParent();
-    }
-
-    @Override
-    public List<ISwc4jAst> getChildren() {
-        return new ArrayList<>(decls);
     }
 
     /**
@@ -88,7 +83,7 @@ public class Swc4jAstVarDecl
      * @since 0.2.0
      */
     public List<Swc4jAstVarDeclarator> getDecls() {
-        return Collections.unmodifiableList(decls);
+        return decls;
     }
 
     /**

@@ -60,19 +60,15 @@ public abstract class Swc4jAstProgram<AST extends ISwc4jAst>
      */
     protected Swc4jAstProgram(List<AST> body, String shebang, int startPosition, int endPosition) {
         super(startPosition, endPosition);
-        this.body = AssertionUtils.notNull(body, "Body");
+        this.body = Collections.unmodifiableList(AssertionUtils.notNull(body, "Body"));
         this.shebang = shebang;
+        children = Collections.unmodifiableList(new ArrayList<>(body));
         updateParent();
     }
 
     @Override
     public List<AST> getBody() {
-        return Collections.unmodifiableList(body);
-    }
-
-    @Override
-    public List<ISwc4jAst> getChildren() {
-        return new ArrayList<>(body);
+        return body;
     }
 
     @Override

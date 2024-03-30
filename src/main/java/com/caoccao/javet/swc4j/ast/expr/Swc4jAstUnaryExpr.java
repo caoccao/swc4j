@@ -17,13 +17,11 @@
 package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-
-import java.util.List;
 
 public class Swc4jAstUnaryExpr
         extends Swc4jAst
@@ -35,16 +33,12 @@ public class Swc4jAstUnaryExpr
         super(startPosition, endPosition);
         this.arg = AssertionUtils.notNull(arg, "arg");
         this.op = AssertionUtils.notNull(op, "op");
+        children = SimpleList.immutableOf(arg);
         updateParent();
     }
 
     public ISwc4jAstExpr getArg() {
         return arg;
-    }
-
-    @Override
-    public List<ISwc4jAst> getChildren() {
-        return SimpleList.of(arg);
     }
 
     public Swc4jAstUnaryOp getOp() {

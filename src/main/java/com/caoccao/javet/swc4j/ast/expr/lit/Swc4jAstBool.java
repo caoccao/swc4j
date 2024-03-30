@@ -17,12 +17,8 @@
 package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.utils.SimpleList;
-
-import java.util.List;
 
 public class Swc4jAstBool
         extends Swc4jAst
@@ -32,11 +28,6 @@ public class Swc4jAstBool
     public Swc4jAstBool(boolean value, int startPosition, int endPosition) {
         super(startPosition, endPosition);
         this.value = value;
-    }
-
-    @Override
-    public List<ISwc4jAst> getChildren() {
-        return SimpleList.of();
     }
 
     @Override

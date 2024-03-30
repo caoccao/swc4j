@@ -17,7 +17,9 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -26,6 +28,12 @@ import java.util.Objects;
  * @since 0.2.0
  */
 public abstract class Swc4jAst implements ISwc4jAst {
+    /**
+     * The constant EMPTY_CHILDREN.
+     *
+     * @since 0.2.0
+     */
+    protected static final List<ISwc4jAst> EMPTY_CHILDREN = SimpleList.immutableOf();
     /**
      * The End position.
      *
@@ -38,6 +46,12 @@ public abstract class Swc4jAst implements ISwc4jAst {
      * @since 0.2.0
      */
     protected final int startPosition;
+    /**
+     * The Children.
+     *
+     * @since 0.2.0
+     */
+    protected List<ISwc4jAst> children;
     /**
      * The Parent.
      *
@@ -53,9 +67,15 @@ public abstract class Swc4jAst implements ISwc4jAst {
      * @since 0.2.0
      */
     protected Swc4jAst(int startPosition, int endPosition) {
+        children = EMPTY_CHILDREN;
         this.endPosition = endPosition;
         parent = null;
         this.startPosition = startPosition;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildren() {
+        return children;
     }
 
     @Override

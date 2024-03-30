@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,43 +14,33 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.expr;
+package com.caoccao.javet.swc4j.ast.enums;
 
 import java.util.stream.Stream;
 
-public enum Swc4jAstUnaryOp {
-    Bang(1, "!"),
-    Delete(2, "delete"),
-    Minus(3, "-"),
-    Plus(4, "+"),
-    Tilde(5, "~"),
-    TypeOf(6, "typeof"),
-    Void(0, "void"),
-    ;
+public enum Swc4jAstBigIntSign {
+    NoSign(0),
+    Minus(1),
+    Plus(2);
 
     private static final int LENGTH = values().length;
-    private static final Swc4jAstUnaryOp[] TYPES = new Swc4jAstUnaryOp[LENGTH];
+    private static final Swc4jAstBigIntSign[] TYPES = new Swc4jAstBigIntSign[LENGTH];
 
     static {
         Stream.of(values()).forEach(v -> TYPES[v.getId()] = v);
     }
 
     private final int id;
-    private final String value;
-    Swc4jAstUnaryOp(int id, String value) {
+
+    Swc4jAstBigIntSign(int id) {
         this.id = id;
-        this.value = value;
     }
 
-    public static Swc4jAstUnaryOp parse(int id) {
-        return id >= 0 && id < LENGTH ? TYPES[id] : Void;
+    public static Swc4jAstBigIntSign parse(int id) {
+        return id >= 0 && id < LENGTH ? TYPES[id] : NoSign;
     }
 
     public int getId() {
         return id;
-    }
-
-    public String getValue() {
-        return value;
     }
 }

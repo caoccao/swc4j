@@ -17,14 +17,11 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-
-import java.util.List;
 
 public class Swc4jAstExprStmt
         extends Swc4jAst
@@ -34,12 +31,8 @@ public class Swc4jAstExprStmt
     public Swc4jAstExprStmt(ISwc4jAstExpr expr, int startPosition, int endPosition) {
         super(startPosition, endPosition);
         this.expr = AssertionUtils.notNull(expr, "Expr");
+        children = SimpleList.immutableOf(expr);
         updateParent();
-    }
-
-    @Override
-    public List<ISwc4jAst> getChildren() {
-        return SimpleList.of(expr);
     }
 
     public ISwc4jAstExpr getExpr() {

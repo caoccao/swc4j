@@ -17,16 +17,13 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-
-import java.util.List;
 
 /**
  * The type Swc4j ast var declarator.
@@ -76,12 +73,8 @@ public class Swc4jAstVarDeclarator
         this.definite = definite;
         this.init = init;
         this.name = AssertionUtils.notNull(name, "Name");
+        children = SimpleList.immutableOf(init, name);
         updateParent();
-    }
-
-    @Override
-    public List<ISwc4jAst> getChildren() {
-        return SimpleList.of(init, name);
     }
 
     /**

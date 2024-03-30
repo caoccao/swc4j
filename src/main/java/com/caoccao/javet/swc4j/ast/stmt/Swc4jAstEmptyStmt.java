@@ -17,23 +17,14 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.utils.SimpleList;
-
-import java.util.List;
 
 public class Swc4jAstEmptyStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
     public Swc4jAstEmptyStmt(int startPosition, int endPosition) {
         super(startPosition, endPosition);
-    }
-
-    @Override
-    public List<ISwc4jAst> getChildren() {
-        return SimpleList.of();
     }
 
     @Override

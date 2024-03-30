@@ -18,12 +18,9 @@ package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-
-import java.util.List;
 
 /**
  * The type Swc4j ast ts type ann.
@@ -44,12 +41,8 @@ public class Swc4jAstTsTypeAnn extends Swc4jAst {
     protected Swc4jAstTsTypeAnn(ISwc4jAstTsType typeAnn, int startPosition, int endPosition) {
         super(startPosition, endPosition);
         this.typeAnn = typeAnn;
+        children = SimpleList.immutableOf(typeAnn);
         updateParent();
-    }
-
-    @Override
-    public List<ISwc4jAst> getChildren() {
-        return SimpleList.of(typeAnn);
     }
 
     @Override

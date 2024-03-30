@@ -18,7 +18,7 @@ package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;

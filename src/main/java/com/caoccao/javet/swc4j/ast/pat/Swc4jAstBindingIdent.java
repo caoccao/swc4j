@@ -22,7 +22,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -67,12 +67,8 @@ public class Swc4jAstBindingIdent
         super(startPosition, endPosition);
         this.id = AssertionUtils.notNull(id, "Id");
         this.typeAnn = typeAnn;
+        children = SimpleList.immutableOf(id, typeAnn);
         updateParent();
-    }
-
-    @Override
-    public List<ISwc4jAst> getChildren() {
-        return SimpleList.of(id, typeAnn);
     }
 
     /**

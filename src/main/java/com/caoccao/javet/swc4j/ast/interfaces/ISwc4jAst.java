@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 
 import java.util.List;
 
