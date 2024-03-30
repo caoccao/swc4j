@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024. caoccao.com Sam Cao
+ * Copyright (c) 2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,35 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.stmt;
+package com.caoccao.javet.swc4j.ast.lit;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNull;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestSwc4jAstDebuggerStmt extends BaseTestSuiteSwc4jAst {
+public class TestSwc4jAstNull extends BaseTestSuiteSwc4jAst {
     @Test
-    public void testEmpty() throws Swc4jCoreException {
-        String code = "debugger;";
+    public void test() throws Swc4jCoreException {
+        String code = "null";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstDebuggerStmt debuggerStmt = (Swc4jAstDebuggerStmt) script.getBody().get(0);
-        assertEquals(script, debuggerStmt.getParent());
-        assertEquals(Swc4jAstType.DebuggerStmt, debuggerStmt.getType());
-        assertEquals(0, debuggerStmt.getStartPosition());
-        assertEquals(9, debuggerStmt.getEndPosition());
+        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) script.getBody().get(0);
+        assertEquals(script, exprStmt.getParent());
+        assertEquals(0, exprStmt.getStartPosition());
+        assertEquals(4, exprStmt.getEndPosition());
+        Swc4jAstNull astNull = (Swc4jAstNull) exprStmt.getExpr();
+        assertEquals(exprStmt, astNull.getParent());
+        assertEquals(Swc4jAstType.Null, astNull.getType());
+        assertEquals(0, astNull.getStartPosition());
+        assertEquals(4, astNull.getEndPosition());
     }
 }

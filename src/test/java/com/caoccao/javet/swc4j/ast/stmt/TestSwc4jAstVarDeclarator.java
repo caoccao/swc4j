@@ -43,9 +43,12 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
         assertEquals(code.length(), script.getEndPosition());
         assertNotNull(script.getBody());
         Swc4jAstVarDecl varDecl = (Swc4jAstVarDecl) script.getBody().get(0);
+        assertEquals(script, varDecl.getParent());
         assertEquals(Swc4jAstVarDeclKind.Let, varDecl.getKind());
         Swc4jAstVarDeclarator varDeclarator = varDecl.getDecls().get(0);
+        assertEquals(varDecl, varDeclarator.getParent());
         Swc4jAstBindingIdent name = (Swc4jAstBindingIdent) varDeclarator.getName();
+        assertEquals(varDeclarator, name.getParent());
         assertEquals(Swc4jAstType.BindingIdent, name.getType());
         assertEquals("a變量", name.getId().getSym());
         assertEquals(4, name.getStartPosition());

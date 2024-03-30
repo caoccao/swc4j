@@ -12,3 +12,4 @@ crate_type = ["cdylib", "rlib"]
 debug_print = "1.0.0"
 deno_ast = { version = "1.0.1", features = ["module_specifier", "transpiling", "transforms"] }
 jni = "0.21.1"
+num-bigint = "0.4.4"

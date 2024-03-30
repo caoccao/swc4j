@@ -30,6 +30,7 @@ use std::ptr::null_mut;
 struct JavaSwc4jAstFactory {
   #[allow(dead_code)]
   class: GlobalRef,
+  method_create_big_int: JStaticMethodID,
   method_create_binding_ident: JStaticMethodID,
   method_create_block_stmt: JStaticMethodID,
   method_create_bool: JStaticMethodID,
@@ -38,6 +39,8 @@ struct JavaSwc4jAstFactory {
   method_create_expr_stmt: JStaticMethodID,
   method_create_ident: JStaticMethodID,
   method_create_module: JStaticMethodID,
+  method_create_null: JStaticMethodID,
+  method_create_number: JStaticMethodID,
   method_create_script: JStaticMethodID,
   method_create_str: JStaticMethodID,
   method_create_var_decl: JStaticMethodID,
@@ -54,6 +57,13 @@ impl JavaSwc4jAstFactory {
     let class = env
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jAstFactory");
+    let method_create_big_int = env
+      .get_static_method_id(
+        &class,
+        "createBigInt",
+        "(ILjava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBigInt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createBigInt");
     let method_create_binding_ident = env
       .get_static_method_id(
         &class,
@@ -110,6 +120,20 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstModule;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createModule");
+    let method_create_null = env
+      .get_static_method_id(
+        &class,
+        "createNull",
+        "(II)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstNull;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createNull");
+    let method_create_number = env
+      .get_static_method_id(
+        &class,
+        "createNumber",
+        "(DLjava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstNumber;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createNumber");
     let method_create_script = env
       .get_static_method_id(
         &class,
@@ -140,6 +164,7 @@ impl JavaSwc4jAstFactory {
       .expect("Couldn't find method Swc4jAstFactory.createVarDeclarator");
     JavaSwc4jAstFactory {
       class,
+      method_create_big_int,
       method_create_binding_ident,
       method_create_block_stmt,
       method_create_bool,
@@ -148,11 +173,51 @@ impl JavaSwc4jAstFactory {
       method_create_expr_stmt,
       method_create_ident,
       method_create_module,
+      method_create_null,
+      method_create_number,
       method_create_script,
       method_create_str,
       method_create_var_decl,
       method_create_var_declarator,
     }
+  }
+
+  pub fn create_big_int<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    sign: i32,
+    raw: &Option<String>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let sign = jvalue {
+      i: sign as i32,
+    };
+    let java_raw = match &raw {
+      Some(raw) => converter::string_to_jstring(env, &raw),
+      None => Default::default(),
+    };
+    let raw = jvalue {
+      l: java_raw.as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_big_int,
+          ReturnType::Object,
+          &[sign, raw, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstBigInt by create_big_int()")
+        .l()
+        .expect("Couldn't convert Swc4jAstBigInt by create_big_int()")
+    };
+    delete_local_ref!(env, java_raw);
+    return_value
   }
 
   pub fn create_binding_ident<'local, 'a>(
@@ -390,6 +455,69 @@ impl JavaSwc4jAstFactory {
         .expect("Couldn't convert Swc4jAstModule by create_module()")
     };
     delete_local_ref!(env, java_shebang);
+    return_value
+  }
+
+  pub fn create_null<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_null,
+          ReturnType::Object,
+          &[start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstNull by create_null()")
+        .l()
+        .expect("Couldn't convert Swc4jAstNull by create_null()")
+    };
+    return_value
+  }
+
+  pub fn create_number<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    value: f64,
+    raw: &Option<String>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let value = jvalue {
+      d: value as f64,
+    };
+    let java_raw = match &raw {
+      Some(raw) => converter::string_to_jstring(env, &raw),
+      None => Default::default(),
+    };
+    let raw = jvalue {
+      l: java_raw.as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_number,
+          ReturnType::Object,
+          &[value, raw, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstNumber by create_number()")
+        .l()
+        .expect("Couldn't convert Swc4jAstNumber by create_number()")
+    };
+    delete_local_ref!(env, java_raw);
     return_value
   }
 
@@ -2115,6 +2243,17 @@ pub mod program {
 
   use deno_ast::swc::ast::*;
 
+  fn create_big_int<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BigInt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let sign = node.value.sign().get_id();
+    let raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
+    java_ast_factory.create_big_int(env, sign, &raw, &range)
+  }
+
   fn create_binding_ident<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -2236,6 +2375,9 @@ pub mod program {
     match node {
       Lit::Str(node) => create_str(env, map, node),
       Lit::Bool(node) => create_bool(env, map, node),
+      Lit::Null(node) => create_null(env, map, node),
+      Lit::Num(node) => create_number(env, map, node),
+      Lit::BigInt(node) => create_big_int(env, map, node),
       _ => Default::default(),
       // TODO
     }
@@ -2268,6 +2410,26 @@ pub mod program {
       _ => Default::default(),
       // TODO
     }
+  }
+
+  fn create_null<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Null) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    java_ast_factory.create_null(env, &range)
+  }
+
+  fn create_number<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Number) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let value = node.value;
+    let raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
+    java_ast_factory.create_number(env, value, &raw, &range)
   }
 
   fn create_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Pat) -> JObject<'a>
@@ -2338,7 +2500,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let range = map.get_range_by_span(&node.span);
-    let value = &node.value.as_str();
+    let value = node.value.as_str();
     let raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
     java_ast_factory.create_str(env, value, &raw, &range)
   }

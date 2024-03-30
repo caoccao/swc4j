@@ -32,6 +32,7 @@ public class TestSwc4jAstBlockStmt extends BaseTestSuiteSwc4jAst {
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         Swc4jAstScript script = output.getProgram().asScript();
         Swc4jAstBlockStmt blockStmt = (Swc4jAstBlockStmt) script.getBody().get(0);
+        assertEquals(script, blockStmt.getParent());
         assertEquals(Swc4jAstType.BlockStmt, blockStmt.getType());
         assertTrue(blockStmt.getStmts().isEmpty());
         assertEquals(0, blockStmt.getStartPosition());

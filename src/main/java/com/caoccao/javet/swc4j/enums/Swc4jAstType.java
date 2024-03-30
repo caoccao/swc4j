@@ -25,6 +25,8 @@ public enum Swc4jAstType {
     ExprStmt,
     Ident,
     Module,
+    Null,
+    Number,
     Script,
     Str,
     TsTypeAnn,

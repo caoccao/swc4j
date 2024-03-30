@@ -819,6 +819,7 @@ dependencies = [
  "debug_print",
  "deno_ast",
  "jni",
+ "num-bigint",
 ]
 
 [[package]]

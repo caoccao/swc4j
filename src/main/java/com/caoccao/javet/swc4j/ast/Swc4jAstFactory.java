@@ -17,8 +17,7 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
+import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
@@ -40,6 +39,15 @@ import java.util.List;
 @Jni2RustClass(filePath = "rust/src/ast_utils.rs")
 public final class Swc4jAstFactory {
     private Swc4jAstFactory() {
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstBigInt createBigInt(
+            int sign,
+            @Jni2RustParam(optional = true) String raw,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstBigInt(Swc4jAstBigIntSign.parse(sign), raw, startPosition, endPosition);
     }
 
     @Jni2RustMethod
@@ -105,6 +113,22 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstModule(body, shebang, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstNull createNull(
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstNull(startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstNumber createNumber(
+            double value,
+            @Jni2RustParam(optional = true) String raw,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstNumber(value, raw, startPosition, endPosition);
     }
 
     @Jni2RustMethod

@@ -19,6 +19,7 @@ use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
+use num_bigint::Sign;
 use deno_ast::swc::ast::{AssignOp, VarDeclKind};
 use deno_ast::swc::parser::token::{BinOpToken, Keyword, Token};
 pub use deno_ast::{ImportsNotUsedAsValues, MediaType};
@@ -735,6 +736,23 @@ impl JavaParseMode {
   pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> ParseMode {
     let id = call_as_int(env, obj.as_ref(), self.method_get_id, &[], "getId()");
     ParseMode::parse_by_id(id)
+  }
+}
+
+impl IdentifiableEnum<Sign> for Sign {
+  fn get_id(&self) -> i32 {
+    match self {
+      Sign::NoSign => 0,
+      Sign::Minus => 1,
+      Sign::Plus => 2,
+    }
+  }
+  fn parse_by_id(id: i32) -> Sign {
+    match id {
+      1 => Sign::Minus,
+      2 => Sign::Plus,
+      _ => Sign::NoSign,
+    }
   }
 }
 
