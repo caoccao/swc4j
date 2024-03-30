@@ -17,9 +17,9 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
@@ -132,6 +132,15 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstNumber(value, raw, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstRegex createRegex(
+            String exp,
+            String flags,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstRegex(exp, flags, startPosition, endPosition);
     }
 
     @Jni2RustMethod

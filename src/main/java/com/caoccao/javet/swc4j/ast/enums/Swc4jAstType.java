@@ -24,6 +24,7 @@ public enum Swc4jAstType {
     DebuggerStmt,
     EmptyStmt,
     ExprStmt,
+    Regex,
     Ident,
     Module,
     Null,

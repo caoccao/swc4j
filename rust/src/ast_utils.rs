@@ -41,6 +41,7 @@ struct JavaSwc4jAstFactory {
   method_create_module: JStaticMethodID,
   method_create_null: JStaticMethodID,
   method_create_number: JStaticMethodID,
+  method_create_regex: JStaticMethodID,
   method_create_script: JStaticMethodID,
   method_create_str: JStaticMethodID,
   method_create_unary_expr: JStaticMethodID,
@@ -135,6 +136,13 @@ impl JavaSwc4jAstFactory {
         "(DLjava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstNumber;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createNumber");
+    let method_create_regex = env
+      .get_static_method_id(
+        &class,
+        "createRegex",
+        "(Ljava/lang/String;Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstRegex;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createRegex");
     let method_create_script = env
       .get_static_method_id(
         &class,
@@ -183,6 +191,7 @@ impl JavaSwc4jAstFactory {
       method_create_module,
       method_create_null,
       method_create_number,
+      method_create_regex,
       method_create_script,
       method_create_str,
       method_create_unary_expr,
@@ -527,6 +536,43 @@ impl JavaSwc4jAstFactory {
         .expect("Couldn't convert Swc4jAstNumber by create_number()")
     };
     delete_local_ref!(env, java_raw);
+    return_value
+  }
+
+  pub fn create_regex<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    exp: &str,
+    flags: &str,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_exp = converter::string_to_jstring(env, &exp);
+    let exp = jvalue {
+      l: java_exp.as_raw(),
+    };
+    let java_flags = converter::string_to_jstring(env, &flags);
+    let flags = jvalue {
+      l: java_flags.as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_regex,
+          ReturnType::Object,
+          &[exp, flags, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstRegex by create_regex()")
+        .l()
+        .expect("Couldn't convert Swc4jAstRegex by create_regex()")
+    };
+    delete_local_ref!(env, java_exp);
+    delete_local_ref!(env, java_flags);
     return_value
   }
 
@@ -2419,6 +2465,7 @@ pub mod program {
       Lit::Null(node) => create_null(env, map, node),
       Lit::Num(node) => create_number(env, map, node),
       Lit::BigInt(node) => create_big_int(env, map, node),
+      Lit::Regex(node) => create_regex(env, map, node),
       default => panic!("Lit {:?} is not implemented", default),
       // TODO
     }
@@ -2500,6 +2547,17 @@ pub mod program {
       },
       None => Default::default(),
     }
+  }
+
+  fn create_regex<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Regex) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let exp = node.exp.as_str();
+    let flags = node.flags.as_str();
+    java_ast_factory.create_regex(env, exp, flags, &range)
   }
 
   fn create_script<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Script) -> JObject<'a>
