@@ -2392,7 +2392,7 @@ pub mod program {
   {
     match node {
       Decl::Var(node) => create_var_decl(env, map, &node),
-      default => panic!("Decl {:?} is not implemented", default),
+      default => panic!("Decl {:?}", default),
       // TODO
     }
   }
@@ -2427,7 +2427,7 @@ pub mod program {
       Expr::Unary(node) => create_unary_expr(env, map, &node),
       Expr::Ident(node) => create_ident(env, map, &node),
       Expr::Lit(node) => create_lit(env, map, &node),
-      default => panic!("Expr {:?} is not implemented", default),
+      default => panic!("Expr {:?}", default),
       // TODO
     }
   }
@@ -2466,7 +2466,7 @@ pub mod program {
       Lit::Num(node) => create_number(env, map, node),
       Lit::BigInt(node) => create_big_int(env, map, node),
       Lit::Regex(node) => create_regex(env, map, node),
-      default => panic!("Lit {:?} is not implemented", default),
+      default => panic!("Lit {:?}", default),
       // TODO
     }
   }
@@ -2496,7 +2496,7 @@ pub mod program {
   {
     match node {
       ModuleItem::Stmt(node) => create_stmt(env, map, node),
-      default => panic!("ModuleItem {:?} is not implemented", default),
+      default => panic!("ModuleItem {:?}", default),
       // TODO
     }
   }
@@ -2527,7 +2527,7 @@ pub mod program {
   {
     match node {
       Pat::Ident(node) => create_binding_ident(env, map, &node),
-      default => panic!("Pat {:?} is not implemented", default),
+      default => panic!("Pat {:?}", default),
       // TODO
     }
   }
@@ -2589,7 +2589,7 @@ pub mod program {
       Stmt::Debugger(node) => create_debugger_stmt(env, map, &node),
       Stmt::Decl(node) => create_decl(env, map, &node),
       Stmt::Expr(node) => create_expr_stmt(env, map, &node),
-      default => panic!("Stmt {:?} is not implemented", default),
+      default => panic!("Stmt {:?}", default),
       // TODO
     }
   }
