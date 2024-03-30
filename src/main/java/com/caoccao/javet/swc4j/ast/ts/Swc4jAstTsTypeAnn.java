@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.ts;
 
+import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
@@ -30,6 +31,7 @@ import java.util.List;
  * @since 0.2.0
  */
 public class Swc4jAstTsTypeAnn extends Swc4jAst {
+    @Nullable
     protected final ISwc4jAstTsType typeAnn;
 
     /**

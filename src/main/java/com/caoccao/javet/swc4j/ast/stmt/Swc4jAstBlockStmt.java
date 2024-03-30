@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Swc4jAstBlockStmt
@@ -42,7 +43,7 @@ public class Swc4jAstBlockStmt
     }
 
     public List<ISwc4jAstStmt> getStmts() {
-        return stmts;
+        return Collections.unmodifiableList(stmts);
     }
 
     @Override

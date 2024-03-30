@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.enums;
+package com.caoccao.javet.swc4j.annotations;
 
-public enum Swc4jAstType {
-    BindingIdent,
-    BlockStmt,
-    DebuggerStmt,
-    EmptyStmt,
-    ExprStmt,
-    Ident,
-    Module,
-    Script,
-    Str,
-    TsTypeAnn,
-    VarDecl,
-    VarDeclarator,
+import java.lang.annotation.*;
+
+@Documented
+@Inherited
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.SOURCE)
+public @interface Nullable {
 }

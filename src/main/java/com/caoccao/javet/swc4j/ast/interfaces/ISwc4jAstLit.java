@@ -14,19 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.enums;
+package com.caoccao.javet.swc4j.ast.interfaces;
 
-public enum Swc4jAstType {
-    BindingIdent,
-    BlockStmt,
-    DebuggerStmt,
-    EmptyStmt,
-    ExprStmt,
-    Ident,
-    Module,
-    Script,
-    Str,
-    TsTypeAnn,
-    VarDecl,
-    VarDeclarator,
+public interface ISwc4jAstLit extends ISwc4jAstExpr {
 }

@@ -30,8 +30,7 @@ public class TestSwc4jAstBlockStmt extends BaseTestSuiteSwc4jAst {
     public void testEmpty() throws Swc4jCoreException {
         String code = "{}";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = (Swc4jAstScript) output.getProgram();
-        assertNotNull(script.getBody());
+        Swc4jAstScript script = output.getProgram().asScript();
         Swc4jAstBlockStmt blockStmt = (Swc4jAstBlockStmt) script.getBody().get(0);
         assertEquals(Swc4jAstType.BlockStmt, blockStmt.getType());
         assertTrue(blockStmt.getStmts().isEmpty());

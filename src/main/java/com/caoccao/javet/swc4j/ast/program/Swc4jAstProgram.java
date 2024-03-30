@@ -16,12 +16,14 @@
 
 package com.caoccao.javet.swc4j.ast.program;
 
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -44,6 +46,7 @@ public abstract class Swc4jAstProgram<AST extends ISwc4jAst>
      *
      * @since 0.2.0
      */
+    @Nullable
     protected final String shebang;
 
     /**
@@ -64,7 +67,7 @@ public abstract class Swc4jAstProgram<AST extends ISwc4jAst>
 
     @Override
     public List<AST> getBody() {
-        return body;
+        return Collections.unmodifiableList(body);
     }
 
     @Override

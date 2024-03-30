@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -87,7 +88,7 @@ public class Swc4jAstVarDecl
      * @since 0.2.0
      */
     public List<Swc4jAstVarDeclarator> getDecls() {
-        return decls;
+        return Collections.unmodifiableList(decls);
     }
 
     /**

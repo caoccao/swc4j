@@ -16,6 +16,9 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
+import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
+
 import java.util.List;
 
 /**
@@ -25,6 +28,26 @@ import java.util.List;
  * @since 0.2.0
  */
 public interface ISwc4jAstProgram<AST extends ISwc4jAst> extends ISwc4jAst {
+    /**
+     * As module ast module.
+     *
+     * @return the ast module
+     * @since 0.2.0
+     */
+    default Swc4jAstModule asModule() {
+        return (Swc4jAstModule) this;
+    }
+
+    /**
+     * As script ast script.
+     *
+     * @return the ast script
+     * @since 0.2.0
+     */
+    default Swc4jAstScript asScript() {
+        return (Swc4jAstScript) this;
+    }
+
     /**
      * Gets body.
      *

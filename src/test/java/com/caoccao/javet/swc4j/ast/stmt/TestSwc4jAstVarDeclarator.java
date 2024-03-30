@@ -38,7 +38,7 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
         assertFalse(output.isModule());
         assertTrue(output.isScript());
         assertNotNull(output.getProgram());
-        Swc4jAstScript script = (Swc4jAstScript) output.getProgram();
+        Swc4jAstScript script = output.getProgram().asScript();
         assertEquals(0, script.getStartPosition());
         assertEquals(code.length(), script.getEndPosition());
         assertNotNull(script.getBody());

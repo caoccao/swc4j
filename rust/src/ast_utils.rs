@@ -38,6 +38,7 @@ struct JavaSwc4jAstFactory {
   method_create_ident: JStaticMethodID,
   method_create_module: JStaticMethodID,
   method_create_script: JStaticMethodID,
+  method_create_str: JStaticMethodID,
   method_create_var_decl: JStaticMethodID,
   method_create_var_declarator: JStaticMethodID,
 }
@@ -108,6 +109,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstScript;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createScript");
+    let method_create_str = env
+      .get_static_method_id(
+        &class,
+        "createStr",
+        "(Ljava/lang/String;Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createStr");
     let method_create_var_decl = env
       .get_static_method_id(
         &class,
@@ -132,6 +140,7 @@ impl JavaSwc4jAstFactory {
       method_create_ident,
       method_create_module,
       method_create_script,
+      method_create_str,
       method_create_var_decl,
       method_create_var_declarator,
     }
@@ -379,6 +388,46 @@ impl JavaSwc4jAstFactory {
         .expect("Couldn't convert Swc4jAstScript by create_script()")
     };
     delete_local_ref!(env, java_shebang);
+    return_value
+  }
+
+  pub fn create_str<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    value: &str,
+    raw: &Option<String>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_value = converter::string_to_jstring(env, &value);
+    let value = jvalue {
+      l: java_value.as_raw(),
+    };
+    let java_raw = match &raw {
+      Some(raw) => converter::string_to_jstring(env, &raw),
+      None => Default::default(),
+    };
+    let raw = jvalue {
+      l: java_raw.as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_str,
+          ReturnType::Object,
+          &[value, raw, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstStr by create_str()")
+        .l()
+        .expect("Couldn't convert Swc4jAstStr by create_str()")
+    };
+    delete_local_ref!(env, java_value);
+    delete_local_ref!(env, java_raw);
     return_value
   }
 
@@ -2075,14 +2124,17 @@ pub mod program {
     }
   }
 
-  fn create_debugger_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &DebuggerStmt) -> JObject<'a>
+  fn create_debugger_stmt<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &DebuggerStmt,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let range = map.get_range_by_span(&node.span);
-    let return_value = java_ast_factory.create_debugger_stmt(env, &range);
-    return_value
+    java_ast_factory.create_debugger_stmt(env, &range)
   }
 
   fn create_empty_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &EmptyStmt) -> JObject<'a>
@@ -2091,8 +2143,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let range = map.get_range_by_span(&node.span);
-    let return_value = java_ast_factory.create_empty_stmt(env, &range);
-    return_value
+    java_ast_factory.create_empty_stmt(env, &range)
   }
 
   fn create_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Expr) -> JObject<'a>
@@ -2101,6 +2152,7 @@ pub mod program {
   {
     match node {
       Expr::Ident(node) => create_ident(env, map, &node),
+      Expr::Lit(node) => create_lit(env, map, &node),
       _ => Default::default(),
       // TODO
     }
@@ -2127,6 +2179,17 @@ pub mod program {
     let sym = node.sym.as_str();
     let optional = node.optional;
     java_ast_factory.create_ident(env, sym, optional, &range)
+  }
+
+  fn create_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Lit) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      Lit::Str(node) => create_str(env, map, node),
+      _ => Default::default(),
+      // TODO
+    }
   }
 
   fn create_module<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Module) -> JObject<'a>
@@ -2186,21 +2249,6 @@ pub mod program {
     }
   }
 
-  fn create_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Stmt) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match node {
-      Stmt::Block(node) => create_block_stmt(env, map, &node),
-      Stmt::Empty(node) => create_empty_stmt(env, map, &node),
-      Stmt::Debugger(node) => create_debugger_stmt(env, map, &node),
-      Stmt::Decl(node) => create_decl(env, map, &node),
-      Stmt::Expr(node) => create_expr_stmt(env, map, &node),
-      _ => Default::default(),
-      // TODO
-    }
-  }
-
   fn create_script<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Script) -> JObject<'a>
   where
     'local: 'a,
@@ -2218,6 +2266,32 @@ pub mod program {
     let java_script = java_ast_factory.create_script(env, &java_body, &shebang, &range);
     delete_local_ref!(env, java_body);
     java_script
+  }
+
+  fn create_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Stmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      Stmt::Block(node) => create_block_stmt(env, map, &node),
+      Stmt::Empty(node) => create_empty_stmt(env, map, &node),
+      Stmt::Debugger(node) => create_debugger_stmt(env, map, &node),
+      Stmt::Decl(node) => create_decl(env, map, &node),
+      Stmt::Expr(node) => create_expr_stmt(env, map, &node),
+      _ => Default::default(),
+      // TODO
+    }
+  }
+
+  fn create_str<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Str) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let value = &node.value.as_str();
+    let raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
+    java_ast_factory.create_str(env, value, &raw, &range)
   }
 
   fn create_var_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &VarDecl) -> JObject<'a>

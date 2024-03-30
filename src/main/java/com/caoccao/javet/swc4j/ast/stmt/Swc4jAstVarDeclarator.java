@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.stmt;
 
+import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
@@ -46,6 +47,7 @@ public class Swc4jAstVarDeclarator
      *
      * @since 0.2.0
      */
+    @Nullable
     protected final ISwc4jAstExpr init;
     /**
      * The Name.
@@ -72,7 +74,6 @@ public class Swc4jAstVarDeclarator
             int endPosition) {
         super(startPosition, endPosition);
         this.definite = definite;
-//        this.init = AssertionUtils.notNull(init, "Init");
         this.init = init;
         this.name = AssertionUtils.notNull(name, "Name");
         updateParent();

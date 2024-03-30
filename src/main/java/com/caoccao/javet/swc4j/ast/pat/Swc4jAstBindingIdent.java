@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.pat;
 
+import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
@@ -46,6 +47,7 @@ public class Swc4jAstBindingIdent
      *
      * @since 0.2.0
      */
+    @Nullable
     protected final Swc4jAstTsTypeAnn typeAnn;
 
     /**
