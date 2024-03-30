@@ -32,4 +32,5 @@ public enum Swc4jAstType {
     TsTypeAnn,
     VarDecl,
     VarDeclarator,
+    UnaryExpr,
 }

@@ -19,8 +19,7 @@ use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
-use num_bigint::Sign;
-use deno_ast::swc::ast::{AssignOp, VarDeclKind};
+use deno_ast::swc::ast::AssignOp;
 use deno_ast::swc::parser::token::{BinOpToken, Keyword, Token};
 pub use deno_ast::{ImportsNotUsedAsValues, MediaType};
 
@@ -739,40 +738,6 @@ impl JavaParseMode {
   }
 }
 
-impl IdentifiableEnum<Sign> for Sign {
-  fn get_id(&self) -> i32 {
-    match self {
-      Sign::NoSign => 0,
-      Sign::Minus => 1,
-      Sign::Plus => 2,
-    }
-  }
-  fn parse_by_id(id: i32) -> Sign {
-    match id {
-      1 => Sign::Minus,
-      2 => Sign::Plus,
-      _ => Sign::NoSign,
-    }
-  }
-}
-
-impl IdentifiableEnum<VarDeclKind> for VarDeclKind {
-  fn get_id(&self) -> i32 {
-    match self {
-      VarDeclKind::Const => 0,
-      VarDeclKind::Let => 1,
-      VarDeclKind::Var => 2,
-    }
-  }
-  fn parse_by_id(id: i32) -> VarDeclKind {
-    match id {
-      1 => VarDeclKind::Let,
-      2 => VarDeclKind::Var,
-      _ => VarDeclKind::Const,
-    }
-  }
-}
-
 pub static mut JAVA_TOKEN_TYPE: Option<JavaTokenType> = None;
 pub static mut JAVA_IMPORTS_NOT_USED_AS_VALUES: Option<JavaImportsNotUsedAsValues> = None;
 pub static mut JAVA_MEDIA_TYPE: Option<JavaMediaType> = None;
@@ -784,5 +749,70 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
     JAVA_IMPORTS_NOT_USED_AS_VALUES = Some(JavaImportsNotUsedAsValues::new(env));
     JAVA_MEDIA_TYPE = Some(JavaMediaType::new(env));
     JAVA_PARSE_MODE = Some(JavaParseMode::new(env));
+  }
+}
+
+pub mod swc_enums {
+  use deno_ast::swc::ast::*;
+  use num_bigint::Sign;
+  use crate::enums::IdentifiableEnum;
+
+  impl IdentifiableEnum<Sign> for Sign {
+    fn get_id(&self) -> i32 {
+      match self {
+        Sign::NoSign => 0,
+        Sign::Minus => 1,
+        Sign::Plus => 2,
+      }
+    }
+    fn parse_by_id(id: i32) -> Sign {
+      match id {
+        1 => Sign::Minus,
+        2 => Sign::Plus,
+        _ => Sign::NoSign,
+      }
+    }
+  }
+
+  impl IdentifiableEnum<UnaryOp> for UnaryOp {
+    fn get_id(&self) -> i32 {
+      match self {
+        UnaryOp::Void => 0,
+        UnaryOp::Bang => 1,
+        UnaryOp::Delete => 2,
+        UnaryOp::Minus => 3,
+        UnaryOp::Plus => 4,
+        UnaryOp::Tilde => 5,
+        UnaryOp::TypeOf => 6,
+      }
+    }
+    fn parse_by_id(id: i32) -> UnaryOp {
+      match id {
+        1 => UnaryOp::Bang,
+        2 => UnaryOp::Delete,
+        3 => UnaryOp::Minus,
+        4 => UnaryOp::Plus,
+        5 => UnaryOp::Tilde,
+        6 => UnaryOp::TypeOf,
+        _ => UnaryOp::Void,
+      }
+    }
+  }
+
+  impl IdentifiableEnum<VarDeclKind> for VarDeclKind {
+    fn get_id(&self) -> i32 {
+      match self {
+        VarDeclKind::Const => 0,
+        VarDeclKind::Let => 1,
+        VarDeclKind::Var => 2,
+      }
+    }
+    fn parse_by_id(id: i32) -> VarDeclKind {
+      match id {
+        1 => VarDeclKind::Let,
+        2 => VarDeclKind::Var,
+        _ => VarDeclKind::Const,
+      }
+    }
   }
 }

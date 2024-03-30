@@ -43,6 +43,7 @@ struct JavaSwc4jAstFactory {
   method_create_number: JStaticMethodID,
   method_create_script: JStaticMethodID,
   method_create_str: JStaticMethodID,
+  method_create_unary_expr: JStaticMethodID,
   method_create_var_decl: JStaticMethodID,
   method_create_var_declarator: JStaticMethodID,
 }
@@ -148,6 +149,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/lang/String;Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createStr");
+    let method_create_unary_expr = env
+      .get_static_method_id(
+        &class,
+        "createUnaryExpr",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstUnaryExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createUnaryExpr");
     let method_create_var_decl = env
       .get_static_method_id(
         &class,
@@ -177,6 +185,7 @@ impl JavaSwc4jAstFactory {
       method_create_number,
       method_create_script,
       method_create_str,
+      method_create_unary_expr,
       method_create_var_decl,
       method_create_var_declarator,
     }
@@ -594,6 +603,37 @@ impl JavaSwc4jAstFactory {
     };
     delete_local_ref!(env, java_value);
     delete_local_ref!(env, java_raw);
+    return_value
+  }
+
+  pub fn create_unary_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    op: i32,
+    arg: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let op = jvalue {
+      i: op as i32,
+    };
+    let arg = jvalue { l: arg.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_unary_expr,
+          ReturnType::Object,
+          &[op, arg, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstUnaryExpr by create_unary_expr()")
+        .l()
+        .expect("Couldn't convert Swc4jAstUnaryExpr by create_unary_expr()")
+    };
     return_value
   }
 
@@ -2306,7 +2346,7 @@ pub mod program {
   {
     match node {
       Decl::Var(node) => create_var_decl(env, map, &node),
-      _ => Default::default(),
+      default => panic!("Decl {:?} is not implemented", default),
       // TODO
     }
   }
@@ -2338,9 +2378,10 @@ pub mod program {
     'local: 'a,
   {
     match node {
+      Expr::Unary(node) => create_unary_expr(env, map, &node),
       Expr::Ident(node) => create_ident(env, map, &node),
       Expr::Lit(node) => create_lit(env, map, &node),
-      _ => Default::default(),
+      default => panic!("Expr {:?} is not implemented", default),
       // TODO
     }
   }
@@ -2378,7 +2419,7 @@ pub mod program {
       Lit::Null(node) => create_null(env, map, node),
       Lit::Num(node) => create_number(env, map, node),
       Lit::BigInt(node) => create_big_int(env, map, node),
-      _ => Default::default(),
+      default => panic!("Lit {:?} is not implemented", default),
       // TODO
     }
   }
@@ -2407,7 +2448,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      _ => Default::default(),
+      ModuleItem::Stmt(node) => create_stmt(env, map, node),
+      default => panic!("ModuleItem {:?} is not implemented", default),
       // TODO
     }
   }
@@ -2438,7 +2480,7 @@ pub mod program {
   {
     match node {
       Pat::Ident(node) => create_binding_ident(env, map, &node),
-      _ => Default::default(),
+      default => panic!("Pat {:?} is not implemented", default),
       // TODO
     }
   }
@@ -2489,7 +2531,7 @@ pub mod program {
       Stmt::Debugger(node) => create_debugger_stmt(env, map, &node),
       Stmt::Decl(node) => create_decl(env, map, &node),
       Stmt::Expr(node) => create_expr_stmt(env, map, &node),
-      _ => Default::default(),
+      default => panic!("Stmt {:?} is not implemented", default),
       // TODO
     }
   }
@@ -2531,6 +2573,19 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     Default::default()
+  }
+
+  fn create_unary_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UnaryExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let op = node.op.get_id();
+    let arg = create_expr(env, map, &node.arg);
+    let return_value = java_ast_factory.create_unary_expr(env, op, &arg, &range);
+    delete_local_ref!(env, arg);
+    return_value
   }
 
   fn create_var_declarator<'local, 'a>(
