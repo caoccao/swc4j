@@ -16,7 +16,10 @@
 
 package com.caoccao.javet.swc4j.utils;
 
+import com.caoccao.javet.swc4j.interfaces.ISwc4jLogger;
+
 public final class AssertionUtils {
+    private static final ISwc4jLogger LOGGER = new Swc4jDefaultLogger(AssertionUtils.class.getName());
 
     private static final String VALUE = "Value";
 
@@ -29,14 +32,19 @@ public final class AssertionUtils {
 
     public static <T> T notNull(T value, String name) {
         if (value == null) {
-            throw new NullPointerException(name + " is not nullable");
+            String message = name + " should not be null";
+            NullPointerException exception = new NullPointerException(message);
+            LOGGER.error(message, exception);
+            throw exception;
         }
         return value;
     }
 
     public static void notTrue(boolean b, String message) {
         if (!b) {
-            throw new IllegalArgumentException(message);
+            IllegalArgumentException exception = new IllegalArgumentException(message);
+            LOGGER.error(message, exception);
+            throw exception;
         }
     }
 }
