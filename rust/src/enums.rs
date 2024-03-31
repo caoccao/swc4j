@@ -757,6 +757,23 @@ pub mod swc_enums {
   use num_bigint::Sign;
   use crate::enums::IdentifiableEnum;
 
+  impl IdentifiableEnum<Accessibility> for Accessibility {
+    fn get_id(&self) -> i32 {
+      match self {
+        Accessibility::Public => 0,
+        Accessibility::Protected => 1,
+        Accessibility::Private => 2,
+      }
+    }
+    fn parse_by_id(id: i32) -> Accessibility {
+      match id {
+        1 => Accessibility::Protected,
+        2 => Accessibility::Private,
+        _ => Accessibility::Public,
+      }
+    }
+  }
+
   impl IdentifiableEnum<Sign> for Sign {
     fn get_id(&self) -> i32 {
       match self {

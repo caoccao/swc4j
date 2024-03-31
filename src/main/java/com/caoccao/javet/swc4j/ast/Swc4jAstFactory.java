@@ -17,7 +17,9 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstConstructor;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstDecorator;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
@@ -102,6 +104,19 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstClassDecl(ident, declare, clazz, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstConstructor createConstructor(
+            ISwc4jAstPropName key,
+            List<ISwc4jAstParamOrTsParamProp> params,
+            @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
+            int accessibility,
+            boolean optional,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstConstructor(
+                key, params, body, Swc4jAstAccessibility.parse(accessibility), optional, startPosition, endPosition);
     }
 
     @Jni2RustMethod
