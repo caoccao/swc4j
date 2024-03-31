@@ -14,33 +14,51 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.ts;
+package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstTsTypeAnn extends Swc4jAst {
-    protected final ISwc4jAstTsType typeAnn;
+public class Swc4jAstClassDecl
+        extends Swc4jAst
+        implements ISwc4jAstDecl {
+    protected final Swc4jAstClass clazz;
+    protected final boolean declare;
+    protected final Swc4jAstIdent ident;
 
-    public Swc4jAstTsTypeAnn(
-            ISwc4jAstTsType typeAnn,
+    public Swc4jAstClassDecl(
+            Swc4jAstIdent ident,
+            boolean declare,
+            Swc4jAstClass clazz,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
-        children = SimpleList.immutableOf(typeAnn);
+        this.clazz = AssertionUtils.notNull(clazz, "Class");
+        this.declare = declare;
+        this.ident = AssertionUtils.notNull(ident, "Ident");
+        children = SimpleList.immutableOf(clazz, ident);
         updateParent();
+    }
+
+    public Swc4jAstClass getClazz() {
+        return clazz;
+    }
+
+    public Swc4jAstIdent getIdent() {
+        return ident;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.TsTypeAnn;
+        return Swc4jAstType.ClassDecl;
     }
 
-    public ISwc4jAstTsType getTypeAnn() {
-        return typeAnn;
+    public boolean isDeclare() {
+        return declare;
     }
 }

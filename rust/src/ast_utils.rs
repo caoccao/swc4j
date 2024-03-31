@@ -34,7 +34,10 @@ struct JavaSwc4jAstFactory {
   method_create_binding_ident: JStaticMethodID,
   method_create_block_stmt: JStaticMethodID,
   method_create_bool: JStaticMethodID,
+  method_create_class: JStaticMethodID,
+  method_create_class_decl: JStaticMethodID,
   method_create_debugger_stmt: JStaticMethodID,
+  method_create_decorator: JStaticMethodID,
   method_create_empty_stmt: JStaticMethodID,
   method_create_export_all: JStaticMethodID,
   method_create_export_decl: JStaticMethodID,
@@ -57,9 +60,14 @@ struct JavaSwc4jAstFactory {
   method_create_spread_element: JStaticMethodID,
   method_create_str: JStaticMethodID,
   method_create_ts_export_assignment: JStaticMethodID,
+  method_create_ts_expr_with_type_args: JStaticMethodID,
   method_create_ts_external_module_ref: JStaticMethodID,
   method_create_ts_import_equals_decl: JStaticMethodID,
   method_create_ts_namespace_export_decl: JStaticMethodID,
+  method_create_ts_type_ann: JStaticMethodID,
+  method_create_ts_type_param: JStaticMethodID,
+  method_create_ts_type_param_decl: JStaticMethodID,
+  method_create_ts_type_param_instantiation: JStaticMethodID,
   method_create_unary_expr: JStaticMethodID,
   method_create_using_decl: JStaticMethodID,
   method_create_var_decl: JStaticMethodID,
@@ -104,6 +112,20 @@ impl JavaSwc4jAstFactory {
         "(ZII)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBool;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBool");
+    let method_create_class = env
+      .get_static_method_id(
+        &class,
+        "createClass",
+        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Ljava/util/List;II)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createClass");
+    let method_create_class_decl = env
+      .get_static_method_id(
+        &class,
+        "createClassDecl",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;II)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstClassDecl;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createClassDecl");
     let method_create_debugger_stmt = env
       .get_static_method_id(
         &class,
@@ -111,6 +133,13 @@ impl JavaSwc4jAstFactory {
         "(II)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstDebuggerStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createDebuggerStmt");
+    let method_create_decorator = env
+      .get_static_method_id(
+        &class,
+        "createDecorator",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstDecorator;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createDecorator");
     let method_create_empty_stmt = env
       .get_static_method_id(
         &class,
@@ -265,6 +294,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsExportAssignment;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsExportAssignment");
+    let method_create_ts_expr_with_type_args = env
+      .get_static_method_id(
+        &class,
+        "createTsExprWithTypeArgs",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;II)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsExprWithTypeArgs;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsExprWithTypeArgs");
     let method_create_ts_external_module_ref = env
       .get_static_method_id(
         &class,
@@ -286,6 +322,34 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;II)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsNamespaceExportDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsNamespaceExportDecl");
+    let method_create_ts_type_ann = env
+      .get_static_method_id(
+        &class,
+        "createTsTypeAnn",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;II)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTypeAnn");
+    let method_create_ts_type_param = env
+      .get_static_method_id(
+        &class,
+        "createTsTypeParam",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;II)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTypeParam");
+    let method_create_ts_type_param_decl = env
+      .get_static_method_id(
+        &class,
+        "createTsTypeParamDecl",
+        "(Ljava/util/List;II)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTypeParamDecl");
+    let method_create_ts_type_param_instantiation = env
+      .get_static_method_id(
+        &class,
+        "createTsTypeParamInstantiation",
+        "(Ljava/util/List;II)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTypeParamInstantiation");
     let method_create_unary_expr = env
       .get_static_method_id(
         &class,
@@ -320,7 +384,10 @@ impl JavaSwc4jAstFactory {
       method_create_binding_ident,
       method_create_block_stmt,
       method_create_bool,
+      method_create_class,
+      method_create_class_decl,
       method_create_debugger_stmt,
+      method_create_decorator,
       method_create_empty_stmt,
       method_create_export_all,
       method_create_export_decl,
@@ -343,9 +410,14 @@ impl JavaSwc4jAstFactory {
       method_create_spread_element,
       method_create_str,
       method_create_ts_export_assignment,
+      method_create_ts_expr_with_type_args,
       method_create_ts_external_module_ref,
       method_create_ts_import_equals_decl,
       method_create_ts_namespace_export_decl,
+      method_create_ts_type_ann,
+      method_create_ts_type_param,
+      method_create_ts_type_param_decl,
+      method_create_ts_type_param_instantiation,
       method_create_unary_expr,
       method_create_using_decl,
       method_create_var_decl,
@@ -481,6 +553,95 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_class<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    decorators: &JObject<'_>,
+    body: &JObject<'_>,
+    super_class: &Option<JObject>,
+    is_abstract: bool,
+    type_params: &Option<JObject>,
+    super_type_params: &Option<JObject>,
+    implements: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let decorators = jvalue { l: decorators.as_raw() };
+    let body = jvalue { l: body.as_raw() };
+    let super_class = jvalue {
+      l: match super_class {
+        Some(super_class) => super_class.as_raw(),
+        None => null_mut(),
+      },
+    };
+    let is_abstract = jvalue {
+      z: is_abstract as u8,
+    };
+    let type_params = jvalue {
+      l: match type_params {
+        Some(type_params) => type_params.as_raw(),
+        None => null_mut(),
+      },
+    };
+    let super_type_params = jvalue {
+      l: match super_type_params {
+        Some(super_type_params) => super_type_params.as_raw(),
+        None => null_mut(),
+      },
+    };
+    let implements = jvalue { l: implements.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_class,
+          ReturnType::Object,
+          &[decorators, body, super_class, is_abstract, type_params, super_type_params, implements, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstClass by create_class()")
+        .l()
+        .expect("Couldn't convert Swc4jAstClass by create_class()")
+    };
+    return_value
+  }
+
+  pub fn create_class_decl<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    ident: &JObject<'_>,
+    declare: bool,
+    clazz: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let ident = jvalue { l: ident.as_raw() };
+    let declare = jvalue {
+      z: declare as u8,
+    };
+    let clazz = jvalue { l: clazz.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_class_decl,
+          ReturnType::Object,
+          &[ident, declare, clazz, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstClassDecl by create_class_decl()")
+        .l()
+        .expect("Couldn't convert Swc4jAstClassDecl by create_class_decl()")
+    };
+    return_value
+  }
+
   pub fn create_debugger_stmt<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -502,6 +663,33 @@ impl JavaSwc4jAstFactory {
         .expect("Couldn't create Swc4jAstDebuggerStmt by create_debugger_stmt()")
         .l()
         .expect("Couldn't convert Swc4jAstDebuggerStmt by create_debugger_stmt()")
+    };
+    return_value
+  }
+
+  pub fn create_decorator<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = jvalue { l: expr.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_decorator,
+          ReturnType::Object,
+          &[expr, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstDecorator by create_decorator()")
+        .l()
+        .expect("Couldn't convert Swc4jAstDecorator by create_decorator()")
     };
     return_value
   }
@@ -1227,6 +1415,40 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_ts_expr_with_type_args<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    type_args: &Option<JObject>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = jvalue { l: expr.as_raw() };
+    let type_args = jvalue {
+      l: match type_args {
+        Some(type_args) => type_args.as_raw(),
+        None => null_mut(),
+      },
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_ts_expr_with_type_args,
+          ReturnType::Object,
+          &[expr, type_args, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstTsExprWithTypeArgs by create_ts_expr_with_type_args()")
+        .l()
+        .expect("Couldn't convert Swc4jAstTsExprWithTypeArgs by create_ts_expr_with_type_args()")
+    };
+    return_value
+  }
+
   pub fn create_ts_external_module_ref<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -1314,6 +1536,140 @@ impl JavaSwc4jAstFactory {
         .expect("Couldn't create Swc4jAstTsNamespaceExportDecl by create_ts_namespace_export_decl()")
         .l()
         .expect("Couldn't convert Swc4jAstTsNamespaceExportDecl by create_ts_namespace_export_decl()")
+    };
+    return_value
+  }
+
+  pub fn create_ts_type_ann<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    type_ann: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let type_ann = jvalue { l: type_ann.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_ts_type_ann,
+          ReturnType::Object,
+          &[type_ann, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstTsTypeAnn by create_ts_type_ann()")
+        .l()
+        .expect("Couldn't convert Swc4jAstTsTypeAnn by create_ts_type_ann()")
+    };
+    return_value
+  }
+
+  pub fn create_ts_type_param<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    name: &JObject<'_>,
+    is_in: bool,
+    is_out: bool,
+    is_const: bool,
+    constraint: &Option<JObject>,
+    default: &Option<JObject>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let name = jvalue { l: name.as_raw() };
+    let is_in = jvalue {
+      z: is_in as u8,
+    };
+    let is_out = jvalue {
+      z: is_out as u8,
+    };
+    let is_const = jvalue {
+      z: is_const as u8,
+    };
+    let constraint = jvalue {
+      l: match constraint {
+        Some(constraint) => constraint.as_raw(),
+        None => null_mut(),
+      },
+    };
+    let default = jvalue {
+      l: match default {
+        Some(default) => default.as_raw(),
+        None => null_mut(),
+      },
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_ts_type_param,
+          ReturnType::Object,
+          &[name, is_in, is_out, is_const, constraint, default, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstTsTypeParam by create_ts_type_param()")
+        .l()
+        .expect("Couldn't convert Swc4jAstTsTypeParam by create_ts_type_param()")
+    };
+    return_value
+  }
+
+  pub fn create_ts_type_param_decl<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    params: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let params = jvalue { l: params.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_ts_type_param_decl,
+          ReturnType::Object,
+          &[params, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstTsTypeParamDecl by create_ts_type_param_decl()")
+        .l()
+        .expect("Couldn't convert Swc4jAstTsTypeParamDecl by create_ts_type_param_decl()")
+    };
+    return_value
+  }
+
+  pub fn create_ts_type_param_instantiation<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    params: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let params = jvalue { l: params.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_ts_type_param_instantiation,
+          ReturnType::Object,
+          &[params, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstTsTypeParamInstantiation by create_ts_type_param_instantiation()")
+        .l()
+        .expect("Couldn't convert Swc4jAstTsTypeParamInstantiation by create_ts_type_param_instantiation()")
     };
     return_value
   }
@@ -3106,6 +3462,88 @@ pub mod program {
     java_ast_factory.create_bool(env, value, &range)
   }
 
+  fn create_class<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Class) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_decorators = java_array_list.construct(env, node.decorators.len());
+    node.decorators.iter().for_each(|node| {
+      let java_node = create_decorator(env, map, node);
+      java_array_list.add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_body = java_array_list.construct(env, node.body.len());
+    node.body.iter().for_each(|node| {
+      let java_node = enum_create_class_member(env, map, node);
+      java_array_list.add(env, &java_body, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_option_super_class = node.super_class.as_ref().map(|node| enum_create_expr(env, map, node));
+    let is_abstract = node.is_abstract;
+    let java_type_params = node
+      .type_params
+      .as_ref()
+      .map(|node| create_ts_type_param_decl(env, map, node));
+    let java_super_type_params = node
+      .super_type_params
+      .as_ref()
+      .map(|node| create_ts_type_param_instantiation(env, map, node));
+    let java_implements = java_array_list.construct(env, node.implements.len());
+    node.implements.iter().for_each(|node| {
+      let java_node = create_ts_expr_with_type_args(env, map, node);
+      java_array_list.add(env, &java_implements, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = java_ast_factory.create_class(
+      env,
+      &java_decorators,
+      &java_body,
+      &java_option_super_class,
+      is_abstract,
+      &java_type_params,
+      &java_super_type_params,
+      &java_implements,
+      &range,
+    );
+    delete_local_ref!(env, java_decorators);
+    delete_local_ref!(env, java_body);
+    java_option_super_class.map(|j| delete_local_ref!(env, j));
+    java_type_params.map(|j| delete_local_ref!(env, j));
+    java_super_type_params.map(|j| delete_local_ref!(env, j));
+    delete_local_ref!(env, java_implements);
+    return_value
+  }
+
+  fn create_class_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ClassDecl) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span());
+    let java_ident = create_ident(env, map, &node.ident);
+    let declare = node.declare;
+    let java_class = create_class(env, map, &node.class);
+    let return_value = java_ast_factory.create_class_decl(env, &java_ident, declare, &java_class, &range);
+    delete_local_ref!(env, java_ident);
+    delete_local_ref!(env, java_class);
+    return_value
+  }
+
+  fn create_decorator<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Decorator) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_expr = enum_create_expr(env, map, &node.expr);
+    let return_type = java_ast_factory.create_decorator(env, &java_expr, &range);
+    delete_local_ref!(env, java_expr);
+    return_type
+  }
+
   fn create_debugger_stmt<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -3468,6 +3906,27 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_expr_with_type_args<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsExprWithTypeArgs,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_expr = enum_create_expr(env, map, &node.expr);
+    let java_type_args = node
+      .type_args
+      .as_ref()
+      .map(|node| create_ts_type_param_instantiation(env, map, node));
+    let return_value = java_ast_factory.create_ts_expr_with_type_args(env, &java_expr, &java_type_args, &range);
+    delete_local_ref!(env, java_expr);
+    java_type_args.map(|j| delete_local_ref!(env, j));
+    return_value
+  }
+
   fn create_ts_external_module_ref<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -3526,7 +3985,83 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    Default::default()
+    let range = map.get_range_by_span(&node.span);
+    let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
+    let return_value = java_ast_factory.create_ts_type_ann(env, &java_type_ann, &range);
+    delete_local_ref!(env, java_type_ann);
+    return_value
+  }
+
+  fn create_ts_type_param<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeParam) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_name = create_ident(env, map, &node.name);
+    let is_in = node.is_in;
+    let is_out = node.is_out;
+    let is_const = node.is_const;
+    let java_constraint = node.constraint.as_ref().map(|node| enum_create_ts_type(env, map, node));
+    let java_default = node.default.as_ref().map(|node| enum_create_ts_type(env, map, node));
+    let return_value = java_ast_factory.create_ts_type_param(
+      env,
+      &java_name,
+      is_in,
+      is_out,
+      is_const,
+      &java_constraint,
+      &java_default,
+      &range,
+    );
+    delete_local_ref!(env, java_name);
+    java_constraint.map(|j| delete_local_ref!(env, j));
+    java_default.map(|j| delete_local_ref!(env, j));
+    return_value
+  }
+
+  fn create_ts_type_param_decl<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsTypeParamDecl,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_params = java_array_list.construct(env, node.params.len());
+    node.params.iter().for_each(|node| {
+      let java_node = create_ts_type_param(env, map, node);
+      java_array_list.add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = java_ast_factory.create_ts_type_param_decl(env, &java_params, &range);
+    delete_local_ref!(env, java_params);
+    return_value
+  }
+
+  fn create_ts_type_param_instantiation<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsTypeParamInstantiation,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_params = java_array_list.construct(env, node.params.len());
+    node.params.iter().for_each(|node| {
+      let java_node = enum_create_ts_type(env, map, node);
+      java_array_list.add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = java_ast_factory.create_ts_type_param_instantiation(env, &java_params, &range);
+    delete_local_ref!(env, java_params);
+    return_value
   }
 
   fn create_unary_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UnaryExpr) -> JObject<'a>
@@ -3643,6 +4178,7 @@ pub mod program {
     'local: 'a,
   {
     match node {
+      Decl::Class(node) => create_class_decl(env, map, node),
       Decl::Var(node) => create_var_decl(env, map, node),
       Decl::Using(node) => create_using_decl(env, map, node),
       default => panic!("{:?}", default),
@@ -4238,6 +4774,7 @@ pub mod program {
     match node {
       VarDeclOrExpr::VarDecl(node) => create_var_decl(env, map, node),
       VarDeclOrExpr::Expr(node) => enum_create_expr(env, map, node),
+      // TODO
     }
   }
 }

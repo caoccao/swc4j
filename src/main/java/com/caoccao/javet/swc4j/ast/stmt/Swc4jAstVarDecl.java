@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -25,43 +26,13 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
-/**
- * The type Swc4j ast var decl.
- *
- * @since 0.2.0
- */
 public class Swc4jAstVarDecl
         extends Swc4jAst
         implements ISwc4jAstDecl, ISwc4jAstVarDeclOrExpr {
-    /**
-     * The Declare.
-     *
-     * @since 0.2.0
-     */
     protected final boolean declare;
-    /**
-     * The Init.
-     *
-     * @since 0.2.0
-     */
     protected final List<Swc4jAstVarDeclarator> decls;
-    /**
-     * The Name.
-     *
-     * @since 0.2.0
-     */
     protected final Swc4jAstVarDeclKind kind;
 
-    /**
-     * Instantiates a new Swc4j ast decl.
-     *
-     * @param kind          the kind
-     * @param declare       the definite
-     * @param decls         the decls
-     * @param startPosition the start position
-     * @param endPosition   the end position
-     * @since 0.2.0
-     */
     public Swc4jAstVarDecl(
             Swc4jAstVarDeclKind kind,
             boolean declare,
@@ -76,22 +47,10 @@ public class Swc4jAstVarDecl
         updateParent();
     }
 
-    /**
-     * Gets decls.
-     *
-     * @return the decls
-     * @since 0.2.0
-     */
     public List<Swc4jAstVarDeclarator> getDecls() {
         return decls;
     }
 
-    /**
-     * Gets kind.
-     *
-     * @return the kind
-     * @since 0.2.0
-     */
     public Swc4jAstVarDeclKind getKind() {
         return kind;
     }
@@ -101,12 +60,6 @@ public class Swc4jAstVarDecl
         return Swc4jAstType.VarDecl;
     }
 
-    /**
-     * Is declare.
-     *
-     * @return the declare
-     * @since 0.2.0
-     */
     public boolean isDeclare() {
         return declare;
     }

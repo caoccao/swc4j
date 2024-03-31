@@ -14,33 +14,34 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.ts;
+package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstTsTypeAnn extends Swc4jAst {
-    protected final ISwc4jAstTsType typeAnn;
+public class Swc4jAstDecorator
+        extends Swc4jAst {
+    protected final ISwc4jAstExpr expr;
 
-    public Swc4jAstTsTypeAnn(
-            ISwc4jAstTsType typeAnn,
+    public Swc4jAstDecorator(
+            ISwc4jAstExpr expr,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
-        children = SimpleList.immutableOf(typeAnn);
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        children = SimpleList.immutableOf(expr);
         updateParent();
+    }
+
+    public ISwc4jAstExpr getExpr() {
+        return expr;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.TsTypeAnn;
-    }
-
-    public ISwc4jAstTsType getTypeAnn() {
-        return typeAnn;
+        return Swc4jAstType.Decorator;
     }
 }

@@ -18,21 +18,28 @@ package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstTsTypeAnn extends Swc4jAst {
-    protected final ISwc4jAstTsType typeAnn;
+public class Swc4jAstTsExprWithTypeArgs extends Swc4jAst {
+    protected final ISwc4jAstExpr expr;
+    protected final Swc4jAstTsTypeParamInstantiation typeArgs;
 
-    public Swc4jAstTsTypeAnn(
-            ISwc4jAstTsType typeAnn,
+    public Swc4jAstTsExprWithTypeArgs(
+            ISwc4jAstExpr expr,
+            Swc4jAstTsTypeParamInstantiation typeArgs,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
-        children = SimpleList.immutableOf(typeAnn);
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        this.typeArgs = AssertionUtils.notNull(typeArgs, "TypeArgs");
+        children = SimpleList.immutableOf(expr, typeArgs);
         updateParent();
+    }
+
+    public ISwc4jAstExpr getExpr() {
+        return expr;
     }
 
     @Override
@@ -40,7 +47,7 @@ public class Swc4jAstTsTypeAnn extends Swc4jAst {
         return Swc4jAstType.TsTypeAnn;
     }
 
-    public ISwc4jAstTsType getTypeAnn() {
-        return typeAnn;
+    public Swc4jAstTsTypeParamInstantiation getTypeArgs() {
+        return typeArgs;
     }
 }

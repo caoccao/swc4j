@@ -18,35 +18,31 @@ package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
+public class TestSwc4jAstUsingDecl extends BaseTestSuiteSwc4jAst {
     @Test
-    public void testLet() throws Swc4jCoreException {
-        String code = "let a變量";
+    public void testUsingInTypeScript() throws Swc4jCoreException {
+        String code = "using a";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        assertNotNull(output);
-        assertFalse(output.isModule());
-        assertTrue(output.isScript());
-        assertNotNull(output.getProgram());
         Swc4jAstScript script = output.getProgram().asScript();
-        assertEquals(0, script.getStartPosition());
-        assertEquals(code.length(), script.getEndPosition());
-        assertNotNull(script.getBody());
-        Swc4jAstVarDecl varDecl = (Swc4jAstVarDecl) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.VarDecl, 0, 7);
-        assertEquals(Swc4jAstVarDeclKind.Let, varDecl.getKind());
+        Swc4jAstUsingDecl usingDecl = (Swc4jAstUsingDecl) assertAst(
+                script, script.getBody().get(0), Swc4jAstType.UsingDecl, 0, 7);
+        assertFalse(usingDecl.await);
         Swc4jAstVarDeclarator varDeclarator = assertAst(
-                varDecl, varDecl.getDecls().get(0), Swc4jAstType.VarDeclarator, 4, 7);
-        Swc4jAstBindingIdent name = (Swc4jAstBindingIdent) assertAst(
-                varDeclarator, varDeclarator.getName(), Swc4jAstType.BindingIdent, 4, 7);
-        assertEquals("a變量", name.getId().getSym());
+                usingDecl, usingDecl.getDecls().get(0), Swc4jAstType.VarDeclarator, 6, 7);
+        Swc4jAstBindingIdent bindingIdent = (Swc4jAstBindingIdent) assertAst(
+                varDeclarator, varDeclarator.getName(), Swc4jAstType.BindingIdent, 6, 7);
+        Swc4jAstIdent ident = assertAst(
+                bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 6, 7);
+        assertEquals("a", ident.getSym());
     }
 }

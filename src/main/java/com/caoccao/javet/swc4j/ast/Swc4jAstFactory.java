@@ -16,8 +16,11 @@
 
 package com.caoccao.javet.swc4j.ast;
 
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstDecorator;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
@@ -27,7 +30,7 @@ import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.*;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
+import com.caoccao.javet.swc4j.ast.ts.*;
 import com.caoccao.javet.swc4j.jni2rust.*;
 
 import java.util.List;
@@ -77,10 +80,43 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstClass createClass(
+            List<Swc4jAstDecorator> decorators,
+            List<ISwc4jAstClassMember> body,
+            @Jni2RustParam(optional = true) ISwc4jAstExpr superClass,
+            boolean isAbstract,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation superTypeParams,
+            List<Swc4jAstTsExprWithTypeArgs> _implements,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstClass(decorators, body, superClass, isAbstract, typeParams,
+                superTypeParams, _implements, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstClassDecl createClassDecl(
+            Swc4jAstIdent ident,
+            boolean declare,
+            Swc4jAstClass clazz,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstClassDecl(ident, declare, clazz, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstDebuggerStmt createDebuggerStmt(
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstDebuggerStmt(startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstDecorator createDecorator(
+            ISwc4jAstExpr expr,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstDecorator(expr, startPosition, endPosition);
     }
 
     @Jni2RustMethod
@@ -277,6 +313,15 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsExprWithTypeArgs createTsExprWithTypeArgs(
+            ISwc4jAstExpr expr,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstTsExprWithTypeArgs(expr, typeArgs, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsExternalModuleRef createTsExternalModuleRef(
             Swc4jAstStr expr,
             @Jni2RustParamStartPosition int startPosition,
@@ -301,6 +346,43 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstTsNamespaceExportDecl(id, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsTypeAnn createTsTypeAnn(
+            ISwc4jAstTsType typeAnn,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstTsTypeAnn(typeAnn, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsTypeParam createTsTypeParam(
+            Swc4jAstIdent name,
+            boolean isIn,
+            boolean isOut,
+            boolean isConst,
+            @Jni2RustParam(optional = true) ISwc4jAstTsType constraint,
+            @Jni2RustParam(optional = true) ISwc4jAstTsType _default,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstTsTypeParam(name, isIn, isOut, isConst, constraint, _default, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsTypeParamDecl createTsTypeParamDecl(
+            List<Swc4jAstTsTypeParam> params,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstTsTypeParamDecl(params, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsTypeParamInstantiation createTsTypeParamInstantiation(
+            List<ISwc4jAstTsType> params,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstTsTypeParamInstantiation(params, startPosition, endPosition);
     }
 
     @Jni2RustMethod

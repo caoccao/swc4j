@@ -22,25 +22,28 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstTsTypeAnn extends Swc4jAst {
-    protected final ISwc4jAstTsType typeAnn;
+import java.util.List;
 
-    public Swc4jAstTsTypeAnn(
-            ISwc4jAstTsType typeAnn,
+public class Swc4jAstTsTypeParamInstantiation
+        extends Swc4jAst {
+    protected final List<ISwc4jAstTsType> params;
+
+    public Swc4jAstTsTypeParamInstantiation(
+            List<ISwc4jAstTsType> params,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
-        children = SimpleList.immutableOf(typeAnn);
+        this.params = SimpleList.immutableCopyOf(AssertionUtils.notNull(params, "Params"));
+        children = SimpleList.immutableCopyOf(params);
         updateParent();
+    }
+
+    public List<ISwc4jAstTsType> getParams() {
+        return params;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.TsTypeAnn;
-    }
-
-    public ISwc4jAstTsType getTypeAnn() {
-        return typeAnn;
+        return Swc4jAstType.TsTypeParam;
     }
 }
