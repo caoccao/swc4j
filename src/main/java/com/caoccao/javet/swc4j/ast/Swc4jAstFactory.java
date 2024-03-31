@@ -153,6 +153,15 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstJsxText createJsxText(
+            String value,
+            String raw,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstJsxText(value, raw, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstModule createModule(
             List<ISwc4jAstModuleItem> body,
             @Jni2RustParam(optional = true) String shebang,

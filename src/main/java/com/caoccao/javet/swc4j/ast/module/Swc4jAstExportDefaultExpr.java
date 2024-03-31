@@ -44,6 +44,6 @@ public class Swc4jAstExportDefaultExpr
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.ExportExpr;
+        return Swc4jAstType.ExportDefaultExpr;
     }
 }

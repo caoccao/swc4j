@@ -43,6 +43,7 @@ struct JavaSwc4jAstFactory {
   method_create_expr_stmt: JStaticMethodID,
   method_create_ident: JStaticMethodID,
   method_create_import_decl: JStaticMethodID,
+  method_create_jsx_text: JStaticMethodID,
   method_create_module: JStaticMethodID,
   method_create_named_export: JStaticMethodID,
   method_create_null: JStaticMethodID,
@@ -161,6 +162,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstObjectLit;II)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImportDecl");
+    let method_create_jsx_text = env
+      .get_static_method_id(
+        &class,
+        "createJsxText",
+        "(Ljava/lang/String;Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstJsxText;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createJsxText");
     let method_create_module = env
       .get_static_method_id(
         &class,
@@ -281,6 +289,7 @@ impl JavaSwc4jAstFactory {
       method_create_expr_stmt,
       method_create_ident,
       method_create_import_decl,
+      method_create_jsx_text,
       method_create_module,
       method_create_named_export,
       method_create_null,
@@ -695,6 +704,43 @@ impl JavaSwc4jAstFactory {
         .l()
         .expect("Couldn't convert Swc4jAstImportDecl by create_import_decl()")
     };
+    return_value
+  }
+
+  pub fn create_jsx_text<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    value: &str,
+    raw: &str,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_value = converter::string_to_jstring(env, &value);
+    let value = jvalue {
+      l: java_value.as_raw(),
+    };
+    let java_raw = converter::string_to_jstring(env, &raw);
+    let raw = jvalue {
+      l: java_raw.as_raw(),
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_jsx_text,
+          ReturnType::Object,
+          &[value, raw, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstJsxText by create_jsx_text()")
+        .l()
+        .expect("Couldn't convert Swc4jAstJsxText by create_jsx_text()")
+    };
+    delete_local_ref!(env, java_value);
+    delete_local_ref!(env, java_raw);
     return_value
   }
 
@@ -1693,29 +1739,6 @@ pub mod span {
     }
   }
 
-  fn register_assign_expr(map: &mut ByteToIndexMap, node: &AssignExpr) {
-    map.register_by_span(&node.span);
-    enum_register_pat_or_expr(map, &node.left);
-    enum_register_expr(map, &node.right);
-  }
-
-  fn register_assign_pat(map: &mut ByteToIndexMap, node: &AssignPat) {
-    map.register_by_span(&node.span);
-    enum_register_pat(map, &node.left);
-    enum_register_expr(map, &node.right);
-  }
-
-  fn register_assign_pat_prop(map: &mut ByteToIndexMap, node: &AssignPatProp) {
-    map.register_by_span(&node.span);
-    register_ident(map, &node.key);
-    node.value.as_ref().map(|node| enum_register_expr(map, node));
-  }
-
-  fn register_assign_prop(map: &mut ByteToIndexMap, node: &AssignProp) {
-    register_ident(map, &node.key);
-    enum_register_expr(map, &node.value);
-  }
-
   fn register_array_lit(map: &mut ByteToIndexMap, node: &ArrayLit) {
     map.register_by_span(&node.span);
     node.elems.iter().for_each(|node| {
@@ -1743,6 +1766,29 @@ pub mod span {
       .as_ref()
       .map(|node| register_ts_type_param_decl(map, node));
     node.return_type.as_ref().map(|node| register_ts_type_ann(map, node));
+  }
+
+  fn register_assign_expr(map: &mut ByteToIndexMap, node: &AssignExpr) {
+    map.register_by_span(&node.span);
+    enum_register_pat_or_expr(map, &node.left);
+    enum_register_expr(map, &node.right);
+  }
+
+  fn register_assign_pat(map: &mut ByteToIndexMap, node: &AssignPat) {
+    map.register_by_span(&node.span);
+    enum_register_pat(map, &node.left);
+    enum_register_expr(map, &node.right);
+  }
+
+  fn register_assign_pat_prop(map: &mut ByteToIndexMap, node: &AssignPatProp) {
+    map.register_by_span(&node.span);
+    register_ident(map, &node.key);
+    node.value.as_ref().map(|node| enum_register_expr(map, node));
+  }
+
+  fn register_assign_prop(map: &mut ByteToIndexMap, node: &AssignProp) {
+    register_ident(map, &node.key);
+    enum_register_expr(map, &node.value);
   }
 
   fn register_auto_accessor(map: &mut ByteToIndexMap, node: &AutoAccessor) {
@@ -2958,6 +3004,17 @@ pub mod program {
     return_value
   }
 
+  fn create_jsx_text<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXText) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let value = node.value.as_str();
+    let raw = node.raw.as_str();
+    java_ast_factory.create_jsx_text(env, value, raw, &range)
+  }
+
   fn create_ident<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Ident) -> JObject<'a>
   where
     'local: 'a,
@@ -3145,6 +3202,22 @@ pub mod program {
     java_ast_factory.create_str(env, value, &raw, &range)
   }
 
+  fn create_ts_export_assignment<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsExportAssignment,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_expr = enum_create_expr(env, map, &node.expr);
+    let return_value = java_ast_factory.create_ts_export_assignment(env, &java_expr, &range);
+    delete_local_ref!(env, java_expr);
+    return_value
+  }
+
   fn create_ts_import_equals_decl<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -3166,6 +3239,30 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_namespace_export_decl<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsNamespaceExportDecl,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_id = create_ident(env, map, &node.id);
+    let return_value = java_ast_factory.create_ts_namespace_export_decl(env, &java_id, &range);
+    delete_local_ref!(env, java_id);
+    return_value
+  }
+
+  fn create_ts_type_ann<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeAnn) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    Default::default()
+  }
+
   fn create_var_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &VarDecl) -> JObject<'a>
   where
     'local: 'a,
@@ -3184,14 +3281,6 @@ pub mod program {
     let return_value = java_ast_factory.create_var_decl(env, kind_id, declare, &java_decls, &range);
     delete_local_ref!(env, java_decls);
     return_value
-  }
-
-  fn create_ts_type_ann<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeAnn) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    Default::default()
   }
 
   fn create_unary_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UnaryExpr) -> JObject<'a>
@@ -3224,6 +3313,36 @@ pub mod program {
     java_option_init.map(|j| delete_local_ref!(env, j));
     delete_local_ref!(env, java_name);
     return_value
+  }
+
+  fn enum_create_block_stmt_or_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BlockStmtOrExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_callee<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Callee) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_class_member<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ClassMember) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
   }
 
   fn enum_create_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Decl) -> JObject<'a>
@@ -3278,11 +3397,101 @@ pub mod program {
     }
   }
 
+  fn enum_create_for_head<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ForHead) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
   fn enum_create_import_specifier<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
     node: &ImportSpecifier,
   ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_jsx_attr_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXAttrName) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_jsx_attr_or_spread<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXAttrOrSpread) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_jsx_attr_value<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXAttrValue) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_jsx_element_child<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXElementChild) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_jsx_element_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXElementName) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_jsx_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_jsx_object<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXObject) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_key<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Key) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3303,6 +3512,15 @@ pub mod program {
       Lit::Num(node) => create_number(env, map, node),
       Lit::BigInt(node) => create_big_int(env, map, node),
       Lit::Regex(node) => create_regex(env, map, node),
+      Lit::JSXText(node) => create_jsx_text(env, map, node),
+    }
+  }
+
+  fn enum_create_member_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &MemberProp) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
       default => panic!("{:?}", default),
       // TODO
     }
@@ -3329,6 +3547,16 @@ pub mod program {
     }
   }
 
+  fn enum_create_module_export_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ModuleExportName) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
   fn enum_create_module_item<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -3343,12 +3571,52 @@ pub mod program {
     }
   }
 
+  fn enum_create_object_pat_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ObjectPatProp) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_opt_chain_base<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &OptChainBase) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_param_or_ts_param_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ParamOrTsParamProp) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
   fn enum_create_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Pat) -> JObject<'a>
   where
     'local: 'a,
   {
     match node {
       Pat::Ident(node) => create_binding_ident(env, map, node),
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_pat_or_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &PatOrExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
       default => panic!("{:?}", default),
       // TODO
     }
@@ -3377,6 +3645,16 @@ pub mod program {
   {
     match node {
       Prop::Shorthand(node) => create_ident(env, map, node),
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_prop_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &PropName) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
       default => panic!("{:?}", default),
       // TODO
     }
@@ -3411,20 +3689,74 @@ pub mod program {
     }
   }
 
-  fn create_ts_export_assignment<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    map: &ByteToIndexMap,
-    node: &TsExportAssignment,
-  ) -> JObject<'a>
+  fn enum_create_super_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SuperProp) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let range = map.get_range_by_span(&node.span);
-    let java_expr = enum_create_expr(env, map, &node.expr);
-    let return_value = java_ast_factory.create_ts_export_assignment(env, &java_expr, &range);
-    delete_local_ref!(env, java_expr);
-    return_value
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_ts_entity_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsEntityName) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_ts_enum_member_id<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsEnumMemberId) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_ts_fn_or_constructor_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsFnOrConstructorType) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_ts_fn_param<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsFnParam) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_ts_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsLit) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_ts_module_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsModuleName) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
   }
 
   fn enum_create_ts_module_ref<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsModuleRef) -> JObject<'a>
@@ -3436,20 +3768,84 @@ pub mod program {
       // TODO
     }
   }
-
-  fn create_ts_namespace_export_decl<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    map: &ByteToIndexMap,
-    node: &TsNamespaceExportDecl,
-  ) -> JObject<'a>
+  
+  fn enum_create_ts_namespace_body<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsNamespaceBody) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let range = map.get_range_by_span(&node.span);
-    let java_id = create_ident(env, map, &node.id);
-    let return_value = java_ast_factory.create_ts_namespace_export_decl(env, &java_id, &range);
-    delete_local_ref!(env, java_id);
-    return_value
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_ts_param_prop_param<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsParamPropParam) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_ts_this_type_or_ident<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsThisTypeOrIdent) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_ts_type_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeElement) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_ts_type_query_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeQueryExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_ts_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsType) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_ts_union_or_intersection_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsUnionOrIntersectionType) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_var_decl_or_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &VarDeclOrExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      default => panic!("{:?}", default),
+      // TODO
+    }
   }
 }
