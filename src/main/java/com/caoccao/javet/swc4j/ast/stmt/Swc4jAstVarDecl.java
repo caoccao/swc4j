@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.stmt;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -31,7 +32,7 @@ import java.util.List;
  */
 public class Swc4jAstVarDecl
         extends Swc4jAst
-        implements ISwc4jAstDecl {
+        implements ISwc4jAstDecl, ISwc4jAstVarDeclOrExpr {
     /**
      * The Declare.
      *

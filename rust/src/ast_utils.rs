@@ -43,6 +43,9 @@ struct JavaSwc4jAstFactory {
   method_create_expr_stmt: JStaticMethodID,
   method_create_ident: JStaticMethodID,
   method_create_import_decl: JStaticMethodID,
+  method_create_import_default_specifier: JStaticMethodID,
+  method_create_import_named_specifier: JStaticMethodID,
+  method_create_import_star_as_specifier: JStaticMethodID,
   method_create_jsx_text: JStaticMethodID,
   method_create_module: JStaticMethodID,
   method_create_named_export: JStaticMethodID,
@@ -54,6 +57,7 @@ struct JavaSwc4jAstFactory {
   method_create_spread_element: JStaticMethodID,
   method_create_str: JStaticMethodID,
   method_create_ts_export_assignment: JStaticMethodID,
+  method_create_ts_external_module_ref: JStaticMethodID,
   method_create_ts_import_equals_decl: JStaticMethodID,
   method_create_ts_namespace_export_decl: JStaticMethodID,
   method_create_unary_expr: JStaticMethodID,
@@ -162,6 +166,27 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstObjectLit;II)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImportDecl");
+    let method_create_import_default_specifier = env
+      .get_static_method_id(
+        &class,
+        "createImportDefaultSpecifier",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;II)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportDefaultSpecifier;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createImportDefaultSpecifier");
+    let method_create_import_named_specifier = env
+      .get_static_method_id(
+        &class,
+        "createImportNamedSpecifier",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;ZII)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportNamedSpecifier;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createImportNamedSpecifier");
+    let method_create_import_star_as_specifier = env
+      .get_static_method_id(
+        &class,
+        "createImportStarAsSpecifier",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;II)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportStarAsSpecifier;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createImportStarAsSpecifier");
     let method_create_jsx_text = env
       .get_static_method_id(
         &class,
@@ -239,6 +264,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsExportAssignment;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsExportAssignment");
+    let method_create_ts_external_module_ref = env
+      .get_static_method_id(
+        &class,
+        "createTsExternalModuleRef",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;II)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsExternalModuleRef;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsExternalModuleRef");
     let method_create_ts_import_equals_decl = env
       .get_static_method_id(
         &class,
@@ -289,6 +321,9 @@ impl JavaSwc4jAstFactory {
       method_create_expr_stmt,
       method_create_ident,
       method_create_import_decl,
+      method_create_import_default_specifier,
+      method_create_import_named_specifier,
+      method_create_import_star_as_specifier,
       method_create_jsx_text,
       method_create_module,
       method_create_named_export,
@@ -300,6 +335,7 @@ impl JavaSwc4jAstFactory {
       method_create_spread_element,
       method_create_str,
       method_create_ts_export_assignment,
+      method_create_ts_external_module_ref,
       method_create_ts_import_equals_decl,
       method_create_ts_namespace_export_decl,
       method_create_unary_expr,
@@ -707,6 +743,98 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_import_default_specifier<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    local: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let local = jvalue { l: local.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_import_default_specifier,
+          ReturnType::Object,
+          &[local, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstImportDefaultSpecifier by create_import_default_specifier()")
+        .l()
+        .expect("Couldn't convert Swc4jAstImportDefaultSpecifier by create_import_default_specifier()")
+    };
+    return_value
+  }
+
+  pub fn create_import_named_specifier<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    local: &JObject<'_>,
+    imported: &Option<JObject>,
+    type_only: bool,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let local = jvalue { l: local.as_raw() };
+    let imported = jvalue {
+      l: match imported {
+        Some(imported) => imported.as_raw(),
+        None => null_mut(),
+      },
+    };
+    let type_only = jvalue {
+      z: type_only as u8,
+    };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_import_named_specifier,
+          ReturnType::Object,
+          &[local, imported, type_only, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstImportNamedSpecifier by create_import_named_specifier()")
+        .l()
+        .expect("Couldn't convert Swc4jAstImportNamedSpecifier by create_import_named_specifier()")
+    };
+    return_value
+  }
+
+  pub fn create_import_star_as_specifier<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    local: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let local = jvalue { l: local.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_import_star_as_specifier,
+          ReturnType::Object,
+          &[local, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstImportStarAsSpecifier by create_import_star_as_specifier()")
+        .l()
+        .expect("Couldn't convert Swc4jAstImportStarAsSpecifier by create_import_star_as_specifier()")
+    };
+    return_value
+  }
+
   pub fn create_jsx_text<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -1086,6 +1214,33 @@ impl JavaSwc4jAstFactory {
         .expect("Couldn't create Swc4jAstTsExportAssignment by create_ts_export_assignment()")
         .l()
         .expect("Couldn't convert Swc4jAstTsExportAssignment by create_ts_export_assignment()")
+    };
+    return_value
+  }
+
+  pub fn create_ts_external_module_ref<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = jvalue { l: expr.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_ts_external_module_ref,
+          ReturnType::Object,
+          &[expr, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstTsExternalModuleRef by create_ts_external_module_ref()")
+        .l()
+        .expect("Couldn't convert Swc4jAstTsExternalModuleRef by create_ts_external_module_ref()")
     };
     return_value
   }
@@ -2944,7 +3099,7 @@ pub mod program {
     let java_option_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
     let return_value = java_ast_factory.create_export_all(env, &java_src, type_only, &java_option_with, &range);
     delete_local_ref!(env, java_src);
-    java_option_with.map(|node| delete_local_ref!(env, node));
+    java_option_with.map(|j| delete_local_ref!(env, j));
     return_value
   }
 
@@ -3004,6 +3159,61 @@ pub mod program {
     return_value
   }
 
+  fn create_import_default_specifier<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &ImportDefaultSpecifier,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_local = create_ident(env, map, &node.local);
+    let return_value = java_ast_factory.create_import_default_specifier(env, &java_local, &range);
+    delete_local_ref!(env, java_local);
+    return_value
+  }
+
+  fn create_import_named_specifier<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &ImportNamedSpecifier,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_local = create_ident(env, map, &node.local);
+    let java_imported = node
+      .imported
+      .as_ref()
+      .map(|node| enum_create_module_export_name(env, map, node));
+    let is_type_only = node.is_type_only;
+    let return_value =
+      java_ast_factory.create_import_named_specifier(env, &java_local, &java_imported, is_type_only, &range);
+    delete_local_ref!(env, java_local);
+    java_imported.map(|j| delete_local_ref!(env, j));
+    return_value
+  }
+
+  fn create_import_star_as_specifier<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &ImportStarAsSpecifier,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_local = create_ident(env, map, &node.local);
+    let return_value = java_ast_factory.create_import_star_as_specifier(env, &java_local, &range);
+    delete_local_ref!(env, java_local);
+    return_value
+  }
+
   fn create_jsx_text<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXText) -> JObject<'a>
   where
     'local: 'a,
@@ -3046,7 +3256,7 @@ pub mod program {
       java_ast_factory.create_import_decl(env, &java_specifiers, &java_src, type_only, &java_option_with, &range);
     delete_local_ref!(env, java_specifiers);
     delete_local_ref!(env, java_src);
-    java_option_with.map(|node| delete_local_ref!(env, node));
+    java_option_with.map(|j| delete_local_ref!(env, j));
     return_value
   }
 
@@ -3094,8 +3304,8 @@ pub mod program {
       &range,
     );
     delete_local_ref!(env, java_specifiers);
-    java_option_src.map(|node| delete_local_ref!(env, node));
-    java_option_with.map(|node| delete_local_ref!(env, node));
+    java_option_src.map(|j| delete_local_ref!(env, j));
+    java_option_with.map(|j| delete_local_ref!(env, j));
     return_value
   }
 
@@ -3218,6 +3428,22 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_external_module_ref<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsExternalModuleRef,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_expr = create_str(env, map, &node.expr);
+    let return_value = java_ast_factory.create_ts_external_module_ref(env, &java_expr, &range);
+    delete_local_ref!(env, java_expr);
+    return_value
+  }
+
   fn create_ts_import_equals_decl<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -3315,7 +3541,11 @@ pub mod program {
     return_value
   }
 
-  fn enum_create_block_stmt_or_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BlockStmtOrExpr) -> JObject<'a>
+  fn enum_create_block_stmt_or_expr<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &BlockStmtOrExpr,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3335,7 +3565,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_class_member<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ClassMember) -> JObject<'a>
+  fn enum_create_class_member<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &ClassMember,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3416,12 +3650,17 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      ImportSpecifier::Named(node) => create_import_named_specifier(env, map, node),
+      ImportSpecifier::Default(node) => create_import_default_specifier(env, map, node),
+      ImportSpecifier::Namespace(node) => create_import_star_as_specifier(env, map, node),
     }
   }
 
-  fn enum_create_jsx_attr_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXAttrName) -> JObject<'a>
+  fn enum_create_jsx_attr_name<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXAttrName,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3431,7 +3670,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_jsx_attr_or_spread<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXAttrOrSpread) -> JObject<'a>
+  fn enum_create_jsx_attr_or_spread<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXAttrOrSpread,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3441,7 +3684,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_jsx_attr_value<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXAttrValue) -> JObject<'a>
+  fn enum_create_jsx_attr_value<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXAttrValue,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3451,7 +3698,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_jsx_element_child<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXElementChild) -> JObject<'a>
+  fn enum_create_jsx_element_child<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXElementChild,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3461,7 +3712,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_jsx_element_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXElementName) -> JObject<'a>
+  fn enum_create_jsx_element_name<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXElementName,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3516,7 +3771,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_member_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &MemberProp) -> JObject<'a>
+  fn enum_create_member_prop<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &MemberProp,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3547,7 +3806,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_module_export_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ModuleExportName) -> JObject<'a>
+  fn enum_create_module_export_name<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &ModuleExportName,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3571,7 +3834,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_object_pat_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ObjectPatProp) -> JObject<'a>
+  fn enum_create_object_pat_prop<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &ObjectPatProp,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3581,7 +3848,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_opt_chain_base<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &OptChainBase) -> JObject<'a>
+  fn enum_create_opt_chain_base<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &OptChainBase,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3591,7 +3862,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_param_or_ts_param_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ParamOrTsParamProp) -> JObject<'a>
+  fn enum_create_param_or_ts_param_prop<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &ParamOrTsParamProp,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3612,7 +3887,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_pat_or_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &PatOrExpr) -> JObject<'a>
+  fn enum_create_pat_or_expr<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &PatOrExpr,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3699,7 +3978,26 @@ pub mod program {
     }
   }
 
-  fn enum_create_ts_entity_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsEntityName) -> JObject<'a>
+  fn enum_create_ts_entity_name<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsEntityName,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      TsEntityName::Ident(node) => create_ident(env, map, node),
+      default => panic!("{:?}", default),
+      // TODO
+    }
+  }
+
+  fn enum_create_ts_enum_member_id<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsEnumMemberId,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3709,7 +4007,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_ts_enum_member_id<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsEnumMemberId) -> JObject<'a>
+  fn enum_create_ts_fn_or_constructor_type<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsFnOrConstructorType,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3719,17 +4021,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_ts_fn_or_constructor_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsFnOrConstructorType) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match node {
-      default => panic!("{:?}", default),
-      // TODO
-    }
-  }
-
-  fn enum_create_ts_fn_param<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsFnParam) -> JObject<'a>
+  fn enum_create_ts_fn_param<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsFnParam,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3749,7 +4045,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_ts_module_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsModuleName) -> JObject<'a>
+  fn enum_create_ts_module_name<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsModuleName,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3759,17 +4059,25 @@ pub mod program {
     }
   }
 
-  fn enum_create_ts_module_ref<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsModuleRef) -> JObject<'a>
+  fn enum_create_ts_module_ref<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsModuleRef,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      TsModuleRef::TsEntityName(node) => enum_create_ts_entity_name(env, map, node),
+      TsModuleRef::TsExternalModuleRef(node) => create_ts_external_module_ref(env, map, node),
     }
   }
-  
-  fn enum_create_ts_namespace_body<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsNamespaceBody) -> JObject<'a>
+
+  fn enum_create_ts_namespace_body<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsNamespaceBody,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3779,7 +4087,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_ts_param_prop_param<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsParamPropParam) -> JObject<'a>
+  fn enum_create_ts_param_prop_param<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsParamPropParam,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3789,7 +4101,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_ts_this_type_or_ident<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsThisTypeOrIdent) -> JObject<'a>
+  fn enum_create_ts_this_type_or_ident<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsThisTypeOrIdent,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3799,7 +4115,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_ts_type_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeElement) -> JObject<'a>
+  fn enum_create_ts_type_element<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsTypeElement,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3809,7 +4129,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_ts_type_query_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeQueryExpr) -> JObject<'a>
+  fn enum_create_ts_type_query_expr<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsTypeQueryExpr,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3829,7 +4153,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_ts_union_or_intersection_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsUnionOrIntersectionType) -> JObject<'a>
+  fn enum_create_ts_union_or_intersection_type<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsUnionOrIntersectionType,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -3839,13 +4167,17 @@ pub mod program {
     }
   }
 
-  fn enum_create_var_decl_or_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &VarDeclOrExpr) -> JObject<'a>
+  fn enum_create_var_decl_or_expr<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &VarDeclOrExpr,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      VarDeclOrExpr::VarDecl(node) => create_var_decl(env, map, node),
+      VarDeclOrExpr::Expr(node) => enum_create_expr(env, map, node),
     }
   }
 }

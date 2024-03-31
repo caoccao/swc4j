@@ -153,6 +153,32 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstImportDefaultSpecifier createImportDefaultSpecifier(
+            Swc4jAstIdent local,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstImportDefaultSpecifier(local, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstImportNamedSpecifier createImportNamedSpecifier(
+            Swc4jAstIdent local,
+            @Jni2RustParam(optional = true) ISwc4jAstModuleExportName imported,
+            boolean typeOnly,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstImportNamedSpecifier(local, imported, typeOnly, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstImportStarAsSpecifier createImportStarAsSpecifier(
+            Swc4jAstIdent local,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstImportStarAsSpecifier(local, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstJsxText createJsxText(
             String value,
             String raw,
@@ -248,6 +274,14 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstTsExportAssignment(decl, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsExternalModuleRef createTsExternalModuleRef(
+            Swc4jAstStr expr,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstTsExternalModuleRef(expr, startPosition, endPosition);
     }
 
     @Jni2RustMethod
