@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,14 +31,29 @@ public final class SimpleList {
     }
 
     /**
-     * Immutable of list.
+     * Copy of list.
      *
-     * @param <T> the type parameter
-     * @return the immutable list
+     * @param <R>        the type parameter
+     * @param <T>        the type parameter
+     * @param collection the collection
+     * @return the copied list
      * @since 0.2.0
      */
-    public static <T> List<T> immutableOf() {
-        return Collections.unmodifiableList(of());
+    public static <R, T extends R> List<R> copyOf(Collection<T> collection) {
+        return new ArrayList<>(collection);
+    }
+
+    /**
+     * Immutable copy of list.
+     *
+     * @param <R>        the type parameter
+     * @param <T>        the type parameter
+     * @param collection the collection
+     * @return the immutable copied list
+     * @since 0.2.0
+     */
+    public static <R, T extends R> List<R> immutableCopyOf(Collection<T> collection) {
+        return Collections.unmodifiableList(copyOf(collection));
     }
 
     /**
@@ -51,6 +67,17 @@ public final class SimpleList {
     @SafeVarargs
     public static <T> List<T> immutableOf(T... objects) {
         return Collections.unmodifiableList(of(objects));
+    }
+
+    /**
+     * Immutable of list.
+     *
+     * @param <T> the type parameter
+     * @return the immutable list
+     * @since 0.2.0
+     */
+    public static <T> List<T> immutableOf() {
+        return Collections.unmodifiableList(of());
     }
 
     /**

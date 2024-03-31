@@ -21,10 +21,8 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.ast.module.*;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
@@ -93,6 +91,40 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstExportAll createExportAll(
+            Swc4jAstStr src,
+            boolean typeOnly,
+            @Jni2RustParam(optional = true) Swc4jAstObjectLit with,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstExportAll(src, typeOnly, with, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstExportDecl createExportDecl(
+            ISwc4jAstDecl decl,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstExportDecl(decl, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstExportDefaultDecl createExportDefaultDecl(
+            ISwc4jAstDefaultDecl decl,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstExportDefaultDecl(decl, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstExportDefaultExpr createExportDefaultExpr(
+            ISwc4jAstExpr decl,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstExportDefaultExpr(decl, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstExprStmt createExprStmt(
             ISwc4jAstExpr expr,
             @Jni2RustParamStartPosition int startPosition,
@@ -110,12 +142,34 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstImportDecl createImportDecl(
+            List<ISwc4jAstImportSpecifier> specifiers,
+            Swc4jAstStr src,
+            boolean typeOnly,
+            @Jni2RustParam(optional = true) Swc4jAstObjectLit with,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstImportDecl(specifiers, src, typeOnly, with, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstModule createModule(
             List<ISwc4jAstModuleItem> body,
             @Jni2RustParam(optional = true) String shebang,
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstModule(body, shebang, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstNamedExport createNamedExport(
+            List<ISwc4jAstExportSpecifier> specifiers,
+            @Jni2RustParam(optional = true) Swc4jAstStr src,
+            boolean typeOnly,
+            @Jni2RustParam(optional = true) Swc4jAstObjectLit with,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstNamedExport(specifiers, src, typeOnly, with, startPosition, endPosition);
     }
 
     @Jni2RustMethod
@@ -132,6 +186,14 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstNumber(value, raw, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstObjectLit createObjectLit(
+            List<ISwc4jAstPropOrSpread> props,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstObjectLit(props, startPosition, endPosition);
     }
 
     @Jni2RustMethod
@@ -153,12 +215,49 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstSpreadElement createSpreadElement(
+            int dot3TokenStartPosition,
+            int dot3TokenEndPosition,
+            ISwc4jAstExpr expr,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstSpreadElement(dot3TokenStartPosition, dot3TokenEndPosition, expr, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstStr createStr(
             String value,
             @Jni2RustParam(optional = true) String raw,
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstStr(value, raw, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsExportAssignment createTsExportAssignment(
+            ISwc4jAstExpr decl,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstTsExportAssignment(decl, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsImportEqualsDecl createTsImportEqualsDecl(
+            boolean export,
+            boolean typeOnly,
+            Swc4jAstIdent id,
+            ISwc4jAstModuleRef moduleRef,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstTsImportEqualsDecl(export, typeOnly, id, moduleRef, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsNamespaceExportDecl createTsNamespaceExportDecl(
+            Swc4jAstIdent id,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstTsNamespaceExportDecl(id, startPosition, endPosition);
     }
 
     @Jni2RustMethod

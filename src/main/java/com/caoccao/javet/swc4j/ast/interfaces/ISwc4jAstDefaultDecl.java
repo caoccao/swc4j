@@ -14,34 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.enums;
+package com.caoccao.javet.swc4j.ast.interfaces;
 
-public enum Swc4jAstType {
-    BindingIdent,
-    BigInt,
-    BlockStmt,
-    Bool,
-    DebuggerStmt,
-    EmptyStmt,
-    ExportDecl,
-    ExportExpr,
-    ExprStmt,
-    Regex,
-    Ident,
-    ImportDecl,
-    Module,
-    NamedExport,
-    Null,
-    Number,
-    ObjectLit,
-    Script,
-    SpreadElement,
-    Str,
-    TsExportAssignment,
-    TsImportEqualsDecl,
-    TsNamespaceExportDecl,
-    TsTypeAnn,
-    VarDecl,
-    VarDeclarator,
-    UnaryExpr,
+public interface ISwc4jAstDefaultDecl extends ISwc4jAstStmt {
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024. caoccao.com Sam Cao
+ * Copyright (c) 2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,37 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.stmt;
+package com.caoccao.javet.swc4j.ast.module;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDefaultDecl;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.List;
-
-public class Swc4jAstBlockStmt
+public class Swc4jAstExportDefaultDecl
         extends Swc4jAst
-        implements ISwc4jAstStmt {
-    protected final List<ISwc4jAstStmt> stmts;
+        implements ISwc4jAstModuleDecl {
+    protected final ISwc4jAstDefaultDecl decl;
 
-    public Swc4jAstBlockStmt(List<ISwc4jAstStmt> stmts, int startPosition, int endPosition) {
+    public Swc4jAstExportDefaultDecl(
+            ISwc4jAstDefaultDecl decl,
+            int startPosition,
+            int endPosition) {
         super(startPosition, endPosition);
-        this.stmts = SimpleList.immutableCopyOf(AssertionUtils.notNull(stmts, "Stmts"));
-        children = SimpleList.immutableCopyOf(stmts);
+        this.decl = AssertionUtils.notNull(decl, "Decl");
+        children = SimpleList.immutableOf(decl);
         updateParent();
     }
 
-    public List<ISwc4jAstStmt> getStmts() {
-        return stmts;
+    public ISwc4jAstDefaultDecl getDecl() {
+        return decl;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.BlockStmt;
+        return Swc4jAstType.ExportDecl;
     }
 }

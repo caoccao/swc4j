@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024. caoccao.com Sam Cao
+ * Copyright (c) 2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,35 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.stmt;
+package com.caoccao.javet.swc4j.ast;
 
-import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropOrSpread;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
-public class Swc4jAstBlockStmt
-        extends Swc4jAst
-        implements ISwc4jAstStmt {
-    protected final List<ISwc4jAstStmt> stmts;
+public class Swc4jAstObjectLit
+        extends Swc4jAst {
+    protected final List<ISwc4jAstPropOrSpread> props;
 
-    public Swc4jAstBlockStmt(List<ISwc4jAstStmt> stmts, int startPosition, int endPosition) {
+    public Swc4jAstObjectLit(
+            List<ISwc4jAstPropOrSpread> props,
+            int startPosition,
+            int endPosition) {
         super(startPosition, endPosition);
-        this.stmts = SimpleList.immutableCopyOf(AssertionUtils.notNull(stmts, "Stmts"));
-        children = SimpleList.immutableCopyOf(stmts);
+        this.props = SimpleList.immutableCopyOf(AssertionUtils.notNull(props, "Props"));
+        children = SimpleList.immutableCopyOf(props);
         updateParent();
     }
 
-    public List<ISwc4jAstStmt> getStmts() {
-        return stmts;
+    public List<ISwc4jAstPropOrSpread> getProps() {
+        return props;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.BlockStmt;
+        return Swc4jAstType.ObjectLit;
     }
 }

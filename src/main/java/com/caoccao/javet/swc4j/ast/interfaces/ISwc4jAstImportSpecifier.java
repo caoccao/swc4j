@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024. caoccao.com Sam Cao
+ * Copyright (c) 2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.enums;
+package com.caoccao.javet.swc4j.ast.interfaces;
 
-public enum Swc4jAstType {
-    BindingIdent,
-    BigInt,
-    BlockStmt,
-    Bool,
-    DebuggerStmt,
-    EmptyStmt,
-    ExportDecl,
-    ExportExpr,
-    ExprStmt,
-    Regex,
-    Ident,
-    ImportDecl,
-    Module,
-    NamedExport,
-    Null,
-    Number,
-    ObjectLit,
-    Script,
-    SpreadElement,
-    Str,
-    TsExportAssignment,
-    TsImportEqualsDecl,
-    TsNamespaceExportDecl,
-    TsTypeAnn,
-    VarDecl,
-    VarDeclarator,
-    UnaryExpr,
+public interface ISwc4jAstImportSpecifier extends ISwc4jAst {
 }

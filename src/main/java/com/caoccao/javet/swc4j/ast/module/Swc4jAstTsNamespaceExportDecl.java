@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024. caoccao.com Sam Cao
+ * Copyright (c) 2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,36 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.stmt;
+package com.caoccao.javet.swc4j.ast.module;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.List;
-
-public class Swc4jAstBlockStmt
+public class Swc4jAstTsNamespaceExportDecl
         extends Swc4jAst
-        implements ISwc4jAstStmt {
-    protected final List<ISwc4jAstStmt> stmts;
+        implements ISwc4jAstModuleDecl {
+    protected final Swc4jAstIdent id;
 
-    public Swc4jAstBlockStmt(List<ISwc4jAstStmt> stmts, int startPosition, int endPosition) {
+    public Swc4jAstTsNamespaceExportDecl(
+            Swc4jAstIdent id,
+            int startPosition,
+            int endPosition) {
         super(startPosition, endPosition);
-        this.stmts = SimpleList.immutableCopyOf(AssertionUtils.notNull(stmts, "Stmts"));
-        children = SimpleList.immutableCopyOf(stmts);
+        this.id = AssertionUtils.notNull(id, "Id");
+        children = SimpleList.immutableOf(id);
         updateParent();
     }
 
-    public List<ISwc4jAstStmt> getStmts() {
-        return stmts;
+    public Swc4jAstIdent getId() {
+        return id;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.BlockStmt;
+        return Swc4jAstType.TsNamespaceExportDecl;
     }
 }

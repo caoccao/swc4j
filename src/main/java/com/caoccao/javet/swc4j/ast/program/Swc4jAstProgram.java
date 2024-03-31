@@ -21,9 +21,8 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -60,9 +59,9 @@ public abstract class Swc4jAstProgram<AST extends ISwc4jAst>
      */
     protected Swc4jAstProgram(List<AST> body, String shebang, int startPosition, int endPosition) {
         super(startPosition, endPosition);
-        this.body = Collections.unmodifiableList(AssertionUtils.notNull(body, "Body"));
+        this.body = SimpleList.immutableCopyOf(AssertionUtils.notNull(body, "Body"));
         this.shebang = shebang;
-        children = Collections.unmodifiableList(new ArrayList<>(body));
+        children = SimpleList.immutableCopyOf(body);
         updateParent();
     }
 
