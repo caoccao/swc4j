@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstConstructor;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstDecorator;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstStaticBlock;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
@@ -308,6 +309,14 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstSpreadElement(dot3TokenStartPosition, dot3TokenEndPosition, expr, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstStaticBlock createStaticBlock(
+            Swc4jAstBlockStmt body,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstStaticBlock(body, startPosition, endPosition);
     }
 
     @Jni2RustMethod

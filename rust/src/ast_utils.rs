@@ -59,6 +59,7 @@ struct JavaSwc4jAstFactory {
   method_create_regex: JStaticMethodID,
   method_create_script: JStaticMethodID,
   method_create_spread_element: JStaticMethodID,
+  method_create_static_block: JStaticMethodID,
   method_create_str: JStaticMethodID,
   method_create_ts_export_assignment: JStaticMethodID,
   method_create_ts_expr_with_type_args: JStaticMethodID,
@@ -288,6 +289,13 @@ impl JavaSwc4jAstFactory {
         "(IILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpreadElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSpreadElement");
+    let method_create_static_block = env
+      .get_static_method_id(
+        &class,
+        "createStaticBlock",
+        "(Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;II)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstStaticBlock;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createStaticBlock");
     let method_create_str = env
       .get_static_method_id(
         &class,
@@ -417,6 +425,7 @@ impl JavaSwc4jAstFactory {
       method_create_regex,
       method_create_script,
       method_create_spread_element,
+      method_create_static_block,
       method_create_str,
       method_create_ts_export_assignment,
       method_create_ts_expr_with_type_args,
@@ -1397,6 +1406,33 @@ impl JavaSwc4jAstFactory {
         .expect("Couldn't create Swc4jAstSpreadElement by create_spread_element()")
         .l()
         .expect("Couldn't convert Swc4jAstSpreadElement by create_spread_element()")
+    };
+    return_value
+  }
+
+  pub fn create_static_block<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    body: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let body = jvalue { l: body.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_static_block,
+          ReturnType::Object,
+          &[body, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstStaticBlock by create_static_block()")
+        .l()
+        .expect("Couldn't convert Swc4jAstStaticBlock by create_static_block()")
     };
     return_value
   }
@@ -3965,6 +4001,18 @@ pub mod program {
     return_value
   }
 
+  fn create_static_block<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &StaticBlock) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_body = create_block_stmt(env, map, &node.body);
+    let return_value = java_ast_factory.create_static_block(env, &java_body, &range);
+    delete_local_ref!(env, java_body);
+    return_value
+  }
+
   fn create_str<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Str) -> JObject<'a>
   where
     'local: 'a,
@@ -4255,6 +4303,7 @@ pub mod program {
   {
     match node {
       ClassMember::Constructor(node) => create_constructor(env, map, node),
+      ClassMember::StaticBlock(node) => create_static_block(env, map, node),
       default => panic!("{:?}", default),
       // TODO
     }
