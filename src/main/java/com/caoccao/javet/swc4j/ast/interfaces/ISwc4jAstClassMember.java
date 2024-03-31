@@ -16,5 +16,5 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-public interface ISwc4jAstStmt extends ISwc4jAstModuleItem {
+public interface ISwc4jAstClassMember extends ISwc4jAst {
 }

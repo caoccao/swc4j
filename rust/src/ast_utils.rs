@@ -61,6 +61,7 @@ struct JavaSwc4jAstFactory {
   method_create_ts_import_equals_decl: JStaticMethodID,
   method_create_ts_namespace_export_decl: JStaticMethodID,
   method_create_unary_expr: JStaticMethodID,
+  method_create_using_decl: JStaticMethodID,
   method_create_var_decl: JStaticMethodID,
   method_create_var_declarator: JStaticMethodID,
 }
@@ -292,6 +293,13 @@ impl JavaSwc4jAstFactory {
         "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstUnaryExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createUnaryExpr");
+    let method_create_using_decl = env
+      .get_static_method_id(
+        &class,
+        "createUsingDecl",
+        "(ZLjava/util/List;II)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstUsingDecl;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createUsingDecl");
     let method_create_var_decl = env
       .get_static_method_id(
         &class,
@@ -339,6 +347,7 @@ impl JavaSwc4jAstFactory {
       method_create_ts_import_equals_decl,
       method_create_ts_namespace_export_decl,
       method_create_unary_expr,
+      method_create_using_decl,
       method_create_var_decl,
       method_create_var_declarator,
     }
@@ -1336,6 +1345,37 @@ impl JavaSwc4jAstFactory {
         .expect("Couldn't create Swc4jAstUnaryExpr by create_unary_expr()")
         .l()
         .expect("Couldn't convert Swc4jAstUnaryExpr by create_unary_expr()")
+    };
+    return_value
+  }
+
+  pub fn create_using_decl<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    is_await: bool,
+    decls: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let is_await = jvalue {
+      z: is_await as u8,
+    };
+    let decls = jvalue { l: decls.as_raw() };
+    let start_position = jvalue { i: range.start as i32 };
+    let end_position = jvalue { i: range.end as i32 };
+    let return_value = unsafe {
+      env
+        .call_static_method_unchecked(
+          &self.class,
+          self.method_create_using_decl,
+          ReturnType::Object,
+          &[is_await, decls, start_position, end_position],
+        )
+        .expect("Couldn't create Swc4jAstUsingDecl by create_using_decl()")
+        .l()
+        .expect("Couldn't convert Swc4jAstUsingDecl by create_using_decl()")
     };
     return_value
   }
@@ -3489,6 +3529,38 @@ pub mod program {
     Default::default()
   }
 
+  fn create_unary_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UnaryExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let op = node.op.get_id();
+    let java_arg = enum_create_expr(env, map, &node.arg);
+    let return_value = java_ast_factory.create_unary_expr(env, op, &java_arg, &range);
+    delete_local_ref!(env, java_arg);
+    return_value
+  }
+
+  fn create_using_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UsingDecl) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let is_await = node.is_await;
+    let java_decls = java_array_list.construct(env, node.decls.len());
+    node.decls.iter().for_each(|node| {
+      let java_node = create_var_declarator(env, map, node);
+      java_array_list.add(env, &java_decls, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = java_ast_factory.create_using_decl(env, is_await, &java_decls, &range);
+    delete_local_ref!(env, java_decls);
+    return_value
+  }
+
   fn create_var_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &VarDecl) -> JObject<'a>
   where
     'local: 'a,
@@ -3506,19 +3578,6 @@ pub mod program {
     });
     let return_value = java_ast_factory.create_var_decl(env, kind_id, declare, &java_decls, &range);
     delete_local_ref!(env, java_decls);
-    return_value
-  }
-
-  fn create_unary_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UnaryExpr) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let range = map.get_range_by_span(&node.span);
-    let op = node.op.get_id();
-    let java_arg = enum_create_expr(env, map, &node.arg);
-    let return_value = java_ast_factory.create_unary_expr(env, op, &java_arg, &range);
-    delete_local_ref!(env, java_arg);
     return_value
   }
 
@@ -3585,6 +3644,7 @@ pub mod program {
   {
     match node {
       Decl::Var(node) => create_var_decl(env, map, node),
+      Decl::Using(node) => create_using_decl(env, map, node),
       default => panic!("{:?}", default),
       // TODO
     }
@@ -3815,8 +3875,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      ModuleExportName::Ident(node) => create_ident(env, map, node),
+      ModuleExportName::Str(node) => create_str(env, map, node),
     }
   }
 

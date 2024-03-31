@@ -313,6 +313,15 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstUsingDecl createUsingDecl(
+            boolean isAwait,
+            List<Swc4jAstVarDeclarator> decls,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstUsingDecl(isAwait, decls, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstVarDecl createVarDecl(
             int kindId,
             boolean declare,

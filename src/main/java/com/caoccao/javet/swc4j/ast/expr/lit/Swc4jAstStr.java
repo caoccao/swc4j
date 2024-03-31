@@ -20,11 +20,12 @@ import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleExportName;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 public class Swc4jAstStr
         extends Swc4jAst
-        implements ISwc4jAstLit {
+        implements ISwc4jAstLit, ISwc4jAstModuleExportName {
     @Nullable
     protected final String raw;
     protected final String value;
