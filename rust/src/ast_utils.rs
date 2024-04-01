@@ -36,6 +36,7 @@ struct JavaSwc4jAstFactory {
   method_create_bool: JStaticMethodID,
   method_create_class: JStaticMethodID,
   method_create_class_decl: JStaticMethodID,
+  method_create_class_prop: JStaticMethodID,
   method_create_constructor: JStaticMethodID,
   method_create_debugger_stmt: JStaticMethodID,
   method_create_decorator: JStaticMethodID,
@@ -136,6 +137,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;II)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstClassDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClassDecl");
+    let method_create_class_prop = env
+      .get_static_method_id(
+        &class,
+        "createClassProp",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZZZII)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClassProp;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createClassProp");
     let method_create_constructor = env
       .get_static_method_id(
         &class,
@@ -418,6 +426,7 @@ impl JavaSwc4jAstFactory {
       method_create_bool,
       method_create_class,
       method_create_class_decl,
+      method_create_class_prop,
       method_create_constructor,
       method_create_debugger_stmt,
       method_create_decorator,
@@ -649,6 +658,51 @@ impl JavaSwc4jAstFactory {
         self.method_create_class_decl,
         &[ident, declare, clazz, start_position, end_position],
         "Swc4jAstClassDecl create_class_decl()"
+      );
+    return_value
+  }
+
+  pub fn create_class_prop<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    key: &JObject<'_>,
+    value: &Option<JObject>,
+    type_ann: &Option<JObject>,
+    is_static: bool,
+    decorators: &JObject<'_>,
+    accessibility_id: i32,
+    is_abstract: bool,
+    is_optional: bool,
+    is_override: bool,
+    readonly: bool,
+    declare: bool,
+    definite: bool,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let key = object_to_jvalue!(key);
+    let value = optional_object_to_jvalue!(value);
+    let type_ann = optional_object_to_jvalue!(type_ann);
+    let is_static = boolean_to_jvalue!(is_static);
+    let decorators = object_to_jvalue!(decorators);
+    let accessibility_id = int_to_jvalue!(accessibility_id);
+    let is_abstract = boolean_to_jvalue!(is_abstract);
+    let is_optional = boolean_to_jvalue!(is_optional);
+    let is_override = boolean_to_jvalue!(is_override);
+    let readonly = boolean_to_jvalue!(readonly);
+    let declare = boolean_to_jvalue!(declare);
+    let definite = boolean_to_jvalue!(definite);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_class_prop,
+        &[key, value, type_ann, is_static, decorators, accessibility_id, is_abstract, is_optional, is_override, readonly, declare, definite, start_position, end_position],
+        "Swc4jAstClassProp create_class_prop()"
       );
     return_value
   }
@@ -3408,6 +3462,53 @@ pub mod program {
     return_value
   }
 
+  fn create_class_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ClassProp) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_key = enum_create_prop_name(env, map, &node.key);
+    let java_option_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
+    let java_option_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let is_static = node.is_static;
+    let java_decorators = java_array_list.construct(env, node.decorators.len());
+    node.decorators.iter().for_each(|node| {
+      let java_node = create_decorator(env, map, node);
+      java_array_list.add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let accessibility = node.accessibility.map_or_else(|| -1, |node| node.get_id());
+    let is_abstract = node.is_abstract;
+    let is_optional = node.is_optional;
+    let is_override = node.is_override;
+    let readonly = node.readonly;
+    let declare = node.declare;
+    let definite = node.definite;
+    let return_type = java_ast_factory.create_class_prop(
+      env,
+      &java_key,
+      &java_option_value,
+      &java_option_type_ann,
+      is_static,
+      &java_decorators,
+      accessibility,
+      is_abstract,
+      is_optional,
+      is_override,
+      readonly,
+      declare,
+      definite,
+      &range,
+    );
+    delete_local_ref!(env, java_key);
+    delete_local_optional_ref!(env, java_option_value);
+    delete_local_optional_ref!(env, java_option_type_ann);
+    delete_local_ref!(env, java_decorators);
+    return_type
+  }
+
   fn create_constructor<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Constructor) -> JObject<'a>
   where
     'local: 'a,
@@ -4116,6 +4217,7 @@ pub mod program {
     match node {
       ClassMember::AutoAccessor(node) => create_auto_accessor(env, map, node),
       ClassMember::Constructor(node) => create_constructor(env, map, node),
+      ClassMember::ClassProp(node) => create_class_prop(env, map, node),
       ClassMember::Empty(node) => create_empty_stmt(env, map, node),
       ClassMember::StaticBlock(node) => create_static_block(env, map, node),
       ClassMember::TsIndexSignature(node) => create_ts_index_signature(env, map, node),

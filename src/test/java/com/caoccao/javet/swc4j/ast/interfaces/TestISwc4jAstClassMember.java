@@ -16,10 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstAutoAccessor;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstConstructor;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstStaticBlock;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstTsIndexSignature;
+import com.caoccao.javet.swc4j.ast.clazz.*;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstEmptyStmt;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +27,7 @@ public class TestISwc4jAstClassMember {
     public void testAssignable() {
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstAutoAccessor.class));
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstConstructor.class));
+        assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstClassProp.class));
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstEmptyStmt.class));
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstStaticBlock.class));
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstTsIndexSignature.class));

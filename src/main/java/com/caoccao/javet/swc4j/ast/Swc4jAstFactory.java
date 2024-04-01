@@ -121,6 +121,29 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstClassProp createClassProp(
+            ISwc4jAstKey key,
+            @Jni2RustParam(optional = true) ISwc4jAstExpr value,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            boolean isStatic,
+            List<Swc4jAstDecorator> decorators,
+            int accessibilityId,
+            boolean isAbstract,
+            boolean isOptional,
+            boolean isOverride,
+            boolean readonly,
+            boolean declare,
+            boolean definite,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstClassProp(
+                key, value, typeAnn, isStatic, decorators,
+                accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
+                isAbstract, isOptional, isOverride, readonly, declare, definite,
+                startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstConstructor createConstructor(
             ISwc4jAstPropName key,
             List<ISwc4jAstParamOrTsParamProp> params,
