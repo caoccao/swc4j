@@ -452,15 +452,11 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let sign = jvalue {
-      i: sign as i32,
-    };
+    let sign = int_to_jvalue!(sign);
     let java_raw = optional_string_to_jstring!(env, &raw);
-    let raw = jvalue {
-      l: java_raw.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let raw = object_to_jvalue!(java_raw);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -483,15 +479,10 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let id = jvalue { l: id.as_raw() };
-    let type_ann = jvalue {
-      l: match type_ann {
-        Some(type_ann) => type_ann.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let id = object_to_jvalue!(id);
+    let type_ann = optional_object_to_jvalue!(type_ann);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -512,9 +503,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let stmts = jvalue { l: stmts.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let stmts = object_to_jvalue!(stmts);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -535,11 +526,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let value = jvalue {
-      z: value as u8,
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let value = boolean_to_jvalue!(value);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -566,32 +555,15 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let decorators = jvalue { l: decorators.as_raw() };
-    let body = jvalue { l: body.as_raw() };
-    let super_class = jvalue {
-      l: match super_class {
-        Some(super_class) => super_class.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let is_abstract = jvalue {
-      z: is_abstract as u8,
-    };
-    let type_params = jvalue {
-      l: match type_params {
-        Some(type_params) => type_params.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let super_type_params = jvalue {
-      l: match super_type_params {
-        Some(super_type_params) => super_type_params.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let implements = jvalue { l: implements.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let decorators = object_to_jvalue!(decorators);
+    let body = object_to_jvalue!(body);
+    let super_class = optional_object_to_jvalue!(super_class);
+    let is_abstract = boolean_to_jvalue!(is_abstract);
+    let type_params = optional_object_to_jvalue!(type_params);
+    let super_type_params = optional_object_to_jvalue!(super_type_params);
+    let implements = object_to_jvalue!(implements);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -614,13 +586,11 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let ident = jvalue { l: ident.as_raw() };
-    let declare = jvalue {
-      z: declare as u8,
-    };
-    let clazz = jvalue { l: clazz.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let ident = object_to_jvalue!(ident);
+    let declare = boolean_to_jvalue!(declare);
+    let clazz = object_to_jvalue!(clazz);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -645,22 +615,13 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let key = jvalue { l: key.as_raw() };
-    let params = jvalue { l: params.as_raw() };
-    let body = jvalue {
-      l: match body {
-        Some(body) => body.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let accessibility = jvalue {
-      i: accessibility as i32,
-    };
-    let optional = jvalue {
-      z: optional as u8,
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let key = object_to_jvalue!(key);
+    let params = object_to_jvalue!(params);
+    let body = optional_object_to_jvalue!(body);
+    let accessibility = int_to_jvalue!(accessibility);
+    let optional = boolean_to_jvalue!(optional);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -680,8 +641,8 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -702,9 +663,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let expr = jvalue { l: expr.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let expr = object_to_jvalue!(expr);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -724,8 +685,8 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -748,18 +709,11 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let src = jvalue { l: src.as_raw() };
-    let type_only = jvalue {
-      z: type_only as u8,
-    };
-    let with = jvalue {
-      l: match with {
-        Some(with) => with.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let src = object_to_jvalue!(src);
+    let type_only = boolean_to_jvalue!(type_only);
+    let with = optional_object_to_jvalue!(with);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -780,9 +734,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let decl = jvalue { l: decl.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let decl = object_to_jvalue!(decl);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -803,9 +757,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let decl = jvalue { l: decl.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let decl = object_to_jvalue!(decl);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -826,9 +780,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let decl = jvalue { l: decl.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let decl = object_to_jvalue!(decl);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -849,9 +803,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let expr = jvalue { l: expr.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let expr = object_to_jvalue!(expr);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -874,14 +828,10 @@ impl JavaSwc4jAstFactory {
     'local: 'a,
   {
     let java_sym = string_to_jstring!(env, &sym);
-    let sym = jvalue {
-      l: java_sym.as_raw(),
-    };
-    let optional = jvalue {
-      z: optional as u8,
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let sym = object_to_jvalue!(java_sym);
+    let optional = boolean_to_jvalue!(optional);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -906,19 +856,12 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let specifiers = jvalue { l: specifiers.as_raw() };
-    let src = jvalue { l: src.as_raw() };
-    let type_only = jvalue {
-      z: type_only as u8,
-    };
-    let with = jvalue {
-      l: match with {
-        Some(with) => with.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let specifiers = object_to_jvalue!(specifiers);
+    let src = object_to_jvalue!(src);
+    let type_only = boolean_to_jvalue!(type_only);
+    let with = optional_object_to_jvalue!(with);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -939,9 +882,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let local = jvalue { l: local.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let local = object_to_jvalue!(local);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -964,18 +907,11 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let local = jvalue { l: local.as_raw() };
-    let imported = jvalue {
-      l: match imported {
-        Some(imported) => imported.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let type_only = jvalue {
-      z: type_only as u8,
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let local = object_to_jvalue!(local);
+    let imported = optional_object_to_jvalue!(imported);
+    let type_only = boolean_to_jvalue!(type_only);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -996,9 +932,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let local = jvalue { l: local.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let local = object_to_jvalue!(local);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1021,15 +957,11 @@ impl JavaSwc4jAstFactory {
     'local: 'a,
   {
     let java_value = string_to_jstring!(env, &value);
-    let value = jvalue {
-      l: java_value.as_raw(),
-    };
+    let value = object_to_jvalue!(java_value);
     let java_raw = string_to_jstring!(env, &raw);
-    let raw = jvalue {
-      l: java_raw.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let raw = object_to_jvalue!(java_raw);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1053,13 +985,11 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let body = jvalue { l: body.as_raw() };
+    let body = object_to_jvalue!(body);
     let java_shebang = optional_string_to_jstring!(env, &shebang);
-    let shebang = jvalue {
-      l: java_shebang.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let shebang = object_to_jvalue!(java_shebang);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1084,24 +1014,12 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let specifiers = jvalue { l: specifiers.as_raw() };
-    let src = jvalue {
-      l: match src {
-        Some(src) => src.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let type_only = jvalue {
-      z: type_only as u8,
-    };
-    let with = jvalue {
-      l: match with {
-        Some(with) => with.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let specifiers = object_to_jvalue!(specifiers);
+    let src = optional_object_to_jvalue!(src);
+    let type_only = boolean_to_jvalue!(type_only);
+    let with = optional_object_to_jvalue!(with);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1121,8 +1039,8 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1144,15 +1062,11 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let value = jvalue {
-      d: value as f64,
-    };
+    let value = double_to_jvalue!(value);
     let java_raw = optional_string_to_jstring!(env, &raw);
-    let raw = jvalue {
-      l: java_raw.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let raw = object_to_jvalue!(java_raw);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1174,9 +1088,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let props = jvalue { l: props.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let props = object_to_jvalue!(props);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1199,15 +1113,11 @@ impl JavaSwc4jAstFactory {
     'local: 'a,
   {
     let java_exp = string_to_jstring!(env, &exp);
-    let exp = jvalue {
-      l: java_exp.as_raw(),
-    };
+    let exp = object_to_jvalue!(java_exp);
     let java_flags = string_to_jstring!(env, &flags);
-    let flags = jvalue {
-      l: java_flags.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let flags = object_to_jvalue!(java_flags);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1231,13 +1141,11 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let body = jvalue { l: body.as_raw() };
+    let body = object_to_jvalue!(body);
     let java_shebang = optional_string_to_jstring!(env, &shebang);
-    let shebang = jvalue {
-      l: java_shebang.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let shebang = object_to_jvalue!(java_shebang);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1261,15 +1169,11 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let dot3_token_start_position = jvalue {
-      i: dot3_token_start_position as i32,
-    };
-    let dot3_token_end_position = jvalue {
-      i: dot3_token_end_position as i32,
-    };
-    let expr = jvalue { l: expr.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let dot3_token_start_position = int_to_jvalue!(dot3_token_start_position);
+    let dot3_token_end_position = int_to_jvalue!(dot3_token_end_position);
+    let expr = object_to_jvalue!(expr);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1290,9 +1194,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let body = jvalue { l: body.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let body = object_to_jvalue!(body);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1315,15 +1219,11 @@ impl JavaSwc4jAstFactory {
     'local: 'a,
   {
     let java_value = string_to_jstring!(env, &value);
-    let value = jvalue {
-      l: java_value.as_raw(),
-    };
+    let value = object_to_jvalue!(java_value);
     let java_raw = optional_string_to_jstring!(env, &raw);
-    let raw = jvalue {
-      l: java_raw.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let raw = object_to_jvalue!(java_raw);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1346,9 +1246,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let decl = jvalue { l: decl.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let decl = object_to_jvalue!(decl);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1370,15 +1270,10 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let expr = jvalue { l: expr.as_raw() };
-    let type_args = jvalue {
-      l: match type_args {
-        Some(type_args) => type_args.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let expr = object_to_jvalue!(expr);
+    let type_args = optional_object_to_jvalue!(type_args);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1399,9 +1294,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let expr = jvalue { l: expr.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let expr = object_to_jvalue!(expr);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1425,16 +1320,12 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let export = jvalue {
-      z: export as u8,
-    };
-    let type_only = jvalue {
-      z: type_only as u8,
-    };
-    let id = jvalue { l: id.as_raw() };
-    let module_ref = jvalue { l: module_ref.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let export = boolean_to_jvalue!(export);
+    let type_only = boolean_to_jvalue!(type_only);
+    let id = object_to_jvalue!(id);
+    let module_ref = object_to_jvalue!(module_ref);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1455,9 +1346,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let id = jvalue { l: id.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let id = object_to_jvalue!(id);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1478,9 +1369,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let type_ann = jvalue { l: type_ann.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let type_ann = object_to_jvalue!(type_ann);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1506,30 +1397,14 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let name = jvalue { l: name.as_raw() };
-    let is_in = jvalue {
-      z: is_in as u8,
-    };
-    let is_out = jvalue {
-      z: is_out as u8,
-    };
-    let is_const = jvalue {
-      z: is_const as u8,
-    };
-    let constraint = jvalue {
-      l: match constraint {
-        Some(constraint) => constraint.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let default = jvalue {
-      l: match default {
-        Some(default) => default.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let name = object_to_jvalue!(name);
+    let is_in = boolean_to_jvalue!(is_in);
+    let is_out = boolean_to_jvalue!(is_out);
+    let is_const = boolean_to_jvalue!(is_const);
+    let constraint = optional_object_to_jvalue!(constraint);
+    let default = optional_object_to_jvalue!(default);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1550,9 +1425,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let params = jvalue { l: params.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let params = object_to_jvalue!(params);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1573,9 +1448,9 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let params = jvalue { l: params.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let params = object_to_jvalue!(params);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1597,12 +1472,10 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let op = jvalue {
-      i: op as i32,
-    };
-    let arg = jvalue { l: arg.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let op = int_to_jvalue!(op);
+    let arg = object_to_jvalue!(arg);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1624,12 +1497,10 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let is_await = jvalue {
-      z: is_await as u8,
-    };
-    let decls = jvalue { l: decls.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let is_await = boolean_to_jvalue!(is_await);
+    let decls = object_to_jvalue!(decls);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1652,15 +1523,11 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let kind_id = jvalue {
-      i: kind_id as i32,
-    };
-    let declare = jvalue {
-      z: declare as u8,
-    };
-    let decls = jvalue { l: decls.as_raw() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let kind_id = int_to_jvalue!(kind_id);
+    let declare = boolean_to_jvalue!(declare);
+    let decls = object_to_jvalue!(decls);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -1683,18 +1550,11 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let name = jvalue { l: name.as_raw() };
-    let init = jvalue {
-      l: match init {
-        Some(init) => init.as_raw(),
-        None => null_mut(),
-      },
-    };
-    let definite = jvalue {
-      z: definite as u8,
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
+    let name = object_to_jvalue!(name);
+    let init = optional_object_to_jvalue!(init);
+    let definite = boolean_to_jvalue!(definite);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
     let return_value = 
       call_static_as_object!(
         env,
@@ -3295,7 +3155,7 @@ pub mod program {
 
   use crate::ast_utils::JAVA_AST_FACTORY;
   use crate::enums::IdentifiableEnum;
-  use crate::jni_utils::{delete_local_ref, JAVA_ARRAY_LIST};
+  use crate::jni_utils::*;
   use crate::position_utils::ByteToIndexMap;
 
   use std::sync::Arc;
@@ -3327,7 +3187,7 @@ pub mod program {
     let java_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
     let return_value = java_ast_factory.create_binding_ident(env, &java_id, &java_type_ann, &range);
     delete_local_ref!(env, java_id);
-    java_type_ann.map(|j| delete_local_ref!(env, j));
+    delete_local_optional_ref!(env, java_type_ann);
     return_value
   }
 
@@ -3407,9 +3267,9 @@ pub mod program {
     );
     delete_local_ref!(env, java_decorators);
     delete_local_ref!(env, java_body);
-    java_option_super_class.map(|j| delete_local_ref!(env, j));
-    java_type_params.map(|j| delete_local_ref!(env, j));
-    java_super_type_params.map(|j| delete_local_ref!(env, j));
+    delete_local_optional_ref!(env, java_option_super_class);
+    delete_local_optional_ref!(env, java_type_params);
+    delete_local_optional_ref!(env, java_super_type_params);
     delete_local_ref!(env, java_implements);
     return_value
   }
@@ -3507,7 +3367,7 @@ pub mod program {
     let java_option_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
     let return_value = java_ast_factory.create_export_all(env, &java_src, type_only, &java_option_with, &range);
     delete_local_ref!(env, java_src);
-    java_option_with.map(|j| delete_local_ref!(env, j));
+    delete_local_optional_ref!(env, java_option_with);
     return_value
   }
 
@@ -3602,7 +3462,7 @@ pub mod program {
     let return_value =
       java_ast_factory.create_import_named_specifier(env, &java_local, &java_imported, is_type_only, &range);
     delete_local_ref!(env, java_local);
-    java_imported.map(|j| delete_local_ref!(env, j));
+    delete_local_optional_ref!(env, java_imported);
     return_value
   }
 
@@ -3664,7 +3524,7 @@ pub mod program {
       java_ast_factory.create_import_decl(env, &java_specifiers, &java_src, type_only, &java_option_with, &range);
     delete_local_ref!(env, java_specifiers);
     delete_local_ref!(env, java_src);
-    java_option_with.map(|j| delete_local_ref!(env, j));
+    delete_local_optional_ref!(env, java_option_with);
     return_value
   }
 
@@ -3712,8 +3572,8 @@ pub mod program {
       &range,
     );
     delete_local_ref!(env, java_specifiers);
-    java_option_src.map(|j| delete_local_ref!(env, j));
-    java_option_with.map(|j| delete_local_ref!(env, j));
+    delete_local_optional_ref!(env, java_option_src);
+    delete_local_optional_ref!(env, java_option_with);
     return_value
   }
 
@@ -3865,7 +3725,7 @@ pub mod program {
       .map(|node| create_ts_type_param_instantiation(env, map, node));
     let return_value = java_ast_factory.create_ts_expr_with_type_args(env, &java_expr, &java_type_args, &range);
     delete_local_ref!(env, java_expr);
-    java_type_args.map(|j| delete_local_ref!(env, j));
+    delete_local_optional_ref!(env, java_type_args);
     return_value
   }
 
@@ -3957,8 +3817,8 @@ pub mod program {
       &range,
     );
     delete_local_ref!(env, java_name);
-    java_constraint.map(|j| delete_local_ref!(env, j));
-    java_default.map(|j| delete_local_ref!(env, j));
+    delete_local_optional_ref!(env, java_constraint);
+    delete_local_optional_ref!(env, java_default);
     return_value
   }
 
@@ -4072,7 +3932,7 @@ pub mod program {
     let java_name = enum_create_pat(env, map, &node.name);
     let range = map.get_range_by_span(&node.span);
     let return_value = java_ast_factory.create_var_declarator(env, &java_name, &java_option_init, definite, &range);
-    java_option_init.map(|j| delete_local_ref!(env, j));
+    delete_local_optional_ref!(env, java_option_init);
     delete_local_ref!(env, java_name);
     return_value
   }

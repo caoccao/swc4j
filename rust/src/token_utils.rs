@@ -235,12 +235,10 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let type_id = jvalue { i: token_type.get_id() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let type_id = int_to_jvalue!(token_type.get_id());
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -263,14 +261,10 @@ impl JavaSwc4jTokenFactory {
     'local: 'a,
   {
     let java_text = string_to_jstring!(env, &text);
-    let text = jvalue {
-      l: java_text.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let text = object_to_jvalue!(java_text);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -293,12 +287,10 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let type_id = jvalue { i: token_type.get_id() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let type_id = int_to_jvalue!(token_type.get_id());
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -322,18 +314,14 @@ impl JavaSwc4jTokenFactory {
     'local: 'a,
   {
     let java_text = string_to_jstring!(env, &text);
-    let text = jvalue {
-      l: java_text.as_raw(),
-    };
+    let text = object_to_jvalue!(java_text);
     let java_error = string_to_jstring!(env, &format!("{:?}", error));
     let error = jvalue {
       l: java_error.as_raw(),
     };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -356,11 +344,9 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -382,12 +368,10 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let type_id = jvalue { i: token_type.get_id() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let type_id = int_to_jvalue!(token_type.get_id());
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -410,14 +394,10 @@ impl JavaSwc4jTokenFactory {
     'local: 'a,
   {
     let java_text = string_to_jstring!(env, &text);
-    let text = jvalue {
-      l: java_text.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let text = object_to_jvalue!(java_text);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -441,14 +421,10 @@ impl JavaSwc4jTokenFactory {
     'local: 'a,
   {
     let java_text = string_to_jstring!(env, &text);
-    let text = jvalue {
-      l: java_text.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let text = object_to_jvalue!(java_text);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -472,14 +448,10 @@ impl JavaSwc4jTokenFactory {
     'local: 'a,
   {
     let java_text = string_to_jstring!(env, &text);
-    let text = jvalue {
-      l: java_text.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let text = object_to_jvalue!(java_text);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -503,14 +475,10 @@ impl JavaSwc4jTokenFactory {
     'local: 'a,
   {
     let java_text = string_to_jstring!(env, &text);
-    let text = jvalue {
-      l: java_text.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let text = object_to_jvalue!(java_text);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -533,12 +501,10 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let type_id = jvalue { i: token_type.get_id() };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let type_id = int_to_jvalue!(token_type.get_id());
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -559,11 +525,9 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -587,17 +551,11 @@ impl JavaSwc4jTokenFactory {
     'local: 'a,
   {
     let java_text = string_to_jstring!(env, &text);
-    let text = jvalue {
-      l: java_text.as_raw(),
-    };
-    let value = jvalue {
-      d: value as f64,
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let text = object_to_jvalue!(java_text);
+    let value = double_to_jvalue!(value);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -623,22 +581,14 @@ impl JavaSwc4jTokenFactory {
     'local: 'a,
   {
     let java_text = string_to_jstring!(env, &text);
-    let text = jvalue {
-      l: java_text.as_raw(),
-    };
+    let text = object_to_jvalue!(java_text);
     let java_value = string_to_jstring!(env, &value);
-    let value = jvalue {
-      l: java_value.as_raw(),
-    };
+    let value = object_to_jvalue!(java_value);
     let java_flags = string_to_jstring!(env, &flags);
-    let flags = jvalue {
-      l: java_flags.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let flags = object_to_jvalue!(java_flags);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -665,18 +615,12 @@ impl JavaSwc4jTokenFactory {
     'local: 'a,
   {
     let java_text = string_to_jstring!(env, &text);
-    let text = jvalue {
-      l: java_text.as_raw(),
-    };
+    let text = object_to_jvalue!(java_text);
     let java_value = string_to_jstring!(env, &value);
-    let value = jvalue {
-      l: java_value.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let value = object_to_jvalue!(java_value);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -702,18 +646,12 @@ impl JavaSwc4jTokenFactory {
     'local: 'a,
   {
     let java_text = string_to_jstring!(env, &text);
-    let text = jvalue {
-      l: java_text.as_raw(),
-    };
+    let text = object_to_jvalue!(java_text);
     let java_value = string_to_jstring!(env, &value);
-    let value = jvalue {
-      l: java_value.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let value = object_to_jvalue!(java_value);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -739,18 +677,12 @@ impl JavaSwc4jTokenFactory {
     'local: 'a,
   {
     let java_text = string_to_jstring!(env, &text);
-    let text = jvalue {
-      l: java_text.as_raw(),
-    };
+    let text = object_to_jvalue!(java_text);
     let java_value = optional_string_to_jstring!(env, &value);
-    let value = jvalue {
-      l: java_value.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let value = object_to_jvalue!(java_value);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -773,11 +705,9 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,
@@ -800,14 +730,10 @@ impl JavaSwc4jTokenFactory {
     'local: 'a,
   {
     let java_text = string_to_jstring!(env, &text);
-    let text = jvalue {
-      l: java_text.as_raw(),
-    };
-    let start_position = jvalue { i: range.start as i32 };
-    let end_position = jvalue { i: range.end as i32 };
-    let line_break_ahead = jvalue {
-      z: line_break_ahead as u8,
-    };
+    let text = object_to_jvalue!(java_text);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = 
       call_static_as_object!(
         env,

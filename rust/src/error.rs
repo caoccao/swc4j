@@ -60,18 +60,16 @@ impl JavaCoreException {
   }
 
   pub fn throw_parse_error<'local, 'a>(&self, env: &mut JNIEnv<'local>, message: &'a str) {
-    let message = jvalue {
-      l: string_to_jstring!(env, message).as_raw(),
-    };
+    let java_message = string_to_jstring!(env, message);
+    let message = object_to_jvalue!(java_message);
     let exception = call_static_as_object!(env, &self.class, &self.method_parse_error, &[message], "parseError()");
     let exception = unsafe { JThrowable::from_raw(exception.as_raw()) };
     let _ = env.throw(exception);
   }
 
   pub fn throw_transpile_error<'local, 'a>(&self, env: &mut JNIEnv<'local>, message: &'a str) {
-    let message = jvalue {
-      l: string_to_jstring!(env, message).as_raw(),
-    };
+    let java_message = string_to_jstring!(env, message);
+    let message = object_to_jvalue!(java_message);
     let exception = call_static_as_object!(
       env,
       &self.class,

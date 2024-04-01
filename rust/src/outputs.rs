@@ -23,7 +23,6 @@ use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
-use std::ptr::null_mut;
 use std::sync::Arc;
 
 use crate::ast_utils;
@@ -70,19 +69,14 @@ impl JavaSwc4jParseOutput {
   {
     let byte_to_index_map = parse_output.get_byte_to_index_map();
     let program = ast_utils::program::enum_create_program(env, &byte_to_index_map, &parse_output.program);
-    let program = jvalue { l: program.as_raw() };
+    let program = object_to_jvalue!(program);
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let media_type = java_media_type.parse(env, parse_output.media_type.get_id());
-    let media_type = jvalue { l: media_type.as_raw() };
-    let module = jvalue {
-      z: if parse_output.module { 1u8 } else { 0u8 },
-    };
-    let script = jvalue {
-      z: if parse_output.script { 1u8 } else { 0u8 },
-    };
-    let source_text = jvalue {
-      l: string_to_jstring!(env, &parse_output.source_text).as_raw(),
-    };
+    let media_type = object_to_jvalue!(media_type);
+    let module = boolean_to_jvalue!(parse_output.module);
+    let script = boolean_to_jvalue!(parse_output.script);
+    let java_source_text = string_to_jstring!(env, &parse_output.source_text);
+    let source_text = object_to_jvalue!(java_source_text);
     let tokens = token_utils::token_and_spans_to_java_list(
       env,
       &byte_to_index_map,
@@ -135,29 +129,20 @@ impl JavaSwc4jTranspileOutput {
     'local: 'a,
   {
     let byte_to_index_map = transpile_output.parse_output.get_byte_to_index_map();
-    let program = ast_utils::program::enum_create_program(env, &byte_to_index_map, &transpile_output.parse_output.program);
-    let program = jvalue { l: program.as_raw() };
-    let code = jvalue {
-      l: string_to_jstring!(env, &transpile_output.code).as_raw(),
-    };
+    let program =
+      ast_utils::program::enum_create_program(env, &byte_to_index_map, &transpile_output.parse_output.program);
+    let program = object_to_jvalue!(program);
+    let java_code = string_to_jstring!(env, &transpile_output.code);
+    let code = object_to_jvalue!(java_code);
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let media_type = java_media_type.parse(env, transpile_output.parse_output.media_type.get_id());
-    let media_type = jvalue { l: media_type.as_raw() };
-    let module = jvalue {
-      z: if transpile_output.parse_output.module { 1u8 } else { 0u8 },
-    };
-    let script = jvalue {
-      z: if transpile_output.parse_output.script { 1u8 } else { 0u8 },
-    };
-    let source_map = jvalue {
-      l: match &transpile_output.source_map {
-        Some(s) => string_to_jstring!(env, &s).as_raw(),
-        None => null_mut(),
-      },
-    };
-    let source_text = jvalue {
-      l: string_to_jstring!(env, &transpile_output.parse_output.source_text).as_raw(),
-    };
+    let media_type = object_to_jvalue!(media_type);
+    let module = boolean_to_jvalue!(transpile_output.parse_output.module);
+    let script = boolean_to_jvalue!(transpile_output.parse_output.script);
+    let java_source_map = optional_string_to_jstring!(env, &transpile_output.source_map);
+    let source_map = object_to_jvalue!(java_source_map);
+    let java_source_text = string_to_jstring!(env, &transpile_output.parse_output.source_text);
+    let source_text = object_to_jvalue!(java_source_text);
     let tokens = token_utils::token_and_spans_to_java_list(
       env,
       &byte_to_index_map,

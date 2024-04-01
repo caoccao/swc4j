@@ -24,6 +24,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Jni2RustParam(
         rustType = "range: &Range<usize>",
-        preCalls = "    let end_position = jvalue { i: range.end as i32 };")
+        preCalls = "    let end_position = int_to_jvalue!(range.end);")
 public @interface Jni2RustParamEndPosition {
 }

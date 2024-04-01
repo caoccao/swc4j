@@ -24,6 +24,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Jni2RustParam(
         rustType = "token_type: &TokenType",
-        preCalls = "    let type_id = jvalue { i: token_type.get_id() };")
+        preCalls = "    let type_id = int_to_jvalue!(token_type.get_id());")
 public @interface Jni2RustParamTokenType {
 }

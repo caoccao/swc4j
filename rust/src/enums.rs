@@ -24,7 +24,7 @@ use deno_ast::swc::ast::AssignOp;
 use deno_ast::swc::parser::token::{BinOpToken, Keyword, Token};
 pub use deno_ast::{ImportsNotUsedAsValues, MediaType};
 
-use crate::jni_utils::{call_as_int, call_static_as_object};
+use crate::jni_utils::*;
 
 pub trait IdentifiableEnum<T> {
   fn get_id(&self) -> i32;
@@ -549,7 +549,7 @@ impl JavaTokenType {
   where
     'local: 'a,
   {
-    let id = jvalue { i: id };
+    let id = int_to_jvalue!(id);
     call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
   }
 }
@@ -685,7 +685,7 @@ impl JavaMediaType {
   where
     'local: 'a,
   {
-    let id = jvalue { i: id };
+    let id = int_to_jvalue!(id);
     call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
   }
 }
@@ -754,9 +754,9 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 }
 
 pub mod swc_enums {
+  use crate::enums::IdentifiableEnum;
   use deno_ast::swc::ast::*;
   use num_bigint::Sign;
-  use crate::enums::IdentifiableEnum;
 
   impl IdentifiableEnum<Accessibility> for Accessibility {
     fn get_id(&self) -> i32 {

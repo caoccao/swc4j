@@ -69,6 +69,7 @@ macro_rules! call_as_object {
 }
 pub(crate) use call_as_object;
 
+#[allow(dead_code)]
 macro_rules! call_static_as_boolean {
   ($env: ident, $class: expr, $method: expr, $args: expr, $name: literal) => {
     match unsafe {
@@ -82,8 +83,10 @@ macro_rules! call_static_as_boolean {
     }
   };
 }
+#[allow(dead_code)]
 pub(crate) use call_static_as_boolean;
 
+#[allow(dead_code)]
 macro_rules! call_static_as_int {
   ($env: ident, $class: expr, $method: expr, $args: expr, $name: literal) => {
     match unsafe { $env.call_static_method_unchecked($class, $method, ReturnType::Primitive(Primitive::Int), $args) } {
@@ -95,6 +98,7 @@ macro_rules! call_static_as_int {
     }
   };
 }
+#[allow(dead_code)]
 pub(crate) use call_static_as_int;
 
 macro_rules! call_static_as_object {
@@ -109,6 +113,16 @@ macro_rules! call_static_as_object {
   };
 }
 pub(crate) use call_static_as_object;
+
+macro_rules! delete_local_optional_ref {
+  ($env: ident, $name: expr) => {
+    $name.map(|j| match $env.delete_local_ref(j) {
+      Ok(_) => {}
+      Err(err) => panic!("Couldn't delete local {} because {}", stringify!($name), err),
+    });
+  };
+}
+pub(crate) use delete_local_optional_ref;
 
 macro_rules! delete_local_ref {
   ($env: ident, $name: expr) => {
@@ -166,6 +180,91 @@ macro_rules! string_to_jstring {
 }
 pub(crate) use string_to_jstring;
 
+macro_rules! boolean_to_jvalue {
+  ($object: expr) => {
+    jvalue { z: $object as u8 }
+  };
+}
+pub(crate) use boolean_to_jvalue;
+
+#[allow(dead_code)]
+macro_rules! byte_to_jvalue {
+  ($object: expr) => {
+    jvalue { b: $object as i8 }
+  };
+}
+#[allow(dead_code)]
+pub(crate) use byte_to_jvalue;
+
+#[allow(dead_code)]
+macro_rules! char_to_jvalue {
+  ($object: expr) => {
+    jvalue { c: $object as char }
+  };
+}
+#[allow(dead_code)]
+pub(crate) use char_to_jvalue;
+
+macro_rules! double_to_jvalue {
+  ($object: expr) => {
+    jvalue { d: $object as f64 }
+  };
+}
+pub(crate) use double_to_jvalue;
+
+#[allow(dead_code)]
+macro_rules! float_to_jvalue {
+  ($object: expr) => {
+    jvalue { f: $object as f32 }
+  };
+}
+#[allow(dead_code)]
+pub(crate) use float_to_jvalue;
+
+macro_rules! int_to_jvalue {
+  ($object: expr) => {
+    jvalue { i: $object as i32 }
+  };
+}
+pub(crate) use int_to_jvalue;
+
+#[allow(dead_code)]
+macro_rules! long_to_jvalue {
+  ($object: expr) => {
+    jvalue { j: $object as i64 }
+  };
+}
+#[allow(dead_code)]
+pub(crate) use long_to_jvalue;
+
+macro_rules! object_to_jvalue {
+  ($object: expr) => {
+    jvalue { l: $object.as_raw() }
+  };
+}
+pub(crate) use object_to_jvalue;
+
+macro_rules! optional_object_to_jvalue {
+  ($object: expr) => {
+    jvalue {
+      l: match $object {
+        Some(o) => o.as_raw(),
+        None => null_mut(),
+      },
+    }
+  };
+}
+pub(crate) use optional_object_to_jvalue;
+
+#[allow(dead_code)]
+macro_rules! short_to_jvalue {
+  ($object: expr) => {
+    jvalue { s: $object as i16 }
+  };
+}
+#[allow(dead_code)]
+pub(crate) use short_to_jvalue;
+
 pub trait ToJniType {
   fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
   where
@@ -204,9 +303,7 @@ impl JavaArrayList {
   where
     'local: 'a,
   {
-    let initial_capacity = jvalue {
-      i: initial_capacity as i32,
-    };
+    let initial_capacity = int_to_jvalue!(initial_capacity);
     call_as_construct!(
       env,
       &self.class,

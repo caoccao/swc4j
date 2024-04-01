@@ -174,31 +174,19 @@ public class Jni2Rust<T> {
                         }
                         if (ArrayUtils.isEmpty(preCalls)) {
                             if (parameterType.isPrimitive()) {
-                                lines.add(String.format("    let %s = jvalue {", name));
-                                lines.add(String.format("      %s: %s as %s,",
-                                        options.getJavaTypeToJniSimpleTypeMap().get(parameterType.getName()).toLowerCase(),
-                                        name,
-                                        options.getJavaTypeToJniCastTypeMap().get(parameterType.getName())));
-                                lines.add("    };");
+                                lines.add(String.format("    let %s = %s_to_jvalue!(%s);", name, parameterType.getName(), name));
                             } else if (parameterType == String.class) {
                                 if (isOptional) {
                                     lines.add(String.format("    let java_%s = optional_string_to_jstring!(env, &%s);", name, name));
                                 } else {
                                     lines.add(String.format("    let java_%s = string_to_jstring!(env, &%s);", name, name));
                                 }
-                                lines.add(String.format("    let %s = jvalue {", name));
-                                lines.add(String.format("      l: java_%s.as_raw(),", name));
-                                lines.add("    };");
+                                lines.add(String.format("    let %s = object_to_jvalue!(java_%s);", name, name));
                             } else {
                                 if (isOptional) {
-                                    lines.add(String.format("    let %s = jvalue {", name));
-                                    lines.add(String.format("      l: match %s {", name));
-                                    lines.add(String.format("        Some(%s) => %s.as_raw(),", name, name));
-                                    lines.add("        None => null_mut(),");
-                                    lines.add("      },");
-                                    lines.add("    };");
+                                    lines.add(String.format("    let %s = optional_object_to_jvalue!(%s);", name, name));
                                 } else {
-                                    lines.add(String.format("    let %s = jvalue { l: %s.as_raw() };", name, name));
+                                    lines.add(String.format("    let %s = object_to_jvalue!(%s);", name, name));
                                 }
                             }
                         } else {
