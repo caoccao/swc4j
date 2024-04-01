@@ -65,6 +65,7 @@ struct JavaSwc4jAstFactory {
   method_create_ts_expr_with_type_args: JStaticMethodID,
   method_create_ts_external_module_ref: JStaticMethodID,
   method_create_ts_import_equals_decl: JStaticMethodID,
+  method_create_ts_index_signature: JStaticMethodID,
   method_create_ts_namespace_export_decl: JStaticMethodID,
   method_create_ts_type_ann: JStaticMethodID,
   method_create_ts_type_param: JStaticMethodID,
@@ -338,6 +339,13 @@ impl JavaSwc4jAstFactory {
         "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleRef;II)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsImportEqualsDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsImportEqualsDecl");
+    let method_create_ts_index_signature = env
+      .get_static_method_id(
+        &class,
+        "createTsIndexSignature",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZZII)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstTsIndexSignature;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsIndexSignature");
     let method_create_ts_namespace_export_decl = env
       .get_static_method_id(
         &class,
@@ -439,6 +447,7 @@ impl JavaSwc4jAstFactory {
       method_create_ts_expr_with_type_args,
       method_create_ts_external_module_ref,
       method_create_ts_import_equals_decl,
+      method_create_ts_index_signature,
       method_create_ts_namespace_export_decl,
       method_create_ts_type_ann,
       method_create_ts_type_param,
@@ -1375,6 +1384,35 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_import_equals_decl,
         &[export, type_only, id, module_ref, start_position, end_position],
         "Swc4jAstTsImportEqualsDecl create_ts_import_equals_decl()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_index_signature<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    params: &JObject<'_>,
+    type_ann: &Option<JObject>,
+    readonly: bool,
+    is_static: bool,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let params = object_to_jvalue!(params);
+    let type_ann = optional_object_to_jvalue!(type_ann);
+    let readonly = boolean_to_jvalue!(readonly);
+    let is_static = boolean_to_jvalue!(is_static);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_index_signature,
+        &[params, type_ann, readonly, is_static, start_position, end_position],
+        "Swc4jAstTsIndexSignature create_ts_index_signature()"
       );
     return_value
   }
@@ -3225,9 +3263,7 @@ pub mod program {
       java_array_list.add(env, &java_decorators, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let accessibility = node
-      .accessibility
-      .map_or_else(|| -1, |node| node.get_id());
+    let accessibility = node.accessibility.map_or_else(|| -1, |node| node.get_id());
     let return_type = java_ast_factory.create_auto_accessor(
       env,
       &java_key,
@@ -3267,10 +3303,10 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let range = map.get_range_by_span(&node.span);
     let java_id = create_ident(env, map, &node.id);
-    let java_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-    let return_value = java_ast_factory.create_binding_ident(env, &java_id, &java_type_ann, &range);
+    let java_option_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let return_value = java_ast_factory.create_binding_ident(env, &java_id, &java_option_type_ann, &range);
     delete_local_ref!(env, java_id);
-    delete_local_optional_ref!(env, java_type_ann);
+    delete_local_optional_ref!(env, java_option_type_ann);
     return_value
   }
 
@@ -3387,9 +3423,7 @@ pub mod program {
       delete_local_ref!(env, java_node);
     });
     let java_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
-    let accessibility = node
-      .accessibility
-      .map_or_else(|| -1, |node| node.get_id());
+    let accessibility = node.accessibility.map_or_else(|| -1, |node| node.get_id());
     let is_optional = node.is_optional;
     let return_type = java_ast_factory.create_constructor(
       env,
@@ -3849,6 +3883,33 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_index_signature<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsIndexSignature,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_params = java_array_list.construct(env, node.params.len());
+    node.params.iter().for_each(|node| {
+      let java_node = enum_create_ts_fn_param(env, map, node);
+      java_array_list.add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_option_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let readonly = node.readonly;
+    let is_static = node.is_static;
+    let return_value =
+      java_ast_factory.create_ts_index_signature(env, &java_params, &java_option_type_ann, readonly, is_static, &range);
+    delete_local_ref!(env, java_params);
+    delete_local_optional_ref!(env, java_option_type_ann);
+    return_value
+  }
+
   fn create_ts_namespace_export_decl<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -4055,7 +4116,9 @@ pub mod program {
     match node {
       ClassMember::AutoAccessor(node) => create_auto_accessor(env, map, node),
       ClassMember::Constructor(node) => create_constructor(env, map, node),
+      ClassMember::Empty(node) => create_empty_stmt(env, map, node),
       ClassMember::StaticBlock(node) => create_static_block(env, map, node),
+      ClassMember::TsIndexSignature(node) => create_ts_index_signature(env, map, node),
       default => panic!("{:?}", default),
       // TODO
     }

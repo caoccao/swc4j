@@ -18,11 +18,12 @@ package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 
 public class Swc4jAstEmptyStmt
         extends Swc4jAst
-        implements ISwc4jAstStmt {
+        implements ISwc4jAstStmt, ISwc4jAstClassMember {
     public Swc4jAstEmptyStmt(int startPosition, int endPosition) {
         super(startPosition, endPosition);
     }

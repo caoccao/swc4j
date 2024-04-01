@@ -380,6 +380,17 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsIndexSignature createTsIndexSignature(
+            List<ISwc4jAstTsFnParam> params,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            boolean readonly,
+            boolean isStatic,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstTsIndexSignature(params, typeAnn, readonly, isStatic, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsNamespaceExportDecl createTsNamespaceExportDecl(
             Swc4jAstIdent id,
             @Jni2RustParamStartPosition int startPosition,
