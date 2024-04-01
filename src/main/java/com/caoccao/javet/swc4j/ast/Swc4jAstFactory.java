@@ -19,7 +19,6 @@ package com.caoccao.javet.swc4j.ast;
 import com.caoccao.javet.swc4j.ast.clazz.*;
 import com.caoccao.javet.swc4j.ast.enums.*;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
@@ -157,6 +156,14 @@ public final class Swc4jAstFactory {
                 accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
                 isAbstract, isOptional, isOverride, readonly, declare, definite,
                 startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstComputedPropName createComputedPropName(
+            ISwc4jAstExpr expr,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstComputedPropName(expr, startPosition, endPosition);
     }
 
     @Jni2RustMethod

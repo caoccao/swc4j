@@ -38,6 +38,7 @@ struct JavaSwc4jAstFactory {
   method_create_class_decl: JStaticMethodID,
   method_create_class_method: JStaticMethodID,
   method_create_class_prop: JStaticMethodID,
+  method_create_computed_prop_name: JStaticMethodID,
   method_create_constructor: JStaticMethodID,
   method_create_debugger_stmt: JStaticMethodID,
   method_create_decorator: JStaticMethodID,
@@ -157,6 +158,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZZZII)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClassProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClassProp");
+    let method_create_computed_prop_name = env
+      .get_static_method_id(
+        &class,
+        "createComputedPropName",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstComputedPropName;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createComputedPropName");
     let method_create_constructor = env
       .get_static_method_id(
         &class,
@@ -315,14 +323,14 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createPrivateMethod",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;IZIZZZII)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateMethod;",
+        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;IZIZZZII)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateMethod;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createPrivateMethod");
     let method_create_private_name = env
       .get_static_method_id(
         &class,
         "createPrivateName",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;II)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstPrivateName;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;II)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createPrivateName");
     let method_create_private_prop = env
@@ -476,6 +484,7 @@ impl JavaSwc4jAstFactory {
       method_create_class_decl,
       method_create_class_method,
       method_create_class_prop,
+      method_create_computed_prop_name,
       method_create_constructor,
       method_create_debugger_stmt,
       method_create_decorator,
@@ -794,6 +803,29 @@ impl JavaSwc4jAstFactory {
         self.method_create_class_prop,
         &[key, value, type_ann, is_static, decorators, accessibility_id, is_abstract, is_optional, is_override, readonly, declare, definite, start_position, end_position],
         "Swc4jAstClassProp create_class_prop()"
+      );
+    return_value
+  }
+
+  pub fn create_computed_prop_name<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = object_to_jvalue!(expr);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_computed_prop_name,
+        &[expr, start_position, end_position],
+        "Swc4jAstComputedPropName create_computed_prop_name()"
       );
     return_value
   }
@@ -3792,6 +3824,18 @@ pub mod program {
     return_type
   }
 
+  fn create_computed_prop_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ComputedPropName) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_expr = enum_create_expr(env, map, &node.expr);
+    let return_type = java_ast_factory.create_computed_prop_name(env, &java_expr, &range);
+    delete_local_ref!(env, java_expr);
+    return_type
+  }
+
   fn create_constructor<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Constructor) -> JObject<'a>
   where
     'local: 'a,
@@ -4182,7 +4226,11 @@ pub mod program {
     return_type
   }
 
-  fn create_private_method<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &PrivateMethod) -> JObject<'a>
+  fn create_private_method<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &PrivateMethod,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -4843,8 +4891,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      Key::Private(node) => create_private_name(env, map, node),
+      Key::Public(node) => enum_create_prop_name(env, map, node),
     }
   }
 
@@ -5026,8 +5074,11 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      PropName::BigInt(node) => create_big_int(env, map, node),
+      PropName::Computed(node) => create_computed_prop_name(env, map, node),
+      PropName::Ident(node) => create_ident(env, map, node),
+      PropName::Num(node) => create_number(env, map, node),
+      PropName::Str(node) => create_str(env, map, node),
     }
   }
 

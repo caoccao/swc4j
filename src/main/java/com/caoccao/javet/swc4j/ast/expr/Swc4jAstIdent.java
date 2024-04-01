@@ -23,7 +23,8 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 public class Swc4jAstIdent
         extends Swc4jAst
-        implements ISwc4jAstExpr, ISwc4jAstProp, ISwc4jAstModuleRef, ISwc4jAstModuleExportName, ISwc4jAstTsEntityName {
+        implements ISwc4jAstExpr, ISwc4jAstProp, ISwc4jAstModuleRef, ISwc4jAstModuleExportName, ISwc4jAstTsEntityName,
+        ISwc4jAstPropName {
     protected static final String QUESTION_MARK = "?";
     protected final boolean optional;
     protected final String sym;

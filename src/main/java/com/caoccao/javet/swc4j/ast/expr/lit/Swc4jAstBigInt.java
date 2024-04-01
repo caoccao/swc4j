@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.StringUtils;
 
@@ -28,7 +29,7 @@ import java.math.BigInteger;
 
 public class Swc4jAstBigInt
         extends Swc4jAst
-        implements ISwc4jAstLit {
+        implements ISwc4jAstLit, ISwc4jAstPropName {
     @Nullable
     protected final String raw;
     protected final Swc4jAstBigIntSign sign;

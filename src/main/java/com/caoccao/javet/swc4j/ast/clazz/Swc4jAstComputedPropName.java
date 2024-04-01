@@ -14,49 +14,36 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.expr.lit;
+package com.caoccao.javet.swc4j.ast.clazz;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstNumber
+public class Swc4jAstComputedPropName
         extends Swc4jAst
-        implements ISwc4jAstLit, ISwc4jAstPropName {
-    @Nullable
-    protected final String raw;
-    protected final double value;
+        implements ISwc4jAstPropName {
+    protected final ISwc4jAstExpr expr;
 
-    public Swc4jAstNumber(double value, String raw, int startPosition, int endPosition) {
+    public Swc4jAstComputedPropName(
+            ISwc4jAstExpr expr,
+            int startPosition,
+            int endPosition) {
         super(startPosition, endPosition);
-        this.value = value;
-        this.raw = raw;
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        children = SimpleList.immutableOf(expr);
+        updateParent();
     }
 
-    public String getRaw() {
-        return raw;
+    public ISwc4jAstExpr getExpr() {
+        return expr;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.Number;
-    }
-
-    public double getValue() {
-        return value;
-    }
-
-    public float getValueAsFloat() {
-        return ((Double) value).floatValue();
-    }
-
-    public int getValueAsInt() {
-        return ((Double) value).intValue();
-    }
-
-    public long getValueAsLong() {
-        return ((Double) value).longValue();
+        return Swc4jAstType.ComputedPropName;
     }
 }

@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstMethodKind;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;

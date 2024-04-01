@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.expr;
+package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstKey;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 public class Swc4jAstPrivateName
         extends Swc4jAst
-        implements ISwc4jAst {
+        implements ISwc4jAstKey {
     protected final Swc4jAstIdent id;
 
     public Swc4jAstPrivateName(Swc4jAstIdent id, int startPosition, int endPosition) {
