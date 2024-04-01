@@ -27,9 +27,8 @@ use std::ptr::null_mut;
 use std::sync::Arc;
 
 use crate::ast_utils;
-use crate::converter;
 use crate::enums::*;
-use crate::jni_utils::{call_as_construct, ToJniType};
+use crate::jni_utils::*;
 use crate::options::*;
 use crate::position_utils::ByteToIndexMap;
 use crate::token_utils;
@@ -82,7 +81,7 @@ impl JavaSwc4jParseOutput {
       z: if parse_output.script { 1u8 } else { 0u8 },
     };
     let source_text = jvalue {
-      l: converter::string_to_jstring(env, &parse_output.source_text).as_raw(),
+      l: string_to_jstring!(env, &parse_output.source_text).as_raw(),
     };
     let tokens = token_utils::token_and_spans_to_java_list(
       env,
@@ -90,12 +89,12 @@ impl JavaSwc4jParseOutput {
       &parse_output.source_text.to_string(),
       parse_output.tokens.clone(),
     );
-    call_as_construct(
+    call_as_construct!(
       env,
       &self.class,
-      &self.method_construct,
+      self.method_construct,
       &[program, media_type, module, script, source_text, tokens],
-      "Swc4jParseOutput",
+      "Swc4jParseOutput"
     )
   }
 }
@@ -139,7 +138,7 @@ impl JavaSwc4jTranspileOutput {
     let program = ast_utils::program::enum_create_program(env, &byte_to_index_map, &transpile_output.parse_output.program);
     let program = jvalue { l: program.as_raw() };
     let code = jvalue {
-      l: converter::string_to_jstring(env, &transpile_output.code).as_raw(),
+      l: string_to_jstring!(env, &transpile_output.code).as_raw(),
     };
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let media_type = java_media_type.parse(env, transpile_output.parse_output.media_type.get_id());
@@ -152,12 +151,12 @@ impl JavaSwc4jTranspileOutput {
     };
     let source_map = jvalue {
       l: match &transpile_output.source_map {
-        Some(s) => converter::string_to_jstring(env, &s).as_raw(),
+        Some(s) => string_to_jstring!(env, &s).as_raw(),
         None => null_mut(),
       },
     };
     let source_text = jvalue {
-      l: converter::string_to_jstring(env, &transpile_output.parse_output.source_text).as_raw(),
+      l: string_to_jstring!(env, &transpile_output.parse_output.source_text).as_raw(),
     };
     let tokens = token_utils::token_and_spans_to_java_list(
       env,
@@ -165,10 +164,10 @@ impl JavaSwc4jTranspileOutput {
       &transpile_output.parse_output.source_text.to_string(),
       transpile_output.parse_output.tokens.clone(),
     );
-    call_as_construct(
+    call_as_construct!(
       env,
       &self.class,
-      &self.method_construct,
+      self.method_construct,
       &[
         program,
         code,
@@ -179,7 +178,7 @@ impl JavaSwc4jTranspileOutput {
         source_text,
         tokens,
       ],
-      "Swc4jTranspileOutput",
+      "Swc4jTranspileOutput"
     )
   }
 }

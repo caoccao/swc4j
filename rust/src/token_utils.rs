@@ -25,9 +25,8 @@ use deno_ast::swc::common::source_map::Pos;
 use deno_ast::swc::parser::error::Error;
 use deno_ast::swc::parser::token::{IdentLike, Token, TokenAndSpan, Word};
 
-use crate::converter;
 use crate::enums::*;
-use crate::jni_utils::{delete_local_ref, JAVA_ARRAY_LIST};
+use crate::jni_utils::*;
 use crate::position_utils::ByteToIndexMap;
 
 use std::ops::Range;
@@ -242,18 +241,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_assign_operator,
-          ReturnType::Object,
-          &[type_id, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jToken by create_assign_operator()")
-        .l()
-        .expect("Couldn't convert Swc4jToken by create_assign_operator()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_assign_operator,
+        &[type_id, start_position, end_position, line_break_ahead],
+        "Swc4jToken create_assign_operator()"
+      );
     return_value
   }
 
@@ -267,7 +262,7 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let java_text = converter::string_to_jstring(env, &text);
+    let java_text = string_to_jstring!(env, &text);
     let text = jvalue {
       l: java_text.as_raw(),
     };
@@ -276,18 +271,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_big_int,
-          ReturnType::Object,
-          &[text, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenTextValue by create_big_int()")
-        .l()
-        .expect("Couldn't convert Swc4jTokenTextValue by create_big_int()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_big_int,
+        &[text, start_position, end_position, line_break_ahead],
+        "Swc4jTokenTextValue create_big_int()"
+      );
     delete_local_ref!(env, java_text);
     return_value
   }
@@ -308,18 +299,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_binary_operator,
-          ReturnType::Object,
-          &[type_id, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jToken by create_binary_operator()")
-        .l()
-        .expect("Couldn't convert Swc4jToken by create_binary_operator()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_binary_operator,
+        &[type_id, start_position, end_position, line_break_ahead],
+        "Swc4jToken create_binary_operator()"
+      );
     return_value
   }
 
@@ -334,11 +321,11 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let java_text = converter::string_to_jstring(env, &text);
+    let java_text = string_to_jstring!(env, &text);
     let text = jvalue {
       l: java_text.as_raw(),
     };
-    let java_error = converter::string_to_jstring(env, &format!("{:?}", error));
+    let java_error = string_to_jstring!(env, &format!("{:?}", error));
     let error = jvalue {
       l: java_error.as_raw(),
     };
@@ -347,18 +334,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_error,
-          ReturnType::Object,
-          &[text, error, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenTextValue by create_error()")
-        .l()
-        .expect("Couldn't convert Swc4jTokenTextValue by create_error()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_error,
+        &[text, error, start_position, end_position, line_break_ahead],
+        "Swc4jTokenTextValue create_error()"
+      );
     delete_local_ref!(env, java_text);
     delete_local_ref!(env, java_error);
     return_value
@@ -378,18 +361,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_false,
-          ReturnType::Object,
-          &[start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jToken by create_false()")
-        .l()
-        .expect("Couldn't convert Swc4jToken by create_false()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_false,
+        &[start_position, end_position, line_break_ahead],
+        "Swc4jToken create_false()"
+      );
     return_value
   }
 
@@ -409,18 +388,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_generic_operator,
-          ReturnType::Object,
-          &[type_id, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jToken by create_generic_operator()")
-        .l()
-        .expect("Couldn't convert Swc4jToken by create_generic_operator()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_generic_operator,
+        &[type_id, start_position, end_position, line_break_ahead],
+        "Swc4jToken create_generic_operator()"
+      );
     return_value
   }
 
@@ -434,7 +409,7 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let java_text = converter::string_to_jstring(env, &text);
+    let java_text = string_to_jstring!(env, &text);
     let text = jvalue {
       l: java_text.as_raw(),
     };
@@ -443,18 +418,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_ident_known,
-          ReturnType::Object,
-          &[text, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenText by create_ident_known()")
-        .l()
-        .expect("Couldn't convert Swc4jTokenText by create_ident_known()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ident_known,
+        &[text, start_position, end_position, line_break_ahead],
+        "Swc4jTokenText create_ident_known()"
+      );
     delete_local_ref!(env, java_text);
     return_value
   }
@@ -469,7 +440,7 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let java_text = converter::string_to_jstring(env, &text);
+    let java_text = string_to_jstring!(env, &text);
     let text = jvalue {
       l: java_text.as_raw(),
     };
@@ -478,18 +449,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_ident_other,
-          ReturnType::Object,
-          &[text, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenText by create_ident_other()")
-        .l()
-        .expect("Couldn't convert Swc4jTokenText by create_ident_other()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ident_other,
+        &[text, start_position, end_position, line_break_ahead],
+        "Swc4jTokenText create_ident_other()"
+      );
     delete_local_ref!(env, java_text);
     return_value
   }
@@ -504,7 +471,7 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let java_text = converter::string_to_jstring(env, &text);
+    let java_text = string_to_jstring!(env, &text);
     let text = jvalue {
       l: java_text.as_raw(),
     };
@@ -513,18 +480,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_jsx_tag_name,
-          ReturnType::Object,
-          &[text, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenText by create_jsx_tag_name()")
-        .l()
-        .expect("Couldn't convert Swc4jTokenText by create_jsx_tag_name()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_jsx_tag_name,
+        &[text, start_position, end_position, line_break_ahead],
+        "Swc4jTokenText create_jsx_tag_name()"
+      );
     delete_local_ref!(env, java_text);
     return_value
   }
@@ -539,7 +502,7 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let java_text = converter::string_to_jstring(env, &text);
+    let java_text = string_to_jstring!(env, &text);
     let text = jvalue {
       l: java_text.as_raw(),
     };
@@ -548,18 +511,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_jsx_tag_text,
-          ReturnType::Object,
-          &[text, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenText by create_jsx_tag_text()")
-        .l()
-        .expect("Couldn't convert Swc4jTokenText by create_jsx_tag_text()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_jsx_tag_text,
+        &[text, start_position, end_position, line_break_ahead],
+        "Swc4jTokenText create_jsx_tag_text()"
+      );
     delete_local_ref!(env, java_text);
     return_value
   }
@@ -580,18 +539,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_keyword,
-          ReturnType::Object,
-          &[type_id, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jToken by create_keyword()")
-        .l()
-        .expect("Couldn't convert Swc4jToken by create_keyword()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_keyword,
+        &[type_id, start_position, end_position, line_break_ahead],
+        "Swc4jToken create_keyword()"
+      );
     return_value
   }
 
@@ -609,18 +564,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_null,
-          ReturnType::Object,
-          &[start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jToken by create_null()")
-        .l()
-        .expect("Couldn't convert Swc4jToken by create_null()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_null,
+        &[start_position, end_position, line_break_ahead],
+        "Swc4jToken create_null()"
+      );
     return_value
   }
 
@@ -635,7 +586,7 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let java_text = converter::string_to_jstring(env, &text);
+    let java_text = string_to_jstring!(env, &text);
     let text = jvalue {
       l: java_text.as_raw(),
     };
@@ -647,18 +598,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_number,
-          ReturnType::Object,
-          &[text, value, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenTextValue by create_number()")
-        .l()
-        .expect("Couldn't convert Swc4jTokenTextValue by create_number()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_number,
+        &[text, value, start_position, end_position, line_break_ahead],
+        "Swc4jTokenTextValue create_number()"
+      );
     delete_local_ref!(env, java_text);
     return_value
   }
@@ -675,15 +622,15 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let java_text = converter::string_to_jstring(env, &text);
+    let java_text = string_to_jstring!(env, &text);
     let text = jvalue {
       l: java_text.as_raw(),
     };
-    let java_value = converter::string_to_jstring(env, &value);
+    let java_value = string_to_jstring!(env, &value);
     let value = jvalue {
       l: java_value.as_raw(),
     };
-    let java_flags = converter::string_to_jstring(env, &flags);
+    let java_flags = string_to_jstring!(env, &flags);
     let flags = jvalue {
       l: java_flags.as_raw(),
     };
@@ -692,18 +639,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_regex,
-          ReturnType::Object,
-          &[text, value, flags, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenTextValueFlags by create_regex()")
-        .l()
-        .expect("Couldn't convert Swc4jTokenTextValueFlags by create_regex()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_regex,
+        &[text, value, flags, start_position, end_position, line_break_ahead],
+        "Swc4jTokenTextValueFlags create_regex()"
+      );
     delete_local_ref!(env, java_text);
     delete_local_ref!(env, java_value);
     delete_local_ref!(env, java_flags);
@@ -721,11 +664,11 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let java_text = converter::string_to_jstring(env, &text);
+    let java_text = string_to_jstring!(env, &text);
     let text = jvalue {
       l: java_text.as_raw(),
     };
-    let java_value = converter::string_to_jstring(env, &value);
+    let java_value = string_to_jstring!(env, &value);
     let value = jvalue {
       l: java_value.as_raw(),
     };
@@ -734,18 +677,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_shebang,
-          ReturnType::Object,
-          &[text, value, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenTextValue by create_shebang()")
-        .l()
-        .expect("Couldn't convert Swc4jTokenTextValue by create_shebang()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_shebang,
+        &[text, value, start_position, end_position, line_break_ahead],
+        "Swc4jTokenTextValue create_shebang()"
+      );
     delete_local_ref!(env, java_text);
     delete_local_ref!(env, java_value);
     return_value
@@ -762,11 +701,11 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let java_text = converter::string_to_jstring(env, &text);
+    let java_text = string_to_jstring!(env, &text);
     let text = jvalue {
       l: java_text.as_raw(),
     };
-    let java_value = converter::string_to_jstring(env, &value);
+    let java_value = string_to_jstring!(env, &value);
     let value = jvalue {
       l: java_value.as_raw(),
     };
@@ -775,18 +714,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_string,
-          ReturnType::Object,
-          &[text, value, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenTextValue by create_string()")
-        .l()
-        .expect("Couldn't convert Swc4jTokenTextValue by create_string()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_string,
+        &[text, value, start_position, end_position, line_break_ahead],
+        "Swc4jTokenTextValue create_string()"
+      );
     delete_local_ref!(env, java_text);
     delete_local_ref!(env, java_value);
     return_value
@@ -803,14 +738,11 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let java_text = converter::string_to_jstring(env, &text);
+    let java_text = string_to_jstring!(env, &text);
     let text = jvalue {
       l: java_text.as_raw(),
     };
-    let java_value = match &value {
-      Some(value) => converter::string_to_jstring(env, &value),
-      None => Default::default(),
-    };
+    let java_value = optional_string_to_jstring!(env, &value);
     let value = jvalue {
       l: java_value.as_raw(),
     };
@@ -819,18 +751,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_template,
-          ReturnType::Object,
-          &[text, value, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenTextValue by create_template()")
-        .l()
-        .expect("Couldn't convert Swc4jTokenTextValue by create_template()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_template,
+        &[text, value, start_position, end_position, line_break_ahead],
+        "Swc4jTokenTextValue create_template()"
+      );
     delete_local_ref!(env, java_text);
     delete_local_ref!(env, java_value);
     return_value
@@ -850,18 +778,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_true,
-          ReturnType::Object,
-          &[start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jToken by create_true()")
-        .l()
-        .expect("Couldn't convert Swc4jToken by create_true()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_true,
+        &[start_position, end_position, line_break_ahead],
+        "Swc4jToken create_true()"
+      );
     return_value
   }
 
@@ -875,7 +799,7 @@ impl JavaSwc4jTokenFactory {
   where
     'local: 'a,
   {
-    let java_text = converter::string_to_jstring(env, &text);
+    let java_text = string_to_jstring!(env, &text);
     let text = jvalue {
       l: java_text.as_raw(),
     };
@@ -884,18 +808,14 @@ impl JavaSwc4jTokenFactory {
     let line_break_ahead = jvalue {
       z: line_break_ahead as u8,
     };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_unknown,
-          ReturnType::Object,
-          &[text, start_position, end_position, line_break_ahead],
-        )
-        .expect("Couldn't create Swc4jTokenText by create_unknown()")
-        .l()
-        .expect("Couldn't convert Swc4jTokenText by create_unknown()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_unknown,
+        &[text, start_position, end_position, line_break_ahead],
+        "Swc4jTokenText create_unknown()"
+      );
     delete_local_ref!(env, java_text);
     return_value
   }

@@ -116,7 +116,7 @@ public final class Swc4jTokenFactory {
             @Jni2RustParam(
                     rustType = "error: &Error",
                     preCalls = {
-                            "    let java_error = converter::string_to_jstring(env, &format!(\"{:?}\", error));",
+                            "    let java_error = string_to_jstring!(env, &format!(\"{:?}\", error));",
                             "    let error = jvalue {",
                             "      l: java_error.as_raw(),",
                             "    };",

@@ -15,7 +15,7 @@
 * limitations under the License.
 */
 
-use jni::objects::JClass;
+use jni::objects::{JClass, JString};
 use jni::sys::{jint, jobject, jstring, JNI_VERSION_1_8};
 use jni::{JNIEnv, JavaVM};
 use options::FromJniType;
@@ -25,7 +25,6 @@ use std::ffi::c_void;
 use std::ptr::null_mut;
 
 pub mod ast_utils;
-pub mod converter;
 pub mod core;
 pub mod enums;
 pub mod error;
@@ -35,7 +34,7 @@ pub mod outputs;
 pub mod position_utils;
 pub mod token_utils;
 
-use crate::jni_utils::ToJniType;
+use crate::jni_utils::{jstring_to_optional_string, jstring_to_string, string_to_jstring, ToJniType};
 
 #[no_mangle]
 pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
@@ -56,7 +55,7 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion<'
   env: JNIEnv<'local>,
   _: JClass<'local>,
 ) -> jstring {
-  converter::string_to_jstring(&env, core::get_version()).as_raw()
+  string_to_jstring!(env, core::get_version()).as_raw()
 }
 
 #[no_mangle]
@@ -66,7 +65,7 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse<'local
   code: jstring,
   options: jobject,
 ) -> jobject {
-  let code = converter::jstring_to_string(&mut env, code);
+  let code = jstring_to_string!(env, code);
   let options = options::ParseOptions::from_jni_type(&mut env, options);
   match core::parse(code, options) {
     Ok(output) => output.to_jni_type(&mut env).as_raw(),
@@ -84,7 +83,7 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'l
   code: jstring,
   options: jobject,
 ) -> jobject {
-  let code = converter::jstring_to_string(&mut env, code);
+  let code = jstring_to_string!(env, code);
   let options = options::TranspileOptions::from_jni_type(&mut env, options);
   match core::transpile(code, options) {
     Ok(output) => output.to_jni_type(&mut env).as_raw(),

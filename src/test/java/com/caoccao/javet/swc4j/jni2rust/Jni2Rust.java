@@ -182,12 +182,9 @@ public class Jni2Rust<T> {
                                 lines.add("    };");
                             } else if (parameterType == String.class) {
                                 if (isOptional) {
-                                    lines.add(String.format("    let java_%s = match &%s {", name, name));
-                                    lines.add(String.format("      Some(%s) => converter::string_to_jstring(env, &%s),", name, name));
-                                    lines.add("      None => Default::default(),");
-                                    lines.add("    };");
+                                    lines.add(String.format("    let java_%s = optional_string_to_jstring!(env, &%s);", name, name));
                                 } else {
-                                    lines.add(String.format("    let java_%s = converter::string_to_jstring(env, &%s);", name, name));
+                                    lines.add(String.format("    let java_%s = string_to_jstring!(env, &%s);", name, name));
                                 }
                                 lines.add(String.format("    let %s = jvalue {", name));
                                 lines.add(String.format("      l: java_%s.as_raw(),", name));
@@ -209,48 +206,33 @@ public class Jni2Rust<T> {
                         }
                     }
                     // call
-                    lines.add("    let return_value = unsafe {");
-                    lines.add("      env");
-                    if (isStatic) {
-                        lines.add("        .call_static_method_unchecked(");
-                        lines.add("          &self.class,");
-                    } else {
-                        lines.add("        .call_method_unchecked(");
-                        lines.add("          obj,");
-                    }
-                    lines.add(String.format("          self.method_%s,", methodName));
+                    lines.add("    let return_value = ");
+                    String returnType;
                     if (isVoid) {
-                        lines.add("          ReturnType::Primitive(Primitive::Void),");
+                        returnType = "void";
                     } else if (isPrimitive) {
-                        lines.add(String.format("          ReturnType::Primitive(Primitive::%s),",
-                                options.getJavaTypeToJniFullTypeMap().get(method.getReturnType().getName())));
+                        returnType = method.getReturnType().getName();
                     } else {
-                        lines.add("          ReturnType::Object,");
+                        returnType = "object";
                     }
-                    lines.add(String.format("          &[%s],", StringUtils.join(", ", parameterNames)));
-                    lines.add("        )");
-                    if (isVoid) {
-                        // TODO
+                    if (isStatic) {
+                        lines.add(String.format("      call_static_as_%s!(", returnType));
+                        lines.add("        env,");
+                        lines.add("        &self.class,");
                     } else {
-                        lines.add(String.format("        .expect(\"Couldn't create %s by %s()\")",
-                                returnTypeName,
-                                methodName));
-                        if (isPrimitive) {
-                            lines.add(String.format("        .%s()",
-                                    options.getJavaTypeToJniSimpleTypeMap().get(method.getReturnType().getName()).toLowerCase()));
-                        } else {
-                            lines.add("        .l()");
-                        }
-                        lines.add(String.format("        .expect(\"Couldn't convert %s by %s()\")",
-                                returnTypeName,
-                                methodName));
+                        lines.add(String.format("      call_as_%s!(", returnType));
+                        lines.add("        env,");
+                        lines.add("        obj,");
                     }
-                    lines.add("    };");
+                    lines.add(String.format("        self.method_%s,", methodName));
+                    lines.add(String.format("        &[%s],", StringUtils.join(", ", parameterNames)));
+                    lines.add(String.format("        \"%s %s()\"", returnTypeName, methodName));
+                    lines.add("      );");
                     if (isString) {
                         if (jni2RustMethod != null && jni2RustMethod.optional()) {
-                            lines.add("    let return_value = converter::jstring_to_optional_string(env, return_value.as_raw());");
+                            lines.add("    let return_value = jstring_to_optional_string!(env, return_value.as_raw());");
                         } else {
-                            lines.add("    let return_value = converter::jstring_to_string(env, return_value.as_raw());");
+                            lines.add("    let return_value = jstring_to_string!(env, return_value.as_raw());");
                         }
                     }
                     // post-call

@@ -16,6 +16,7 @@
 */
 
 use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID};
+use jni::signature::{Primitive, ReturnType};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
@@ -540,7 +541,7 @@ impl JavaTokenType {
   }
 
   pub fn get_token_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> TokenType {
-    let id = call_as_int(env, obj.as_ref(), self.method_get_id, &[], "getId()");
+    let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
     TokenType::parse_by_id(id)
   }
 
@@ -549,7 +550,7 @@ impl JavaTokenType {
     'local: 'a,
   {
     let id = jvalue { i: id };
-    call_static_as_object(env, &self.class, &self.method_parse, &[id], "parse()")
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
   }
 }
 
@@ -597,7 +598,7 @@ impl JavaImportsNotUsedAsValues {
     env: &mut JNIEnv<'local>,
     obj: &JObject<'a>,
   ) -> ImportsNotUsedAsValues {
-    let id = call_as_int(env, obj.as_ref(), self.method_get_id, &[], "getId()");
+    let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
     ImportsNotUsedAsValues::parse_by_id(id)
   }
 }
@@ -676,7 +677,7 @@ impl JavaMediaType {
   }
 
   pub fn get_media_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> MediaType {
-    let id = call_as_int(env, obj.as_ref(), self.method_get_id, &[], "getId()");
+    let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
     MediaType::parse_by_id(id)
   }
 
@@ -685,7 +686,7 @@ impl JavaMediaType {
     'local: 'a,
   {
     let id = jvalue { i: id };
-    call_static_as_object(env, &self.class, &self.method_parse, &[id], "parse()")
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
   }
 }
 
@@ -733,7 +734,7 @@ impl JavaParseMode {
   }
 
   pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> ParseMode {
-    let id = call_as_int(env, obj.as_ref(), self.method_get_id, &[], "getId()");
+    let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
     ParseMode::parse_by_id(id)
   }
 }

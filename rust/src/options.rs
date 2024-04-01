@@ -15,13 +15,13 @@
 * limitations under the License.
 */
 
-use jni::objects::{GlobalRef, JMethodID, JObject};
+use jni::objects::{GlobalRef, JMethodID, JObject, JString};
 use jni::signature::{Primitive, ReturnType};
 use jni::sys::jobject;
 use jni::JNIEnv;
 
-use crate::converter;
 use crate::enums::*;
+use crate::jni_utils::*;
 
 /* JavaSwc4jParseOptions Begin */
 struct JavaSwc4jParseOptions {
@@ -106,18 +106,14 @@ impl JavaSwc4jParseOptions {
   where
     'local: 'a,
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_get_media_type,
-          ReturnType::Object,
-          &[],
-        )
-        .expect("Couldn't create Swc4jMediaType by get_media_type()")
-        .l()
-        .expect("Couldn't convert Swc4jMediaType by get_media_type()")
-    };
+    let return_value = 
+      call_as_object!(
+        env,
+        obj,
+        self.method_get_media_type,
+        &[],
+        "Swc4jMediaType get_media_type()"
+      );
     return_value
   }
 
@@ -129,18 +125,14 @@ impl JavaSwc4jParseOptions {
   where
     'local: 'a,
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_get_parse_mode,
-          ReturnType::Object,
-          &[],
-        )
-        .expect("Couldn't create Swc4jParseMode by get_parse_mode()")
-        .l()
-        .expect("Couldn't convert Swc4jParseMode by get_parse_mode()")
-    };
+    let return_value = 
+      call_as_object!(
+        env,
+        obj,
+        self.method_get_parse_mode,
+        &[],
+        "Swc4jParseMode get_parse_mode()"
+      );
     return_value
   }
 
@@ -150,19 +142,15 @@ impl JavaSwc4jParseOptions {
     obj: &JObject<'_>,
   ) -> String
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_get_specifier,
-          ReturnType::Object,
-          &[],
-        )
-        .expect("Couldn't create String by get_specifier()")
-        .l()
-        .expect("Couldn't convert String by get_specifier()")
-    };
-    let return_value = converter::jstring_to_string(env, return_value.as_raw());
+    let return_value = 
+      call_as_object!(
+        env,
+        obj,
+        self.method_get_specifier,
+        &[],
+        "String get_specifier()"
+      );
+    let return_value = jstring_to_string!(env, return_value.as_raw());
     return_value
   }
 
@@ -172,18 +160,14 @@ impl JavaSwc4jParseOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_capture_ast,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_capture_ast()")
-        .z()
-        .expect("Couldn't convert boolean by is_capture_ast()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_capture_ast,
+        &[],
+        "boolean is_capture_ast()"
+      );
     return_value
   }
 
@@ -193,18 +177,14 @@ impl JavaSwc4jParseOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_capture_tokens,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_capture_tokens()")
-        .z()
-        .expect("Couldn't convert boolean by is_capture_tokens()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_capture_tokens,
+        &[],
+        "boolean is_capture_tokens()"
+      );
     return_value
   }
 
@@ -214,18 +194,14 @@ impl JavaSwc4jParseOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_scope_analysis,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_scope_analysis()")
-        .z()
-        .expect("Couldn't convert boolean by is_scope_analysis()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_scope_analysis,
+        &[],
+        "boolean is_scope_analysis()"
+      );
     return_value
   }
 }
@@ -431,18 +407,14 @@ impl JavaSwc4jTranspileOptions {
   where
     'local: 'a,
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_get_imports_not_used_as_values,
-          ReturnType::Object,
-          &[],
-        )
-        .expect("Couldn't create Swc4jImportsNotUsedAsValues by get_imports_not_used_as_values()")
-        .l()
-        .expect("Couldn't convert Swc4jImportsNotUsedAsValues by get_imports_not_used_as_values()")
-    };
+    let return_value = 
+      call_as_object!(
+        env,
+        obj,
+        self.method_get_imports_not_used_as_values,
+        &[],
+        "Swc4jImportsNotUsedAsValues get_imports_not_used_as_values()"
+      );
     return_value
   }
 
@@ -452,19 +424,15 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> String
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_get_jsx_factory,
-          ReturnType::Object,
-          &[],
-        )
-        .expect("Couldn't create String by get_jsx_factory()")
-        .l()
-        .expect("Couldn't convert String by get_jsx_factory()")
-    };
-    let return_value = converter::jstring_to_string(env, return_value.as_raw());
+    let return_value = 
+      call_as_object!(
+        env,
+        obj,
+        self.method_get_jsx_factory,
+        &[],
+        "String get_jsx_factory()"
+      );
+    let return_value = jstring_to_string!(env, return_value.as_raw());
     return_value
   }
 
@@ -474,19 +442,15 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> String
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_get_jsx_fragment_factory,
-          ReturnType::Object,
-          &[],
-        )
-        .expect("Couldn't create String by get_jsx_fragment_factory()")
-        .l()
-        .expect("Couldn't convert String by get_jsx_fragment_factory()")
-    };
-    let return_value = converter::jstring_to_string(env, return_value.as_raw());
+    let return_value = 
+      call_as_object!(
+        env,
+        obj,
+        self.method_get_jsx_fragment_factory,
+        &[],
+        "String get_jsx_fragment_factory()"
+      );
+    let return_value = jstring_to_string!(env, return_value.as_raw());
     return_value
   }
 
@@ -496,19 +460,15 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> Option<String>
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_get_jsx_import_source,
-          ReturnType::Object,
-          &[],
-        )
-        .expect("Couldn't create String by get_jsx_import_source()")
-        .l()
-        .expect("Couldn't convert String by get_jsx_import_source()")
-    };
-    let return_value = converter::jstring_to_optional_string(env, return_value.as_raw());
+    let return_value = 
+      call_as_object!(
+        env,
+        obj,
+        self.method_get_jsx_import_source,
+        &[],
+        "String get_jsx_import_source()"
+      );
+    let return_value = jstring_to_optional_string!(env, return_value.as_raw());
     return_value
   }
 
@@ -520,18 +480,14 @@ impl JavaSwc4jTranspileOptions {
   where
     'local: 'a,
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_get_media_type,
-          ReturnType::Object,
-          &[],
-        )
-        .expect("Couldn't create Swc4jMediaType by get_media_type()")
-        .l()
-        .expect("Couldn't convert Swc4jMediaType by get_media_type()")
-    };
+    let return_value = 
+      call_as_object!(
+        env,
+        obj,
+        self.method_get_media_type,
+        &[],
+        "Swc4jMediaType get_media_type()"
+      );
     return_value
   }
 
@@ -543,18 +499,14 @@ impl JavaSwc4jTranspileOptions {
   where
     'local: 'a,
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_get_parse_mode,
-          ReturnType::Object,
-          &[],
-        )
-        .expect("Couldn't create Swc4jParseMode by get_parse_mode()")
-        .l()
-        .expect("Couldn't convert Swc4jParseMode by get_parse_mode()")
-    };
+    let return_value = 
+      call_as_object!(
+        env,
+        obj,
+        self.method_get_parse_mode,
+        &[],
+        "Swc4jParseMode get_parse_mode()"
+      );
     return_value
   }
 
@@ -564,19 +516,15 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> String
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_get_specifier,
-          ReturnType::Object,
-          &[],
-        )
-        .expect("Couldn't create String by get_specifier()")
-        .l()
-        .expect("Couldn't convert String by get_specifier()")
-    };
-    let return_value = converter::jstring_to_string(env, return_value.as_raw());
+    let return_value = 
+      call_as_object!(
+        env,
+        obj,
+        self.method_get_specifier,
+        &[],
+        "String get_specifier()"
+      );
+    let return_value = jstring_to_string!(env, return_value.as_raw());
     return_value
   }
 
@@ -586,18 +534,14 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_capture_ast,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_capture_ast()")
-        .z()
-        .expect("Couldn't convert boolean by is_capture_ast()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_capture_ast,
+        &[],
+        "boolean is_capture_ast()"
+      );
     return_value
   }
 
@@ -607,18 +551,14 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_capture_tokens,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_capture_tokens()")
-        .z()
-        .expect("Couldn't convert boolean by is_capture_tokens()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_capture_tokens,
+        &[],
+        "boolean is_capture_tokens()"
+      );
     return_value
   }
 
@@ -628,18 +568,14 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_emit_metadata,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_emit_metadata()")
-        .z()
-        .expect("Couldn't convert boolean by is_emit_metadata()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_emit_metadata,
+        &[],
+        "boolean is_emit_metadata()"
+      );
     return_value
   }
 
@@ -649,18 +585,14 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_inline_source_map,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_inline_source_map()")
-        .z()
-        .expect("Couldn't convert boolean by is_inline_source_map()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_inline_source_map,
+        &[],
+        "boolean is_inline_source_map()"
+      );
     return_value
   }
 
@@ -670,18 +602,14 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_inline_sources,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_inline_sources()")
-        .z()
-        .expect("Couldn't convert boolean by is_inline_sources()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_inline_sources,
+        &[],
+        "boolean is_inline_sources()"
+      );
     return_value
   }
 
@@ -691,18 +619,14 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_jsx_automatic,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_jsx_automatic()")
-        .z()
-        .expect("Couldn't convert boolean by is_jsx_automatic()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_jsx_automatic,
+        &[],
+        "boolean is_jsx_automatic()"
+      );
     return_value
   }
 
@@ -712,18 +636,14 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_jsx_development,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_jsx_development()")
-        .z()
-        .expect("Couldn't convert boolean by is_jsx_development()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_jsx_development,
+        &[],
+        "boolean is_jsx_development()"
+      );
     return_value
   }
 
@@ -733,18 +653,14 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_precompile_jsx,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_precompile_jsx()")
-        .z()
-        .expect("Couldn't convert boolean by is_precompile_jsx()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_precompile_jsx,
+        &[],
+        "boolean is_precompile_jsx()"
+      );
     return_value
   }
 
@@ -754,18 +670,14 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_scope_analysis,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_scope_analysis()")
-        .z()
-        .expect("Couldn't convert boolean by is_scope_analysis()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_scope_analysis,
+        &[],
+        "boolean is_scope_analysis()"
+      );
     return_value
   }
 
@@ -775,18 +687,14 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_source_map,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_source_map()")
-        .z()
-        .expect("Couldn't convert boolean by is_source_map()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_source_map,
+        &[],
+        "boolean is_source_map()"
+      );
     return_value
   }
 
@@ -796,18 +704,14 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_transform_jsx,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_transform_jsx()")
-        .z()
-        .expect("Couldn't convert boolean by is_transform_jsx()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_transform_jsx,
+        &[],
+        "boolean is_transform_jsx()"
+      );
     return_value
   }
 
@@ -817,18 +721,14 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = unsafe {
-      env
-        .call_method_unchecked(
-          obj,
-          self.method_is_var_decl_imports,
-          ReturnType::Primitive(Primitive::Boolean),
-          &[],
-        )
-        .expect("Couldn't create boolean by is_var_decl_imports()")
-        .z()
-        .expect("Couldn't convert boolean by is_var_decl_imports()")
-    };
+    let return_value = 
+      call_as_boolean!(
+        env,
+        obj,
+        self.method_is_var_decl_imports,
+        &[],
+        "boolean is_var_decl_imports()"
+      );
     return_value
   }
 }

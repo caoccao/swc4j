@@ -16,11 +16,11 @@
 */
 
 use jni::objects::{GlobalRef, JStaticMethodID, JThrowable};
+use jni::signature::ReturnType;
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
-use crate::converter;
-use crate::jni_utils::call_static_as_object;
+use crate::jni_utils::*;
 
 struct JavaCoreException {
   pub class: GlobalRef,
@@ -61,23 +61,23 @@ impl JavaCoreException {
 
   pub fn throw_parse_error<'local, 'a>(&self, env: &mut JNIEnv<'local>, message: &'a str) {
     let message = jvalue {
-      l: converter::string_to_jstring(env, message).as_raw(),
+      l: string_to_jstring!(env, message).as_raw(),
     };
-    let exception = call_static_as_object(env, &self.class, &self.method_parse_error, &[message], "parseError()");
+    let exception = call_static_as_object!(env, &self.class, &self.method_parse_error, &[message], "parseError()");
     let exception = unsafe { JThrowable::from_raw(exception.as_raw()) };
     let _ = env.throw(exception);
   }
 
   pub fn throw_transpile_error<'local, 'a>(&self, env: &mut JNIEnv<'local>, message: &'a str) {
     let message = jvalue {
-      l: converter::string_to_jstring(env, message).as_raw(),
+      l: string_to_jstring!(env, message).as_raw(),
     };
-    let exception = call_static_as_object(
+    let exception = call_static_as_object!(
       env,
       &self.class,
       &self.method_transpile_error,
       &[message],
-      "transpileError()",
+      "transpileError()"
     );
     let exception = unsafe { JThrowable::from_raw(exception.as_raw()) };
     let _ = env.throw(exception);

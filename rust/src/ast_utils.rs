@@ -20,8 +20,7 @@ use jni::signature::ReturnType;
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
-use crate::converter;
-use crate::jni_utils::delete_local_ref;
+use crate::jni_utils::*;
 
 use std::ops::Range;
 use std::ptr::null_mut;
@@ -456,27 +455,20 @@ impl JavaSwc4jAstFactory {
     let sign = jvalue {
       i: sign as i32,
     };
-    let java_raw = match &raw {
-      Some(raw) => converter::string_to_jstring(env, &raw),
-      None => Default::default(),
-    };
+    let java_raw = optional_string_to_jstring!(env, &raw);
     let raw = jvalue {
       l: java_raw.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_big_int,
-          ReturnType::Object,
-          &[sign, raw, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstBigInt by create_big_int()")
-        .l()
-        .expect("Couldn't convert Swc4jAstBigInt by create_big_int()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_big_int,
+        &[sign, raw, start_position, end_position],
+        "Swc4jAstBigInt create_big_int()"
+      );
     delete_local_ref!(env, java_raw);
     return_value
   }
@@ -500,18 +492,14 @@ impl JavaSwc4jAstFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_binding_ident,
-          ReturnType::Object,
-          &[id, type_ann, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstBindingIdent by create_binding_ident()")
-        .l()
-        .expect("Couldn't convert Swc4jAstBindingIdent by create_binding_ident()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_binding_ident,
+        &[id, type_ann, start_position, end_position],
+        "Swc4jAstBindingIdent create_binding_ident()"
+      );
     return_value
   }
 
@@ -527,18 +515,14 @@ impl JavaSwc4jAstFactory {
     let stmts = jvalue { l: stmts.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_block_stmt,
-          ReturnType::Object,
-          &[stmts, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstBlockStmt by create_block_stmt()")
-        .l()
-        .expect("Couldn't convert Swc4jAstBlockStmt by create_block_stmt()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_block_stmt,
+        &[stmts, start_position, end_position],
+        "Swc4jAstBlockStmt create_block_stmt()"
+      );
     return_value
   }
 
@@ -556,18 +540,14 @@ impl JavaSwc4jAstFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_bool,
-          ReturnType::Object,
-          &[value, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstBool by create_bool()")
-        .l()
-        .expect("Couldn't convert Swc4jAstBool by create_bool()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_bool,
+        &[value, start_position, end_position],
+        "Swc4jAstBool create_bool()"
+      );
     return_value
   }
 
@@ -612,18 +592,14 @@ impl JavaSwc4jAstFactory {
     let implements = jvalue { l: implements.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_class,
-          ReturnType::Object,
-          &[decorators, body, super_class, is_abstract, type_params, super_type_params, implements, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstClass by create_class()")
-        .l()
-        .expect("Couldn't convert Swc4jAstClass by create_class()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_class,
+        &[decorators, body, super_class, is_abstract, type_params, super_type_params, implements, start_position, end_position],
+        "Swc4jAstClass create_class()"
+      );
     return_value
   }
 
@@ -645,18 +621,14 @@ impl JavaSwc4jAstFactory {
     let clazz = jvalue { l: clazz.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_class_decl,
-          ReturnType::Object,
-          &[ident, declare, clazz, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstClassDecl by create_class_decl()")
-        .l()
-        .expect("Couldn't convert Swc4jAstClassDecl by create_class_decl()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_class_decl,
+        &[ident, declare, clazz, start_position, end_position],
+        "Swc4jAstClassDecl create_class_decl()"
+      );
     return_value
   }
 
@@ -689,18 +661,14 @@ impl JavaSwc4jAstFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_constructor,
-          ReturnType::Object,
-          &[key, params, body, accessibility, optional, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstConstructor by create_constructor()")
-        .l()
-        .expect("Couldn't convert Swc4jAstConstructor by create_constructor()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_constructor,
+        &[key, params, body, accessibility, optional, start_position, end_position],
+        "Swc4jAstConstructor create_constructor()"
+      );
     return_value
   }
 
@@ -714,18 +682,14 @@ impl JavaSwc4jAstFactory {
   {
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_debugger_stmt,
-          ReturnType::Object,
-          &[start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstDebuggerStmt by create_debugger_stmt()")
-        .l()
-        .expect("Couldn't convert Swc4jAstDebuggerStmt by create_debugger_stmt()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_debugger_stmt,
+        &[start_position, end_position],
+        "Swc4jAstDebuggerStmt create_debugger_stmt()"
+      );
     return_value
   }
 
@@ -741,18 +705,14 @@ impl JavaSwc4jAstFactory {
     let expr = jvalue { l: expr.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_decorator,
-          ReturnType::Object,
-          &[expr, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstDecorator by create_decorator()")
-        .l()
-        .expect("Couldn't convert Swc4jAstDecorator by create_decorator()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_decorator,
+        &[expr, start_position, end_position],
+        "Swc4jAstDecorator create_decorator()"
+      );
     return_value
   }
 
@@ -766,18 +726,14 @@ impl JavaSwc4jAstFactory {
   {
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_empty_stmt,
-          ReturnType::Object,
-          &[start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstEmptyStmt by create_empty_stmt()")
-        .l()
-        .expect("Couldn't convert Swc4jAstEmptyStmt by create_empty_stmt()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_empty_stmt,
+        &[start_position, end_position],
+        "Swc4jAstEmptyStmt create_empty_stmt()"
+      );
     return_value
   }
 
@@ -804,18 +760,14 @@ impl JavaSwc4jAstFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_export_all,
-          ReturnType::Object,
-          &[src, type_only, with, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstExportAll by create_export_all()")
-        .l()
-        .expect("Couldn't convert Swc4jAstExportAll by create_export_all()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_export_all,
+        &[src, type_only, with, start_position, end_position],
+        "Swc4jAstExportAll create_export_all()"
+      );
     return_value
   }
 
@@ -831,18 +783,14 @@ impl JavaSwc4jAstFactory {
     let decl = jvalue { l: decl.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_export_decl,
-          ReturnType::Object,
-          &[decl, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstExportDecl by create_export_decl()")
-        .l()
-        .expect("Couldn't convert Swc4jAstExportDecl by create_export_decl()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_export_decl,
+        &[decl, start_position, end_position],
+        "Swc4jAstExportDecl create_export_decl()"
+      );
     return_value
   }
 
@@ -858,18 +806,14 @@ impl JavaSwc4jAstFactory {
     let decl = jvalue { l: decl.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_export_default_decl,
-          ReturnType::Object,
-          &[decl, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstExportDefaultDecl by create_export_default_decl()")
-        .l()
-        .expect("Couldn't convert Swc4jAstExportDefaultDecl by create_export_default_decl()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_export_default_decl,
+        &[decl, start_position, end_position],
+        "Swc4jAstExportDefaultDecl create_export_default_decl()"
+      );
     return_value
   }
 
@@ -885,18 +829,14 @@ impl JavaSwc4jAstFactory {
     let decl = jvalue { l: decl.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_export_default_expr,
-          ReturnType::Object,
-          &[decl, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstExportDefaultExpr by create_export_default_expr()")
-        .l()
-        .expect("Couldn't convert Swc4jAstExportDefaultExpr by create_export_default_expr()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_export_default_expr,
+        &[decl, start_position, end_position],
+        "Swc4jAstExportDefaultExpr create_export_default_expr()"
+      );
     return_value
   }
 
@@ -912,18 +852,14 @@ impl JavaSwc4jAstFactory {
     let expr = jvalue { l: expr.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_expr_stmt,
-          ReturnType::Object,
-          &[expr, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstExprStmt by create_expr_stmt()")
-        .l()
-        .expect("Couldn't convert Swc4jAstExprStmt by create_expr_stmt()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_expr_stmt,
+        &[expr, start_position, end_position],
+        "Swc4jAstExprStmt create_expr_stmt()"
+      );
     return_value
   }
 
@@ -937,7 +873,7 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let java_sym = converter::string_to_jstring(env, &sym);
+    let java_sym = string_to_jstring!(env, &sym);
     let sym = jvalue {
       l: java_sym.as_raw(),
     };
@@ -946,18 +882,14 @@ impl JavaSwc4jAstFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_ident,
-          ReturnType::Object,
-          &[sym, optional, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstIdent by create_ident()")
-        .l()
-        .expect("Couldn't convert Swc4jAstIdent by create_ident()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ident,
+        &[sym, optional, start_position, end_position],
+        "Swc4jAstIdent create_ident()"
+      );
     delete_local_ref!(env, java_sym);
     return_value
   }
@@ -987,18 +919,14 @@ impl JavaSwc4jAstFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_import_decl,
-          ReturnType::Object,
-          &[specifiers, src, type_only, with, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstImportDecl by create_import_decl()")
-        .l()
-        .expect("Couldn't convert Swc4jAstImportDecl by create_import_decl()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_import_decl,
+        &[specifiers, src, type_only, with, start_position, end_position],
+        "Swc4jAstImportDecl create_import_decl()"
+      );
     return_value
   }
 
@@ -1014,18 +942,14 @@ impl JavaSwc4jAstFactory {
     let local = jvalue { l: local.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_import_default_specifier,
-          ReturnType::Object,
-          &[local, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstImportDefaultSpecifier by create_import_default_specifier()")
-        .l()
-        .expect("Couldn't convert Swc4jAstImportDefaultSpecifier by create_import_default_specifier()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_import_default_specifier,
+        &[local, start_position, end_position],
+        "Swc4jAstImportDefaultSpecifier create_import_default_specifier()"
+      );
     return_value
   }
 
@@ -1052,18 +976,14 @@ impl JavaSwc4jAstFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_import_named_specifier,
-          ReturnType::Object,
-          &[local, imported, type_only, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstImportNamedSpecifier by create_import_named_specifier()")
-        .l()
-        .expect("Couldn't convert Swc4jAstImportNamedSpecifier by create_import_named_specifier()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_import_named_specifier,
+        &[local, imported, type_only, start_position, end_position],
+        "Swc4jAstImportNamedSpecifier create_import_named_specifier()"
+      );
     return_value
   }
 
@@ -1079,18 +999,14 @@ impl JavaSwc4jAstFactory {
     let local = jvalue { l: local.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_import_star_as_specifier,
-          ReturnType::Object,
-          &[local, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstImportStarAsSpecifier by create_import_star_as_specifier()")
-        .l()
-        .expect("Couldn't convert Swc4jAstImportStarAsSpecifier by create_import_star_as_specifier()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_import_star_as_specifier,
+        &[local, start_position, end_position],
+        "Swc4jAstImportStarAsSpecifier create_import_star_as_specifier()"
+      );
     return_value
   }
 
@@ -1104,28 +1020,24 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let java_value = converter::string_to_jstring(env, &value);
+    let java_value = string_to_jstring!(env, &value);
     let value = jvalue {
       l: java_value.as_raw(),
     };
-    let java_raw = converter::string_to_jstring(env, &raw);
+    let java_raw = string_to_jstring!(env, &raw);
     let raw = jvalue {
       l: java_raw.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_jsx_text,
-          ReturnType::Object,
-          &[value, raw, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstJsxText by create_jsx_text()")
-        .l()
-        .expect("Couldn't convert Swc4jAstJsxText by create_jsx_text()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_jsx_text,
+        &[value, raw, start_position, end_position],
+        "Swc4jAstJsxText create_jsx_text()"
+      );
     delete_local_ref!(env, java_value);
     delete_local_ref!(env, java_raw);
     return_value
@@ -1142,27 +1054,20 @@ impl JavaSwc4jAstFactory {
     'local: 'a,
   {
     let body = jvalue { l: body.as_raw() };
-    let java_shebang = match &shebang {
-      Some(shebang) => converter::string_to_jstring(env, &shebang),
-      None => Default::default(),
-    };
+    let java_shebang = optional_string_to_jstring!(env, &shebang);
     let shebang = jvalue {
       l: java_shebang.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_module,
-          ReturnType::Object,
-          &[body, shebang, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstModule by create_module()")
-        .l()
-        .expect("Couldn't convert Swc4jAstModule by create_module()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_module,
+        &[body, shebang, start_position, end_position],
+        "Swc4jAstModule create_module()"
+      );
     delete_local_ref!(env, java_shebang);
     return_value
   }
@@ -1197,18 +1102,14 @@ impl JavaSwc4jAstFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_named_export,
-          ReturnType::Object,
-          &[specifiers, src, type_only, with, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstNamedExport by create_named_export()")
-        .l()
-        .expect("Couldn't convert Swc4jAstNamedExport by create_named_export()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_named_export,
+        &[specifiers, src, type_only, with, start_position, end_position],
+        "Swc4jAstNamedExport create_named_export()"
+      );
     return_value
   }
 
@@ -1222,18 +1123,14 @@ impl JavaSwc4jAstFactory {
   {
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_null,
-          ReturnType::Object,
-          &[start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstNull by create_null()")
-        .l()
-        .expect("Couldn't convert Swc4jAstNull by create_null()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_null,
+        &[start_position, end_position],
+        "Swc4jAstNull create_null()"
+      );
     return_value
   }
 
@@ -1250,27 +1147,20 @@ impl JavaSwc4jAstFactory {
     let value = jvalue {
       d: value as f64,
     };
-    let java_raw = match &raw {
-      Some(raw) => converter::string_to_jstring(env, &raw),
-      None => Default::default(),
-    };
+    let java_raw = optional_string_to_jstring!(env, &raw);
     let raw = jvalue {
       l: java_raw.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_number,
-          ReturnType::Object,
-          &[value, raw, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstNumber by create_number()")
-        .l()
-        .expect("Couldn't convert Swc4jAstNumber by create_number()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_number,
+        &[value, raw, start_position, end_position],
+        "Swc4jAstNumber create_number()"
+      );
     delete_local_ref!(env, java_raw);
     return_value
   }
@@ -1287,18 +1177,14 @@ impl JavaSwc4jAstFactory {
     let props = jvalue { l: props.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_object_lit,
-          ReturnType::Object,
-          &[props, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstObjectLit by create_object_lit()")
-        .l()
-        .expect("Couldn't convert Swc4jAstObjectLit by create_object_lit()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_object_lit,
+        &[props, start_position, end_position],
+        "Swc4jAstObjectLit create_object_lit()"
+      );
     return_value
   }
 
@@ -1312,28 +1198,24 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let java_exp = converter::string_to_jstring(env, &exp);
+    let java_exp = string_to_jstring!(env, &exp);
     let exp = jvalue {
       l: java_exp.as_raw(),
     };
-    let java_flags = converter::string_to_jstring(env, &flags);
+    let java_flags = string_to_jstring!(env, &flags);
     let flags = jvalue {
       l: java_flags.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_regex,
-          ReturnType::Object,
-          &[exp, flags, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstRegex by create_regex()")
-        .l()
-        .expect("Couldn't convert Swc4jAstRegex by create_regex()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_regex,
+        &[exp, flags, start_position, end_position],
+        "Swc4jAstRegex create_regex()"
+      );
     delete_local_ref!(env, java_exp);
     delete_local_ref!(env, java_flags);
     return_value
@@ -1350,27 +1232,20 @@ impl JavaSwc4jAstFactory {
     'local: 'a,
   {
     let body = jvalue { l: body.as_raw() };
-    let java_shebang = match &shebang {
-      Some(shebang) => converter::string_to_jstring(env, &shebang),
-      None => Default::default(),
-    };
+    let java_shebang = optional_string_to_jstring!(env, &shebang);
     let shebang = jvalue {
       l: java_shebang.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_script,
-          ReturnType::Object,
-          &[body, shebang, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstScript by create_script()")
-        .l()
-        .expect("Couldn't convert Swc4jAstScript by create_script()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_script,
+        &[body, shebang, start_position, end_position],
+        "Swc4jAstScript create_script()"
+      );
     delete_local_ref!(env, java_shebang);
     return_value
   }
@@ -1395,18 +1270,14 @@ impl JavaSwc4jAstFactory {
     let expr = jvalue { l: expr.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_spread_element,
-          ReturnType::Object,
-          &[dot3_token_start_position, dot3_token_end_position, expr, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstSpreadElement by create_spread_element()")
-        .l()
-        .expect("Couldn't convert Swc4jAstSpreadElement by create_spread_element()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_spread_element,
+        &[dot3_token_start_position, dot3_token_end_position, expr, start_position, end_position],
+        "Swc4jAstSpreadElement create_spread_element()"
+      );
     return_value
   }
 
@@ -1422,18 +1293,14 @@ impl JavaSwc4jAstFactory {
     let body = jvalue { l: body.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_static_block,
-          ReturnType::Object,
-          &[body, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstStaticBlock by create_static_block()")
-        .l()
-        .expect("Couldn't convert Swc4jAstStaticBlock by create_static_block()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_static_block,
+        &[body, start_position, end_position],
+        "Swc4jAstStaticBlock create_static_block()"
+      );
     return_value
   }
 
@@ -1447,31 +1314,24 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let java_value = converter::string_to_jstring(env, &value);
+    let java_value = string_to_jstring!(env, &value);
     let value = jvalue {
       l: java_value.as_raw(),
     };
-    let java_raw = match &raw {
-      Some(raw) => converter::string_to_jstring(env, &raw),
-      None => Default::default(),
-    };
+    let java_raw = optional_string_to_jstring!(env, &raw);
     let raw = jvalue {
       l: java_raw.as_raw(),
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_str,
-          ReturnType::Object,
-          &[value, raw, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstStr by create_str()")
-        .l()
-        .expect("Couldn't convert Swc4jAstStr by create_str()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_str,
+        &[value, raw, start_position, end_position],
+        "Swc4jAstStr create_str()"
+      );
     delete_local_ref!(env, java_value);
     delete_local_ref!(env, java_raw);
     return_value
@@ -1489,18 +1349,14 @@ impl JavaSwc4jAstFactory {
     let decl = jvalue { l: decl.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_ts_export_assignment,
-          ReturnType::Object,
-          &[decl, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstTsExportAssignment by create_ts_export_assignment()")
-        .l()
-        .expect("Couldn't convert Swc4jAstTsExportAssignment by create_ts_export_assignment()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_export_assignment,
+        &[decl, start_position, end_position],
+        "Swc4jAstTsExportAssignment create_ts_export_assignment()"
+      );
     return_value
   }
 
@@ -1523,18 +1379,14 @@ impl JavaSwc4jAstFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_ts_expr_with_type_args,
-          ReturnType::Object,
-          &[expr, type_args, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstTsExprWithTypeArgs by create_ts_expr_with_type_args()")
-        .l()
-        .expect("Couldn't convert Swc4jAstTsExprWithTypeArgs by create_ts_expr_with_type_args()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_expr_with_type_args,
+        &[expr, type_args, start_position, end_position],
+        "Swc4jAstTsExprWithTypeArgs create_ts_expr_with_type_args()"
+      );
     return_value
   }
 
@@ -1550,18 +1402,14 @@ impl JavaSwc4jAstFactory {
     let expr = jvalue { l: expr.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_ts_external_module_ref,
-          ReturnType::Object,
-          &[expr, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstTsExternalModuleRef by create_ts_external_module_ref()")
-        .l()
-        .expect("Couldn't convert Swc4jAstTsExternalModuleRef by create_ts_external_module_ref()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_external_module_ref,
+        &[expr, start_position, end_position],
+        "Swc4jAstTsExternalModuleRef create_ts_external_module_ref()"
+      );
     return_value
   }
 
@@ -1587,18 +1435,14 @@ impl JavaSwc4jAstFactory {
     let module_ref = jvalue { l: module_ref.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_ts_import_equals_decl,
-          ReturnType::Object,
-          &[export, type_only, id, module_ref, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstTsImportEqualsDecl by create_ts_import_equals_decl()")
-        .l()
-        .expect("Couldn't convert Swc4jAstTsImportEqualsDecl by create_ts_import_equals_decl()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_import_equals_decl,
+        &[export, type_only, id, module_ref, start_position, end_position],
+        "Swc4jAstTsImportEqualsDecl create_ts_import_equals_decl()"
+      );
     return_value
   }
 
@@ -1614,18 +1458,14 @@ impl JavaSwc4jAstFactory {
     let id = jvalue { l: id.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_ts_namespace_export_decl,
-          ReturnType::Object,
-          &[id, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstTsNamespaceExportDecl by create_ts_namespace_export_decl()")
-        .l()
-        .expect("Couldn't convert Swc4jAstTsNamespaceExportDecl by create_ts_namespace_export_decl()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_namespace_export_decl,
+        &[id, start_position, end_position],
+        "Swc4jAstTsNamespaceExportDecl create_ts_namespace_export_decl()"
+      );
     return_value
   }
 
@@ -1641,18 +1481,14 @@ impl JavaSwc4jAstFactory {
     let type_ann = jvalue { l: type_ann.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_ts_type_ann,
-          ReturnType::Object,
-          &[type_ann, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstTsTypeAnn by create_ts_type_ann()")
-        .l()
-        .expect("Couldn't convert Swc4jAstTsTypeAnn by create_ts_type_ann()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_type_ann,
+        &[type_ann, start_position, end_position],
+        "Swc4jAstTsTypeAnn create_ts_type_ann()"
+      );
     return_value
   }
 
@@ -1694,18 +1530,14 @@ impl JavaSwc4jAstFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_ts_type_param,
-          ReturnType::Object,
-          &[name, is_in, is_out, is_const, constraint, default, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstTsTypeParam by create_ts_type_param()")
-        .l()
-        .expect("Couldn't convert Swc4jAstTsTypeParam by create_ts_type_param()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_type_param,
+        &[name, is_in, is_out, is_const, constraint, default, start_position, end_position],
+        "Swc4jAstTsTypeParam create_ts_type_param()"
+      );
     return_value
   }
 
@@ -1721,18 +1553,14 @@ impl JavaSwc4jAstFactory {
     let params = jvalue { l: params.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_ts_type_param_decl,
-          ReturnType::Object,
-          &[params, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstTsTypeParamDecl by create_ts_type_param_decl()")
-        .l()
-        .expect("Couldn't convert Swc4jAstTsTypeParamDecl by create_ts_type_param_decl()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_type_param_decl,
+        &[params, start_position, end_position],
+        "Swc4jAstTsTypeParamDecl create_ts_type_param_decl()"
+      );
     return_value
   }
 
@@ -1748,18 +1576,14 @@ impl JavaSwc4jAstFactory {
     let params = jvalue { l: params.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_ts_type_param_instantiation,
-          ReturnType::Object,
-          &[params, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstTsTypeParamInstantiation by create_ts_type_param_instantiation()")
-        .l()
-        .expect("Couldn't convert Swc4jAstTsTypeParamInstantiation by create_ts_type_param_instantiation()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_type_param_instantiation,
+        &[params, start_position, end_position],
+        "Swc4jAstTsTypeParamInstantiation create_ts_type_param_instantiation()"
+      );
     return_value
   }
 
@@ -1779,18 +1603,14 @@ impl JavaSwc4jAstFactory {
     let arg = jvalue { l: arg.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_unary_expr,
-          ReturnType::Object,
-          &[op, arg, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstUnaryExpr by create_unary_expr()")
-        .l()
-        .expect("Couldn't convert Swc4jAstUnaryExpr by create_unary_expr()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_unary_expr,
+        &[op, arg, start_position, end_position],
+        "Swc4jAstUnaryExpr create_unary_expr()"
+      );
     return_value
   }
 
@@ -1810,18 +1630,14 @@ impl JavaSwc4jAstFactory {
     let decls = jvalue { l: decls.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_using_decl,
-          ReturnType::Object,
-          &[is_await, decls, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstUsingDecl by create_using_decl()")
-        .l()
-        .expect("Couldn't convert Swc4jAstUsingDecl by create_using_decl()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_using_decl,
+        &[is_await, decls, start_position, end_position],
+        "Swc4jAstUsingDecl create_using_decl()"
+      );
     return_value
   }
 
@@ -1845,18 +1661,14 @@ impl JavaSwc4jAstFactory {
     let decls = jvalue { l: decls.as_raw() };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_var_decl,
-          ReturnType::Object,
-          &[kind_id, declare, decls, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstVarDecl by create_var_decl()")
-        .l()
-        .expect("Couldn't convert Swc4jAstVarDecl by create_var_decl()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_var_decl,
+        &[kind_id, declare, decls, start_position, end_position],
+        "Swc4jAstVarDecl create_var_decl()"
+      );
     return_value
   }
 
@@ -1883,18 +1695,14 @@ impl JavaSwc4jAstFactory {
     };
     let start_position = jvalue { i: range.start as i32 };
     let end_position = jvalue { i: range.end as i32 };
-    let return_value = unsafe {
-      env
-        .call_static_method_unchecked(
-          &self.class,
-          self.method_create_var_declarator,
-          ReturnType::Object,
-          &[name, init, definite, start_position, end_position],
-        )
-        .expect("Couldn't create Swc4jAstVarDeclarator by create_var_declarator()")
-        .l()
-        .expect("Couldn't convert Swc4jAstVarDeclarator by create_var_declarator()")
-    };
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_var_declarator,
+        &[name, init, definite, start_position, end_position],
+        "Swc4jAstVarDeclarator create_var_declarator()"
+      );
     return_value
   }
 }
