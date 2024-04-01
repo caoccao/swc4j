@@ -775,6 +775,23 @@ pub mod swc_enums {
     }
   }
 
+  impl IdentifiableEnum<MethodKind> for MethodKind {
+    fn get_id(&self) -> i32 {
+      match self {
+        MethodKind::Method => 0,
+        MethodKind::Getter => 1,
+        MethodKind::Setter => 2,
+      }
+    }
+    fn parse_by_id(id: i32) -> MethodKind {
+      match id {
+        1 => MethodKind::Getter,
+        2 => MethodKind::Setter,
+        _ => MethodKind::Method,
+      }
+    }
+  }
+
   impl IdentifiableEnum<Sign> for Sign {
     fn get_id(&self) -> i32 {
       match self {

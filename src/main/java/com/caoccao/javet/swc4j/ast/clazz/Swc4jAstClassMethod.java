@@ -19,46 +19,47 @@ package com.caoccao.javet.swc4j.ast.clazz;
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstMethodKind;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.Collections;
-import java.util.List;
-
-public class Swc4jAstConstructor
+public class Swc4jAstClassMethod
         extends Swc4jAst
         implements ISwc4jAstClassMember {
+    protected final boolean _abstract;
+    protected final boolean _override;
+    protected final boolean _static;
     @Nullable
     protected final Swc4jAstAccessibility accessibility;
-    @Nullable
-    protected final Swc4jAstBlockStmt body;
+    protected final Swc4jAstFunction function;
     protected final ISwc4jAstPropName key;
+    protected final Swc4jAstMethodKind kind;
     protected final boolean optional;
-    protected final List<ISwc4jAstParamOrTsParamProp> params;
 
-    public Swc4jAstConstructor(
+    public Swc4jAstClassMethod(
             ISwc4jAstPropName key,
-            List<ISwc4jAstParamOrTsParamProp> params,
-            Swc4jAstBlockStmt body,
+            Swc4jAstFunction function,
+            Swc4jAstMethodKind kind,
+            boolean _static,
             Swc4jAstAccessibility accessibility,
+            boolean _abstract,
             boolean optional,
+            boolean _override,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
+        this._abstract = _abstract;
+        this._override = _override;
+        this._static = _static;
         this.accessibility = accessibility;
-        this.body = body;
+        this.function = function;
         this.key = AssertionUtils.notNull(key, "Key");
+        this.kind = AssertionUtils.notNull(kind, "Kind");
         this.optional = optional;
-        this.params = AssertionUtils.notNull(params, "Params");
-        children = SimpleList.copyOf(params);
-        children.add(body);
-        children.add(key);
-        children = Collections.unmodifiableList(children);
+        children = SimpleList.immutableOf(key, function);
         updateParent();
     }
 
@@ -66,24 +67,32 @@ public class Swc4jAstConstructor
         return accessibility;
     }
 
-    public Swc4jAstBlockStmt getBody() {
-        return body;
+    public Swc4jAstFunction getFunction() {
+        return function;
     }
 
     public ISwc4jAstPropName getKey() {
         return key;
     }
 
-    public List<ISwc4jAstParamOrTsParamProp> getParams() {
-        return params;
+    public Swc4jAstMethodKind getKind() {
+        return kind;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.Constructor;
+        return Swc4jAstType.ClassProp;
     }
 
-    public boolean isOptional() {
-        return optional;
+    public boolean isAbstract() {
+        return _abstract;
+    }
+
+    public boolean isOverride() {
+        return _override;
+    }
+
+    public boolean isStatic() {
+        return _static;
     }
 }

@@ -27,6 +27,7 @@ public class TestISwc4jAstClassMember {
     public void testAssignable() {
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstAutoAccessor.class));
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstConstructor.class));
+        assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstClassMethod.class));
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstClassProp.class));
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstEmptyStmt.class));
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstPrivateProp.class));

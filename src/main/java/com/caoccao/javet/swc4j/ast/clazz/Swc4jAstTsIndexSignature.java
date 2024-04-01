@@ -61,7 +61,7 @@ public class Swc4jAstTsIndexSignature
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.Decorator;
+        return Swc4jAstType.TsIndexSignature;
     }
 
     public Swc4jAstTsTypeAnn getTypeAnn() {

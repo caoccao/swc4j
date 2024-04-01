@@ -69,7 +69,7 @@ macro_rules! call_as_object {
 }
 pub(crate) use call_as_object;
 
-#[allow(dead_code)]
+#[allow(unused_macros)]
 macro_rules! call_static_as_boolean {
   ($env: ident, $class: expr, $method: expr, $args: expr, $name: literal) => {
     match unsafe {
@@ -83,10 +83,10 @@ macro_rules! call_static_as_boolean {
     }
   };
 }
-#[allow(dead_code)]
+#[allow(unused_imports)]
 pub(crate) use call_static_as_boolean;
 
-#[allow(dead_code)]
+#[allow(unused_macros)]
 macro_rules! call_static_as_int {
   ($env: ident, $class: expr, $method: expr, $args: expr, $name: literal) => {
     match unsafe { $env.call_static_method_unchecked($class, $method, ReturnType::Primitive(Primitive::Int), $args) } {
@@ -98,7 +98,7 @@ macro_rules! call_static_as_int {
     }
   };
 }
-#[allow(dead_code)]
+#[allow(unused_imports)]
 pub(crate) use call_static_as_int;
 
 macro_rules! call_static_as_object {
@@ -187,22 +187,22 @@ macro_rules! boolean_to_jvalue {
 }
 pub(crate) use boolean_to_jvalue;
 
-#[allow(dead_code)]
+#[allow(unused_macros)]
 macro_rules! byte_to_jvalue {
   ($object: expr) => {
     jvalue { b: $object as i8 }
   };
 }
-#[allow(dead_code)]
+#[allow(unused_imports)]
 pub(crate) use byte_to_jvalue;
 
-#[allow(dead_code)]
+#[allow(unused_macros)]
 macro_rules! char_to_jvalue {
   ($object: expr) => {
     jvalue { c: $object as char }
   };
 }
-#[allow(dead_code)]
+#[allow(unused_imports)]
 pub(crate) use char_to_jvalue;
 
 macro_rules! double_to_jvalue {
@@ -212,13 +212,13 @@ macro_rules! double_to_jvalue {
 }
 pub(crate) use double_to_jvalue;
 
-#[allow(dead_code)]
+#[allow(unused_macros)]
 macro_rules! float_to_jvalue {
   ($object: expr) => {
     jvalue { f: $object as f32 }
   };
 }
-#[allow(dead_code)]
+#[allow(unused_imports)]
 pub(crate) use float_to_jvalue;
 
 macro_rules! int_to_jvalue {
@@ -228,13 +228,13 @@ macro_rules! int_to_jvalue {
 }
 pub(crate) use int_to_jvalue;
 
-#[allow(dead_code)]
+#[allow(unused_macros)]
 macro_rules! long_to_jvalue {
   ($object: expr) => {
     jvalue { j: $object as i64 }
   };
 }
-#[allow(dead_code)]
+#[allow(unused_imports)]
 pub(crate) use long_to_jvalue;
 
 macro_rules! object_to_jvalue {
@@ -256,13 +256,13 @@ macro_rules! optional_object_to_jvalue {
 }
 pub(crate) use optional_object_to_jvalue;
 
-#[allow(dead_code)]
+#[allow(unused_macros)]
 macro_rules! short_to_jvalue {
   ($object: expr) => {
     jvalue { s: $object as i16 }
   };
 }
-#[allow(dead_code)]
+#[allow(unused_imports)]
 pub(crate) use short_to_jvalue;
 
 pub trait ToJniType {

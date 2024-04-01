@@ -36,6 +36,7 @@ struct JavaSwc4jAstFactory {
   method_create_bool: JStaticMethodID,
   method_create_class: JStaticMethodID,
   method_create_class_decl: JStaticMethodID,
+  method_create_class_method: JStaticMethodID,
   method_create_class_prop: JStaticMethodID,
   method_create_constructor: JStaticMethodID,
   method_create_debugger_stmt: JStaticMethodID,
@@ -46,6 +47,7 @@ struct JavaSwc4jAstFactory {
   method_create_export_default_decl: JStaticMethodID,
   method_create_export_default_expr: JStaticMethodID,
   method_create_expr_stmt: JStaticMethodID,
+  method_create_function: JStaticMethodID,
   method_create_ident: JStaticMethodID,
   method_create_import_decl: JStaticMethodID,
   method_create_import_default_specifier: JStaticMethodID,
@@ -57,6 +59,8 @@ struct JavaSwc4jAstFactory {
   method_create_null: JStaticMethodID,
   method_create_number: JStaticMethodID,
   method_create_object_lit: JStaticMethodID,
+  method_create_param: JStaticMethodID,
+  method_create_private_method: JStaticMethodID,
   method_create_private_name: JStaticMethodID,
   method_create_private_prop: JStaticMethodID,
   method_create_regex: JStaticMethodID,
@@ -139,6 +143,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;II)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstClassDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClassDecl");
+    let method_create_class_method = env
+      .get_static_method_id(
+        &class,
+        "createClassMethod",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;IZIZZZII)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClassMethod;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createClassMethod");
     let method_create_class_prop = env
       .get_static_method_id(
         &class,
@@ -209,6 +220,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstExprStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExprStmt");
+    let method_create_function = env
+      .get_static_method_id(
+        &class,
+        "createFunction",
+        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;II)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createFunction");
     let method_create_ident = env
       .get_static_method_id(
         &class,
@@ -286,6 +304,20 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;II)Lcom/caoccao/javet/swc4j/ast/Swc4jAstObjectLit;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createObjectLit");
+    let method_create_param = env
+      .get_static_method_id(
+        &class,
+        "createParam",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;II)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstParam;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createParam");
+    let method_create_private_method = env
+      .get_static_method_id(
+        &class,
+        "createPrivateMethod",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;IZIZZZII)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateMethod;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createPrivateMethod");
     let method_create_private_name = env
       .get_static_method_id(
         &class,
@@ -442,6 +474,7 @@ impl JavaSwc4jAstFactory {
       method_create_bool,
       method_create_class,
       method_create_class_decl,
+      method_create_class_method,
       method_create_class_prop,
       method_create_constructor,
       method_create_debugger_stmt,
@@ -452,6 +485,7 @@ impl JavaSwc4jAstFactory {
       method_create_export_default_decl,
       method_create_export_default_expr,
       method_create_expr_stmt,
+      method_create_function,
       method_create_ident,
       method_create_import_decl,
       method_create_import_default_specifier,
@@ -463,6 +497,8 @@ impl JavaSwc4jAstFactory {
       method_create_null,
       method_create_number,
       method_create_object_lit,
+      method_create_param,
+      method_create_private_method,
       method_create_private_name,
       method_create_private_prop,
       method_create_regex,
@@ -676,6 +712,43 @@ impl JavaSwc4jAstFactory {
         self.method_create_class_decl,
         &[ident, declare, clazz, start_position, end_position],
         "Swc4jAstClassDecl create_class_decl()"
+      );
+    return_value
+  }
+
+  pub fn create_class_method<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    key: &JObject<'_>,
+    function: &JObject<'_>,
+    kind: i32,
+    is_static: bool,
+    accessibility_id: i32,
+    is_abstract: bool,
+    optional: bool,
+    is_override: bool,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let key = object_to_jvalue!(key);
+    let function = object_to_jvalue!(function);
+    let kind = int_to_jvalue!(kind);
+    let is_static = boolean_to_jvalue!(is_static);
+    let accessibility_id = int_to_jvalue!(accessibility_id);
+    let is_abstract = boolean_to_jvalue!(is_abstract);
+    let optional = boolean_to_jvalue!(optional);
+    let is_override = boolean_to_jvalue!(is_override);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_class_method,
+        &[key, function, kind, is_static, accessibility_id, is_abstract, optional, is_override, start_position, end_position],
+        "Swc4jAstClassMethod create_class_method()"
       );
     return_value
   }
@@ -936,6 +1009,41 @@ impl JavaSwc4jAstFactory {
         self.method_create_expr_stmt,
         &[expr, start_position, end_position],
         "Swc4jAstExprStmt create_expr_stmt()"
+      );
+    return_value
+  }
+
+  pub fn create_function<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    params: &JObject<'_>,
+    decorators: &JObject<'_>,
+    body: &Option<JObject>,
+    generator: bool,
+    is_async: bool,
+    type_params: &Option<JObject>,
+    return_type: &Option<JObject>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let params = object_to_jvalue!(params);
+    let decorators = object_to_jvalue!(decorators);
+    let body = optional_object_to_jvalue!(body);
+    let generator = boolean_to_jvalue!(generator);
+    let is_async = boolean_to_jvalue!(is_async);
+    let type_params = optional_object_to_jvalue!(type_params);
+    let return_type = optional_object_to_jvalue!(return_type);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_function,
+        &[params, decorators, body, generator, is_async, type_params, return_type, start_position, end_position],
+        "Swc4jAstFunction create_function()"
       );
     return_value
   }
@@ -1221,6 +1329,68 @@ impl JavaSwc4jAstFactory {
         self.method_create_object_lit,
         &[props, start_position, end_position],
         "Swc4jAstObjectLit create_object_lit()"
+      );
+    return_value
+  }
+
+  pub fn create_param<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    decorators: &JObject<'_>,
+    pat: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let decorators = object_to_jvalue!(decorators);
+    let pat = object_to_jvalue!(pat);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_param,
+        &[decorators, pat, start_position, end_position],
+        "Swc4jAstParam create_param()"
+      );
+    return_value
+  }
+
+  pub fn create_private_method<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    key: &JObject<'_>,
+    function: &JObject<'_>,
+    kind: i32,
+    is_static: bool,
+    accessibility_id: i32,
+    is_abstract: bool,
+    optional: bool,
+    is_override: bool,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let key = object_to_jvalue!(key);
+    let function = object_to_jvalue!(function);
+    let kind = int_to_jvalue!(kind);
+    let is_static = boolean_to_jvalue!(is_static);
+    let accessibility_id = int_to_jvalue!(accessibility_id);
+    let is_abstract = boolean_to_jvalue!(is_abstract);
+    let optional = boolean_to_jvalue!(optional);
+    let is_override = boolean_to_jvalue!(is_override);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_private_method,
+        &[key, function, kind, is_static, accessibility_id, is_abstract, optional, is_override, start_position, end_position],
+        "Swc4jAstPrivateMethod create_private_method()"
       );
     return_value
   }
@@ -1805,23 +1975,23 @@ pub mod span {
 
   fn enum_register_callee(map: &mut ByteToIndexMap, node: &Callee) {
     match node {
-      Callee::Super(node) => register_super(map, node),
-      Callee::Import(node) => register_import(map, node),
       Callee::Expr(node) => enum_register_expr(map, node),
+      Callee::Import(node) => register_import(map, node),
+      Callee::Super(node) => register_super(map, node),
     }
   }
 
   fn enum_register_class_member(map: &mut ByteToIndexMap, node: &ClassMember) {
     match node {
+      ClassMember::AutoAccessor(node) => register_auto_accessor(map, node),
+      ClassMember::ClassProp(node) => register_class_prop(map, node),
       ClassMember::Constructor(node) => register_constructor(map, node),
+      ClassMember::Empty(node) => register_empty_stmt(map, node),
       ClassMember::Method(node) => register_class_method(map, node),
       ClassMember::PrivateMethod(node) => register_private_method(map, node),
-      ClassMember::ClassProp(node) => register_class_prop(map, node),
       ClassMember::PrivateProp(node) => register_private_prop(map, node),
-      ClassMember::TsIndexSignature(node) => register_ts_index_signature(map, node),
-      ClassMember::Empty(node) => register_empty_stmt(map, node),
       ClassMember::StaticBlock(node) => register_static_block(map, node),
-      ClassMember::AutoAccessor(node) => register_auto_accessor(map, node),
+      ClassMember::TsIndexSignature(node) => register_ts_index_signature(map, node),
     }
   }
 
@@ -1829,12 +1999,12 @@ pub mod span {
     match node {
       Decl::Class(node) => register_class_decl(map, &node),
       Decl::Fn(node) => register_fn_decl(map, &node),
-      Decl::Var(node) => register_var_decl(map, node.as_ref()),
-      Decl::Using(node) => register_using_decl(map, &node.as_ref()),
-      Decl::TsInterface(node) => register_ts_interface_decl(map, &node.as_ref()),
-      Decl::TsTypeAlias(node) => register_ts_type_alias_decl(map, &node.as_ref()),
       Decl::TsEnum(node) => register_ts_enum_decl(map, &node.as_ref()),
+      Decl::TsInterface(node) => register_ts_interface_decl(map, &node.as_ref()),
       Decl::TsModule(node) => register_ts_module_decl(map, &node.as_ref()),
+      Decl::TsTypeAlias(node) => register_ts_type_alias_decl(map, &node.as_ref()),
+      Decl::Using(node) => register_using_decl(map, &node.as_ref()),
+      Decl::Var(node) => register_var_decl(map, node.as_ref()),
     };
   }
 
@@ -1848,67 +2018,67 @@ pub mod span {
 
   fn enum_register_export_specifier(map: &mut ByteToIndexMap, node: &ExportSpecifier) {
     match node {
-      ExportSpecifier::Namespace(node) => register_export_namespace_specifier(map, node),
       ExportSpecifier::Default(node) => register_export_default_specifier(map, node),
       ExportSpecifier::Named(node) => register_export_named_specifier(map, node),
+      ExportSpecifier::Namespace(node) => register_export_namespace_specifier(map, node),
     }
   }
 
   fn enum_register_expr(map: &mut ByteToIndexMap, node: &Expr) {
     match node {
-      Expr::This(node) => register_this_expr(map, node),
       Expr::Array(node) => register_array_lit(map, node),
-      Expr::Object(node) => register_object_lit(map, node),
-      Expr::Fn(node) => register_fn_expr(map, node),
-      Expr::Unary(node) => register_unary_expr(map, node),
-      Expr::Update(node) => register_update_expr(map, node),
-      Expr::Bin(node) => register_bin_expr(map, node),
-      Expr::Assign(node) => register_assign_expr(map, node),
-      Expr::Member(node) => register_member_expr(map, node),
-      Expr::SuperProp(node) => register_super_prop_expr(map, node),
-      Expr::Cond(node) => register_cond_expr(map, node),
-      Expr::Call(node) => register_call_expr(map, node),
-      Expr::New(node) => register_new_expr(map, node),
-      Expr::Seq(node) => register_seq_expr(map, node),
-      Expr::Ident(node) => register_ident(map, node),
-      Expr::Lit(node) => enum_register_lit(map, node),
-      Expr::Tpl(node) => register_tpl(map, node),
-      Expr::TaggedTpl(node) => register_tagged_tpl(map, node),
       Expr::Arrow(node) => register_arrow_expr(map, node),
-      Expr::Class(node) => register_class_expr(map, node),
-      Expr::Yield(node) => register_yield_expr(map, node),
-      Expr::MetaProp(node) => register_meta_prop_expr(map, node),
+      Expr::Assign(node) => register_assign_expr(map, node),
       Expr::Await(node) => register_await_expr(map, node),
-      Expr::Paren(node) => register_paren_expr(map, node),
+      Expr::Bin(node) => register_bin_expr(map, node),
+      Expr::Call(node) => register_call_expr(map, node),
+      Expr::Class(node) => register_class_expr(map, node),
+      Expr::Cond(node) => register_cond_expr(map, node),
+      Expr::Fn(node) => register_fn_expr(map, node),
+      Expr::Ident(node) => register_ident(map, node),
+      Expr::Invalid(node) => register_invalid(map, node),
+      Expr::JSXElement(node) => register_jsx_element(map, node),
+      Expr::JSXEmpty(node) => register_jsx_empty_expr(map, node),
+      Expr::JSXFragment(node) => register_jsx_fragment(map, node),
       Expr::JSXMember(node) => register_jsx_member_expr(map, node),
       Expr::JSXNamespacedName(node) => register_jsx_namespaced_name(map, node),
-      Expr::JSXEmpty(node) => register_jsx_empty_expr(map, node),
-      Expr::JSXElement(node) => register_jsx_element(map, node),
-      Expr::JSXFragment(node) => register_jsx_fragment(map, node),
-      Expr::TsTypeAssertion(node) => register_ts_type_assertion(map, node),
-      Expr::TsConstAssertion(node) => register_ts_const_assertion(map, node),
-      Expr::TsNonNull(node) => register_ts_non_null_expr(map, node),
-      Expr::TsAs(node) => register_ts_as_expr(map, node),
-      Expr::TsInstantiation(node) => register_ts_instantiation(map, node),
-      Expr::TsSatisfies(node) => register_ts_satisfies_expr(map, node),
-      Expr::PrivateName(node) => register_private_name(map, node),
+      Expr::Lit(node) => enum_register_lit(map, node),
+      Expr::Member(node) => register_member_expr(map, node),
+      Expr::MetaProp(node) => register_meta_prop_expr(map, node),
+      Expr::New(node) => register_new_expr(map, node),
+      Expr::Object(node) => register_object_lit(map, node),
       Expr::OptChain(node) => register_opt_chain_expr(map, node),
-      Expr::Invalid(node) => register_invalid(map, node),
+      Expr::Paren(node) => register_paren_expr(map, node),
+      Expr::PrivateName(node) => register_private_name(map, node),
+      Expr::Seq(node) => register_seq_expr(map, node),
+      Expr::SuperProp(node) => register_super_prop_expr(map, node),
+      Expr::TaggedTpl(node) => register_tagged_tpl(map, node),
+      Expr::This(node) => register_this_expr(map, node),
+      Expr::Tpl(node) => register_tpl(map, node),
+      Expr::TsAs(node) => register_ts_as_expr(map, node),
+      Expr::TsConstAssertion(node) => register_ts_const_assertion(map, node),
+      Expr::TsInstantiation(node) => register_ts_instantiation(map, node),
+      Expr::TsNonNull(node) => register_ts_non_null_expr(map, node),
+      Expr::TsSatisfies(node) => register_ts_satisfies_expr(map, node),
+      Expr::TsTypeAssertion(node) => register_ts_type_assertion(map, node),
+      Expr::Unary(node) => register_unary_expr(map, node),
+      Expr::Update(node) => register_update_expr(map, node),
+      Expr::Yield(node) => register_yield_expr(map, node),
     }
   }
 
   fn enum_register_for_head(map: &mut ByteToIndexMap, node: &ForHead) {
     match node {
-      ForHead::VarDecl(node) => register_var_decl(map, node),
-      ForHead::UsingDecl(node) => register_using_decl(map, node),
       ForHead::Pat(node) => enum_register_pat(map, node),
+      ForHead::UsingDecl(node) => register_using_decl(map, node),
+      ForHead::VarDecl(node) => register_var_decl(map, node),
     }
   }
 
   fn enum_register_import_specifier(map: &mut ByteToIndexMap, node: &ImportSpecifier) {
     match node {
-      ImportSpecifier::Named(node) => register_import_named_specifier(map, node),
       ImportSpecifier::Default(node) => register_import_default_specifier(map, node),
+      ImportSpecifier::Named(node) => register_import_named_specifier(map, node),
       ImportSpecifier::Namespace(node) => register_import_star_as_specifier(map, node),
     }
   }
@@ -1929,20 +2099,20 @@ pub mod span {
 
   fn enum_register_jsx_attr_value(map: &mut ByteToIndexMap, node: &JSXAttrValue) {
     match node {
-      JSXAttrValue::Lit(node) => enum_register_lit(map, node),
-      JSXAttrValue::JSXExprContainer(node) => register_jsx_expr_container(map, node),
       JSXAttrValue::JSXElement(node) => register_jsx_element(map, node),
+      JSXAttrValue::JSXExprContainer(node) => register_jsx_expr_container(map, node),
       JSXAttrValue::JSXFragment(node) => register_jsx_fragment(map, node),
+      JSXAttrValue::Lit(node) => enum_register_lit(map, node),
     }
   }
 
   fn enum_register_jsx_element_child(map: &mut ByteToIndexMap, node: &JSXElementChild) {
     match node {
-      JSXElementChild::JSXText(node) => register_jsx_text(map, node),
-      JSXElementChild::JSXExprContainer(node) => register_jsx_expr_container(map, node),
-      JSXElementChild::JSXSpreadChild(node) => register_jsx_spread_child(map, node),
       JSXElementChild::JSXElement(node) => register_jsx_element(map, node),
+      JSXElementChild::JSXExprContainer(node) => register_jsx_expr_container(map, node),
       JSXElementChild::JSXFragment(node) => register_jsx_fragment(map, node),
+      JSXElementChild::JSXSpreadChild(node) => register_jsx_spread_child(map, node),
+      JSXElementChild::JSXText(node) => register_jsx_text(map, node),
     }
   }
 
@@ -1956,15 +2126,15 @@ pub mod span {
 
   fn enum_register_jsx_expr(map: &mut ByteToIndexMap, node: &JSXExpr) {
     match node {
-      JSXExpr::JSXEmptyExpr(node) => register_jsx_empty_expr(map, node),
       JSXExpr::Expr(node) => enum_register_expr(map, node),
+      JSXExpr::JSXEmptyExpr(node) => register_jsx_empty_expr(map, node),
     }
   }
 
   fn enum_register_jsx_object(map: &mut ByteToIndexMap, node: &JSXObject) {
     match node {
-      JSXObject::JSXMemberExpr(node) => register_jsx_member_expr(map, node),
       JSXObject::Ident(node) => register_ident(map, node),
+      JSXObject::JSXMemberExpr(node) => register_jsx_member_expr(map, node),
     }
   }
 
@@ -1977,34 +2147,34 @@ pub mod span {
 
   fn enum_register_lit(map: &mut ByteToIndexMap, node: &Lit) {
     match node {
-      Lit::Str(node) => register_str(map, node),
+      Lit::BigInt(node) => register_big_int(map, node),
       Lit::Bool(node) => register_bool(map, node),
+      Lit::JSXText(node) => register_jsx_text(map, node),
       Lit::Null(node) => register_null(map, node),
       Lit::Num(node) => register_number(map, node),
-      Lit::BigInt(node) => register_big_int(map, node),
       Lit::Regex(node) => register_regex(map, node),
-      Lit::JSXText(node) => register_jsx_text(map, node),
+      Lit::Str(node) => register_str(map, node),
     }
   }
 
   fn enum_register_member_prop(map: &mut ByteToIndexMap, node: &MemberProp) {
     match node {
+      MemberProp::Computed(node) => register_computed_prop_name(map, node),
       MemberProp::Ident(node) => register_ident(map, node),
       MemberProp::PrivateName(node) => register_private_name(map, node),
-      MemberProp::Computed(node) => register_computed_prop_name(map, node),
     }
   }
 
   fn enum_register_module_decl(map: &mut ByteToIndexMap, node: &ModuleDecl) {
     match node {
-      ModuleDecl::Import(node) => register_import_decl(map, node),
+      ModuleDecl::ExportAll(node) => register_export_all(map, node),
       ModuleDecl::ExportDecl(node) => register_export_decl(map, node),
-      ModuleDecl::ExportNamed(node) => register_named_export(map, node),
       ModuleDecl::ExportDefaultDecl(node) => register_export_default_decl(map, node),
       ModuleDecl::ExportDefaultExpr(node) => register_export_default_expr(map, node),
-      ModuleDecl::ExportAll(node) => register_export_all(map, node),
-      ModuleDecl::TsImportEquals(node) => register_ts_import_equals_decl(map, node),
+      ModuleDecl::ExportNamed(node) => register_named_export(map, node),
+      ModuleDecl::Import(node) => register_import_decl(map, node),
       ModuleDecl::TsExportAssignment(node) => register_ts_export_assignment(map, node),
+      ModuleDecl::TsImportEquals(node) => register_ts_import_equals_decl(map, node),
       ModuleDecl::TsNamespaceExport(node) => register_ts_namespace_export_decl(map, node),
     }
   }
@@ -2025,35 +2195,35 @@ pub mod span {
 
   fn enum_register_object_pat_prop(map: &mut ByteToIndexMap, node: &ObjectPatProp) {
     match node {
-      ObjectPatProp::KeyValue(node) => register_key_value_pat_prop(map, node),
       ObjectPatProp::Assign(node) => register_assign_pat_prop(map, node),
+      ObjectPatProp::KeyValue(node) => register_key_value_pat_prop(map, node),
       ObjectPatProp::Rest(node) => register_rest_pat(map, node),
     }
   }
 
   fn enum_register_opt_chain_base(map: &mut ByteToIndexMap, node: &OptChainBase) {
     match node {
-      OptChainBase::Member(node) => register_member_expr(map, node),
       OptChainBase::Call(node) => register_opt_call(map, node),
+      OptChainBase::Member(node) => register_member_expr(map, node),
     }
   }
 
   fn enum_register_param_or_ts_param_prop(map: &mut ByteToIndexMap, node: &ParamOrTsParamProp) {
     match node {
-      ParamOrTsParamProp::TsParamProp(node) => register_ts_param_prop(map, node),
       ParamOrTsParamProp::Param(node) => register_param(map, node),
+      ParamOrTsParamProp::TsParamProp(node) => register_ts_param_prop(map, node),
     }
   }
 
   fn enum_register_pat(map: &mut ByteToIndexMap, node: &Pat) {
     match &node {
-      Pat::Ident(node) => register_binding_ident(map, node),
       Pat::Array(node) => register_array_pat(map, node),
-      Pat::Rest(node) => register_rest_pat(map, node),
-      Pat::Object(node) => register_object_pat(map, node),
       Pat::Assign(node) => register_assign_pat(map, node),
-      Pat::Invalid(node) => register_invalid(map, node),
       Pat::Expr(node) => enum_register_expr(map, node),
+      Pat::Ident(node) => register_binding_ident(map, node),
+      Pat::Invalid(node) => register_invalid(map, node),
+      Pat::Object(node) => register_object_pat(map, node),
+      Pat::Rest(node) => register_rest_pat(map, node),
     }
   }
 
@@ -2073,67 +2243,67 @@ pub mod span {
 
   fn enum_register_prop(map: &mut ByteToIndexMap, node: &Prop) {
     match node {
-      Prop::Shorthand(node) => register_ident(map, node),
-      Prop::KeyValue(node) => register_key_value_prop(map, node),
       Prop::Assign(node) => register_assign_prop(map, node),
       Prop::Getter(node) => register_getter_prop(map, node),
-      Prop::Setter(node) => register_setter_prop(map, node),
+      Prop::KeyValue(node) => register_key_value_prop(map, node),
       Prop::Method(node) => register_method_prop(map, node),
+      Prop::Setter(node) => register_setter_prop(map, node),
+      Prop::Shorthand(node) => register_ident(map, node),
     }
   }
 
   fn enum_register_prop_name(map: &mut ByteToIndexMap, node: &PropName) {
     match node {
-      PropName::Ident(node) => register_ident(map, node),
-      PropName::Str(node) => register_str(map, node),
-      PropName::Num(node) => register_number(map, node),
-      PropName::Computed(node) => register_computed_prop_name(map, node),
       PropName::BigInt(node) => register_big_int(map, node),
+      PropName::Computed(node) => register_computed_prop_name(map, node),
+      PropName::Ident(node) => register_ident(map, node),
+      PropName::Num(node) => register_number(map, node),
+      PropName::Str(node) => register_str(map, node),
     }
   }
 
   fn enum_register_prop_or_spread(map: &mut ByteToIndexMap, node: &PropOrSpread) {
     match node {
-      PropOrSpread::Spread(node) => register_spread_element(map, node),
       PropOrSpread::Prop(node) => enum_register_prop(map, node),
+      PropOrSpread::Spread(node) => register_spread_element(map, node),
     }
   }
 
   fn enum_register_stmt(map: &mut ByteToIndexMap, node: &Stmt) {
     match node {
       Stmt::Block(node) => register_block_stmt(map, node),
-      Stmt::Empty(node) => register_empty_stmt(map, node),
-      Stmt::Debugger(node) => register_debugger_stmt(map, node),
-      Stmt::With(node) => register_with_stmt(map, node),
-      Stmt::Return(node) => register_return_stmt(map, node),
-      Stmt::Labeled(node) => register_labeled_stmt(map, node),
       Stmt::Break(node) => register_break_stmt(map, node),
       Stmt::Continue(node) => register_continue_stmt(map, node),
+      Stmt::Debugger(node) => register_debugger_stmt(map, node),
+      Stmt::Decl(node) => enum_register_decl(map, node),
+      Stmt::DoWhile(node) => register_do_while_stmt(map, node),
+      Stmt::Empty(node) => register_empty_stmt(map, node),
+      Stmt::Expr(node) => register_expr_stmt(map, node),
+      Stmt::For(node) => register_for_stmt(map, node),
+      Stmt::ForIn(node) => register_for_in_stmt(map, node),
+      Stmt::ForOf(node) => register_for_of_stmt(map, node),
       Stmt::If(node) => register_if_stmt(map, node),
+      Stmt::Labeled(node) => register_labeled_stmt(map, node),
+      Stmt::Return(node) => register_return_stmt(map, node),
       Stmt::Switch(node) => register_switch_stmt(map, node),
       Stmt::Throw(node) => register_throw_stmt(map, node),
       Stmt::Try(node) => register_try_stmt(map, node),
       Stmt::While(node) => register_while_stmt(map, node),
-      Stmt::DoWhile(node) => register_do_while_stmt(map, node),
-      Stmt::For(node) => register_for_stmt(map, node),
-      Stmt::ForIn(node) => register_for_in_stmt(map, node),
-      Stmt::ForOf(node) => register_for_of_stmt(map, node),
-      Stmt::Decl(node) => enum_register_decl(map, node),
-      Stmt::Expr(node) => register_expr_stmt(map, node),
+      Stmt::With(node) => register_with_stmt(map, node),
     };
   }
 
   fn enum_register_super_prop(map: &mut ByteToIndexMap, node: &SuperProp) {
     match node {
-      SuperProp::Ident(node) => register_ident(map, node),
       SuperProp::Computed(node) => register_computed_prop_name(map, node),
+      SuperProp::Ident(node) => register_ident(map, node),
     }
   }
 
   fn enum_register_ts_entity_name(map: &mut ByteToIndexMap, node: &TsEntityName) {
     match node {
-      TsEntityName::TsQualifiedName(node) => register_ts_qualified_name(map, node),
       TsEntityName::Ident(node) => register_ident(map, node),
+      TsEntityName::TsQualifiedName(node) => register_ts_qualified_name(map, node),
     }
   }
 
@@ -2146,26 +2316,26 @@ pub mod span {
 
   fn enum_register_ts_fn_or_constructor_type(map: &mut ByteToIndexMap, node: &TsFnOrConstructorType) {
     match node {
-      TsFnOrConstructorType::TsFnType(node) => register_ts_fn_type(map, node),
       TsFnOrConstructorType::TsConstructorType(node) => register_ts_constructor_type(map, node),
+      TsFnOrConstructorType::TsFnType(node) => register_ts_fn_type(map, node),
     }
   }
 
   fn enum_register_ts_fn_param(map: &mut ByteToIndexMap, node: &TsFnParam) {
     match node {
-      TsFnParam::Ident(node) => register_binding_ident(map, node),
       TsFnParam::Array(node) => register_array_pat(map, node),
-      TsFnParam::Rest(node) => register_rest_pat(map, node),
+      TsFnParam::Ident(node) => register_binding_ident(map, node),
       TsFnParam::Object(node) => register_object_pat(map, node),
+      TsFnParam::Rest(node) => register_rest_pat(map, node),
     }
   }
 
   fn enum_register_ts_lit(map: &mut ByteToIndexMap, node: &TsLit) {
     match node {
+      TsLit::BigInt(node) => register_big_int(map, node),
+      TsLit::Bool(node) => register_bool(map, node),
       TsLit::Number(node) => register_number(map, node),
       TsLit::Str(node) => register_str(map, node),
-      TsLit::Bool(node) => register_bool(map, node),
-      TsLit::BigInt(node) => register_big_int(map, node),
       TsLit::Tpl(node) => register_ts_tpl_lit_type(map, node),
     }
   }
@@ -2193,40 +2363,40 @@ pub mod span {
 
   fn enum_register_ts_param_prop_param(map: &mut ByteToIndexMap, node: &TsParamPropParam) {
     match node {
-      TsParamPropParam::Ident(node) => register_binding_ident(map, node),
       TsParamPropParam::Assign(node) => register_assign_pat(map, node),
+      TsParamPropParam::Ident(node) => register_binding_ident(map, node),
     }
   }
 
   fn enum_register_ts_this_type_or_ident(map: &mut ByteToIndexMap, node: &TsThisTypeOrIdent) {
     match node {
-      TsThisTypeOrIdent::TsThisType(node) => register_ts_this_type(map, node),
       TsThisTypeOrIdent::Ident(node) => register_ident(map, node),
+      TsThisTypeOrIdent::TsThisType(node) => register_ts_this_type(map, node),
     }
   }
 
   fn enum_register_ts_type(map: &mut ByteToIndexMap, node: &TsType) {
     match node {
-      TsType::TsKeywordType(node) => register_ts_keyword_type(map, node),
-      TsType::TsThisType(node) => register_ts_this_type(map, node),
-      TsType::TsFnOrConstructorType(node) => enum_register_ts_fn_or_constructor_type(map, node),
-      TsType::TsTypeRef(node) => register_ts_type_ref(map, node),
-      TsType::TsTypeQuery(node) => register_ts_type_query(map, node),
-      TsType::TsTypeLit(node) => register_ts_type_lit(map, node),
       TsType::TsArrayType(node) => register_ts_array_type(map, node),
-      TsType::TsTupleType(node) => register_ts_tuple_type(map, node),
-      TsType::TsOptionalType(node) => register_ts_optional_type(map, node),
-      TsType::TsRestType(node) => register_ts_rest_type(map, node),
-      TsType::TsUnionOrIntersectionType(node) => enum_register_ts_union_or_intersection_type(map, node),
       TsType::TsConditionalType(node) => register_ts_conditional_type(map, node),
-      TsType::TsInferType(node) => register_ts_infer_type(map, node),
-      TsType::TsParenthesizedType(node) => register_ts_parenthesized_type(map, node),
-      TsType::TsTypeOperator(node) => register_ts_type_operator(map, node),
-      TsType::TsIndexedAccessType(node) => register_ts_indexed_access_type(map, node),
-      TsType::TsMappedType(node) => register_ts_mapped_type(map, node),
-      TsType::TsLitType(node) => register_ts_lit_type(map, node),
-      TsType::TsTypePredicate(node) => register_ts_type_predicate(map, node),
+      TsType::TsFnOrConstructorType(node) => enum_register_ts_fn_or_constructor_type(map, node),
       TsType::TsImportType(node) => register_ts_import_type(map, node),
+      TsType::TsIndexedAccessType(node) => register_ts_indexed_access_type(map, node),
+      TsType::TsInferType(node) => register_ts_infer_type(map, node),
+      TsType::TsKeywordType(node) => register_ts_keyword_type(map, node),
+      TsType::TsLitType(node) => register_ts_lit_type(map, node),
+      TsType::TsMappedType(node) => register_ts_mapped_type(map, node),
+      TsType::TsOptionalType(node) => register_ts_optional_type(map, node),
+      TsType::TsParenthesizedType(node) => register_ts_parenthesized_type(map, node),
+      TsType::TsRestType(node) => register_ts_rest_type(map, node),
+      TsType::TsThisType(node) => register_ts_this_type(map, node),
+      TsType::TsTupleType(node) => register_ts_tuple_type(map, node),
+      TsType::TsTypeLit(node) => register_ts_type_lit(map, node),
+      TsType::TsTypeOperator(node) => register_ts_type_operator(map, node),
+      TsType::TsTypePredicate(node) => register_ts_type_predicate(map, node),
+      TsType::TsTypeQuery(node) => register_ts_type_query(map, node),
+      TsType::TsTypeRef(node) => register_ts_type_ref(map, node),
+      TsType::TsUnionOrIntersectionType(node) => enum_register_ts_union_or_intersection_type(map, node),
     }
   }
 
@@ -2234,32 +2404,32 @@ pub mod span {
     match node {
       TsTypeElement::TsCallSignatureDecl(node) => register_ts_call_signature_decl(map, node),
       TsTypeElement::TsConstructSignatureDecl(node) => register_ts_construct_signature_decl(map, node),
-      TsTypeElement::TsPropertySignature(node) => register_ts_property_signature(map, node),
       TsTypeElement::TsGetterSignature(node) => register_ts_getter_signature(map, node),
-      TsTypeElement::TsSetterSignature(node) => register_ts_setter_signature(map, node),
-      TsTypeElement::TsMethodSignature(node) => register_ts_method_signature(map, node),
       TsTypeElement::TsIndexSignature(node) => register_ts_index_signature(map, node),
+      TsTypeElement::TsMethodSignature(node) => register_ts_method_signature(map, node),
+      TsTypeElement::TsPropertySignature(node) => register_ts_property_signature(map, node),
+      TsTypeElement::TsSetterSignature(node) => register_ts_setter_signature(map, node),
     }
   }
 
   fn enum_register_ts_type_query_expr(map: &mut ByteToIndexMap, node: &TsTypeQueryExpr) {
     match node {
-      TsTypeQueryExpr::TsEntityName(node) => enum_register_ts_entity_name(map, node),
       TsTypeQueryExpr::Import(node) => register_ts_import_type(map, node),
+      TsTypeQueryExpr::TsEntityName(node) => enum_register_ts_entity_name(map, node),
     }
   }
 
   fn enum_register_ts_union_or_intersection_type(map: &mut ByteToIndexMap, node: &TsUnionOrIntersectionType) {
     match node {
-      TsUnionOrIntersectionType::TsUnionType(node) => register_ts_union_type(map, node),
       TsUnionOrIntersectionType::TsIntersectionType(node) => register_ts_intersection_type(map, node),
+      TsUnionOrIntersectionType::TsUnionType(node) => register_ts_union_type(map, node),
     }
   }
 
   fn enum_register_var_decl_or_expr(map: &mut ByteToIndexMap, node: &VarDeclOrExpr) {
     match node {
-      VarDeclOrExpr::VarDecl(node) => register_var_decl(map, node),
       VarDeclOrExpr::Expr(node) => enum_register_expr(map, node),
+      VarDeclOrExpr::VarDecl(node) => register_var_decl(map, node),
     }
   }
 
@@ -3390,8 +3560,8 @@ pub mod program {
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
     let range = map.get_range_by_span(&node.span);
     let java_key = enum_create_key(env, map, &node.key);
-    let java_option_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
-    let java_option_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
+    let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
     let is_static = node.is_static;
     let java_decorators = java_array_list.construct(env, node.decorators.len());
     node.decorators.iter().for_each(|node| {
@@ -3403,16 +3573,16 @@ pub mod program {
     let return_type = java_ast_factory.create_auto_accessor(
       env,
       &java_key,
-      &java_option_value,
-      &java_option_type_ann,
+      &java_optional_value,
+      &java_optional_type_ann,
       is_static,
       &java_decorators,
       accessibility,
       &range,
     );
     delete_local_ref!(env, java_key);
-    delete_local_optional_ref!(env, java_option_value);
-    delete_local_optional_ref!(env, java_option_type_ann);
+    delete_local_optional_ref!(env, java_optional_value);
+    delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_decorators);
     return_type
   }
@@ -3439,10 +3609,10 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let range = map.get_range_by_span(&node.span);
     let java_id = create_ident(env, map, &node.id);
-    let java_option_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-    let return_value = java_ast_factory.create_binding_ident(env, &java_id, &java_option_type_ann, &range);
+    let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let return_value = java_ast_factory.create_binding_ident(env, &java_id, &java_optional_type_ann, &range);
     delete_local_ref!(env, java_id);
-    delete_local_optional_ref!(env, java_option_type_ann);
+    delete_local_optional_ref!(env, java_optional_type_ann);
     return_value
   }
 
@@ -3493,13 +3663,13 @@ pub mod program {
       java_array_list.add(env, &java_body, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let java_option_super_class = node.super_class.as_ref().map(|node| enum_create_expr(env, map, node));
+    let java_optional_super_class = node.super_class.as_ref().map(|node| enum_create_expr(env, map, node));
     let is_abstract = node.is_abstract;
-    let java_type_params = node
+    let java_optional_type_params = node
       .type_params
       .as_ref()
       .map(|node| create_ts_type_param_decl(env, map, node));
-    let java_super_type_params = node
+    let java_optional_super_type_params = node
       .super_type_params
       .as_ref()
       .map(|node| create_ts_type_param_instantiation(env, map, node));
@@ -3513,18 +3683,18 @@ pub mod program {
       env,
       &java_decorators,
       &java_body,
-      &java_option_super_class,
+      &java_optional_super_class,
       is_abstract,
-      &java_type_params,
-      &java_super_type_params,
+      &java_optional_type_params,
+      &java_optional_super_type_params,
       &java_implements,
       &range,
     );
     delete_local_ref!(env, java_decorators);
     delete_local_ref!(env, java_body);
-    delete_local_optional_ref!(env, java_option_super_class);
-    delete_local_optional_ref!(env, java_type_params);
-    delete_local_optional_ref!(env, java_super_type_params);
+    delete_local_optional_ref!(env, java_optional_super_class);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_optional_ref!(env, java_optional_super_type_params);
     delete_local_ref!(env, java_implements);
     return_value
   }
@@ -3544,6 +3714,37 @@ pub mod program {
     return_value
   }
 
+  fn create_class_method<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ClassMethod) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_key = enum_create_prop_name(env, map, &node.key);
+    let java_function = create_function(env, map, &node.function);
+    let kind = node.kind.get_id();
+    let is_static = node.is_static;
+    let accessibility = node.accessibility.map_or_else(|| -1, |node| node.get_id());
+    let is_abstract = node.is_abstract;
+    let is_optional = node.is_optional;
+    let is_override = node.is_override;
+    let return_type = java_ast_factory.create_class_method(
+      env,
+      &java_key,
+      &java_function,
+      kind,
+      is_static,
+      accessibility,
+      is_abstract,
+      is_optional,
+      is_override,
+      &range,
+    );
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_function);
+    return_type
+  }
+
   fn create_class_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ClassProp) -> JObject<'a>
   where
     'local: 'a,
@@ -3552,8 +3753,8 @@ pub mod program {
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
     let range = map.get_range_by_span(&node.span);
     let java_key = enum_create_prop_name(env, map, &node.key);
-    let java_option_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
-    let java_option_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
+    let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
     let is_static = node.is_static;
     let java_decorators = java_array_list.construct(env, node.decorators.len());
     node.decorators.iter().for_each(|node| {
@@ -3571,8 +3772,8 @@ pub mod program {
     let return_type = java_ast_factory.create_class_prop(
       env,
       &java_key,
-      &java_option_value,
-      &java_option_type_ann,
+      &java_optional_value,
+      &java_optional_type_ann,
       is_static,
       &java_decorators,
       accessibility,
@@ -3585,8 +3786,8 @@ pub mod program {
       &range,
     );
     delete_local_ref!(env, java_key);
-    delete_local_optional_ref!(env, java_option_value);
-    delete_local_optional_ref!(env, java_option_type_ann);
+    delete_local_optional_ref!(env, java_optional_value);
+    delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_decorators);
     return_type
   }
@@ -3664,10 +3865,10 @@ pub mod program {
     let range = map.get_range_by_span(&node.span);
     let java_src = create_str(env, map, &node.src);
     let type_only = node.type_only;
-    let java_option_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
-    let return_value = java_ast_factory.create_export_all(env, &java_src, type_only, &java_option_with, &range);
+    let java_optional_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
+    let return_value = java_ast_factory.create_export_all(env, &java_src, type_only, &java_optional_with, &range);
     delete_local_ref!(env, java_src);
-    delete_local_optional_ref!(env, java_option_with);
+    delete_local_optional_ref!(env, java_optional_with);
     return_value
   }
 
@@ -3727,6 +3928,52 @@ pub mod program {
     return_value
   }
 
+  fn create_function<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Function) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_params = java_array_list.construct(env, node.params.len());
+    node.params.iter().for_each(|node| {
+      let java_node = create_param(env, map, node);
+      java_array_list.add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_decorators = java_array_list.construct(env, node.decorators.len());
+    node.decorators.iter().for_each(|node| {
+      let java_node = create_decorator(env, map, node);
+      java_array_list.add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
+    let is_generator = node.is_generator;
+    let is_async = node.is_async;
+    let java_optional_type_params = node
+      .type_params
+      .as_ref()
+      .map(|node| create_ts_type_param_decl(env, map, node));
+    let java_optional_return_type = node.return_type.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let return_value = java_ast_factory.create_function(
+      env,
+      &java_params,
+      &java_decorators,
+      &java_optional_body,
+      is_generator,
+      is_async,
+      &java_optional_type_params,
+      &java_optional_return_type,
+      &range,
+    );
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_decorators);
+    delete_local_optional_ref!(env, java_optional_body);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_optional_ref!(env, java_optional_return_type);
+    return_value
+  }
+
   fn create_import_default_specifier<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -3754,15 +4001,15 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let range = map.get_range_by_span(&node.span);
     let java_local = create_ident(env, map, &node.local);
-    let java_imported = node
+    let java_optional_imported = node
       .imported
       .as_ref()
       .map(|node| enum_create_module_export_name(env, map, node));
     let is_type_only = node.is_type_only;
     let return_value =
-      java_ast_factory.create_import_named_specifier(env, &java_local, &java_imported, is_type_only, &range);
+      java_ast_factory.create_import_named_specifier(env, &java_local, &java_optional_imported, is_type_only, &range);
     delete_local_ref!(env, java_local);
-    delete_local_optional_ref!(env, java_imported);
+    delete_local_optional_ref!(env, java_optional_imported);
     return_value
   }
 
@@ -3819,12 +4066,12 @@ pub mod program {
     });
     let java_src = create_str(env, map, &node.src);
     let type_only = node.type_only;
-    let java_option_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
+    let java_optional_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
     let return_value =
-      java_ast_factory.create_import_decl(env, &java_specifiers, &java_src, type_only, &java_option_with, &range);
+      java_ast_factory.create_import_decl(env, &java_specifiers, &java_src, type_only, &java_optional_with, &range);
     delete_local_ref!(env, java_specifiers);
     delete_local_ref!(env, java_src);
-    delete_local_optional_ref!(env, java_option_with);
+    delete_local_optional_ref!(env, java_optional_with);
     return_value
   }
 
@@ -3860,20 +4107,20 @@ pub mod program {
       java_array_list.add(env, &java_specifiers, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let java_option_src = node.src.as_ref().map(|node| create_str(env, map, node));
+    let java_optional_src = node.src.as_ref().map(|node| create_str(env, map, node));
     let type_only = node.type_only;
-    let java_option_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
+    let java_optional_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
     let return_value = java_ast_factory.create_named_export(
       env,
       &java_specifiers,
-      &java_option_src,
+      &java_optional_src,
       type_only,
-      &java_option_with,
+      &java_optional_with,
       &range,
     );
     delete_local_ref!(env, java_specifiers);
-    delete_local_optional_ref!(env, java_option_src);
-    delete_local_optional_ref!(env, java_option_with);
+    delete_local_optional_ref!(env, java_optional_src);
+    delete_local_optional_ref!(env, java_optional_with);
     return_value
   }
 
@@ -3915,6 +4162,57 @@ pub mod program {
     return_value
   }
 
+  fn create_param<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Param) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_decorators = java_array_list.construct(env, node.decorators.len());
+    node.decorators.iter().for_each(|node| {
+      let java_node = create_decorator(env, map, node);
+      java_array_list.add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_pat = enum_create_pat(env, map, &node.pat);
+    let return_type = java_ast_factory.create_param(env, &java_decorators, &java_pat, &range);
+    delete_local_ref!(env, java_decorators);
+    delete_local_ref!(env, java_pat);
+    return_type
+  }
+
+  fn create_private_method<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &PrivateMethod) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_key = create_private_name(env, map, &node.key);
+    let java_function = create_function(env, map, &node.function);
+    let kind = node.kind.get_id();
+    let is_static = node.is_static;
+    let accessibility = node.accessibility.map_or_else(|| -1, |node| node.get_id());
+    let is_abstract = node.is_abstract;
+    let is_optional = node.is_optional;
+    let is_override = node.is_override;
+    let return_type = java_ast_factory.create_private_method(
+      env,
+      &java_key,
+      &java_function,
+      kind,
+      is_static,
+      accessibility,
+      is_abstract,
+      is_optional,
+      is_override,
+      &range,
+    );
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_function);
+    return_type
+  }
+
   fn create_private_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &PrivateName) -> JObject<'a>
   where
     'local: 'a,
@@ -3935,8 +4233,8 @@ pub mod program {
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
     let range = map.get_range_by_span(&node.span);
     let java_key = create_private_name(env, map, &node.key);
-    let java_option_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
-    let java_option_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
+    let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
     let is_static = node.is_static;
     let java_decorators = java_array_list.construct(env, node.decorators.len());
     node.decorators.iter().for_each(|node| {
@@ -3952,8 +4250,8 @@ pub mod program {
     let return_type = java_ast_factory.create_private_prop(
       env,
       &java_key,
-      &java_option_value,
-      &java_option_type_ann,
+      &java_optional_value,
+      &java_optional_type_ann,
       is_static,
       &java_decorators,
       accessibility,
@@ -3964,8 +4262,8 @@ pub mod program {
       &range,
     );
     delete_local_ref!(env, java_key);
-    delete_local_optional_ref!(env, java_option_value);
-    delete_local_optional_ref!(env, java_option_type_ann);
+    delete_local_optional_ref!(env, java_optional_value);
+    delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_decorators);
     return_type
   }
@@ -4074,13 +4372,14 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let range = map.get_range_by_span(&node.span);
     let java_expr = enum_create_expr(env, map, &node.expr);
-    let java_type_args = node
+    let java_optional_type_args = node
       .type_args
       .as_ref()
       .map(|node| create_ts_type_param_instantiation(env, map, node));
-    let return_value = java_ast_factory.create_ts_expr_with_type_args(env, &java_expr, &java_type_args, &range);
+    let return_value =
+      java_ast_factory.create_ts_expr_with_type_args(env, &java_expr, &java_optional_type_args, &range);
     delete_local_ref!(env, java_expr);
-    delete_local_optional_ref!(env, java_type_args);
+    delete_local_optional_ref!(env, java_optional_type_args);
     return_value
   }
 
@@ -4138,13 +4437,19 @@ pub mod program {
       java_array_list.add(env, &java_params, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let java_option_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
     let readonly = node.readonly;
     let is_static = node.is_static;
-    let return_value =
-      java_ast_factory.create_ts_index_signature(env, &java_params, &java_option_type_ann, readonly, is_static, &range);
+    let return_value = java_ast_factory.create_ts_index_signature(
+      env,
+      &java_params,
+      &java_optional_type_ann,
+      readonly,
+      is_static,
+      &range,
+    );
     delete_local_ref!(env, java_params);
-    delete_local_optional_ref!(env, java_option_type_ann);
+    delete_local_optional_ref!(env, java_optional_type_ann);
     return_value
   }
 
@@ -4186,21 +4491,21 @@ pub mod program {
     let is_in = node.is_in;
     let is_out = node.is_out;
     let is_const = node.is_const;
-    let java_constraint = node.constraint.as_ref().map(|node| enum_create_ts_type(env, map, node));
-    let java_default = node.default.as_ref().map(|node| enum_create_ts_type(env, map, node));
+    let java_optional_constraint = node.constraint.as_ref().map(|node| enum_create_ts_type(env, map, node));
+    let java_optional_default = node.default.as_ref().map(|node| enum_create_ts_type(env, map, node));
     let return_value = java_ast_factory.create_ts_type_param(
       env,
       &java_name,
       is_in,
       is_out,
       is_const,
-      &java_constraint,
-      &java_default,
+      &java_optional_constraint,
+      &java_optional_default,
       &range,
     );
     delete_local_ref!(env, java_name);
-    delete_local_optional_ref!(env, java_constraint);
-    delete_local_optional_ref!(env, java_default);
+    delete_local_optional_ref!(env, java_optional_constraint);
+    delete_local_optional_ref!(env, java_optional_default);
     return_value
   }
 
@@ -4310,11 +4615,11 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let definite = node.definite;
-    let java_option_init: Option<JObject> = node.init.as_ref().map(|node| enum_create_expr(env, map, node.as_ref()));
+    let java_optional_init: Option<JObject> = node.init.as_ref().map(|node| enum_create_expr(env, map, node.as_ref()));
     let java_name = enum_create_pat(env, map, &node.name);
     let range = map.get_range_by_span(&node.span);
-    let return_value = java_ast_factory.create_var_declarator(env, &java_name, &java_option_init, definite, &range);
-    delete_local_optional_ref!(env, java_option_init);
+    let return_value = java_ast_factory.create_var_declarator(env, &java_name, &java_optional_init, definite, &range);
+    delete_local_optional_ref!(env, java_optional_init);
     delete_local_ref!(env, java_name);
     return_value
   }
@@ -4356,11 +4661,11 @@ pub mod program {
       ClassMember::Constructor(node) => create_constructor(env, map, node),
       ClassMember::ClassProp(node) => create_class_prop(env, map, node),
       ClassMember::Empty(node) => create_empty_stmt(env, map, node),
+      ClassMember::Method(node) => create_class_method(env, map, node),
+      ClassMember::PrivateMethod(node) => create_private_method(env, map, node),
       ClassMember::PrivateProp(node) => create_private_prop(env, map, node),
       ClassMember::StaticBlock(node) => create_static_block(env, map, node),
       ClassMember::TsIndexSignature(node) => create_ts_index_signature(env, map, node),
-      default => panic!("{:?}", default),
-      // TODO
     }
   }
 

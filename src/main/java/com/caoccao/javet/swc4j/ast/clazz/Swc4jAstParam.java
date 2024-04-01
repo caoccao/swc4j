@@ -18,32 +18,42 @@ package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstStaticBlock
-        extends Swc4jAst
-        implements ISwc4jAstClassMember {
-    protected final Swc4jAstBlockStmt body;
+import java.util.Collections;
+import java.util.List;
 
-    public Swc4jAstStaticBlock(
-            Swc4jAstBlockStmt body,
+public class Swc4jAstParam
+        extends Swc4jAst {
+    protected final List<Swc4jAstDecorator> decorators;
+    protected final ISwc4jAstPat pat;
+
+    public Swc4jAstParam(
+            List<Swc4jAstDecorator> decorators,
+            ISwc4jAstPat pat,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.body = AssertionUtils.notNull(body, "Body");
-        children = SimpleList.immutableOf(body);
+        this.decorators = AssertionUtils.notNull(decorators, "Decorators");
+        this.pat = AssertionUtils.notNull(pat, "Pat");
+        children = SimpleList.copyOf(decorators);
+        children.add(pat);
+        children = Collections.unmodifiableList(children);
         updateParent();
     }
 
-    public Swc4jAstBlockStmt getBody() {
-        return body;
+    public List<Swc4jAstDecorator> getDecorators() {
+        return decorators;
+    }
+
+    public ISwc4jAstPat getPat() {
+        return pat;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.StaticBlock;
+        return Swc4jAstType.Param;
     }
 }

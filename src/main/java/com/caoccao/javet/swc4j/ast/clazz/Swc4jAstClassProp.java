@@ -99,7 +99,7 @@ public class Swc4jAstClassProp
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.AutoAccessor;
+        return Swc4jAstType.ClassProp;
     }
 
     public Swc4jAstTsTypeAnn getTypeAnn() {

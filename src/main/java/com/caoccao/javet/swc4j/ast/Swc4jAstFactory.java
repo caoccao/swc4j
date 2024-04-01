@@ -17,10 +17,7 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.clazz.*;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
+import com.caoccao.javet.swc4j.ast.enums.*;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
@@ -119,6 +116,24 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstClassDecl(ident, declare, clazz, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstClassMethod createClassMethod(
+            ISwc4jAstPropName key,
+            Swc4jAstFunction function,
+            int kind,
+            boolean isStatic,
+            int accessibilityId,
+            boolean isAbstract,
+            boolean optional,
+            boolean isOverride,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstClassMethod(
+                key, function, Swc4jAstMethodKind.parse(kind), isStatic,
+                accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
+                isAbstract, optional, isOverride, startPosition, endPosition);
     }
 
     @Jni2RustMethod
@@ -224,6 +239,21 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstFunction createFunction(
+            List<Swc4jAstParam> params,
+            List<Swc4jAstDecorator> decorators,
+            @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
+            boolean generator,
+            boolean isAsync,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn returnType,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstFunction(
+                params, decorators, body, generator, isAsync, typeParams, returnType, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstIdent createIdent(
             String sym,
             boolean optional,
@@ -320,6 +350,33 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstObjectLit(props, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstParam createParam(
+            List<Swc4jAstDecorator> decorators,
+            ISwc4jAstPat pat,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstParam(decorators, pat, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstPrivateMethod createPrivateMethod(
+            Swc4jAstPrivateName key,
+            Swc4jAstFunction function,
+            int kind,
+            boolean isStatic,
+            int accessibilityId,
+            boolean isAbstract,
+            boolean optional,
+            boolean isOverride,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstPrivateMethod(
+                key, function, Swc4jAstMethodKind.parse(kind), isStatic,
+                accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
+                isAbstract, optional, isOverride, startPosition, endPosition);
     }
 
     @Jni2RustMethod
