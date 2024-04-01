@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstPrivateName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
@@ -319,6 +320,35 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstObjectLit(props, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstPrivateName createPrivateName(
+            Swc4jAstIdent id,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstPrivateName(id, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstPrivateProp createPrivateProp(
+            ISwc4jAstKey key,
+            @Jni2RustParam(optional = true) ISwc4jAstExpr value,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            boolean isStatic,
+            List<Swc4jAstDecorator> decorators,
+            int accessibilityId,
+            boolean isOptional,
+            boolean isOverride,
+            boolean readonly,
+            boolean definite,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstPrivateProp(
+                key, value, typeAnn, isStatic, decorators,
+                accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
+                isOptional, isOverride, readonly, definite,
+                startPosition, endPosition);
     }
 
     @Jni2RustMethod

@@ -29,6 +29,7 @@ public class TestISwc4jAstClassMember {
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstConstructor.class));
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstClassProp.class));
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstEmptyStmt.class));
+        assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstPrivateProp.class));
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstStaticBlock.class));
         assertTrue(ISwc4jAstClassMember.class.isAssignableFrom(Swc4jAstTsIndexSignature.class));
     }

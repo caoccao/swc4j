@@ -18,41 +18,25 @@ package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
-public class Swc4jAstIdent
+public class Swc4jAstPrivateName
         extends Swc4jAst
-        implements ISwc4jAstExpr, ISwc4jAstProp, ISwc4jAstModuleRef, ISwc4jAstModuleExportName, ISwc4jAstTsEntityName {
-    protected static final String QUESTION_MARK = "?";
-    protected final boolean optional;
-    protected final String sym;
+        implements ISwc4jAst {
+    protected final Swc4jAstIdent id;
 
-    public Swc4jAstIdent(String sym, boolean optional, int startPosition, int endPosition) {
+    public Swc4jAstPrivateName(Swc4jAstIdent id, int startPosition, int endPosition) {
         super(startPosition, endPosition);
-        this.optional = optional;
-        this.sym = AssertionUtils.notNull(sym, "Sym");
+        this.id = AssertionUtils.notNull(id, "Id");
     }
 
-    public String getSym() {
-        return sym;
+    public Swc4jAstIdent getId() {
+        return id;
     }
 
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.Ident;
-    }
-
-    public boolean isOptional() {
-        return optional;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder(sym);
-        if (optional) {
-            sb.append(QUESTION_MARK);
-        }
-        return sb.toString();
     }
 }

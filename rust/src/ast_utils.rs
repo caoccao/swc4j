@@ -57,6 +57,8 @@ struct JavaSwc4jAstFactory {
   method_create_null: JStaticMethodID,
   method_create_number: JStaticMethodID,
   method_create_object_lit: JStaticMethodID,
+  method_create_private_name: JStaticMethodID,
+  method_create_private_prop: JStaticMethodID,
   method_create_regex: JStaticMethodID,
   method_create_script: JStaticMethodID,
   method_create_spread_element: JStaticMethodID,
@@ -284,6 +286,20 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;II)Lcom/caoccao/javet/swc4j/ast/Swc4jAstObjectLit;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createObjectLit");
+    let method_create_private_name = env
+      .get_static_method_id(
+        &class,
+        "createPrivateName",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;II)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstPrivateName;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createPrivateName");
+    let method_create_private_prop = env
+      .get_static_method_id(
+        &class,
+        "createPrivateProp",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZII)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateProp;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createPrivateProp");
     let method_create_regex = env
       .get_static_method_id(
         &class,
@@ -447,6 +463,8 @@ impl JavaSwc4jAstFactory {
       method_create_null,
       method_create_number,
       method_create_object_lit,
+      method_create_private_name,
+      method_create_private_prop,
       method_create_regex,
       method_create_script,
       method_create_spread_element,
@@ -1203,6 +1221,70 @@ impl JavaSwc4jAstFactory {
         self.method_create_object_lit,
         &[props, start_position, end_position],
         "Swc4jAstObjectLit create_object_lit()"
+      );
+    return_value
+  }
+
+  pub fn create_private_name<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    id: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = object_to_jvalue!(id);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_private_name,
+        &[id, start_position, end_position],
+        "Swc4jAstPrivateName create_private_name()"
+      );
+    return_value
+  }
+
+  pub fn create_private_prop<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    key: &JObject<'_>,
+    value: &Option<JObject>,
+    type_ann: &Option<JObject>,
+    is_static: bool,
+    decorators: &JObject<'_>,
+    accessibility_id: i32,
+    is_optional: bool,
+    is_override: bool,
+    readonly: bool,
+    definite: bool,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let key = object_to_jvalue!(key);
+    let value = optional_object_to_jvalue!(value);
+    let type_ann = optional_object_to_jvalue!(type_ann);
+    let is_static = boolean_to_jvalue!(is_static);
+    let decorators = object_to_jvalue!(decorators);
+    let accessibility_id = int_to_jvalue!(accessibility_id);
+    let is_optional = boolean_to_jvalue!(is_optional);
+    let is_override = boolean_to_jvalue!(is_override);
+    let readonly = boolean_to_jvalue!(readonly);
+    let definite = boolean_to_jvalue!(definite);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_private_prop,
+        &[key, value, type_ann, is_static, decorators, accessibility_id, is_optional, is_override, readonly, definite, start_position, end_position],
+        "Swc4jAstPrivateProp create_private_prop()"
       );
     return_value
   }
@@ -3833,6 +3915,61 @@ pub mod program {
     return_value
   }
 
+  fn create_private_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &PrivateName) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_id = create_ident(env, map, &node.id);
+    let return_type = java_ast_factory.create_private_name(env, &java_id, &range);
+    delete_local_ref!(env, java_id);
+    return_type
+  }
+
+  fn create_private_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &PrivateProp) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_key = create_private_name(env, map, &node.key);
+    let java_option_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
+    let java_option_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let is_static = node.is_static;
+    let java_decorators = java_array_list.construct(env, node.decorators.len());
+    node.decorators.iter().for_each(|node| {
+      let java_node = create_decorator(env, map, node);
+      java_array_list.add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let accessibility = node.accessibility.map_or_else(|| -1, |node| node.get_id());
+    let is_optional = node.is_optional;
+    let is_override = node.is_override;
+    let readonly = node.readonly;
+    let definite = node.definite;
+    let return_type = java_ast_factory.create_private_prop(
+      env,
+      &java_key,
+      &java_option_value,
+      &java_option_type_ann,
+      is_static,
+      &java_decorators,
+      accessibility,
+      is_optional,
+      is_override,
+      readonly,
+      definite,
+      &range,
+    );
+    delete_local_ref!(env, java_key);
+    delete_local_optional_ref!(env, java_option_value);
+    delete_local_optional_ref!(env, java_option_type_ann);
+    delete_local_ref!(env, java_decorators);
+    return_type
+  }
+
   fn create_regex<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Regex) -> JObject<'a>
   where
     'local: 'a,
@@ -4219,6 +4356,7 @@ pub mod program {
       ClassMember::Constructor(node) => create_constructor(env, map, node),
       ClassMember::ClassProp(node) => create_class_prop(env, map, node),
       ClassMember::Empty(node) => create_empty_stmt(env, map, node),
+      ClassMember::PrivateProp(node) => create_private_prop(env, map, node),
       ClassMember::StaticBlock(node) => create_static_block(env, map, node),
       ClassMember::TsIndexSignature(node) => create_ts_index_signature(env, map, node),
       default => panic!("{:?}", default),
