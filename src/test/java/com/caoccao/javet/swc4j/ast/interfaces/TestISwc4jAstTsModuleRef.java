@@ -16,5 +16,15 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-public interface ISwc4jAstTsEntityName extends ISwc4jAstTsModuleRef {
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsExternalModuleRef;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class TestISwc4jAstTsModuleRef {
+    @Test
+    public void testAssignable() {
+        assertTrue(ISwc4jAstTsModuleRef.class.isAssignableFrom(ISwc4jAstTsEntityName.class));
+        assertTrue(ISwc4jAstTsModuleRef.class.isAssignableFrom(Swc4jAstTsExternalModuleRef.class));
+    }
 }

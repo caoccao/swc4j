@@ -29,6 +29,7 @@ use std::ptr::null_mut;
 struct JavaSwc4jAstFactory {
   #[allow(dead_code)]
   class: GlobalRef,
+  method_create_auto_accessor: JStaticMethodID,
   method_create_big_int: JStaticMethodID,
   method_create_binding_ident: JStaticMethodID,
   method_create_block_stmt: JStaticMethodID,
@@ -85,6 +86,13 @@ impl JavaSwc4jAstFactory {
     let class = env
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jAstFactory");
+    let method_create_auto_accessor = env
+      .get_static_method_id(
+        &class,
+        "createAutoAccessor",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;III)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstAutoAccessor;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createAutoAccessor");
     let method_create_big_int = env
       .get_static_method_id(
         &class,
@@ -395,6 +403,7 @@ impl JavaSwc4jAstFactory {
       .expect("Couldn't find method Swc4jAstFactory.createVarDeclarator");
     JavaSwc4jAstFactory {
       class,
+      method_create_auto_accessor,
       method_create_big_int,
       method_create_binding_ident,
       method_create_block_stmt,
@@ -440,6 +449,39 @@ impl JavaSwc4jAstFactory {
       method_create_var_decl,
       method_create_var_declarator,
     }
+  }
+
+  pub fn create_auto_accessor<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    key: &JObject<'_>,
+    value: &Option<JObject>,
+    type_ann: &Option<JObject>,
+    is_static: bool,
+    decorators: &JObject<'_>,
+    accessibility_id: i32,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let key = object_to_jvalue!(key);
+    let value = optional_object_to_jvalue!(value);
+    let type_ann = optional_object_to_jvalue!(type_ann);
+    let is_static = boolean_to_jvalue!(is_static);
+    let decorators = object_to_jvalue!(decorators);
+    let accessibility_id = int_to_jvalue!(accessibility_id);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = 
+      call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_auto_accessor,
+        &[key, value, type_ann, is_static, decorators, accessibility_id, start_position, end_position],
+        "Swc4jAstAutoAccessor create_auto_accessor()"
+      );
+    return_value
   }
 
   pub fn create_big_int<'local, 'a>(
@@ -608,7 +650,7 @@ impl JavaSwc4jAstFactory {
     key: &JObject<'_>,
     params: &JObject<'_>,
     body: &Option<JObject>,
-    accessibility: i32,
+    accessibility_id: i32,
     optional: bool,
     range: &Range<usize>,
   ) -> JObject<'a>
@@ -618,7 +660,7 @@ impl JavaSwc4jAstFactory {
     let key = object_to_jvalue!(key);
     let params = object_to_jvalue!(params);
     let body = optional_object_to_jvalue!(body);
-    let accessibility = int_to_jvalue!(accessibility);
+    let accessibility_id = int_to_jvalue!(accessibility_id);
     let optional = boolean_to_jvalue!(optional);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
@@ -627,7 +669,7 @@ impl JavaSwc4jAstFactory {
         env,
         &self.class,
         self.method_create_constructor,
-        &[key, params, body, accessibility, optional, start_position, end_position],
+        &[key, params, body, accessibility_id, optional, start_position, end_position],
         "Swc4jAstConstructor create_constructor()"
       );
     return_value
@@ -3162,6 +3204,47 @@ pub mod program {
 
   use deno_ast::swc::ast::*;
 
+  fn create_auto_accessor<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &AutoAccessor,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_key = enum_create_key(env, map, &node.key);
+    let java_option_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
+    let java_option_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let is_static = node.is_static;
+    let java_decorators = java_array_list.construct(env, node.decorators.len());
+    node.decorators.iter().for_each(|node| {
+      let java_node = create_decorator(env, map, node);
+      java_array_list.add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let accessibility = node
+      .accessibility
+      .map_or_else(|| -1, |node| node.get_id());
+    let return_type = java_ast_factory.create_auto_accessor(
+      env,
+      &java_key,
+      &java_option_value,
+      &java_option_type_ann,
+      is_static,
+      &java_decorators,
+      accessibility,
+      &range,
+    );
+    delete_local_ref!(env, java_key);
+    delete_local_optional_ref!(env, java_option_value);
+    delete_local_optional_ref!(env, java_option_type_ann);
+    delete_local_ref!(env, java_decorators);
+    return_type
+  }
+
   fn create_big_int<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BigInt) -> JObject<'a>
   where
     'local: 'a,
@@ -3306,7 +3389,7 @@ pub mod program {
     let java_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
     let accessibility = node
       .accessibility
-      .map_or_else(|| Accessibility::Public.get_id(), |node| node.get_id());
+      .map_or_else(|| -1, |node| node.get_id());
     let is_optional = node.is_optional;
     let return_type = java_ast_factory.create_constructor(
       env,
@@ -3970,6 +4053,7 @@ pub mod program {
     'local: 'a,
   {
     match node {
+      ClassMember::AutoAccessor(node) => create_auto_accessor(env, map, node),
       ClassMember::Constructor(node) => create_constructor(env, map, node),
       ClassMember::StaticBlock(node) => create_static_block(env, map, node),
       default => panic!("{:?}", default),
@@ -3983,8 +4067,8 @@ pub mod program {
   {
     match node {
       Decl::Class(node) => create_class_decl(env, map, node),
-      Decl::Var(node) => create_var_decl(env, map, node),
       Decl::Using(node) => create_using_decl(env, map, node),
+      Decl::Var(node) => create_var_decl(env, map, node),
       default => panic!("{:?}", default),
       // TODO
     }
@@ -4050,8 +4134,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      ImportSpecifier::Named(node) => create_import_named_specifier(env, map, node),
       ImportSpecifier::Default(node) => create_import_default_specifier(env, map, node),
+      ImportSpecifier::Named(node) => create_import_named_specifier(env, map, node),
       ImportSpecifier::Namespace(node) => create_import_star_as_specifier(env, map, node),
     }
   }
@@ -4161,13 +4245,13 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      Lit::Str(node) => create_str(env, map, node),
+      Lit::BigInt(node) => create_big_int(env, map, node),
       Lit::Bool(node) => create_bool(env, map, node),
+      Lit::JSXText(node) => create_jsx_text(env, map, node),
       Lit::Null(node) => create_null(env, map, node),
       Lit::Num(node) => create_number(env, map, node),
-      Lit::BigInt(node) => create_big_int(env, map, node),
       Lit::Regex(node) => create_regex(env, map, node),
-      Lit::JSXText(node) => create_jsx_text(env, map, node),
+      Lit::Str(node) => create_str(env, map, node),
     }
   }
 
@@ -4194,14 +4278,14 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      ModuleDecl::Import(node) => create_import_decl(env, map, node),
+      ModuleDecl::ExportAll(node) => create_export_all(env, map, node),
       ModuleDecl::ExportDecl(node) => create_export_decl(env, map, node),
-      ModuleDecl::ExportNamed(node) => create_named_export(env, map, node),
       ModuleDecl::ExportDefaultDecl(node) => create_export_default_decl(env, map, node),
       ModuleDecl::ExportDefaultExpr(node) => create_export_default_expr(env, map, node),
-      ModuleDecl::ExportAll(node) => create_export_all(env, map, node),
-      ModuleDecl::TsImportEquals(node) => create_ts_import_equals_decl(env, map, node),
+      ModuleDecl::ExportNamed(node) => create_named_export(env, map, node),
+      ModuleDecl::Import(node) => create_import_decl(env, map, node),
       ModuleDecl::TsExportAssignment(node) => create_ts_export_assignment(env, map, node),
+      ModuleDecl::TsImportEquals(node) => create_ts_import_equals_decl(env, map, node),
       ModuleDecl::TsNamespaceExport(node) => create_ts_namespace_export_decl(env, map, node),
     }
   }
@@ -4359,9 +4443,9 @@ pub mod program {
   {
     match node {
       Stmt::Block(node) => create_block_stmt(env, map, node),
-      Stmt::Empty(node) => create_empty_stmt(env, map, node),
       Stmt::Debugger(node) => create_debugger_stmt(env, map, node),
       Stmt::Decl(node) => enum_create_decl(env, map, node),
+      Stmt::Empty(node) => create_empty_stmt(env, map, node),
       Stmt::Expr(node) => create_expr_stmt(env, map, node),
       default => panic!("{:?}", default),
       // TODO
@@ -4576,8 +4660,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      VarDeclOrExpr::VarDecl(node) => create_var_decl(env, map, node),
       VarDeclOrExpr::Expr(node) => enum_create_expr(env, map, node),
+      VarDeclOrExpr::VarDecl(node) => create_var_decl(env, map, node),
       // TODO
     }
   }

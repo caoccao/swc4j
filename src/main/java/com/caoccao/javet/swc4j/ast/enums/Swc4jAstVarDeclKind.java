@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024. caoccao.com Sam Cao
+ * Copyright (c) 2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package com.caoccao.javet.swc4j.ast.enums;
 
+import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
+
 import java.util.stream.Stream;
 
-public enum Swc4jAstVarDeclKind {
-    Const(0),
-    Let(1),
-    Var(2);
+public enum Swc4jAstVarDeclKind implements ISwc4jEnumIdName {
+    Const(0, "const"),
+    Let(1, "let"),
+    Var(2, "var");
 
     private static final int LENGTH = values().length;
     private static final Swc4jAstVarDeclKind[] TYPES = new Swc4jAstVarDeclKind[LENGTH];
@@ -31,16 +33,24 @@ public enum Swc4jAstVarDeclKind {
     }
 
     private final int id;
+    private final String name;
 
-    Swc4jAstVarDeclKind(int id) {
+    Swc4jAstVarDeclKind(int id, String name) {
         this.id = id;
+        this.name = name;
     }
 
     public static Swc4jAstVarDeclKind parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : Const;
     }
 
+    @Override
     public int getId() {
         return id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 }

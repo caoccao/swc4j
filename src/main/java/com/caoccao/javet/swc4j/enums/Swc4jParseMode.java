@@ -16,6 +16,8 @@
 
 package com.caoccao.javet.swc4j.enums;
 
+import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumId;
+
 import java.util.stream.Stream;
 
 /**
@@ -25,7 +27,7 @@ import java.util.stream.Stream;
  *
  * @since 0.1.0
  */
-public enum Swc4jParseMode {
+public enum Swc4jParseMode implements ISwc4jEnumId {
     Module(0),
     Script(1);
 
@@ -53,12 +55,7 @@ public enum Swc4jParseMode {
         return id >= 0 && id < LENGTH ? TYPES[id] : Module;
     }
 
-    /**
-     * Gets id.
-     *
-     * @return the id
-     * @since 0.1.0
-     */
+    @Override
     public int getId() {
         return id;
     }

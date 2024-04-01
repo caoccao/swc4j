@@ -16,10 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast;
 
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstConstructor;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstDecorator;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstStaticBlock;
+import com.caoccao.javet.swc4j.ast.clazz.*;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
@@ -46,6 +43,22 @@ import java.util.List;
 @Jni2RustClass(filePath = "rust/src/ast_utils.rs")
 public final class Swc4jAstFactory {
     private Swc4jAstFactory() {
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstAutoAccessor createAutoAccessor(
+            ISwc4jAstKey key,
+            @Jni2RustParam(optional = true) ISwc4jAstExpr value,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            boolean isStatic,
+            List<Swc4jAstDecorator> decorators,
+            int accessibilityId,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstAutoAccessor(
+                key, value, typeAnn, isStatic, decorators,
+                accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
+                startPosition, endPosition);
     }
 
     @Jni2RustMethod
@@ -112,12 +125,14 @@ public final class Swc4jAstFactory {
             ISwc4jAstPropName key,
             List<ISwc4jAstParamOrTsParamProp> params,
             @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
-            int accessibility,
+            int accessibilityId,
             boolean optional,
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstConstructor(
-                key, params, body, Swc4jAstAccessibility.parse(accessibility), optional, startPosition, endPosition);
+                key, params, body,
+                accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
+                optional, startPosition, endPosition);
     }
 
     @Jni2RustMethod

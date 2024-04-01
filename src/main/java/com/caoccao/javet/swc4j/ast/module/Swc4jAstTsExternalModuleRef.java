@@ -19,13 +19,13 @@ package com.caoccao.javet.swc4j.ast.module;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleRef;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsModuleRef;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 public class Swc4jAstTsExternalModuleRef
         extends Swc4jAst
-        implements ISwc4jAstModuleRef {
+        implements ISwc4jAstTsModuleRef {
     protected final Swc4jAstStr expr;
 
     public Swc4jAstTsExternalModuleRef(

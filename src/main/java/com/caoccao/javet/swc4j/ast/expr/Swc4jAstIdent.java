@@ -18,10 +18,7 @@ package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleExportName;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleRef;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProp;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 /**
@@ -31,7 +28,7 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
  */
 public class Swc4jAstIdent
         extends Swc4jAst
-        implements ISwc4jAstExpr, ISwc4jAstProp, ISwc4jAstModuleRef, ISwc4jAstModuleExportName {
+        implements ISwc4jAstExpr, ISwc4jAstProp, ISwc4jAstModuleRef, ISwc4jAstModuleExportName, ISwc4jAstTsEntityName {
     /**
      * The constant QUESTION_MARK.
      *

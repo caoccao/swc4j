@@ -16,9 +16,11 @@
 
 package com.caoccao.javet.swc4j.enums;
 
+import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
+
 import java.util.stream.Stream;
 
-public enum Swc4jTokenType {
+public enum Swc4jTokenType implements ISwc4jEnumIdName {
     Unknown(0, null, Swc4jTokenSubType.Unknown),
     // Keyword
     Await(1, "await", Swc4jTokenSubType.Keyword),
@@ -165,10 +167,12 @@ public enum Swc4jTokenType {
         return id >= 0 && id < LENGTH ? TYPES[id] : Unknown;
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public String getName() {
         return name;
     }

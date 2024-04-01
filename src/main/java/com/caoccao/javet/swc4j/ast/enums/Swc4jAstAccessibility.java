@@ -16,9 +16,11 @@
 
 package com.caoccao.javet.swc4j.ast.enums;
 
+import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
+
 import java.util.stream.Stream;
 
-public enum Swc4jAstAccessibility {
+public enum Swc4jAstAccessibility implements ISwc4jEnumIdName {
     Public(0, "public"),
     Protected(1, "protected"),
     Private(2, "private"),
@@ -32,22 +34,24 @@ public enum Swc4jAstAccessibility {
     }
 
     private final int id;
-    private final String value;
+    private final String name;
 
-    Swc4jAstAccessibility(int id, String value) {
+    Swc4jAstAccessibility(int id, String name) {
         this.id = id;
-        this.value = value;
+        this.name = name;
     }
 
     public static Swc4jAstAccessibility parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : Public;
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
-    public String getValue() {
-        return value;
+    @Override
+    public String getName() {
+        return name;
     }
 }

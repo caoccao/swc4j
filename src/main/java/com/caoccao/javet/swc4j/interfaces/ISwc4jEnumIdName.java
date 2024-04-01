@@ -14,7 +14,19 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.interfaces;
+package com.caoccao.javet.swc4j.interfaces;
 
-public interface ISwc4jAstTsEntityName extends ISwc4jAstTsModuleRef {
+/**
+ * The interface Swc4j enum id.
+ *
+ * @since 0.2.0
+ */
+public interface ISwc4jEnumIdName extends ISwc4jEnumId {
+    /**
+     * Gets name.
+     *
+     * @return the name
+     * @since 0.2.0
+     */
+    String getName();
 }

@@ -36,7 +36,7 @@ public class TestSwc4jAstUnaryExpr extends BaseTestSuiteSwc4jAst {
         List<Swc4jAstUnaryOp> opList = SimpleList.of(
                 Swc4jAstUnaryOp.Bang, Swc4jAstUnaryOp.Minus, Swc4jAstUnaryOp.Plus, Swc4jAstUnaryOp.Tilde);
         for (Swc4jAstUnaryOp op : opList) {
-            String code = op.getValue() + "a";
+            String code = op.getName() + "a";
             Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
             Swc4jAstScript script = output.getProgram().asScript();
             Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
@@ -55,7 +55,7 @@ public class TestSwc4jAstUnaryExpr extends BaseTestSuiteSwc4jAst {
         List<Swc4jAstUnaryOp> opList = SimpleList.of(
                 Swc4jAstUnaryOp.Delete, Swc4jAstUnaryOp.TypeOf, Swc4jAstUnaryOp.Void);
         for (Swc4jAstUnaryOp op : opList) {
-            String code = op.getValue() + " a";
+            String code = op.getName() + " a";
             Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
             Swc4jAstScript script = output.getProgram().asScript();
             Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(

@@ -16,12 +16,14 @@
 
 package com.caoccao.javet.swc4j.ast.enums;
 
+import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
+
 import java.util.stream.Stream;
 
-public enum Swc4jAstBigIntSign {
-    NoSign(0),
-    Minus(1),
-    Plus(2);
+public enum Swc4jAstBigIntSign implements ISwc4jEnumIdName {
+    NoSign(0, ""),
+    Minus(1, "-"),
+    Plus(2, "+");
 
     private static final int LENGTH = values().length;
     private static final Swc4jAstBigIntSign[] TYPES = new Swc4jAstBigIntSign[LENGTH];
@@ -31,16 +33,24 @@ public enum Swc4jAstBigIntSign {
     }
 
     private final int id;
+    private final String name;
 
-    Swc4jAstBigIntSign(int id) {
+    Swc4jAstBigIntSign(int id, String name) {
         this.id = id;
+        this.name = name;
     }
 
     public static Swc4jAstBigIntSign parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : NoSign;
     }
 
+    @Override
     public int getId() {
         return id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 }

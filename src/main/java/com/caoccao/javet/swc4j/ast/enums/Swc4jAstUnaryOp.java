@@ -16,9 +16,11 @@
 
 package com.caoccao.javet.swc4j.ast.enums;
 
+import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
+
 import java.util.stream.Stream;
 
-public enum Swc4jAstUnaryOp {
+public enum Swc4jAstUnaryOp implements ISwc4jEnumIdName {
     Bang(1, "!"),
     Delete(2, "delete"),
     Minus(3, "-"),
@@ -36,21 +38,24 @@ public enum Swc4jAstUnaryOp {
     }
 
     private final int id;
-    private final String value;
-    Swc4jAstUnaryOp(int id, String value) {
+    private final String name;
+
+    Swc4jAstUnaryOp(int id, String name) {
         this.id = id;
-        this.value = value;
+        this.name = name;
     }
 
     public static Swc4jAstUnaryOp parse(int id) {
         return id >= 0 && id < LENGTH ? TYPES[id] : Void;
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
-    public String getValue() {
-        return value;
+    @Override
+    public String getName() {
+        return name;
     }
 }

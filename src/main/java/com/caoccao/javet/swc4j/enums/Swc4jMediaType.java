@@ -16,6 +16,8 @@
 
 package com.caoccao.javet.swc4j.enums;
 
+import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumId;
+
 import java.util.stream.Stream;
 
 /**
@@ -23,7 +25,7 @@ import java.util.stream.Stream;
  *
  * @since 0.1.0
  */
-public enum Swc4jMediaType {
+public enum Swc4jMediaType implements ISwc4jEnumId {
     JavaScript(0),
     Jsx(1),
     Mjs(2),
@@ -65,12 +67,7 @@ public enum Swc4jMediaType {
         return id >= 0 && id < LENGTH ? TYPES[id] : Unknown;
     }
 
-    /**
-     * Gets id.
-     *
-     * @return the id
-     * @since 0.1.0
-     */
+    @Override
     public int getId() {
         return id;
     }
