@@ -23,7 +23,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.module.*;
-import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.ast.pat.*;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.*;
@@ -40,6 +40,25 @@ import java.util.List;
 @Jni2RustClass(filePath = "rust/src/ast_utils.rs")
 public final class Swc4jAstFactory {
     private Swc4jAstFactory() {
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstArrayPat createArrayPat(
+            List<ISwc4jAstPat> elems,
+            boolean optional,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstArrayPat(elems, optional, typeAnn, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstAssignPat createAssignPat(
+            ISwc4jAstPat left,
+            ISwc4jAstExpr right,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstAssignPat(left, right, startPosition, endPosition);
     }
 
     @Jni2RustMethod
@@ -326,6 +345,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstInvalid createInvalid(
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstInvalid(startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstJsxText createJsxText(
             String value,
             String raw,
@@ -397,6 +423,16 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstObjectPat createObjectPat(
+            List<ISwc4jAstObjectPatProp> props,
+            boolean optional,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstObjectPat(props, optional, typeAnn, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstParam createParam(
             List<Swc4jAstDecorator> decorators,
             ISwc4jAstPat pat,
@@ -459,6 +495,18 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstRegex(exp, flags, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstRestPat createRestPat(
+            int dot3TokenStartPosition,
+            int dot3TokenEndPosition,
+            ISwc4jAstPat arg,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstRestPat(
+                dot3TokenStartPosition, dot3TokenEndPosition, arg, typeAnn, startPosition, endPosition);
     }
 
     @Jni2RustMethod

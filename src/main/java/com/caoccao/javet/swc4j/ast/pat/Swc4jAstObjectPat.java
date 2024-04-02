@@ -19,41 +19,52 @@ package com.caoccao.javet.swc4j.ast.pat;
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstBindingIdent
+import java.util.List;
+
+public class Swc4jAstObjectPat
         extends Swc4jAst
         implements ISwc4jAstPat {
-    protected final Swc4jAstIdent id;
+    protected final boolean optional;
+    protected final List<ISwc4jAstObjectPatProp> props;
     @Nullable
     protected final Swc4jAstTsTypeAnn typeAnn;
 
-    public Swc4jAstBindingIdent(
-            Swc4jAstIdent id,
+    public Swc4jAstObjectPat(
+            List<ISwc4jAstObjectPatProp> props,
+            boolean optional,
             Swc4jAstTsTypeAnn typeAnn,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.id = AssertionUtils.notNull(id, "Id");
+        this.props = SimpleList.immutableCopyOf(AssertionUtils.notNull(props, "Props"));
+        this.optional = optional;
         this.typeAnn = typeAnn;
-        children = SimpleList.immutableOf(id, typeAnn);
+        children = SimpleList.copyOf(props);
+        children.add(typeAnn);
+        children = SimpleList.immutable(children);
         updateParent();
     }
 
-    public Swc4jAstIdent getId() {
-        return id;
+    public List<ISwc4jAstObjectPatProp> getProps() {
+        return props;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.BindingIdent;
+        return Swc4jAstType.ObjectPat;
     }
 
     public Swc4jAstTsTypeAnn getTypeAnn() {
         return typeAnn;
+    }
+
+    public boolean isOptional() {
+        return optional;
     }
 }

@@ -29,6 +29,8 @@ use std::ptr::null_mut;
 struct JavaSwc4jAstFactory {
   #[allow(dead_code)]
   class: GlobalRef,
+  method_create_array_pat: JStaticMethodID,
+  method_create_assign_pat: JStaticMethodID,
   method_create_assign_prop: JStaticMethodID,
   method_create_auto_accessor: JStaticMethodID,
   method_create_big_int: JStaticMethodID,
@@ -56,6 +58,7 @@ struct JavaSwc4jAstFactory {
   method_create_import_default_specifier: JStaticMethodID,
   method_create_import_named_specifier: JStaticMethodID,
   method_create_import_star_as_specifier: JStaticMethodID,
+  method_create_invalid: JStaticMethodID,
   method_create_jsx_text: JStaticMethodID,
   method_create_key_value_prop: JStaticMethodID,
   method_create_method_prop: JStaticMethodID,
@@ -64,11 +67,13 @@ struct JavaSwc4jAstFactory {
   method_create_null: JStaticMethodID,
   method_create_number: JStaticMethodID,
   method_create_object_lit: JStaticMethodID,
+  method_create_object_pat: JStaticMethodID,
   method_create_param: JStaticMethodID,
   method_create_private_method: JStaticMethodID,
   method_create_private_name: JStaticMethodID,
   method_create_private_prop: JStaticMethodID,
   method_create_regex: JStaticMethodID,
+  method_create_rest_pat: JStaticMethodID,
   method_create_script: JStaticMethodID,
   method_create_setter_prop: JStaticMethodID,
   method_create_spread_element: JStaticMethodID,
@@ -100,6 +105,20 @@ impl JavaSwc4jAstFactory {
     let class = env
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jAstFactory");
+    let method_create_array_pat = env
+      .get_static_method_id(
+        &class,
+        "createArrayPat",
+        "(Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;II)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstArrayPat;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createArrayPat");
+    let method_create_assign_pat = env
+      .get_static_method_id(
+        &class,
+        "createAssignPat",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstAssignPat;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createAssignPat");
     let method_create_assign_prop = env
       .get_static_method_id(
         &class,
@@ -289,6 +308,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;II)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportStarAsSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImportStarAsSpecifier");
+    let method_create_invalid = env
+      .get_static_method_id(
+        &class,
+        "createInvalid",
+        "(II)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstInvalid;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createInvalid");
     let method_create_jsx_text = env
       .get_static_method_id(
         &class,
@@ -345,6 +371,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;II)Lcom/caoccao/javet/swc4j/ast/Swc4jAstObjectLit;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createObjectLit");
+    let method_create_object_pat = env
+      .get_static_method_id(
+        &class,
+        "createObjectPat",
+        "(Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;II)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstObjectPat;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createObjectPat");
     let method_create_param = env
       .get_static_method_id(
         &class,
@@ -380,6 +413,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/lang/String;Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstRegex;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createRegex");
+    let method_create_rest_pat = env
+      .get_static_method_id(
+        &class,
+        "createRestPat",
+        "(IILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;II)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstRestPat;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createRestPat");
     let method_create_script = env
       .get_static_method_id(
         &class,
@@ -515,6 +555,8 @@ impl JavaSwc4jAstFactory {
       .expect("Couldn't find method Swc4jAstFactory.createVarDeclarator");
     JavaSwc4jAstFactory {
       class,
+      method_create_array_pat,
+      method_create_assign_pat,
       method_create_assign_prop,
       method_create_auto_accessor,
       method_create_big_int,
@@ -542,6 +584,7 @@ impl JavaSwc4jAstFactory {
       method_create_import_default_specifier,
       method_create_import_named_specifier,
       method_create_import_star_as_specifier,
+      method_create_invalid,
       method_create_jsx_text,
       method_create_key_value_prop,
       method_create_method_prop,
@@ -550,11 +593,13 @@ impl JavaSwc4jAstFactory {
       method_create_null,
       method_create_number,
       method_create_object_lit,
+      method_create_object_pat,
       method_create_param,
       method_create_private_method,
       method_create_private_name,
       method_create_private_prop,
       method_create_regex,
+      method_create_rest_pat,
       method_create_script,
       method_create_setter_prop,
       method_create_spread_element,
@@ -575,6 +620,56 @@ impl JavaSwc4jAstFactory {
       method_create_var_decl,
       method_create_var_declarator,
     }
+  }
+
+  pub fn create_array_pat<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    elems: &JObject<'_>,
+    optional: bool,
+    type_ann: &Option<JObject>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let elems = object_to_jvalue!(elems);
+    let optional = boolean_to_jvalue!(optional);
+    let type_ann = optional_object_to_jvalue!(type_ann);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_array_pat,
+        &[elems, optional, type_ann, start_position, end_position],
+        "Swc4jAstArrayPat create_array_pat()"
+      );
+    return_value
+  }
+
+  pub fn create_assign_pat<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    left: &JObject<'_>,
+    right: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let left = object_to_jvalue!(left);
+    let right = object_to_jvalue!(right);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_assign_pat,
+        &[left, right, start_position, end_position],
+        "Swc4jAstAssignPat create_assign_pat()"
+      );
+    return_value
   }
 
   pub fn create_assign_prop<'local, 'a>(
@@ -1279,6 +1374,26 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_invalid<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_invalid,
+        &[start_position, end_position],
+        "Swc4jAstInvalid create_invalid()"
+      );
+    return_value
+  }
+
   pub fn create_jsx_text<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -1477,6 +1592,32 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_object_pat<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    props: &JObject<'_>,
+    optional: bool,
+    type_ann: &Option<JObject>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let props = object_to_jvalue!(props);
+    let optional = boolean_to_jvalue!(optional);
+    let type_ann = optional_object_to_jvalue!(type_ann);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_object_pat,
+        &[props, optional, type_ann, start_position, end_position],
+        "Swc4jAstObjectPat create_object_pat()"
+      );
+    return_value
+  }
+
   pub fn create_param<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -1624,6 +1765,34 @@ impl JavaSwc4jAstFactory {
       );
     delete_local_ref!(env, java_exp);
     delete_local_ref!(env, java_flags);
+    return_value
+  }
+
+  pub fn create_rest_pat<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    dot3_token_start_position: i32,
+    dot3_token_end_position: i32,
+    arg: &JObject<'_>,
+    type_ann: &Option<JObject>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let dot3_token_start_position = int_to_jvalue!(dot3_token_start_position);
+    let dot3_token_end_position = int_to_jvalue!(dot3_token_end_position);
+    let arg = object_to_jvalue!(arg);
+    let type_ann = optional_object_to_jvalue!(type_ann);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_rest_pat,
+        &[dot3_token_start_position, dot3_token_end_position, arg, type_ann, start_position, end_position],
+        "Swc4jAstRestPat create_rest_pat()"
+      );
     return_value
   }
 
@@ -3695,6 +3864,43 @@ pub mod program {
 
   use deno_ast::swc::ast::*;
 
+  fn create_array_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ArrayPat) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_elems = java_array_list.construct(env, node.elems.len());
+    node.elems.iter().for_each(|node| {
+      let java_node = node
+        .as_ref()
+        .map_or_else(|| Default::default(), |node| enum_create_pat(env, map, node));
+      java_array_list.add(env, &java_elems, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let optional = node.optional;
+    let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let return_type = java_ast_factory.create_array_pat(env, &java_elems, optional, &java_optional_type_ann, &range);
+    delete_local_ref!(env, java_elems);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    return_type
+  }
+
+  fn create_assign_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &AssignPat) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_left = enum_create_pat(env, map, &node.left);
+    let java_right = enum_create_expr(env, map, &node.right);
+    let return_type = java_ast_factory.create_assign_pat(env, &java_left, &java_right, &range);
+    delete_local_ref!(env, java_left);
+    delete_local_ref!(env, java_right);
+    return_type
+  }
+
   fn create_assign_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &AssignProp) -> JObject<'a>
   where
     'local: 'a,
@@ -4223,6 +4429,15 @@ pub mod program {
     return_value
   }
 
+  fn create_invalid<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Invalid) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    java_ast_factory.create_invalid(env, &range)
+  }
+
   fn create_jsx_text<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXText) -> JObject<'a>
   where
     'local: 'a,
@@ -4388,6 +4603,27 @@ pub mod program {
     return_value
   }
 
+  fn create_object_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ObjectPat) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_props = java_array_list.construct(env, node.props.len());
+    node.props.iter().for_each(|node| {
+      let java_node = enum_create_object_pat_prop(env, map, node);
+      java_array_list.add(env, &java_props, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let optional = node.optional;
+    let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let return_type = java_ast_factory.create_object_pat(env, &java_props, optional, &java_optional_type_ann, &range);
+    delete_local_ref!(env, java_props);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    return_type
+  }
+
   fn create_param<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Param) -> JObject<'a>
   where
     'local: 'a,
@@ -4507,6 +4743,29 @@ pub mod program {
     let exp = node.exp.as_str();
     let flags = node.flags.as_str();
     java_ast_factory.create_regex(env, exp, flags, &range)
+  }
+
+  fn create_rest_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &RestPat) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span());
+    let dot3_token_start_position = node.dot3_token.lo().to_usize() as i32;
+    let dot3_token_end_position = node.dot3_token.hi().to_usize() as i32;
+    let java_arg = enum_create_pat(env, map, &node.arg);
+    let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let return_value = java_ast_factory.create_rest_pat(
+      env,
+      dot3_token_start_position,
+      dot3_token_end_position,
+      &java_arg,
+      &java_optional_type_ann,
+      &range,
+    );
+    delete_local_ref!(env, java_arg);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    return_value
   }
 
   fn create_script<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Script) -> JObject<'a>
@@ -5219,9 +5478,13 @@ pub mod program {
     'local: 'a,
   {
     match node {
+      Pat::Array(node) => create_array_pat(env, map, node),
+      Pat::Assign(node) => create_assign_pat(env, map, node),
+      Pat::Expr(node) => enum_create_expr(env, map, node),
       Pat::Ident(node) => create_binding_ident(env, map, node),
-      default => panic!("{:?}", default),
-      // TODO
+      Pat::Invalid(node) => create_invalid(env, map, node),
+      Pat::Object(node) => create_object_pat(env, map, node),
+      Pat::Rest(node) => create_rest_pat(env, map, node),
     }
   }
 

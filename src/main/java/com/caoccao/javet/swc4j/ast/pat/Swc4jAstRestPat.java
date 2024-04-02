@@ -19,38 +19,51 @@ package com.caoccao.javet.swc4j.ast.pat;
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstBindingIdent
+public class Swc4jAstRestPat
         extends Swc4jAst
         implements ISwc4jAstPat {
-    protected final Swc4jAstIdent id;
+    protected final ISwc4jAstPat arg;
+    protected final int dot3TokenEndPosition;
+    protected final int dot3TokenStartPosition;
     @Nullable
     protected final Swc4jAstTsTypeAnn typeAnn;
 
-    public Swc4jAstBindingIdent(
-            Swc4jAstIdent id,
+    public Swc4jAstRestPat(
+            int dot3TokenStartPosition,
+            int dot3TokenEndPosition,
+            ISwc4jAstPat arg,
             Swc4jAstTsTypeAnn typeAnn,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.id = AssertionUtils.notNull(id, "Id");
+        this.dot3TokenEndPosition = dot3TokenEndPosition;
+        this.dot3TokenStartPosition = dot3TokenStartPosition;
+        this.arg = AssertionUtils.notNull(arg, "Expr");
         this.typeAnn = typeAnn;
-        children = SimpleList.immutableOf(id, typeAnn);
+        children = SimpleList.immutableOf(arg, typeAnn);
         updateParent();
     }
 
-    public Swc4jAstIdent getId() {
-        return id;
+    public ISwc4jAstPat getArg() {
+        return arg;
+    }
+
+    public int getDot3TokenEndPosition() {
+        return dot3TokenEndPosition;
+    }
+
+    public int getDot3TokenStartPosition() {
+        return dot3TokenStartPosition;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.BindingIdent;
+        return Swc4jAstType.RestPat;
     }
 
     public Swc4jAstTsTypeAnn getTypeAnn() {
