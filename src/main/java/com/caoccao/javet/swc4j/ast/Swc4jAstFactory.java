@@ -62,6 +62,15 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstAssignPatProp createAssignPatProp(
+            Swc4jAstIdent key,
+            @Jni2RustParam(optional = true) ISwc4jAstExpr value,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstAssignPatProp(key, value, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstAssignProp createAssignProp(
             Swc4jAstIdent key,
             ISwc4jAstExpr value,
@@ -358,6 +367,15 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstJsxText(value, raw, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstKeyValuePatProp createKeyValuePatProp(
+            ISwc4jAstPropName key,
+            ISwc4jAstPat value,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstKeyValuePatProp(key, value, startPosition, endPosition);
     }
 
     @Jni2RustMethod

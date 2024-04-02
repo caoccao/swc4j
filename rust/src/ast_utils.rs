@@ -31,6 +31,7 @@ struct JavaSwc4jAstFactory {
   class: GlobalRef,
   method_create_array_pat: JStaticMethodID,
   method_create_assign_pat: JStaticMethodID,
+  method_create_assign_pat_prop: JStaticMethodID,
   method_create_assign_prop: JStaticMethodID,
   method_create_auto_accessor: JStaticMethodID,
   method_create_big_int: JStaticMethodID,
@@ -60,6 +61,7 @@ struct JavaSwc4jAstFactory {
   method_create_import_star_as_specifier: JStaticMethodID,
   method_create_invalid: JStaticMethodID,
   method_create_jsx_text: JStaticMethodID,
+  method_create_key_value_pat_prop: JStaticMethodID,
   method_create_key_value_prop: JStaticMethodID,
   method_create_method_prop: JStaticMethodID,
   method_create_module: JStaticMethodID,
@@ -119,6 +121,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstAssignPat;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAssignPat");
+    let method_create_assign_pat_prop = env
+      .get_static_method_id(
+        &class,
+        "createAssignPatProp",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstAssignPatProp;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createAssignPatProp");
     let method_create_assign_prop = env
       .get_static_method_id(
         &class,
@@ -322,6 +331,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/lang/String;Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstJsxText;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxText");
+    let method_create_key_value_pat_prop = env
+      .get_static_method_id(
+        &class,
+        "createKeyValuePatProp",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;II)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstKeyValuePatProp;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createKeyValuePatProp");
     let method_create_key_value_prop = env
       .get_static_method_id(
         &class,
@@ -557,6 +573,7 @@ impl JavaSwc4jAstFactory {
       class,
       method_create_array_pat,
       method_create_assign_pat,
+      method_create_assign_pat_prop,
       method_create_assign_prop,
       method_create_auto_accessor,
       method_create_big_int,
@@ -586,6 +603,7 @@ impl JavaSwc4jAstFactory {
       method_create_import_star_as_specifier,
       method_create_invalid,
       method_create_jsx_text,
+      method_create_key_value_pat_prop,
       method_create_key_value_prop,
       method_create_method_prop,
       method_create_module,
@@ -668,6 +686,30 @@ impl JavaSwc4jAstFactory {
         self.method_create_assign_pat,
         &[left, right, start_position, end_position],
         "Swc4jAstAssignPat create_assign_pat()"
+      );
+    return_value
+  }
+
+  pub fn create_assign_pat_prop<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    key: &JObject<'_>,
+    value: &Option<JObject>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let key = object_to_jvalue!(key);
+    let value = optional_object_to_jvalue!(value);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_assign_pat_prop,
+        &[key, value, start_position, end_position],
+        "Swc4jAstAssignPatProp create_assign_pat_prop()"
       );
     return_value
   }
@@ -1419,6 +1461,30 @@ impl JavaSwc4jAstFactory {
       );
     delete_local_ref!(env, java_value);
     delete_local_ref!(env, java_raw);
+    return_value
+  }
+
+  pub fn create_key_value_pat_prop<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    key: &JObject<'_>,
+    value: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let key = object_to_jvalue!(key);
+    let value = object_to_jvalue!(value);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_key_value_pat_prop,
+        &[key, value, start_position, end_position],
+        "Swc4jAstKeyValuePatProp create_key_value_pat_prop()"
+      );
     return_value
   }
 
@@ -3901,6 +3967,24 @@ pub mod program {
     return_type
   }
 
+  fn create_assign_pat_prop<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &AssignPatProp,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_key = create_ident(env, map, &node.key);
+    let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
+    let return_type = java_ast_factory.create_assign_pat_prop(env, &java_key, &java_optional_value, &range);
+    delete_local_ref!(env, java_key);
+    delete_local_optional_ref!(env, java_optional_value);
+    return_type
+  }
+
   fn create_assign_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &AssignProp) -> JObject<'a>
   where
     'local: 'a,
@@ -4482,6 +4566,24 @@ pub mod program {
     delete_local_ref!(env, java_src);
     delete_local_optional_ref!(env, java_optional_with);
     return_value
+  }
+
+  fn create_key_value_pat_prop<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &KeyValuePatProp,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span());
+    let java_key = enum_create_prop_name(env, map, &node.key);
+    let java_value = enum_create_pat(env, map, &node.value);
+    let return_type = java_ast_factory.create_key_value_pat_prop(env, &java_key, &java_value, &range);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_value);
+    return_type
   }
 
   fn create_key_value_prop<'local, 'a>(
@@ -5440,8 +5542,9 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      ObjectPatProp::Assign(node) => create_assign_pat_prop(env, map, node),
+      ObjectPatProp::KeyValue(node) => create_key_value_pat_prop(env, map, node),
+      ObjectPatProp::Rest(node) => create_rest_pat(env, map, node),
     }
   }
 
