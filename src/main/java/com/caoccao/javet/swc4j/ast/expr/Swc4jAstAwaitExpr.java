@@ -14,35 +14,35 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast;
+package com.caoccao.javet.swc4j.ast.expr;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropOrSpread;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.List;
+public class Swc4jAstAwaitExpr
+        extends Swc4jAst
+        implements ISwc4jAstExpr {
+    protected final ISwc4jAstExpr arg;
 
-public class Swc4jAstObjectLit
-        extends Swc4jAst {
-    protected final List<ISwc4jAstPropOrSpread> props;
-
-    public Swc4jAstObjectLit(
-            List<ISwc4jAstPropOrSpread> props,
+    public Swc4jAstAwaitExpr(
+            ISwc4jAstExpr arg,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.props = SimpleList.immutableCopyOf(AssertionUtils.notNull(props, "Props"));
-        children = SimpleList.immutableCopyOf(props);
+        this.arg = AssertionUtils.notNull(arg, "arg");
+        children = SimpleList.immutableOf(arg);
         updateParent();
     }
 
-    public List<ISwc4jAstPropOrSpread> getProps() {
-        return props;
+    public ISwc4jAstExpr getArg() {
+        return arg;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.ObjectLit;
+        return Swc4jAstType.AwaitExpr;
     }
 }

@@ -41,6 +41,6 @@ public class Swc4jAstPrivateName
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.Ident;
+        return Swc4jAstType.PrivateName;
     }
 }

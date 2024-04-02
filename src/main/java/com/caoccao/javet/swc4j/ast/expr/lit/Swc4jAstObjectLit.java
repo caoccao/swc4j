@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,36 +14,36 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.module;
+package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstImportSpecifier;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropOrSpread;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstImportStarAsSpecifier
-        extends Swc4jAst
-        implements ISwc4jAstImportSpecifier {
-    protected final Swc4jAstIdent local;
+import java.util.List;
 
-    public Swc4jAstImportStarAsSpecifier(
-            Swc4jAstIdent local,
+public class Swc4jAstObjectLit
+        extends Swc4jAst {
+    protected final List<ISwc4jAstPropOrSpread> props;
+
+    public Swc4jAstObjectLit(
+            List<ISwc4jAstPropOrSpread> props,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.local = AssertionUtils.notNull(local, "Local");
-        children = SimpleList.immutableOf(local);
+        this.props = SimpleList.immutableCopyOf(AssertionUtils.notNull(props, "Props"));
+        children = SimpleList.immutableCopyOf(props);
         updateParent();
     }
 
-    public Swc4jAstIdent getLocal() {
-        return local;
+    public List<ISwc4jAstPropOrSpread> getProps() {
+        return props;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.ImportStarAsSpecifier;
+        return Swc4jAstType.ObjectLit;
     }
 }

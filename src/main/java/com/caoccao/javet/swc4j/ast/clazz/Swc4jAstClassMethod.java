@@ -81,7 +81,7 @@ public class Swc4jAstClassMethod
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.ClassProp;
+        return Swc4jAstType.ClassMethod;
     }
 
     public boolean isAbstract() {

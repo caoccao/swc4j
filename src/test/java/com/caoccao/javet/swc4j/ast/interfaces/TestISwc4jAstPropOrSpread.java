@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpreadElement;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstSpreadElement;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

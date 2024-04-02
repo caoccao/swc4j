@@ -45,6 +45,6 @@ public class Swc4jAstExportDefaultDecl
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.ExportDecl;
+        return Swc4jAstType.ExportDefaultDecl;
     }
 }

@@ -44,7 +44,7 @@ public class Swc4jAstTsExprWithTypeArgs extends Swc4jAst {
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.TsTypeAnn;
+        return Swc4jAstType.TsExprWithTypeArgs;
     }
 
     public Swc4jAstTsTypeParamInstantiation getTypeArgs() {

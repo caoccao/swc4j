@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,39 +18,46 @@ package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropOrSpread;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstUnaryExpr
+public class Swc4jAstSpreadElement
         extends Swc4jAst
-        implements ISwc4jAstExpr {
-    protected final ISwc4jAstExpr arg;
-    protected final Swc4jAstUnaryOp op;
+        implements ISwc4jAstPropOrSpread {
+    protected final int dot3TokenEndPosition;
+    protected final int dot3TokenStartPosition;
+    protected final ISwc4jAstExpr expr;
 
-    public Swc4jAstUnaryExpr(
-            Swc4jAstUnaryOp op,
-            ISwc4jAstExpr arg,
+    public Swc4jAstSpreadElement(
+            int dot3TokenStartPosition,
+            int dot3TokenEndPosition,
+            ISwc4jAstExpr expr,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.arg = AssertionUtils.notNull(arg, "arg");
-        this.op = AssertionUtils.notNull(op, "op");
-        children = SimpleList.immutableOf(arg);
+        this.dot3TokenEndPosition = dot3TokenEndPosition;
+        this.dot3TokenStartPosition = dot3TokenStartPosition;
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        children = SimpleList.immutableOf(expr);
         updateParent();
     }
 
-    public ISwc4jAstExpr getArg() {
-        return arg;
+    public int getDot3TokenEndPosition() {
+        return dot3TokenEndPosition;
     }
 
-    public Swc4jAstUnaryOp getOp() {
-        return op;
+    public int getDot3TokenStartPosition() {
+        return dot3TokenStartPosition;
+    }
+
+    public ISwc4jAstExpr getExpr() {
+        return expr;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.UnaryExpr;
+        return Swc4jAstType.SpreadElement;
     }
 }

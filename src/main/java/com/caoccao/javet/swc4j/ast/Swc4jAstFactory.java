@@ -18,8 +18,7 @@ package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.clazz.*;
 import com.caoccao.javet.swc4j.ast.enums.*;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.module.*;
@@ -40,6 +39,14 @@ import java.util.List;
 @Jni2RustClass(filePath = "rust/src/ast_utils.rs")
 public final class Swc4jAstFactory {
     private Swc4jAstFactory() {
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstArrayLit createArrayLit(
+            List<Swc4jAstExprOrSpread> elems,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstArrayLit(elems, startPosition, endPosition);
     }
 
     @Jni2RustMethod
@@ -93,6 +100,14 @@ public final class Swc4jAstFactory {
                 key, value, typeAnn, isStatic, decorators,
                 accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
                 startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstAwaitExpr createAwaitExpr(
+            ISwc4jAstExpr arg,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstAwaitExpr(arg, startPosition, endPosition);
     }
 
     @Jni2RustMethod
@@ -272,6 +287,16 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstExportDefaultExpr(decl, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstExprOrSpread createExprOrSpread(
+            int spreadStartPosition,
+            int spreadEndPosition,
+            ISwc4jAstExpr expr,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstExprOrSpread(spreadStartPosition, spreadEndPosition, expr, startPosition, endPosition);
     }
 
     @Jni2RustMethod
@@ -571,6 +596,13 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstStr(value, raw, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstThisExpr createThisExpr(
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstThisExpr(startPosition, endPosition);
     }
 
     @Jni2RustMethod

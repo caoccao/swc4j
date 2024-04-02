@@ -57,7 +57,7 @@ public class Swc4jAstImportNamedSpecifier
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.TsImportEqualsDecl;
+        return Swc4jAstType.ImportNamedSpecifier;
     }
 
     public boolean isTypeOnly() {

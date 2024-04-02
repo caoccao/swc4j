@@ -25,44 +25,14 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-/**
- * The type Swc4j ast var declarator.
- *
- * @since 0.2.0
- */
 public class Swc4jAstVarDeclarator
         extends Swc4jAst
         implements ISwc4jAstDecl {
-    /**
-     * The Definite.
-     *
-     * @since 0.2.0
-     */
     protected final boolean definite;
-    /**
-     * The Init.
-     *
-     * @since 0.2.0
-     */
     @Nullable
     protected final ISwc4jAstExpr init;
-    /**
-     * The Name.
-     *
-     * @since 0.2.0
-     */
     protected final ISwc4jAstPat name;
 
-    /**
-     * Instantiates a new Swc4j ast var declarator.
-     *
-     * @param name          the name
-     * @param init          the init
-     * @param definite      the definite
-     * @param startPosition the start position
-     * @param endPosition   the end position
-     * @since 0.2.0
-     */
     public Swc4jAstVarDeclarator(
             ISwc4jAstPat name,
             ISwc4jAstExpr init,
@@ -77,22 +47,10 @@ public class Swc4jAstVarDeclarator
         updateParent();
     }
 
-    /**
-     * Gets init.
-     *
-     * @return the init
-     * @since 0.2.0
-     */
     public ISwc4jAstExpr getInit() {
         return init;
     }
 
-    /**
-     * Gets name.
-     *
-     * @return the name
-     * @since 0.2.0
-     */
     public ISwc4jAstPat getName() {
         return name;
     }
@@ -102,12 +60,6 @@ public class Swc4jAstVarDeclarator
         return Swc4jAstType.VarDeclarator;
     }
 
-    /**
-     * Is definite.
-     *
-     * @return the definite
-     * @since 0.2.0
-     */
     public boolean isDefinite() {
         return definite;
     }

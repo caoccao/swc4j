@@ -44,6 +44,6 @@ public class Swc4jAstImportDefaultSpecifier
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.TsImportEqualsDecl;
+        return Swc4jAstType.ImportDefaultSpecifier;
     }
 }

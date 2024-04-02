@@ -14,36 +14,25 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.module;
+package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstImportSpecifier;
-import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstImportStarAsSpecifier
+public class Swc4jAstThisExpr
         extends Swc4jAst
-        implements ISwc4jAstImportSpecifier {
-    protected final Swc4jAstIdent local;
-
-    public Swc4jAstImportStarAsSpecifier(
-            Swc4jAstIdent local,
+        implements ISwc4jAstExpr {
+    public Swc4jAstThisExpr(
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.local = AssertionUtils.notNull(local, "Local");
-        children = SimpleList.immutableOf(local);
-        updateParent();
-    }
-
-    public Swc4jAstIdent getLocal() {
-        return local;
+        children = SimpleList.immutableOf();
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.ImportStarAsSpecifier;
+        return Swc4jAstType.ThisExpr;
     }
 }

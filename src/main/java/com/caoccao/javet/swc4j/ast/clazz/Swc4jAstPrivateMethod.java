@@ -80,7 +80,7 @@ public class Swc4jAstPrivateMethod
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.ClassProp;
+        return Swc4jAstType.PrivateMethod;
     }
 
     public boolean isAbstract() {

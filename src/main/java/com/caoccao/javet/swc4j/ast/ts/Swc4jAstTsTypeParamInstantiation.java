@@ -44,6 +44,6 @@ public class Swc4jAstTsTypeParamInstantiation
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.TsTypeParam;
+        return Swc4jAstType.TsTypeParamInstantiation;
     }
 }

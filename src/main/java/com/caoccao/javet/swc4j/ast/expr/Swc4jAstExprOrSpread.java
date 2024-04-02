@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,49 +14,51 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast;
+package com.caoccao.javet.swc4j.ast.expr;
 
+import com.caoccao.javet.swc4j.annotations.Nullable;
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropOrSpread;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstSpreadElement
-        extends Swc4jAst
-        implements ISwc4jAstPropOrSpread {
-    protected final int dot3TokenEndPosition;
-    protected final int dot3TokenStartPosition;
+public class Swc4jAstExprOrSpread
+        extends Swc4jAst {
     protected final ISwc4jAstExpr expr;
+    @Nullable
+    protected final int spreadEndPosition;
+    @Nullable
+    protected final int spreadStartPosition;
 
-    public Swc4jAstSpreadElement(
-            int dot3TokenStartPosition,
-            int dot3TokenEndPosition,
+    public Swc4jAstExprOrSpread(
+            int spreadStartPosition,
+            int spreadEndPosition,
             ISwc4jAstExpr expr,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.dot3TokenEndPosition = dot3TokenEndPosition;
-        this.dot3TokenStartPosition = dot3TokenStartPosition;
+        this.spreadEndPosition = spreadEndPosition;
+        this.spreadStartPosition = spreadStartPosition;
         this.expr = AssertionUtils.notNull(expr, "Expr");
         children = SimpleList.immutableOf(expr);
         updateParent();
-    }
-
-    public int getDot3TokenEndPosition() {
-        return dot3TokenEndPosition;
-    }
-
-    public int getDot3TokenStartPosition() {
-        return dot3TokenStartPosition;
     }
 
     public ISwc4jAstExpr getExpr() {
         return expr;
     }
 
+    public int getSpreadEndPosition() {
+        return spreadEndPosition;
+    }
+
+    public int getSpreadStartPosition() {
+        return spreadStartPosition;
+    }
+
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.SpreadElement;
+        return Swc4jAstType.ExprOrSpread;
     }
 }

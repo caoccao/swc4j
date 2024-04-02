@@ -18,7 +18,7 @@ package com.caoccao.javet.swc4j.ast.module;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstObjectLit;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
@@ -53,7 +53,7 @@ public class Swc4jAstExportAll
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.NamedExport;
+        return Swc4jAstType.ExportAll;
     }
 
     public Swc4jAstObjectLit getWith() {
