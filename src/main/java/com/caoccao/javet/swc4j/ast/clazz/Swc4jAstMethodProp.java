@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024. caoccao.com Sam Cao
+ * Copyright (c) 2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,29 +18,39 @@ package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstKey;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProp;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstPrivateName
+public class Swc4jAstMethodProp
         extends Swc4jAst
-        implements ISwc4jAstKey {
-    protected final Swc4jAstIdent id;
+        implements ISwc4jAstProp {
+    protected final Swc4jAstFunction function;
+    protected final ISwc4jAstPropName key;
 
-    public Swc4jAstPrivateName(Swc4jAstIdent id, int startPosition, int endPosition) {
+    public Swc4jAstMethodProp(
+            ISwc4jAstPropName key,
+            Swc4jAstFunction function,
+            int startPosition,
+            int endPosition) {
         super(startPosition, endPosition);
-        this.id = AssertionUtils.notNull(id, "Id");
-        children = SimpleList.immutableOf(id);
+        this.function = AssertionUtils.notNull(function, "Function");
+        this.key = AssertionUtils.notNull(key, "Key");
+        children = SimpleList.immutableOf(key, function);
         updateParent();
     }
 
-    public Swc4jAstIdent getId() {
-        return id;
+    public Swc4jAstFunction getFunction() {
+        return function;
+    }
+
+    public ISwc4jAstPropName getKey() {
+        return key;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.Ident;
+        return Swc4jAstType.MethodProp;
     }
 }

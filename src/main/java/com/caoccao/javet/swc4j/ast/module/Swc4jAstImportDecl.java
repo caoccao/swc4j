@@ -26,7 +26,6 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.Collections;
 import java.util.List;
 
 public class Swc4jAstImportDecl
@@ -53,7 +52,7 @@ public class Swc4jAstImportDecl
         children = SimpleList.copyOf(specifiers);
         children.add(src);
         children.add(with);
-        children = Collections.unmodifiableList(children);
+        children = SimpleList.immutable(children);
         updateParent();
     }
 

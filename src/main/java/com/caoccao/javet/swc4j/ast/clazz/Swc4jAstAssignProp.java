@@ -14,50 +14,44 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.expr;
+package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProp;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstIdent
+public class Swc4jAstAssignProp
         extends Swc4jAst
-        implements ISwc4jAstExpr, ISwc4jAstProp, ISwc4jAstModuleRef, ISwc4jAstModuleExportName, ISwc4jAstTsEntityName,
-        ISwc4jAstPropName {
-    protected static final String QUESTION_MARK = "?";
-    protected final boolean optional;
-    protected final String sym;
+        implements ISwc4jAstProp {
+    protected final Swc4jAstIdent key;
+    protected final ISwc4jAstExpr value;
 
-    public Swc4jAstIdent(
-            String sym,
-            boolean optional,
+    public Swc4jAstAssignProp(
+            Swc4jAstIdent key,
+            ISwc4jAstExpr value,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.optional = optional;
-        this.sym = AssertionUtils.notNull(sym, "Sym");
+        this.key = AssertionUtils.notNull(key, "Key");
+        this.value = AssertionUtils.notNull(value, "Value");
+        children = SimpleList.immutableOf(key, value);
+        updateParent();
     }
 
-    public String getSym() {
-        return sym;
+    public Swc4jAstIdent getKey() {
+        return key;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.Ident;
+        return Swc4jAstType.AssignProp;
     }
 
-    public boolean isOptional() {
-        return optional;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder(sym);
-        if (optional) {
-            sb.append(QUESTION_MARK);
-        }
-        return sb.toString();
+    public ISwc4jAstExpr getValue() {
+        return value;
     }
 }

@@ -29,6 +29,7 @@ use std::ptr::null_mut;
 struct JavaSwc4jAstFactory {
   #[allow(dead_code)]
   class: GlobalRef,
+  method_create_assign_prop: JStaticMethodID,
   method_create_auto_accessor: JStaticMethodID,
   method_create_big_int: JStaticMethodID,
   method_create_binding_ident: JStaticMethodID,
@@ -49,12 +50,15 @@ struct JavaSwc4jAstFactory {
   method_create_export_default_expr: JStaticMethodID,
   method_create_expr_stmt: JStaticMethodID,
   method_create_function: JStaticMethodID,
+  method_create_getter_prop: JStaticMethodID,
   method_create_ident: JStaticMethodID,
   method_create_import_decl: JStaticMethodID,
   method_create_import_default_specifier: JStaticMethodID,
   method_create_import_named_specifier: JStaticMethodID,
   method_create_import_star_as_specifier: JStaticMethodID,
   method_create_jsx_text: JStaticMethodID,
+  method_create_key_value_prop: JStaticMethodID,
+  method_create_method_prop: JStaticMethodID,
   method_create_module: JStaticMethodID,
   method_create_named_export: JStaticMethodID,
   method_create_null: JStaticMethodID,
@@ -66,6 +70,7 @@ struct JavaSwc4jAstFactory {
   method_create_private_prop: JStaticMethodID,
   method_create_regex: JStaticMethodID,
   method_create_script: JStaticMethodID,
+  method_create_setter_prop: JStaticMethodID,
   method_create_spread_element: JStaticMethodID,
   method_create_static_block: JStaticMethodID,
   method_create_str: JStaticMethodID,
@@ -95,6 +100,13 @@ impl JavaSwc4jAstFactory {
     let class = env
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jAstFactory");
+    let method_create_assign_prop = env
+      .get_static_method_id(
+        &class,
+        "createAssignProp",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstAssignProp;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createAssignProp");
     let method_create_auto_accessor = env
       .get_static_method_id(
         &class,
@@ -235,6 +247,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;II)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createFunction");
+    let method_create_getter_prop = env
+      .get_static_method_id(
+        &class,
+        "createGetterProp",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;II)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstGetterProp;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createGetterProp");
     let method_create_ident = env
       .get_static_method_id(
         &class,
@@ -277,6 +296,20 @@ impl JavaSwc4jAstFactory {
         "(Ljava/lang/String;Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstJsxText;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxText");
+    let method_create_key_value_prop = env
+      .get_static_method_id(
+        &class,
+        "createKeyValueProp",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;II)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstKeyValueProp;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createKeyValueProp");
+    let method_create_method_prop = env
+      .get_static_method_id(
+        &class,
+        "createMethodProp",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;II)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstMethodProp;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createMethodProp");
     let method_create_module = env
       .get_static_method_id(
         &class,
@@ -354,6 +387,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Ljava/lang/String;II)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstScript;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createScript");
+    let method_create_setter_prop = env
+      .get_static_method_id(
+        &class,
+        "createSetterProp",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;II)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSetterProp;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createSetterProp");
     let method_create_spread_element = env
       .get_static_method_id(
         &class,
@@ -475,6 +515,7 @@ impl JavaSwc4jAstFactory {
       .expect("Couldn't find method Swc4jAstFactory.createVarDeclarator");
     JavaSwc4jAstFactory {
       class,
+      method_create_assign_prop,
       method_create_auto_accessor,
       method_create_big_int,
       method_create_binding_ident,
@@ -495,12 +536,15 @@ impl JavaSwc4jAstFactory {
       method_create_export_default_expr,
       method_create_expr_stmt,
       method_create_function,
+      method_create_getter_prop,
       method_create_ident,
       method_create_import_decl,
       method_create_import_default_specifier,
       method_create_import_named_specifier,
       method_create_import_star_as_specifier,
       method_create_jsx_text,
+      method_create_key_value_prop,
+      method_create_method_prop,
       method_create_module,
       method_create_named_export,
       method_create_null,
@@ -512,6 +556,7 @@ impl JavaSwc4jAstFactory {
       method_create_private_prop,
       method_create_regex,
       method_create_script,
+      method_create_setter_prop,
       method_create_spread_element,
       method_create_static_block,
       method_create_str,
@@ -530,6 +575,30 @@ impl JavaSwc4jAstFactory {
       method_create_var_decl,
       method_create_var_declarator,
     }
+  }
+
+  pub fn create_assign_prop<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    key: &JObject<'_>,
+    value: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let key = object_to_jvalue!(key);
+    let value = object_to_jvalue!(value);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_assign_prop,
+        &[key, value, start_position, end_position],
+        "Swc4jAstAssignProp create_assign_prop()"
+      );
+    return_value
   }
 
   pub fn create_auto_accessor<'local, 'a>(
@@ -554,8 +623,7 @@ impl JavaSwc4jAstFactory {
     let accessibility_id = int_to_jvalue!(accessibility_id);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_auto_accessor,
@@ -580,8 +648,7 @@ impl JavaSwc4jAstFactory {
     let raw = object_to_jvalue!(java_raw);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_big_int,
@@ -606,8 +673,7 @@ impl JavaSwc4jAstFactory {
     let type_ann = optional_object_to_jvalue!(type_ann);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_binding_ident,
@@ -629,8 +695,7 @@ impl JavaSwc4jAstFactory {
     let stmts = object_to_jvalue!(stmts);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_block_stmt,
@@ -652,8 +717,7 @@ impl JavaSwc4jAstFactory {
     let value = boolean_to_jvalue!(value);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_bool,
@@ -687,8 +751,7 @@ impl JavaSwc4jAstFactory {
     let implements = object_to_jvalue!(implements);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_class,
@@ -714,8 +777,7 @@ impl JavaSwc4jAstFactory {
     let clazz = object_to_jvalue!(clazz);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_class_decl,
@@ -751,8 +813,7 @@ impl JavaSwc4jAstFactory {
     let is_override = boolean_to_jvalue!(is_override);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_class_method,
@@ -796,8 +857,7 @@ impl JavaSwc4jAstFactory {
     let definite = boolean_to_jvalue!(definite);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_class_prop,
@@ -819,8 +879,7 @@ impl JavaSwc4jAstFactory {
     let expr = object_to_jvalue!(expr);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_computed_prop_name,
@@ -850,8 +909,7 @@ impl JavaSwc4jAstFactory {
     let optional = boolean_to_jvalue!(optional);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_constructor,
@@ -871,8 +929,7 @@ impl JavaSwc4jAstFactory {
   {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_debugger_stmt,
@@ -894,8 +951,7 @@ impl JavaSwc4jAstFactory {
     let expr = object_to_jvalue!(expr);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_decorator,
@@ -915,8 +971,7 @@ impl JavaSwc4jAstFactory {
   {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_empty_stmt,
@@ -942,8 +997,7 @@ impl JavaSwc4jAstFactory {
     let with = optional_object_to_jvalue!(with);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_export_all,
@@ -965,8 +1019,7 @@ impl JavaSwc4jAstFactory {
     let decl = object_to_jvalue!(decl);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_export_decl,
@@ -988,8 +1041,7 @@ impl JavaSwc4jAstFactory {
     let decl = object_to_jvalue!(decl);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_export_default_decl,
@@ -1011,8 +1063,7 @@ impl JavaSwc4jAstFactory {
     let decl = object_to_jvalue!(decl);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_export_default_expr,
@@ -1034,8 +1085,7 @@ impl JavaSwc4jAstFactory {
     let expr = object_to_jvalue!(expr);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_expr_stmt,
@@ -1069,13 +1119,38 @@ impl JavaSwc4jAstFactory {
     let return_type = optional_object_to_jvalue!(return_type);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_function,
         &[params, decorators, body, generator, is_async, type_params, return_type, start_position, end_position],
         "Swc4jAstFunction create_function()"
+      );
+    return_value
+  }
+
+  pub fn create_getter_prop<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    key: &JObject<'_>,
+    type_ann: &Option<JObject>,
+    body: &Option<JObject>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let key = object_to_jvalue!(key);
+    let type_ann = optional_object_to_jvalue!(type_ann);
+    let body = optional_object_to_jvalue!(body);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_getter_prop,
+        &[key, type_ann, body, start_position, end_position],
+        "Swc4jAstGetterProp create_getter_prop()"
       );
     return_value
   }
@@ -1095,8 +1170,7 @@ impl JavaSwc4jAstFactory {
     let optional = boolean_to_jvalue!(optional);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ident,
@@ -1125,8 +1199,7 @@ impl JavaSwc4jAstFactory {
     let with = optional_object_to_jvalue!(with);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_import_decl,
@@ -1148,8 +1221,7 @@ impl JavaSwc4jAstFactory {
     let local = object_to_jvalue!(local);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_import_default_specifier,
@@ -1175,8 +1247,7 @@ impl JavaSwc4jAstFactory {
     let type_only = boolean_to_jvalue!(type_only);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_import_named_specifier,
@@ -1198,8 +1269,7 @@ impl JavaSwc4jAstFactory {
     let local = object_to_jvalue!(local);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_import_star_as_specifier,
@@ -1225,8 +1295,7 @@ impl JavaSwc4jAstFactory {
     let raw = object_to_jvalue!(java_raw);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_jsx_text,
@@ -1235,6 +1304,54 @@ impl JavaSwc4jAstFactory {
       );
     delete_local_ref!(env, java_value);
     delete_local_ref!(env, java_raw);
+    return_value
+  }
+
+  pub fn create_key_value_prop<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    key: &JObject<'_>,
+    value: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let key = object_to_jvalue!(key);
+    let value = object_to_jvalue!(value);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_key_value_prop,
+        &[key, value, start_position, end_position],
+        "Swc4jAstKeyValueProp create_key_value_prop()"
+      );
+    return_value
+  }
+
+  pub fn create_method_prop<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    key: &JObject<'_>,
+    function: &JObject<'_>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let key = object_to_jvalue!(key);
+    let function = object_to_jvalue!(function);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_method_prop,
+        &[key, function, start_position, end_position],
+        "Swc4jAstMethodProp create_method_prop()"
+      );
     return_value
   }
 
@@ -1253,8 +1370,7 @@ impl JavaSwc4jAstFactory {
     let shebang = object_to_jvalue!(java_shebang);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_module,
@@ -1283,8 +1399,7 @@ impl JavaSwc4jAstFactory {
     let with = optional_object_to_jvalue!(with);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_named_export,
@@ -1304,8 +1419,7 @@ impl JavaSwc4jAstFactory {
   {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_null,
@@ -1330,8 +1444,7 @@ impl JavaSwc4jAstFactory {
     let raw = object_to_jvalue!(java_raw);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_number,
@@ -1354,8 +1467,7 @@ impl JavaSwc4jAstFactory {
     let props = object_to_jvalue!(props);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_object_lit,
@@ -1379,8 +1491,7 @@ impl JavaSwc4jAstFactory {
     let pat = object_to_jvalue!(pat);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_param,
@@ -1416,8 +1527,7 @@ impl JavaSwc4jAstFactory {
     let is_override = boolean_to_jvalue!(is_override);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_private_method,
@@ -1439,8 +1549,7 @@ impl JavaSwc4jAstFactory {
     let id = object_to_jvalue!(id);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_private_name,
@@ -1480,8 +1589,7 @@ impl JavaSwc4jAstFactory {
     let definite = boolean_to_jvalue!(definite);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_private_prop,
@@ -1507,8 +1615,7 @@ impl JavaSwc4jAstFactory {
     let flags = object_to_jvalue!(java_flags);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_regex,
@@ -1535,8 +1642,7 @@ impl JavaSwc4jAstFactory {
     let shebang = object_to_jvalue!(java_shebang);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_script,
@@ -1544,6 +1650,32 @@ impl JavaSwc4jAstFactory {
         "Swc4jAstScript create_script()"
       );
     delete_local_ref!(env, java_shebang);
+    return_value
+  }
+
+  pub fn create_setter_prop<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    key: &JObject<'_>,
+    param: &JObject<'_>,
+    body: &Option<JObject>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let key = object_to_jvalue!(key);
+    let param = object_to_jvalue!(param);
+    let body = optional_object_to_jvalue!(body);
+    let start_position = int_to_jvalue!(range.start);
+    let end_position = int_to_jvalue!(range.end);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_setter_prop,
+        &[key, param, body, start_position, end_position],
+        "Swc4jAstSetterProp create_setter_prop()"
+      );
     return_value
   }
 
@@ -1563,8 +1695,7 @@ impl JavaSwc4jAstFactory {
     let expr = object_to_jvalue!(expr);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_spread_element,
@@ -1586,8 +1717,7 @@ impl JavaSwc4jAstFactory {
     let body = object_to_jvalue!(body);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_static_block,
@@ -1613,8 +1743,7 @@ impl JavaSwc4jAstFactory {
     let raw = object_to_jvalue!(java_raw);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_str,
@@ -1638,8 +1767,7 @@ impl JavaSwc4jAstFactory {
     let decl = object_to_jvalue!(decl);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ts_export_assignment,
@@ -1663,8 +1791,7 @@ impl JavaSwc4jAstFactory {
     let type_args = optional_object_to_jvalue!(type_args);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ts_expr_with_type_args,
@@ -1686,8 +1813,7 @@ impl JavaSwc4jAstFactory {
     let expr = object_to_jvalue!(expr);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ts_external_module_ref,
@@ -1715,8 +1841,7 @@ impl JavaSwc4jAstFactory {
     let module_ref = object_to_jvalue!(module_ref);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ts_import_equals_decl,
@@ -1744,8 +1869,7 @@ impl JavaSwc4jAstFactory {
     let is_static = boolean_to_jvalue!(is_static);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ts_index_signature,
@@ -1767,8 +1891,7 @@ impl JavaSwc4jAstFactory {
     let id = object_to_jvalue!(id);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ts_namespace_export_decl,
@@ -1790,8 +1913,7 @@ impl JavaSwc4jAstFactory {
     let type_ann = object_to_jvalue!(type_ann);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ts_type_ann,
@@ -1823,8 +1945,7 @@ impl JavaSwc4jAstFactory {
     let default = optional_object_to_jvalue!(default);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ts_type_param,
@@ -1846,8 +1967,7 @@ impl JavaSwc4jAstFactory {
     let params = object_to_jvalue!(params);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ts_type_param_decl,
@@ -1869,8 +1989,7 @@ impl JavaSwc4jAstFactory {
     let params = object_to_jvalue!(params);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ts_type_param_instantiation,
@@ -1894,8 +2013,7 @@ impl JavaSwc4jAstFactory {
     let arg = object_to_jvalue!(arg);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_unary_expr,
@@ -1919,8 +2037,7 @@ impl JavaSwc4jAstFactory {
     let decls = object_to_jvalue!(decls);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_using_decl,
@@ -1946,8 +2063,7 @@ impl JavaSwc4jAstFactory {
     let decls = object_to_jvalue!(decls);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_var_decl,
@@ -1973,8 +2089,7 @@ impl JavaSwc4jAstFactory {
     let definite = boolean_to_jvalue!(definite);
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_var_declarator,
@@ -3580,6 +3695,20 @@ pub mod program {
 
   use deno_ast::swc::ast::*;
 
+  fn create_assign_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &AssignProp) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span());
+    let java_key = create_ident(env, map, &node.key);
+    let java_value = enum_create_expr(env, map, &node.value);
+    let return_type = java_ast_factory.create_assign_prop(env, &java_key, &java_value, &range);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_value);
+    return_type
+  }
+
   fn create_auto_accessor<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -3824,7 +3953,11 @@ pub mod program {
     return_type
   }
 
-  fn create_computed_prop_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ComputedPropName) -> JObject<'a>
+  fn create_computed_prop_name<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &ComputedPropName,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -4018,6 +4151,23 @@ pub mod program {
     return_value
   }
 
+  fn create_getter_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &GetterProp) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_key = enum_create_prop_name(env, map, &node.key);
+    let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let java_optional_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
+    let return_type =
+      java_ast_factory.create_getter_prop(env, &java_key, &java_optional_type_ann, &java_optional_body, &range);
+    delete_local_ref!(env, java_key);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_optional_ref!(env, java_optional_body);
+    return_type
+  }
+
   fn create_import_default_specifier<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -4117,6 +4267,38 @@ pub mod program {
     delete_local_ref!(env, java_src);
     delete_local_optional_ref!(env, java_optional_with);
     return_value
+  }
+
+  fn create_key_value_prop<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &KeyValueProp,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span());
+    let java_key = enum_create_prop_name(env, map, &node.key);
+    let java_value = enum_create_expr(env, map, &node.value);
+    let return_type = java_ast_factory.create_key_value_prop(env, &java_key, &java_value, &range);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_value);
+    return_type
+  }
+
+  fn create_method_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &MethodProp) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span());
+    let java_key = enum_create_prop_name(env, map, &node.key);
+    let java_function = create_function(env, map, &node.function);
+    let return_type = java_ast_factory.create_method_prop(env, &java_key, &java_function, &range);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_function);
+    return_type
   }
 
   fn create_module<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Module) -> JObject<'a>
@@ -4344,6 +4526,22 @@ pub mod program {
     let return_value = java_ast_factory.create_script(env, &java_body, &shebang, &range);
     delete_local_ref!(env, java_body);
     return_value
+  }
+
+  fn create_setter_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SetterProp) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let range = map.get_range_by_span(&node.span);
+    let java_key = enum_create_prop_name(env, map, &node.key);
+    let java_param = enum_create_pat(env, map, &node.param);
+    let java_optional_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
+    let return_type = java_ast_factory.create_setter_prop(env, &java_key, &java_param, &java_optional_body, &range);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_param);
+    delete_local_optional_ref!(env, java_optional_body);
+    return_type
   }
 
   fn create_spread_element<'local, 'a>(
@@ -5063,9 +5261,12 @@ pub mod program {
     'local: 'a,
   {
     match node {
+      Prop::Assign(node) => create_assign_prop(env, map, node),
+      Prop::Getter(node) => create_getter_prop(env, map, node),
+      Prop::KeyValue(node) => create_key_value_prop(env, map, node),
+      Prop::Method(node) => create_method_prop(env, map, node),
+      Prop::Setter(node) => create_setter_prop(env, map, node),
       Prop::Shorthand(node) => create_ident(env, map, node),
-      default => panic!("{:?}", default),
-      // TODO
     }
   }
 

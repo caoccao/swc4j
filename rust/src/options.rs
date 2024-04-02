@@ -106,8 +106,7 @@ impl JavaSwc4jParseOptions {
   where
     'local: 'a,
   {
-    let return_value = 
-      call_as_object!(
+    let return_value = call_as_object!(
         env,
         obj,
         self.method_get_media_type,
@@ -125,8 +124,7 @@ impl JavaSwc4jParseOptions {
   where
     'local: 'a,
   {
-    let return_value = 
-      call_as_object!(
+    let return_value = call_as_object!(
         env,
         obj,
         self.method_get_parse_mode,
@@ -142,8 +140,7 @@ impl JavaSwc4jParseOptions {
     obj: &JObject<'_>,
   ) -> String
   {
-    let return_value = 
-      call_as_object!(
+    let return_value = call_as_object!(
         env,
         obj,
         self.method_get_specifier,
@@ -160,8 +157,7 @@ impl JavaSwc4jParseOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_capture_ast,
@@ -177,8 +173,7 @@ impl JavaSwc4jParseOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_capture_tokens,
@@ -194,8 +189,7 @@ impl JavaSwc4jParseOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_scope_analysis,
@@ -407,8 +401,7 @@ impl JavaSwc4jTranspileOptions {
   where
     'local: 'a,
   {
-    let return_value = 
-      call_as_object!(
+    let return_value = call_as_object!(
         env,
         obj,
         self.method_get_imports_not_used_as_values,
@@ -424,8 +417,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> String
   {
-    let return_value = 
-      call_as_object!(
+    let return_value = call_as_object!(
         env,
         obj,
         self.method_get_jsx_factory,
@@ -442,8 +434,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> String
   {
-    let return_value = 
-      call_as_object!(
+    let return_value = call_as_object!(
         env,
         obj,
         self.method_get_jsx_fragment_factory,
@@ -460,8 +451,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> Option<String>
   {
-    let return_value = 
-      call_as_object!(
+    let return_value = call_as_object!(
         env,
         obj,
         self.method_get_jsx_import_source,
@@ -480,8 +470,7 @@ impl JavaSwc4jTranspileOptions {
   where
     'local: 'a,
   {
-    let return_value = 
-      call_as_object!(
+    let return_value = call_as_object!(
         env,
         obj,
         self.method_get_media_type,
@@ -499,8 +488,7 @@ impl JavaSwc4jTranspileOptions {
   where
     'local: 'a,
   {
-    let return_value = 
-      call_as_object!(
+    let return_value = call_as_object!(
         env,
         obj,
         self.method_get_parse_mode,
@@ -516,8 +504,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> String
   {
-    let return_value = 
-      call_as_object!(
+    let return_value = call_as_object!(
         env,
         obj,
         self.method_get_specifier,
@@ -534,8 +521,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_capture_ast,
@@ -551,8 +537,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_capture_tokens,
@@ -568,8 +553,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_emit_metadata,
@@ -585,8 +569,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_inline_source_map,
@@ -602,8 +585,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_inline_sources,
@@ -619,8 +601,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_jsx_automatic,
@@ -636,8 +617,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_jsx_development,
@@ -653,8 +633,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_precompile_jsx,
@@ -670,8 +649,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_scope_analysis,
@@ -687,8 +665,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_source_map,
@@ -704,8 +681,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_transform_jsx,
@@ -721,8 +697,7 @@ impl JavaSwc4jTranspileOptions {
     obj: &JObject<'_>,
   ) -> bool
   {
-    let return_value = 
-      call_as_boolean!(
+    let return_value = call_as_boolean!(
         env,
         obj,
         self.method_is_var_decl_imports,

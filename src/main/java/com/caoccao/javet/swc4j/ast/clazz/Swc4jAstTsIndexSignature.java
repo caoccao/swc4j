@@ -25,7 +25,6 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.Collections;
 import java.util.List;
 
 public class Swc4jAstTsIndexSignature
@@ -51,7 +50,7 @@ public class Swc4jAstTsIndexSignature
         this.typeAnn = typeAnn;
         children = SimpleList.copyOf(params);
         children.add(typeAnn);
-        children = Collections.unmodifiableList(children);
+        children = SimpleList.immutable(children);
         updateParent();
     }
 

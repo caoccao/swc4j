@@ -27,7 +27,6 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.Collections;
 import java.util.List;
 
 public class Swc4jAstClass
@@ -67,7 +66,7 @@ public class Swc4jAstClass
         children.add(superClass);
         children.add(superTypeParams);
         children.add(typeParams);
-        children = Collections.unmodifiableList(children);
+        children = SimpleList.immutable(children);
         updateParent();
     }
 

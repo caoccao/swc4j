@@ -22,7 +22,6 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.Collections;
 import java.util.List;
 
 public class Swc4jAstParam
@@ -40,7 +39,7 @@ public class Swc4jAstParam
         this.pat = AssertionUtils.notNull(pat, "Pat");
         children = SimpleList.copyOf(decorators);
         children.add(pat);
-        children = Collections.unmodifiableList(children);
+        children = SimpleList.immutable(children);
         updateParent();
     }
 

@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.clazz.*;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TestISwc4jAstProp {
     @Test
     public void testAssignable() {
+        assertTrue(ISwc4jAstProp.class.isAssignableFrom(Swc4jAstAssignProp.class));
+        assertTrue(ISwc4jAstProp.class.isAssignableFrom(Swc4jAstGetterProp.class));
         assertTrue(ISwc4jAstProp.class.isAssignableFrom(Swc4jAstIdent.class));
+        assertTrue(ISwc4jAstProp.class.isAssignableFrom(Swc4jAstKeyValueProp.class));
+        assertTrue(ISwc4jAstProp.class.isAssignableFrom(Swc4jAstMethodProp.class));
+        assertTrue(ISwc4jAstProp.class.isAssignableFrom(Swc4jAstSetterProp.class));
     }
 }

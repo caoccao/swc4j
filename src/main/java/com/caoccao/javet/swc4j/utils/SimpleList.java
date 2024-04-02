@@ -44,6 +44,18 @@ public final class SimpleList {
     }
 
     /**
+     * Get an immutable list.
+     *
+     * @param <T>  the type parameter
+     * @param list the list
+     * @return the list
+     * @since 0.2.0
+     */
+    public static <T> List<T> immutable(List<T> list) {
+        return Collections.unmodifiableList(list);
+    }
+
+    /**
      * Immutable copy of list.
      *
      * @param <R>        the type parameter
@@ -53,7 +65,18 @@ public final class SimpleList {
      * @since 0.2.0
      */
     public static <R, T extends R> List<R> immutableCopyOf(Collection<T> collection) {
-        return Collections.unmodifiableList(copyOf(collection));
+        return immutable(copyOf(collection));
+    }
+
+    /**
+     * Immutable of list.
+     *
+     * @param <T> the type parameter
+     * @return the immutable list
+     * @since 0.2.0
+     */
+    public static <T> List<T> immutableOf() {
+        return immutable(of());
     }
 
     /**
@@ -66,18 +89,7 @@ public final class SimpleList {
      */
     @SafeVarargs
     public static <T> List<T> immutableOf(T... objects) {
-        return Collections.unmodifiableList(of(objects));
-    }
-
-    /**
-     * Immutable of list.
-     *
-     * @param <T> the type parameter
-     * @return the immutable list
-     * @since 0.2.0
-     */
-    public static <T> List<T> immutableOf() {
-        return Collections.unmodifiableList(of());
+        return immutable(of(objects));
     }
 
     /**

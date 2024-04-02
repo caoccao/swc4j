@@ -43,6 +43,15 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstAssignProp createAssignProp(
+            Swc4jAstIdent key,
+            ISwc4jAstExpr value,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstAssignProp(key, value, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstAutoAccessor createAutoAccessor(
             ISwc4jAstKey key,
             @Jni2RustParam(optional = true) ISwc4jAstExpr value,
@@ -261,6 +270,16 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstGetterProp createGetterProp(
+            ISwc4jAstPropName key,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstGetterProp(key, typeAnn, body, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstIdent createIdent(
             String sym,
             boolean optional,
@@ -313,6 +332,24 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstJsxText(value, raw, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstKeyValueProp createKeyValueProp(
+            ISwc4jAstPropName key,
+            ISwc4jAstExpr value,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstKeyValueProp(key, value, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstMethodProp createMethodProp(
+            ISwc4jAstPropName key,
+            Swc4jAstFunction function,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstMethodProp(key, function, startPosition, endPosition);
     }
 
     @Jni2RustMethod
@@ -431,6 +468,16 @@ public final class Swc4jAstFactory {
             @Jni2RustParamStartPosition int startPosition,
             @Jni2RustParamEndPosition int endPosition) {
         return new Swc4jAstScript(body, shebang, startPosition, endPosition);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstSetterProp createSetterProp(
+            ISwc4jAstPropName key,
+            ISwc4jAstPat param,
+            @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
+            @Jni2RustParamStartPosition int startPosition,
+            @Jni2RustParamEndPosition int endPosition) {
+        return new Swc4jAstSetterProp(key, param, body, startPosition, endPosition);
     }
 
     @Jni2RustMethod

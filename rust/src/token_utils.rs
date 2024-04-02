@@ -239,8 +239,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_assign_operator,
@@ -265,8 +264,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_big_int,
@@ -291,8 +289,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_binary_operator,
@@ -322,8 +319,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_error,
@@ -347,8 +343,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_false,
@@ -372,8 +367,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_generic_operator,
@@ -398,8 +392,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ident_known,
@@ -425,8 +418,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ident_other,
@@ -452,8 +444,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_jsx_tag_name,
@@ -479,8 +470,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_jsx_tag_text,
@@ -505,8 +495,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_keyword,
@@ -528,8 +517,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_null,
@@ -556,8 +544,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_number,
@@ -589,8 +576,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_regex,
@@ -621,8 +607,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_shebang,
@@ -652,8 +637,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_string,
@@ -683,8 +667,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_template,
@@ -708,8 +691,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_true,
@@ -734,8 +716,7 @@ impl JavaSwc4jTokenFactory {
     let start_position = int_to_jvalue!(range.start);
     let end_position = int_to_jvalue!(range.end);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
-    let return_value = 
-      call_static_as_object!(
+    let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_unknown,

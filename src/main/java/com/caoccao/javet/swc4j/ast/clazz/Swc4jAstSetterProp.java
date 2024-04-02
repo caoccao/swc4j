@@ -18,51 +18,34 @@ package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.List;
-
-public class Swc4jAstConstructor
+public class Swc4jAstSetterProp
         extends Swc4jAst
-        implements ISwc4jAstClassMember {
-    @Nullable
-    protected final Swc4jAstAccessibility accessibility;
+        implements ISwc4jAstProp {
     @Nullable
     protected final Swc4jAstBlockStmt body;
     protected final ISwc4jAstPropName key;
-    protected final boolean optional;
-    protected final List<ISwc4jAstParamOrTsParamProp> params;
+    protected final ISwc4jAstPat param;
 
-    public Swc4jAstConstructor(
+    public Swc4jAstSetterProp(
             ISwc4jAstPropName key,
-            List<ISwc4jAstParamOrTsParamProp> params,
+            ISwc4jAstPat param,
             Swc4jAstBlockStmt body,
-            Swc4jAstAccessibility accessibility,
-            boolean optional,
             int startPosition,
             int endPosition) {
         super(startPosition, endPosition);
-        this.accessibility = accessibility;
         this.body = body;
         this.key = AssertionUtils.notNull(key, "Key");
-        this.optional = optional;
-        this.params = AssertionUtils.notNull(params, "Params");
-        children = SimpleList.copyOf(params);
-        children.add(body);
-        children.add(key);
-        children = SimpleList.immutable(children);
+        this.param = AssertionUtils.notNull(param, "Param");
+        children = SimpleList.immutableOf(key, param, body);
         updateParent();
-    }
-
-    public Swc4jAstAccessibility getAccessibility() {
-        return accessibility;
     }
 
     public Swc4jAstBlockStmt getBody() {
@@ -73,16 +56,12 @@ public class Swc4jAstConstructor
         return key;
     }
 
-    public List<ISwc4jAstParamOrTsParamProp> getParams() {
-        return params;
+    public ISwc4jAstPat getParam() {
+        return param;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.Constructor;
-    }
-
-    public boolean isOptional() {
-        return optional;
+        return Swc4jAstType.SetterProp;
     }
 }

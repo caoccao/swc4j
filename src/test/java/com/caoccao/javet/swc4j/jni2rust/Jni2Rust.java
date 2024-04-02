@@ -194,7 +194,6 @@ public class Jni2Rust<T> {
                         }
                     }
                     // call
-                    lines.add("    let return_value = ");
                     String returnType;
                     if (isVoid) {
                         returnType = "void";
@@ -204,11 +203,11 @@ public class Jni2Rust<T> {
                         returnType = "object";
                     }
                     if (isStatic) {
-                        lines.add(String.format("      call_static_as_%s!(", returnType));
+                        lines.add(String.format("    let return_value = call_static_as_%s!(", returnType));
                         lines.add("        env,");
                         lines.add("        &self.class,");
                     } else {
-                        lines.add(String.format("      call_as_%s!(", returnType));
+                        lines.add(String.format("    let return_value = call_as_%s!(", returnType));
                         lines.add("        env,");
                         lines.add("        obj,");
                     }
