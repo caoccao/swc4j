@@ -16,5 +16,5 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-public interface ISwc4jAstDefaultDecl extends ISwc4jAstStmt {
+public interface ISwc4jAstDefaultDecl extends ISwc4jAst {
 }

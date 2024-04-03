@@ -23,7 +23,8 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstTsTypeAnn extends Swc4jAst {
+public class Swc4jAstTsTypeAnn
+        extends Swc4jAst {
     protected final ISwc4jAstTsType typeAnn;
 
     public Swc4jAstTsTypeAnn(

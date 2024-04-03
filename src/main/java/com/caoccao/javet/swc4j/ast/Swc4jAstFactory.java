@@ -620,6 +620,24 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsInterfaceBody createTsInterfaceBody(
+            List<ISwc4jAstTsTypeElement> body,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsInterfaceBody(body, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsInterfaceDecl createTsInterfaceDecl(
+            Swc4jAstIdent id,
+            boolean declare,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParam typeParams,
+            List<Swc4jAstTsExprWithTypeArgs> _extends,
+            Swc4jAstTsInterfaceBody body,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsInterfaceDecl(id, declare, typeParams, _extends, body, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsNamespaceExportDecl createTsNamespaceExportDecl(
             Swc4jAstIdent id,
             @Jni2RustParam Swc4jAstSpan span) {

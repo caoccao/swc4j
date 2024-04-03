@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.interfaces;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstClassExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstFnExpr;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsInterfaceDecl;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,5 +28,6 @@ public class TestISwc4jAstDefaultDecl {
     public void testAssignable() {
         assertTrue(ISwc4jAstDefaultDecl.class.isAssignableFrom(Swc4jAstClassExpr.class));
         assertTrue(ISwc4jAstDefaultDecl.class.isAssignableFrom(Swc4jAstFnExpr.class));
+        assertTrue(ISwc4jAstDefaultDecl.class.isAssignableFrom(Swc4jAstTsInterfaceDecl.class));
     }
 }

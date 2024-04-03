@@ -94,6 +94,8 @@ struct JavaSwc4jAstFactory {
   method_create_ts_external_module_ref: JStaticMethodID,
   method_create_ts_import_equals_decl: JStaticMethodID,
   method_create_ts_index_signature: JStaticMethodID,
+  method_create_ts_interface_body: JStaticMethodID,
+  method_create_ts_interface_decl: JStaticMethodID,
   method_create_ts_namespace_export_decl: JStaticMethodID,
   method_create_ts_type_ann: JStaticMethodID,
   method_create_ts_type_param: JStaticMethodID,
@@ -570,6 +572,20 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstTsIndexSignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsIndexSignature");
+    let method_create_ts_interface_body = env
+      .get_static_method_id(
+        &class,
+        "createTsInterfaceBody",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsInterfaceBody");
+    let method_create_ts_interface_decl = env
+      .get_static_method_id(
+        &class,
+        "createTsInterfaceDecl",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsInterfaceDecl;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsInterfaceDecl");
     let method_create_ts_namespace_export_decl = env
       .get_static_method_id(
         &class,
@@ -700,6 +716,8 @@ impl JavaSwc4jAstFactory {
       method_create_ts_external_module_ref,
       method_create_ts_import_equals_decl,
       method_create_ts_index_signature,
+      method_create_ts_interface_body,
+      method_create_ts_interface_decl,
       method_create_ts_namespace_export_decl,
       method_create_ts_type_ann,
       method_create_ts_type_param,
@@ -2296,6 +2314,56 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_index_signature,
         &[params, type_ann, readonly, is_static, span],
         "Swc4jAstTsIndexSignature create_ts_index_signature()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_interface_body<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    body: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let body = object_to_jvalue!(body);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_interface_body,
+        &[body, span],
+        "Swc4jAstTsInterfaceBody create_ts_interface_body()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_interface_decl<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    id: &JObject<'_>,
+    declare: bool,
+    type_params: &Option<JObject>,
+    extends: &JObject<'_>,
+    body: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = object_to_jvalue!(id);
+    let declare = boolean_to_jvalue!(declare);
+    let type_params = optional_object_to_jvalue!(type_params);
+    let extends = object_to_jvalue!(extends);
+    let body = object_to_jvalue!(body);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_interface_decl,
+        &[id, declare, type_params, extends, body, span],
+        "Swc4jAstTsInterfaceDecl create_ts_interface_decl()"
       );
     return_value
   }
@@ -5430,6 +5498,70 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_interface_body<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsInterfaceBody,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_body = java_array_list.construct(env, node.body.len());
+    node.body.iter().for_each(|node| {
+      let java_node = enum_create_ts_type_element(env, map, node);
+      java_array_list.add(env, &java_body, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_type = java_ast_factory.create_ts_interface_body(env, &java_body, &java_range);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
+  fn create_ts_interface_decl<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsInterfaceDecl,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_id = create_ident(env, map, &node.id);
+    let declare = node.declare;
+    let java_optional_type_params = node
+      .type_params
+      .as_ref()
+      .map(|node| create_ts_type_param_decl(env, map, node));
+    let java_extends = java_array_list.construct(env, node.extends.len());
+    node.extends.iter().for_each(|node| {
+      let java_node = create_ts_expr_with_type_args(env, map, node);
+      java_array_list.add(env, &java_extends, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_body = create_ts_interface_body(env, map, &node.body);
+    let return_type = java_ast_factory.create_ts_interface_decl(
+      env,
+      &java_id,
+      declare,
+      &java_optional_type_params,
+      &java_extends,
+      &java_body,
+      &java_range,
+    );
+    delete_local_ref!(env, java_id);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_extends);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_ts_namespace_export_decl<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -5681,8 +5813,7 @@ pub mod program {
     match node {
       DefaultDecl::Class(node) => create_class_expr(env, map, node),
       DefaultDecl::Fn(node) => create_fn_expr(env, map, node),
-      default => panic!("{:?}", default),
-      // TODO
+      DefaultDecl::TsInterfaceDecl(node) => create_ts_interface_decl(env, map, node),
     }
   }
 

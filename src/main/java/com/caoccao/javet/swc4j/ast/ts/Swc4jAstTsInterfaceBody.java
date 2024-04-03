@@ -19,36 +19,31 @@ package com.caoccao.javet.swc4j.ast.ts;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsTypeElement;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstTsExprWithTypeArgs
-        extends Swc4jAst {
-    protected final ISwc4jAstExpr expr;
-    protected final Swc4jAstTsTypeParamInstantiation typeArgs;
+import java.util.List;
 
-    public Swc4jAstTsExprWithTypeArgs(
-            ISwc4jAstExpr expr,
-            Swc4jAstTsTypeParamInstantiation typeArgs,
+public class Swc4jAstTsInterfaceBody
+        extends Swc4jAst {
+    protected final List<ISwc4jAstTsTypeElement> body;
+
+    public Swc4jAstTsInterfaceBody(
+            List<ISwc4jAstTsTypeElement> body,
             Swc4jAstSpan span) {
         super(span);
-        this.expr = AssertionUtils.notNull(expr, "Expr");
-        this.typeArgs = AssertionUtils.notNull(typeArgs, "TypeArgs");
-        children = SimpleList.immutableOf(expr, typeArgs);
+        this.body = SimpleList.immutableCopyOf(AssertionUtils.notNull(body, "Body"));
+        children = SimpleList.immutableCopyOf(body);
         updateParent();
     }
 
-    public ISwc4jAstExpr getExpr() {
-        return expr;
+    public List<ISwc4jAstTsTypeElement> getBody() {
+        return body;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.TsExprWithTypeArgs;
-    }
-
-    public Swc4jAstTsTypeParamInstantiation getTypeArgs() {
-        return typeArgs;
+        return Swc4jAstType.TsInterfaceBody;
     }
 }
