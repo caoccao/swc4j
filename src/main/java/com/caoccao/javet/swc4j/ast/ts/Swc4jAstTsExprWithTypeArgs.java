@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -29,9 +30,8 @@ public class Swc4jAstTsExprWithTypeArgs extends Swc4jAst {
     public Swc4jAstTsExprWithTypeArgs(
             ISwc4jAstExpr expr,
             Swc4jAstTsTypeParamInstantiation typeArgs,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.expr = AssertionUtils.notNull(expr, "Expr");
         this.typeArgs = AssertionUtils.notNull(typeArgs, "TypeArgs");
         children = SimpleList.immutableOf(expr, typeArgs);

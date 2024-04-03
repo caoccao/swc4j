@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.pat;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
@@ -33,9 +34,8 @@ public class Swc4jAstKeyValuePatProp
     public Swc4jAstKeyValuePatProp(
             ISwc4jAstPropName key,
             ISwc4jAstPat value,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.key = AssertionUtils.notNull(key, "Key");
         this.value = AssertionUtils.notNull(value, "Value");
         children = SimpleList.immutableOf(key, value);

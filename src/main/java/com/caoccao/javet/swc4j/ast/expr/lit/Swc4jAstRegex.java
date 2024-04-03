@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -27,8 +28,11 @@ public class Swc4jAstRegex
     protected final String exp;
     protected final String flags;
 
-    public Swc4jAstRegex(String exp, String flags, int startPosition, int endPosition) {
-        super(startPosition, endPosition);
+    public Swc4jAstRegex(
+            String exp,
+            String flags,
+            Swc4jAstSpan span) {
+        super(span);
         this.flags = AssertionUtils.notNull(flags, "Flags");
         this.exp = AssertionUtils.notNull(exp, "Exp");
     }

@@ -44,9 +44,8 @@ public final class Swc4jAstFactory {
     @Jni2RustMethod
     public static Swc4jAstArrayLit createArrayLit(
             List<Swc4jAstExprOrSpread> elems,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstArrayLit(elems, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstArrayLit(elems, span);
     }
 
     @Jni2RustMethod
@@ -54,36 +53,32 @@ public final class Swc4jAstFactory {
             List<ISwc4jAstPat> elems,
             boolean optional,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstArrayPat(elems, optional, typeAnn, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstArrayPat(elems, optional, typeAnn, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstAssignPat createAssignPat(
             ISwc4jAstPat left,
             ISwc4jAstExpr right,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstAssignPat(left, right, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstAssignPat(left, right, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstAssignPatProp createAssignPatProp(
             Swc4jAstIdent key,
             @Jni2RustParam(optional = true) ISwc4jAstExpr value,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstAssignPatProp(key, value, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstAssignPatProp(key, value, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstAssignProp createAssignProp(
             Swc4jAstIdent key,
             ISwc4jAstExpr value,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstAssignProp(key, value, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstAssignProp(key, value, span);
     }
 
     @Jni2RustMethod
@@ -94,54 +89,48 @@ public final class Swc4jAstFactory {
             boolean isStatic,
             List<Swc4jAstDecorator> decorators,
             int accessibilityId,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
+            @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstAutoAccessor(
                 key, value, typeAnn, isStatic, decorators,
                 accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
-                startPosition, endPosition);
+                span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstAwaitExpr createAwaitExpr(
             ISwc4jAstExpr arg,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstAwaitExpr(arg, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstAwaitExpr(arg, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstBigInt createBigInt(
             int sign,
             @Jni2RustParam(optional = true) String raw,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstBigInt(Swc4jAstBigIntSign.parse(sign), raw, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstBigInt(Swc4jAstBigIntSign.parse(sign), raw, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstBindingIdent createBindingIdent(
             Swc4jAstIdent id,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstBindingIdent(id, typeAnn, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstBindingIdent(id, typeAnn, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstBlockStmt createBlockStmt(
             List<ISwc4jAstStmt> stmts,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstBlockStmt(stmts, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstBlockStmt(stmts, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstBool createBool(
             boolean value,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstBool(value, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstBool(value, span);
     }
 
     @Jni2RustMethod
@@ -153,10 +142,9 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation superTypeParams,
             List<Swc4jAstTsExprWithTypeArgs> _implements,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
+            @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstClass(decorators, body, superClass, isAbstract, typeParams,
-                superTypeParams, _implements, startPosition, endPosition);
+                superTypeParams, _implements, span);
     }
 
     @Jni2RustMethod
@@ -164,9 +152,8 @@ public final class Swc4jAstFactory {
             Swc4jAstIdent ident,
             boolean declare,
             Swc4jAstClass clazz,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstClassDecl(ident, declare, clazz, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstClassDecl(ident, declare, clazz, span);
     }
 
     @Jni2RustMethod
@@ -179,12 +166,11 @@ public final class Swc4jAstFactory {
             boolean isAbstract,
             boolean optional,
             boolean isOverride,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
+            @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstClassMethod(
                 key, function, Swc4jAstMethodKind.parse(kind), isStatic,
                 accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
-                isAbstract, optional, isOverride, startPosition, endPosition);
+                isAbstract, optional, isOverride, span);
     }
 
     @Jni2RustMethod
@@ -201,21 +187,19 @@ public final class Swc4jAstFactory {
             boolean readonly,
             boolean declare,
             boolean definite,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
+            @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstClassProp(
                 key, value, typeAnn, isStatic, decorators,
                 accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
                 isAbstract, isOptional, isOverride, readonly, declare, definite,
-                startPosition, endPosition);
+                span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstComputedPropName createComputedPropName(
             ISwc4jAstExpr expr,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstComputedPropName(expr, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstComputedPropName(expr, span);
     }
 
     @Jni2RustMethod
@@ -225,34 +209,30 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
             int accessibilityId,
             boolean optional,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
+            @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstConstructor(
                 key, params, body,
                 accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
-                optional, startPosition, endPosition);
+                optional, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstDebuggerStmt createDebuggerStmt(
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstDebuggerStmt(startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstDebuggerStmt(span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstDecorator createDecorator(
             ISwc4jAstExpr expr,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstDecorator(expr, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstDecorator(expr, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstEmptyStmt createEmptyStmt(
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstEmptyStmt(startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstEmptyStmt(span);
     }
 
     @Jni2RustMethod
@@ -260,51 +240,44 @@ public final class Swc4jAstFactory {
             Swc4jAstStr src,
             boolean typeOnly,
             @Jni2RustParam(optional = true) Swc4jAstObjectLit with,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstExportAll(src, typeOnly, with, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstExportAll(src, typeOnly, with, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstExportDecl createExportDecl(
             ISwc4jAstDecl decl,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstExportDecl(decl, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstExportDecl(decl, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstExportDefaultDecl createExportDefaultDecl(
             ISwc4jAstDefaultDecl decl,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstExportDefaultDecl(decl, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstExportDefaultDecl(decl, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstExportDefaultExpr createExportDefaultExpr(
             ISwc4jAstExpr decl,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstExportDefaultExpr(decl, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstExportDefaultExpr(decl, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstExprOrSpread createExprOrSpread(
-            int spreadStartPosition,
-            int spreadEndPosition,
+            @Jni2RustParam(optional = true) Swc4jAstSpan spread,
             ISwc4jAstExpr expr,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstExprOrSpread(spreadStartPosition, spreadEndPosition, expr, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstExprOrSpread(spread, expr, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstExprStmt createExprStmt(
             ISwc4jAstExpr expr,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstExprStmt(expr, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstExprStmt(expr, span);
     }
 
     @Jni2RustMethod
@@ -316,10 +289,9 @@ public final class Swc4jAstFactory {
             boolean isAsync,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn returnType,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
+            @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstFunction(
-                params, decorators, body, generator, isAsync, typeParams, returnType, startPosition, endPosition);
+                params, decorators, body, generator, isAsync, typeParams, returnType, span);
     }
 
     @Jni2RustMethod
@@ -327,18 +299,16 @@ public final class Swc4jAstFactory {
             ISwc4jAstPropName key,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstGetterProp(key, typeAnn, body, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstGetterProp(key, typeAnn, body, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstIdent createIdent(
             String sym,
             boolean optional,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstIdent(sym, optional, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstIdent(sym, optional, span);
     }
 
     @Jni2RustMethod
@@ -347,17 +317,15 @@ public final class Swc4jAstFactory {
             Swc4jAstStr src,
             boolean typeOnly,
             @Jni2RustParam(optional = true) Swc4jAstObjectLit with,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstImportDecl(specifiers, src, typeOnly, with, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstImportDecl(specifiers, src, typeOnly, with, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstImportDefaultSpecifier createImportDefaultSpecifier(
             Swc4jAstIdent local,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstImportDefaultSpecifier(local, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstImportDefaultSpecifier(local, span);
     }
 
     @Jni2RustMethod
@@ -365,69 +333,61 @@ public final class Swc4jAstFactory {
             Swc4jAstIdent local,
             @Jni2RustParam(optional = true) ISwc4jAstModuleExportName imported,
             boolean typeOnly,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstImportNamedSpecifier(local, imported, typeOnly, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstImportNamedSpecifier(local, imported, typeOnly, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstImportStarAsSpecifier createImportStarAsSpecifier(
             Swc4jAstIdent local,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstImportStarAsSpecifier(local, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstImportStarAsSpecifier(local, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstInvalid createInvalid(
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstInvalid(startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstInvalid(span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstJsxText createJsxText(
             String value,
             String raw,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstJsxText(value, raw, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstJsxText(value, raw, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstKeyValuePatProp createKeyValuePatProp(
             ISwc4jAstPropName key,
             ISwc4jAstPat value,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstKeyValuePatProp(key, value, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstKeyValuePatProp(key, value, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstKeyValueProp createKeyValueProp(
             ISwc4jAstPropName key,
             ISwc4jAstExpr value,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstKeyValueProp(key, value, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstKeyValueProp(key, value, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstMethodProp createMethodProp(
             ISwc4jAstPropName key,
             Swc4jAstFunction function,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstMethodProp(key, function, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstMethodProp(key, function, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstModule createModule(
             List<ISwc4jAstModuleItem> body,
             @Jni2RustParam(optional = true) String shebang,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstModule(body, shebang, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstModule(body, shebang, span);
     }
 
     @Jni2RustMethod
@@ -436,33 +396,29 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) Swc4jAstStr src,
             boolean typeOnly,
             @Jni2RustParam(optional = true) Swc4jAstObjectLit with,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstNamedExport(specifiers, src, typeOnly, with, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstNamedExport(specifiers, src, typeOnly, with, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstNull createNull(
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstNull(startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstNull(span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstNumber createNumber(
             double value,
             @Jni2RustParam(optional = true) String raw,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstNumber(value, raw, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstNumber(value, raw, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstObjectLit createObjectLit(
             List<ISwc4jAstPropOrSpread> props,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstObjectLit(props, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstObjectLit(props, span);
     }
 
     @Jni2RustMethod
@@ -470,18 +426,16 @@ public final class Swc4jAstFactory {
             List<ISwc4jAstObjectPatProp> props,
             boolean optional,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstObjectPat(props, optional, typeAnn, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstObjectPat(props, optional, typeAnn, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstParam createParam(
             List<Swc4jAstDecorator> decorators,
             ISwc4jAstPat pat,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstParam(decorators, pat, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstParam(decorators, pat, span);
     }
 
     @Jni2RustMethod
@@ -494,20 +448,18 @@ public final class Swc4jAstFactory {
             boolean isAbstract,
             boolean optional,
             boolean isOverride,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
+            @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstPrivateMethod(
                 key, function, Swc4jAstMethodKind.parse(kind), isStatic,
                 accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
-                isAbstract, optional, isOverride, startPosition, endPosition);
+                isAbstract, optional, isOverride, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstPrivateName createPrivateName(
             Swc4jAstIdent id,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstPrivateName(id, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstPrivateName(id, span);
     }
 
     @Jni2RustMethod
@@ -522,43 +474,37 @@ public final class Swc4jAstFactory {
             boolean isOverride,
             boolean readonly,
             boolean definite,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
+            @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstPrivateProp(
                 key, value, typeAnn, isStatic, decorators,
                 accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
                 isOptional, isOverride, readonly, definite,
-                startPosition, endPosition);
+                span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstRegex createRegex(
             String exp,
             String flags,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstRegex(exp, flags, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstRegex(exp, flags, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstRestPat createRestPat(
-            int dot3TokenStartPosition,
-            int dot3TokenEndPosition,
+            Swc4jAstSpan dot3Token,
             ISwc4jAstPat arg,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstRestPat(
-                dot3TokenStartPosition, dot3TokenEndPosition, arg, typeAnn, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstRestPat(dot3Token, arg, typeAnn, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstScript createScript(
             List<ISwc4jAstStmt> body,
             @Jni2RustParam(optional = true) String shebang,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstScript(body, shebang, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstScript(body, shebang, span);
     }
 
     @Jni2RustMethod
@@ -566,68 +512,66 @@ public final class Swc4jAstFactory {
             ISwc4jAstPropName key,
             ISwc4jAstPat param,
             @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstSetterProp(key, param, body, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstSetterProp(key, param, body, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstSpan createSpan(
+            @Jni2RustParamStartPosition int start,
+            @Jni2RustParamEndPosition int end) {
+        return new Swc4jAstSpan(start, end);
     }
 
     @Jni2RustMethod
     public static Swc4jAstSpreadElement createSpreadElement(
-            int dot3TokenStartPosition,
-            int dot3TokenEndPosition,
+            Swc4jAstSpan dot3Token,
             ISwc4jAstExpr expr,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstSpreadElement(dot3TokenStartPosition, dot3TokenEndPosition, expr, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstSpreadElement(dot3Token, expr, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstStaticBlock createStaticBlock(
             Swc4jAstBlockStmt body,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstStaticBlock(body, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstStaticBlock(body, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstStr createStr(
             String value,
             @Jni2RustParam(optional = true) String raw,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstStr(value, raw, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstStr(value, raw, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstThisExpr createThisExpr(
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstThisExpr(startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstThisExpr(span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstTsExportAssignment createTsExportAssignment(
             ISwc4jAstExpr decl,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstTsExportAssignment(decl, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsExportAssignment(decl, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstTsExprWithTypeArgs createTsExprWithTypeArgs(
             ISwc4jAstExpr expr,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstTsExprWithTypeArgs(expr, typeArgs, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsExprWithTypeArgs(expr, typeArgs, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstTsExternalModuleRef createTsExternalModuleRef(
             Swc4jAstStr expr,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstTsExternalModuleRef(expr, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsExternalModuleRef(expr, span);
     }
 
     @Jni2RustMethod
@@ -636,9 +580,8 @@ public final class Swc4jAstFactory {
             boolean typeOnly,
             Swc4jAstIdent id,
             ISwc4jAstModuleRef moduleRef,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstTsImportEqualsDecl(export, typeOnly, id, moduleRef, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsImportEqualsDecl(export, typeOnly, id, moduleRef, span);
     }
 
     @Jni2RustMethod
@@ -647,25 +590,22 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             boolean readonly,
             boolean isStatic,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstTsIndexSignature(params, typeAnn, readonly, isStatic, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsIndexSignature(params, typeAnn, readonly, isStatic, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstTsNamespaceExportDecl createTsNamespaceExportDecl(
             Swc4jAstIdent id,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstTsNamespaceExportDecl(id, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsNamespaceExportDecl(id, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstTsTypeAnn createTsTypeAnn(
             ISwc4jAstTsType typeAnn,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstTsTypeAnn(typeAnn, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTypeAnn(typeAnn, span);
     }
 
     @Jni2RustMethod
@@ -676,43 +616,38 @@ public final class Swc4jAstFactory {
             boolean isConst,
             @Jni2RustParam(optional = true) ISwc4jAstTsType constraint,
             @Jni2RustParam(optional = true) ISwc4jAstTsType _default,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstTsTypeParam(name, isIn, isOut, isConst, constraint, _default, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTypeParam(name, isIn, isOut, isConst, constraint, _default, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstTsTypeParamDecl createTsTypeParamDecl(
             List<Swc4jAstTsTypeParam> params,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstTsTypeParamDecl(params, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTypeParamDecl(params, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstTsTypeParamInstantiation createTsTypeParamInstantiation(
             List<ISwc4jAstTsType> params,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstTsTypeParamInstantiation(params, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTypeParamInstantiation(params, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstUnaryExpr createUnaryExpr(
             int op,
             ISwc4jAstExpr arg,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstUnaryExpr(Swc4jAstUnaryOp.parse(op), arg, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstUnaryExpr(Swc4jAstUnaryOp.parse(op), arg, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstUsingDecl createUsingDecl(
             boolean isAwait,
             List<Swc4jAstVarDeclarator> decls,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstUsingDecl(isAwait, decls, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstUsingDecl(isAwait, decls, span);
     }
 
     @Jni2RustMethod
@@ -720,9 +655,8 @@ public final class Swc4jAstFactory {
             int kindId,
             boolean declare,
             List<Swc4jAstVarDeclarator> decls,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstVarDecl(Swc4jAstVarDeclKind.parse(kindId), declare, decls, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstVarDecl(Swc4jAstVarDeclKind.parse(kindId), declare, decls, span);
     }
 
     @Jni2RustMethod
@@ -730,8 +664,7 @@ public final class Swc4jAstFactory {
             ISwc4jAstPat name,
             @Jni2RustParam(optional = true) ISwc4jAstExpr init,
             boolean definite,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition) {
-        return new Swc4jAstVarDeclarator(name, init, definite, startPosition, endPosition);
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstVarDeclarator(name, init, definite, span);
     }
 }

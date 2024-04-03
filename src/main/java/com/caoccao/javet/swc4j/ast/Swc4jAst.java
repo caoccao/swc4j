@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
@@ -35,17 +36,11 @@ public abstract class Swc4jAst implements ISwc4jAst {
      */
     protected static final List<ISwc4jAst> EMPTY_CHILDREN = SimpleList.immutableOf();
     /**
-     * The End position.
+     * The Span.
      *
      * @since 0.2.0
      */
-    protected final int endPosition;
-    /**
-     * The Start position.
-     *
-     * @since 0.2.0
-     */
-    protected final int startPosition;
+    protected final Swc4jAstSpan span;
     /**
      * The Children.
      *
@@ -62,15 +57,14 @@ public abstract class Swc4jAst implements ISwc4jAst {
     /**
      * Instantiates a new Swc4j ast.
      *
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param span the span
      * @since 0.2.0
      */
-    protected Swc4jAst(int startPosition, int endPosition) {
+    protected Swc4jAst(
+            Swc4jAstSpan span) {
         children = EMPTY_CHILDREN;
-        this.endPosition = endPosition;
         parent = null;
-        this.startPosition = startPosition;
+        this.span = AssertionUtils.notNull(span, "Span");
     }
 
     @Override
@@ -79,18 +73,13 @@ public abstract class Swc4jAst implements ISwc4jAst {
     }
 
     @Override
-    public int getEndPosition() {
-        return endPosition;
-    }
-
-    @Override
     public ISwc4jAst getParent() {
         return parent;
     }
 
     @Override
-    public int getStartPosition() {
-        return startPosition;
+    public Swc4jAstSpan getSpan() {
+        return span;
     }
 
     @Override

@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropOrSpread;
@@ -26,30 +27,22 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 public class Swc4jAstSpreadElement
         extends Swc4jAst
         implements ISwc4jAstPropOrSpread {
-    protected final int dot3TokenEndPosition;
-    protected final int dot3TokenStartPosition;
+    protected final Swc4jAstSpan dot3Token;
     protected final ISwc4jAstExpr expr;
 
     public Swc4jAstSpreadElement(
-            int dot3TokenStartPosition,
-            int dot3TokenEndPosition,
+            Swc4jAstSpan dot3Token,
             ISwc4jAstExpr expr,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
-        this.dot3TokenEndPosition = dot3TokenEndPosition;
-        this.dot3TokenStartPosition = dot3TokenStartPosition;
+            Swc4jAstSpan span) {
+        super(span);
+        this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
         this.expr = AssertionUtils.notNull(expr, "Expr");
         children = SimpleList.immutableOf(expr);
         updateParent();
     }
 
-    public int getDot3TokenEndPosition() {
-        return dot3TokenEndPosition;
-    }
-
-    public int getDot3TokenStartPosition() {
-        return dot3TokenStartPosition;
+    public Swc4jAstSpan getDot3Token() {
+        return dot3Token;
     }
 
     public ISwc4jAstExpr getExpr() {

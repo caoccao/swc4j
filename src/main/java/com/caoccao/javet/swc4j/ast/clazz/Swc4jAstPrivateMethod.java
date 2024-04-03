@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstMethodKind;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
@@ -47,9 +48,8 @@ public class Swc4jAstPrivateMethod
             boolean _abstract,
             boolean optional,
             boolean _override,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this._abstract = _abstract;
         this._override = _override;
         this._static = _static;

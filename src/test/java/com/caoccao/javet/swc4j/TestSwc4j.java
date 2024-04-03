@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j;
 
-import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.enums.Swc4jTokenType;
@@ -26,13 +25,10 @@ import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import com.caoccao.javet.swc4j.tokens.Swc4jToken;
-import com.caoccao.javet.swc4j.tokens.Swc4jTokenTextValue;
-import com.caoccao.javet.swc4j.tokens.Swc4jTokenTextValueFlags;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -167,7 +163,7 @@ public class TestSwc4j extends BaseTestSuite {
         assertFalse(tokens.get(12).isLineBreakAhead());
         tokens.forEach(token ->
                 assertEquals(
-                        code.substring(token.getStartPosition(), token.getEndPosition()),
+                        code.substring(token.getSpan().getStart(), token.getSpan().getEnd()),
                         token.getText()));
     }
 

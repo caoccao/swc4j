@@ -16,38 +16,18 @@
 
 package com.caoccao.javet.swc4j.tokens;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.enums.Swc4jTokenType;
 
-/**
- * The type swc4j token text.
- *
- * @since 0.2.0
- */
 public class Swc4jTokenText extends Swc4jToken {
-    /**
-     * The Text.
-     *
-     * @since 0.2.0
-     */
     protected final String text;
 
-    /**
-     * Instantiates a new swc4j token text.
-     *
-     * @param type           the type
-     * @param text           the text
-     * @param startPosition  the start position
-     * @param endPosition    the end position
-     * @param lineBreakAhead the line break ahead
-     * @since 0.2.0
-     */
     public Swc4jTokenText(
             Swc4jTokenType type,
             String text,
-            int startPosition,
-            int endPosition,
+            Swc4jAstSpan span,
             boolean lineBreakAhead) {
-        super(type, startPosition, endPosition, lineBreakAhead);
+        super(type, span, lineBreakAhead);
         this.text = text;
     }
 

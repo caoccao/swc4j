@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -29,9 +30,8 @@ public class Swc4jAstTsTypeParamDecl
 
     public Swc4jAstTsTypeParamDecl(
             List<Swc4jAstTsTypeParam> params,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.params = SimpleList.immutableCopyOf(AssertionUtils.notNull(params, "Params"));
         children = SimpleList.immutableCopyOf(params);
         updateParent();

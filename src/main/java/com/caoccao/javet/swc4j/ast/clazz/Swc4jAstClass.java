@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -50,9 +51,8 @@ public class Swc4jAstClass
             Swc4jAstTsTypeParamDecl typeParams,
             Swc4jAstTsTypeParamInstantiation superTypeParams,
             List<Swc4jAstTsExprWithTypeArgs> _implements,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this._abstract = _abstract;
         this._implements = _implements;
         this.body = AssertionUtils.notNull(body, "Body");

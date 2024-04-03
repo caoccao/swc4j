@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.program;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 
@@ -30,14 +31,16 @@ public class Swc4jAstScript extends Swc4jAstProgram<ISwc4jAstStmt> {
     /**
      * Instantiates a new Swc4j ast script.
      *
-     * @param body          the body
-     * @param shebang       the shebang
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param body    the body
+     * @param shebang the shebang
+     * @param span    the span
      * @since 0.2.0
      */
-    public Swc4jAstScript(List<ISwc4jAstStmt> body, String shebang, int startPosition, int endPosition) {
-        super(body, shebang, startPosition, endPosition);
+    public Swc4jAstScript(
+            List<ISwc4jAstStmt> body,
+            String shebang,
+            Swc4jAstSpan span) {
+        super(body, shebang, span);
     }
 
     @Override

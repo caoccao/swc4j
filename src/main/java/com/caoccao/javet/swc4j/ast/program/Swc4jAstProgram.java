@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.program;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -51,14 +52,16 @@ public abstract class Swc4jAstProgram<AST extends ISwc4jAst>
     /**
      * Instantiates a new Swc4j ast program.
      *
-     * @param body          the body
-     * @param shebang       the shebang
-     * @param startPosition the start position
-     * @param endPosition   the end position
+     * @param body    the body
+     * @param shebang the shebang
+     * @param span    the span
      * @since 0.2.0
      */
-    protected Swc4jAstProgram(List<AST> body, String shebang, int startPosition, int endPosition) {
-        super(startPosition, endPosition);
+    protected Swc4jAstProgram(
+            List<AST> body,
+            String shebang,
+            Swc4jAstSpan span) {
+        super(span);
         this.body = SimpleList.immutableCopyOf(AssertionUtils.notNull(body, "Body"));
         this.shebang = shebang;
         children = SimpleList.immutableCopyOf(body);

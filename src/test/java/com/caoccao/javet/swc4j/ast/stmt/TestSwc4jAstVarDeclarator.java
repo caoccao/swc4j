@@ -37,8 +37,8 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
         assertTrue(output.isScript());
         assertNotNull(output.getProgram());
         Swc4jAstScript script = output.getProgram().asScript();
-        assertEquals(0, script.getStartPosition());
-        assertEquals(code.length(), script.getEndPosition());
+        assertEquals(0, script.getSpan().getStart());
+        assertEquals(code.length(), script.getSpan().getEnd());
         assertNotNull(script.getBody());
         Swc4jAstVarDecl varDecl = (Swc4jAstVarDecl) assertAst(
                 script, script.getBody().get(0), Swc4jAstType.VarDecl, 0, 7);

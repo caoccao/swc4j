@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 
@@ -25,8 +26,10 @@ public class Swc4jAstBool
         implements ISwc4jAstLit {
     protected final boolean value;
 
-    public Swc4jAstBool(boolean value, int startPosition, int endPosition) {
-        super(startPosition, endPosition);
+    public Swc4jAstBool(
+            boolean value,
+            Swc4jAstSpan span) {
+        super(span);
         this.value = value;
     }
 

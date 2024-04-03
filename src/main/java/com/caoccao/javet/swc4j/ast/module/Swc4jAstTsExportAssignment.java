@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.module;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
@@ -30,9 +31,8 @@ public class Swc4jAstTsExportAssignment
 
     public Swc4jAstTsExportAssignment(
             ISwc4jAstExpr expr,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.expr = AssertionUtils.notNull(expr, "Expr");
         children = SimpleList.immutableOf(expr);
         updateParent();

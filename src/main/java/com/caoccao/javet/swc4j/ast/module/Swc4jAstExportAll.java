@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.module;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
@@ -37,9 +38,8 @@ public class Swc4jAstExportAll
             Swc4jAstStr src,
             boolean typeOnly,
             Swc4jAstObjectLit with,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.src = AssertionUtils.notNull(src, "Src");
         this.typeOnly = typeOnly;
         this.with = with;

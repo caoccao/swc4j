@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -32,9 +33,8 @@ public class Swc4jAstParam
     public Swc4jAstParam(
             List<Swc4jAstDecorator> decorators,
             ISwc4jAstPat pat,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
         this.pat = AssertionUtils.notNull(pat, "Pat");
         children = SimpleList.copyOf(decorators);

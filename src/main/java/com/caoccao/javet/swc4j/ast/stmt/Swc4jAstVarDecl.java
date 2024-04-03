@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
@@ -37,9 +38,8 @@ public class Swc4jAstVarDecl
             Swc4jAstVarDeclKind kind,
             boolean declare,
             List<Swc4jAstVarDeclarator> decls,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.declare = declare;
         this.decls = SimpleList.immutableCopyOf(AssertionUtils.notNull(decls, "Decls"));
         this.kind = AssertionUtils.notNull(kind, "Kind");

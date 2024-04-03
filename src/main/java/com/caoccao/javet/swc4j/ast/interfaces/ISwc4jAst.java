@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 
 import java.util.List;
@@ -35,14 +36,6 @@ public interface ISwc4jAst {
     List<ISwc4jAst> getChildren();
 
     /**
-     * Gets end position.
-     *
-     * @return the end position
-     * @since 0.2.0
-     */
-    int getEndPosition();
-
-    /**
      * Gets parent.
      *
      * @return the parent
@@ -51,12 +44,12 @@ public interface ISwc4jAst {
     ISwc4jAst getParent();
 
     /**
-     * Gets start position.
+     * Gets span.
      *
-     * @return the start position
+     * @return the span
      * @since 0.2.0
      */
-    int getStartPosition();
+    Swc4jAstSpan getSpan();
 
     /**
      * Gets type.

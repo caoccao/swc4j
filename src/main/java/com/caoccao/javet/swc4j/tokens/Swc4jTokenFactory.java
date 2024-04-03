@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.tokens;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.enums.Swc4jTokenType;
 import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -36,8 +37,7 @@ public final class Swc4jTokenFactory {
      * Create token assign operator.
      *
      * @param typeId         the type id
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token assign operator
      * @since 0.2.0
@@ -45,20 +45,18 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jToken createAssignOperator(
             @Jni2RustParamTokenType int typeId,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
         Swc4jTokenType type = Swc4jTokenType.parse(typeId);
         AssertionUtils.notTrue(type.getSubType().isAssignOperator(), "Assign operator is expected");
-        return new Swc4jToken(type, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jToken(type, span, lineBreakAhead);
     }
 
     /**
      * Create token big int.
      *
      * @param text           the text
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token big int
      * @since 0.2.0
@@ -66,15 +64,13 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jTokenTextValue<BigInteger> createBigInt(
             String text,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValue<>(
                 Swc4jTokenType.BigInt,
                 text,
                 new BigInteger(text.substring(0, text.length() - 1)),
-                startPosition,
-                endPosition,
+                span,
                 lineBreakAhead);
     }
 
@@ -82,8 +78,7 @@ public final class Swc4jTokenFactory {
      * Create token binary operator.
      *
      * @param typeId         the type id
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token binary operator
      * @since 0.2.0
@@ -91,12 +86,11 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jToken createBinaryOperator(
             @Jni2RustParamTokenType int typeId,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
         Swc4jTokenType type = Swc4jTokenType.parse(typeId);
         AssertionUtils.notTrue(type.getSubType().isBinaryOperator(), "Binary operator is expected");
-        return new Swc4jToken(type, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jToken(type, span, lineBreakAhead);
     }
 
     /**
@@ -104,8 +98,7 @@ public final class Swc4jTokenFactory {
      *
      * @param text           the text
      * @param error          the error
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token error
      * @since 0.2.0
@@ -121,41 +114,36 @@ public final class Swc4jTokenFactory {
                             "      l: java_error.as_raw(),",
                             "    };",
                     }) String error,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValue<>(
                 Swc4jTokenType.Error,
                 text,
                 error,
-                startPosition,
-                endPosition,
+                span,
                 lineBreakAhead);
     }
 
     /**
      * Create token false.
      *
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token false
      * @since 0.2.0
      */
     @Jni2RustMethod
     public static Swc4jToken createFalse(
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
-        return new Swc4jToken(Swc4jTokenType.False, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jToken(Swc4jTokenType.False, span, lineBreakAhead);
     }
 
     /**
      * Create token generic operator.
      *
      * @param typeId         the type id
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token generic operator
      * @since 0.2.0
@@ -163,20 +151,18 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jToken createGenericOperator(
             @Jni2RustParamTokenType int typeId,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
         Swc4jTokenType type = Swc4jTokenType.parse(typeId);
         AssertionUtils.notTrue(type.getSubType().isGenericOperator(), "Generic operator is expected");
-        return new Swc4jToken(type, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jToken(type, span, lineBreakAhead);
     }
 
     /**
      * Create token ident known.
      *
      * @param text           the text
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token ident known
      * @since 0.2.0
@@ -184,18 +170,16 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jTokenText createIdentKnown(
             String text,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
-        return new Swc4jTokenText(Swc4jTokenType.IdentKnown, text, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jTokenText(Swc4jTokenType.IdentKnown, text, span, lineBreakAhead);
     }
 
     /**
      * Create token ident other.
      *
      * @param text           the text
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token ident other
      * @since 0.2.0
@@ -203,18 +187,16 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jTokenText createIdentOther(
             String text,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
-        return new Swc4jTokenText(Swc4jTokenType.IdentOther, text, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jTokenText(Swc4jTokenType.IdentOther, text, span, lineBreakAhead);
     }
 
     /**
      * Create token jsx tag name.
      *
      * @param text           the text
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token jsx tag name
      * @since 0.2.0
@@ -222,18 +204,16 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jTokenText createJsxTagName(
             String text,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
-        return new Swc4jTokenText(Swc4jTokenType.JsxTagName, text, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jTokenText(Swc4jTokenType.JsxTagName, text, span, lineBreakAhead);
     }
 
     /**
      * Create token jsx tag text.
      *
      * @param text           the text
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token jsx tag text
      * @since 0.2.0
@@ -241,18 +221,16 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jTokenText createJsxTagText(
             String text,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
-        return new Swc4jTokenText(Swc4jTokenType.JsxTagText, text, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jTokenText(Swc4jTokenType.JsxTagText, text, span, lineBreakAhead);
     }
 
     /**
      * Create token keyword.
      *
      * @param typeId         the type id
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token keyword
      * @since 0.2.0
@@ -260,29 +238,26 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jToken createKeyword(
             @Jni2RustParamTokenType int typeId,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
         Swc4jTokenType type = Swc4jTokenType.parse(typeId);
         AssertionUtils.notTrue(type.getSubType().isKeyword(), "Keyword is expected");
-        return new Swc4jToken(type, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jToken(type, span, lineBreakAhead);
     }
 
     /**
      * Create token null.
      *
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token null
      * @since 0.2.0
      */
     @Jni2RustMethod
     public static Swc4jToken createNull(
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
-        return new Swc4jToken(Swc4jTokenType.Null, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jToken(Swc4jTokenType.Null, span, lineBreakAhead);
     }
 
     /**
@@ -290,8 +265,7 @@ public final class Swc4jTokenFactory {
      *
      * @param text           the text
      * @param value          the value
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token number
      * @since 0.2.0
@@ -300,15 +274,13 @@ public final class Swc4jTokenFactory {
     public static Swc4jTokenTextValue<Double> createNumber(
             String text,
             double value,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValue<>(
                 Swc4jTokenType.Num,
                 text,
                 value,
-                startPosition,
-                endPosition,
+                span,
                 lineBreakAhead);
     }
 
@@ -318,8 +290,7 @@ public final class Swc4jTokenFactory {
      * @param text           the text
      * @param value          the value
      * @param flags          the flags
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token regex
      * @since 0.2.0
@@ -329,11 +300,10 @@ public final class Swc4jTokenFactory {
             String text,
             String value,
             String flags,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValueFlags<>(
-                Swc4jTokenType.Regex, text, value, flags, startPosition, endPosition, lineBreakAhead);
+                Swc4jTokenType.Regex, text, value, flags, span, lineBreakAhead);
     }
 
     /**
@@ -341,8 +311,7 @@ public final class Swc4jTokenFactory {
      *
      * @param text           the text
      * @param value          the value
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token shebang
      * @since 0.2.0
@@ -351,16 +320,29 @@ public final class Swc4jTokenFactory {
     public static Swc4jTokenTextValue<String> createShebang(
             String text,
             String value,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValue<>(
                 Swc4jTokenType.Shebang,
                 text,
                 value,
-                startPosition,
-                endPosition,
+                span,
                 lineBreakAhead);
+    }
+
+    /**
+     * Create ast span.
+     *
+     * @param start the start
+     * @param end   the end
+     * @return the ast span
+     * @since 0.2.0
+     */
+    @Jni2RustMethod
+    public static Swc4jAstSpan createSpan(
+            @Jni2RustParamStartPosition int start,
+            @Jni2RustParamEndPosition int end) {
+        return new Swc4jAstSpan(start, end);
     }
 
     /**
@@ -368,8 +350,7 @@ public final class Swc4jTokenFactory {
      *
      * @param text           the text
      * @param value          the value
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token string
      * @since 0.2.0
@@ -378,14 +359,13 @@ public final class Swc4jTokenFactory {
     public static Swc4jTokenTextValue<String> createString(
             String text,
             String value,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValue<>(
                 Swc4jTokenType.Str,
                 text,
                 value,
-                startPosition, endPosition,
+                span,
                 lineBreakAhead);
     }
 
@@ -394,8 +374,7 @@ public final class Swc4jTokenFactory {
      *
      * @param text           the text
      * @param value          the value
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token template
      * @since 0.2.0
@@ -404,41 +383,36 @@ public final class Swc4jTokenFactory {
     public static Swc4jTokenTextValue<String> createTemplate(
             String text,
             @Jni2RustParam(optional = true) String value,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
         return new Swc4jTokenTextValue<>(
                 Swc4jTokenType.Template,
                 text,
                 value,
-                startPosition,
-                endPosition,
+                span,
                 lineBreakAhead);
     }
 
     /**
      * Create token true.
      *
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token true
      * @since 0.2.0
      */
     @Jni2RustMethod
     public static Swc4jToken createTrue(
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
-        return new Swc4jToken(Swc4jTokenType.True, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jToken(Swc4jTokenType.True, span, lineBreakAhead);
     }
 
     /**
      * Create token unknown.
      *
      * @param text           the text
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token unknown
      * @since 0.2.0
@@ -446,9 +420,8 @@ public final class Swc4jTokenFactory {
     @Jni2RustMethod
     public static Swc4jTokenText createUnknown(
             String text,
-            @Jni2RustParamStartPosition int startPosition,
-            @Jni2RustParamEndPosition int endPosition,
+            @Jni2RustParam Swc4jAstSpan span,
             boolean lineBreakAhead) {
-        return new Swc4jTokenText(Swc4jTokenType.Unknown, text, startPosition, endPosition, lineBreakAhead);
+        return new Swc4jTokenText(Swc4jTokenType.Unknown, text, span, lineBreakAhead);
     }
 }

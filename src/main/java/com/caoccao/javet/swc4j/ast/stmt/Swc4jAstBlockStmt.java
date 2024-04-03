@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -29,8 +30,10 @@ public class Swc4jAstBlockStmt
         implements ISwc4jAstStmt {
     protected final List<ISwc4jAstStmt> stmts;
 
-    public Swc4jAstBlockStmt(List<ISwc4jAstStmt> stmts, int startPosition, int endPosition) {
-        super(startPosition, endPosition);
+    public Swc4jAstBlockStmt(
+            List<ISwc4jAstStmt> stmts,
+            Swc4jAstSpan span) {
+        super(span);
         this.stmts = SimpleList.immutableCopyOf(AssertionUtils.notNull(stmts, "Stmts"));
         children = SimpleList.immutableCopyOf(stmts);
         updateParent();

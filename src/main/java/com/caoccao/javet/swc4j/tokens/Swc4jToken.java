@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.tokens;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.enums.Swc4jTokenType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.JsonUtils;
@@ -27,25 +28,18 @@ import com.caoccao.javet.swc4j.utils.JsonUtils;
  */
 public class Swc4jToken {
     /**
-     * The End position of the token.
-     * It is zero-based.
-     *
-     * @since 0.2.0
-     */
-    protected final int endPosition;
-    /**
      * The Line break ahead.
      *
      * @since 0.2.0
      */
     protected final boolean lineBreakAhead;
     /**
-     * The Start position of the token.
+     * The span of the token.
      * It is zero-based.
      *
      * @since 0.2.0
      */
-    protected final int startPosition;
+    protected final Swc4jAstSpan span;
     /**
      * The token Type.
      *
@@ -57,36 +51,27 @@ public class Swc4jToken {
      * Instantiates a new swc4j token.
      *
      * @param type           the type
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
-    public Swc4jToken(Swc4jTokenType type, int startPosition, int endPosition, boolean lineBreakAhead) {
-        this.endPosition = endPosition;
+    public Swc4jToken(
+            Swc4jTokenType type,
+            Swc4jAstSpan span,
+            boolean lineBreakAhead) {
         this.lineBreakAhead = lineBreakAhead;
-        this.startPosition = startPosition;
+        this.span = span;
         this.type = AssertionUtils.notNull(type, "Ast token type");
     }
 
     /**
-     * Gets end position.
+     * Gets span.
      *
-     * @return the end position
+     * @return the span
      * @since 0.2.0
      */
-    public int getEndPosition() {
-        return endPosition;
-    }
-
-    /**
-     * Gets start position.
-     *
-     * @return the start position
-     * @since 0.2.0
-     */
-    public int getStartPosition() {
-        return startPosition;
+    public Swc4jAstSpan getSpan() {
+        return span;
     }
 
     /**
@@ -123,8 +108,8 @@ public class Swc4jToken {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{ \"lineBreakAhead\": ").append(lineBreakAhead);
-        sb.append(", \"start\": ").append(startPosition);
-        sb.append(", \"end\": ").append(endPosition);
+        sb.append(", \"start\": ").append(span.getStart());
+        sb.append(", \"end\": ").append(span.getEnd());
         sb.append(", \"type\": \"").append(type.name()).append("\"");
         sb.append(", \"text\": \"").append(JsonUtils.escape(getText())).append("\"");
         sb.append(" }");

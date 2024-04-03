@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.tokens;
 
 import com.caoccao.javet.swc4j.BaseTestSuite;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jTokenType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -42,10 +43,10 @@ public class TestSwc4jToken extends BaseTestSuite {
             Swc4jParseOptions options,
             Swc4jTokenType type,
             String text,
-            int startPosition,
-            int endPosition)
+            int start,
+            int end)
             throws Swc4jCoreException {
-        return parseAndAssert(code, options, type, text, startPosition, endPosition, 0, 1);
+        return parseAndAssert(code, options, type, text, start, end, 0, 1);
     }
 
     protected Swc4jToken parseAndAssert(
@@ -53,8 +54,8 @@ public class TestSwc4jToken extends BaseTestSuite {
             Swc4jParseOptions options,
             Swc4jTokenType type,
             String text,
-            int startPosition,
-            int endPosition,
+            int start,
+            int end,
             int tokenIndex,
             int tokenSize)
             throws Swc4jCoreException {
@@ -66,9 +67,9 @@ public class TestSwc4jToken extends BaseTestSuite {
         Swc4jToken token = tokens.get(tokenIndex);
         assertEquals(type, token.getType(), code + " type should match");
         assertEquals(text, token.getText(), code + " text should match");
-        assertEquals(startPosition, token.getStartPosition(), code + " start position should match");
-        assertEquals(endPosition, token.getEndPosition(), code + " end position should match");
-        assertEquals(code.substring(startPosition, endPosition), token.getText(), code + " text should match");
+        assertEquals(start, token.getSpan().getStart(), code + " start position should match");
+        assertEquals(end, token.getSpan().getEnd(), code + " end position should match");
+        assertEquals(code.substring(start, end), token.getText(), code + " text should match");
         return token;
     }
 
@@ -92,7 +93,7 @@ public class TestSwc4jToken extends BaseTestSuite {
         tokens.forEach(token -> {
             assertNotEquals(Swc4jTokenType.Unknown, token.getType());
             assertEquals(
-                    code.substring(token.getStartPosition(), token.getEndPosition()),
+                    code.substring(token.getSpan().getStart(), token.getSpan().getEnd()),
                     token.getText());
         });
     }

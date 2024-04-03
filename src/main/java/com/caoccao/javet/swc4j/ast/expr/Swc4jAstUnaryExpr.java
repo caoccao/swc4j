@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -32,9 +33,8 @@ public class Swc4jAstUnaryExpr
     public Swc4jAstUnaryExpr(
             Swc4jAstUnaryOp op,
             ISwc4jAstExpr arg,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.arg = AssertionUtils.notNull(arg, "arg");
         this.op = AssertionUtils.notNull(op, "op");
         children = SimpleList.immutableOf(arg);

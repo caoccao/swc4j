@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.pat;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
@@ -29,21 +30,17 @@ public class Swc4jAstRestPat
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstObjectPatProp {
     protected final ISwc4jAstPat arg;
-    protected final int dot3TokenEndPosition;
-    protected final int dot3TokenStartPosition;
+    protected final Swc4jAstSpan dot3Token;
     @Nullable
     protected final Swc4jAstTsTypeAnn typeAnn;
 
     public Swc4jAstRestPat(
-            int dot3TokenStartPosition,
-            int dot3TokenEndPosition,
+            Swc4jAstSpan dot3Token,
             ISwc4jAstPat arg,
             Swc4jAstTsTypeAnn typeAnn,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
-        this.dot3TokenEndPosition = dot3TokenEndPosition;
-        this.dot3TokenStartPosition = dot3TokenStartPosition;
+            Swc4jAstSpan span) {
+        super(span);
+        this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
         this.arg = AssertionUtils.notNull(arg, "Expr");
         this.typeAnn = typeAnn;
         children = SimpleList.immutableOf(arg, typeAnn);
@@ -54,12 +51,8 @@ public class Swc4jAstRestPat
         return arg;
     }
 
-    public int getDot3TokenEndPosition() {
-        return dot3TokenEndPosition;
-    }
-
-    public int getDot3TokenStartPosition() {
-        return dot3TokenStartPosition;
+    public Swc4jAstSpan getDot3Token() {
+        return dot3Token;
     }
 
     @Override

@@ -16,30 +16,26 @@
 
 package com.caoccao.javet.swc4j.ast.expr;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.Optional;
+
 public class Swc4jAstExprOrSpread
         extends Swc4jAst {
     protected final ISwc4jAstExpr expr;
-    @Nullable
-    protected final int spreadEndPosition;
-    @Nullable
-    protected final int spreadStartPosition;
+    protected final Optional<Swc4jAstSpan> spread;
 
     public Swc4jAstExprOrSpread(
-            int spreadStartPosition,
-            int spreadEndPosition,
+            Swc4jAstSpan spread,
             ISwc4jAstExpr expr,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
-        this.spreadEndPosition = spreadEndPosition;
-        this.spreadStartPosition = spreadStartPosition;
+            Swc4jAstSpan span) {
+        super(span);
+        this.spread = Optional.ofNullable(spread);
         this.expr = AssertionUtils.notNull(expr, "Expr");
         children = SimpleList.immutableOf(expr);
         updateParent();
@@ -49,12 +45,8 @@ public class Swc4jAstExprOrSpread
         return expr;
     }
 
-    public int getSpreadEndPosition() {
-        return spreadEndPosition;
-    }
-
-    public int getSpreadStartPosition() {
-        return spreadStartPosition;
+    public Optional<Swc4jAstSpan> getSpread() {
+        return spread;
     }
 
     @Override

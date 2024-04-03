@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.module;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstImportSpecifier;
@@ -37,9 +38,8 @@ public class Swc4jAstImportNamedSpecifier
             Swc4jAstIdent local,
             ISwc4jAstModuleExportName imported,
             boolean typeOnly,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.imported = imported;
         this.local = AssertionUtils.notNull(local, "Local");
         this.typeOnly = typeOnly;

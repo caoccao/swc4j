@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
@@ -34,9 +35,8 @@ public class Swc4jAstUsingDecl
     public Swc4jAstUsingDecl(
             boolean await,
             List<Swc4jAstVarDeclarator> decls,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.await = await;
         this.decls = SimpleList.immutableCopyOf(AssertionUtils.notNull(decls, "Decls"));
         children = SimpleList.immutableCopyOf(decls);

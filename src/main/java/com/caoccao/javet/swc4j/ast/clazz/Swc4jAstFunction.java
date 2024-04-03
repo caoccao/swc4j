@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
@@ -48,9 +49,8 @@ public class Swc4jAstFunction
             boolean _async,
             Swc4jAstTsTypeParamDecl typeParams,
             Swc4jAstTsTypeAnn returnType,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this._async = _async;
         this.body = body;
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");

@@ -45,12 +45,12 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
             ISwc4jAst parentNode,
             AST node,
             Swc4jAstType type,
-            int startPosition,
-            int endPosition) {
+            int start,
+            int end) {
         assertEquals(parentNode, node.getParent());
         assertEquals(type, node.getType());
-        assertEquals(startPosition, node.getStartPosition());
-        assertEquals(endPosition, node.getEndPosition());
+        assertEquals(start, node.getSpan().getStart());
+        assertEquals(end, node.getSpan().getEnd());
         return node;
     }
 }

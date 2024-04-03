@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -32,9 +33,8 @@ public class Swc4jAstArrayLit
 
     public Swc4jAstArrayLit(
             List<Swc4jAstExprOrSpread> elems,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.elems = SimpleList.immutableCopyOf(AssertionUtils.notNull(elems, "Elems"));
         children = SimpleList.immutableCopyOf(elems);
         updateParent();

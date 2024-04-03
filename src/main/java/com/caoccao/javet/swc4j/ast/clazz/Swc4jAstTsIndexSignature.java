@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
@@ -41,9 +42,8 @@ public class Swc4jAstTsIndexSignature
             Swc4jAstTsTypeAnn typeAnn,
             boolean readonly,
             boolean _static,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this._static = _static;
         this.params = AssertionUtils.notNull(params, "Params");
         this.readonly = readonly;

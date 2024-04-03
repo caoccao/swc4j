@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -32,9 +33,8 @@ public class Swc4jAstIdent
     public Swc4jAstIdent(
             String sym,
             boolean optional,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.optional = optional;
         this.sym = AssertionUtils.notNull(sym, "Sym");
     }

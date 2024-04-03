@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.pat;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
@@ -38,9 +39,8 @@ public class Swc4jAstArrayPat
             List<ISwc4jAstPat> elems,
             boolean optional,
             Swc4jAstTsTypeAnn typeAnn,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.elems = SimpleList.immutableCopyOf(AssertionUtils.notNull(elems, "Elems"));
         this.optional = optional;
         this.typeAnn = typeAnn;

@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
@@ -29,8 +30,11 @@ public class Swc4jAstNumber
     protected final String raw;
     protected final double value;
 
-    public Swc4jAstNumber(double value, String raw, int startPosition, int endPosition) {
-        super(startPosition, endPosition);
+    public Swc4jAstNumber(
+            double value,
+            String raw,
+            Swc4jAstSpan span) {
+        super(span);
         this.value = value;
         this.raw = raw;
     }

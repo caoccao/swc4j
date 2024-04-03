@@ -52,6 +52,7 @@ struct JavaSwc4jTokenFactory {
   method_create_number: JStaticMethodID,
   method_create_regex: JStaticMethodID,
   method_create_shebang: JStaticMethodID,
+  method_create_span: JStaticMethodID,
   method_create_string: JStaticMethodID,
   method_create_template: JStaticMethodID,
   method_create_true: JStaticMethodID,
@@ -72,133 +73,140 @@ impl JavaSwc4jTokenFactory {
       .get_static_method_id(
         &class,
         "createAssignOperator",
-        "(IIIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createAssignOperator");
     let method_create_big_int = env
       .get_static_method_id(
         &class,
         "createBigInt",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createBigInt");
     let method_create_binary_operator = env
       .get_static_method_id(
         &class,
         "createBinaryOperator",
-        "(IIIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createBinaryOperator");
     let method_create_error = env
       .get_static_method_id(
         &class,
         "createError",
-        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createError");
     let method_create_false = env
       .get_static_method_id(
         &class,
         "createFalse",
-        "(IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createFalse");
     let method_create_generic_operator = env
       .get_static_method_id(
         &class,
         "createGenericOperator",
-        "(IIIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createGenericOperator");
     let method_create_ident_known = env
       .get_static_method_id(
         &class,
         "createIdentKnown",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createIdentKnown");
     let method_create_ident_other = env
       .get_static_method_id(
         &class,
         "createIdentOther",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createIdentOther");
     let method_create_jsx_tag_name = env
       .get_static_method_id(
         &class,
         "createJsxTagName",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createJsxTagName");
     let method_create_jsx_tag_text = env
       .get_static_method_id(
         &class,
         "createJsxTagText",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createJsxTagText");
     let method_create_keyword = env
       .get_static_method_id(
         &class,
         "createKeyword",
-        "(IIIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createKeyword");
     let method_create_null = env
       .get_static_method_id(
         &class,
         "createNull",
-        "(IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createNull");
     let method_create_number = env
       .get_static_method_id(
         &class,
         "createNumber",
-        "(Ljava/lang/String;DIIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        "(Ljava/lang/String;DLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createNumber");
     let method_create_regex = env
       .get_static_method_id(
         &class,
         "createRegex",
-        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValueFlags;",
+        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValueFlags;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createRegex");
     let method_create_shebang = env
       .get_static_method_id(
         &class,
         "createShebang",
-        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createShebang");
+    let method_create_span = env
+      .get_static_method_id(
+        &class,
+        "createSpan",
+        "(II)Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;",
+      )
+      .expect("Couldn't find method Swc4jTokenFactory.createSpan");
     let method_create_string = env
       .get_static_method_id(
         &class,
         "createString",
-        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createString");
     let method_create_template = env
       .get_static_method_id(
         &class,
         "createTemplate",
-        "(Ljava/lang/String;Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createTemplate");
     let method_create_true = env
       .get_static_method_id(
         &class,
         "createTrue",
-        "(IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createTrue");
     let method_create_unknown = env
       .get_static_method_id(
         &class,
         "createUnknown",
-        "(Ljava/lang/String;IIZ)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createUnknown");
     JavaSwc4jTokenFactory {
@@ -218,6 +226,7 @@ impl JavaSwc4jTokenFactory {
       method_create_number,
       method_create_regex,
       method_create_shebang,
+      method_create_span,
       method_create_string,
       method_create_template,
       method_create_true,
@@ -229,21 +238,20 @@ impl JavaSwc4jTokenFactory {
     &self,
     env: &mut JNIEnv<'local>,
     token_type: &TokenType,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
     let type_id = int_to_jvalue!(token_type.get_id());
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_assign_operator,
-        &[type_id, start_position, end_position, line_break_ahead],
+        &[type_id, span, line_break_ahead],
         "Swc4jToken create_assign_operator()"
       );
     return_value
@@ -253,7 +261,7 @@ impl JavaSwc4jTokenFactory {
     &self,
     env: &mut JNIEnv<'local>,
     text: &str,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -261,14 +269,13 @@ impl JavaSwc4jTokenFactory {
   {
     let java_text = string_to_jstring!(env, &text);
     let text = object_to_jvalue!(java_text);
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_big_int,
-        &[text, start_position, end_position, line_break_ahead],
+        &[text, span, line_break_ahead],
         "Swc4jTokenTextValue create_big_int()"
       );
     delete_local_ref!(env, java_text);
@@ -279,21 +286,20 @@ impl JavaSwc4jTokenFactory {
     &self,
     env: &mut JNIEnv<'local>,
     token_type: &TokenType,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
     let type_id = int_to_jvalue!(token_type.get_id());
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_binary_operator,
-        &[type_id, start_position, end_position, line_break_ahead],
+        &[type_id, span, line_break_ahead],
         "Swc4jToken create_binary_operator()"
       );
     return_value
@@ -304,7 +310,7 @@ impl JavaSwc4jTokenFactory {
     env: &mut JNIEnv<'local>,
     text: &str,
     error: &Error,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -316,14 +322,13 @@ impl JavaSwc4jTokenFactory {
     let error = jvalue {
       l: java_error.as_raw(),
     };
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_error,
-        &[text, error, start_position, end_position, line_break_ahead],
+        &[text, error, span, line_break_ahead],
         "Swc4jTokenTextValue create_error()"
       );
     delete_local_ref!(env, java_text);
@@ -334,20 +339,19 @@ impl JavaSwc4jTokenFactory {
   pub fn create_false<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_false,
-        &[start_position, end_position, line_break_ahead],
+        &[span, line_break_ahead],
         "Swc4jToken create_false()"
       );
     return_value
@@ -357,21 +361,20 @@ impl JavaSwc4jTokenFactory {
     &self,
     env: &mut JNIEnv<'local>,
     token_type: &TokenType,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
     let type_id = int_to_jvalue!(token_type.get_id());
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_generic_operator,
-        &[type_id, start_position, end_position, line_break_ahead],
+        &[type_id, span, line_break_ahead],
         "Swc4jToken create_generic_operator()"
       );
     return_value
@@ -381,7 +384,7 @@ impl JavaSwc4jTokenFactory {
     &self,
     env: &mut JNIEnv<'local>,
     text: &str,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -389,14 +392,13 @@ impl JavaSwc4jTokenFactory {
   {
     let java_text = string_to_jstring!(env, &text);
     let text = object_to_jvalue!(java_text);
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ident_known,
-        &[text, start_position, end_position, line_break_ahead],
+        &[text, span, line_break_ahead],
         "Swc4jTokenText create_ident_known()"
       );
     delete_local_ref!(env, java_text);
@@ -407,7 +409,7 @@ impl JavaSwc4jTokenFactory {
     &self,
     env: &mut JNIEnv<'local>,
     text: &str,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -415,14 +417,13 @@ impl JavaSwc4jTokenFactory {
   {
     let java_text = string_to_jstring!(env, &text);
     let text = object_to_jvalue!(java_text);
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ident_other,
-        &[text, start_position, end_position, line_break_ahead],
+        &[text, span, line_break_ahead],
         "Swc4jTokenText create_ident_other()"
       );
     delete_local_ref!(env, java_text);
@@ -433,7 +434,7 @@ impl JavaSwc4jTokenFactory {
     &self,
     env: &mut JNIEnv<'local>,
     text: &str,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -441,14 +442,13 @@ impl JavaSwc4jTokenFactory {
   {
     let java_text = string_to_jstring!(env, &text);
     let text = object_to_jvalue!(java_text);
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_jsx_tag_name,
-        &[text, start_position, end_position, line_break_ahead],
+        &[text, span, line_break_ahead],
         "Swc4jTokenText create_jsx_tag_name()"
       );
     delete_local_ref!(env, java_text);
@@ -459,7 +459,7 @@ impl JavaSwc4jTokenFactory {
     &self,
     env: &mut JNIEnv<'local>,
     text: &str,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -467,14 +467,13 @@ impl JavaSwc4jTokenFactory {
   {
     let java_text = string_to_jstring!(env, &text);
     let text = object_to_jvalue!(java_text);
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_jsx_tag_text,
-        &[text, start_position, end_position, line_break_ahead],
+        &[text, span, line_break_ahead],
         "Swc4jTokenText create_jsx_tag_text()"
       );
     delete_local_ref!(env, java_text);
@@ -485,21 +484,20 @@ impl JavaSwc4jTokenFactory {
     &self,
     env: &mut JNIEnv<'local>,
     token_type: &TokenType,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
     let type_id = int_to_jvalue!(token_type.get_id());
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_keyword,
-        &[type_id, start_position, end_position, line_break_ahead],
+        &[type_id, span, line_break_ahead],
         "Swc4jToken create_keyword()"
       );
     return_value
@@ -508,20 +506,19 @@ impl JavaSwc4jTokenFactory {
   pub fn create_null<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_null,
-        &[start_position, end_position, line_break_ahead],
+        &[span, line_break_ahead],
         "Swc4jToken create_null()"
       );
     return_value
@@ -532,7 +529,7 @@ impl JavaSwc4jTokenFactory {
     env: &mut JNIEnv<'local>,
     text: &str,
     value: f64,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -541,14 +538,13 @@ impl JavaSwc4jTokenFactory {
     let java_text = string_to_jstring!(env, &text);
     let text = object_to_jvalue!(java_text);
     let value = double_to_jvalue!(value);
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_number,
-        &[text, value, start_position, end_position, line_break_ahead],
+        &[text, value, span, line_break_ahead],
         "Swc4jTokenTextValue create_number()"
       );
     delete_local_ref!(env, java_text);
@@ -561,7 +557,7 @@ impl JavaSwc4jTokenFactory {
     text: &str,
     value: &str,
     flags: &str,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -573,14 +569,13 @@ impl JavaSwc4jTokenFactory {
     let value = object_to_jvalue!(java_value);
     let java_flags = string_to_jstring!(env, &flags);
     let flags = object_to_jvalue!(java_flags);
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_regex,
-        &[text, value, flags, start_position, end_position, line_break_ahead],
+        &[text, value, flags, span, line_break_ahead],
         "Swc4jTokenTextValueFlags create_regex()"
       );
     delete_local_ref!(env, java_text);
@@ -594,7 +589,7 @@ impl JavaSwc4jTokenFactory {
     env: &mut JNIEnv<'local>,
     text: &str,
     value: &str,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -604,18 +599,37 @@ impl JavaSwc4jTokenFactory {
     let text = object_to_jvalue!(java_text);
     let java_value = string_to_jstring!(env, &value);
     let value = object_to_jvalue!(java_value);
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_shebang,
-        &[text, value, start_position, end_position, line_break_ahead],
+        &[text, value, span, line_break_ahead],
         "Swc4jTokenTextValue create_shebang()"
       );
     delete_local_ref!(env, java_text);
     delete_local_ref!(env, java_value);
+    return_value
+  }
+
+  pub fn create_span<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    range: &Range<usize>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let start = int_to_jvalue!(range.start);
+    let end = int_to_jvalue!(range.end);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_span,
+        &[start, end],
+        "Swc4jAstSpan create_span()"
+      );
     return_value
   }
 
@@ -624,7 +638,7 @@ impl JavaSwc4jTokenFactory {
     env: &mut JNIEnv<'local>,
     text: &str,
     value: &str,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -634,14 +648,13 @@ impl JavaSwc4jTokenFactory {
     let text = object_to_jvalue!(java_text);
     let java_value = string_to_jstring!(env, &value);
     let value = object_to_jvalue!(java_value);
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_string,
-        &[text, value, start_position, end_position, line_break_ahead],
+        &[text, value, span, line_break_ahead],
         "Swc4jTokenTextValue create_string()"
       );
     delete_local_ref!(env, java_text);
@@ -654,7 +667,7 @@ impl JavaSwc4jTokenFactory {
     env: &mut JNIEnv<'local>,
     text: &str,
     value: &Option<String>,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -664,14 +677,13 @@ impl JavaSwc4jTokenFactory {
     let text = object_to_jvalue!(java_text);
     let java_value = optional_string_to_jstring!(env, &value);
     let value = object_to_jvalue!(java_value);
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_template,
-        &[text, value, start_position, end_position, line_break_ahead],
+        &[text, value, span, line_break_ahead],
         "Swc4jTokenTextValue create_template()"
       );
     delete_local_ref!(env, java_text);
@@ -682,20 +694,19 @@ impl JavaSwc4jTokenFactory {
   pub fn create_true<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_true,
-        &[start_position, end_position, line_break_ahead],
+        &[span, line_break_ahead],
         "Swc4jToken create_true()"
       );
     return_value
@@ -705,7 +716,7 @@ impl JavaSwc4jTokenFactory {
     &self,
     env: &mut JNIEnv<'local>,
     text: &str,
-    range: &Range<usize>,
+    span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
   where
@@ -713,14 +724,13 @@ impl JavaSwc4jTokenFactory {
   {
     let java_text = string_to_jstring!(env, &text);
     let text = object_to_jvalue!(java_text);
-    let start_position = int_to_jvalue!(range.start);
-    let end_position = int_to_jvalue!(range.end);
+    let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_unknown,
-        &[text, start_position, end_position, line_break_ahead],
+        &[text, span, line_break_ahead],
         "Swc4jTokenText create_unknown()"
       );
     delete_local_ref!(env, java_text);
@@ -755,78 +765,90 @@ pub fn token_and_spans_to_java_list<'local>(
             start: token_and_span.span.lo().to_usize() - 1,
             end: token_and_span.span.hi().to_usize() - 1,
           }];
-          let index_range = byte_to_index_map.get_range_by_span(&token_and_span.span);
-          let token = match &token_and_span.token {
+          let java_index_range =
+            java_token_factory.create_span(env, &byte_to_index_map.get_range_by_span(&token_and_span.span));
+          let java_token = match &token_and_span.token {
             Token::Word(word) => match word {
               Word::Keyword(keyword) => java_token_factory.create_keyword(
                 env,
                 &TokenType::parse_by_keyword(&keyword),
-                &index_range,
+                &java_index_range,
                 line_break_ahead,
               ),
-              Word::Null => java_token_factory.create_null(env, &index_range, line_break_ahead),
-              Word::True => java_token_factory.create_true(env, &index_range, line_break_ahead),
-              Word::False => java_token_factory.create_false(env, &index_range, line_break_ahead),
+              Word::Null => java_token_factory.create_null(env, &java_index_range, line_break_ahead),
+              Word::True => java_token_factory.create_true(env, &java_index_range, line_break_ahead),
+              Word::False => java_token_factory.create_false(env, &java_index_range, line_break_ahead),
               Word::Ident(ident) => match ident {
-                IdentLike::Known(known_ident) => {
-                  java_token_factory.create_ident_known(env, &Atom::from(*known_ident), &index_range, line_break_ahead)
-                }
+                IdentLike::Known(known_ident) => java_token_factory.create_ident_known(
+                  env,
+                  &Atom::from(*known_ident),
+                  &java_index_range,
+                  line_break_ahead,
+                ),
                 IdentLike::Other(js_word) => {
-                  java_token_factory.create_ident_other(env, &js_word, &index_range, line_break_ahead)
+                  java_token_factory.create_ident_other(env, &js_word, &java_index_range, line_break_ahead)
                 }
               },
             },
             Token::BinOp(bin_op) => java_token_factory.create_binary_operator(
               env,
               &TokenType::parse_by_binary_operator(bin_op),
-              &index_range,
+              &java_index_range,
               line_break_ahead,
             ),
             Token::AssignOp(assign_op) => java_token_factory.create_assign_operator(
               env,
               &TokenType::parse_by_assign_operator(assign_op),
-              &index_range,
+              &java_index_range,
               line_break_ahead,
             ),
             Token::Str { value, raw } => {
-              java_token_factory.create_string(env, &raw, &value, &index_range, line_break_ahead)
+              java_token_factory.create_string(env, &raw, &value, &java_index_range, line_break_ahead)
             }
             Token::Num { value, raw } => {
-              java_token_factory.create_number(env, &raw, *value, &index_range, line_break_ahead)
+              java_token_factory.create_number(env, &raw, *value, &java_index_range, line_break_ahead)
             }
             Token::BigInt { value: _, raw } => {
-              java_token_factory.create_big_int(env, &raw, &index_range, line_break_ahead)
+              java_token_factory.create_big_int(env, &raw, &java_index_range, line_break_ahead)
             }
             Token::Regex(value, flags) => {
-              java_token_factory.create_regex(env, &text, &value, &flags, &index_range, line_break_ahead)
+              java_token_factory.create_regex(env, &text, &value, &flags, &java_index_range, line_break_ahead)
             }
             Token::Template { raw, cooked } => {
               let cooked = match &cooked {
                 Ok(atom) => Some(atom.as_str().to_owned()),
                 Err(_) => None,
               };
-              java_token_factory.create_template(env, &raw, &cooked, &index_range, line_break_ahead)
+              java_token_factory.create_template(env, &raw, &cooked, &java_index_range, line_break_ahead)
             }
             Token::Shebang(shebang) => {
-              java_token_factory.create_shebang(env, &text, &shebang, &index_range, line_break_ahead)
+              java_token_factory.create_shebang(env, &text, &shebang, &java_index_range, line_break_ahead)
             }
-            Token::Error(error) => java_token_factory.create_error(env, &text, &error, &index_range, line_break_ahead),
+            Token::Error(error) => {
+              java_token_factory.create_error(env, &text, &error, &java_index_range, line_break_ahead)
+            }
             Token::JSXName { name } => {
-              java_token_factory.create_jsx_tag_name(env, &name, &index_range, line_break_ahead)
+              java_token_factory.create_jsx_tag_name(env, &name, &java_index_range, line_break_ahead)
             }
-            Token::JSXText { raw } => java_token_factory.create_jsx_tag_text(env, &raw, &index_range, line_break_ahead),
+            Token::JSXText { raw } => {
+              java_token_factory.create_jsx_tag_text(env, &raw, &java_index_range, line_break_ahead)
+            }
             token => match &TokenType::parse_by_generic_operator(token) {
               TokenType::Unknown => {
                 eprintln!("Unknown {:?}", token);
-                java_token_factory.create_unknown(env, &text, &index_range, line_break_ahead)
+                java_token_factory.create_unknown(env, &text, &java_index_range, line_break_ahead)
               }
-              generic_operator_type => {
-                java_token_factory.create_generic_operator(env, generic_operator_type, &index_range, line_break_ahead)
-              }
+              generic_operator_type => java_token_factory.create_generic_operator(
+                env,
+                generic_operator_type,
+                &java_index_range,
+                line_break_ahead,
+              ),
             },
           };
-          java_array_list.add(env, &list, &token);
-          delete_local_ref!(env, token);
+          java_array_list.add(env, &list, &java_token);
+          delete_local_ref!(env, java_token);
+          delete_local_ref!(env, java_index_range);
         });
         list.as_raw()
       }

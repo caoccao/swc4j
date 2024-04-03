@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
@@ -39,9 +40,8 @@ public class Swc4jAstGetterProp
             ISwc4jAstPropName key,
             Swc4jAstTsTypeAnn typeAnn,
             Swc4jAstBlockStmt body,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.body = body;
         this.key = AssertionUtils.notNull(key, "Key");
         this.typeAnn = typeAnn;

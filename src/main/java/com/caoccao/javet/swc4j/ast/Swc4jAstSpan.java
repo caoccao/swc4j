@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.jni2rust;
+package com.caoccao.javet.swc4j.ast;
 
-import java.lang.annotation.*;
+public class Swc4jAstSpan {
+    protected final int end;
+    protected final int start;
 
-@Documented
-@Inherited
-@Target({ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})
-@Retention(RetentionPolicy.RUNTIME)
-@Jni2RustParam(
-        rustType = "range: &Range<usize>",
-        preCalls = "    let end = int_to_jvalue!(range.end);")
-public @interface Jni2RustParamEndPosition {
+    public Swc4jAstSpan(int start, int end) {
+        this.end = end;
+        this.start = start;
+    }
+
+    public int getEnd() {
+        return end;
+    }
+
+    public int getStart() {
+        return start;
+    }
 }

@@ -16,11 +16,13 @@
 
 package com.caoccao.javet.swc4j.tokens;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.enums.Swc4jTokenType;
 
 /**
  * The type Swc4j token text value flags.
  *
+ * @param <T> the type parameter
  * @since 0.2.0
  */
 public class Swc4jTokenTextValueFlags<T> extends Swc4jTokenTextValue<T> {
@@ -32,11 +34,11 @@ public class Swc4jTokenTextValueFlags<T> extends Swc4jTokenTextValue<T> {
     /**
      * Instantiates a new Swc4j token text value flags.
      *
+     * @param type           the type
      * @param text           the text
      * @param value          the value
      * @param flags          the flags
-     * @param startPosition  the start position
-     * @param endPosition    the end position
+     * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @since 0.2.0
      */
@@ -45,10 +47,9 @@ public class Swc4jTokenTextValueFlags<T> extends Swc4jTokenTextValue<T> {
             String text,
             T value,
             String flags,
-            int startPosition,
-            int endPosition,
+            Swc4jAstSpan span,
             boolean lineBreakAhead) {
-        super(type, text, value, startPosition, endPosition, lineBreakAhead);
+        super(type, text, value, span, lineBreakAhead);
         this.flags = flags;
     }
 

@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
@@ -35,8 +36,11 @@ public class Swc4jAstBigInt
     protected final Swc4jAstBigIntSign sign;
     protected final BigInteger value;
 
-    public Swc4jAstBigInt(Swc4jAstBigIntSign sign, String raw, int startPosition, int endPosition) {
-        super(startPosition, endPosition);
+    public Swc4jAstBigInt(
+            Swc4jAstBigIntSign sign,
+            String raw,
+            Swc4jAstSpan span) {
+        super(span);
         this.sign = AssertionUtils.notNull(sign, "Sign");
         this.raw = raw;
         this.value = StringUtils.isEmpty(raw) ? BigInteger.ZERO : new BigInteger(raw.substring(0, raw.length() - 1));

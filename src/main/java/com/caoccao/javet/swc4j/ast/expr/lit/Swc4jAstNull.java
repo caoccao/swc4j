@@ -17,14 +17,16 @@
 package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 
 public class Swc4jAstNull
         extends Swc4jAst
         implements ISwc4jAstLit {
-    public Swc4jAstNull(int startPosition, int endPosition) {
-        super(startPosition, endPosition);
+    public Swc4jAstNull(
+            Swc4jAstSpan span) {
+        super(span);
     }
 
     @Override

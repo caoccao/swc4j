@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.pat;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
@@ -32,9 +33,8 @@ public class Swc4jAstAssignPat
     public Swc4jAstAssignPat(
             ISwc4jAstPat left,
             ISwc4jAstExpr right,
-            int startPosition,
-            int endPosition) {
-        super(startPosition, endPosition);
+            Swc4jAstSpan span) {
+        super(span);
         this.left = AssertionUtils.notNull(left, "Left");
         this.right = AssertionUtils.notNull(right, "Right");
         children = SimpleList.immutableOf(left, right);
