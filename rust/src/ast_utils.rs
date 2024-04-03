@@ -98,7 +98,9 @@ struct JavaSwc4jAstFactory {
   method_create_ts_index_signature: JStaticMethodID,
   method_create_ts_interface_body: JStaticMethodID,
   method_create_ts_interface_decl: JStaticMethodID,
+  method_create_ts_module_decl: JStaticMethodID,
   method_create_ts_namespace_export_decl: JStaticMethodID,
+  method_create_ts_qualified_name: JStaticMethodID,
   method_create_ts_type_alias_decl: JStaticMethodID,
   method_create_ts_type_ann: JStaticMethodID,
   method_create_ts_type_param: JStaticMethodID,
@@ -603,6 +605,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsInterfaceDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsInterfaceDecl");
+    let method_create_ts_module_decl = env
+      .get_static_method_id(
+        &class,
+        "createTsModuleDecl",
+        "(ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsNamespaceBody;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsModuleDecl;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsModuleDecl");
     let method_create_ts_namespace_export_decl = env
       .get_static_method_id(
         &class,
@@ -610,6 +619,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsNamespaceExportDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsNamespaceExportDecl");
+    let method_create_ts_qualified_name = env
+      .get_static_method_id(
+        &class,
+        "createTsQualifiedName",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsQualifiedName;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsQualifiedName");
     let method_create_ts_type_alias_decl = env
       .get_static_method_id(
         &class,
@@ -744,7 +760,9 @@ impl JavaSwc4jAstFactory {
       method_create_ts_index_signature,
       method_create_ts_interface_body,
       method_create_ts_interface_decl,
+      method_create_ts_module_decl,
       method_create_ts_namespace_export_decl,
+      method_create_ts_qualified_name,
       method_create_ts_type_alias_decl,
       method_create_ts_type_ann,
       method_create_ts_type_param,
@@ -2445,6 +2463,33 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_ts_module_decl<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    declare: bool,
+    global: bool,
+    id: &JObject<'_>,
+    body: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let declare = boolean_to_jvalue!(declare);
+    let global = boolean_to_jvalue!(global);
+    let id = object_to_jvalue!(id);
+    let body = optional_object_to_jvalue!(body);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_module_decl,
+        &[declare, global, id, body, span],
+        "Swc4jAstTsModuleDecl create_ts_module_decl()"
+      );
+    return_value
+  }
+
   pub fn create_ts_namespace_export_decl<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -2462,6 +2507,29 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_namespace_export_decl,
         &[id, span],
         "Swc4jAstTsNamespaceExportDecl create_ts_namespace_export_decl()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_qualified_name<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    left: &JObject<'_>,
+    right: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let left = object_to_jvalue!(left);
+    let right = object_to_jvalue!(right);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_qualified_name,
+        &[left, right, span],
+        "Swc4jAstTsQualifiedName create_ts_qualified_name()"
       );
     return_value
   }
@@ -5709,6 +5777,31 @@ pub mod program {
     return_type
   }
 
+  fn create_ts_module_decl<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsModuleDecl,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let declare = node.declare;
+    let global = node.global;
+    let java_id = enum_create_ts_module_name(env, map, &node.id);
+    let java_optional_body = node
+      .body
+      .as_ref()
+      .map(|node| enum_create_ts_namespace_body(env, map, node));
+    let return_type =
+      java_ast_factory.create_ts_module_decl(env, declare, global, &java_id, &java_optional_body, &java_range);
+    delete_local_ref!(env, java_id);
+    delete_local_optional_ref!(env, java_optional_body);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_ts_namespace_export_decl<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -5722,6 +5815,24 @@ pub mod program {
     let java_id = create_ident(env, map, &node.id);
     let return_value = java_ast_factory.create_ts_namespace_export_decl(env, &java_id, &java_range);
     delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_qualified_name<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsQualifiedName,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_left = enum_create_ts_entity_name(env, map, &node.left);
+    let java_right = create_ident(env, map, &node.right);
+    let return_value = java_ast_factory.create_ts_qualified_name(env, &java_left, &java_right, &java_range);
+    delete_local_ref!(env, java_right);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -5976,11 +6087,10 @@ pub mod program {
       Decl::Fn(node) => create_fn_decl(env, map, node),
       Decl::TsEnum(node) => create_ts_enum_decl(env, map, node),
       Decl::TsInterface(node) => create_ts_interface_decl(env, map, node),
+      Decl::TsModule(node) => create_ts_module_decl(env, map, node),
       Decl::TsTypeAlias(node) => create_ts_type_alias_decl(env, map, node),
       Decl::Using(node) => create_using_decl(env, map, node),
       Decl::Var(node) => create_var_decl(env, map, node),
-      default => panic!("{:?}", default),
-      // TODO
     }
   }
 
@@ -6397,8 +6507,7 @@ pub mod program {
   {
     match node {
       TsEntityName::Ident(node) => create_ident(env, map, node),
-      default => panic!("{:?}", default),
-      // TODO
+      TsEntityName::TsQualifiedName(node) => create_ts_qualified_name(env, map, node),
     }
   }
 
@@ -6439,8 +6548,10 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      TsFnParam::Array(node) => create_array_pat(env, map, node),
+      TsFnParam::Ident(node) => create_binding_ident(env, map, node),
+      TsFnParam::Object(node) => create_object_pat(env, map, node),
+      TsFnParam::Rest(node) => create_rest_pat(env, map, node),
     }
   }
 
@@ -6463,8 +6574,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      TsModuleName::Ident(node) => create_ident(env, map, node),
+      TsModuleName::Str(node) => create_str(env, map, node),
     }
   }
 

@@ -28,6 +28,7 @@ public class TestISwc4jAstDecl {
         assertTrue(ISwc4jAstDecl.class.isAssignableFrom(Swc4jAstFnDecl.class));
         assertTrue(ISwc4jAstDecl.class.isAssignableFrom(Swc4jAstTsEnumDecl.class));
         assertTrue(ISwc4jAstDecl.class.isAssignableFrom(Swc4jAstTsInterfaceDecl.class));
+        assertTrue(ISwc4jAstDecl.class.isAssignableFrom(Swc4jAstTsModuleDecl.class));
         assertTrue(ISwc4jAstDecl.class.isAssignableFrom(Swc4jAstTsTypeAliasDecl.class));
         assertTrue(ISwc4jAstDecl.class.isAssignableFrom(Swc4jAstUsingDecl.class));
         assertTrue(ISwc4jAstDecl.class.isAssignableFrom(Swc4jAstVarDecl.class));

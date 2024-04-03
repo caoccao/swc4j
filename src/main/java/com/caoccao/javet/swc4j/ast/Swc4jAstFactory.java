@@ -656,10 +656,28 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsModuleDecl createTsModuleDecl(
+            boolean declare,
+            boolean global,
+            ISwc4jAstTsModuleName id,
+            @Jni2RustParam(optional = true) ISwc4jAstTsNamespaceBody body,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsModuleDecl(declare, global, id, body, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsNamespaceExportDecl createTsNamespaceExportDecl(
             Swc4jAstIdent id,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsNamespaceExportDecl(id, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsQualifiedName createTsQualifiedName(
+            ISwc4jAstTsEntityName left,
+            Swc4jAstIdent right,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsQualifiedName(left, right, span);
     }
 
     @Jni2RustMethod

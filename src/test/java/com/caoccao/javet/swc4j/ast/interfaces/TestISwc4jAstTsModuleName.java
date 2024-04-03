@@ -17,15 +17,15 @@
 package com.caoccao.javet.swc4j.ast.interfaces;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsQualifiedName;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestISwc4jAstTsEntityName {
+public class TestISwc4jAstTsModuleName {
     @Test
     public void testAssignable() {
-        assertTrue(ISwc4jAstTsEntityName.class.isAssignableFrom(Swc4jAstIdent.class));
-        assertTrue(ISwc4jAstTsEntityName.class.isAssignableFrom(Swc4jAstTsQualifiedName.class));
+        assertTrue(ISwc4jAstTsModuleName.class.isAssignableFrom(Swc4jAstIdent.class));
+        assertTrue(ISwc4jAstTsModuleName.class.isAssignableFrom(Swc4jAstStr.class));
     }
 }

@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -29,7 +30,7 @@ import java.util.Optional;
 
 public class Swc4jAstRestPat
         extends Swc4jAst
-        implements ISwc4jAstPat, ISwc4jAstObjectPatProp {
+        implements ISwc4jAstPat, ISwc4jAstObjectPatProp, ISwc4jAstTsFnParam {
     protected final ISwc4jAstPat arg;
     protected final Swc4jAstSpan dot3Token;
     protected final Optional<Swc4jAstTsTypeAnn> typeAnn;

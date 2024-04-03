@@ -14,47 +14,60 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.pat;
+package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsModuleName;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsNamespaceBody;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
-public class Swc4jAstBindingIdent
+public class Swc4jAstTsModuleDecl
         extends Swc4jAst
-        implements ISwc4jAstPat, ISwc4jAstTsFnParam {
-    protected final Swc4jAstIdent id;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
+        implements ISwc4jAstDecl {
+    protected final Optional<ISwc4jAstTsNamespaceBody> body;
+    protected final boolean declare;
+    protected final boolean global;
+    protected final ISwc4jAstTsModuleName id;
 
-    public Swc4jAstBindingIdent(
-            Swc4jAstIdent id,
-            Swc4jAstTsTypeAnn typeAnn,
+    public Swc4jAstTsModuleDecl(
+            boolean declare,
+            boolean global,
+            ISwc4jAstTsModuleName id,
+            ISwc4jAstTsNamespaceBody body,
             Swc4jAstSpan span) {
         super(span);
+        this.declare = declare;
+        this.global = global;
+        this.body = Optional.ofNullable(body);
         this.id = AssertionUtils.notNull(id, "Id");
-        this.typeAnn = Optional.ofNullable(typeAnn);
-        children = SimpleList.immutableOf(id, typeAnn);
+        children = SimpleList.immutableOf(id, body);
         updateParent();
     }
 
-    public Swc4jAstIdent getId() {
+    public Optional<ISwc4jAstTsNamespaceBody> getBody() {
+        return body;
+    }
+
+    public ISwc4jAstTsModuleName getId() {
         return id;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.BindingIdent;
+        return Swc4jAstType.TsModuleDecl;
     }
 
-    public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
-        return typeAnn;
+    public boolean isDeclare() {
+        return declare;
+    }
+
+    public boolean isGlobal() {
+        return global;
     }
 }

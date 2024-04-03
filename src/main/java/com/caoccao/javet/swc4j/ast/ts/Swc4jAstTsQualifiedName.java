@@ -14,47 +14,43 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.pat;
+package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsEntityName;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.Optional;
-
-public class Swc4jAstBindingIdent
+public class Swc4jAstTsQualifiedName
         extends Swc4jAst
-        implements ISwc4jAstPat, ISwc4jAstTsFnParam {
-    protected final Swc4jAstIdent id;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
+        implements ISwc4jAstTsEntityName {
+    protected final ISwc4jAstTsEntityName left;
+    protected final Swc4jAstIdent right;
 
-    public Swc4jAstBindingIdent(
-            Swc4jAstIdent id,
-            Swc4jAstTsTypeAnn typeAnn,
+    public Swc4jAstTsQualifiedName(
+            ISwc4jAstTsEntityName left,
+            Swc4jAstIdent right,
             Swc4jAstSpan span) {
         super(span);
-        this.id = AssertionUtils.notNull(id, "Id");
-        this.typeAnn = Optional.ofNullable(typeAnn);
-        children = SimpleList.immutableOf(id, typeAnn);
+        this.left = AssertionUtils.notNull(left, "Left");
+        this.right = AssertionUtils.notNull(right, "Right");
+        children = SimpleList.immutableOf(left, right);
         updateParent();
     }
 
-    public Swc4jAstIdent getId() {
-        return id;
+    public ISwc4jAstTsEntityName getLeft() {
+        return left;
+    }
+
+    public Swc4jAstIdent getRight() {
+        return right;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.BindingIdent;
-    }
-
-    public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
-        return typeAnn;
+        return Swc4jAstType.TsQualifiedName;
     }
 }
