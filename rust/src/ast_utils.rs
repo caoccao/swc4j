@@ -42,6 +42,7 @@ struct JavaSwc4jAstFactory {
   method_create_bool: JStaticMethodID,
   method_create_class: JStaticMethodID,
   method_create_class_decl: JStaticMethodID,
+  method_create_class_expr: JStaticMethodID,
   method_create_class_method: JStaticMethodID,
   method_create_class_prop: JStaticMethodID,
   method_create_computed_prop_name: JStaticMethodID,
@@ -55,6 +56,8 @@ struct JavaSwc4jAstFactory {
   method_create_export_default_expr: JStaticMethodID,
   method_create_expr_or_spread: JStaticMethodID,
   method_create_expr_stmt: JStaticMethodID,
+  method_create_fn_decl: JStaticMethodID,
+  method_create_fn_expr: JStaticMethodID,
   method_create_function: JStaticMethodID,
   method_create_getter_prop: JStaticMethodID,
   method_create_ident: JStaticMethodID,
@@ -203,6 +206,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstClassDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClassDecl");
+    let method_create_class_expr = env
+      .get_static_method_id(
+        &class,
+        "createClassExpr",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstClassExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createClassExpr");
     let method_create_class_method = env
       .get_static_method_id(
         &class,
@@ -294,6 +304,20 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstExprStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExprStmt");
+    let method_create_fn_decl = env
+      .get_static_method_id(
+        &class,
+        "createFnDecl",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstFnDecl;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createFnDecl");
+    let method_create_fn_expr = env
+      .get_static_method_id(
+        &class,
+        "createFnExpr",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstFnExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createFnExpr");
     let method_create_function = env
       .get_static_method_id(
         &class,
@@ -624,6 +648,7 @@ impl JavaSwc4jAstFactory {
       method_create_bool,
       method_create_class,
       method_create_class_decl,
+      method_create_class_expr,
       method_create_class_method,
       method_create_class_prop,
       method_create_computed_prop_name,
@@ -637,6 +662,8 @@ impl JavaSwc4jAstFactory {
       method_create_export_default_expr,
       method_create_expr_or_spread,
       method_create_expr_stmt,
+      method_create_fn_decl,
+      method_create_fn_expr,
       method_create_function,
       method_create_getter_prop,
       method_create_ident,
@@ -1000,6 +1027,29 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_class_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    ident: &Option<JObject>,
+    clazz: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let ident = optional_object_to_jvalue!(ident);
+    let clazz = object_to_jvalue!(clazz);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_class_expr,
+        &[ident, clazz, span],
+        "Swc4jAstClassExpr create_class_expr()"
+      );
+    return_value
+  }
+
   pub fn create_class_method<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -1315,6 +1365,54 @@ impl JavaSwc4jAstFactory {
         self.method_create_expr_stmt,
         &[expr, span],
         "Swc4jAstExprStmt create_expr_stmt()"
+      );
+    return_value
+  }
+
+  pub fn create_fn_decl<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    ident: &JObject<'_>,
+    declare: bool,
+    function: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let ident = object_to_jvalue!(ident);
+    let declare = boolean_to_jvalue!(declare);
+    let function = object_to_jvalue!(function);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_fn_decl,
+        &[ident, declare, function, span],
+        "Swc4jAstFnDecl create_fn_decl()"
+      );
+    return_value
+  }
+
+  pub fn create_fn_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    ident: &Option<JObject>,
+    function: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let ident = optional_object_to_jvalue!(ident);
+    let function = object_to_jvalue!(function);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_fn_expr,
+        &[ident, function, span],
+        "Swc4jAstFnExpr create_fn_expr()"
       );
     return_value
   }
@@ -4291,6 +4389,21 @@ pub mod program {
     return_value
   }
 
+  fn create_class_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ClassExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_optional_ident = node.ident.as_ref().map(|node| create_ident(env, map, node));
+    let java_class = create_class(env, map, &node.class);
+    let return_type = java_ast_factory.create_class_expr(env, &java_optional_ident, &java_class, &java_range);
+    delete_local_optional_ref!(env, java_optional_ident);
+    delete_local_ref!(env, java_class);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_class_method<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ClassMethod) -> JObject<'a>
   where
     'local: 'a,
@@ -4555,6 +4668,37 @@ pub mod program {
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_range);
     return_value
+  }
+
+  fn create_fn_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &FnDecl) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_ident = create_ident(env, map, &node.ident);
+    let declare = node.declare;
+    let java_function = create_function(env, map, &node.function);
+    let return_value = java_ast_factory.create_fn_decl(env, &java_ident, declare, &java_function, &java_range);
+    delete_local_ref!(env, java_ident);
+    delete_local_ref!(env, java_function);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_fn_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &FnExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_optional_ident = node.ident.as_ref().map(|node| create_ident(env, map, node));
+    let java_function = create_function(env, map, &node.function);
+    let return_type = java_ast_factory.create_fn_expr(env, &java_optional_ident, &java_function, &java_range);
+    delete_local_optional_ref!(env, java_optional_ident);
+    delete_local_ref!(env, java_function);
+    delete_local_ref!(env, java_range);
+    return_type
   }
 
   fn create_function<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Function) -> JObject<'a>
@@ -5518,6 +5662,7 @@ pub mod program {
   {
     match node {
       Decl::Class(node) => create_class_decl(env, map, node),
+      Decl::Fn(node) => create_fn_decl(env, map, node),
       Decl::Using(node) => create_using_decl(env, map, node),
       Decl::Var(node) => create_var_decl(env, map, node),
       default => panic!("{:?}", default),
@@ -5534,6 +5679,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
+      DefaultDecl::Class(node) => create_class_expr(env, map, node),
+      DefaultDecl::Fn(node) => create_fn_expr(env, map, node),
       default => panic!("{:?}", default),
       // TODO
     }

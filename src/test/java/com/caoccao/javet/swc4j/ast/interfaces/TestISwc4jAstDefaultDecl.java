@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.jni2rust;
+package com.caoccao.javet.swc4j.ast.interfaces;
 
-import java.lang.annotation.*;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstClassExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstFnExpr;
+import org.junit.jupiter.api.Test;
 
-@Documented
-@Inherited
-@Target({ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})
-@Retention(RetentionPolicy.RUNTIME)
-@Jni2RustParam(
-        rustType = "range: &Range<usize>",
-        preCalls = "    let start = int_to_jvalue!(range.start);")
-public @interface Jni2RustParamStartPosition {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class TestISwc4jAstDefaultDecl {
+    @Test
+    public void testAssignable() {
+        assertTrue(ISwc4jAstDefaultDecl.class.isAssignableFrom(Swc4jAstClassExpr.class));
+        assertTrue(ISwc4jAstDefaultDecl.class.isAssignableFrom(Swc4jAstFnExpr.class));
+    }
 }

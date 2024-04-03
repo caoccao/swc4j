@@ -157,6 +157,14 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstClassExpr createClassExpr(
+            @Jni2RustParam(optional = true) Swc4jAstIdent ident,
+            Swc4jAstClass clazz,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstClassExpr(ident, clazz, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstClassMethod createClassMethod(
             ISwc4jAstPropName key,
             Swc4jAstFunction function,
@@ -278,6 +286,23 @@ public final class Swc4jAstFactory {
             ISwc4jAstExpr expr,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstExprStmt(expr, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstFnDecl createFnDecl(
+            Swc4jAstIdent ident,
+            boolean declare,
+            Swc4jAstFunction function,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstFnDecl(ident, declare, function, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstFnExpr createFnExpr(
+            @Jni2RustParam(optional = true) Swc4jAstIdent ident,
+            Swc4jAstFunction function,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstFnExpr(ident, function, span);
     }
 
     @Jni2RustMethod
@@ -518,8 +543,8 @@ public final class Swc4jAstFactory {
 
     @Jni2RustMethod
     public static Swc4jAstSpan createSpan(
-            @Jni2RustParamStartPosition int start,
-            @Jni2RustParamEndPosition int end) {
+            @Jni2RustParamSpanStart int start,
+            @Jni2RustParamSpanEnd int end) {
         return new Swc4jAstSpan(start, end);
     }
 

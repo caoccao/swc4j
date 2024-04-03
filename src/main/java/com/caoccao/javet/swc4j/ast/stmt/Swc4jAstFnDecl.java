@@ -14,35 +14,51 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.expr;
+package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstAwaitExpr
+public class Swc4jAstFnDecl
         extends Swc4jAst
-        implements ISwc4jAstExpr {
-    protected final ISwc4jAstExpr arg;
+        implements ISwc4jAstDecl {
+    protected final boolean declare;
+    protected final Swc4jAstFunction function;
+    protected final Swc4jAstIdent ident;
 
-    public Swc4jAstAwaitExpr(
-            ISwc4jAstExpr arg,
+    public Swc4jAstFnDecl(
+            Swc4jAstIdent ident,
+            boolean declare,
+            Swc4jAstFunction function,
             Swc4jAstSpan span) {
         super(span);
-        this.arg = AssertionUtils.notNull(arg, "Arg");
-        children = SimpleList.immutableOf(arg);
+        this.function = AssertionUtils.notNull(function, "Function");
+        this.declare = declare;
+        this.ident = AssertionUtils.notNull(ident, "Ident");
+        children = SimpleList.immutableOf(function, ident);
         updateParent();
     }
 
-    public ISwc4jAstExpr getArg() {
-        return arg;
+    public Swc4jAstFunction getFunction() {
+        return function;
+    }
+
+    public Swc4jAstIdent getIdent() {
+        return ident;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.AwaitExpr;
+        return Swc4jAstType.FnDecl;
+    }
+
+    public boolean isDeclare() {
+        return declare;
     }
 }

@@ -340,8 +340,8 @@ public final class Swc4jTokenFactory {
      */
     @Jni2RustMethod
     public static Swc4jAstSpan createSpan(
-            @Jni2RustParamStartPosition int start,
-            @Jni2RustParamEndPosition int end) {
+            @Jni2RustParamSpanStart int start,
+            @Jni2RustParamSpanEnd int end) {
         return new Swc4jAstSpan(start, end);
     }
 
