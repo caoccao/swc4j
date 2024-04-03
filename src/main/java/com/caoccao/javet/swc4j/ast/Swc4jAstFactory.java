@@ -58,6 +58,15 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstAssignExpr createAssignExpr(
+            int op,
+            ISwc4jAstPatOrExpr left,
+            ISwc4jAstExpr right,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstAssignExpr(Swc4jAstAssignOp.parse(op), left, right, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstAssignPat createAssignPat(
             ISwc4jAstPat left,
             ISwc4jAstExpr right,
@@ -409,6 +418,14 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstMemberExpr createMemberExpr(
+            ISwc4jAstExpr obj,
+            ISwc4jAstMemberProp prop,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstMemberExpr(obj, prop, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstMethodProp createMethodProp(
             ISwc4jAstPropName key,
             Swc4jAstFunction function,
@@ -578,6 +595,20 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) String raw,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstStr(value, raw, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstSuper createSuper(
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstSuper(span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstSuperPropExpr createSuperPropExpr(
+            Swc4jAstSuper obj,
+            ISwc4jAstSuperProp prop,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstSuperPropExpr(obj, prop, span);
     }
 
     @Jni2RustMethod

@@ -758,6 +758,49 @@ pub mod swc_enums {
   use deno_ast::swc::ast::*;
   use num_bigint::Sign;
 
+  impl IdentifiableEnum<AssignOp> for AssignOp {
+    fn get_id(&self) -> i32 {
+      match self {
+        AssignOp::AddAssign => 0,
+        AssignOp::AndAssign => 1,
+        AssignOp::Assign => 2,
+        AssignOp::BitAndAssign => 3,
+        AssignOp::BitOrAssign => 4,
+        AssignOp::BitXorAssign => 5,
+        AssignOp::DivAssign => 6,
+        AssignOp::ExpAssign => 7,
+        AssignOp::LShiftAssign => 8,
+        AssignOp::ModAssign => 9,
+        AssignOp::MulAssign => 10,
+        AssignOp::NullishAssign => 11,
+        AssignOp::OrAssign => 12,
+        AssignOp::RShiftAssign => 13,
+        AssignOp::SubAssign => 14,
+        AssignOp::ZeroFillRShiftAssign => 15,
+      }
+    }
+    fn parse_by_id(id: i32) -> AssignOp {
+      match id {
+        1 => AssignOp::AndAssign,
+        2 => AssignOp::Assign,
+        3 => AssignOp::BitAndAssign,
+        4 => AssignOp::BitOrAssign,
+        5 => AssignOp::BitXorAssign,
+        6 => AssignOp::DivAssign,
+        7 => AssignOp::ExpAssign,
+        8 => AssignOp::LShiftAssign,
+        9 => AssignOp::ModAssign,
+        10 => AssignOp::MulAssign,
+        11 => AssignOp::NullishAssign,
+        12 => AssignOp::OrAssign,
+        13 => AssignOp::RShiftAssign,
+        14 => AssignOp::SubAssign,
+        15 => AssignOp::ZeroFillRShiftAssign,
+        _ => AssignOp::AddAssign,
+      }
+    }
+  }
+
   impl IdentifiableEnum<BinaryOp> for BinaryOp {
     fn get_id(&self) -> i32 {
       match self {
