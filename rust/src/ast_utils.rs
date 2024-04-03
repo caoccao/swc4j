@@ -42,12 +42,14 @@ struct JavaSwc4jAstFactory {
   method_create_binding_ident: JStaticMethodID,
   method_create_block_stmt: JStaticMethodID,
   method_create_bool: JStaticMethodID,
+  method_create_call_expr: JStaticMethodID,
   method_create_class: JStaticMethodID,
   method_create_class_decl: JStaticMethodID,
   method_create_class_expr: JStaticMethodID,
   method_create_class_method: JStaticMethodID,
   method_create_class_prop: JStaticMethodID,
   method_create_computed_prop_name: JStaticMethodID,
+  method_create_cond_expr: JStaticMethodID,
   method_create_constructor: JStaticMethodID,
   method_create_debugger_stmt: JStaticMethodID,
   method_create_decorator: JStaticMethodID,
@@ -75,6 +77,7 @@ struct JavaSwc4jAstFactory {
   method_create_method_prop: JStaticMethodID,
   method_create_module: JStaticMethodID,
   method_create_named_export: JStaticMethodID,
+  method_create_new_expr: JStaticMethodID,
   method_create_null: JStaticMethodID,
   method_create_number: JStaticMethodID,
   method_create_object_lit: JStaticMethodID,
@@ -219,6 +222,13 @@ impl JavaSwc4jAstFactory {
         "(ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBool;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBool");
+    let method_create_call_expr = env
+      .get_static_method_id(
+        &class,
+        "createCallExpr",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstCallee;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstCallExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createCallExpr");
     let method_create_class = env
       .get_static_method_id(
         &class,
@@ -261,6 +271,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstComputedPropName;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createComputedPropName");
+    let method_create_cond_expr = env
+      .get_static_method_id(
+        &class,
+        "createCondExpr",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstCondExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createCondExpr");
     let method_create_constructor = env
       .get_static_method_id(
         &class,
@@ -450,6 +467,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstNamedExport;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createNamedExport");
+    let method_create_new_expr = env
+      .get_static_method_id(
+        &class,
+        "createNewExpr",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstCallee;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstNewExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createNewExpr");
     let method_create_null = env
       .get_static_method_id(
         &class,
@@ -752,12 +776,14 @@ impl JavaSwc4jAstFactory {
       method_create_binding_ident,
       method_create_block_stmt,
       method_create_bool,
+      method_create_call_expr,
       method_create_class,
       method_create_class_decl,
       method_create_class_expr,
       method_create_class_method,
       method_create_class_prop,
       method_create_computed_prop_name,
+      method_create_cond_expr,
       method_create_constructor,
       method_create_debugger_stmt,
       method_create_decorator,
@@ -785,6 +811,7 @@ impl JavaSwc4jAstFactory {
       method_create_method_prop,
       method_create_module,
       method_create_named_export,
+      method_create_new_expr,
       method_create_null,
       method_create_number,
       method_create_object_lit,
@@ -1136,6 +1163,31 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_call_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    callee: &JObject<'_>,
+    args: &JObject<'_>,
+    type_args: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let callee = object_to_jvalue!(callee);
+    let args = object_to_jvalue!(args);
+    let type_args = optional_object_to_jvalue!(type_args);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_call_expr,
+        &[callee, args, type_args, span],
+        "Swc4jAstCallExpr create_call_expr()"
+      );
+    return_value
+  }
+
   pub fn create_class<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -1312,6 +1364,31 @@ impl JavaSwc4jAstFactory {
         self.method_create_computed_prop_name,
         &[expr, span],
         "Swc4jAstComputedPropName create_computed_prop_name()"
+      );
+    return_value
+  }
+
+  pub fn create_cond_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    test: &JObject<'_>,
+    cons: &JObject<'_>,
+    alt: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let test = object_to_jvalue!(test);
+    let cons = object_to_jvalue!(cons);
+    let alt = object_to_jvalue!(alt);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_cond_expr,
+        &[test, cons, alt, span],
+        "Swc4jAstCondExpr create_cond_expr()"
       );
     return_value
   }
@@ -1947,6 +2024,31 @@ impl JavaSwc4jAstFactory {
         self.method_create_named_export,
         &[specifiers, src, type_only, with, span],
         "Swc4jAstNamedExport create_named_export()"
+      );
+    return_value
+  }
+
+  pub fn create_new_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    callee: &JObject<'_>,
+    args: &Option<JObject>,
+    type_args: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let callee = object_to_jvalue!(callee);
+    let args = optional_object_to_jvalue!(args);
+    let type_args = optional_object_to_jvalue!(type_args);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_new_expr,
+        &[callee, args, type_args, span],
+        "Swc4jAstNewExpr create_new_expr()"
       );
     return_value
   }
@@ -4783,6 +4885,33 @@ pub mod program {
     return_value
   }
 
+  fn create_call_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &CallExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_callee = enum_create_callee(env, map, &node.callee);
+    let java_args = java_array_list.construct(env, node.args.len());
+    node.args.iter().for_each(|node| {
+      let java_node = create_expr_or_spread(env, map, node);
+      java_array_list.add(env, &java_args, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_type_args = node
+      .type_args
+      .as_ref()
+      .map(|node| create_ts_type_param_instantiation(env, map, node));
+    let return_type =
+      java_ast_factory.create_call_expr(env, &java_callee, &java_args, &java_optional_type_args, &java_range);
+    delete_local_ref!(env, java_callee);
+    delete_local_ref!(env, java_args);
+    delete_local_optional_ref!(env, java_optional_type_args);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_class<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Class) -> JObject<'a>
   where
     'local: 'a,
@@ -4963,6 +5092,23 @@ pub mod program {
     let java_expr = enum_create_expr(env, map, &node.expr);
     let return_type = java_ast_factory.create_computed_prop_name(env, &java_expr, &java_range);
     delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
+  fn create_cond_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &CondExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_test = enum_create_expr(env, map, &node.test);
+    let java_cons = enum_create_expr(env, map, &node.cons);
+    let java_alt = enum_create_expr(env, map, &node.alt);
+    let return_type = java_ast_factory.create_cond_expr(env, &java_test, &java_cons, &java_alt, &java_range);
+    delete_local_ref!(env, java_test);
+    delete_local_ref!(env, java_cons);
+    delete_local_ref!(env, java_alt);
     delete_local_ref!(env, java_range);
     return_type
   }
@@ -5488,6 +5634,41 @@ pub mod program {
     return_value
   }
 
+  fn create_new_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &NewExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_callee = enum_create_expr(env, map, &node.callee);
+    let java_optional_args = node.args.as_ref().map(|node| {
+      let java_args = java_array_list.construct(env, node.len());
+      node.iter().for_each(|node| {
+        let java_node = create_expr_or_spread(env, map, node);
+        java_array_list.add(env, &java_args, &java_node);
+        delete_local_ref!(env, java_node);
+      });
+      java_args
+    });
+    let java_optional_type_args = node
+      .type_args
+      .as_ref()
+      .map(|node| create_ts_type_param_instantiation(env, map, node));
+    let return_type = java_ast_factory.create_new_expr(
+      env,
+      &java_callee,
+      &java_optional_args,
+      &java_optional_type_args,
+      &java_range,
+    );
+    delete_local_ref!(env, java_callee);
+    delete_local_optional_ref!(env, java_optional_args);
+    delete_local_optional_ref!(env, java_optional_type_args);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_null<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Null) -> JObject<'a>
   where
     'local: 'a,
@@ -5793,7 +5974,11 @@ pub mod program {
     return_type
   }
 
-  fn create_super_prop_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SuperPropExpr) -> JObject<'a>
+  fn create_super_prop_expr<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &SuperPropExpr,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -6416,10 +6601,13 @@ pub mod program {
       Expr::Assign(node) => create_assign_expr(env, map, node),
       Expr::Await(node) => create_await_expr(env, map, node),
       Expr::Bin(node) => create_bin_expr(env, map, node),
+      Expr::Call(node) => create_call_expr(env, map, node),
+      Expr::Cond(node) => create_cond_expr(env, map, node),
       Expr::Fn(node) => create_fn_expr(env, map, node),
       Expr::Ident(node) => create_ident(env, map, node),
       Expr::Lit(node) => enum_create_lit(env, map, node),
       Expr::Member(node) => create_member_expr(env, map, node),
+      Expr::New(node) => create_new_expr(env, map, node),
       Expr::Object(node) => create_object_lit(env, map, node),
       Expr::SuperProp(node) => create_super_prop_expr(env, map, node),
       Expr::This(node) => create_this_expr(env, map, node),

@@ -30,9 +30,12 @@ public class TestISwc4jAstExpr {
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstArrayLit.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstAssignExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstAwaitExpr.class));
+        assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstCallExpr.class));
+        assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstCondExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstFnExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstIdent.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstMemberExpr.class));
+        assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstNewExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstObjectLit.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstSuperPropExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstThisExpr.class));

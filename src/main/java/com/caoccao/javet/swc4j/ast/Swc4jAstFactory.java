@@ -152,6 +152,15 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstCallExpr createCallExpr(
+            ISwc4jAstCallee callee,
+            List<Swc4jAstExprOrSpread> args,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstCallExpr(callee, args, typeArgs, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstClass createClass(
             List<Swc4jAstDecorator> decorators,
             List<ISwc4jAstClassMember> body,
@@ -226,6 +235,15 @@ public final class Swc4jAstFactory {
             ISwc4jAstExpr expr,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstComputedPropName(expr, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstCondExpr createCondExpr(
+            ISwc4jAstExpr test,
+            ISwc4jAstExpr cons,
+            ISwc4jAstExpr alt,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstCondExpr(test, cons, alt, span);
     }
 
     @Jni2RustMethod
@@ -449,6 +467,15 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) Swc4jAstObjectLit with,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstNamedExport(specifiers, src, typeOnly, with, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstNewExpr createNewExpr(
+            ISwc4jAstCallee callee,
+            @Jni2RustParam(optional = true) List<Swc4jAstExprOrSpread> args,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstNewExpr(callee, args, typeArgs, span);
     }
 
     @Jni2RustMethod
