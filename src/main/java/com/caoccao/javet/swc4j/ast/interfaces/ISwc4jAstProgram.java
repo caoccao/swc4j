@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The interface Swc4j ast program.
@@ -62,5 +63,5 @@ public interface ISwc4jAstProgram<AST extends ISwc4jAst> extends ISwc4jAst {
      * @return the shebang
      * @since 0.2.0
      */
-    String getShebang();
+    Optional<String> getShebang();
 }

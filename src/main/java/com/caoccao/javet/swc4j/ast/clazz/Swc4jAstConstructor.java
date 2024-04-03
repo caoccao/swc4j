@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.clazz;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
@@ -29,14 +28,13 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Swc4jAstConstructor
         extends Swc4jAst
         implements ISwc4jAstClassMember {
-    @Nullable
-    protected final Swc4jAstAccessibility accessibility;
-    @Nullable
-    protected final Swc4jAstBlockStmt body;
+    protected final Optional<Swc4jAstAccessibility> accessibility;
+    protected final Optional<Swc4jAstBlockStmt> body;
     protected final ISwc4jAstPropName key;
     protected final boolean optional;
     protected final List<ISwc4jAstParamOrTsParamProp> params;
@@ -49,8 +47,8 @@ public class Swc4jAstConstructor
             boolean optional,
             Swc4jAstSpan span) {
         super(span);
-        this.accessibility = accessibility;
-        this.body = body;
+        this.accessibility = Optional.ofNullable(accessibility);
+        this.body = Optional.ofNullable(body);
         this.key = AssertionUtils.notNull(key, "Key");
         this.optional = optional;
         this.params = AssertionUtils.notNull(params, "Params");
@@ -61,11 +59,11 @@ public class Swc4jAstConstructor
         updateParent();
     }
 
-    public Swc4jAstAccessibility getAccessibility() {
+    public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
     }
 
-    public Swc4jAstBlockStmt getBody() {
+    public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
     }
 

@@ -16,11 +16,10 @@
 
 package com.caoccao.javet.swc4j.ast.module;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExportSpecifier;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
@@ -28,6 +27,7 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Swc4jAstNamedExport
         extends Swc4jAst
@@ -35,8 +35,7 @@ public class Swc4jAstNamedExport
     protected final List<ISwc4jAstExportSpecifier> specifiers;
     protected final Swc4jAstStr src;
     protected final boolean typeOnly;
-    @Nullable
-    protected final Swc4jAstObjectLit with;
+    protected final Optional<Swc4jAstObjectLit> with;
 
     public Swc4jAstNamedExport(
             List<ISwc4jAstExportSpecifier> specifiers,
@@ -48,7 +47,7 @@ public class Swc4jAstNamedExport
         this.specifiers = AssertionUtils.notNull(specifiers, "Specifiers");
         this.src = src;
         this.typeOnly = typeOnly;
-        this.with = with;
+        this.with = Optional.ofNullable(with);
         children = SimpleList.copyOf(specifiers);
         children.add(src);
         children.add(with);
@@ -69,7 +68,7 @@ public class Swc4jAstNamedExport
         return Swc4jAstType.NamedExport;
     }
 
-    public Swc4jAstObjectLit getWith() {
+    public Optional<Swc4jAstObjectLit> getWith() {
         return with;
     }
 

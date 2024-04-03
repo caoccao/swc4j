@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.clazz;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
@@ -29,6 +28,7 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Swc4jAstClass
         extends Swc4jAst {
@@ -36,12 +36,9 @@ public class Swc4jAstClass
     protected final List<Swc4jAstTsExprWithTypeArgs> _implements;
     protected final List<ISwc4jAstClassMember> body;
     protected final List<Swc4jAstDecorator> decorators;
-    @Nullable
-    protected final ISwc4jAstExpr superClass;
-    @Nullable
-    protected final Swc4jAstTsTypeParamInstantiation superTypeParams;
-    @Nullable
-    protected final Swc4jAstTsTypeParamDecl typeParams;
+    protected final Optional<ISwc4jAstExpr> superClass;
+    protected final Optional<Swc4jAstTsTypeParamInstantiation> superTypeParams;
+    protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     public Swc4jAstClass(
             List<Swc4jAstDecorator> decorators,
@@ -57,9 +54,9 @@ public class Swc4jAstClass
         this._implements = _implements;
         this.body = AssertionUtils.notNull(body, "Body");
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
-        this.superClass = superClass;
-        this.superTypeParams = superTypeParams;
-        this.typeParams = typeParams;
+        this.superClass = Optional.ofNullable(superClass);
+        this.superTypeParams = Optional.ofNullable(superTypeParams);
+        this.typeParams = Optional.ofNullable(typeParams);
         children = SimpleList.copyOf(_implements);
         children.addAll(body);
         children.addAll(decorators);
@@ -82,11 +79,11 @@ public class Swc4jAstClass
         return _implements;
     }
 
-    public ISwc4jAstExpr getSuperClass() {
+    public Optional<ISwc4jAstExpr> getSuperClass() {
         return superClass;
     }
 
-    public Swc4jAstTsTypeParamInstantiation getSuperTypeParams() {
+    public Optional<Swc4jAstTsTypeParamInstantiation> getSuperTypeParams() {
         return superTypeParams;
     }
 
@@ -95,7 +92,7 @@ public class Swc4jAstClass
         return Swc4jAstType.Class;
     }
 
-    public Swc4jAstTsTypeParamDecl getTypeParams() {
+    public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 

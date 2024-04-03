@@ -16,18 +16,18 @@
 
 package com.caoccao.javet.swc4j.ast.expr.lit;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 
+import java.util.Optional;
+
 public class Swc4jAstNumber
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName {
-    @Nullable
-    protected final String raw;
+    protected final Optional<String> raw;
     protected final double value;
 
     public Swc4jAstNumber(
@@ -36,10 +36,10 @@ public class Swc4jAstNumber
             Swc4jAstSpan span) {
         super(span);
         this.value = value;
-        this.raw = raw;
+        this.raw = Optional.ofNullable(raw);
     }
 
-    public String getRaw() {
+    public Optional<String> getRaw() {
         return raw;
     }
 

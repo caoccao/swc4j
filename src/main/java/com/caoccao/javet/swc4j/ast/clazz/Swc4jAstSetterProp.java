@@ -27,11 +27,12 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.Optional;
+
 public class Swc4jAstSetterProp
         extends Swc4jAst
         implements ISwc4jAstProp {
-    @Nullable
-    protected final Swc4jAstBlockStmt body;
+    protected final Optional<Swc4jAstBlockStmt> body;
     protected final ISwc4jAstPropName key;
     protected final ISwc4jAstPat param;
 
@@ -41,14 +42,14 @@ public class Swc4jAstSetterProp
             Swc4jAstBlockStmt body,
             Swc4jAstSpan span) {
         super(span);
-        this.body = body;
+        this.body = Optional.ofNullable(body);
         this.key = AssertionUtils.notNull(key, "Key");
         this.param = AssertionUtils.notNull(param, "Param");
         children = SimpleList.immutableOf(key, param, body);
         updateParent();
     }
 
-    public Swc4jAstBlockStmt getBody() {
+    public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
     }
 

@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.clazz;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
@@ -27,19 +26,17 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Swc4jAstFunction
         extends Swc4jAst {
     protected final boolean _async;
-    @Nullable
-    protected final Swc4jAstBlockStmt body;
+    protected final Optional<Swc4jAstBlockStmt> body;
     protected final List<Swc4jAstDecorator> decorators;
     protected final boolean generator;
     protected final List<Swc4jAstParam> params;
-    @Nullable
-    protected final Swc4jAstTsTypeAnn returnType;
-    @Nullable
-    protected final Swc4jAstTsTypeParamDecl typeParams;
+    protected final Optional<Swc4jAstTsTypeAnn> returnType;
+    protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     public Swc4jAstFunction(
             List<Swc4jAstParam> params,
@@ -52,12 +49,12 @@ public class Swc4jAstFunction
             Swc4jAstSpan span) {
         super(span);
         this._async = _async;
-        this.body = body;
+        this.body = Optional.ofNullable(body);
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
         this.generator = generator;
         this.params = AssertionUtils.notNull(params, "Params");
-        this.returnType = returnType;
-        this.typeParams = typeParams;
+        this.returnType = Optional.ofNullable(returnType);
+        this.typeParams = Optional.ofNullable(typeParams);
         children = SimpleList.copyOf(decorators);
         children.addAll(params);
         children.add(body);
@@ -67,7 +64,7 @@ public class Swc4jAstFunction
         updateParent();
     }
 
-    public Swc4jAstBlockStmt getBody() {
+    public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
     }
 
@@ -79,7 +76,7 @@ public class Swc4jAstFunction
         return params;
     }
 
-    public Swc4jAstTsTypeAnn getReturnType() {
+    public Optional<Swc4jAstTsTypeAnn> getReturnType() {
         return returnType;
     }
 
@@ -88,7 +85,7 @@ public class Swc4jAstFunction
         return Swc4jAstType.Function;
     }
 
-    public Swc4jAstTsTypeParamDecl getTypeParams() {
+    public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 

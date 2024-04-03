@@ -42,7 +42,7 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 41);
         Swc4jAstBigInt bigInt = (Swc4jAstBigInt) assertAst(
                 exprStmt, exprStmt.getExpr(), Swc4jAstType.BigInt, 0, 41);
-        assertEquals("1234567890123456789012345678901234567890n", bigInt.getRaw());
+        assertEquals("1234567890123456789012345678901234567890n", bigInt.getRaw().get());
         assertEquals("1234567890123456789012345678901234567890", bigInt.getValue().toString());
         assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
     }
@@ -59,7 +59,7 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
         assertEquals(Swc4jAstUnaryOp.Minus, unaryExpr.getOp());
         Swc4jAstBigInt bigInt = (Swc4jAstBigInt) assertAst(
                 unaryExpr, unaryExpr.getArg(), Swc4jAstType.BigInt, 1, 3);
-        assertEquals("1n", bigInt.getRaw());
+        assertEquals("1n", bigInt.getRaw().get());
         assertEquals(BigInteger.ONE, bigInt.getValue());
         assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
     }
@@ -76,7 +76,7 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
         assertEquals(Swc4jAstUnaryOp.Plus, unaryExpr.getOp());
         Swc4jAstBigInt bigInt = (Swc4jAstBigInt) assertAst(
                 unaryExpr, unaryExpr.getArg(), Swc4jAstType.BigInt, 1, 3);
-        assertEquals("1n", bigInt.getRaw());
+        assertEquals("1n", bigInt.getRaw().get());
         assertEquals(BigInteger.ONE, bigInt.getValue());
         assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
     }
@@ -90,7 +90,7 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 2);
         Swc4jAstBigInt bigInt = (Swc4jAstBigInt) assertAst(
                 exprStmt, exprStmt.getExpr(), Swc4jAstType.BigInt, 0, 2);
-        assertEquals("0n", bigInt.getRaw());
+        assertEquals("0n", bigInt.getRaw().get());
         assertEquals(BigInteger.ZERO, bigInt.getValue());
         assertEquals(Swc4jAstBigIntSign.NoSign, bigInt.getSign());
     }

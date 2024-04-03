@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.pat;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
@@ -26,12 +25,13 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.Optional;
+
 public class Swc4jAstBindingIdent
         extends Swc4jAst
         implements ISwc4jAstPat {
     protected final Swc4jAstIdent id;
-    @Nullable
-    protected final Swc4jAstTsTypeAnn typeAnn;
+    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     public Swc4jAstBindingIdent(
             Swc4jAstIdent id,
@@ -39,7 +39,7 @@ public class Swc4jAstBindingIdent
             Swc4jAstSpan span) {
         super(span);
         this.id = AssertionUtils.notNull(id, "Id");
-        this.typeAnn = typeAnn;
+        this.typeAnn = Optional.ofNullable(typeAnn);
         children = SimpleList.immutableOf(id, typeAnn);
         updateParent();
     }
@@ -53,7 +53,7 @@ public class Swc4jAstBindingIdent
         return Swc4jAstType.BindingIdent;
     }
 
-    public Swc4jAstTsTypeAnn getTypeAnn() {
+    public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 }

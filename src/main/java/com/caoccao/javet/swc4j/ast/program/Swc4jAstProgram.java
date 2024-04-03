@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.program;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
@@ -25,6 +24,7 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The type Swc4j ast program.
@@ -46,8 +46,7 @@ public abstract class Swc4jAstProgram<AST extends ISwc4jAst>
      *
      * @since 0.2.0
      */
-    @Nullable
-    protected final String shebang;
+    protected final Optional<String> shebang;
 
     /**
      * Instantiates a new Swc4j ast program.
@@ -63,7 +62,7 @@ public abstract class Swc4jAstProgram<AST extends ISwc4jAst>
             Swc4jAstSpan span) {
         super(span);
         this.body = SimpleList.immutableCopyOf(AssertionUtils.notNull(body, "Body"));
-        this.shebang = shebang;
+        this.shebang = Optional.ofNullable(shebang);
         children = SimpleList.immutableCopyOf(body);
         updateParent();
     }
@@ -74,7 +73,7 @@ public abstract class Swc4jAstProgram<AST extends ISwc4jAst>
     }
 
     @Override
-    public String getShebang() {
+    public Optional<String> getShebang() {
         return shebang;
     }
 }

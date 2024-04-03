@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.module;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
@@ -26,11 +25,12 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleExportName;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.Optional;
+
 public class Swc4jAstImportNamedSpecifier
         extends Swc4jAst
         implements ISwc4jAstImportSpecifier {
-    @Nullable
-    protected final ISwc4jAstModuleExportName imported;
+    protected final Optional<ISwc4jAstModuleExportName> imported;
     protected final Swc4jAstIdent local;
     protected final boolean typeOnly;
 
@@ -40,14 +40,14 @@ public class Swc4jAstImportNamedSpecifier
             boolean typeOnly,
             Swc4jAstSpan span) {
         super(span);
-        this.imported = imported;
+        this.imported = Optional.ofNullable(imported);
         this.local = AssertionUtils.notNull(local, "Local");
         this.typeOnly = typeOnly;
         children = SimpleList.immutableOf(imported, local);
         updateParent();
     }
 
-    public ISwc4jAstModuleExportName getImported() {
+    public Optional<ISwc4jAstModuleExportName> getImported() {
         return imported;
     }
 

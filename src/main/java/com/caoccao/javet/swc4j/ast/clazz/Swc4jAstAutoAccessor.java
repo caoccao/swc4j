@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.clazz;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
@@ -29,19 +28,17 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Swc4jAstAutoAccessor
         extends Swc4jAst
         implements ISwc4jAstClassMember {
     protected final boolean _static;
-    @Nullable
-    protected final Swc4jAstAccessibility accessibility;
+    protected final Optional<Swc4jAstAccessibility> accessibility;
     protected final List<Swc4jAstDecorator> decorators;
     protected final ISwc4jAstKey key;
-    @Nullable
-    protected final Swc4jAstTsTypeAnn typeAnn;
-    @Nullable
-    protected final ISwc4jAstExpr value;
+    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
+    protected final Optional<ISwc4jAstExpr> value;
 
     public Swc4jAstAutoAccessor(
             ISwc4jAstKey key,
@@ -53,11 +50,11 @@ public class Swc4jAstAutoAccessor
             Swc4jAstSpan span) {
         super(span);
         this._static = _static;
-        this.accessibility = accessibility;
+        this.accessibility = Optional.ofNullable(accessibility);
         this.decorators = SimpleList.immutableCopyOf(AssertionUtils.notNull(decorators, "Decorators"));
         this.key = AssertionUtils.notNull(key, "Key");
-        this.typeAnn = typeAnn;
-        this.value = value;
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        this.value = Optional.ofNullable(value);
         children = SimpleList.copyOf(decorators);
         children.add(key);
         children.add(value);
@@ -66,7 +63,7 @@ public class Swc4jAstAutoAccessor
         updateParent();
     }
 
-    public Swc4jAstAccessibility getAccessibility() {
+    public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
     }
 
@@ -79,11 +76,11 @@ public class Swc4jAstAutoAccessor
         return Swc4jAstType.AutoAccessor;
     }
 
-    public Swc4jAstTsTypeAnn getTypeAnn() {
+    public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
-    public ISwc4jAstExpr getValue() {
+    public Optional<ISwc4jAstExpr> getValue() {
         return value;
     }
 

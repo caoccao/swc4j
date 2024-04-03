@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.ts;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
@@ -25,13 +24,13 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.Optional;
+
 public class Swc4jAstTsTypeParam
         extends Swc4jAst {
     protected final boolean _const;
-    @Nullable
-    protected final ISwc4jAstTsType _default;
-    @Nullable
-    protected final ISwc4jAstTsType constraint;
+    protected final Optional<ISwc4jAstTsType> _default;
+    protected final Optional<ISwc4jAstTsType> constraint;
     protected final boolean in;
     protected final Swc4jAstIdent name;
     protected final boolean out;
@@ -46,8 +45,8 @@ public class Swc4jAstTsTypeParam
             Swc4jAstSpan span) {
         super(span);
         this._const = _const;
-        this._default = AssertionUtils.notNull(_default, "Default");
-        this.constraint = AssertionUtils.notNull(constraint, "Constraint");
+        this._default = Optional.ofNullable(_default);
+        this.constraint = Optional.ofNullable(constraint);
         this.in = in;
         this.name = AssertionUtils.notNull(name, "Name");
         this.out = out;
@@ -55,11 +54,11 @@ public class Swc4jAstTsTypeParam
         updateParent();
     }
 
-    public ISwc4jAstTsType getConstraint() {
+    public Optional<ISwc4jAstTsType> getConstraint() {
         return constraint;
     }
 
-    public ISwc4jAstTsType getDefault() {
+    public Optional<ISwc4jAstTsType> getDefault() {
         return _default;
     }
 

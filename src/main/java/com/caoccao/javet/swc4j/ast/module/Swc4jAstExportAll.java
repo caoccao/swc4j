@@ -16,23 +16,23 @@
 
 package com.caoccao.javet.swc4j.ast.module;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+
+import java.util.Optional;
 
 public class Swc4jAstExportAll
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
     protected final Swc4jAstStr src;
     protected final boolean typeOnly;
-    @Nullable
-    protected final Swc4jAstObjectLit with;
+    protected final Optional<Swc4jAstObjectLit> with;
 
     public Swc4jAstExportAll(
             Swc4jAstStr src,
@@ -42,7 +42,7 @@ public class Swc4jAstExportAll
         super(span);
         this.src = AssertionUtils.notNull(src, "Src");
         this.typeOnly = typeOnly;
-        this.with = with;
+        this.with = Optional.ofNullable(with);
         children = SimpleList.immutableOf(src, with);
         updateParent();
     }
@@ -56,7 +56,7 @@ public class Swc4jAstExportAll
         return Swc4jAstType.ExportAll;
     }
 
-    public Swc4jAstObjectLit getWith() {
+    public Optional<Swc4jAstObjectLit> getWith() {
         return with;
     }
 

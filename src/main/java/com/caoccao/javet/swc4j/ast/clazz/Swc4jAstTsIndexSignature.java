@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.clazz;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
@@ -27,6 +26,7 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Swc4jAstTsIndexSignature
         extends Swc4jAst
@@ -34,8 +34,7 @@ public class Swc4jAstTsIndexSignature
     protected final boolean _static;
     protected final List<ISwc4jAstTsFnParam> params;
     protected final boolean readonly;
-    @Nullable
-    protected final Swc4jAstTsTypeAnn typeAnn;
+    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     public Swc4jAstTsIndexSignature(
             List<ISwc4jAstTsFnParam> params,
@@ -47,7 +46,7 @@ public class Swc4jAstTsIndexSignature
         this._static = _static;
         this.params = AssertionUtils.notNull(params, "Params");
         this.readonly = readonly;
-        this.typeAnn = typeAnn;
+        this.typeAnn = Optional.ofNullable(typeAnn);
         children = SimpleList.copyOf(params);
         children.add(typeAnn);
         children = SimpleList.immutable(children);
@@ -63,7 +62,7 @@ public class Swc4jAstTsIndexSignature
         return Swc4jAstType.TsIndexSignature;
     }
 
-    public Swc4jAstTsTypeAnn getTypeAnn() {
+    public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 

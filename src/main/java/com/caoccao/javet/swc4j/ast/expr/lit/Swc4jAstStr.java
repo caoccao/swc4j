@@ -25,11 +25,12 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleExportName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
+import java.util.Optional;
+
 public class Swc4jAstStr
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstModuleExportName, ISwc4jAstPropName {
-    @Nullable
-    protected final String raw;
+    protected final Optional<String> raw;
     protected final String value;
 
     public Swc4jAstStr(
@@ -38,10 +39,10 @@ public class Swc4jAstStr
             Swc4jAstSpan span) {
         super(span);
         this.value = AssertionUtils.notNull(value, "Value");
-        this.raw = raw;
+        this.raw = Optional.ofNullable(raw);
     }
 
-    public String getRaw() {
+    public Optional<String> getRaw() {
         return raw;
     }
 

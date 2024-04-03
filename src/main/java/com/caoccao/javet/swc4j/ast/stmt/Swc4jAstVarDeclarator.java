@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.stmt;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
@@ -26,12 +25,13 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.Optional;
+
 public class Swc4jAstVarDeclarator
         extends Swc4jAst
         implements ISwc4jAstDecl {
     protected final boolean definite;
-    @Nullable
-    protected final ISwc4jAstExpr init;
+    protected final Optional<ISwc4jAstExpr> init;
     protected final ISwc4jAstPat name;
 
     public Swc4jAstVarDeclarator(
@@ -41,13 +41,13 @@ public class Swc4jAstVarDeclarator
             Swc4jAstSpan span) {
         super(span);
         this.definite = definite;
-        this.init = init;
+        this.init = Optional.ofNullable(init);
         this.name = AssertionUtils.notNull(name, "Name");
         children = SimpleList.immutableOf(init, name);
         updateParent();
     }
 
-    public ISwc4jAstExpr getInit() {
+    public Optional<ISwc4jAstExpr> getInit() {
         return init;
     }
 

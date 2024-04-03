@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.pat;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
@@ -27,14 +26,14 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Swc4jAstObjectPat
         extends Swc4jAst
         implements ISwc4jAstPat {
     protected final boolean optional;
     protected final List<ISwc4jAstObjectPatProp> props;
-    @Nullable
-    protected final Swc4jAstTsTypeAnn typeAnn;
+    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     public Swc4jAstObjectPat(
             List<ISwc4jAstObjectPatProp> props,
@@ -44,7 +43,7 @@ public class Swc4jAstObjectPat
         super(span);
         this.props = SimpleList.immutableCopyOf(AssertionUtils.notNull(props, "Props"));
         this.optional = optional;
-        this.typeAnn = typeAnn;
+        this.typeAnn = Optional.ofNullable(typeAnn);
         children = SimpleList.copyOf(props);
         children.add(typeAnn);
         children = SimpleList.immutable(children);
@@ -60,7 +59,7 @@ public class Swc4jAstObjectPat
         return Swc4jAstType.ObjectPat;
     }
 
-    public Swc4jAstTsTypeAnn getTypeAnn() {
+    public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 

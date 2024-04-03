@@ -27,14 +27,15 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.Optional;
+
 public class Swc4jAstClassMethod
         extends Swc4jAst
         implements ISwc4jAstClassMember {
     protected final boolean _abstract;
     protected final boolean _override;
     protected final boolean _static;
-    @Nullable
-    protected final Swc4jAstAccessibility accessibility;
+        protected final Optional<Swc4jAstAccessibility> accessibility;
     protected final Swc4jAstFunction function;
     protected final ISwc4jAstPropName key;
     protected final Swc4jAstMethodKind kind;
@@ -54,7 +55,7 @@ public class Swc4jAstClassMethod
         this._abstract = _abstract;
         this._override = _override;
         this._static = _static;
-        this.accessibility = accessibility;
+        this.accessibility = Optional.ofNullable(accessibility);
         this.function = function;
         this.key = AssertionUtils.notNull(key, "Key");
         this.kind = AssertionUtils.notNull(kind, "Kind");
@@ -63,7 +64,7 @@ public class Swc4jAstClassMethod
         updateParent();
     }
 
-    public Swc4jAstAccessibility getAccessibility() {
+    public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
     }
 

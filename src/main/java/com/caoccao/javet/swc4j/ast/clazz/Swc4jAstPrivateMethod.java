@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.clazz;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
@@ -26,14 +25,15 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.Optional;
+
 public class Swc4jAstPrivateMethod
         extends Swc4jAst
         implements ISwc4jAstClassMember {
     protected final boolean _abstract;
     protected final boolean _override;
     protected final boolean _static;
-    @Nullable
-    protected final Swc4jAstAccessibility accessibility;
+    protected final Optional<Swc4jAstAccessibility> accessibility;
     protected final Swc4jAstFunction function;
     protected final Swc4jAstPrivateName key;
     protected final Swc4jAstMethodKind kind;
@@ -53,7 +53,7 @@ public class Swc4jAstPrivateMethod
         this._abstract = _abstract;
         this._override = _override;
         this._static = _static;
-        this.accessibility = accessibility;
+        this.accessibility = Optional.ofNullable(accessibility);
         this.function = function;
         this.key = AssertionUtils.notNull(key, "Key");
         this.kind = AssertionUtils.notNull(kind, "Kind");
@@ -62,7 +62,7 @@ public class Swc4jAstPrivateMethod
         updateParent();
     }
 
-    public Swc4jAstAccessibility getAccessibility() {
+    public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
     }
 

@@ -38,7 +38,7 @@ public class TestSwc4jAstStr extends BaseTestSuiteSwc4jAst {
         Swc4jAstStr str = (Swc4jAstStr) assertAst(
                 exprStmt, exprStmt.getExpr(), Swc4jAstType.Str, 0, 2);
         assertEquals("", str.getValue());
-        assertEquals("''", str.getRaw());
+        assertEquals("''", str.getRaw().get());
     }
 
     @Test
@@ -51,6 +51,6 @@ public class TestSwc4jAstStr extends BaseTestSuiteSwc4jAst {
         Swc4jAstStr str = (Swc4jAstStr) assertAst(
                 exprStmt, exprStmt.getExpr(), Swc4jAstType.Str, 0, 5);
         assertEquals("abc", str.getValue());
-        assertEquals("'abc'", str.getRaw());
+        assertEquals("'abc'", str.getRaw().get());
     }
 }

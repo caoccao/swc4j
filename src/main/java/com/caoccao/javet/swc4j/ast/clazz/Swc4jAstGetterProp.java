@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.clazz;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
@@ -27,14 +26,14 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.Optional;
+
 public class Swc4jAstGetterProp
         extends Swc4jAst
         implements ISwc4jAstProp {
-    @Nullable
-    protected final Swc4jAstBlockStmt body;
+    protected final Optional<Swc4jAstBlockStmt> body;
     protected final ISwc4jAstPropName key;
-    @Nullable
-    protected final Swc4jAstTsTypeAnn typeAnn;
+    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     public Swc4jAstGetterProp(
             ISwc4jAstPropName key,
@@ -42,14 +41,14 @@ public class Swc4jAstGetterProp
             Swc4jAstBlockStmt body,
             Swc4jAstSpan span) {
         super(span);
-        this.body = body;
+        this.body = Optional.ofNullable(body);
         this.key = AssertionUtils.notNull(key, "Key");
-        this.typeAnn = typeAnn;
+        this.typeAnn = Optional.ofNullable(typeAnn);
         children = SimpleList.immutableOf(key, typeAnn, body);
         updateParent();
     }
 
-    public Swc4jAstBlockStmt getBody() {
+    public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
     }
 
@@ -62,7 +61,7 @@ public class Swc4jAstGetterProp
         return Swc4jAstType.GetterProp;
     }
 
-    public Swc4jAstTsTypeAnn getTypeAnn() {
+    public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 }

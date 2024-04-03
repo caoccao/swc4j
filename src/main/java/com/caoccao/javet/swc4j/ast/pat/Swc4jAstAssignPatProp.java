@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.ast.pat;
 
-import com.caoccao.javet.swc4j.annotations.Nullable;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
@@ -26,12 +25,13 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.Optional;
+
 public class Swc4jAstAssignPatProp
         extends Swc4jAst
         implements ISwc4jAstObjectPatProp {
     protected final Swc4jAstIdent key;
-    @Nullable
-    protected final ISwc4jAstExpr value;
+    protected final Optional<ISwc4jAstExpr> value;
 
     public Swc4jAstAssignPatProp(
             Swc4jAstIdent key,
@@ -39,7 +39,7 @@ public class Swc4jAstAssignPatProp
             Swc4jAstSpan span) {
         super(span);
         this.key = AssertionUtils.notNull(key, "Key");
-        this.value = value;
+        this.value = Optional.ofNullable(value);
         children = SimpleList.immutableOf(key, value);
         updateParent();
     }
@@ -53,7 +53,7 @@ public class Swc4jAstAssignPatProp
         return Swc4jAstType.AssignPatProp;
     }
 
-    public ISwc4jAstExpr getValue() {
+    public Optional<ISwc4jAstExpr> getValue() {
         return value;
     }
 }
