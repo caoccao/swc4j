@@ -16,11 +16,9 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAwaitExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstThisExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,8 +29,11 @@ public class TestISwc4jAstExpr {
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(ISwc4jAstLit.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstArrayLit.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstAwaitExpr.class));
+        assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstFnExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstIdent.class));
+        assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstObjectLit.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstThisExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstUnaryExpr.class));
+        assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstUpdateExpr.class));
     }
 }

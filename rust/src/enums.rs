@@ -758,6 +758,67 @@ pub mod swc_enums {
   use deno_ast::swc::ast::*;
   use num_bigint::Sign;
 
+  impl IdentifiableEnum<BinaryOp> for BinaryOp {
+    fn get_id(&self) -> i32 {
+      match self {
+        BinaryOp::Add => 0,
+        BinaryOp::BitAnd => 1,
+        BinaryOp::BitOr => 2,
+        BinaryOp::BitXor => 3,
+        BinaryOp::Div => 4,
+        BinaryOp::EqEq => 5,
+        BinaryOp::EqEqEq => 6,
+        BinaryOp::Exp => 7,
+        BinaryOp::Gt => 8,
+        BinaryOp::GtEq => 9,
+        BinaryOp::In => 10,
+        BinaryOp::InstanceOf => 11,
+        BinaryOp::LogicalAnd => 12,
+        BinaryOp::LogicalOr => 13,
+        BinaryOp::LShift => 14,
+        BinaryOp::Lt => 15,
+        BinaryOp::LtEq => 16,
+        BinaryOp::Mod => 17,
+        BinaryOp::Mul => 18,
+        BinaryOp::NotEq => 19,
+        BinaryOp::NotEqEq => 20,
+        BinaryOp::NullishCoalescing => 21,
+        BinaryOp::RShift => 22,
+        BinaryOp::Sub => 23,
+        BinaryOp::ZeroFillRShift => 24,
+      }
+    }
+    fn parse_by_id(id: i32) -> BinaryOp {
+      match id {
+        1 => BinaryOp::BitAnd,
+        2 => BinaryOp::BitOr,
+        3 => BinaryOp::BitXor,
+        4 => BinaryOp::Div,
+        5 => BinaryOp::EqEq,
+        6 => BinaryOp::EqEqEq,
+        7 => BinaryOp::Exp,
+        8 => BinaryOp::Gt,
+        9 => BinaryOp::GtEq,
+        10 => BinaryOp::In,
+        11 => BinaryOp::InstanceOf,
+        12 => BinaryOp::LogicalAnd,
+        13 => BinaryOp::LogicalOr,
+        14 => BinaryOp::LShift,
+        15 => BinaryOp::Lt,
+        16 => BinaryOp::LtEq,
+        17 => BinaryOp::Mod,
+        18 => BinaryOp::Mul,
+        19 => BinaryOp::NotEq,
+        20 => BinaryOp::NotEqEq,
+        21 => BinaryOp::NullishCoalescing,
+        22 => BinaryOp::RShift,
+        23 => BinaryOp::Sub,
+        24 => BinaryOp::ZeroFillRShift,
+        _ => BinaryOp::Add,
+      }
+    }
+  }
+
   impl IdentifiableEnum<Accessibility> for Accessibility {
     fn get_id(&self) -> i32 {
       match self {
@@ -830,6 +891,21 @@ pub mod swc_enums {
         5 => UnaryOp::Tilde,
         6 => UnaryOp::TypeOf,
         _ => UnaryOp::Void,
+      }
+    }
+  }
+
+  impl IdentifiableEnum<UpdateOp> for UpdateOp {
+    fn get_id(&self) -> i32 {
+      match self {
+        UpdateOp::PlusPlus => 0,
+        UpdateOp::MinusMinus => 1,
+      }
+    }
+    fn parse_by_id(id: i32) -> UpdateOp {
+      match id {
+        1 => UpdateOp::MinusMinus,
+        _ => UpdateOp::PlusPlus,
       }
     }
   }

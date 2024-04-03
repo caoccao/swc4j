@@ -35,8 +35,8 @@ public class Swc4jAstUnaryExpr
             ISwc4jAstExpr arg,
             Swc4jAstSpan span) {
         super(span);
-        this.arg = AssertionUtils.notNull(arg, "arg");
-        this.op = AssertionUtils.notNull(op, "op");
+        this.arg = AssertionUtils.notNull(arg, "Arg");
+        this.op = AssertionUtils.notNull(op, "Op");
         children = SimpleList.immutableOf(arg);
         updateParent();
     }

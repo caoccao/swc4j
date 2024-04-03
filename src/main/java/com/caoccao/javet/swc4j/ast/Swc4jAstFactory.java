@@ -112,6 +112,15 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstBinExpr createBinExpr(
+            int op,
+            ISwc4jAstExpr left,
+            ISwc4jAstExpr right,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstBinExpr(Swc4jAstBinaryOp.parse(op), left, right, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstBindingIdent createBindingIdent(
             Swc4jAstIdent id,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
@@ -729,6 +738,15 @@ public final class Swc4jAstFactory {
             ISwc4jAstExpr arg,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstUnaryExpr(Swc4jAstUnaryOp.parse(op), arg, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstUpdateExpr createUpdateExpr(
+            int op,
+            boolean prefix,
+            ISwc4jAstExpr arg,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstUpdateExpr(Swc4jAstUpdateOp.parse(op), prefix, arg, span);
     }
 
     @Jni2RustMethod

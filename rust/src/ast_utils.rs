@@ -37,6 +37,7 @@ struct JavaSwc4jAstFactory {
   method_create_auto_accessor: JStaticMethodID,
   method_create_await_expr: JStaticMethodID,
   method_create_big_int: JStaticMethodID,
+  method_create_bin_expr: JStaticMethodID,
   method_create_binding_ident: JStaticMethodID,
   method_create_block_stmt: JStaticMethodID,
   method_create_bool: JStaticMethodID,
@@ -107,6 +108,7 @@ struct JavaSwc4jAstFactory {
   method_create_ts_type_param_decl: JStaticMethodID,
   method_create_ts_type_param_instantiation: JStaticMethodID,
   method_create_unary_expr: JStaticMethodID,
+  method_create_update_expr: JStaticMethodID,
   method_create_using_decl: JStaticMethodID,
   method_create_var_decl: JStaticMethodID,
   method_create_var_declarator: JStaticMethodID,
@@ -178,6 +180,13 @@ impl JavaSwc4jAstFactory {
         "(ILjava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBigInt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBigInt");
+    let method_create_bin_expr = env
+      .get_static_method_id(
+        &class,
+        "createBinExpr",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstBinExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createBinExpr");
     let method_create_binding_ident = env
       .get_static_method_id(
         &class,
@@ -668,6 +677,13 @@ impl JavaSwc4jAstFactory {
         "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstUnaryExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createUnaryExpr");
+    let method_create_update_expr = env
+      .get_static_method_id(
+        &class,
+        "createUpdateExpr",
+        "(IZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstUpdateExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createUpdateExpr");
     let method_create_using_decl = env
       .get_static_method_id(
         &class,
@@ -699,6 +715,7 @@ impl JavaSwc4jAstFactory {
       method_create_auto_accessor,
       method_create_await_expr,
       method_create_big_int,
+      method_create_bin_expr,
       method_create_binding_ident,
       method_create_block_stmt,
       method_create_bool,
@@ -769,6 +786,7 @@ impl JavaSwc4jAstFactory {
       method_create_ts_type_param_decl,
       method_create_ts_type_param_instantiation,
       method_create_unary_expr,
+      method_create_update_expr,
       method_create_using_decl,
       method_create_var_decl,
       method_create_var_declarator,
@@ -964,6 +982,31 @@ impl JavaSwc4jAstFactory {
         "Swc4jAstBigInt create_big_int()"
       );
     delete_local_ref!(env, java_raw);
+    return_value
+  }
+
+  pub fn create_bin_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    op: i32,
+    left: &JObject<'_>,
+    right: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let op = int_to_jvalue!(op);
+    let left = object_to_jvalue!(left);
+    let right = object_to_jvalue!(right);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_bin_expr,
+        &[op, left, right, span],
+        "Swc4jAstBinExpr create_bin_expr()"
+      );
     return_value
   }
 
@@ -2674,6 +2717,31 @@ impl JavaSwc4jAstFactory {
         self.method_create_unary_expr,
         &[op, arg, span],
         "Swc4jAstUnaryExpr create_unary_expr()"
+      );
+    return_value
+  }
+
+  pub fn create_update_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    op: i32,
+    prefix: bool,
+    arg: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let op = int_to_jvalue!(op);
+    let prefix = boolean_to_jvalue!(prefix);
+    let arg = object_to_jvalue!(arg);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_update_expr,
+        &[op, prefix, arg, span],
+        "Swc4jAstUpdateExpr create_update_expr()"
       );
     return_value
   }
@@ -4501,10 +4569,26 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let sign = node.value.sign().get_id();
-    let raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
-    let return_value = java_ast_factory.create_big_int(env, sign, &raw, &java_range);
+    let optional_raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
+    let return_value = java_ast_factory.create_big_int(env, sign, &optional_raw, &java_range);
     delete_local_ref!(env, java_range);
     return_value
+  }
+
+  fn create_bin_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BinExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let op = node.op.get_id();
+    let java_left = enum_create_expr(env, map, &node.left);
+    let java_right = enum_create_expr(env, map, &node.right);
+    let return_type = java_ast_factory.create_bin_expr(env, op, &java_left, &java_right, &java_range);
+    delete_local_ref!(env, java_left);
+    delete_local_ref!(env, java_right);
+    delete_local_ref!(env, java_range);
+    return_type
   }
 
   fn create_binding_ident<'local, 'a>(
@@ -4755,20 +4839,21 @@ pub mod program {
       java_array_list.add(env, &java_params, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let java_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
+    let java_optional_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
     let accessibility = node.accessibility.map_or(-1, |node| node.get_id());
     let is_optional = node.is_optional;
     let return_type = java_ast_factory.create_constructor(
       env,
       &java_key,
       &java_params,
-      &java_body,
+      &java_optional_body,
       accessibility,
       is_optional,
       &java_range,
     );
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_params);
+    delete_local_optional_ref!(env, java_optional_body);
     delete_local_ref!(env, java_range);
     return_type
   }
@@ -4891,8 +4976,8 @@ pub mod program {
       .map(|node| java_ast_factory.create_span(env, &map.get_range_by_span(node)));
     let java_expr = enum_create_expr(env, map, &node.expr);
     let return_value = java_ast_factory.create_expr_or_spread(env, &java_optional_spread, &java_expr, &java_range);
-    delete_local_ref!(env, java_expr);
     delete_local_optional_ref!(env, java_optional_spread);
+    delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -5201,7 +5286,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let shebang: Option<String> = node.shebang.to_owned().map(|s| s.to_string());
+    let optional_shebang: Option<String> = node.shebang.to_owned().map(|s| s.to_string());
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let java_body = java_array_list.construct(env, node.body.len());
     node.body.iter().for_each(|node| {
@@ -5209,7 +5294,7 @@ pub mod program {
       java_array_list.add(env, &java_body, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_module(env, &java_body, &shebang, &java_range);
+    let return_value = java_ast_factory.create_module(env, &java_body, &optional_shebang, &java_range);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_range);
     return_value
@@ -5264,8 +5349,8 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let value = node.value;
-    let raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
-    let return_value = java_ast_factory.create_number(env, value, &raw, &java_range);
+    let optional_raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
+    let return_value = java_ast_factory.create_number(env, value, &optional_raw, &java_range);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -5463,7 +5548,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let shebang: Option<String> = node.shebang.to_owned().map(|s| s.to_string());
+    let optional_shebang: Option<String> = node.shebang.to_owned().map(|s| s.to_string());
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let java_body = java_array_list.construct(env, node.body.len());
     node.body.iter().for_each(|node| {
@@ -5471,7 +5556,7 @@ pub mod program {
       java_array_list.add(env, &java_body, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_script(env, &java_body, &shebang, &java_range);
+    let return_value = java_ast_factory.create_script(env, &java_body, &optional_shebang, &java_range);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_range);
     return_value
@@ -5534,8 +5619,8 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let value = node.value.as_str();
-    let raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
-    let return_value = java_ast_factory.create_str(env, value, &raw, &java_range);
+    let optional_raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
+    let return_value = java_ast_factory.create_str(env, value, &optional_raw, &java_range);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -5832,6 +5917,7 @@ pub mod program {
     let java_left = enum_create_ts_entity_name(env, map, &node.left);
     let java_right = create_ident(env, map, &node.right);
     let return_value = java_ast_factory.create_ts_qualified_name(env, &java_left, &java_right, &java_range);
+    delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
     delete_local_ref!(env, java_range);
     return_value
@@ -5971,6 +6057,21 @@ pub mod program {
     return_value
   }
 
+  fn create_update_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UpdateExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let op = node.op.get_id();
+    let prefix = node.prefix;
+    let java_arg = enum_create_expr(env, map, &node.arg);
+    let return_value = java_ast_factory.create_update_expr(env, op, prefix, &java_arg, &java_range);
+    delete_local_ref!(env, java_arg);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_using_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UsingDecl) -> JObject<'a>
   where
     'local: 'a,
@@ -6021,14 +6122,14 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let definite = node.definite;
-    let java_optional_init: Option<JObject> = node.init.as_ref().map(|node| enum_create_expr(env, map, node.as_ref()));
     let java_name = enum_create_pat(env, map, &node.name);
+    let java_optional_init: Option<JObject> = node.init.as_ref().map(|node| enum_create_expr(env, map, node.as_ref()));
+    let definite = node.definite;
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let return_value =
       java_ast_factory.create_var_declarator(env, &java_name, &java_optional_init, definite, &java_range);
-    delete_local_optional_ref!(env, java_optional_init);
     delete_local_ref!(env, java_name);
+    delete_local_optional_ref!(env, java_optional_init);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -6130,10 +6231,14 @@ pub mod program {
     match node {
       Expr::Array(node) => create_array_lit(env, map, node),
       Expr::Await(node) => create_await_expr(env, map, node),
+      Expr::Bin(node) => create_bin_expr(env, map, node),
+      Expr::Fn(node) => create_fn_expr(env, map, node),
       Expr::Ident(node) => create_ident(env, map, node),
       Expr::Lit(node) => enum_create_lit(env, map, node),
+      Expr::Object(node) => create_object_lit(env, map, node),
       Expr::This(node) => create_this_expr(env, map, node),
       Expr::Unary(node) => create_unary_expr(env, map, node),
+      Expr::Update(node) => create_update_expr(env, map, node),
       default => panic!("{:?}", default),
       // TODO
     }

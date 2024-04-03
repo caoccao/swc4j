@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024. caoccao.com Sam Cao
+ * Copyright (c) 2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,38 +14,50 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.expr.lit;
+package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropOrSpread;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.List;
-
-public class Swc4jAstObjectLit
+public class Swc4jAstBinExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
-    protected final List<ISwc4jAstPropOrSpread> props;
+    protected final ISwc4jAstExpr left;
+    protected final Swc4jAstBinaryOp op;
+    protected final ISwc4jAstExpr right;
 
-    public Swc4jAstObjectLit(
-            List<ISwc4jAstPropOrSpread> props,
+    public Swc4jAstBinExpr(
+            Swc4jAstBinaryOp op,
+            ISwc4jAstExpr left,
+            ISwc4jAstExpr right,
             Swc4jAstSpan span) {
         super(span);
-        this.props = SimpleList.immutableCopyOf(AssertionUtils.notNull(props, "Props"));
-        children = SimpleList.immutableCopyOf(props);
+        this.left = AssertionUtils.notNull(left, "Left");
+        this.op = AssertionUtils.notNull(op, "Op");
+        this.right = AssertionUtils.notNull(right, "Right");
+        children = SimpleList.immutableOf(left, right);
         updateParent();
     }
 
-    public List<ISwc4jAstPropOrSpread> getProps() {
-        return props;
+    public ISwc4jAstExpr getLeft() {
+        return left;
+    }
+
+    public Swc4jAstBinaryOp getOp() {
+        return op;
+    }
+
+    public ISwc4jAstExpr getRight() {
+        return right;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.ObjectLit;
+        return Swc4jAstType.BinExpr;
     }
 }
