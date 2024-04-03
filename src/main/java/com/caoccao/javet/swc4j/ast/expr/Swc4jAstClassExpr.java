@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDefaultDecl;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -28,7 +29,7 @@ import java.util.Optional;
 
 public class Swc4jAstClassExpr
         extends Swc4jAst
-        implements ISwc4jAstDefaultDecl {
+        implements ISwc4jAstDefaultDecl, ISwc4jAstExpr {
     protected final Swc4jAstClass clazz;
     protected final Optional<Swc4jAstIdent> ident;
 
