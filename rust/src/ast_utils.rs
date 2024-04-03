@@ -89,6 +89,8 @@ struct JavaSwc4jAstFactory {
   method_create_static_block: JStaticMethodID,
   method_create_str: JStaticMethodID,
   method_create_this_expr: JStaticMethodID,
+  method_create_ts_enum_decl: JStaticMethodID,
+  method_create_ts_enum_member: JStaticMethodID,
   method_create_ts_export_assignment: JStaticMethodID,
   method_create_ts_expr_with_type_args: JStaticMethodID,
   method_create_ts_external_module_ref: JStaticMethodID,
@@ -97,6 +99,7 @@ struct JavaSwc4jAstFactory {
   method_create_ts_interface_body: JStaticMethodID,
   method_create_ts_interface_decl: JStaticMethodID,
   method_create_ts_namespace_export_decl: JStaticMethodID,
+  method_create_ts_type_alias_decl: JStaticMethodID,
   method_create_ts_type_ann: JStaticMethodID,
   method_create_ts_type_param: JStaticMethodID,
   method_create_ts_type_param_decl: JStaticMethodID,
@@ -537,6 +540,20 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstThisExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createThisExpr");
+    let method_create_ts_enum_decl = env
+      .get_static_method_id(
+        &class,
+        "createTsEnumDecl",
+        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsEnumDecl;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsEnumDecl");
+    let method_create_ts_enum_member = env
+      .get_static_method_id(
+        &class,
+        "createTsEnumMember",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEnumMemberId;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsEnumMember;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsEnumMember");
     let method_create_ts_export_assignment = env
       .get_static_method_id(
         &class,
@@ -583,7 +600,7 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createTsInterfaceDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsInterfaceDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsInterfaceDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsInterfaceDecl");
     let method_create_ts_namespace_export_decl = env
@@ -593,6 +610,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsNamespaceExportDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsNamespaceExportDecl");
+    let method_create_ts_type_alias_decl = env
+      .get_static_method_id(
+        &class,
+        "createTsTypeAliasDecl",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsTypeAliasDecl;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTypeAliasDecl");
     let method_create_ts_type_ann = env
       .get_static_method_id(
         &class,
@@ -711,6 +735,8 @@ impl JavaSwc4jAstFactory {
       method_create_static_block,
       method_create_str,
       method_create_this_expr,
+      method_create_ts_enum_decl,
+      method_create_ts_enum_member,
       method_create_ts_export_assignment,
       method_create_ts_expr_with_type_args,
       method_create_ts_external_module_ref,
@@ -719,6 +745,7 @@ impl JavaSwc4jAstFactory {
       method_create_ts_interface_body,
       method_create_ts_interface_decl,
       method_create_ts_namespace_export_decl,
+      method_create_ts_type_alias_decl,
       method_create_ts_type_ann,
       method_create_ts_type_param,
       method_create_ts_type_param_decl,
@@ -2199,6 +2226,56 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_ts_enum_decl<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    declare: bool,
+    is_const: bool,
+    id: &JObject<'_>,
+    members: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let declare = boolean_to_jvalue!(declare);
+    let is_const = boolean_to_jvalue!(is_const);
+    let id = object_to_jvalue!(id);
+    let members = object_to_jvalue!(members);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_enum_decl,
+        &[declare, is_const, id, members, span],
+        "Swc4jAstTsEnumDecl create_ts_enum_decl()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_enum_member<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    id: &JObject<'_>,
+    init: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = object_to_jvalue!(id);
+    let init = optional_object_to_jvalue!(init);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_enum_member,
+        &[id, init, span],
+        "Swc4jAstTsEnumMember create_ts_enum_member()"
+      );
+    return_value
+  }
+
   pub fn create_ts_export_assignment<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -2385,6 +2462,33 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_namespace_export_decl,
         &[id, span],
         "Swc4jAstTsNamespaceExportDecl create_ts_namespace_export_decl()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_type_alias_decl<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    id: &JObject<'_>,
+    declare: bool,
+    type_params: &Option<JObject>,
+    type_ann: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = object_to_jvalue!(id);
+    let declare = boolean_to_jvalue!(declare);
+    let type_params = optional_object_to_jvalue!(type_params);
+    let type_ann = object_to_jvalue!(type_ann);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_type_alias_decl,
+        &[id, declare, type_params, type_ann, span],
+        "Swc4jAstTsTypeAliasDecl create_ts_type_alias_decl()"
       );
     return_value
   }
@@ -5379,6 +5483,49 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_enum_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsEnumDecl) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let declare = node.declare;
+    let is_const = node.is_const;
+    let java_id = create_ident(env, map, &node.id);
+    let java_members = java_array_list.construct(env, node.members.len());
+    node.members.iter().for_each(|node| {
+      let java_node = create_ts_enum_member(env, map, node);
+      java_array_list.add(env, &java_members, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_type =
+      java_ast_factory.create_ts_enum_decl(env, declare, is_const, &java_id, &java_members, &java_range);
+    delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_members);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
+  fn create_ts_enum_member<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsEnumMember,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_id = enum_create_ts_enum_member_id(env, map, &node.id);
+    let java_optional_init = node.init.as_ref().map(|node| enum_create_expr(env, map, node));
+    let return_value = java_ast_factory.create_ts_enum_member(env, &java_id, &java_optional_init, &java_range);
+    delete_local_ref!(env, java_id);
+    delete_local_optional_ref!(env, java_optional_init);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_ts_export_assignment<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -5577,6 +5724,38 @@ pub mod program {
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_range);
     return_value
+  }
+
+  fn create_ts_type_alias_decl<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsTypeAliasDecl,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_id = create_ident(env, map, &node.id);
+    let declare = node.declare;
+    let java_optional_type_params = node
+      .type_params
+      .as_ref()
+      .map(|node| create_ts_type_param_decl(env, map, node));
+    let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
+    let return_type = java_ast_factory.create_ts_type_alias_decl(
+      env,
+      &java_id,
+      declare,
+      &java_optional_type_params,
+      &java_type_ann,
+      &java_range,
+    );
+    delete_local_ref!(env, java_id);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_range);
+    return_type
   }
 
   fn create_ts_type_ann<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeAnn) -> JObject<'a>
@@ -5795,6 +5974,9 @@ pub mod program {
     match node {
       Decl::Class(node) => create_class_decl(env, map, node),
       Decl::Fn(node) => create_fn_decl(env, map, node),
+      Decl::TsEnum(node) => create_ts_enum_decl(env, map, node),
+      Decl::TsInterface(node) => create_ts_interface_decl(env, map, node),
+      Decl::TsTypeAlias(node) => create_ts_type_alias_decl(env, map, node),
       Decl::Using(node) => create_using_decl(env, map, node),
       Decl::Var(node) => create_var_decl(env, map, node),
       default => panic!("{:?}", default),

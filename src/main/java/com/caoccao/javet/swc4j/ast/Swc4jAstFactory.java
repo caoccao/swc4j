@@ -578,6 +578,24 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsEnumDecl createTsEnumDecl(
+            boolean declare,
+            boolean isConst,
+            Swc4jAstIdent id,
+            List<Swc4jAstTsEnumMember> members,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsEnumDecl(declare, isConst, id, members, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsEnumMember createTsEnumMember(
+            ISwc4jAstTsEnumMemberId id,
+            @Jni2RustParam(optional = true) ISwc4jAstExpr init,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsEnumMember(id, init, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsExportAssignment createTsExportAssignment(
             ISwc4jAstExpr decl,
             @Jni2RustParam Swc4jAstSpan span) {
@@ -630,7 +648,7 @@ public final class Swc4jAstFactory {
     public static Swc4jAstTsInterfaceDecl createTsInterfaceDecl(
             Swc4jAstIdent id,
             boolean declare,
-            @Jni2RustParam(optional = true) Swc4jAstTsTypeParam typeParams,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
             List<Swc4jAstTsExprWithTypeArgs> _extends,
             Swc4jAstTsInterfaceBody body,
             @Jni2RustParam Swc4jAstSpan span) {
@@ -642,6 +660,16 @@ public final class Swc4jAstFactory {
             Swc4jAstIdent id,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsNamespaceExportDecl(id, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsTypeAliasDecl createTsTypeAliasDecl(
+            Swc4jAstIdent id,
+            boolean declare,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
+            ISwc4jAstTsType typeAnn,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTypeAliasDecl(id, declare, typeParams, typeAnn, span);
     }
 
     @Jni2RustMethod

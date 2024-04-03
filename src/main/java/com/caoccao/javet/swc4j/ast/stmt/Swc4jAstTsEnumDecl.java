@@ -21,65 +21,52 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDefaultDecl;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsInterfaceBody;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsEnumMember;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
-import java.util.Optional;
 
-public class Swc4jAstTsInterfaceDecl
+public class Swc4jAstTsEnumDecl
         extends Swc4jAst
-        implements ISwc4jAstDecl, ISwc4jAstDefaultDecl {
-    protected final List<Swc4jAstTsExprWithTypeArgs> _extends;
-    protected final Swc4jAstTsInterfaceBody body;
+        implements ISwc4jAstDecl {
+    protected final boolean _const;
     protected final boolean declare;
     protected final Swc4jAstIdent id;
-    protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
+    protected final List<Swc4jAstTsEnumMember> members;
 
-    public Swc4jAstTsInterfaceDecl(
-            Swc4jAstIdent id,
+    public Swc4jAstTsEnumDecl(
             boolean declare,
-            Swc4jAstTsTypeParamDecl typeParams,
-            List<Swc4jAstTsExprWithTypeArgs> _extends,
-            Swc4jAstTsInterfaceBody body,
+            boolean _const,
+            Swc4jAstIdent id,
+            List<Swc4jAstTsEnumMember> members,
             Swc4jAstSpan span) {
         super(span);
-        this._extends = SimpleList.immutableCopyOf(AssertionUtils.notNull(_extends, "Extends"));
-        this.body = AssertionUtils.notNull(body, "Body");
+        this._const = _const;
         this.declare = declare;
         this.id = AssertionUtils.notNull(id, "Id");
-        this.typeParams = Optional.ofNullable(typeParams);
-        children = SimpleList.copyOf(_extends);
+        this.members = SimpleList.immutableCopyOf(AssertionUtils.notNull(members, "TypeAnn"));
+        children = SimpleList.copyOf(members);
         children.add(id);
-        children.add(typeParams);
-        children.add(body);
         children = SimpleList.immutable(children);
         updateParent();
-    }
-
-    public Swc4jAstTsInterfaceBody getBody() {
-        return body;
-    }
-
-    public List<Swc4jAstTsExprWithTypeArgs> getExtends() {
-        return _extends;
     }
 
     public Swc4jAstIdent getId() {
         return id;
     }
 
-    @Override
-    public Swc4jAstType getType() {
-        return Swc4jAstType.TsInterfaceDecl;
+    public List<Swc4jAstTsEnumMember> getMembers() {
+        return members;
     }
 
-    public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
-        return typeParams;
+    @Override
+    public Swc4jAstType getType() {
+        return Swc4jAstType.TsEnumDecl;
+    }
+
+    public boolean isConst() {
+        return _const;
     }
 
     public boolean isDeclare() {
