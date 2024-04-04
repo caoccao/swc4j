@@ -14,25 +14,36 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.clazz;
+package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstMetaPropKind;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
-import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
-public class Swc4jAstSuper
+public class Swc4jAstMetaPropExpr
         extends Swc4jAst
-        implements ISwc4jAst {
-    public Swc4jAstSuper(
+        implements ISwc4jAstExpr {
+    @Jni2RustField(value = "MetaPropKind::NewTarget")
+    protected final Swc4jAstMetaPropKind kind;
+
+    public Swc4jAstMetaPropExpr(
+            Swc4jAstMetaPropKind kind,
             Swc4jAstSpan span) {
         super(span);
+        this.kind = AssertionUtils.notNull(kind, "Kind");
         children = EMPTY_CHILDREN;
+    }
+
+    public Swc4jAstMetaPropKind getKind() {
+        return kind;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.Super;
+        return Swc4jAstType.MetaPropExpr;
     }
 }

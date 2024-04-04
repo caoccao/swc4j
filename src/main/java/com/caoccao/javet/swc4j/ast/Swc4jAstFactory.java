@@ -457,6 +457,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstMetaPropExpr createMetaPropExpr(
+            int kind,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstMetaPropExpr(Swc4jAstMetaPropKind.parse(kind), span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstMethodProp createMethodProp(
             ISwc4jAstPropName key,
             Swc4jAstFunction function,
@@ -870,5 +877,13 @@ public final class Swc4jAstFactory {
             boolean definite,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstVarDeclarator(name, init, definite, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstYieldExpr createYieldExpr(
+            @Jni2RustParam(optional = true) ISwc4jAstExpr arg,
+            boolean delegate,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstYieldExpr(arg, delegate, span);
     }
 }

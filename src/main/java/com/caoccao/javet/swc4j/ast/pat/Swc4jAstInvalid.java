@@ -29,7 +29,7 @@ public class Swc4jAstInvalid
     public Swc4jAstInvalid(
             Swc4jAstSpan span) {
         super(span);
-        children = SimpleList.immutableOf();
+        children = EMPTY_CHILDREN;
     }
 
     @Override

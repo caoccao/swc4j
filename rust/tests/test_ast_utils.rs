@@ -273,6 +273,10 @@ fn test_structs() {
     obj: Box::new(Expr::dummy()),
     prop: MemberProp::dummy(),
   };
+  let _ = MetaPropExpr {
+    span: Default::default(),
+    kind: MetaPropKind::NewTarget,
+  };
   let _ = MethodProp {
     function: Box::new(Function::dummy()),
     key: PropName::dummy(),
@@ -520,5 +524,10 @@ fn test_structs() {
     definite: Default::default(),
     init: Default::default(),
     name: Pat::dummy(),
+  };
+  let _ = YieldExpr {
+    span: Default::default(),
+    arg: Default::default(),
+    delegate: Default::default(),
   };
 }

@@ -879,6 +879,21 @@ pub mod swc_enums {
     }
   }
 
+  impl IdentifiableEnum<MetaPropKind> for MetaPropKind {
+    fn get_id(&self) -> i32 {
+      match self {
+        MetaPropKind::NewTarget => 0,
+        MetaPropKind::ImportMeta => 1,
+      }
+    }
+    fn parse_by_id(id: i32) -> MetaPropKind {
+      match id {
+        1 => MetaPropKind::ImportMeta,
+        _ => MetaPropKind::NewTarget,
+      }
+    }
+  }
+
   impl IdentifiableEnum<MethodKind> for MethodKind {
     fn get_id(&self) -> i32 {
       match self {

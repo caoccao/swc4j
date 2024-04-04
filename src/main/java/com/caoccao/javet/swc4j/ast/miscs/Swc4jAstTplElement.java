@@ -39,8 +39,7 @@ public class Swc4jAstTplElement
         this.cooked = Optional.ofNullable(cooked);
         this.raw = AssertionUtils.notNull(raw, "Raw");
         this.tail = tail;
-        children = SimpleList.immutableOf();
-        updateParent();
+        children = EMPTY_CHILDREN;
     }
 
     public Optional<String> getCooked() {

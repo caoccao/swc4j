@@ -28,7 +28,7 @@ public class Swc4jAstThisExpr
     public Swc4jAstThisExpr(
             Swc4jAstSpan span) {
         super(span);
-        children = SimpleList.immutableOf();
+        children = EMPTY_CHILDREN;
     }
 
     @Override

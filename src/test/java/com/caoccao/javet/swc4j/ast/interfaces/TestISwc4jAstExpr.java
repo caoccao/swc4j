@@ -40,6 +40,7 @@ public class TestISwc4jAstExpr {
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstIdent.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstInvalid.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstMemberExpr.class));
+        assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstMetaPropExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstNewExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstObjectLit.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstPrivateName.class));
@@ -49,5 +50,6 @@ public class TestISwc4jAstExpr {
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstTpl.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstUnaryExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstUpdateExpr.class));
+        assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstYieldExpr.class));
     }
 }

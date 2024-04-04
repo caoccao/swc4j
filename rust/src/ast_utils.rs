@@ -75,6 +75,7 @@ struct JavaSwc4jAstFactory {
   method_create_key_value_pat_prop: JStaticMethodID,
   method_create_key_value_prop: JStaticMethodID,
   method_create_member_expr: JStaticMethodID,
+  method_create_meta_prop_expr: JStaticMethodID,
   method_create_method_prop: JStaticMethodID,
   method_create_module: JStaticMethodID,
   method_create_named_export: JStaticMethodID,
@@ -123,6 +124,7 @@ struct JavaSwc4jAstFactory {
   method_create_using_decl: JStaticMethodID,
   method_create_var_decl: JStaticMethodID,
   method_create_var_declarator: JStaticMethodID,
+  method_create_yield_expr: JStaticMethodID,
 }
 unsafe impl Send for JavaSwc4jAstFactory {}
 unsafe impl Sync for JavaSwc4jAstFactory {}
@@ -457,6 +459,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstMemberProp;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstMemberExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createMemberExpr");
+    let method_create_meta_prop_expr = env
+      .get_static_method_id(
+        &class,
+        "createMetaPropExpr",
+        "(ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstMetaPropExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createMetaPropExpr");
     let method_create_method_prop = env
       .get_static_method_id(
         &class,
@@ -793,6 +802,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstVarDeclarator;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createVarDeclarator");
+    let method_create_yield_expr = env
+      .get_static_method_id(
+        &class,
+        "createYieldExpr",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstYieldExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createYieldExpr");
     JavaSwc4jAstFactory {
       class,
       method_create_array_lit,
@@ -841,6 +857,7 @@ impl JavaSwc4jAstFactory {
       method_create_key_value_pat_prop,
       method_create_key_value_prop,
       method_create_member_expr,
+      method_create_meta_prop_expr,
       method_create_method_prop,
       method_create_module,
       method_create_named_export,
@@ -889,6 +906,7 @@ impl JavaSwc4jAstFactory {
       method_create_using_decl,
       method_create_var_decl,
       method_create_var_declarator,
+      method_create_yield_expr,
     }
   }
 
@@ -2016,6 +2034,27 @@ impl JavaSwc4jAstFactory {
         self.method_create_member_expr,
         &[obj, prop, span],
         "Swc4jAstMemberExpr create_member_expr()"
+      );
+    return_value
+  }
+
+  pub fn create_meta_prop_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    kind: i32,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let kind = int_to_jvalue!(kind);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_meta_prop_expr,
+        &[kind, span],
+        "Swc4jAstMetaPropExpr create_meta_prop_expr()"
       );
     return_value
   }
@@ -3187,6 +3226,29 @@ impl JavaSwc4jAstFactory {
         self.method_create_var_declarator,
         &[name, init, definite, span],
         "Swc4jAstVarDeclarator create_var_declarator()"
+      );
+    return_value
+  }
+
+  pub fn create_yield_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    arg: &Option<JObject>,
+    delegate: bool,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let arg = optional_object_to_jvalue!(arg);
+    let delegate = boolean_to_jvalue!(delegate);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_yield_expr,
+        &[arg, delegate, span],
+        "Swc4jAstYieldExpr create_yield_expr()"
       );
     return_value
   }
@@ -5751,6 +5813,18 @@ pub mod program {
     return_type
   }
 
+  fn create_meta_prop_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &MetaPropExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let kind = node.kind.get_id();
+    let return_type = java_ast_factory.create_meta_prop_expr(env, kind, &java_range);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_method_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &MethodProp) -> JObject<'a>
   where
     'local: 'a,
@@ -6746,6 +6820,20 @@ pub mod program {
     return_value
   }
 
+  fn create_yield_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &YieldExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_optional_arg = node.arg.as_ref().map(|node| enum_create_expr(env, map, node));
+    let java_delegate = node.delegate;
+    let return_value = java_ast_factory.create_yield_expr(env, &java_optional_arg, java_delegate, &java_range);
+    delete_local_optional_ref!(env, java_optional_arg);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn enum_create_block_stmt_or_expr<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -6854,6 +6942,7 @@ pub mod program {
       Expr::Invalid(node) => create_invalid(env, map, node),
       Expr::Lit(node) => enum_create_lit(env, map, node),
       Expr::Member(node) => create_member_expr(env, map, node),
+      Expr::MetaProp(node) => create_meta_prop_expr(env, map, node),
       Expr::New(node) => create_new_expr(env, map, node),
       Expr::Object(node) => create_object_lit(env, map, node),
       Expr::PrivateName(node) => create_private_name(env, map, node),
@@ -6863,6 +6952,7 @@ pub mod program {
       Expr::Tpl(node) => create_tpl(env, map, node),
       Expr::Unary(node) => create_unary_expr(env, map, node),
       Expr::Update(node) => create_update_expr(env, map, node),
+      Expr::Yield(node) => create_yield_expr(env, map, node),
       default => panic!("{:?}", default),
       // TODO
     }

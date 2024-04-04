@@ -14,25 +14,43 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.clazz;
+package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstSuper
+import java.util.Optional;
+
+public class Swc4jAstYieldExpr
         extends Swc4jAst
-        implements ISwc4jAst {
-    public Swc4jAstSuper(
+        implements ISwc4jAstExpr {
+    protected final Optional<ISwc4jAstExpr> arg;
+    protected final boolean delegate;
+
+    public Swc4jAstYieldExpr(
+            ISwc4jAstExpr arg,
+            boolean delegate,
             Swc4jAstSpan span) {
         super(span);
-        children = EMPTY_CHILDREN;
+        this.arg = Optional.ofNullable(arg);
+        this.delegate = delegate;
+        children = SimpleList.immutableOf(arg);
+        updateParent();
+    }
+
+    public Optional<ISwc4jAstExpr> getArg() {
+        return arg;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.Super;
+        return Swc4jAstType.YieldExpr;
+    }
+
+    public boolean isDelegate() {
+        return delegate;
     }
 }
