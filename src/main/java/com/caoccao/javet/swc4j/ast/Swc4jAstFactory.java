@@ -59,6 +59,18 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstArrowExpr createArrowExpr(
+            List<ISwc4jAstPat> params,
+            ISwc4jAstBlockStmtOrExpr body,
+            boolean isAsync,
+            boolean generator,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn returnType,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstArrowExpr(params, body, isAsync, generator, typeParams, returnType, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstAssignExpr createAssignExpr(
             int op,
             ISwc4jAstPatOrExpr left,

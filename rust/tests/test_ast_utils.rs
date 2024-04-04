@@ -31,6 +31,15 @@ fn test_structs() {
     optional: Default::default(),
     type_ann: Default::default(),
   };
+  let _ = ArrowExpr {
+    span: Default::default(),
+    is_async: Default::default(),
+    body: Box::new(BlockStmtOrExpr::dummy()),
+    is_generator: Default::default(),
+    params: Default::default(),
+    return_type: Default::default(),
+    type_params: Default::default(),
+  };
   let _ = AssignExpr {
     span: Default::default(),
     left: PatOrExpr::dummy(),

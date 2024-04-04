@@ -31,6 +31,7 @@ struct JavaSwc4jAstFactory {
   class: GlobalRef,
   method_create_array_lit: JStaticMethodID,
   method_create_array_pat: JStaticMethodID,
+  method_create_arrow_expr: JStaticMethodID,
   method_create_assign_expr: JStaticMethodID,
   method_create_assign_pat: JStaticMethodID,
   method_create_assign_pat_prop: JStaticMethodID,
@@ -148,6 +149,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstArrayPat;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createArrayPat");
+    let method_create_arrow_expr = env
+      .get_static_method_id(
+        &class,
+        "createArrowExpr",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstBlockStmtOrExpr;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createArrowExpr");
     let method_create_assign_expr = env
       .get_static_method_id(
         &class,
@@ -789,6 +797,7 @@ impl JavaSwc4jAstFactory {
       class,
       method_create_array_lit,
       method_create_array_pat,
+      method_create_arrow_expr,
       method_create_assign_expr,
       method_create_assign_pat,
       method_create_assign_pat_prop,
@@ -925,6 +934,37 @@ impl JavaSwc4jAstFactory {
         self.method_create_array_pat,
         &[elems, optional, type_ann, span],
         "Swc4jAstArrayPat create_array_pat()"
+      );
+    return_value
+  }
+
+  pub fn create_arrow_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    params: &JObject<'_>,
+    body: &JObject<'_>,
+    is_async: bool,
+    generator: bool,
+    type_params: &Option<JObject>,
+    return_type: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let params = object_to_jvalue!(params);
+    let body = object_to_jvalue!(body);
+    let is_async = boolean_to_jvalue!(is_async);
+    let generator = boolean_to_jvalue!(generator);
+    let type_params = optional_object_to_jvalue!(type_params);
+    let return_type = optional_object_to_jvalue!(return_type);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_arrow_expr,
+        &[params, body, is_async, generator, type_params, return_type, span],
+        "Swc4jAstArrowExpr create_arrow_expr()"
       );
     return_value
   }
@@ -4792,6 +4832,45 @@ pub mod program {
     return_type
   }
 
+  fn create_arrow_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ArrowExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_params = java_array_list.construct(env, node.params.len());
+    node.params.iter().for_each(|node| {
+      let java_node = enum_create_pat(env, map, node);
+      java_array_list.add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_body = enum_create_block_stmt_or_expr(env, map, &node.body);
+    let is_async = node.is_async;
+    let is_generator = node.is_generator;
+    let java_optional_type_params = node
+      .type_params
+      .as_ref()
+      .map(|node| create_ts_type_param_decl(env, map, node));
+    let java_optional_return_type = node.return_type.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let return_type = java_ast_factory.create_arrow_expr(
+      env,
+      &java_params,
+      &java_body,
+      is_async,
+      is_generator,
+      &java_optional_type_params,
+      &java_optional_return_type,
+      &java_range,
+    );
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_body);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_optional_ref!(env, java_optional_return_type);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_assign_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &AssignExpr) -> JObject<'a>
   where
     'local: 'a,
@@ -6763,6 +6842,7 @@ pub mod program {
   {
     match node {
       Expr::Array(node) => create_array_lit(env, map, node),
+      Expr::Arrow(node) => create_arrow_expr(env, map, node),
       Expr::Assign(node) => create_assign_expr(env, map, node),
       Expr::Await(node) => create_await_expr(env, map, node),
       Expr::Bin(node) => create_bin_expr(env, map, node),
