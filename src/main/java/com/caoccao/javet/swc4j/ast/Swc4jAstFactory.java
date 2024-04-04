@@ -537,6 +537,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstParenExpr createParenExpr(
+            ISwc4jAstExpr expr,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstParenExpr(expr, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstPrivateMethod createPrivateMethod(
             Swc4jAstPrivateName key,
             Swc4jAstFunction function,

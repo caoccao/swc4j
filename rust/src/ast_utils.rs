@@ -85,6 +85,7 @@ struct JavaSwc4jAstFactory {
   method_create_object_lit: JStaticMethodID,
   method_create_object_pat: JStaticMethodID,
   method_create_param: JStaticMethodID,
+  method_create_paren_expr: JStaticMethodID,
   method_create_private_method: JStaticMethodID,
   method_create_private_name: JStaticMethodID,
   method_create_private_prop: JStaticMethodID,
@@ -529,6 +530,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstParam;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createParam");
+    let method_create_paren_expr = env
+      .get_static_method_id(
+        &class,
+        "createParenExpr",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstParenExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createParenExpr");
     let method_create_private_method = env
       .get_static_method_id(
         &class,
@@ -867,6 +875,7 @@ impl JavaSwc4jAstFactory {
       method_create_object_lit,
       method_create_object_pat,
       method_create_param,
+      method_create_paren_expr,
       method_create_private_method,
       method_create_private_name,
       method_create_private_prop,
@@ -2268,6 +2277,27 @@ impl JavaSwc4jAstFactory {
         self.method_create_param,
         &[decorators, pat, span],
         "Swc4jAstParam create_param()"
+      );
+    return_value
+  }
+
+  pub fn create_paren_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = object_to_jvalue!(expr);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_paren_expr,
+        &[expr, span],
+        "Swc4jAstParenExpr create_paren_expr()"
       );
     return_value
   }
@@ -6013,6 +6043,19 @@ pub mod program {
     return_type
   }
 
+  fn create_paren_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ParenExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_expr = enum_create_expr(env, map, &node.expr);
+    let return_type = java_ast_factory.create_paren_expr(env, &java_expr, &java_range);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_private_method<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -6945,6 +6988,7 @@ pub mod program {
       Expr::MetaProp(node) => create_meta_prop_expr(env, map, node),
       Expr::New(node) => create_new_expr(env, map, node),
       Expr::Object(node) => create_object_lit(env, map, node),
+      Expr::Paren(node) => create_paren_expr(env, map, node),
       Expr::PrivateName(node) => create_private_name(env, map, node),
       Expr::SuperProp(node) => create_super_prop_expr(env, map, node),
       Expr::TaggedTpl(node) => create_tagged_tpl(env, map, node),

@@ -317,6 +317,10 @@ fn test_structs() {
     decorators: Default::default(),
     pat: Pat::dummy(),
   };
+  let _ = ParenExpr {
+    span: Default::default(),
+    expr: Box::new(Expr::dummy()),
+  };
   let _ = PrivateMethod {
     span: Default::default(),
     is_abstract: Default::default(),
