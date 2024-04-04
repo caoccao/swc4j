@@ -370,6 +370,12 @@ fn test_structs() {
     obj: Super::dummy(),
     prop: SuperProp::dummy(),
   };
+  let _ = TaggedTpl {
+    span: Default::default(),
+    tag: Box::new(Expr::dummy()),
+    tpl: Box::new(Tpl::dummy()),
+    type_params: Default::default(),
+  };
   let _ = ThisExpr {
     span: Default::default(),
   };

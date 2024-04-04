@@ -44,6 +44,7 @@ public class TestISwc4jAstExpr {
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstPrivateName.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstSuperPropExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstThisExpr.class));
+        assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstTaggedTpl.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstTpl.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstUnaryExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstUpdateExpr.class));

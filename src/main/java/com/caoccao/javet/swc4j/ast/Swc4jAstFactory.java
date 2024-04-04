@@ -640,6 +640,15 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTaggedTpl createTaggedTpl(
+            ISwc4jAstExpr tag,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeParams,
+            Swc4jAstTpl tpl,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTaggedTpl(tag, typeParams, tpl, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstThisExpr createThisExpr(
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstThisExpr(span);

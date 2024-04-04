@@ -96,6 +96,7 @@ struct JavaSwc4jAstFactory {
   method_create_str: JStaticMethodID,
   method_create_super: JStaticMethodID,
   method_create_super_prop_expr: JStaticMethodID,
+  method_create_tagged_tpl: JStaticMethodID,
   method_create_this_expr: JStaticMethodID,
   method_create_tpl: JStaticMethodID,
   method_create_tpl_element: JStaticMethodID,
@@ -602,6 +603,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSuper;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstSuperProp;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSuperPropExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSuperPropExpr");
+    let method_create_tagged_tpl = env
+      .get_static_method_id(
+        &class,
+        "createTaggedTpl",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTpl;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTaggedTpl;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTaggedTpl");
     let method_create_this_expr = env
       .get_static_method_id(
         &class,
@@ -846,6 +854,7 @@ impl JavaSwc4jAstFactory {
       method_create_str,
       method_create_super,
       method_create_super_prop_expr,
+      method_create_tagged_tpl,
       method_create_this_expr,
       method_create_tpl,
       method_create_tpl_element,
@@ -2510,6 +2519,31 @@ impl JavaSwc4jAstFactory {
         self.method_create_super_prop_expr,
         &[obj, prop, span],
         "Swc4jAstSuperPropExpr create_super_prop_expr()"
+      );
+    return_value
+  }
+
+  pub fn create_tagged_tpl<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    tag: &JObject<'_>,
+    type_params: &Option<JObject>,
+    tpl: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let tag = object_to_jvalue!(tag);
+    let type_params = optional_object_to_jvalue!(type_params);
+    let tpl = object_to_jvalue!(tpl);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_tagged_tpl,
+        &[tag, type_params, tpl, span],
+        "Swc4jAstTaggedTpl create_tagged_tpl()"
       );
     return_value
   }
@@ -6063,6 +6097,27 @@ pub mod program {
     return_type
   }
 
+  fn create_tagged_tpl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TaggedTpl) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_tag = enum_create_expr(env, map, &node.tag);
+    let java_optional_type_params = node
+      .type_params
+      .as_ref()
+      .map(|node| create_ts_type_param_instantiation(env, map, node));
+    let java_tpl = create_tpl(env, map, &node.tpl);
+    let return_value =
+      java_ast_factory.create_tagged_tpl(env, &java_tag, &java_optional_type_params, &java_tpl, &java_range);
+    delete_local_ref!(env, java_tag);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_tpl);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_this_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ThisExpr) -> JObject<'a>
   where
     'local: 'a,
@@ -6723,6 +6778,7 @@ pub mod program {
       Expr::Object(node) => create_object_lit(env, map, node),
       Expr::PrivateName(node) => create_private_name(env, map, node),
       Expr::SuperProp(node) => create_super_prop_expr(env, map, node),
+      Expr::TaggedTpl(node) => create_tagged_tpl(env, map, node),
       Expr::This(node) => create_this_expr(env, map, node),
       Expr::Tpl(node) => create_tpl(env, map, node),
       Expr::Unary(node) => create_unary_expr(env, map, node),
