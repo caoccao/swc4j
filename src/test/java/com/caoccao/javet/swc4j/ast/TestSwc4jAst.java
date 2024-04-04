@@ -57,7 +57,9 @@ public class TestSwc4jAst {
                     Path filePath = entry.getValue();
                     try {
                         Path relativeFilePath = Swc4jAstStore.SOURCE_PATH.relativize(filePath);
-                        String className = relativeFilePath.toString().replace('\\', '.');
+                        String className = relativeFilePath.toString()
+                                .replace('/', '.')
+                                .replace('\\', '.');
                         className = className.substring(0, className.length() - 5);
                         Class<?> clazz = Class.forName(className);
                         assertNotNull(clazz, className + " should exist");
