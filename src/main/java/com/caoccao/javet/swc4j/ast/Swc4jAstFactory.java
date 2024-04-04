@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.enums.*;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstTplElement;
 import com.caoccao.javet.swc4j.ast.module.*;
 import com.caoccao.javet.swc4j.ast.pat.*;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
@@ -642,6 +643,23 @@ public final class Swc4jAstFactory {
     public static Swc4jAstThisExpr createThisExpr(
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstThisExpr(span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTpl createTpl(
+            List<ISwc4jAstExpr> exprs,
+            List<Swc4jAstTplElement> quasis,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTpl(exprs, quasis, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTplElement createTplElement(
+            boolean tail,
+            @Jni2RustParam(optional = true) String cooked,
+            String raw,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTplElement(tail, cooked, raw, span);
     }
 
     @Jni2RustMethod

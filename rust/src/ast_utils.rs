@@ -97,6 +97,8 @@ struct JavaSwc4jAstFactory {
   method_create_super: JStaticMethodID,
   method_create_super_prop_expr: JStaticMethodID,
   method_create_this_expr: JStaticMethodID,
+  method_create_tpl: JStaticMethodID,
+  method_create_tpl_element: JStaticMethodID,
   method_create_ts_enum_decl: JStaticMethodID,
   method_create_ts_enum_member: JStaticMethodID,
   method_create_ts_export_assignment: JStaticMethodID,
@@ -607,6 +609,20 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstThisExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createThisExpr");
+    let method_create_tpl = env
+      .get_static_method_id(
+        &class,
+        "createTpl",
+        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTpl;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTpl");
+    let method_create_tpl_element = env
+      .get_static_method_id(
+        &class,
+        "createTplElement",
+        "(ZLjava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstTplElement;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTplElement");
     let method_create_ts_enum_decl = env
       .get_static_method_id(
         &class,
@@ -831,6 +847,8 @@ impl JavaSwc4jAstFactory {
       method_create_super,
       method_create_super_prop_expr,
       method_create_this_expr,
+      method_create_tpl,
+      method_create_tpl_element,
       method_create_ts_enum_decl,
       method_create_ts_enum_member,
       method_create_ts_export_assignment,
@@ -2512,6 +2530,58 @@ impl JavaSwc4jAstFactory {
         &[span],
         "Swc4jAstThisExpr create_this_expr()"
       );
+    return_value
+  }
+
+  pub fn create_tpl<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    exprs: &JObject<'_>,
+    quasis: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let exprs = object_to_jvalue!(exprs);
+    let quasis = object_to_jvalue!(quasis);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_tpl,
+        &[exprs, quasis, span],
+        "Swc4jAstTpl create_tpl()"
+      );
+    return_value
+  }
+
+  pub fn create_tpl_element<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    tail: bool,
+    cooked: &Option<String>,
+    raw: &str,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let tail = boolean_to_jvalue!(tail);
+    let java_cooked = optional_string_to_jstring!(env, &cooked);
+    let cooked = object_to_jvalue!(java_cooked);
+    let java_raw = string_to_jstring!(env, &raw);
+    let raw = object_to_jvalue!(java_raw);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_tpl_element,
+        &[tail, cooked, raw, span],
+        "Swc4jAstTplElement create_tpl_element()"
+      );
+    delete_local_ref!(env, java_cooked);
+    delete_local_ref!(env, java_raw);
     return_value
   }
 
@@ -6411,6 +6481,46 @@ pub mod program {
     return_value
   }
 
+  fn create_tpl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Tpl) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_exprs = java_array_list.construct(env, node.exprs.len());
+    node.exprs.iter().for_each(|node| {
+      let java_node = enum_create_expr(env, map, node);
+      java_array_list.add(env, &java_exprs, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_quasis = java_array_list.construct(env, node.quasis.len());
+    node.quasis.iter().for_each(|node| {
+      let java_node = create_tpl_element(env, map, node);
+      java_array_list.add(env, &java_quasis, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = java_ast_factory.create_tpl(env, &java_exprs, &java_quasis, &java_range);
+    delete_local_ref!(env, java_exprs);
+    delete_local_ref!(env, java_quasis);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_tpl_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TplElement) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let tail = node.tail;
+    let optional_cooked = node.cooked.as_ref().map(|node| node.to_string());
+    let raw = node.raw.as_str();
+    let return_value = java_ast_factory.create_tpl_element(env, tail, &optional_cooked, raw, &java_range);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_unary_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UnaryExpr) -> JObject<'a>
   where
     'local: 'a,
@@ -6614,6 +6724,7 @@ pub mod program {
       Expr::PrivateName(node) => create_private_name(env, map, node),
       Expr::SuperProp(node) => create_super_prop_expr(env, map, node),
       Expr::This(node) => create_this_expr(env, map, node),
+      Expr::Tpl(node) => create_tpl(env, map, node),
       Expr::Unary(node) => create_unary_expr(env, map, node),
       Expr::Update(node) => create_update_expr(env, map, node),
       default => panic!("{:?}", default),

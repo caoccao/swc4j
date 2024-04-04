@@ -373,6 +373,17 @@ fn test_structs() {
   let _ = ThisExpr {
     span: Default::default(),
   };
+  let _ = Tpl {
+    span: Default::default(),
+    exprs: Default::default(),
+    quasis: Default::default(),
+  };
+  let _ = TplElement {
+    span: Default::default(),
+    cooked: Default::default(),
+    raw: Default::default(),
+    tail: Default::default(),
+  };
   let _ = TsEnumDecl {
     span: Default::default(),
     is_const: Default::default(),
