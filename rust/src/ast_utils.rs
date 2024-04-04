@@ -261,7 +261,7 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createClassProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClassProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClassProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClassProp");
     let method_create_computed_prop_name = env
@@ -471,7 +471,7 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createNewExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstCallee;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstNewExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstNewExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createNewExpr");
     let method_create_null = env
@@ -527,7 +527,7 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createPrivateProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createPrivateProp");
     let method_create_regex = env
@@ -646,7 +646,7 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createTsImportEqualsDecl",
-        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleRef;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsImportEqualsDecl;",
+        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleRef;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsImportEqualsDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsImportEqualsDecl");
     let method_create_ts_index_signature = env

@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -32,6 +33,7 @@ import java.util.Optional;
 
 public class Swc4jAstClass
         extends Swc4jAst {
+    @Jni2RustField(name = "is_abstract")
     protected final boolean _abstract;
     protected final List<Swc4jAstTsExprWithTypeArgs> _implements;
     protected final List<ISwc4jAstClassMember> body;

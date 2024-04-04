@@ -22,13 +22,17 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+@Jni2RustClass(span = false)
 public class Swc4jAstFnDecl
         extends Swc4jAst
         implements ISwc4jAstDecl {
     protected final boolean declare;
+    @Jni2RustField(box = true)
     protected final Swc4jAstFunction function;
     protected final Swc4jAstIdent ident;
 

@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstImportSpecifier;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleExportName;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -32,6 +33,7 @@ public class Swc4jAstImportNamedSpecifier
         implements ISwc4jAstImportSpecifier {
     protected final Optional<ISwc4jAstModuleExportName> imported;
     protected final Swc4jAstIdent local;
+    @Jni2RustField(name = "is_type_only")
     protected final boolean typeOnly;
 
     public Swc4jAstImportNamedSpecifier(

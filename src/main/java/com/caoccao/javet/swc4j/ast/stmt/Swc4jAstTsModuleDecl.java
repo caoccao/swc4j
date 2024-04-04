@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsModuleName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsNamespaceBody;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -33,6 +34,7 @@ public class Swc4jAstTsModuleDecl
     protected final Optional<ISwc4jAstTsNamespaceBody> body;
     protected final boolean declare;
     protected final boolean global;
+    @Jni2RustField(value = "TsModuleName::Ident(Ident::dummy())")
     protected final ISwc4jAstTsModuleName id;
 
     public Swc4jAstTsModuleDecl(

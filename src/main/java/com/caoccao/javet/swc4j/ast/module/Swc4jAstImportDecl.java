@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstImportSpecifier;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -33,6 +34,7 @@ public class Swc4jAstImportDecl
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
     protected final List<ISwc4jAstImportSpecifier> specifiers;
+    @Jni2RustField(box = true)
     protected final Swc4jAstStr src;
     protected final boolean typeOnly;
     protected final Optional<Swc4jAstObjectLit> with;

@@ -22,22 +22,27 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleRef;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsModuleRef;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 public class Swc4jAstTsImportEqualsDecl
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
+    @Jni2RustField(name = "is_export")
     protected final boolean export;
     protected final Swc4jAstIdent id;
-    protected final ISwc4jAstModuleRef moduleRef;
+    @Jni2RustField(value = "TsModuleRef::TsEntityName(TsEntityName::Ident(Ident::dummy()))")
+    protected final ISwc4jAstTsModuleRef moduleRef;
+    @Jni2RustField(name = "is_type_only")
     protected final boolean typeOnly;
 
     public Swc4jAstTsImportEqualsDecl(
             boolean export,
             boolean typeOnly,
             Swc4jAstIdent id,
-            ISwc4jAstModuleRef moduleRef,
+            ISwc4jAstTsModuleRef moduleRef,
             Swc4jAstSpan span) {
         super(span);
         this.export = export;
@@ -52,7 +57,7 @@ public class Swc4jAstTsImportEqualsDecl
         return id;
     }
 
-    public ISwc4jAstModuleRef getModuleRef() {
+    public ISwc4jAstTsModuleRef getModuleRef() {
         return moduleRef;
     }
 

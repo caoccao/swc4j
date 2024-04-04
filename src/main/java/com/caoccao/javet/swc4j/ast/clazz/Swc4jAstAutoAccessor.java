@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstKey;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -33,6 +34,7 @@ import java.util.Optional;
 public class Swc4jAstAutoAccessor
         extends Swc4jAst
         implements ISwc4jAstClassMember {
+    @Jni2RustField(name = "is_static")
     protected final boolean _static;
     protected final Optional<Swc4jAstAccessibility> accessibility;
     protected final List<Swc4jAstDecorator> decorators;

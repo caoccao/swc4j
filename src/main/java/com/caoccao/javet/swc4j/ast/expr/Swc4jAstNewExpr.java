@@ -19,9 +19,9 @@ package com.caoccao.javet.swc4j.ast.expr;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -32,11 +32,12 @@ public class Swc4jAstNewExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
     protected final Optional<List<Swc4jAstExprOrSpread>> args;
-    protected final ISwc4jAstCallee callee;
+    @Jni2RustField(box = true)
+    protected final ISwc4jAstExpr callee;
     protected final Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
     public Swc4jAstNewExpr(
-            ISwc4jAstCallee callee,
+            ISwc4jAstExpr callee,
             List<Swc4jAstExprOrSpread> args,
             Swc4jAstTsTypeParamInstantiation typeArgs,
             Swc4jAstSpan span) {
@@ -55,7 +56,7 @@ public class Swc4jAstNewExpr
         return args;
     }
 
-    public ISwc4jAstCallee getCallee() {
+    public ISwc4jAstExpr getCallee() {
         return callee;
     }
 

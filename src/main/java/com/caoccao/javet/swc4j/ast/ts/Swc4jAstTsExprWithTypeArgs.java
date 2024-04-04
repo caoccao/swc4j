@@ -20,13 +20,17 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.Optional;
+
 public class Swc4jAstTsExprWithTypeArgs
         extends Swc4jAst {
+    @Jni2RustField(box = true)
     protected final ISwc4jAstExpr expr;
-    protected final Swc4jAstTsTypeParamInstantiation typeArgs;
+    protected final Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
     public Swc4jAstTsExprWithTypeArgs(
             ISwc4jAstExpr expr,
@@ -34,7 +38,7 @@ public class Swc4jAstTsExprWithTypeArgs
             Swc4jAstSpan span) {
         super(span);
         this.expr = AssertionUtils.notNull(expr, "Expr");
-        this.typeArgs = AssertionUtils.notNull(typeArgs, "TypeArgs");
+        this.typeArgs = Optional.ofNullable(typeArgs);
         children = SimpleList.immutableOf(expr, typeArgs);
         updateParent();
     }
@@ -48,7 +52,7 @@ public class Swc4jAstTsExprWithTypeArgs
         return Swc4jAstType.TsExprWithTypeArgs;
     }
 
-    public Swc4jAstTsTypeParamInstantiation getTypeArgs() {
+    public Optional<Swc4jAstTsTypeParamInstantiation> getTypeArgs() {
         return typeArgs;
     }
 }

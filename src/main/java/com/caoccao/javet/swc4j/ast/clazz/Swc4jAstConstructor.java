@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -36,6 +37,7 @@ public class Swc4jAstConstructor
     protected final Optional<Swc4jAstAccessibility> accessibility;
     protected final Optional<Swc4jAstBlockStmt> body;
     protected final ISwc4jAstPropName key;
+    @Jni2RustField(name = "is_optional")
     protected final boolean optional;
     protected final List<ISwc4jAstParamOrTsParamProp> params;
 

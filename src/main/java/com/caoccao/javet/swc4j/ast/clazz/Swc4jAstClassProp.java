@@ -23,7 +23,9 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstKey;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -33,21 +35,25 @@ import java.util.Optional;
 public class Swc4jAstClassProp
         extends Swc4jAst
         implements ISwc4jAstClassMember {
+    @Jni2RustField(name = "is_abstract")
     protected final boolean _abstract;
+    @Jni2RustField(name = "is_override")
     protected final boolean _override;
+    @Jni2RustField(name = "is_static")
     protected final boolean _static;
     protected final Optional<Swc4jAstAccessibility> accessibility;
     protected final boolean declare;
     protected final List<Swc4jAstDecorator> decorators;
     protected final boolean definite;
-    protected final ISwc4jAstKey key;
+    protected final ISwc4jAstPropName key;
+    @Jni2RustField(name = "is_optional")
     protected final boolean optional;
     protected final boolean readonly;
     protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
     protected final Optional<ISwc4jAstExpr> value;
 
     public Swc4jAstClassProp(
-            ISwc4jAstKey key,
+            ISwc4jAstPropName key,
             ISwc4jAstExpr value,
             Swc4jAstTsTypeAnn typeAnn,
             boolean _static,
@@ -89,7 +95,7 @@ public class Swc4jAstClassProp
         return decorators;
     }
 
-    public ISwc4jAstKey getKey() {
+    public ISwc4jAstPropName getKey() {
         return key;
     }
 

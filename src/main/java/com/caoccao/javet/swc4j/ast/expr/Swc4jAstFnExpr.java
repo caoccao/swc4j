@@ -22,14 +22,18 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDefaultDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
+@Jni2RustClass(span = false)
 public class Swc4jAstFnExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstDefaultDecl {
+    @Jni2RustField(box = true)
     protected final Swc4jAstFunction function;
     protected final Optional<Swc4jAstIdent> ident;
 

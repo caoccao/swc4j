@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -31,6 +32,7 @@ import java.util.Optional;
 public class Swc4jAstTsIndexSignature
         extends Swc4jAst
         implements ISwc4jAstClassMember {
+    @Jni2RustField(name = "is_static")
     protected final boolean _static;
     protected final List<ISwc4jAstTsFnParam> params;
     protected final boolean readonly;

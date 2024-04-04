@@ -21,13 +21,17 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropOrSpread;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+@Jni2RustClass(span = false)
 public class Swc4jAstSpreadElement
         extends Swc4jAst
         implements ISwc4jAstPropOrSpread {
     protected final Swc4jAstSpan dot3Token;
+    @Jni2RustField(box = true)
     protected final ISwc4jAstExpr expr;
 
     public Swc4jAstSpreadElement(

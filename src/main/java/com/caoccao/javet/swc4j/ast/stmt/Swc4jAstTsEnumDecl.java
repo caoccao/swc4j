@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsEnumMember;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -30,6 +31,7 @@ import java.util.List;
 public class Swc4jAstTsEnumDecl
         extends Swc4jAst
         implements ISwc4jAstDecl {
+    @Jni2RustField(name = "is_const")
     protected final boolean _const;
     protected final boolean declare;
     protected final Swc4jAstIdent id;

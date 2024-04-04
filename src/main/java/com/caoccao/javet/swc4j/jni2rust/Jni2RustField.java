@@ -20,14 +20,14 @@ import java.lang.annotation.*;
 
 @Documented
 @Inherited
-@Target(ElementType.TYPE)
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Jni2RustClass {
-    String filePath() default "";
+public @interface Jni2RustField {
+    boolean box() default false;
 
     boolean ignore() default false;
 
     String name() default "";
 
-    boolean span() default true;
+    String value() default "";
 }

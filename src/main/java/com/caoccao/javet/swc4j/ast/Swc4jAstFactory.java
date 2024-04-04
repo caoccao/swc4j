@@ -210,7 +210,7 @@ public final class Swc4jAstFactory {
 
     @Jni2RustMethod
     public static Swc4jAstClassProp createClassProp(
-            ISwc4jAstKey key,
+            ISwc4jAstPropName key,
             @Jni2RustParam(optional = true) ISwc4jAstExpr value,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             boolean isStatic,
@@ -471,7 +471,7 @@ public final class Swc4jAstFactory {
 
     @Jni2RustMethod
     public static Swc4jAstNewExpr createNewExpr(
-            ISwc4jAstCallee callee,
+            ISwc4jAstExpr callee,
             @Jni2RustParam(optional = true) List<Swc4jAstExprOrSpread> args,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
             @Jni2RustParam Swc4jAstSpan span) {
@@ -542,7 +542,7 @@ public final class Swc4jAstFactory {
 
     @Jni2RustMethod
     public static Swc4jAstPrivateProp createPrivateProp(
-            ISwc4jAstKey key,
+            Swc4jAstPrivateName key,
             @Jni2RustParam(optional = true) ISwc4jAstExpr value,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             boolean isStatic,
@@ -689,7 +689,7 @@ public final class Swc4jAstFactory {
             boolean export,
             boolean typeOnly,
             Swc4jAstIdent id,
-            ISwc4jAstModuleRef moduleRef,
+            ISwc4jAstTsModuleRef moduleRef,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsImportEqualsDecl(export, typeOnly, id, moduleRef, span);
     }

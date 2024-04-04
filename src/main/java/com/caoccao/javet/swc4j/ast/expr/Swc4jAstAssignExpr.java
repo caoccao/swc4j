@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAssignOp;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPatOrExpr;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -29,7 +30,9 @@ public class Swc4jAstAssignExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
     protected final ISwc4jAstPatOrExpr left;
+    @Jni2RustField(value = "AssignOp::AddAssign")
     protected final Swc4jAstAssignOp op;
+    @Jni2RustField(box = true)
     protected final ISwc4jAstExpr right;
 
     public Swc4jAstAssignExpr(

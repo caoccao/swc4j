@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstMethodKind;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -30,13 +31,20 @@ import java.util.Optional;
 public class Swc4jAstPrivateMethod
         extends Swc4jAst
         implements ISwc4jAstClassMember {
+    @Jni2RustField(name = "is_abstract")
     protected final boolean _abstract;
+    @Jni2RustField(name = "is_override")
     protected final boolean _override;
+    @Jni2RustField(name = "is_static")
     protected final boolean _static;
     protected final Optional<Swc4jAstAccessibility> accessibility;
+    @Jni2RustField(box = true)
     protected final Swc4jAstFunction function;
+    @Jni2RustField(value = "PrivateName { span: Default::default(), id: Ident::dummy() }")
     protected final Swc4jAstPrivateName key;
+    @Jni2RustField(value = "MethodKind::Getter")
     protected final Swc4jAstMethodKind kind;
+    @Jni2RustField(name = "is_optional")
     protected final boolean optional;
 
     public Swc4jAstPrivateMethod(

@@ -22,13 +22,17 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+@Jni2RustClass(span = false)
 public class Swc4jAstKeyValuePatProp
         extends Swc4jAst
         implements ISwc4jAstObjectPatProp {
     protected final ISwc4jAstPropName key;
+    @Jni2RustField(box = true)
     protected final ISwc4jAstPat value;
 
     public Swc4jAstKeyValuePatProp(

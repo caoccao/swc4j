@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -33,6 +34,7 @@ public class Swc4jAstTsTypeAliasDecl
         implements ISwc4jAstDecl {
     protected final boolean declare;
     protected final Swc4jAstIdent id;
+    @Jni2RustField(value = "Box::new(TsType::TsThisType(TsThisType { span: Default::default() }))")
     protected final ISwc4jAstTsType typeAnn;
     protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
 

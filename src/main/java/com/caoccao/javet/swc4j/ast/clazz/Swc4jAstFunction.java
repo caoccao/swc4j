@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -30,9 +31,11 @@ import java.util.Optional;
 
 public class Swc4jAstFunction
         extends Swc4jAst {
+    @Jni2RustField(name = "is_async")
     protected final boolean _async;
     protected final Optional<Swc4jAstBlockStmt> body;
     protected final List<Swc4jAstDecorator> decorators;
+    @Jni2RustField(name = "is_generator")
     protected final boolean generator;
     protected final List<Swc4jAstParam> params;
     protected final Optional<Swc4jAstTsTypeAnn> returnType;

@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -29,6 +30,7 @@ import java.util.List;
 public class Swc4jAstUsingDecl
         extends Swc4jAst
         implements ISwc4jAstDecl, ISwc4jAstVarDeclOrExpr {
+    @Jni2RustField(name = "is_await")
     protected final boolean await;
     protected final List<Swc4jAstVarDeclarator> decls;
 

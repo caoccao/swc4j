@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -28,11 +29,14 @@ import java.util.Optional;
 
 public class Swc4jAstTsTypeParam
         extends Swc4jAst {
+    @Jni2RustField(name = "is_const")
     protected final boolean _const;
     protected final Optional<ISwc4jAstTsType> _default;
     protected final Optional<ISwc4jAstTsType> constraint;
+    @Jni2RustField(name = "is_in")
     protected final boolean in;
     protected final Swc4jAstIdent name;
+    @Jni2RustField(name = "is_out")
     protected final boolean out;
 
     public Swc4jAstTsTypeParam(

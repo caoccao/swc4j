@@ -33,7 +33,7 @@ public class Swc4jAstNamedExport
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
     protected final List<ISwc4jAstExportSpecifier> specifiers;
-    protected final Swc4jAstStr src;
+    protected final Optional<Swc4jAstStr> src;
     protected final boolean typeOnly;
     protected final Optional<Swc4jAstObjectLit> with;
 
@@ -45,7 +45,7 @@ public class Swc4jAstNamedExport
             Swc4jAstSpan span) {
         super(span);
         this.specifiers = AssertionUtils.notNull(specifiers, "Specifiers");
-        this.src = src;
+        this.src = Optional.ofNullable(src);
         this.typeOnly = typeOnly;
         this.with = Optional.ofNullable(with);
         children = SimpleList.copyOf(specifiers);
@@ -59,7 +59,7 @@ public class Swc4jAstNamedExport
         return specifiers;
     }
 
-    public Swc4jAstStr getSrc() {
+    public Optional<Swc4jAstStr> getSrc() {
         return src;
     }
 
