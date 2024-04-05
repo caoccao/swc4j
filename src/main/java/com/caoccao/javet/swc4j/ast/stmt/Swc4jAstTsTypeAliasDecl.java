@@ -34,7 +34,7 @@ public class Swc4jAstTsTypeAliasDecl
         implements ISwc4jAstDecl {
     protected final boolean declare;
     protected final Swc4jAstIdent id;
-    @Jni2RustField(value = "Box::new(TsType::TsThisType(TsThisType { span: Default::default() }))")
+    @Jni2RustField(value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
     protected final ISwc4jAstTsType typeAnn;
     protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
 

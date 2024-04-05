@@ -84,6 +84,8 @@ struct JavaSwc4jAstFactory {
   method_create_number: JStaticMethodID,
   method_create_object_lit: JStaticMethodID,
   method_create_object_pat: JStaticMethodID,
+  method_create_opt_call: JStaticMethodID,
+  method_create_opt_chain_expr: JStaticMethodID,
   method_create_param: JStaticMethodID,
   method_create_paren_expr: JStaticMethodID,
   method_create_private_method: JStaticMethodID,
@@ -523,6 +525,20 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstObjectPat;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createObjectPat");
+    let method_create_opt_call = env
+      .get_static_method_id(
+        &class,
+        "createOptCall",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstOptCall;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createOptCall");
+    let method_create_opt_chain_expr = env
+      .get_static_method_id(
+        &class,
+        "createOptChainExpr",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstOptChainBase;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstOptChainExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createOptChainExpr");
     let method_create_param = env
       .get_static_method_id(
         &class,
@@ -874,6 +890,8 @@ impl JavaSwc4jAstFactory {
       method_create_number,
       method_create_object_lit,
       method_create_object_pat,
+      method_create_opt_call,
+      method_create_opt_chain_expr,
       method_create_param,
       method_create_paren_expr,
       method_create_private_method,
@@ -2254,6 +2272,54 @@ impl JavaSwc4jAstFactory {
         self.method_create_object_pat,
         &[props, optional, type_ann, span],
         "Swc4jAstObjectPat create_object_pat()"
+      );
+    return_value
+  }
+
+  pub fn create_opt_call<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    callee: &JObject<'_>,
+    args: &JObject<'_>,
+    type_args: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let callee = object_to_jvalue!(callee);
+    let args = object_to_jvalue!(args);
+    let type_args = optional_object_to_jvalue!(type_args);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_opt_call,
+        &[callee, args, type_args, span],
+        "Swc4jAstOptCall create_opt_call()"
+      );
+    return_value
+  }
+
+  pub fn create_opt_chain_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    optional: bool,
+    base: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let optional = boolean_to_jvalue!(optional);
+    let base = object_to_jvalue!(base);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_opt_chain_expr,
+        &[optional, base, span],
+        "Swc4jAstOptChainExpr create_opt_chain_expr()"
       );
     return_value
   }
@@ -5843,7 +5909,11 @@ pub mod program {
     return_type
   }
 
-  fn create_meta_prop_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &MetaPropExpr) -> JObject<'a>
+  fn create_meta_prop_expr<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &MetaPropExpr,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -6020,6 +6090,51 @@ pub mod program {
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_range);
     return_type
+  }
+
+  fn create_opt_call<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &OptCall) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_callee = enum_create_expr(env, map, &node.callee);
+    let java_args = java_array_list.construct(env, node.args.len());
+    node.args.iter().for_each(|node| {
+      let java_node = create_expr_or_spread(env, map, node);
+      java_array_list.add(env, &java_args, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_type_args = node
+      .type_args
+      .as_ref()
+      .map(|node| create_ts_type_param_instantiation(env, map, node));
+    let return_value =
+      java_ast_factory.create_opt_call(env, &java_callee, &java_args, &java_optional_type_args, &java_range);
+    delete_local_ref!(env, java_callee);
+    delete_local_ref!(env, java_args);
+    delete_local_optional_ref!(env, java_optional_type_args);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_opt_chain_expr<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &OptChainExpr,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let optional = node.optional;
+    let java_base = enum_create_opt_chain_base(env, map, &node.base);
+    let return_value = java_ast_factory.create_opt_chain_expr(env, optional, &java_base, &java_range);
+    delete_local_ref!(env, java_base);
+    delete_local_ref!(env, java_range);
+    return_value
   }
 
   fn create_param<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Param) -> JObject<'a>
@@ -6988,6 +7103,7 @@ pub mod program {
       Expr::MetaProp(node) => create_meta_prop_expr(env, map, node),
       Expr::New(node) => create_new_expr(env, map, node),
       Expr::Object(node) => create_object_lit(env, map, node),
+      Expr::OptChain(node) => create_opt_chain_expr(env, map, node),
       Expr::Paren(node) => create_paren_expr(env, map, node),
       Expr::PrivateName(node) => create_private_name(env, map, node),
       Expr::SuperProp(node) => create_super_prop_expr(env, map, node),
@@ -7229,8 +7345,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      OptChainBase::Call(node) => create_opt_call(env, map, node),
+      OptChainBase::Member(node) => create_member_expr(env, map, node),
     }
   }
 

@@ -41,7 +41,7 @@ public class Swc4jAstPrivateProp
     protected final Optional<Swc4jAstAccessibility> accessibility;
     protected final List<Swc4jAstDecorator> decorators;
     protected final boolean definite;
-    @Jni2RustField(value = "PrivateName { span: Default::default(), id: Ident::dummy() }")
+    @Jni2RustField(value = "PrivateName { span: DUMMY_SP, id: Ident::dummy() }")
     protected final Swc4jAstPrivateName key;
     @Jni2RustField(name = "is_optional")
     protected final boolean optional;

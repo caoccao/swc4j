@@ -71,7 +71,7 @@ public class TestSwc4jAst {
                                     .orElse(entry.getKey());
                             lines.add(String.format("  let _ = %s {", structName));
                             if (jni2RustClass.map(Jni2RustClass::span).orElse(true)) {
-                                lines.add("    span: Default::default(),");
+                                lines.add("    span: DUMMY_SP,");
                             }
                             for (Field field : clazz.getDeclaredFields()) {
                                 Optional<Jni2RustField> jni2RustField =

@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.enums.*;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstOptCall;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstTplElement;
 import com.caoccao.javet.swc4j.ast.module.*;
 import com.caoccao.javet.swc4j.ast.pat.*;
@@ -526,6 +527,23 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstObjectPat(props, optional, typeAnn, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstOptCall createOptCall(
+            ISwc4jAstExpr callee,
+            List<Swc4jAstExprOrSpread> args,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstOptCall(callee, args, typeArgs, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstOptChainExpr createOptChainExpr(
+            boolean optional,
+            ISwc4jAstOptChainBase base,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstOptChainExpr(optional, base, span);
     }
 
     @Jni2RustMethod

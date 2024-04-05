@@ -14,36 +14,45 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.ts;
+package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstOptChainBase;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstTsTypeAnn
-        extends Swc4jAst {
-    @Jni2RustField(value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
-    protected final ISwc4jAstTsType typeAnn;
+public class Swc4jAstOptChainExpr
+        extends Swc4jAst
+        implements ISwc4jAstExpr {
+    @Jni2RustField(box = true, value = "Box::new(OptChainBase::Call(OptCall::dummy()))")
+    protected final ISwc4jAstOptChainBase base;
+    protected final boolean optional;
 
-    public Swc4jAstTsTypeAnn(
-            ISwc4jAstTsType typeAnn,
+    public Swc4jAstOptChainExpr(
+            boolean optional,
+            ISwc4jAstOptChainBase base,
             Swc4jAstSpan span) {
         super(span);
-        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
-        children = SimpleList.immutableOf(typeAnn);
+        this.base = AssertionUtils.notNull(base, "Base");
+        this.optional = optional;
+        children = SimpleList.immutableOf(base);
         updateParent();
+    }
+
+    public ISwc4jAstOptChainBase getBase() {
+        return base;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.TsTypeAnn;
+        return Swc4jAstType.OptChainExpr;
     }
 
-    public ISwc4jAstTsType getTypeAnn() {
-        return typeAnn;
+    public boolean isOptional() {
+        return optional;
     }
 }
