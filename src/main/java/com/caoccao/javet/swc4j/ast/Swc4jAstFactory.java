@@ -598,6 +598,14 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstLabeledStmt createLabeledStmt(
+            Swc4jAstIdent label,
+            ISwc4jAstStmt body,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstLabeledStmt(label, body, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstMemberExpr createMemberExpr(
             ISwc4jAstExpr obj,
             ISwc4jAstMemberProp prop,
@@ -768,6 +776,13 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstRestPat(dot3Token, arg, typeAnn, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstReturnStmt createReturnStmt(
+            @Jni2RustParam(optional = true) ISwc4jAstExpr arg,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstReturnStmt(arg, span);
     }
 
     @Jni2RustMethod

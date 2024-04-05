@@ -367,6 +367,11 @@ fn test_structs() {
     key: PropName::dummy(),
     value: Box::new(Expr::dummy()),
   };
+  let _ = LabeledStmt {
+    span: DUMMY_SP,
+    body: Box::new(Stmt::dummy()),
+    label: Ident::dummy(),
+  };
   let _ = MemberExpr {
     span: DUMMY_SP,
     obj: Box::new(Expr::dummy()),
@@ -469,6 +474,10 @@ fn test_structs() {
     arg: Box::new(Pat::dummy()),
     dot3_token: Default::default(),
     type_ann: Default::default(),
+  };
+  let _ = ReturnStmt {
+    span: DUMMY_SP,
+    arg: Default::default(),
   };
   let _ = SeqExpr {
     span: DUMMY_SP,

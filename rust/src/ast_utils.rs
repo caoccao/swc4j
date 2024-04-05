@@ -93,6 +93,7 @@ struct JavaSwc4jAstFactory {
   method_create_jsx_text: JStaticMethodID,
   method_create_key_value_pat_prop: JStaticMethodID,
   method_create_key_value_prop: JStaticMethodID,
+  method_create_labeled_stmt: JStaticMethodID,
   method_create_member_expr: JStaticMethodID,
   method_create_meta_prop_expr: JStaticMethodID,
   method_create_method_prop: JStaticMethodID,
@@ -112,6 +113,7 @@ struct JavaSwc4jAstFactory {
   method_create_private_prop: JStaticMethodID,
   method_create_regex: JStaticMethodID,
   method_create_rest_pat: JStaticMethodID,
+  method_create_return_stmt: JStaticMethodID,
   method_create_script: JStaticMethodID,
   method_create_seq_expr: JStaticMethodID,
   method_create_setter_prop: JStaticMethodID,
@@ -615,6 +617,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstKeyValueProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createKeyValueProp");
+    let method_create_labeled_stmt = env
+      .get_static_method_id(
+        &class,
+        "createLabeledStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstLabeledStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createLabeledStmt");
     let method_create_member_expr = env
       .get_static_method_id(
         &class,
@@ -748,6 +757,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstRestPat;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createRestPat");
+    let method_create_return_stmt = env
+      .get_static_method_id(
+        &class,
+        "createReturnStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstReturnStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createReturnStmt");
     let method_create_script = env
       .get_static_method_id(
         &class,
@@ -1115,6 +1131,7 @@ impl JavaSwc4jAstFactory {
       method_create_jsx_text,
       method_create_key_value_pat_prop,
       method_create_key_value_prop,
+      method_create_labeled_stmt,
       method_create_member_expr,
       method_create_meta_prop_expr,
       method_create_method_prop,
@@ -1134,6 +1151,7 @@ impl JavaSwc4jAstFactory {
       method_create_private_prop,
       method_create_regex,
       method_create_rest_pat,
+      method_create_return_stmt,
       method_create_script,
       method_create_seq_expr,
       method_create_setter_prop,
@@ -2716,6 +2734,29 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_labeled_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    label: &JObject<'_>,
+    body: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let label = object_to_jvalue!(label);
+    let body = object_to_jvalue!(body);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_labeled_stmt,
+        &[label, body, span],
+        "Swc4jAstLabeledStmt create_labeled_stmt()"
+      );
+    return_value
+  }
+
   pub fn create_member_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -3185,6 +3226,27 @@ impl JavaSwc4jAstFactory {
         self.method_create_rest_pat,
         &[dot3_token, arg, type_ann, span],
         "Swc4jAstRestPat create_rest_pat()"
+      );
+    return_value
+  }
+
+  pub fn create_return_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    arg: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let arg = optional_object_to_jvalue!(arg);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_return_stmt,
+        &[arg, span],
+        "Swc4jAstReturnStmt create_return_stmt()"
       );
     return_value
   }
@@ -7122,6 +7184,26 @@ pub mod program {
     return_type
   }
 
+  fn create_labeled_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &LabeledStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_label = create_ident(env, map, &node.label);
+    let java_body = enum_create_stmt(env, map, &node.body);
+    let return_value = java_ast_factory.create_labeled_stmt(
+      env,
+      &java_label,
+      &java_body,
+      &java_range,
+    );
+    delete_local_ref!(env, java_label);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_member_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &MemberExpr) -> JObject<'a>
   where
     'local: 'a,
@@ -7519,6 +7601,23 @@ pub mod program {
     delete_local_ref!(env, java_dot3_token);
     delete_local_ref!(env, java_arg);
     delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_return_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ReturnStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_optional_arg = node.arg.as_ref().map(|node| enum_create_expr(env, map, node));
+    let return_value = java_ast_factory.create_return_stmt(
+      env,
+      &java_optional_arg,
+      &java_range,
+    );
+    delete_local_optional_ref!(env, java_optional_arg);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -8869,8 +8968,8 @@ pub mod program {
       Stmt::ForIn(node) => create_for_in_stmt(env, map, node),
       Stmt::ForOf(node) => create_for_of_stmt(env, map, node),
       Stmt::If(node) => create_if_stmt(env, map, node),
-      // Stmt::Labeled(node) => create_labeled_stmt(env, map, node),
-      // Stmt::Return(node) => create_return_stmt(env, map, node),
+      Stmt::Labeled(node) => create_labeled_stmt(env, map, node),
+      Stmt::Return(node) => create_return_stmt(env, map, node),
       // Stmt::Switch(node) => create_switch_stmt(env, map, node),
       // Stmt::Throw(node) => create_throw_stmt(env, map, node),
       // Stmt::Try(node) => create_try_stmt(env, map, node),
