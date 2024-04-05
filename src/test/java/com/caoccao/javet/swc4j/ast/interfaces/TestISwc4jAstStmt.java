@@ -16,10 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstDebuggerStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstEmptyStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
+import com.caoccao.javet.swc4j.ast.stmt.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,7 +26,10 @@ public class TestISwc4jAstStmt {
     public void testAssignable() {
         assertTrue(ISwc4jAstStmt.class.isAssignableFrom(ISwc4jAstDecl.class));
         assertTrue(ISwc4jAstStmt.class.isAssignableFrom(Swc4jAstBlockStmt.class));
+        assertTrue(ISwc4jAstStmt.class.isAssignableFrom(Swc4jAstBreakStmt.class));
+        assertTrue(ISwc4jAstStmt.class.isAssignableFrom(Swc4jAstContinueStmt.class));
         assertTrue(ISwc4jAstStmt.class.isAssignableFrom(Swc4jAstDebuggerStmt.class));
+        assertTrue(ISwc4jAstStmt.class.isAssignableFrom(Swc4jAstDoWhileStmt.class));
         assertTrue(ISwc4jAstStmt.class.isAssignableFrom(Swc4jAstEmptyStmt.class));
         assertTrue(ISwc4jAstStmt.class.isAssignableFrom(Swc4jAstExprStmt.class));
     }

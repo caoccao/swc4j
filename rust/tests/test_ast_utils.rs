@@ -105,6 +105,10 @@ fn test_structs() {
     span: DUMMY_SP,
     value: Default::default(),
   };
+  let _ = BreakStmt {
+    span: DUMMY_SP,
+    label: Default::default(),
+  };
   let _ = CallExpr {
     span: DUMMY_SP,
     args: Default::default(),
@@ -174,12 +178,21 @@ fn test_structs() {
     is_optional: Default::default(),
     params: Default::default(),
   };
+  let _ = ContinueStmt {
+    span: DUMMY_SP,
+    label: Default::default(),
+  };
   let _ = DebuggerStmt {
     span: DUMMY_SP,
   };
   let _ = Decorator {
     span: DUMMY_SP,
     expr: Box::new(Expr::dummy()),
+  };
+  let _ = DoWhileStmt {
+    span: DUMMY_SP,
+    body: Box::new(Stmt::dummy()),
+    test: Box::new(Expr::dummy()),
   };
   let _ = EmptyStmt {
     span: DUMMY_SP,

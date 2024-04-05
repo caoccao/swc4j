@@ -43,6 +43,7 @@ struct JavaSwc4jAstFactory {
   method_create_binding_ident: JStaticMethodID,
   method_create_block_stmt: JStaticMethodID,
   method_create_bool: JStaticMethodID,
+  method_create_break_stmt: JStaticMethodID,
   method_create_call_expr: JStaticMethodID,
   method_create_class: JStaticMethodID,
   method_create_class_decl: JStaticMethodID,
@@ -52,8 +53,10 @@ struct JavaSwc4jAstFactory {
   method_create_computed_prop_name: JStaticMethodID,
   method_create_cond_expr: JStaticMethodID,
   method_create_constructor: JStaticMethodID,
+  method_create_continue_stmt: JStaticMethodID,
   method_create_debugger_stmt: JStaticMethodID,
   method_create_decorator: JStaticMethodID,
+  method_create_do_while_stmt: JStaticMethodID,
   method_create_empty_stmt: JStaticMethodID,
   method_create_export_all: JStaticMethodID,
   method_create_export_decl: JStaticMethodID,
@@ -258,6 +261,13 @@ impl JavaSwc4jAstFactory {
         "(ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBool;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBool");
+    let method_create_break_stmt = env
+      .get_static_method_id(
+        &class,
+        "createBreakStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBreakStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createBreakStmt");
     let method_create_call_expr = env
       .get_static_method_id(
         &class,
@@ -321,6 +331,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;IZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstConstructor;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createConstructor");
+    let method_create_continue_stmt = env
+      .get_static_method_id(
+        &class,
+        "createContinueStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstContinueStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createContinueStmt");
     let method_create_debugger_stmt = env
       .get_static_method_id(
         &class,
@@ -335,6 +352,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstDecorator;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createDecorator");
+    let method_create_do_while_stmt = env
+      .get_static_method_id(
+        &class,
+        "createDoWhileStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstDoWhileStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createDoWhileStmt");
     let method_create_empty_stmt = env
       .get_static_method_id(
         &class,
@@ -1009,6 +1033,7 @@ impl JavaSwc4jAstFactory {
       method_create_binding_ident,
       method_create_block_stmt,
       method_create_bool,
+      method_create_break_stmt,
       method_create_call_expr,
       method_create_class,
       method_create_class_decl,
@@ -1018,8 +1043,10 @@ impl JavaSwc4jAstFactory {
       method_create_computed_prop_name,
       method_create_cond_expr,
       method_create_constructor,
+      method_create_continue_stmt,
       method_create_debugger_stmt,
       method_create_decorator,
+      method_create_do_while_stmt,
       method_create_empty_stmt,
       method_create_export_all,
       method_create_export_decl,
@@ -1455,6 +1482,27 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_break_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    label: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let label = optional_object_to_jvalue!(label);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_break_stmt,
+        &[label, span],
+        "Swc4jAstBreakStmt create_break_stmt()"
+      );
+    return_value
+  }
+
   pub fn create_call_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -1714,6 +1762,27 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_continue_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    label: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let label = optional_object_to_jvalue!(label);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_continue_stmt,
+        &[label, span],
+        "Swc4jAstContinueStmt create_continue_stmt()"
+      );
+    return_value
+  }
+
   pub fn create_debugger_stmt<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -1750,6 +1819,29 @@ impl JavaSwc4jAstFactory {
         self.method_create_decorator,
         &[expr, span],
         "Swc4jAstDecorator create_decorator()"
+      );
+    return_value
+  }
+
+  pub fn create_do_while_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    test: &JObject<'_>,
+    body: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let test = object_to_jvalue!(test);
+    let body = object_to_jvalue!(body);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_do_while_stmt,
+        &[test, body, span],
+        "Swc4jAstDoWhileStmt create_do_while_stmt()"
       );
     return_value
   }
@@ -5852,6 +5944,19 @@ pub mod program {
     return_value
   }
 
+  fn create_break_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BreakStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_optional_label = node.label.as_ref().map(|node| create_ident(env, map, node));
+    let return_value = java_ast_factory.create_break_stmt(env, &java_optional_label, &java_range);
+    delete_local_optional_ref!(env, java_optional_label);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_call_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &CallExpr) -> JObject<'a>
   where
     'local: 'a,
@@ -6113,6 +6218,23 @@ pub mod program {
     return_type
   }
 
+  fn create_continue_stmt<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &ContinueStmt,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_optional_label = node.label.as_ref().map(|node| create_ident(env, map, node));
+    let return_value = java_ast_factory.create_continue_stmt(env, &java_optional_label, &java_range);
+    delete_local_optional_ref!(env, java_optional_label);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_decorator<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Decorator) -> JObject<'a>
   where
     'local: 'a,
@@ -6139,6 +6261,21 @@ pub mod program {
     let return_type = java_ast_factory.create_debugger_stmt(env, &java_range);
     delete_local_ref!(env, java_range);
     return_type
+  }
+
+  fn create_do_while_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &DoWhileStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_expr = enum_create_expr(env, map, &node.test);
+    let java_body = enum_create_stmt(env, map, &node.body);
+    let return_value = java_ast_factory.create_do_while_stmt(env, &java_expr, &java_body, &java_range);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_range);
+    return_value
   }
 
   fn create_empty_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &EmptyStmt) -> JObject<'a>
@@ -8421,8 +8558,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      PatOrExpr::Expr(node) => enum_create_expr(env, map, node),
+      PatOrExpr::Pat(node) => enum_create_pat(env, map, node),
     }
   }
 
@@ -8490,10 +8627,24 @@ pub mod program {
   {
     match node {
       Stmt::Block(node) => create_block_stmt(env, map, node),
+      Stmt::Break(node) => create_break_stmt(env, map, node),
+      Stmt::Continue(node) => create_continue_stmt(env, map, node),
       Stmt::Debugger(node) => create_debugger_stmt(env, map, node),
+      Stmt::DoWhile(node) => create_do_while_stmt(env, map, node),
       Stmt::Decl(node) => enum_create_decl(env, map, node),
       Stmt::Empty(node) => create_empty_stmt(env, map, node),
       Stmt::Expr(node) => create_expr_stmt(env, map, node),
+      // Stmt::For(node) => create_for_stmt(env, map, node),
+      // Stmt::ForIn(node) => create_for_in_stmt(env, map, node),
+      // Stmt::ForOf(node) => create_for_of_stmt(env, map, node),
+      // Stmt::If(node) => create_if_stmt(env, map, node),
+      // Stmt::Labeled(node) => create_labeled_stmt(env, map, node),
+      // Stmt::Return(node) => create_return_stmt(env, map, node),
+      // Stmt::Switch(node) => create_switch_stmt(env, map, node),
+      // Stmt::Throw(node) => create_throw_stmt(env, map, node),
+      // Stmt::Try(node) => create_try_stmt(env, map, node),
+      // Stmt::While(node) => create_while_stmt(env, map, node),
+      // Stmt::With(node) => create_with_stmt(env, map, node),
       default => panic!("{:?}", default),
       // TODO
     }

@@ -16,5 +16,15 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-public interface ISwc4jAstPat extends ISwc4jAstPatOrExpr {
+import com.caoccao.javet.swc4j.ast.pat.*;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class TestISwc4jAstPatOrExpr {
+    @Test
+    public void testAssignable() {
+        assertTrue(ISwc4jAstPatOrExpr.class.isAssignableFrom(ISwc4jAstExpr.class));
+        assertTrue(ISwc4jAstPatOrExpr.class.isAssignableFrom(ISwc4jAstPat.class));
+    }
 }

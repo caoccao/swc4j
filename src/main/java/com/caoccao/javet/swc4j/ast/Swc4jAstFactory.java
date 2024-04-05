@@ -165,6 +165,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstBreakStmt createBreakStmt(
+            @Jni2RustParam(optional = true) Swc4jAstIdent label,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstBreakStmt(label, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstCallExpr createCallExpr(
             ISwc4jAstCallee callee,
             List<Swc4jAstExprOrSpread> args,
@@ -274,6 +281,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstContinueStmt createContinueStmt(
+            @Jni2RustParam(optional = true) Swc4jAstIdent label,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstContinueStmt(label, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstDebuggerStmt createDebuggerStmt(
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstDebuggerStmt(span);
@@ -284,6 +298,14 @@ public final class Swc4jAstFactory {
             ISwc4jAstExpr expr,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstDecorator(expr, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstDoWhileStmt createDoWhileStmt(
+            ISwc4jAstExpr test,
+            ISwc4jAstStmt body,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstDoWhileStmt(test, body, span);
     }
 
     @Jni2RustMethod

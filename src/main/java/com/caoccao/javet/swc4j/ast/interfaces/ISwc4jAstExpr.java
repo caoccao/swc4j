@@ -17,5 +17,6 @@
 package com.caoccao.javet.swc4j.ast.interfaces;
 
 public interface ISwc4jAstExpr
-        extends ISwc4jAstVarDeclOrExpr, ISwc4jAstPat, ISwc4jAstJsxExpr, ISwc4jAstCallee, ISwc4jAstBlockStmtOrExpr {
+        extends ISwc4jAstVarDeclOrExpr, ISwc4jAstPat, ISwc4jAstJsxExpr, ISwc4jAstCallee, ISwc4jAstBlockStmtOrExpr,
+        ISwc4jAstPatOrExpr {
 }
