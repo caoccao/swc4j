@@ -232,6 +232,26 @@ fn test_structs() {
     function: Box::new(Function::dummy()),
     ident: Default::default(),
   };
+  let _ = ForInStmt {
+    span: DUMMY_SP,
+    body: Box::new(Stmt::dummy()),
+    left: ForHead::dummy(),
+    right: Box::new(Expr::dummy()),
+  };
+  let _ = ForOfStmt {
+    span: DUMMY_SP,
+    is_await: Default::default(),
+    body: Box::new(Stmt::dummy()),
+    left: ForHead::dummy(),
+    right: Box::new(Expr::dummy()),
+  };
+  let _ = ForStmt {
+    span: DUMMY_SP,
+    body: Box::new(Stmt::dummy()),
+    init: Default::default(),
+    test: Default::default(),
+    update: Default::default(),
+  };
   let _ = Function {
     span: DUMMY_SP,
     is_async: Default::default(),

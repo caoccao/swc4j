@@ -66,6 +66,9 @@ struct JavaSwc4jAstFactory {
   method_create_expr_stmt: JStaticMethodID,
   method_create_fn_decl: JStaticMethodID,
   method_create_fn_expr: JStaticMethodID,
+  method_create_for_in_stmt: JStaticMethodID,
+  method_create_for_of_stmt: JStaticMethodID,
+  method_create_for_stmt: JStaticMethodID,
   method_create_function: JStaticMethodID,
   method_create_getter_prop: JStaticMethodID,
   method_create_ident: JStaticMethodID,
@@ -422,6 +425,27 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstFnExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createFnExpr");
+    let method_create_for_in_stmt = env
+      .get_static_method_id(
+        &class,
+        "createForInStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstForHead;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForInStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createForInStmt");
+    let method_create_for_of_stmt = env
+      .get_static_method_id(
+        &class,
+        "createForOfStmt",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstForHead;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForOfStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createForOfStmt");
+    let method_create_for_stmt = env
+      .get_static_method_id(
+        &class,
+        "createForStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstVarDeclOrExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createForStmt");
     let method_create_function = env
       .get_static_method_id(
         &class,
@@ -1056,6 +1080,9 @@ impl JavaSwc4jAstFactory {
       method_create_expr_stmt,
       method_create_fn_decl,
       method_create_fn_expr,
+      method_create_for_in_stmt,
+      method_create_for_of_stmt,
+      method_create_for_stmt,
       method_create_function,
       method_create_getter_prop,
       method_create_ident,
@@ -2041,6 +2068,85 @@ impl JavaSwc4jAstFactory {
         self.method_create_fn_expr,
         &[ident, function, span],
         "Swc4jAstFnExpr create_fn_expr()"
+      );
+    return_value
+  }
+
+  pub fn create_for_in_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    left: &JObject<'_>,
+    right: &JObject<'_>,
+    body: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let left = object_to_jvalue!(left);
+    let right = object_to_jvalue!(right);
+    let body = object_to_jvalue!(body);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_for_in_stmt,
+        &[left, right, body, span],
+        "Swc4jAstForInStmt create_for_in_stmt()"
+      );
+    return_value
+  }
+
+  pub fn create_for_of_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    is_await: bool,
+    left: &JObject<'_>,
+    right: &JObject<'_>,
+    body: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let is_await = boolean_to_jvalue!(is_await);
+    let left = object_to_jvalue!(left);
+    let right = object_to_jvalue!(right);
+    let body = object_to_jvalue!(body);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_for_of_stmt,
+        &[is_await, left, right, body, span],
+        "Swc4jAstForOfStmt create_for_of_stmt()"
+      );
+    return_value
+  }
+
+  pub fn create_for_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    init: &Option<JObject>,
+    test: &Option<JObject>,
+    update: &Option<JObject>,
+    body: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let init = optional_object_to_jvalue!(init);
+    let test = optional_object_to_jvalue!(test);
+    let update = optional_object_to_jvalue!(update);
+    let body = object_to_jvalue!(body);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_for_stmt,
+        &[init, test, update, body, span],
+        "Swc4jAstForStmt create_for_stmt()"
       );
     return_value
   }
@@ -6418,6 +6524,71 @@ pub mod program {
     return_type
   }
 
+  fn create_for_in_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ForInStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_left = enum_create_for_head(env, map, &node.left);
+    let java_right = enum_create_expr(env, map, &node.right);
+    let java_body = enum_create_stmt(env, map, &node.body);
+    let return_value = java_ast_factory.create_for_in_stmt(env, &java_left, &java_right, &java_body, &java_range);
+    delete_local_ref!(env, java_left);
+    delete_local_ref!(env, java_right);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_for_of_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ForOfStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let is_await = node.is_await;
+    let java_left = enum_create_for_head(env, map, &node.left);
+    let java_right = enum_create_expr(env, map, &node.right);
+    let java_body = enum_create_stmt(env, map, &node.body);
+    let return_value =
+      java_ast_factory.create_for_of_stmt(env, is_await, &java_left, &java_right, &java_body, &java_range);
+    delete_local_ref!(env, java_left);
+    delete_local_ref!(env, java_right);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_for_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ForStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_optional_init = node
+      .init
+      .as_ref()
+      .map(|node| enum_create_var_decl_or_expr(env, map, node));
+    let java_optional_test = node.test.as_ref().map(|node| enum_create_expr(env, map, node));
+    let java_optional_update = node.update.as_ref().map(|node| enum_create_expr(env, map, node));
+    let java_body = enum_create_stmt(env, map, &node.body);
+    let return_value = java_ast_factory.create_for_stmt(
+      env,
+      &java_optional_init,
+      &java_optional_test,
+      &java_optional_update,
+      &java_body,
+      &java_range,
+    );
+    delete_local_optional_ref!(env, java_optional_init);
+    delete_local_optional_ref!(env, java_optional_test);
+    delete_local_optional_ref!(env, java_optional_update);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_function<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Function) -> JObject<'a>
   where
     'local: 'a,
@@ -8634,9 +8805,9 @@ pub mod program {
       Stmt::Decl(node) => enum_create_decl(env, map, node),
       Stmt::Empty(node) => create_empty_stmt(env, map, node),
       Stmt::Expr(node) => create_expr_stmt(env, map, node),
-      // Stmt::For(node) => create_for_stmt(env, map, node),
-      // Stmt::ForIn(node) => create_for_in_stmt(env, map, node),
-      // Stmt::ForOf(node) => create_for_of_stmt(env, map, node),
+      Stmt::For(node) => create_for_stmt(env, map, node),
+      Stmt::ForIn(node) => create_for_in_stmt(env, map, node),
+      Stmt::ForOf(node) => create_for_of_stmt(env, map, node),
       // Stmt::If(node) => create_if_stmt(env, map, node),
       // Stmt::Labeled(node) => create_labeled_stmt(env, map, node),
       // Stmt::Return(node) => create_return_stmt(env, map, node),

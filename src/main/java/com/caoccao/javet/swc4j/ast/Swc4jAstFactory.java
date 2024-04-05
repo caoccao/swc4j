@@ -377,6 +377,35 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstForInStmt createForInStmt(
+            ISwc4jAstForHead left,
+            ISwc4jAstExpr right,
+            ISwc4jAstStmt body,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstForInStmt(left, right, body, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstForOfStmt createForOfStmt(
+            boolean isAwait,
+            ISwc4jAstForHead left,
+            ISwc4jAstExpr right,
+            ISwc4jAstStmt body,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstForOfStmt(isAwait, left, right, body, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstForStmt createForStmt(
+            @Jni2RustParam(optional = true) ISwc4jAstVarDeclOrExpr init,
+            @Jni2RustParam(optional = true) ISwc4jAstExpr test,
+            @Jni2RustParam(optional = true) ISwc4jAstExpr update,
+            ISwc4jAstStmt body,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstForStmt(init, test, update, body, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstFunction createFunction(
             List<Swc4jAstParam> params,
             List<Swc4jAstDecorator> decorators,
