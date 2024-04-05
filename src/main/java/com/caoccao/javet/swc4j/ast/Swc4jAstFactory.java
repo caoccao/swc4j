@@ -21,10 +21,7 @@ import com.caoccao.javet.swc4j.ast.enums.*;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
-import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxClosingElement;
-import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxOpeningElement;
-import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstOptCall;
-import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstTplElement;
+import com.caoccao.javet.swc4j.ast.miscs.*;
 import com.caoccao.javet.swc4j.ast.module.*;
 import com.caoccao.javet.swc4j.ast.pat.*;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
@@ -435,6 +432,12 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstJsxClosingFragment createJsxClosingFragment(
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstJsxClosingFragment(span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstJsxElement createJsxElement(
             Swc4jAstJsxOpeningElement opening,
             List<ISwc4jAstJsxElementChild> children,
@@ -447,6 +450,15 @@ public final class Swc4jAstFactory {
     public static Swc4jAstJsxEmptyExpr createJsxEmptyExpr(
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstJsxEmptyExpr(span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstJsxFragment createJsxFragment(
+            Swc4jAstJsxOpeningFragment opening,
+            List<ISwc4jAstJsxElementChild> children,
+            Swc4jAstJsxClosingFragment closing,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstJsxFragment(opening, children, closing, span);
     }
 
     @Jni2RustMethod
@@ -473,6 +485,12 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstJsxOpeningElement(name, attrs, selfClosing, typeArgs, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstJsxOpeningFragment createJsxOpeningFragment(
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstJsxOpeningFragment(span);
     }
 
     @Jni2RustMethod

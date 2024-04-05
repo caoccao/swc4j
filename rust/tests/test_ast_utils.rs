@@ -268,6 +268,9 @@ fn test_structs() {
     span: DUMMY_SP,
     name: JSXElementName::dummy(),
   };
+  let _ = JSXClosingFragment {
+    span: DUMMY_SP,
+  };
   let _ = JSXElement {
     span: DUMMY_SP,
     children: Default::default(),
@@ -276,6 +279,12 @@ fn test_structs() {
   };
   let _ = JSXEmptyExpr {
     span: DUMMY_SP,
+  };
+  let _ = JSXFragment {
+    span: DUMMY_SP,
+    children: Default::default(),
+    closing: JSXClosingFragment::dummy(),
+    opening: JSXOpeningFragment::dummy(),
   };
   let _ = JSXMemberExpr {
     obj: JSXObject::Ident(Ident::dummy()),
@@ -291,6 +300,9 @@ fn test_structs() {
     name: JSXElementName::dummy(),
     self_closing: Default::default(),
     type_args: Default::default(),
+  };
+  let _ = JSXOpeningFragment {
+    span: DUMMY_SP,
   };
   let _ = JSXText {
     span: DUMMY_SP,
