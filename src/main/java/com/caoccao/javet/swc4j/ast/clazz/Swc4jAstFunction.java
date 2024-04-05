@@ -58,12 +58,12 @@ public class Swc4jAstFunction
         this.params = AssertionUtils.notNull(params, "Params");
         this.returnType = Optional.ofNullable(returnType);
         this.typeParams = Optional.ofNullable(typeParams);
-        children = SimpleList.copyOf(decorators);
-        children.addAll(params);
-        children.add(body);
-        children.add(typeParams);
-        children.add(returnType);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(decorators);
+        childNodes.addAll(params);
+        childNodes.add(body);
+        childNodes.add(typeParams);
+        childNodes.add(returnType);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

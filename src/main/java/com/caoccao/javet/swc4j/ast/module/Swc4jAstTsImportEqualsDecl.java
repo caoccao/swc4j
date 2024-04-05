@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleRef;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsModuleRef;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -49,7 +48,7 @@ public class Swc4jAstTsImportEqualsDecl
         this.id = AssertionUtils.notNull(id, "Id");
         this.moduleRef = AssertionUtils.notNull(moduleRef, "ModuleRef");
         this.typeOnly = typeOnly;
-        children = SimpleList.immutableOf(id, moduleRef);
+        childNodes = SimpleList.immutableOf(id, moduleRef);
         updateParent();
     }
 

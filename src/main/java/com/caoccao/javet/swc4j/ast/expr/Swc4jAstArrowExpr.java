@@ -59,11 +59,11 @@ public class Swc4jAstArrowExpr
         this.params = SimpleList.immutableCopyOf(AssertionUtils.notNull(params, "Params"));
         this.returnType = Optional.ofNullable(returnType);
         this.typeParams = Optional.ofNullable(typeParams);
-        children = SimpleList.copyOf(params);
-        children.add(body);
-        children.add(typeParams);
-        children.add(returnType);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(params);
+        childNodes.add(body);
+        childNodes.add(typeParams);
+        childNodes.add(returnType);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

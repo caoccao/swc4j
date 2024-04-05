@@ -30,7 +30,7 @@ public class Swc4jAstJsxEmptyExpr
     public Swc4jAstJsxEmptyExpr(
             Swc4jAstSpan span) {
         super(span);
-        children = EMPTY_CHILDREN;
+        childNodes = EMPTY_CHILD_NODES;
     }
 
     @Override

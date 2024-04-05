@@ -40,7 +40,7 @@ public class Swc4jAstUnaryExpr
         super(span);
         this.arg = AssertionUtils.notNull(arg, "Arg");
         this.op = AssertionUtils.notNull(op, "Op");
-        children = SimpleList.immutableOf(arg);
+        childNodes = SimpleList.immutableOf(arg);
         updateParent();
     }
 

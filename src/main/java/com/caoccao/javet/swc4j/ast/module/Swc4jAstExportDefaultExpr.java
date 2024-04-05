@@ -36,7 +36,7 @@ public class Swc4jAstExportDefaultExpr
             Swc4jAstSpan span) {
         super(span);
         this.expr = AssertionUtils.notNull(expr, "Expr");
-        children = SimpleList.immutableOf(expr);
+        childNodes = SimpleList.immutableOf(expr);
         updateParent();
     }
 

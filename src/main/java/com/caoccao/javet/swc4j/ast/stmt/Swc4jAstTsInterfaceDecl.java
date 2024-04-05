@@ -55,11 +55,11 @@ public class Swc4jAstTsInterfaceDecl
         this.declare = declare;
         this.id = AssertionUtils.notNull(id, "Id");
         this.typeParams = Optional.ofNullable(typeParams);
-        children = SimpleList.copyOf(_extends);
-        children.add(id);
-        children.add(typeParams);
-        children.add(body);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(_extends);
+        childNodes.add(id);
+        childNodes.add(typeParams);
+        childNodes.add(body);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

@@ -44,10 +44,10 @@ public class Swc4jAstCallExpr
         this.args = SimpleList.immutableCopyOf(AssertionUtils.notNull(args, "Args"));
         this.callee = AssertionUtils.notNull(callee, "Callee");
         this.typeArgs = Optional.ofNullable(typeArgs);
-        children = SimpleList.copyOf(args);
-        children.add(callee);
-        children.add(typeArgs);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(args);
+        childNodes.add(callee);
+        childNodes.add(typeArgs);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

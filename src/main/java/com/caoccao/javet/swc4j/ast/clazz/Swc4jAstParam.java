@@ -37,9 +37,9 @@ public class Swc4jAstParam
         super(span);
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
         this.pat = AssertionUtils.notNull(pat, "Pat");
-        children = SimpleList.copyOf(decorators);
-        children.add(pat);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(decorators);
+        childNodes.add(pat);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

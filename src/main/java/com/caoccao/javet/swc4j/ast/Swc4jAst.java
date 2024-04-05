@@ -34,7 +34,7 @@ public abstract class Swc4jAst implements ISwc4jAst {
      *
      * @since 0.2.0
      */
-    protected static final List<ISwc4jAst> EMPTY_CHILDREN = SimpleList.immutableOf();
+    protected static final List<ISwc4jAst> EMPTY_CHILD_NODES = SimpleList.immutableOf();
     /**
      * The Span.
      *
@@ -46,7 +46,7 @@ public abstract class Swc4jAst implements ISwc4jAst {
      *
      * @since 0.2.0
      */
-    protected List<ISwc4jAst> children;
+    protected List<ISwc4jAst> childNodes;
     /**
      * The Parent.
      *
@@ -62,14 +62,14 @@ public abstract class Swc4jAst implements ISwc4jAst {
      */
     protected Swc4jAst(
             Swc4jAstSpan span) {
-        children = EMPTY_CHILDREN;
+        childNodes = EMPTY_CHILD_NODES;
         parent = null;
         this.span = AssertionUtils.notNull(span, "Span");
     }
 
     @Override
-    public List<ISwc4jAst> getChildren() {
-        return children;
+    public List<ISwc4jAst> getChildNodes() {
+        return childNodes;
     }
 
     @Override
@@ -93,7 +93,7 @@ public abstract class Swc4jAst implements ISwc4jAst {
      * @since 0.2.0
      */
     protected void updateParent() {
-        getChildren().stream()
+        getChildNodes().stream()
                 .filter(Objects::nonNull)
                 .forEach(node -> node.setParent(this));
     }

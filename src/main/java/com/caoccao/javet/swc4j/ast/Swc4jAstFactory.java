@@ -21,6 +21,8 @@ import com.caoccao.javet.swc4j.ast.enums.*;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxClosingElement;
+import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxOpeningElement;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstOptCall;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstTplElement;
 import com.caoccao.javet.swc4j.ast.module.*;
@@ -426,6 +428,22 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstJsxClosingElement createJsxClosingElement(
+            ISwc4jAstJsxElementName name,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstJsxClosingElement(name, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstJsxElement createJsxElement(
+            Swc4jAstJsxOpeningElement opening,
+            List<ISwc4jAstJsxElementChild> children,
+            @Jni2RustParam(optional = true) Swc4jAstJsxClosingElement closing,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstJsxElement(opening, children, closing, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstJsxEmptyExpr createJsxEmptyExpr(
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstJsxEmptyExpr(span);
@@ -445,6 +463,16 @@ public final class Swc4jAstFactory {
             Swc4jAstIdent name,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstJsxNamespacedName(ns, name, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstJsxOpeningElement createJsxOpeningElement(
+            ISwc4jAstJsxElementName name,
+            List<ISwc4jAstJsxAttrOrSpread> attrs,
+            boolean selfClosing,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstJsxOpeningElement(name, attrs, selfClosing, typeArgs, span);
     }
 
     @Jni2RustMethod
@@ -650,6 +678,13 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) String shebang,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstScript(body, shebang, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstSeqExpr createSeqExpr(
+            List<ISwc4jAstExpr> exprs,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstSeqExpr(exprs, span);
     }
 
     @Jni2RustMethod

@@ -46,7 +46,7 @@ public class Swc4jAstRestPat
         this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
         this.arg = AssertionUtils.notNull(arg, "Expr");
         this.typeAnn = Optional.ofNullable(typeAnn);
-        children = SimpleList.immutableOf(arg, typeAnn);
+        childNodes = SimpleList.immutableOf(arg, typeAnn);
         updateParent();
     }
 

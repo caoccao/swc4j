@@ -40,7 +40,7 @@ public class Swc4jAstAssignPat
         super(span);
         this.left = AssertionUtils.notNull(left, "Left");
         this.right = AssertionUtils.notNull(right, "Right");
-        children = SimpleList.immutableOf(left, right);
+        childNodes = SimpleList.immutableOf(left, right);
         updateParent();
     }
 

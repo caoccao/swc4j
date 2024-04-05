@@ -264,6 +264,16 @@ fn test_structs() {
   let _ = Invalid {
     span: DUMMY_SP,
   };
+  let _ = JSXClosingElement {
+    span: DUMMY_SP,
+    name: JSXElementName::dummy(),
+  };
+  let _ = JSXElement {
+    span: DUMMY_SP,
+    children: Default::default(),
+    closing: Default::default(),
+    opening: JSXOpeningElement::dummy(),
+  };
   let _ = JSXEmptyExpr {
     span: DUMMY_SP,
   };
@@ -274,6 +284,13 @@ fn test_structs() {
   let _ = JSXNamespacedName {
     name: Ident::dummy(),
     ns: Ident::dummy(),
+  };
+  let _ = JSXOpeningElement {
+    span: DUMMY_SP,
+    attrs: Default::default(),
+    name: JSXElementName::dummy(),
+    self_closing: Default::default(),
+    type_args: Default::default(),
   };
   let _ = JSXText {
     span: DUMMY_SP,
@@ -390,6 +407,10 @@ fn test_structs() {
     arg: Box::new(Pat::dummy()),
     dot3_token: Default::default(),
     type_ann: Default::default(),
+  };
+  let _ = SeqExpr {
+    span: DUMMY_SP,
+    exprs: Default::default(),
   };
   let _ = SetterProp {
     span: DUMMY_SP,

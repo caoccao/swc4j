@@ -40,7 +40,7 @@ public class Swc4jAstTsEnumMember
         super(span);
         this.id = AssertionUtils.notNull(id, "Id");
         this.init = Optional.ofNullable(init);
-        children = SimpleList.immutableOf(id, init);
+        childNodes = SimpleList.immutableOf(id, init);
         updateParent();
     }
 

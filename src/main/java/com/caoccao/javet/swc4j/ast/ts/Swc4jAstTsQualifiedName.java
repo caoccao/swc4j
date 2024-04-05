@@ -41,7 +41,7 @@ public class Swc4jAstTsQualifiedName
         super(span);
         this.left = AssertionUtils.notNull(left, "Left");
         this.right = AssertionUtils.notNull(right, "Right");
-        children = SimpleList.immutableOf(left, right);
+        childNodes = SimpleList.immutableOf(left, right);
         updateParent();
     }
 

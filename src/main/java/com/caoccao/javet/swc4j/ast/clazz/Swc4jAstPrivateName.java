@@ -35,7 +35,7 @@ public class Swc4jAstPrivateName
             Swc4jAstSpan span) {
         super(span);
         this.id = AssertionUtils.notNull(id, "Id");
-        children = SimpleList.immutableOf(id);
+        childNodes = SimpleList.immutableOf(id);
         updateParent();
     }
 

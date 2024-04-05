@@ -45,7 +45,7 @@ public class Swc4jAstClassDecl
         this.clazz = AssertionUtils.notNull(clazz, "Class");
         this.declare = declare;
         this.ident = AssertionUtils.notNull(ident, "Ident");
-        children = SimpleList.immutableOf(clazz, ident);
+        childNodes = SimpleList.immutableOf(clazz, ident);
         updateParent();
     }
 

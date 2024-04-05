@@ -20,7 +20,6 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsTypeElement;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -35,7 +34,7 @@ public class Swc4jAstTsInterfaceBody
             Swc4jAstSpan span) {
         super(span);
         this.body = SimpleList.immutableCopyOf(AssertionUtils.notNull(body, "Body"));
-        children = SimpleList.immutableCopyOf(body);
+        childNodes = SimpleList.immutableCopyOf(body);
         updateParent();
     }
 

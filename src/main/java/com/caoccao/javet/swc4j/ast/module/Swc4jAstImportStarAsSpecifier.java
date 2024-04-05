@@ -34,7 +34,7 @@ public class Swc4jAstImportStarAsSpecifier
             Swc4jAstSpan span) {
         super(span);
         this.local = AssertionUtils.notNull(local, "Local");
-        children = SimpleList.immutableOf(local);
+        childNodes = SimpleList.immutableOf(local);
         updateParent();
     }
 

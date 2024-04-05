@@ -39,7 +39,7 @@ public class Swc4jAstOptChainExpr
         super(span);
         this.base = AssertionUtils.notNull(base, "Base");
         this.optional = optional;
-        children = SimpleList.immutableOf(base);
+        childNodes = SimpleList.immutableOf(base);
         updateParent();
     }
 

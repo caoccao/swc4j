@@ -38,7 +38,7 @@ public class Swc4jAstSuperPropExpr
         super(span);
         this.prop = AssertionUtils.notNull(prop, "Prop");
         this.obj = AssertionUtils.notNull(obj, "Obj");
-        children = SimpleList.immutableOf(obj, prop);
+        childNodes = SimpleList.immutableOf(obj, prop);
         updateParent();
     }
 

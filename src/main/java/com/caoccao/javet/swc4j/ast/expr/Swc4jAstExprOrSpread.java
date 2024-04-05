@@ -41,7 +41,7 @@ public class Swc4jAstExprOrSpread
         super(span);
         this.spread = Optional.ofNullable(spread);
         this.expr = AssertionUtils.notNull(expr, "Expr");
-        children = SimpleList.immutableOf(expr);
+        childNodes = SimpleList.immutableOf(expr);
         updateParent();
     }
 

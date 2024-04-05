@@ -34,7 +34,7 @@ public class Swc4jAstStaticBlock
             Swc4jAstSpan span) {
         super(span);
         this.body = AssertionUtils.notNull(body, "Body");
-        children = SimpleList.immutableOf(body);
+        childNodes = SimpleList.immutableOf(body);
         updateParent();
     }
 

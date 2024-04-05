@@ -22,7 +22,6 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstKey;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -72,11 +71,11 @@ public class Swc4jAstPrivateProp
         this.readonly = readonly;
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.value = Optional.ofNullable(value);
-        children = SimpleList.copyOf(decorators);
-        children.add(key);
-        children.add(value);
-        children.add(typeAnn);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(decorators);
+        childNodes.add(key);
+        childNodes.add(value);
+        childNodes.add(typeAnn);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

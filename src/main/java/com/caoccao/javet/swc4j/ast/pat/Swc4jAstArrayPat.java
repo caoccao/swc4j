@@ -44,9 +44,9 @@ public class Swc4jAstArrayPat
         this.elems = SimpleList.immutableCopyOf(AssertionUtils.notNull(elems, "Elems"));
         this.optional = optional;
         this.typeAnn = Optional.ofNullable(typeAnn);
-        children = SimpleList.copyOf(elems);
-        children.add(typeAnn);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(elems);
+        childNodes.add(typeAnn);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

@@ -19,39 +19,33 @@ package com.caoccao.javet.swc4j.ast.expr;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDefaultDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-@Jni2RustClass(name = "JSXNamespacedName", span = false)
-public class Swc4jAstJsxNamespacedName
-        extends Swc4jAst
-        implements ISwc4jAstExpr {
-    protected final Swc4jAstIdent name;
-    protected final Swc4jAstIdent ns;
+import java.util.List;
 
-    public Swc4jAstJsxNamespacedName(
-            Swc4jAstIdent ns,
-            Swc4jAstIdent name,
+public class Swc4jAstSeqExpr
+        extends Swc4jAst
+        implements ISwc4jAstExpr, ISwc4jAstDefaultDecl {
+    protected final List<ISwc4jAstExpr> exprs;
+
+    public Swc4jAstSeqExpr(
+            List<ISwc4jAstExpr> exprs,
             Swc4jAstSpan span) {
         super(span);
-        this.name = AssertionUtils.notNull(name, "Name");
-        this.ns = AssertionUtils.notNull(ns, "Ns");
-        childNodes = SimpleList.immutableOf(ns, name);
+        this.exprs = SimpleList.immutableCopyOf(AssertionUtils.notNull(exprs, "Exprs"));
+        childNodes = SimpleList.immutableCopyOf(exprs);
         updateParent();
     }
 
-    public Swc4jAstIdent getName() {
-        return name;
-    }
-
-    public Swc4jAstIdent getNs() {
-        return ns;
+    public List<ISwc4jAstExpr> getExprs() {
+        return exprs;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.JsxNamespacedName;
+        return Swc4jAstType.SeqExpr;
     }
 }

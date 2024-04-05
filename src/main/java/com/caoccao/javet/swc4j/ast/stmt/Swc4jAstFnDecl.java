@@ -45,7 +45,7 @@ public class Swc4jAstFnDecl
         this.function = AssertionUtils.notNull(function, "Function");
         this.declare = declare;
         this.ident = AssertionUtils.notNull(ident, "Ident");
-        children = SimpleList.immutableOf(function, ident);
+        childNodes = SimpleList.immutableOf(function, ident);
         updateParent();
     }
 

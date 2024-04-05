@@ -49,9 +49,9 @@ public class Swc4jAstTsIndexSignature
         this.params = AssertionUtils.notNull(params, "Params");
         this.readonly = readonly;
         this.typeAnn = Optional.ofNullable(typeAnn);
-        children = SimpleList.copyOf(params);
-        children.add(typeAnn);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(params);
+        childNodes.add(typeAnn);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

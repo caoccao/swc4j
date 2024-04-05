@@ -36,7 +36,7 @@ public class Swc4jAstObjectLit
             Swc4jAstSpan span) {
         super(span);
         this.props = SimpleList.immutableCopyOf(AssertionUtils.notNull(props, "Props"));
-        children = SimpleList.immutableCopyOf(props);
+        childNodes = SimpleList.immutableCopyOf(props);
         updateParent();
     }
 

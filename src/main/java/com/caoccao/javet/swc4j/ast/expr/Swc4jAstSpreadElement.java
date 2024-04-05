@@ -41,7 +41,7 @@ public class Swc4jAstSpreadElement
         super(span);
         this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
         this.expr = AssertionUtils.notNull(expr, "Expr");
-        children = SimpleList.immutableOf(expr);
+        childNodes = SimpleList.immutableOf(expr);
         updateParent();
     }
 

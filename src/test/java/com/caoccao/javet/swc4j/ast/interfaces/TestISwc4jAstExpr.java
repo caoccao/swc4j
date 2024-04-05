@@ -37,6 +37,7 @@ public class TestISwc4jAstExpr {
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstClassExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstCondExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstFnExpr.class));
+        assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstJsxElement.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstJsxEmptyExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstJsxMemberExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstJsxNamespacedName.class));
@@ -49,6 +50,7 @@ public class TestISwc4jAstExpr {
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstOptChainExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstParenExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstPrivateName.class));
+        assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstSeqExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstSuperPropExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstThisExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstTaggedTpl.class));

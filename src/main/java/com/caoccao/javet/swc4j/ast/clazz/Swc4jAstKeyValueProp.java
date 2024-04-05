@@ -42,7 +42,7 @@ public class Swc4jAstKeyValueProp
         super(span);
         this.key = AssertionUtils.notNull(key, "Key");
         this.value = AssertionUtils.notNull(value, "Value");
-        children = SimpleList.immutableOf(key, value);
+        childNodes = SimpleList.immutableOf(key, value);
         updateParent();
     }
 

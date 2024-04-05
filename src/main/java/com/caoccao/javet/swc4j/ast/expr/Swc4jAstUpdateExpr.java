@@ -43,7 +43,7 @@ public class Swc4jAstUpdateExpr
         this.arg = AssertionUtils.notNull(arg, "Arg");
         this.op = AssertionUtils.notNull(op, "Op");
         this.prefix = prefix;
-        children = SimpleList.immutableOf(arg);
+        childNodes = SimpleList.immutableOf(arg);
         updateParent();
     }
 

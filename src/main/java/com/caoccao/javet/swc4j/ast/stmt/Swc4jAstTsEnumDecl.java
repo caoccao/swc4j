@@ -48,9 +48,9 @@ public class Swc4jAstTsEnumDecl
         this.declare = declare;
         this.id = AssertionUtils.notNull(id, "Id");
         this.members = SimpleList.immutableCopyOf(AssertionUtils.notNull(members, "TypeAnn"));
-        children = SimpleList.copyOf(members);
-        children.add(id);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(members);
+        childNodes.add(id);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

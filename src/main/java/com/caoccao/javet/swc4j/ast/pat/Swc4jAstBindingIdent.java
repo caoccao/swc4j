@@ -43,7 +43,7 @@ public class Swc4jAstBindingIdent
         super(span);
         this.id = AssertionUtils.notNull(id, "Id");
         this.typeAnn = Optional.ofNullable(typeAnn);
-        children = SimpleList.immutableOf(id, typeAnn);
+        childNodes = SimpleList.immutableOf(id, typeAnn);
         updateParent();
     }
 

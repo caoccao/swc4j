@@ -34,7 +34,7 @@ public class Swc4jAstExportDecl
             Swc4jAstSpan span) {
         super(span);
         this.decl = AssertionUtils.notNull(decl, "Decl");
-        children = SimpleList.immutableOf(decl);
+        childNodes = SimpleList.immutableOf(decl);
         updateParent();
     }
 

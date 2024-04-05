@@ -66,7 +66,7 @@ public class Swc4jAstClassMethod
         this.key = AssertionUtils.notNull(key, "Key");
         this.kind = AssertionUtils.notNull(kind, "Kind");
         this.optional = optional;
-        children = SimpleList.immutableOf(key, function);
+        childNodes = SimpleList.immutableOf(key, function);
         updateParent();
     }
 

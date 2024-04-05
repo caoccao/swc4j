@@ -36,7 +36,7 @@ public class Swc4jAstArrayLit
             Swc4jAstSpan span) {
         super(span);
         this.elems = SimpleList.immutableCopyOf(AssertionUtils.notNull(elems, "Elems"));
-        children = SimpleList.immutableCopyOf(elems);
+        childNodes = SimpleList.immutableCopyOf(elems);
         updateParent();
     }
 

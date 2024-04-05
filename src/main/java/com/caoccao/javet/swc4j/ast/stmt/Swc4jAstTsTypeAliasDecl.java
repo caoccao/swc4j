@@ -49,7 +49,7 @@ public class Swc4jAstTsTypeAliasDecl
         this.id = AssertionUtils.notNull(id, "Id");
         this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
         this.typeParams = Optional.ofNullable(typeParams);
-        children = SimpleList.immutableOf(id, typeParams, typeAnn);
+        childNodes = SimpleList.immutableOf(id, typeParams, typeAnn);
         updateParent();
     }
 

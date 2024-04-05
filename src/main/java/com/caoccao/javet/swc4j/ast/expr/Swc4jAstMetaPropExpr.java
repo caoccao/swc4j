@@ -35,7 +35,7 @@ public class Swc4jAstMetaPropExpr
             Swc4jAstSpan span) {
         super(span);
         this.kind = AssertionUtils.notNull(kind, "Kind");
-        children = EMPTY_CHILDREN;
+        childNodes = EMPTY_CHILD_NODES;
     }
 
     public Swc4jAstMetaPropKind getKind() {

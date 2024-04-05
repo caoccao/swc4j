@@ -65,7 +65,7 @@ public abstract class Swc4jAstProgram<AST extends ISwc4jAst>
         super(span);
         this.body = SimpleList.immutableCopyOf(AssertionUtils.notNull(body, "Body"));
         this.shebang = Optional.ofNullable(shebang);
-        children = SimpleList.immutableCopyOf(body);
+        childNodes = SimpleList.immutableCopyOf(body);
         updateParent();
     }
 

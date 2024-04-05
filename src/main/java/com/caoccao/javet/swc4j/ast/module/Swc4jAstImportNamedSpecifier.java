@@ -45,7 +45,7 @@ public class Swc4jAstImportNamedSpecifier
         this.imported = Optional.ofNullable(imported);
         this.local = AssertionUtils.notNull(local, "Local");
         this.typeOnly = typeOnly;
-        children = SimpleList.immutableOf(imported, local);
+        childNodes = SimpleList.immutableOf(imported, local);
         updateParent();
     }
 

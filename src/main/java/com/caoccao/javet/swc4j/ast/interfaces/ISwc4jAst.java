@@ -33,7 +33,7 @@ public interface ISwc4jAst {
      * @return the children
      * @since 0.2.0
      */
-    List<ISwc4jAst> getChildren();
+    List<ISwc4jAst> getChildNodes();
 
     /**
      * Gets parent.

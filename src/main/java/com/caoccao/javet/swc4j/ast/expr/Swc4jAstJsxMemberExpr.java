@@ -41,7 +41,7 @@ public class Swc4jAstJsxMemberExpr
         super(span);
         this.obj = AssertionUtils.notNull(obj, "Obj");
         this.prop = AssertionUtils.notNull(prop, "Prop");
-        children = SimpleList.immutableOf(obj, prop);
+        childNodes = SimpleList.immutableOf(obj, prop);
         updateParent();
     }
 

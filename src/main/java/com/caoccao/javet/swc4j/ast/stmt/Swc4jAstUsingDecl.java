@@ -41,7 +41,7 @@ public class Swc4jAstUsingDecl
         super(span);
         this.await = await;
         this.decls = SimpleList.immutableCopyOf(AssertionUtils.notNull(decls, "Decls"));
-        children = SimpleList.immutableCopyOf(decls);
+        childNodes = SimpleList.immutableCopyOf(decls);
         updateParent();
     }
 

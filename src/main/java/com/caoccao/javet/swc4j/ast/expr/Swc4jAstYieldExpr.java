@@ -37,7 +37,7 @@ public class Swc4jAstYieldExpr
         super(span);
         this.arg = Optional.ofNullable(arg);
         this.delegate = delegate;
-        children = SimpleList.immutableOf(arg);
+        childNodes = SimpleList.immutableOf(arg);
         updateParent();
     }
 

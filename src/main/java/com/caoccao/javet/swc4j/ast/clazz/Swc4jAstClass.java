@@ -59,13 +59,13 @@ public class Swc4jAstClass
         this.superClass = Optional.ofNullable(superClass);
         this.superTypeParams = Optional.ofNullable(superTypeParams);
         this.typeParams = Optional.ofNullable(typeParams);
-        children = SimpleList.copyOf(_implements);
-        children.addAll(body);
-        children.addAll(decorators);
-        children.add(superClass);
-        children.add(superTypeParams);
-        children.add(typeParams);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(_implements);
+        childNodes.addAll(body);
+        childNodes.addAll(decorators);
+        childNodes.add(superClass);
+        childNodes.add(superTypeParams);
+        childNodes.add(typeParams);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

@@ -16,5 +16,8 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+
+@Jni2RustClass(name = "JSXElementChild")
 public interface ISwc4jAstJsxElementChild extends ISwc4jAst {
 }

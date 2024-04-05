@@ -41,7 +41,7 @@ public class Swc4jAstMethodProp
         super(span);
         this.function = AssertionUtils.notNull(function, "Function");
         this.key = AssertionUtils.notNull(key, "Key");
-        children = SimpleList.immutableOf(key, function);
+        childNodes = SimpleList.immutableOf(key, function);
         updateParent();
     }
 

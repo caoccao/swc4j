@@ -39,7 +39,7 @@ public class Swc4jAstTsExprWithTypeArgs
         super(span);
         this.expr = AssertionUtils.notNull(expr, "Expr");
         this.typeArgs = Optional.ofNullable(typeArgs);
-        children = SimpleList.immutableOf(expr, typeArgs);
+        childNodes = SimpleList.immutableOf(expr, typeArgs);
         updateParent();
     }
 

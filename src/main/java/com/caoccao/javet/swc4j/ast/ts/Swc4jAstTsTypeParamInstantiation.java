@@ -34,7 +34,7 @@ public class Swc4jAstTsTypeParamInstantiation
             Swc4jAstSpan span) {
         super(span);
         this.params = SimpleList.immutableCopyOf(AssertionUtils.notNull(params, "Params"));
-        children = SimpleList.immutableCopyOf(params);
+        childNodes = SimpleList.immutableCopyOf(params);
         updateParent();
     }
 

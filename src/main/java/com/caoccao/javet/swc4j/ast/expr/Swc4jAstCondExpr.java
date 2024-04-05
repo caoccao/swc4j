@@ -43,7 +43,7 @@ public class Swc4jAstCondExpr
         this.alt = AssertionUtils.notNull(alt, "Alt");
         this.cons = AssertionUtils.notNull(cons, "Cons");
         this.test = AssertionUtils.notNull(test, "Test");
-        children = SimpleList.immutableOf(alt, cons, test);
+        childNodes = SimpleList.immutableOf(alt, cons, test);
         updateParent();
     }
 

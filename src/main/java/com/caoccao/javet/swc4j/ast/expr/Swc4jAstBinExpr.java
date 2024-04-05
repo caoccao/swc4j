@@ -44,7 +44,7 @@ public class Swc4jAstBinExpr
         this.left = AssertionUtils.notNull(left, "Left");
         this.op = AssertionUtils.notNull(op, "Op");
         this.right = AssertionUtils.notNull(right, "Right");
-        children = SimpleList.immutableOf(left, right);
+        childNodes = SimpleList.immutableOf(left, right);
         updateParent();
     }
 

@@ -34,7 +34,7 @@ public class Swc4jAstTsTypeAnn
             Swc4jAstSpan span) {
         super(span);
         this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
-        children = SimpleList.immutableOf(typeAnn);
+        childNodes = SimpleList.immutableOf(typeAnn);
         updateParent();
     }
 

@@ -39,9 +39,9 @@ public class Swc4jAstTpl
         super(span);
         this.exprs = SimpleList.immutableCopyOf(AssertionUtils.notNull(exprs, "Exprs"));
         this.quasis = SimpleList.immutableCopyOf(AssertionUtils.notNull(quasis, "Quasis"));
-        children = SimpleList.copyOf(exprs);
-        children.addAll(quasis);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(exprs);
+        childNodes.addAll(quasis);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

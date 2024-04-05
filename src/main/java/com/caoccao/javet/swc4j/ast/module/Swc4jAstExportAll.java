@@ -45,7 +45,7 @@ public class Swc4jAstExportAll
         this.src = AssertionUtils.notNull(src, "Src");
         this.typeOnly = typeOnly;
         this.with = Optional.ofNullable(with);
-        children = SimpleList.immutableOf(src, with);
+        childNodes = SimpleList.immutableOf(src, with);
         updateParent();
     }
 

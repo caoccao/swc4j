@@ -48,10 +48,10 @@ public class Swc4jAstNamedExport
         this.src = Optional.ofNullable(src);
         this.typeOnly = typeOnly;
         this.with = Optional.ofNullable(with);
-        children = SimpleList.copyOf(specifiers);
-        children.add(src);
-        children.add(with);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(specifiers);
+        childNodes.add(src);
+        childNodes.add(with);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

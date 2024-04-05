@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.utils.SimpleList;
 
 public class Swc4jAstInvalid
         extends Swc4jAst
@@ -29,7 +28,7 @@ public class Swc4jAstInvalid
     public Swc4jAstInvalid(
             Swc4jAstSpan span) {
         super(span);
-        children = EMPTY_CHILDREN;
+        childNodes = EMPTY_CHILD_NODES;
     }
 
     @Override

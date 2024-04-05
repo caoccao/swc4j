@@ -54,10 +54,10 @@ public class Swc4jAstConstructor
         this.key = AssertionUtils.notNull(key, "Key");
         this.optional = optional;
         this.params = AssertionUtils.notNull(params, "Params");
-        children = SimpleList.copyOf(params);
-        children.add(body);
-        children.add(key);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(params);
+        childNodes.add(body);
+        childNodes.add(key);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

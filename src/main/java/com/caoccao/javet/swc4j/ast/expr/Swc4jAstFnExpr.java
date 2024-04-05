@@ -44,7 +44,7 @@ public class Swc4jAstFnExpr
         super(span);
         this.function = AssertionUtils.notNull(function, "Function");
         this.ident = Optional.ofNullable(ident);
-        children = SimpleList.immutableOf(ident, function);
+        childNodes = SimpleList.immutableOf(ident, function);
         updateParent();
     }
 

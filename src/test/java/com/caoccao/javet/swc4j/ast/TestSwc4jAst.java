@@ -101,8 +101,11 @@ public class TestSwc4jAst {
                                                 && ISwc4jAst.class != fieldClass)
                                                 || (Swc4jAst.class.isAssignableFrom(fieldClass)
                                                 && Swc4jAst.class != fieldClass)) {
-                                            String subTypeName = fieldClass.getSimpleName().substring(
-                                                    fieldClass.isInterface() ? 9 : 8);
+                                            String subTypeName =
+                                                    Optional.ofNullable(fieldClass.getAnnotation(Jni2RustClass.class))
+                                                            .map(Jni2RustClass::name)
+                                                            .orElse(fieldClass.getSimpleName().substring(
+                                                                    fieldClass.isInterface() ? 9 : 8));
                                             if (jni2RustField.map(Jni2RustField::box).orElse(false)) {
                                                 lines.add(String.format("    %s: Box::new(%s::dummy()),", fieldName, subTypeName));
                                             } else {

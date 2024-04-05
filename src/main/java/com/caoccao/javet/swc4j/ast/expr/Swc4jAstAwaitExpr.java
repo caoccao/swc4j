@@ -35,7 +35,7 @@ public class Swc4jAstAwaitExpr
             Swc4jAstSpan span) {
         super(span);
         this.arg = AssertionUtils.notNull(arg, "Arg");
-        children = SimpleList.immutableOf(arg);
+        childNodes = SimpleList.immutableOf(arg);
         updateParent();
     }
 

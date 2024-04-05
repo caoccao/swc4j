@@ -54,7 +54,7 @@ public class Swc4jAstTsTypeParam
         this.in = in;
         this.name = AssertionUtils.notNull(name, "Name");
         this.out = out;
-        children = SimpleList.immutableOf(name, constraint, _default);
+        childNodes = SimpleList.immutableOf(name, constraint, _default);
         updateParent();
     }
 

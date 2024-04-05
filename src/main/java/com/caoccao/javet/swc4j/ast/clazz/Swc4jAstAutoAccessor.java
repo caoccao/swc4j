@@ -57,11 +57,11 @@ public class Swc4jAstAutoAccessor
         this.key = AssertionUtils.notNull(key, "Key");
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.value = Optional.ofNullable(value);
-        children = SimpleList.copyOf(decorators);
-        children.add(key);
-        children.add(value);
-        children.add(typeAnn);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(decorators);
+        childNodes.add(key);
+        childNodes.add(value);
+        childNodes.add(typeAnn);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

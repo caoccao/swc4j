@@ -44,7 +44,7 @@ public class Swc4jAstGetterProp
         this.body = Optional.ofNullable(body);
         this.key = AssertionUtils.notNull(key, "Key");
         this.typeAnn = Optional.ofNullable(typeAnn);
-        children = SimpleList.immutableOf(key, typeAnn, body);
+        childNodes = SimpleList.immutableOf(key, typeAnn, body);
         updateParent();
     }
 

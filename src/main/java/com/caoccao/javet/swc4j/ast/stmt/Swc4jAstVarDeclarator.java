@@ -43,7 +43,7 @@ public class Swc4jAstVarDeclarator
         this.definite = definite;
         this.init = Optional.ofNullable(init);
         this.name = AssertionUtils.notNull(name, "Name");
-        children = SimpleList.immutableOf(init, name);
+        childNodes = SimpleList.immutableOf(init, name);
         updateParent();
     }
 

@@ -45,9 +45,9 @@ public class Swc4jAstObjectPat
         this.props = SimpleList.immutableCopyOf(AssertionUtils.notNull(props, "Props"));
         this.optional = optional;
         this.typeAnn = Optional.ofNullable(typeAnn);
-        children = SimpleList.copyOf(props);
-        children.add(typeAnn);
-        children = SimpleList.immutable(children);
+        childNodes = SimpleList.copyOf(props);
+        childNodes.add(typeAnn);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 

@@ -45,7 +45,7 @@ public class Swc4jAstTaggedTpl
         this.tag = AssertionUtils.notNull(tag, "Tag");
         this.tpl = tpl;
         this.typeParams = Optional.ofNullable(typeParams);
-        children = SimpleList.immutableOf(tag, typeParams, tpl);
+        childNodes = SimpleList.immutableOf(tag, typeParams, tpl);
         updateParent();
     }
 

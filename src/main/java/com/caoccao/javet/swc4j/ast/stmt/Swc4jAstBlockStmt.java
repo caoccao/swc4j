@@ -35,7 +35,7 @@ public class Swc4jAstBlockStmt
             Swc4jAstSpan span) {
         super(span);
         this.stmts = SimpleList.immutableCopyOf(AssertionUtils.notNull(stmts, "Stmts"));
-        children = SimpleList.immutableCopyOf(stmts);
+        childNodes = SimpleList.immutableCopyOf(stmts);
         updateParent();
     }
 

@@ -20,7 +20,6 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
-import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
@@ -39,7 +38,7 @@ public class Swc4jAstTplElement
         this.cooked = Optional.ofNullable(cooked);
         this.raw = AssertionUtils.notNull(raw, "Raw");
         this.tail = tail;
-        children = EMPTY_CHILDREN;
+        childNodes = EMPTY_CHILD_NODES;
     }
 
     public Optional<String> getCooked() {

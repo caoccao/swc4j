@@ -48,7 +48,7 @@ public class Swc4jAstTsModuleDecl
         this.global = global;
         this.body = Optional.ofNullable(body);
         this.id = AssertionUtils.notNull(id, "Id");
-        children = SimpleList.immutableOf(id, body);
+        childNodes = SimpleList.immutableOf(id, body);
         updateParent();
     }
 

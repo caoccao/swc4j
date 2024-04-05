@@ -71,9 +71,12 @@ struct JavaSwc4jAstFactory {
   method_create_import_named_specifier: JStaticMethodID,
   method_create_import_star_as_specifier: JStaticMethodID,
   method_create_invalid: JStaticMethodID,
+  method_create_jsx_closing_element: JStaticMethodID,
+  method_create_jsx_element: JStaticMethodID,
   method_create_jsx_empty_expr: JStaticMethodID,
   method_create_jsx_member_expr: JStaticMethodID,
   method_create_jsx_namespaced_name: JStaticMethodID,
+  method_create_jsx_opening_element: JStaticMethodID,
   method_create_jsx_text: JStaticMethodID,
   method_create_key_value_pat_prop: JStaticMethodID,
   method_create_key_value_prop: JStaticMethodID,
@@ -97,6 +100,7 @@ struct JavaSwc4jAstFactory {
   method_create_regex: JStaticMethodID,
   method_create_rest_pat: JStaticMethodID,
   method_create_script: JStaticMethodID,
+  method_create_seq_expr: JStaticMethodID,
   method_create_setter_prop: JStaticMethodID,
   method_create_span: JStaticMethodID,
   method_create_spread_element: JStaticMethodID,
@@ -437,6 +441,20 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstInvalid;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createInvalid");
+    let method_create_jsx_closing_element = env
+      .get_static_method_id(
+        &class,
+        "createJsxClosingElement",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxElementName;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingElement;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createJsxClosingElement");
+    let method_create_jsx_element = env
+      .get_static_method_id(
+        &class,
+        "createJsxElement",
+        "(Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningElement;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingElement;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxElement;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createJsxElement");
     let method_create_jsx_empty_expr = env
       .get_static_method_id(
         &class,
@@ -458,6 +476,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxNamespacedName;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxNamespacedName");
+    let method_create_jsx_opening_element = env
+      .get_static_method_id(
+        &class,
+        "createJsxOpeningElement",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxElementName;Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningElement;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createJsxOpeningElement");
     let method_create_jsx_text = env
       .get_static_method_id(
         &class,
@@ -619,6 +644,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstScript;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createScript");
+    let method_create_seq_expr = env
+      .get_static_method_id(
+        &class,
+        "createSeqExpr",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSeqExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createSeqExpr");
     let method_create_setter_prop = env
       .get_static_method_id(
         &class,
@@ -901,9 +933,12 @@ impl JavaSwc4jAstFactory {
       method_create_import_named_specifier,
       method_create_import_star_as_specifier,
       method_create_invalid,
+      method_create_jsx_closing_element,
+      method_create_jsx_element,
       method_create_jsx_empty_expr,
       method_create_jsx_member_expr,
       method_create_jsx_namespaced_name,
+      method_create_jsx_opening_element,
       method_create_jsx_text,
       method_create_key_value_pat_prop,
       method_create_key_value_prop,
@@ -927,6 +962,7 @@ impl JavaSwc4jAstFactory {
       method_create_regex,
       method_create_rest_pat,
       method_create_script,
+      method_create_seq_expr,
       method_create_setter_prop,
       method_create_span,
       method_create_spread_element,
@@ -1996,6 +2032,52 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_jsx_closing_element<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    name: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let name = object_to_jvalue!(name);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_jsx_closing_element,
+        &[name, span],
+        "Swc4jAstJsxClosingElement create_jsx_closing_element()"
+      );
+    return_value
+  }
+
+  pub fn create_jsx_element<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    opening: &JObject<'_>,
+    children: &JObject<'_>,
+    closing: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let opening = object_to_jvalue!(opening);
+    let children = object_to_jvalue!(children);
+    let closing = optional_object_to_jvalue!(closing);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_jsx_element,
+        &[opening, children, closing, span],
+        "Swc4jAstJsxElement create_jsx_element()"
+      );
+    return_value
+  }
+
   pub fn create_jsx_empty_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -2057,6 +2139,33 @@ impl JavaSwc4jAstFactory {
         self.method_create_jsx_namespaced_name,
         &[ns, name, span],
         "Swc4jAstJsxNamespacedName create_jsx_namespaced_name()"
+      );
+    return_value
+  }
+
+  pub fn create_jsx_opening_element<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    name: &JObject<'_>,
+    attrs: &JObject<'_>,
+    self_closing: bool,
+    type_args: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let name = object_to_jvalue!(name);
+    let attrs = object_to_jvalue!(attrs);
+    let self_closing = boolean_to_jvalue!(self_closing);
+    let type_args = optional_object_to_jvalue!(type_args);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_jsx_opening_element,
+        &[name, attrs, self_closing, type_args, span],
+        "Swc4jAstJsxOpeningElement create_jsx_opening_element()"
       );
     return_value
   }
@@ -2629,6 +2738,27 @@ impl JavaSwc4jAstFactory {
         "Swc4jAstScript create_script()"
       );
     delete_local_ref!(env, java_shebang);
+    return_value
+  }
+
+  pub fn create_seq_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    exprs: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let exprs = object_to_jvalue!(exprs);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_seq_expr,
+        &[exprs, span],
+        "Swc4jAstSeqExpr create_seq_expr()"
+      );
     return_value
   }
 
@@ -5891,6 +6021,50 @@ pub mod program {
     return_value
   }
 
+  fn create_jsx_closing_element<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXClosingElement,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_name = enum_create_jsx_element_name(env, map, &node.name);
+    let return_value = java_ast_factory.create_jsx_closing_element(env, &java_name, &java_range);
+    delete_local_ref!(env, java_name);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_jsx_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXElement) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_opening = create_jsx_opening_element(env, map, &node.opening);
+    let java_children = java_array_list.construct(env, node.children.len());
+    node.children.iter().for_each(|node| {
+      let java_node = enum_create_jsx_element_child(env, map, node);
+      java_array_list.add(env, &java_children, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_closing = node
+      .closing
+      .as_ref()
+      .map(|node| create_jsx_closing_element(env, map, node));
+    let return_type =
+      java_ast_factory.create_jsx_element(env, &java_opening, &java_children, &java_optional_closing, &java_range);
+    delete_local_ref!(env, java_opening);
+    delete_local_ref!(env, java_children);
+    delete_local_optional_ref!(env, java_optional_closing);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_jsx_empty_expr<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -5942,6 +6116,44 @@ pub mod program {
     delete_local_ref!(env, java_name);
     delete_local_ref!(env, java_range);
     return_type
+  }
+
+  fn create_jsx_opening_element<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXOpeningElement,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_name = enum_create_jsx_element_name(env, map, &node.name);
+    let java_attrs = java_array_list.construct(env, node.attrs.len());
+    node.attrs.iter().for_each(|node| {
+      let java_node = enum_create_jsx_attr_or_spread(env, map, node);
+      java_array_list.add(env, &java_attrs, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let self_closing = node.self_closing;
+    let java_optional_type_args = node
+      .type_args
+      .as_ref()
+      .map(|node| create_ts_type_param_instantiation(env, map, node));
+    let return_value = java_ast_factory.create_jsx_opening_element(
+      env,
+      &java_name,
+      &java_attrs,
+      self_closing,
+      &java_optional_type_args,
+      &java_range,
+    );
+    delete_local_ref!(env, java_name);
+    delete_local_ref!(env, java_attrs);
+    delete_local_optional_ref!(env, java_optional_type_args);
+    delete_local_ref!(env, java_range);
+    return_value
   }
 
   fn create_jsx_text<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXText) -> JObject<'a>
@@ -6530,6 +6742,25 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let return_type = java_ast_factory.create_super(env, &java_range);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
+  fn create_seq_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SeqExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_exprs = java_array_list.construct(env, node.exprs.len());
+    node.exprs.iter().for_each(|node| {
+      let java_node = enum_create_expr(env, map, node);
+      java_array_list.add(env, &java_exprs, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_type = java_ast_factory.create_seq_expr(env, &java_exprs, &java_range);
+    delete_local_ref!(env, java_exprs);
     delete_local_ref!(env, java_range);
     return_type
   }
@@ -7241,11 +7472,13 @@ pub mod program {
       Expr::Class(node) => create_class_expr(env, map, node),
       Expr::Cond(node) => create_cond_expr(env, map, node),
       Expr::Fn(node) => create_fn_expr(env, map, node),
-      Expr::JSXEmpty(node) => create_jsx_empty_expr(env, map, node),
-      Expr::JSXMember(node) => create_jsx_member_expr(env, map, node),
-      Expr::JSXNamespacedName(node) => create_jsx_namespaced_name(env, map, node),
       Expr::Ident(node) => create_ident(env, map, node),
       Expr::Invalid(node) => create_invalid(env, map, node),
+      Expr::JSXElement(node) => create_jsx_element(env, map, node),
+      Expr::JSXEmpty(node) => create_jsx_empty_expr(env, map, node),
+      // Expr::JSXFragment(node) => create_(env, map, node),
+      Expr::JSXMember(node) => create_jsx_member_expr(env, map, node),
+      Expr::JSXNamespacedName(node) => create_jsx_namespaced_name(env, map, node),
       Expr::Lit(node) => enum_create_lit(env, map, node),
       Expr::Member(node) => create_member_expr(env, map, node),
       Expr::MetaProp(node) => create_meta_prop_expr(env, map, node),
@@ -7254,10 +7487,17 @@ pub mod program {
       Expr::OptChain(node) => create_opt_chain_expr(env, map, node),
       Expr::Paren(node) => create_paren_expr(env, map, node),
       Expr::PrivateName(node) => create_private_name(env, map, node),
+      Expr::Seq(node) => create_seq_expr(env, map, node),
       Expr::SuperProp(node) => create_super_prop_expr(env, map, node),
       Expr::TaggedTpl(node) => create_tagged_tpl(env, map, node),
       Expr::This(node) => create_this_expr(env, map, node),
       Expr::Tpl(node) => create_tpl(env, map, node),
+      // Expr::TsAs(node) => create_(env, map, node),
+      // Expr::TsConstAssertion(node) => create_(env, map, node),
+      // Expr::TsInstantiation(node) => create_(env, map, node),
+      // Expr::TsNonNull(node) => create_(env, map, node),
+      // Expr::TsSatisfies(node) => create_(env, map, node),
+      // Expr::TsTypeAssertion(node) => create_(env, map, node),
       Expr::Unary(node) => create_unary_expr(env, map, node),
       Expr::Update(node) => create_update_expr(env, map, node),
       Expr::Yield(node) => create_yield_expr(env, map, node),

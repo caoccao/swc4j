@@ -45,7 +45,7 @@ public class Swc4jAstVarDecl
         this.declare = declare;
         this.decls = SimpleList.immutableCopyOf(AssertionUtils.notNull(decls, "Decls"));
         this.kind = AssertionUtils.notNull(kind, "Kind");
-        children = SimpleList.immutableCopyOf(decls);
+        childNodes = SimpleList.immutableCopyOf(decls);
         updateParent();
     }
 
