@@ -273,6 +273,12 @@ fn test_structs() {
     optional: Default::default(),
     sym: Default::default(),
   };
+  let _ = IfStmt {
+    span: DUMMY_SP,
+    alt: Default::default(),
+    cons: Box::new(Stmt::dummy()),
+    test: Box::new(Expr::dummy()),
+  };
   let _ = Import {
     span: DUMMY_SP,
   };

@@ -437,6 +437,15 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstIfStmt createIfStmt(
+            ISwc4jAstExpr test,
+            ISwc4jAstStmt cons,
+            @Jni2RustParam(optional = true) ISwc4jAstStmt alt,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstIfStmt(test, cons, alt, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstImport createImport(
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstImport(span);

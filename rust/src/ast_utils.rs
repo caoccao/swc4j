@@ -72,6 +72,7 @@ struct JavaSwc4jAstFactory {
   method_create_function: JStaticMethodID,
   method_create_getter_prop: JStaticMethodID,
   method_create_ident: JStaticMethodID,
+  method_create_if_stmt: JStaticMethodID,
   method_create_import: JStaticMethodID,
   method_create_import_decl: JStaticMethodID,
   method_create_import_default_specifier: JStaticMethodID,
@@ -467,6 +468,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/lang/String;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createIdent");
+    let method_create_if_stmt = env
+      .get_static_method_id(
+        &class,
+        "createIfStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstIfStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createIfStmt");
     let method_create_import = env
       .get_static_method_id(
         &class,
@@ -1086,6 +1094,7 @@ impl JavaSwc4jAstFactory {
       method_create_function,
       method_create_getter_prop,
       method_create_ident,
+      method_create_if_stmt,
       method_create_import,
       method_create_import_decl,
       method_create_import_default_specifier,
@@ -2231,6 +2240,31 @@ impl JavaSwc4jAstFactory {
         "Swc4jAstIdent create_ident()"
       );
     delete_local_ref!(env, java_sym);
+    return_value
+  }
+
+  pub fn create_if_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    test: &JObject<'_>,
+    cons: &JObject<'_>,
+    alt: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let test = object_to_jvalue!(test);
+    let cons = object_to_jvalue!(cons);
+    let alt = optional_object_to_jvalue!(alt);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_if_stmt,
+        &[test, cons, alt, span],
+        "Swc4jAstIfStmt create_if_stmt()"
+      );
     return_value
   }
 
@@ -6659,6 +6693,32 @@ pub mod program {
     return_type
   }
 
+  fn create_if_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &IfStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_test = enum_create_expr(env, map, &node.test);
+    let java_cons = enum_create_stmt(env, map, &node.cons);
+    let java_optional_alt = node
+      .alt
+      .as_ref()
+      .map(|node| enum_create_stmt(env, map, node));
+    let return_value = java_ast_factory.create_if_stmt(
+      env,
+      &java_test,
+      &java_cons,
+      &java_optional_alt,
+      &java_range,
+    );
+    delete_local_ref!(env, java_test);
+    delete_local_ref!(env, java_cons);
+    delete_local_optional_ref!(env, java_optional_alt);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_import<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Import) -> JObject<'a>
   where
     'local: 'a,
@@ -8808,7 +8868,7 @@ pub mod program {
       Stmt::For(node) => create_for_stmt(env, map, node),
       Stmt::ForIn(node) => create_for_in_stmt(env, map, node),
       Stmt::ForOf(node) => create_for_of_stmt(env, map, node),
-      // Stmt::If(node) => create_if_stmt(env, map, node),
+      Stmt::If(node) => create_if_stmt(env, map, node),
       // Stmt::Labeled(node) => create_labeled_stmt(env, map, node),
       // Stmt::Return(node) => create_return_stmt(env, map, node),
       // Stmt::Switch(node) => create_switch_stmt(env, map, node),
