@@ -72,6 +72,7 @@ struct JavaSwc4jAstFactory {
   method_create_import_star_as_specifier: JStaticMethodID,
   method_create_invalid: JStaticMethodID,
   method_create_jsx_empty_expr: JStaticMethodID,
+  method_create_jsx_member_expr: JStaticMethodID,
   method_create_jsx_namespaced_name: JStaticMethodID,
   method_create_jsx_text: JStaticMethodID,
   method_create_key_value_pat_prop: JStaticMethodID,
@@ -443,6 +444,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxEmptyExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxEmptyExpr");
+    let method_create_jsx_member_expr = env
+      .get_static_method_id(
+        &class,
+        "createJsxMemberExpr",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxObject;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxMemberExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createJsxMemberExpr");
     let method_create_jsx_namespaced_name = env
       .get_static_method_id(
         &class,
@@ -894,6 +902,7 @@ impl JavaSwc4jAstFactory {
       method_create_import_star_as_specifier,
       method_create_invalid,
       method_create_jsx_empty_expr,
+      method_create_jsx_member_expr,
       method_create_jsx_namespaced_name,
       method_create_jsx_text,
       method_create_key_value_pat_prop,
@@ -2002,6 +2011,29 @@ impl JavaSwc4jAstFactory {
         self.method_create_jsx_empty_expr,
         &[span],
         "Swc4jAstJsxEmptyExpr create_jsx_empty_expr()"
+      );
+    return_value
+  }
+
+  pub fn create_jsx_member_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+    prop: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let obj = object_to_jvalue!(obj);
+    let prop = object_to_jvalue!(prop);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_jsx_member_expr,
+        &[obj, prop, span],
+        "Swc4jAstJsxMemberExpr create_jsx_member_expr()"
       );
     return_value
   }
@@ -5874,6 +5906,25 @@ pub mod program {
     return_type
   }
 
+  fn create_jsx_member_expr<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXMemberExpr,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_obj = enum_create_jsx_object(env, map, &node.obj);
+    let java_prop = create_ident(env, map, &node.prop);
+    let return_type = java_ast_factory.create_jsx_member_expr(env, &java_obj, &java_prop, &java_range);
+    delete_local_ref!(env, java_obj);
+    delete_local_ref!(env, java_prop);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_jsx_namespaced_name<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -7191,6 +7242,7 @@ pub mod program {
       Expr::Cond(node) => create_cond_expr(env, map, node),
       Expr::Fn(node) => create_fn_expr(env, map, node),
       Expr::JSXEmpty(node) => create_jsx_empty_expr(env, map, node),
+      Expr::JSXMember(node) => create_jsx_member_expr(env, map, node),
       Expr::JSXNamespacedName(node) => create_jsx_namespaced_name(env, map, node),
       Expr::Ident(node) => create_ident(env, map, node),
       Expr::Invalid(node) => create_invalid(env, map, node),
@@ -7324,8 +7376,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      JSXObject::Ident(node) => create_ident(env, map, node),
+      JSXObject::JSXMemberExpr(node) => create_jsx_member_expr(env, map, node),
     }
   }
 

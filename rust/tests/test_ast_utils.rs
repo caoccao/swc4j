@@ -267,6 +267,10 @@ fn test_structs() {
   let _ = JSXEmptyExpr {
     span: DUMMY_SP,
   };
+  let _ = JSXMemberExpr {
+    obj: JSXObject::Ident(Ident::dummy()),
+    prop: Ident::dummy(),
+  };
   let _ = JSXNamespacedName {
     name: Ident::dummy(),
     ns: Ident::dummy(),

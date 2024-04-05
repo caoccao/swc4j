@@ -38,6 +38,7 @@ public class TestISwc4jAstExpr {
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstCondExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstFnExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstJsxEmptyExpr.class));
+        assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstJsxMemberExpr.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstJsxNamespacedName.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstIdent.class));
         assertTrue(ISwc4jAstExpr.class.isAssignableFrom(Swc4jAstInvalid.class));

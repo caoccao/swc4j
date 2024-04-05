@@ -432,6 +432,14 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstJsxMemberExpr createJsxMemberExpr(
+            ISwc4jAstJsxObject obj,
+            Swc4jAstIdent prop,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstJsxMemberExpr(obj, prop, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstJsxNamespacedName createJsxNamespacedName(
             Swc4jAstIdent ns,
             Swc4jAstIdent name,

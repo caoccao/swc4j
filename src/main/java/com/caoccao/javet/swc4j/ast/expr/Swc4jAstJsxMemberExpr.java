@@ -20,40 +20,41 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstOptChainBase;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxObject;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstMemberExpr
+@Jni2RustClass(name = "JSXMemberExpr", span = false)
+public class Swc4jAstJsxMemberExpr
         extends Swc4jAst
-        implements ISwc4jAstExpr, ISwc4jAstOptChainBase {
-    @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr obj;
-    protected final ISwc4jAstMemberProp prop;
+        implements ISwc4jAstExpr, ISwc4jAstJsxObject {
+    @Jni2RustField(value = "JSXObject::Ident(Ident::dummy())")
+    protected final ISwc4jAstJsxObject obj;
+    protected final Swc4jAstIdent prop;
 
-    public Swc4jAstMemberExpr(
-            ISwc4jAstExpr obj,
-            ISwc4jAstMemberProp prop,
+    public Swc4jAstJsxMemberExpr(
+            ISwc4jAstJsxObject obj,
+            Swc4jAstIdent prop,
             Swc4jAstSpan span) {
         super(span);
-        this.prop = AssertionUtils.notNull(prop, "Prop");
         this.obj = AssertionUtils.notNull(obj, "Obj");
+        this.prop = AssertionUtils.notNull(prop, "Prop");
         children = SimpleList.immutableOf(obj, prop);
         updateParent();
     }
 
-    public ISwc4jAstExpr getObj() {
+    public ISwc4jAstJsxObject getObj() {
         return obj;
     }
 
-    public ISwc4jAstMemberProp getProp() {
+    public Swc4jAstIdent getProp() {
         return prop;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.MemberExpr;
+        return Swc4jAstType.JsxMemberExpr;
     }
 }

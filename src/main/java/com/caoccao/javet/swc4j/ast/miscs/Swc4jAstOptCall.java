@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstOptChainBase;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -30,7 +31,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class Swc4jAstOptCall
-        extends Swc4jAst {
+        extends Swc4jAst
+        implements ISwc4jAstOptChainBase {
     protected final List<Swc4jAstExprOrSpread> args;
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr callee;
