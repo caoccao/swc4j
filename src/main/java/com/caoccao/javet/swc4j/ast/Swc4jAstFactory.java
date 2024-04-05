@@ -799,6 +799,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsConstAssertion createTsConstAssertion(
+            ISwc4jAstExpr expr,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsConstAssertion(expr, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsEnumDecl createTsEnumDecl(
             boolean declare,
             boolean isConst,
@@ -902,11 +909,26 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsNonNullExpr createTsNonNullExpr(
+            ISwc4jAstExpr expr,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsNonNullExpr(expr, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsQualifiedName createTsQualifiedName(
             ISwc4jAstTsEntityName left,
             Swc4jAstIdent right,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsQualifiedName(left, right, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsSatisfiesExpr createTsSatisfiesExpr(
+            ISwc4jAstExpr expr,
+            ISwc4jAstTsType typeAnn,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsSatisfiesExpr(expr, typeAnn, span);
     }
 
     @Jni2RustMethod
@@ -924,6 +946,14 @@ public final class Swc4jAstFactory {
             ISwc4jAstTsType typeAnn,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsTypeAnn(typeAnn, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsTypeAssertion createTsTypeAssertion(
+            ISwc4jAstExpr expr,
+            ISwc4jAstTsType typeAnn,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTypeAssertion(expr, typeAnn, span);
     }
 
     @Jni2RustMethod

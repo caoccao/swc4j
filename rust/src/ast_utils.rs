@@ -116,6 +116,7 @@ struct JavaSwc4jAstFactory {
   method_create_tpl: JStaticMethodID,
   method_create_tpl_element: JStaticMethodID,
   method_create_ts_as_expr: JStaticMethodID,
+  method_create_ts_const_assertion: JStaticMethodID,
   method_create_ts_enum_decl: JStaticMethodID,
   method_create_ts_enum_member: JStaticMethodID,
   method_create_ts_export_assignment: JStaticMethodID,
@@ -128,9 +129,12 @@ struct JavaSwc4jAstFactory {
   method_create_ts_interface_decl: JStaticMethodID,
   method_create_ts_module_decl: JStaticMethodID,
   method_create_ts_namespace_export_decl: JStaticMethodID,
+  method_create_ts_non_null_expr: JStaticMethodID,
   method_create_ts_qualified_name: JStaticMethodID,
+  method_create_ts_satisfies_expr: JStaticMethodID,
   method_create_ts_type_alias_decl: JStaticMethodID,
   method_create_ts_type_ann: JStaticMethodID,
+  method_create_ts_type_assertion: JStaticMethodID,
   method_create_ts_type_param: JStaticMethodID,
   method_create_ts_type_param_decl: JStaticMethodID,
   method_create_ts_type_param_instantiation: JStaticMethodID,
@@ -761,6 +765,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsAsExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsAsExpr");
+    let method_create_ts_const_assertion = env
+      .get_static_method_id(
+        &class,
+        "createTsConstAssertion",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsConstAssertion;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsConstAssertion");
     let method_create_ts_enum_decl = env
       .get_static_method_id(
         &class,
@@ -845,6 +856,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsNamespaceExportDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsNamespaceExportDecl");
+    let method_create_ts_non_null_expr = env
+      .get_static_method_id(
+        &class,
+        "createTsNonNullExpr",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsNonNullExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsNonNullExpr");
     let method_create_ts_qualified_name = env
       .get_static_method_id(
         &class,
@@ -852,6 +870,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsQualifiedName;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsQualifiedName");
+    let method_create_ts_satisfies_expr = env
+      .get_static_method_id(
+        &class,
+        "createTsSatisfiesExpr",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsSatisfiesExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsSatisfiesExpr");
     let method_create_ts_type_alias_decl = env
       .get_static_method_id(
         &class,
@@ -866,6 +891,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeAnn");
+    let method_create_ts_type_assertion = env
+      .get_static_method_id(
+        &class,
+        "createTsTypeAssertion",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsTypeAssertion;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTypeAssertion");
     let method_create_ts_type_param = env
       .get_static_method_id(
         &class,
@@ -1018,6 +1050,7 @@ impl JavaSwc4jAstFactory {
       method_create_tpl,
       method_create_tpl_element,
       method_create_ts_as_expr,
+      method_create_ts_const_assertion,
       method_create_ts_enum_decl,
       method_create_ts_enum_member,
       method_create_ts_export_assignment,
@@ -1030,9 +1063,12 @@ impl JavaSwc4jAstFactory {
       method_create_ts_interface_decl,
       method_create_ts_module_decl,
       method_create_ts_namespace_export_decl,
+      method_create_ts_non_null_expr,
       method_create_ts_qualified_name,
+      method_create_ts_satisfies_expr,
       method_create_ts_type_alias_decl,
       method_create_ts_type_ann,
+      method_create_ts_type_assertion,
       method_create_ts_type_param,
       method_create_ts_type_param_decl,
       method_create_ts_type_param_instantiation,
@@ -3147,6 +3183,27 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_ts_const_assertion<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = object_to_jvalue!(expr);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_const_assertion,
+        &[expr, span],
+        "Swc4jAstTsConstAssertion create_ts_const_assertion()"
+      );
+    return_value
+  }
+
   pub fn create_ts_enum_decl<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -3437,6 +3494,27 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_ts_non_null_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = object_to_jvalue!(expr);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_non_null_expr,
+        &[expr, span],
+        "Swc4jAstTsNonNullExpr create_ts_non_null_expr()"
+      );
+    return_value
+  }
+
   pub fn create_ts_qualified_name<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -3456,6 +3534,29 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_qualified_name,
         &[left, right, span],
         "Swc4jAstTsQualifiedName create_ts_qualified_name()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_satisfies_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    type_ann: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = object_to_jvalue!(expr);
+    let type_ann = object_to_jvalue!(type_ann);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_satisfies_expr,
+        &[expr, type_ann, span],
+        "Swc4jAstTsSatisfiesExpr create_ts_satisfies_expr()"
       );
     return_value
   }
@@ -3504,6 +3605,29 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_type_ann,
         &[type_ann, span],
         "Swc4jAstTsTypeAnn create_ts_type_ann()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_type_assertion<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    type_ann: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = object_to_jvalue!(expr);
+    let type_ann = object_to_jvalue!(type_ann);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_type_assertion,
+        &[expr, type_ann, span],
+        "Swc4jAstTsTypeAssertion create_ts_type_assertion()"
       );
     return_value
   }
@@ -7069,13 +7193,29 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
     let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
     let return_value = java_ast_factory.create_ts_as_expr(env, &java_expr, &java_type_ann, &java_range);
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_const_assertion<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsConstAssertion,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_expr = enum_create_expr(env, map, &node.expr);
+    let return_value = java_ast_factory.create_ts_const_assertion(env, &java_expr, &java_range);
+    delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -7367,6 +7507,23 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_non_null_expr<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsNonNullExpr,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_expr = enum_create_expr(env, map, &node.expr);
+    let return_value = java_ast_factory.create_ts_non_null_expr(env, &java_expr, &java_range);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_ts_qualified_name<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -7382,6 +7539,25 @@ pub mod program {
     let return_value = java_ast_factory.create_ts_qualified_name(env, &java_left, &java_right, &java_range);
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_satisfies_expr<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsSatisfiesExpr,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_expr = enum_create_expr(env, map, &node.expr);
+    let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
+    let return_value = java_ast_factory.create_ts_satisfies_expr(env, &java_expr, &java_type_ann, &java_range);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -7426,6 +7602,25 @@ pub mod program {
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
     let return_value = java_ast_factory.create_ts_type_ann(env, &java_type_ann, &java_range);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_type_assertion<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsTypeAssertion,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_expr = enum_create_expr(env, map, &node.expr);
+    let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
+    let return_value = java_ast_factory.create_ts_type_assertion(env, &java_expr, &java_type_ann, &java_range);
+    delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_range);
     return_value
@@ -7736,16 +7931,14 @@ pub mod program {
       Expr::This(node) => create_this_expr(env, map, node),
       Expr::Tpl(node) => create_tpl(env, map, node),
       Expr::TsAs(node) => create_ts_as_expr(env, map, node),
-      // Expr::TsConstAssertion(node) => create_(env, map, node),
+      Expr::TsConstAssertion(node) => create_ts_const_assertion(env, map, node),
       Expr::TsInstantiation(node) => create_ts_instantiation(env, map, node),
-      // Expr::TsNonNull(node) => create_(env, map, node),
-      // Expr::TsSatisfies(node) => create_(env, map, node),
-      // Expr::TsTypeAssertion(node) => create_(env, map, node),
+      Expr::TsNonNull(node) => create_ts_non_null_expr(env, map, node),
+      Expr::TsSatisfies(node) => create_ts_satisfies_expr(env, map, node),
+      Expr::TsTypeAssertion(node) => create_ts_type_assertion(env, map, node),
       Expr::Unary(node) => create_unary_expr(env, map, node),
       Expr::Update(node) => create_update_expr(env, map, node),
       Expr::Yield(node) => create_yield_expr(env, map, node),
-      default => panic!("{:?}", default),
-      // TODO
     }
   }
 

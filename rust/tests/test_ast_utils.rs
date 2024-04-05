@@ -476,6 +476,10 @@ fn test_structs() {
     expr: Box::new(Expr::dummy()),
     type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
   };
+  let _ = TsConstAssertion {
+    span: DUMMY_SP,
+    expr: Box::new(Expr::dummy()),
+  };
   let _ = TsEnumDecl {
     span: DUMMY_SP,
     is_const: Default::default(),
@@ -543,9 +547,18 @@ fn test_structs() {
     span: DUMMY_SP,
     id: Ident::dummy(),
   };
+  let _ = TsNonNullExpr {
+    span: DUMMY_SP,
+    expr: Box::new(Expr::dummy()),
+  };
   let _ = TsQualifiedName {
     left: TsEntityName::Ident(Ident::dummy()),
     right: Ident::dummy(),
+  };
+  let _ = TsSatisfiesExpr {
+    span: DUMMY_SP,
+    expr: Box::new(Expr::dummy()),
+    type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
   };
   let _ = TsTypeAliasDecl {
     span: DUMMY_SP,
@@ -556,6 +569,11 @@ fn test_structs() {
   };
   let _ = TsTypeAnn {
     span: DUMMY_SP,
+    type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+  };
+  let _ = TsTypeAssertion {
+    span: DUMMY_SP,
+    expr: Box::new(Expr::dummy()),
     type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
   };
   let _ = TsTypeParam {
