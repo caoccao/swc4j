@@ -33,7 +33,7 @@ import java.util.Optional;
 @Jni2RustClass(name = "JSXElement")
 public class Swc4jAstJsxElement
         extends Swc4jAst
-        implements ISwc4jAstExpr {
+        implements ISwc4jAstExpr, ISwc4jAstJsxElementChild {
     protected final List<ISwc4jAstJsxElementChild> children;
     protected final Optional<Swc4jAstJsxClosingElement> closing;
     protected final Swc4jAstJsxOpeningElement opening;

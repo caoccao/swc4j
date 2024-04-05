@@ -75,11 +75,13 @@ struct JavaSwc4jAstFactory {
   method_create_jsx_closing_fragment: JStaticMethodID,
   method_create_jsx_element: JStaticMethodID,
   method_create_jsx_empty_expr: JStaticMethodID,
+  method_create_jsx_expr_container: JStaticMethodID,
   method_create_jsx_fragment: JStaticMethodID,
   method_create_jsx_member_expr: JStaticMethodID,
   method_create_jsx_namespaced_name: JStaticMethodID,
   method_create_jsx_opening_element: JStaticMethodID,
   method_create_jsx_opening_fragment: JStaticMethodID,
+  method_create_jsx_spread_child: JStaticMethodID,
   method_create_jsx_text: JStaticMethodID,
   method_create_key_value_pat_prop: JStaticMethodID,
   method_create_key_value_prop: JStaticMethodID,
@@ -478,6 +480,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxEmptyExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxEmptyExpr");
+    let method_create_jsx_expr_container = env
+      .get_static_method_id(
+        &class,
+        "createJsxExprContainer",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxExprContainer;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createJsxExprContainer");
     let method_create_jsx_fragment = env
       .get_static_method_id(
         &class,
@@ -513,6 +522,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningFragment;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxOpeningFragment");
+    let method_create_jsx_spread_child = env
+      .get_static_method_id(
+        &class,
+        "createJsxSpreadChild",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxSpreadChild;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createJsxSpreadChild");
     let method_create_jsx_text = env
       .get_static_method_id(
         &class,
@@ -1009,11 +1025,13 @@ impl JavaSwc4jAstFactory {
       method_create_jsx_closing_fragment,
       method_create_jsx_element,
       method_create_jsx_empty_expr,
+      method_create_jsx_expr_container,
       method_create_jsx_fragment,
       method_create_jsx_member_expr,
       method_create_jsx_namespaced_name,
       method_create_jsx_opening_element,
       method_create_jsx_opening_fragment,
+      method_create_jsx_spread_child,
       method_create_jsx_text,
       method_create_key_value_pat_prop,
       method_create_key_value_prop,
@@ -2197,6 +2215,27 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_jsx_expr_container<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = object_to_jvalue!(expr);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_jsx_expr_container,
+        &[expr, span],
+        "Swc4jAstJsxExprContainer create_jsx_expr_container()"
+      );
+    return_value
+  }
+
   pub fn create_jsx_fragment<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -2310,6 +2349,27 @@ impl JavaSwc4jAstFactory {
         self.method_create_jsx_opening_fragment,
         &[span],
         "Swc4jAstJsxOpeningFragment create_jsx_opening_fragment()"
+      );
+    return_value
+  }
+
+  pub fn create_jsx_spread_child<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = object_to_jvalue!(expr);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_jsx_spread_child,
+        &[expr, span],
+        "Swc4jAstJsxSpreadChild create_jsx_spread_child()"
       );
     return_value
   }
@@ -6358,6 +6418,23 @@ pub mod program {
     return_type
   }
 
+  fn create_jsx_expr_container<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXExprContainer,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_expr = enum_create_jsx_expr(env, map, &node.expr);
+    let return_type = java_ast_factory.create_jsx_expr_container(env, &java_expr, &java_range);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_jsx_empty_expr<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -6486,6 +6563,23 @@ pub mod program {
     let return_value = java_ast_factory.create_jsx_opening_fragment(env, &java_range);
     delete_local_ref!(env, java_range);
     return_value
+  }
+
+  fn create_jsx_spread_child<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXSpreadChild,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_expr = enum_create_expr(env, map, &node.expr);
+    let return_type = java_ast_factory.create_jsx_spread_child(env, &java_expr, &java_range);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_range);
+    return_type
   }
 
   fn create_jsx_text<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXText) -> JObject<'a>
@@ -8018,8 +8112,11 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      JSXElementChild::JSXElement(node) => create_jsx_element(env, map, node),
+      JSXElementChild::JSXExprContainer(node) => create_jsx_expr_container(env, map, node),
+      JSXElementChild::JSXFragment(node) => create_jsx_fragment(env, map, node),
+      JSXElementChild::JSXSpreadChild(node) => create_jsx_spread_child(env, map, node),
+      JSXElementChild::JSXText(node) => create_jsx_text(env, map, node),
     }
   }
 
@@ -8032,8 +8129,9 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      JSXElementName::Ident(node) => create_ident(env, map, node),
+      JSXElementName::JSXMemberExpr(node) => create_jsx_member_expr(env, map, node),
+      JSXElementName::JSXNamespacedName(node) => create_jsx_namespaced_name(env, map, node),
     }
   }
 

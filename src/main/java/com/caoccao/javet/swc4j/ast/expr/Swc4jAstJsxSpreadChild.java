@@ -21,51 +21,33 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxElementChild;
-import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxClosingFragment;
-import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxOpeningFragment;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.List;
-
-@Jni2RustClass(name = "JSXFragment")
-public class Swc4jAstJsxFragment
+@Jni2RustClass(name = "JSXSpreadChild")
+public class Swc4jAstJsxSpreadChild
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxElementChild {
-    protected final List<ISwc4jAstJsxElementChild> children;
-    protected final Swc4jAstJsxClosingFragment closing;
-    protected final Swc4jAstJsxOpeningFragment opening;
+    @Jni2RustField(box = true)
+    protected final ISwc4jAstExpr expr;
 
-    public Swc4jAstJsxFragment(
-            Swc4jAstJsxOpeningFragment opening,
-            List<ISwc4jAstJsxElementChild> children,
-            Swc4jAstJsxClosingFragment closing,
+    public Swc4jAstJsxSpreadChild(
+            ISwc4jAstExpr expr,
             Swc4jAstSpan span) {
         super(span);
-        this.children = SimpleList.immutableCopyOf(AssertionUtils.notNull(children, "Children"));
-        this.closing = AssertionUtils.notNull(closing, "Closing");
-        this.opening = AssertionUtils.notNull(opening, "Opening");
-        childNodes = SimpleList.copyOf(children);
-        childNodes.add(opening);
-        childNodes.add(closing);
-        childNodes = SimpleList.immutable(childNodes);
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        childNodes = SimpleList.immutableOf(expr);
+        updateParent();
     }
 
-    public List<ISwc4jAstJsxElementChild> getChildren() {
-        return children;
-    }
-
-    public Swc4jAstJsxClosingFragment getClosing() {
-        return closing;
-    }
-
-    public Swc4jAstJsxOpeningFragment getOpening() {
-        return opening;
+    public ISwc4jAstExpr getExpr() {
+        return expr;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.JsxFragment;
+        return Swc4jAstType.JsxSpreadChild;
     }
 }

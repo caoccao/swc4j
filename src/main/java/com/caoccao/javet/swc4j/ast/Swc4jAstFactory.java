@@ -453,6 +453,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstJsxExprContainer createJsxExprContainer(
+            ISwc4jAstJsxExpr expr,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstJsxExprContainer(expr, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstJsxFragment createJsxFragment(
             Swc4jAstJsxOpeningFragment opening,
             List<ISwc4jAstJsxElementChild> children,
@@ -491,6 +498,13 @@ public final class Swc4jAstFactory {
     public static Swc4jAstJsxOpeningFragment createJsxOpeningFragment(
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstJsxOpeningFragment(span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstJsxSpreadChild createJsxSpreadChild(
+            ISwc4jAstExpr expr,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstJsxSpreadChild(expr, span);
     }
 
     @Jni2RustMethod

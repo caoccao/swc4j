@@ -280,6 +280,10 @@ fn test_structs() {
   let _ = JSXEmptyExpr {
     span: DUMMY_SP,
   };
+  let _ = JSXExprContainer {
+    span: DUMMY_SP,
+    expr: JSXExpr::Expr(Box::new(Expr::dummy())),
+  };
   let _ = JSXFragment {
     span: DUMMY_SP,
     children: Default::default(),
@@ -303,6 +307,10 @@ fn test_structs() {
   };
   let _ = JSXOpeningFragment {
     span: DUMMY_SP,
+  };
+  let _ = JSXSpreadChild {
+    span: DUMMY_SP,
+    expr: Box::new(Expr::dummy()),
   };
   let _ = JSXText {
     span: DUMMY_SP,
