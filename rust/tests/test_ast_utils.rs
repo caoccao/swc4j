@@ -471,6 +471,11 @@ fn test_structs() {
     raw: Default::default(),
     tail: Default::default(),
   };
+  let _ = TsAsExpr {
+    span: DUMMY_SP,
+    expr: Box::new(Expr::dummy()),
+    type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+  };
   let _ = TsEnumDecl {
     span: DUMMY_SP,
     is_const: Default::default(),
@@ -509,6 +514,11 @@ fn test_structs() {
     params: Default::default(),
     readonly: Default::default(),
     type_ann: Default::default(),
+  };
+  let _ = TsInstantiation {
+    span: DUMMY_SP,
+    expr: Box::new(Expr::dummy()),
+    type_args: Box::new(TsTypeParamInstantiation { span: DUMMY_SP, params: Default::default() }),
   };
   let _ = TsInterfaceBody {
     span: DUMMY_SP,

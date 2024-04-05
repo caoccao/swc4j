@@ -791,6 +791,14 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsAsExpr createTsAsExpr(
+            ISwc4jAstExpr expr,
+            ISwc4jAstTsType typeAnn,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsAsExpr(expr, typeAnn, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsEnumDecl createTsEnumDecl(
             boolean declare,
             boolean isConst,
@@ -848,6 +856,14 @@ public final class Swc4jAstFactory {
             boolean isStatic,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsIndexSignature(params, typeAnn, readonly, isStatic, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsInstantiation createTsInstantiation(
+            ISwc4jAstExpr expr,
+            Swc4jAstTsTypeParamInstantiation typeArgs,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsInstantiation(expr, typeArgs, span);
     }
 
     @Jni2RustMethod

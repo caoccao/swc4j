@@ -115,6 +115,7 @@ struct JavaSwc4jAstFactory {
   method_create_this_expr: JStaticMethodID,
   method_create_tpl: JStaticMethodID,
   method_create_tpl_element: JStaticMethodID,
+  method_create_ts_as_expr: JStaticMethodID,
   method_create_ts_enum_decl: JStaticMethodID,
   method_create_ts_enum_member: JStaticMethodID,
   method_create_ts_export_assignment: JStaticMethodID,
@@ -122,6 +123,7 @@ struct JavaSwc4jAstFactory {
   method_create_ts_external_module_ref: JStaticMethodID,
   method_create_ts_import_equals_decl: JStaticMethodID,
   method_create_ts_index_signature: JStaticMethodID,
+  method_create_ts_instantiation: JStaticMethodID,
   method_create_ts_interface_body: JStaticMethodID,
   method_create_ts_interface_decl: JStaticMethodID,
   method_create_ts_module_decl: JStaticMethodID,
@@ -752,6 +754,13 @@ impl JavaSwc4jAstFactory {
         "(ZLjava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstTplElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTplElement");
+    let method_create_ts_as_expr = env
+      .get_static_method_id(
+        &class,
+        "createTsAsExpr",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsAsExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsAsExpr");
     let method_create_ts_enum_decl = env
       .get_static_method_id(
         &class,
@@ -801,6 +810,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstTsIndexSignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsIndexSignature");
+    let method_create_ts_instantiation = env
+      .get_static_method_id(
+        &class,
+        "createTsInstantiation",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsInstantiation;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsInstantiation");
     let method_create_ts_interface_body = env
       .get_static_method_id(
         &class,
@@ -1001,6 +1017,7 @@ impl JavaSwc4jAstFactory {
       method_create_this_expr,
       method_create_tpl,
       method_create_tpl_element,
+      method_create_ts_as_expr,
       method_create_ts_enum_decl,
       method_create_ts_enum_member,
       method_create_ts_export_assignment,
@@ -1008,6 +1025,7 @@ impl JavaSwc4jAstFactory {
       method_create_ts_external_module_ref,
       method_create_ts_import_equals_decl,
       method_create_ts_index_signature,
+      method_create_ts_instantiation,
       method_create_ts_interface_body,
       method_create_ts_interface_decl,
       method_create_ts_module_decl,
@@ -3106,6 +3124,29 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_ts_as_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    type_ann: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = object_to_jvalue!(expr);
+    let type_ann = object_to_jvalue!(type_ann);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_as_expr,
+        &[expr, type_ann, span],
+        "Swc4jAstTsAsExpr create_ts_as_expr()"
+      );
+    return_value
+  }
+
   pub fn create_ts_enum_decl<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -3271,6 +3312,29 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_index_signature,
         &[params, type_ann, readonly, is_static, span],
         "Swc4jAstTsIndexSignature create_ts_index_signature()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_instantiation<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr: &JObject<'_>,
+    type_args: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr = object_to_jvalue!(expr);
+    let type_args = object_to_jvalue!(type_args);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_instantiation,
+        &[expr, type_args, span],
+        "Swc4jAstTsInstantiation create_ts_instantiation()"
       );
     return_value
   }
@@ -6960,6 +7024,62 @@ pub mod program {
     return_value
   }
 
+  fn create_tpl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Tpl) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_exprs = java_array_list.construct(env, node.exprs.len());
+    node.exprs.iter().for_each(|node| {
+      let java_node = enum_create_expr(env, map, node);
+      java_array_list.add(env, &java_exprs, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_quasis = java_array_list.construct(env, node.quasis.len());
+    node.quasis.iter().for_each(|node| {
+      let java_node = create_tpl_element(env, map, node);
+      java_array_list.add(env, &java_quasis, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = java_ast_factory.create_tpl(env, &java_exprs, &java_quasis, &java_range);
+    delete_local_ref!(env, java_exprs);
+    delete_local_ref!(env, java_quasis);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_tpl_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TplElement) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let tail = node.tail;
+    let optional_cooked = node.cooked.as_ref().map(|node| node.to_string());
+    let raw = node.raw.as_str();
+    let return_value = java_ast_factory.create_tpl_element(env, tail, &optional_cooked, raw, &java_range);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_as_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsAsExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_expr = enum_create_expr(env, map, &node.expr);
+    let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
+    let return_value = java_ast_factory.create_ts_as_expr(env, &java_expr, &java_type_ann, &java_range);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_ts_enum_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsEnumDecl) -> JObject<'a>
   where
     'local: 'a,
@@ -7120,6 +7240,25 @@ pub mod program {
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_range);
     return_value
+  }
+
+  fn create_ts_instantiation<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsInstantiation,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_expr = enum_create_expr(env, map, &node.expr);
+    let java_type_args = create_ts_type_param_instantiation(env, map, &node.type_args);
+    let return_type = java_ast_factory.create_ts_instantiation(env, &java_expr, &java_type_args, &java_range);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_type_args);
+    delete_local_ref!(env, java_range);
+    return_type
   }
 
   fn create_ts_interface_body<'local, 'a>(
@@ -7367,46 +7506,6 @@ pub mod program {
     return_value
   }
 
-  fn create_tpl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Tpl) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let java_exprs = java_array_list.construct(env, node.exprs.len());
-    node.exprs.iter().for_each(|node| {
-      let java_node = enum_create_expr(env, map, node);
-      java_array_list.add(env, &java_exprs, &java_node);
-      delete_local_ref!(env, java_node);
-    });
-    let java_quasis = java_array_list.construct(env, node.quasis.len());
-    node.quasis.iter().for_each(|node| {
-      let java_node = create_tpl_element(env, map, node);
-      java_array_list.add(env, &java_quasis, &java_node);
-      delete_local_ref!(env, java_node);
-    });
-    let return_value = java_ast_factory.create_tpl(env, &java_exprs, &java_quasis, &java_range);
-    delete_local_ref!(env, java_exprs);
-    delete_local_ref!(env, java_quasis);
-    delete_local_ref!(env, java_range);
-    return_value
-  }
-
-  fn create_tpl_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TplElement) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let tail = node.tail;
-    let optional_cooked = node.cooked.as_ref().map(|node| node.to_string());
-    let raw = node.raw.as_str();
-    let return_value = java_ast_factory.create_tpl_element(env, tail, &optional_cooked, raw, &java_range);
-    delete_local_ref!(env, java_range);
-    return_value
-  }
-
   fn create_unary_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UnaryExpr) -> JObject<'a>
   where
     'local: 'a,
@@ -7636,9 +7735,9 @@ pub mod program {
       Expr::TaggedTpl(node) => create_tagged_tpl(env, map, node),
       Expr::This(node) => create_this_expr(env, map, node),
       Expr::Tpl(node) => create_tpl(env, map, node),
-      // Expr::TsAs(node) => create_(env, map, node),
+      Expr::TsAs(node) => create_ts_as_expr(env, map, node),
       // Expr::TsConstAssertion(node) => create_(env, map, node),
-      // Expr::TsInstantiation(node) => create_(env, map, node),
+      Expr::TsInstantiation(node) => create_ts_instantiation(env, map, node),
       // Expr::TsNonNull(node) => create_(env, map, node),
       // Expr::TsSatisfies(node) => create_(env, map, node),
       // Expr::TsTypeAssertion(node) => create_(env, map, node),
