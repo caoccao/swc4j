@@ -264,6 +264,13 @@ fn test_structs() {
   let _ = Invalid {
     span: DUMMY_SP,
   };
+  let _ = JSXEmptyExpr {
+    span: DUMMY_SP,
+  };
+  let _ = JSXNamespacedName {
+    name: Ident::dummy(),
+    ns: Ident::dummy(),
+  };
   let _ = JSXText {
     span: DUMMY_SP,
     raw: Default::default(),

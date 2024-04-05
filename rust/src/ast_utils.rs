@@ -71,6 +71,8 @@ struct JavaSwc4jAstFactory {
   method_create_import_named_specifier: JStaticMethodID,
   method_create_import_star_as_specifier: JStaticMethodID,
   method_create_invalid: JStaticMethodID,
+  method_create_jsx_empty_expr: JStaticMethodID,
+  method_create_jsx_namespaced_name: JStaticMethodID,
   method_create_jsx_text: JStaticMethodID,
   method_create_key_value_pat_prop: JStaticMethodID,
   method_create_key_value_prop: JStaticMethodID,
@@ -434,6 +436,20 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstInvalid;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createInvalid");
+    let method_create_jsx_empty_expr = env
+      .get_static_method_id(
+        &class,
+        "createJsxEmptyExpr",
+        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxEmptyExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createJsxEmptyExpr");
+    let method_create_jsx_namespaced_name = env
+      .get_static_method_id(
+        &class,
+        "createJsxNamespacedName",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxNamespacedName;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createJsxNamespacedName");
     let method_create_jsx_text = env
       .get_static_method_id(
         &class,
@@ -877,6 +893,8 @@ impl JavaSwc4jAstFactory {
       method_create_import_named_specifier,
       method_create_import_star_as_specifier,
       method_create_invalid,
+      method_create_jsx_empty_expr,
+      method_create_jsx_namespaced_name,
       method_create_jsx_text,
       method_create_key_value_pat_prop,
       method_create_key_value_prop,
@@ -1965,6 +1983,48 @@ impl JavaSwc4jAstFactory {
         self.method_create_invalid,
         &[span],
         "Swc4jAstInvalid create_invalid()"
+      );
+    return_value
+  }
+
+  pub fn create_jsx_empty_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_jsx_empty_expr,
+        &[span],
+        "Swc4jAstJsxEmptyExpr create_jsx_empty_expr()"
+      );
+    return_value
+  }
+
+  pub fn create_jsx_namespaced_name<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    ns: &JObject<'_>,
+    name: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let ns = object_to_jvalue!(ns);
+    let name = object_to_jvalue!(name);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_jsx_namespaced_name,
+        &[ns, name, span],
+        "Swc4jAstJsxNamespacedName create_jsx_namespaced_name()"
       );
     return_value
   }
@@ -5799,6 +5859,40 @@ pub mod program {
     return_value
   }
 
+  fn create_jsx_empty_expr<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXEmptyExpr,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let return_type = java_ast_factory.create_jsx_empty_expr(env, &java_range);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
+  fn create_jsx_namespaced_name<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXNamespacedName,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_ns = create_ident(env, map, &node.ns);
+    let java_name = create_ident(env, map, &node.name);
+    let return_type = java_ast_factory.create_jsx_namespaced_name(env, &java_ns, &java_name, &java_range);
+    delete_local_ref!(env, java_ns);
+    delete_local_ref!(env, java_name);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_jsx_text<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXText) -> JObject<'a>
   where
     'local: 'a,
@@ -7096,6 +7190,8 @@ pub mod program {
       Expr::Class(node) => create_class_expr(env, map, node),
       Expr::Cond(node) => create_cond_expr(env, map, node),
       Expr::Fn(node) => create_fn_expr(env, map, node),
+      Expr::JSXEmpty(node) => create_jsx_empty_expr(env, map, node),
+      Expr::JSXNamespacedName(node) => create_jsx_namespaced_name(env, map, node),
       Expr::Ident(node) => create_ident(env, map, node),
       Expr::Invalid(node) => create_invalid(env, map, node),
       Expr::Lit(node) => enum_create_lit(env, map, node),

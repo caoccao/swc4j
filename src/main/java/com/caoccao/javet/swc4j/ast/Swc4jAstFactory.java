@@ -426,6 +426,20 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstJsxEmptyExpr createJsxEmptyExpr(
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstJsxEmptyExpr(span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstJsxNamespacedName createJsxNamespacedName(
+            Swc4jAstIdent ns,
+            Swc4jAstIdent name,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstJsxNamespacedName(ns, name, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstJsxText createJsxText(
             String value,
             String raw,
