@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.expr;
+package com.caoccao.javet.swc4j.ast.module;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxExpr;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
 
-@Jni2RustClass(name = "JSXEmptyExpr")
-public class Swc4jAstJsxEmptyExpr
+public class Swc4jAstImport
         extends Swc4jAst
-        implements ISwc4jAstExpr, ISwc4jAstJsxExpr {
-
-    public Swc4jAstJsxEmptyExpr(
+        implements ISwc4jAstCallee {
+    public Swc4jAstImport(
             Swc4jAstSpan span) {
         super(span);
         childNodes = EMPTY_CHILD_NODES;
@@ -36,6 +33,6 @@ public class Swc4jAstJsxEmptyExpr
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.JsxEmptyExpr;
+        return Swc4jAstType.Import;
     }
 }

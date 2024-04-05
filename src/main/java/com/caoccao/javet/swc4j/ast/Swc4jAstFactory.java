@@ -386,6 +386,12 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstImport createImport(
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstImport(span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstImportDecl createImportDecl(
             List<ISwc4jAstImportSpecifier> specifiers,
             Swc4jAstStr src,
@@ -927,6 +933,19 @@ public final class Swc4jAstFactory {
             ISwc4jAstExpr expr,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsNonNullExpr(expr, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsParamProp createTsParamProp(
+            List<Swc4jAstDecorator> decorators,
+            int accessibilityId,
+            boolean isOverride,
+            boolean readonly,
+            ISwc4jAstTsParamPropParam param,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsParamProp(
+                decorators, accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
+                isOverride, readonly, param, span);
     }
 
     @Jni2RustMethod

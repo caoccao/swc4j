@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.clazz;
+package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import org.junit.jupiter.api.Test;
 
-public class Swc4jAstSuper
-        extends Swc4jAst
-        implements ISwc4jAstCallee {
-    public Swc4jAstSuper(
-            Swc4jAstSpan span) {
-        super(span);
-        childNodes = EMPTY_CHILD_NODES;
-    }
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    @Override
-    public Swc4jAstType getType() {
-        return Swc4jAstType.Super;
+public class TestISwc4jAstBlockStmtOrExpr {
+    @Test
+    public void testAssignable() {
+        assertTrue(ISwc4jAstBlockStmtOrExpr.class.isAssignableFrom(ISwc4jAstExpr.class));
+        assertTrue(ISwc4jAstBlockStmtOrExpr.class.isAssignableFrom(Swc4jAstBlockStmt.class));
     }
 }

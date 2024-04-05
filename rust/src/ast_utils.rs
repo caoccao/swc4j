@@ -66,6 +66,7 @@ struct JavaSwc4jAstFactory {
   method_create_function: JStaticMethodID,
   method_create_getter_prop: JStaticMethodID,
   method_create_ident: JStaticMethodID,
+  method_create_import: JStaticMethodID,
   method_create_import_decl: JStaticMethodID,
   method_create_import_default_specifier: JStaticMethodID,
   method_create_import_named_specifier: JStaticMethodID,
@@ -132,6 +133,7 @@ struct JavaSwc4jAstFactory {
   method_create_ts_module_decl: JStaticMethodID,
   method_create_ts_namespace_export_decl: JStaticMethodID,
   method_create_ts_non_null_expr: JStaticMethodID,
+  method_create_ts_param_prop: JStaticMethodID,
   method_create_ts_qualified_name: JStaticMethodID,
   method_create_ts_satisfies_expr: JStaticMethodID,
   method_create_ts_type_alias_decl: JStaticMethodID,
@@ -417,6 +419,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/lang/String;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createIdent");
+    let method_create_import = env
+      .get_static_method_id(
+        &class,
+        "createImport",
+        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImport;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createImport");
     let method_create_import_decl = env
       .get_static_method_id(
         &class,
@@ -879,6 +888,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsNonNullExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsNonNullExpr");
+    let method_create_ts_param_prop = env
+      .get_static_method_id(
+        &class,
+        "createTsParamProp",
+        "(Ljava/util/List;IZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsParamPropParam;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsParamProp;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsParamProp");
     let method_create_ts_qualified_name = env
       .get_static_method_id(
         &class,
@@ -1016,6 +1032,7 @@ impl JavaSwc4jAstFactory {
       method_create_function,
       method_create_getter_prop,
       method_create_ident,
+      method_create_import,
       method_create_import_decl,
       method_create_import_default_specifier,
       method_create_import_named_specifier,
@@ -1082,6 +1099,7 @@ impl JavaSwc4jAstFactory {
       method_create_ts_module_decl,
       method_create_ts_namespace_export_decl,
       method_create_ts_non_null_expr,
+      method_create_ts_param_prop,
       method_create_ts_qualified_name,
       method_create_ts_satisfies_expr,
       method_create_ts_type_alias_decl,
@@ -2015,6 +2033,25 @@ impl JavaSwc4jAstFactory {
         "Swc4jAstIdent create_ident()"
       );
     delete_local_ref!(env, java_sym);
+    return_value
+  }
+
+  pub fn create_import<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_import,
+        &[span],
+        "Swc4jAstImport create_import()"
+      );
     return_value
   }
 
@@ -3571,6 +3608,35 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_non_null_expr,
         &[expr, span],
         "Swc4jAstTsNonNullExpr create_ts_non_null_expr()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_param_prop<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    decorators: &JObject<'_>,
+    accessibility_id: i32,
+    is_override: bool,
+    readonly: bool,
+    param: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let decorators = object_to_jvalue!(decorators);
+    let accessibility_id = int_to_jvalue!(accessibility_id);
+    let is_override = boolean_to_jvalue!(is_override);
+    let readonly = boolean_to_jvalue!(readonly);
+    let param = object_to_jvalue!(param);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_param_prop,
+        &[decorators, accessibility_id, is_override, readonly, param, span],
+        "Swc4jAstTsParamProp create_ts_param_prop()"
       );
     return_value
   }
@@ -6285,6 +6351,17 @@ pub mod program {
     return_type
   }
 
+  fn create_import<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Import) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let return_type = java_ast_factory.create_import(env, &java_range);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_import_default_specifier<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -7618,6 +7695,38 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_param_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsParamProp) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_decorators = java_array_list.construct(env, node.decorators.len());
+    node.decorators.iter().for_each(|node| {
+      let java_node = create_decorator(env, map, node);
+      java_array_list.add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let accessibility = node.accessibility.map_or(-1, |node| node.get_id());
+    let is_override = node.is_override;
+    let readonly = node.readonly;
+    let java_param = enum_create_ts_param_prop_param(env, map, &node.param);
+    let return_type = java_ast_factory.create_ts_param_prop(
+      env,
+      &java_decorators,
+      accessibility,
+      is_override,
+      readonly,
+      &java_param,
+      &java_range,
+    );
+    delete_local_ref!(env, java_decorators);
+    delete_local_ref!(env, java_param);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_ts_qualified_name<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -7909,8 +8018,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      BlockStmtOrExpr::BlockStmt(node) => create_block_stmt(env, map, node),
+      BlockStmtOrExpr::Expr(node) => enum_create_expr(env, map, node),
     }
   }
 
@@ -7919,8 +8028,9 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      Callee::Expr(node) => enum_create_expr(env, map, node),
+      Callee::Import(node) => create_import(env, map, node),
+      Callee::Super(node) => create_super(env, map, node),
     }
   }
 
@@ -8140,8 +8250,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      JSXExpr::Expr(node) => enum_create_expr(env, map, node),
+      JSXExpr::JSXEmptyExpr(node) => create_jsx_empty_expr(env, map, node),
     }
   }
 
@@ -8189,8 +8299,9 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      MemberProp::Computed(node) => create_computed_prop_name(env, map, node),
+      MemberProp::Ident(node) => create_ident(env, map, node),
+      MemberProp::PrivateName(node) => create_private_name(env, map, node),
     }
   }
 
@@ -8281,8 +8392,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      ParamOrTsParamProp::Param(node) => create_param(env, map, node),
+      ParamOrTsParamProp::TsParamProp(node) => create_ts_param_prop(env, map, node),
     }
   }
 

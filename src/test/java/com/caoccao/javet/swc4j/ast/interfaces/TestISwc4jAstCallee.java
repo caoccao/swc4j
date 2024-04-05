@@ -16,6 +16,18 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-public interface ISwc4jAstExpr
-        extends ISwc4jAstVarDeclOrExpr, ISwc4jAstPat, ISwc4jAstJsxExpr, ISwc4jAstCallee, ISwc4jAstBlockStmtOrExpr {
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstSuper;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstJsxEmptyExpr;
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstImport;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class TestISwc4jAstCallee {
+    @Test
+    public void testAssignable() {
+        assertTrue(ISwc4jAstCallee.class.isAssignableFrom(ISwc4jAstExpr.class));
+        assertTrue(ISwc4jAstCallee.class.isAssignableFrom(Swc4jAstImport.class));
+        assertTrue(ISwc4jAstCallee.class.isAssignableFrom(Swc4jAstSuper.class));
+    }
 }

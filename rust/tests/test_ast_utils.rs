@@ -240,6 +240,9 @@ fn test_structs() {
     optional: Default::default(),
     sym: Default::default(),
   };
+  let _ = Import {
+    span: DUMMY_SP,
+  };
   let _ = ImportDecl {
     span: DUMMY_SP,
     specifiers: Default::default(),
@@ -558,6 +561,14 @@ fn test_structs() {
   let _ = TsNonNullExpr {
     span: DUMMY_SP,
     expr: Box::new(Expr::dummy()),
+  };
+  let _ = TsParamProp {
+    span: DUMMY_SP,
+    is_override: Default::default(),
+    accessibility: Default::default(),
+    decorators: Default::default(),
+    param: TsParamPropParam::Ident(BindingIdent::dummy()),
+    readonly: Default::default(),
   };
   let _ = TsQualifiedName {
     left: TsEntityName::Ident(Ident::dummy()),

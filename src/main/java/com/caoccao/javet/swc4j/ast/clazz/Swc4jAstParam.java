@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.clazz;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -26,7 +27,8 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 
 public class Swc4jAstParam
-        extends Swc4jAst {
+        extends Swc4jAst
+        implements ISwc4jAstParamOrTsParamProp {
     protected final List<Swc4jAstDecorator> decorators;
     protected final ISwc4jAstPat pat;
 

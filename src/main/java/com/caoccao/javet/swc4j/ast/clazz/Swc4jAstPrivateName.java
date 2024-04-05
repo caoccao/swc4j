@@ -22,12 +22,13 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstKey;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 public class Swc4jAstPrivateName
         extends Swc4jAst
-        implements ISwc4jAstKey, ISwc4jAstExpr {
+        implements ISwc4jAstKey, ISwc4jAstExpr, ISwc4jAstMemberProp {
     protected final Swc4jAstIdent id;
 
     public Swc4jAstPrivateName(

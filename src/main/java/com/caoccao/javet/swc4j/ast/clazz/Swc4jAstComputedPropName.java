@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -27,7 +28,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 public class Swc4jAstComputedPropName
         extends Swc4jAst
-        implements ISwc4jAstPropName {
+        implements ISwc4jAstPropName, ISwc4jAstMemberProp {
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr expr;
 

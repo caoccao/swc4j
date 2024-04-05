@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.stmt;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstBlockStmtOrExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -27,7 +28,7 @@ import java.util.List;
 
 public class Swc4jAstBlockStmt
         extends Swc4jAst
-        implements ISwc4jAstStmt {
+        implements ISwc4jAstStmt, ISwc4jAstBlockStmtOrExpr {
     protected final List<ISwc4jAstStmt> stmts;
 
     public Swc4jAstBlockStmt(
