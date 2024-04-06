@@ -689,6 +689,18 @@ fn test_structs() {
     span: DUMMY_SP,
     kind: TsKeywordTypeKind::TsAnyKeyword,
   };
+  let _ = TsLitType {
+    span: DUMMY_SP,
+    lit: TsLit::Bool(Bool::dummy()),
+  };
+  let _ = TsMappedType {
+    span: DUMMY_SP,
+    name_type: Default::default(),
+    optional: Default::default(),
+    readonly: Default::default(),
+    type_ann: Default::default(),
+    type_param: TsTypeParam { span: DUMMY_SP, name: Ident::dummy(), is_in: false, is_out: false, is_const: false, constraint: None, default: None },
+  };
   let _ = TsMethodSignature {
     span: DUMMY_SP,
     computed: Default::default(),

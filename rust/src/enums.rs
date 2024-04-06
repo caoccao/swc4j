@@ -965,6 +965,23 @@ pub mod swc_enums {
     }
   }
 
+  impl IdentifiableEnum<TruePlusMinus> for TruePlusMinus {
+    fn get_id(&self) -> i32 {
+      match self {
+        TruePlusMinus::True => 0,
+        TruePlusMinus::Plus => 1,
+        TruePlusMinus::Minus => 2,
+      }
+    }
+    fn parse_by_id(id: i32) -> TruePlusMinus {
+      match id {
+        1 => TruePlusMinus::Plus,
+        2 => TruePlusMinus::Minus,
+        _ => TruePlusMinus::True,
+      }
+    }
+  }
+
   impl IdentifiableEnum<UnaryOp> for UnaryOp {
     fn get_id(&self) -> i32 {
       match self {

@@ -157,6 +157,8 @@ struct JavaSwc4jAstFactory {
   method_create_ts_interface_body: JStaticMethodID,
   method_create_ts_interface_decl: JStaticMethodID,
   method_create_ts_keyword_type: JStaticMethodID,
+  method_create_ts_lit_type: JStaticMethodID,
+  method_create_ts_mapped_type: JStaticMethodID,
   method_create_ts_method_signature: JStaticMethodID,
   method_create_ts_module_decl: JStaticMethodID,
   method_create_ts_namespace_export_decl: JStaticMethodID,
@@ -1089,6 +1091,20 @@ impl JavaSwc4jAstFactory {
         "(ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsKeywordType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsKeywordType");
+    let method_create_ts_lit_type = env
+      .get_static_method_id(
+        &class,
+        "createTsLitType",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsLit;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsLitType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsLitType");
+    let method_create_ts_mapped_type = env
+      .get_static_method_id(
+        &class,
+        "createTsMappedType",
+        "(ILcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsMappedType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsMappedType");
     let method_create_ts_method_signature = env
       .get_static_method_id(
         &class,
@@ -1387,6 +1403,8 @@ impl JavaSwc4jAstFactory {
       method_create_ts_interface_body,
       method_create_ts_interface_decl,
       method_create_ts_keyword_type,
+      method_create_ts_lit_type,
+      method_create_ts_mapped_type,
       method_create_ts_method_signature,
       method_create_ts_module_decl,
       method_create_ts_namespace_export_decl,
@@ -4473,6 +4491,56 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_keyword_type,
         &[kind_id, span],
         "Swc4jAstTsKeywordType create_ts_keyword_type()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_lit_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    lit: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let lit = object_to_jvalue!(lit);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_lit_type,
+        &[lit, span],
+        "Swc4jAstTsLitType create_ts_lit_type()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_mapped_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    readonly: i32,
+    type_param: &JObject<'_>,
+    name_type: &Option<JObject>,
+    optional: i32,
+    type_ann: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let readonly = int_to_jvalue!(readonly);
+    let type_param = object_to_jvalue!(type_param);
+    let name_type = optional_object_to_jvalue!(name_type);
+    let optional = int_to_jvalue!(optional);
+    let type_ann = optional_object_to_jvalue!(type_ann);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_mapped_type,
+        &[readonly, type_param, name_type, optional, type_ann, span],
+        "Swc4jAstTsMappedType create_ts_mapped_type()"
       );
     return_value
   }
@@ -9277,7 +9345,11 @@ pub mod program {
     return_type
   }
 
-  fn create_ts_keyword_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsKeywordType) -> JObject<'a>
+  fn create_ts_keyword_type<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsKeywordType,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -9285,6 +9357,50 @@ pub mod program {
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let kind = node.kind.get_id();
     let return_value = java_ast_factory.create_ts_keyword_type(env, kind, &java_range);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_lit_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsLitType) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_lit = enum_create_ts_lit(env, map, &node.lit);
+    let return_value = java_ast_factory.create_ts_lit_type(env, &java_lit, &java_range);
+    delete_local_ref!(env, java_lit);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_mapped_type<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsMappedType,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let readonly = node.readonly.as_ref().map_or(-1, |node| node.get_id());
+    let java_type_param = create_ts_type_param(env, map, &node.type_param);
+    let java_optional_name_type = node.name_type.as_ref().map(|node| enum_create_ts_type(env, map, node));
+    let optional = node.optional.as_ref().map_or(-1, |node| node.get_id());
+    let java_optional_type_ann = node.type_ann.as_ref().map(|node| enum_create_ts_type(env, map, node));
+    let return_value = java_ast_factory.create_ts_mapped_type(
+      env,
+      readonly,
+      &java_type_param,
+      &java_optional_name_type,
+      optional,
+      &java_optional_type_ann,
+      &java_range,
+    );
+    delete_local_ref!(env, java_type_param);
+    delete_local_optional_ref!(env, java_optional_name_type);
+    delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -10547,8 +10663,8 @@ pub mod program {
       TsType::TsIndexedAccessType(node) => create_ts_indexed_access_type(env, map, node),
       TsType::TsInferType(node) => create_ts_infer_type(env, map, node),
       TsType::TsKeywordType(node) => create_ts_keyword_type(env, map, node),
-      // TsType::TsLitType(node) => create_ts_lit_type(env, map, node),
-      // TsType::TsMappedType(node) => create_ts_mapped_type(env, map, node),
+      TsType::TsLitType(node) => create_ts_lit_type(env, map, node),
+      TsType::TsMappedType(node) => create_ts_mapped_type(env, map, node),
       // TsType::TsOptionalType(node) => create_ts_optional_type(env, map, node),
       // TsType::TsParenthesizedType(node) => create_ts_parenthesized_type(env, map, node),
       // TsType::TsRestType(node) => create_ts_rest_type(env, map, node),

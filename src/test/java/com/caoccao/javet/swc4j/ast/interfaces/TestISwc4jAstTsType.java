@@ -24,11 +24,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TestISwc4jAstTsType {
     @Test
     public void testAssignable() {
+        assertTrue(ISwc4jAstTsType.class.isAssignableFrom(ISwc4jAstTsFnOrConstructorType.class));
+        assertTrue(ISwc4jAstTsType.class.isAssignableFrom(ISwc4jAstTsUnionOrIntersectionType.class));
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsArrayType.class));
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsConditionalType.class));
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsImportType.class));
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsIndexedAccessType.class));
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsInferType.class));
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsKeywordType.class));
+        assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsLitType.class));
+        assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsMappedType.class));
     }
 }

@@ -1136,6 +1136,28 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsLitType createTsLitType(
+            ISwc4jAstTsLit lit,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsLitType(lit, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsMappedType createTsMappedType(
+            int readonly,
+            Swc4jAstTsTypeParam typeParam,
+            @Jni2RustParam(optional = true) ISwc4jAstTsType nameType,
+            int optional,
+            @Jni2RustParam(optional = true) ISwc4jAstTsType typeAnn,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsMappedType(
+                readonly >= 0 ? Swc4jAstTruePlusMinus.parse(readonly) : null,
+                typeParam, nameType,
+                optional >= 0 ? Swc4jAstTruePlusMinus.parse(optional) : null,
+                typeAnn, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsMethodSignature createTsMethodSignature(
             boolean readonly,
             ISwc4jAstExpr key,
