@@ -123,6 +123,8 @@ struct JavaSwc4jAstFactory {
   method_create_str: JStaticMethodID,
   method_create_super: JStaticMethodID,
   method_create_super_prop_expr: JStaticMethodID,
+  method_create_switch_case: JStaticMethodID,
+  method_create_switch_stmt: JStaticMethodID,
   method_create_tagged_tpl: JStaticMethodID,
   method_create_this_expr: JStaticMethodID,
   method_create_tpl: JStaticMethodID,
@@ -827,6 +829,20 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSuper;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstSuperProp;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSuperPropExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSuperPropExpr");
+    let method_create_switch_case = env
+      .get_static_method_id(
+        &class,
+        "createSwitchCase",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstSwitchCase;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createSwitchCase");
+    let method_create_switch_stmt = env
+      .get_static_method_id(
+        &class,
+        "createSwitchStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstSwitchStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createSwitchStmt");
     let method_create_tagged_tpl = env
       .get_static_method_id(
         &class,
@@ -1161,6 +1177,8 @@ impl JavaSwc4jAstFactory {
       method_create_str,
       method_create_super,
       method_create_super_prop_expr,
+      method_create_switch_case,
+      method_create_switch_stmt,
       method_create_tagged_tpl,
       method_create_this_expr,
       method_create_tpl,
@@ -3451,6 +3469,52 @@ impl JavaSwc4jAstFactory {
         self.method_create_super_prop_expr,
         &[obj, prop, span],
         "Swc4jAstSuperPropExpr create_super_prop_expr()"
+      );
+    return_value
+  }
+
+  pub fn create_switch_case<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    test: &Option<JObject>,
+    cons: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let test = optional_object_to_jvalue!(test);
+    let cons = object_to_jvalue!(cons);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_switch_case,
+        &[test, cons, span],
+        "Swc4jAstSwitchCase create_switch_case()"
+      );
+    return_value
+  }
+
+  pub fn create_switch_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    discriminant: &JObject<'_>,
+    cases: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let discriminant = object_to_jvalue!(discriminant);
+    let cases = object_to_jvalue!(cases);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_switch_stmt,
+        &[discriminant, cases, span],
+        "Swc4jAstSwitchStmt create_switch_stmt()"
       );
     return_value
   }
@@ -7642,6 +7706,25 @@ pub mod program {
     return_value
   }
 
+  fn create_seq_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SeqExpr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_exprs = java_array_list.construct(env, node.exprs.len());
+    node.exprs.iter().for_each(|node| {
+      let java_node = enum_create_expr(env, map, node);
+      java_array_list.add(env, &java_exprs, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_type = java_ast_factory.create_seq_expr(env, &java_exprs, &java_range);
+    delete_local_ref!(env, java_exprs);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_setter_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SetterProp) -> JObject<'a>
   where
     'local: 'a,
@@ -7716,25 +7799,6 @@ pub mod program {
     return_type
   }
 
-  fn create_seq_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SeqExpr) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let java_exprs = java_array_list.construct(env, node.exprs.len());
-    node.exprs.iter().for_each(|node| {
-      let java_node = enum_create_expr(env, map, node);
-      java_array_list.add(env, &java_exprs, &java_node);
-      delete_local_ref!(env, java_node);
-    });
-    let return_type = java_ast_factory.create_seq_expr(env, &java_exprs, &java_range);
-    delete_local_ref!(env, java_exprs);
-    delete_local_ref!(env, java_range);
-    return_type
-  }
-
   fn create_super_prop_expr<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -7752,6 +7816,58 @@ pub mod program {
     delete_local_ref!(env, java_prop);
     delete_local_ref!(env, java_range);
     return_type
+  }
+
+  fn create_switch_case<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SwitchCase) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_optional_test = node.test.as_ref().map(|node| enum_create_expr(env, map, node));
+    let java_cons = java_array_list.construct(env, node.cons.len());
+    node.cons.iter().for_each(|node| {
+      let java_node = enum_create_stmt(env, map, node);
+      java_array_list.add(env, &java_cons, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = java_ast_factory.create_switch_case(
+      env,
+      &java_optional_test,
+      &java_cons,
+      &java_range,
+    );
+    delete_local_optional_ref!(env, java_optional_test);
+    delete_local_ref!(env, java_cons);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_switch_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SwitchStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_discriminant = enum_create_expr(env, map, &node.discriminant);
+    let java_cases = java_array_list.construct(env, node.cases.len());
+    node.cases.iter().for_each(|node| {
+      let java_node = create_switch_case(env, map, node);
+      java_array_list.add(env, &java_cases, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = java_ast_factory.create_switch_stmt(
+      env,
+      &java_discriminant,
+      &java_cases,
+      &java_range,
+    );
+    delete_local_ref!(env, java_discriminant);
+    delete_local_ref!(env, java_cases);
+    delete_local_ref!(env, java_range);
+    return_value
   }
 
   fn create_tagged_tpl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TaggedTpl) -> JObject<'a>
@@ -8970,7 +9086,7 @@ pub mod program {
       Stmt::If(node) => create_if_stmt(env, map, node),
       Stmt::Labeled(node) => create_labeled_stmt(env, map, node),
       Stmt::Return(node) => create_return_stmt(env, map, node),
-      // Stmt::Switch(node) => create_switch_stmt(env, map, node),
+      Stmt::Switch(node) => create_switch_stmt(env, map, node),
       // Stmt::Throw(node) => create_throw_stmt(env, map, node),
       // Stmt::Try(node) => create_try_stmt(env, map, node),
       // Stmt::While(node) => create_while_stmt(env, map, node),

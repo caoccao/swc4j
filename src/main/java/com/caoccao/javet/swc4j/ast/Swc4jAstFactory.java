@@ -854,6 +854,22 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstSwitchCase createSwitchCase(
+            @Jni2RustParam(optional = true) ISwc4jAstExpr test,
+            List<ISwc4jAstStmt> cons,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstSwitchCase(test, cons, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstSwitchStmt createSwitchStmt(
+            ISwc4jAstExpr discriminant,
+            List<Swc4jAstSwitchCase> cases,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstSwitchStmt(discriminant, cases, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTaggedTpl createTaggedTpl(
             ISwc4jAstExpr tag,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeParams,

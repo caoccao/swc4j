@@ -510,6 +510,16 @@ fn test_structs() {
     obj: Super::dummy(),
     prop: SuperProp::dummy(),
   };
+  let _ = SwitchCase {
+    span: DUMMY_SP,
+    cons: Default::default(),
+    test: Default::default(),
+  };
+  let _ = SwitchStmt {
+    span: DUMMY_SP,
+    cases: Default::default(),
+    discriminant: Box::new(Expr::dummy()),
+  };
   let _ = TaggedTpl {
     span: DUMMY_SP,
     tag: Box::new(Expr::dummy()),
