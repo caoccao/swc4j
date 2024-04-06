@@ -18,6 +18,6 @@ package com.caoccao.javet.swc4j.ast.interfaces;
 
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 
-@Jni2RustClass(name = "JSXObject")
+@Jni2RustClass(name = "JSXObject", getDefault = "JSXObject::Ident(Ident::get_default())")
 public interface ISwc4jAstJsxObject extends ISwc4jAst {
 }

@@ -18,6 +18,6 @@ package com.caoccao.javet.swc4j.ast.interfaces;
 
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 
-@Jni2RustClass(name = "JSXExpr")
+@Jni2RustClass(name = "JSXExpr", getDefault = "JSXExpr::Expr(Box::new(Expr::get_default()))")
 public interface ISwc4jAstJsxExpr extends ISwc4jAst {
 }

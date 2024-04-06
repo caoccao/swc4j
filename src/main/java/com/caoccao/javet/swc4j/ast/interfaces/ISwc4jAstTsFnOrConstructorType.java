@@ -16,5 +16,8 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+
+@Jni2RustClass(getDefault = "TsFnOrConstructorType::TsFnType(TsFnType::get_default())")
 public interface ISwc4jAstTsFnOrConstructorType extends ISwc4jAstTsType {
 }

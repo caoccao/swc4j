@@ -33,7 +33,7 @@ public class Swc4jAstTsMappedType
     protected final Optional<Swc4jAstTruePlusMinus> optional;
     protected final Optional<Swc4jAstTruePlusMinus> readonly;
     protected final Optional<ISwc4jAstTsType> typeAnn;
-    @Jni2RustField(value = "TsTypeParam { span: DUMMY_SP, name: Ident::dummy(), is_in: false, is_out: false, is_const: false, constraint: None, default: None }")
+    @Jni2RustField(value = "TsTypeParam::get_default()")
     protected final Swc4jAstTsTypeParam typeParam;
 
     public Swc4jAstTsMappedType(

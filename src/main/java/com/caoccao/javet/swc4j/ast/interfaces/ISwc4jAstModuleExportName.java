@@ -16,6 +16,9 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+
+@Jni2RustClass(getDefault = "ModuleExportName::Ident(Ident::get_default())")
 public interface ISwc4jAstModuleExportName
         extends ISwc4jAst {
 }

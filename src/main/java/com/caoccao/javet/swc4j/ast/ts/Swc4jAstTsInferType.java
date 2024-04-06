@@ -27,7 +27,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 public class Swc4jAstTsInferType
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    @Jni2RustField(value = "TsTypeParam { span: DUMMY_SP, name: Ident::dummy(), is_in: false, is_out: false, is_const: false, constraint: None, default: None }")
+    @Jni2RustField(value = "TsTypeParam::get_default()")
     protected final Swc4jAstTsTypeParam typeParam;
 
     public Swc4jAstTsInferType(

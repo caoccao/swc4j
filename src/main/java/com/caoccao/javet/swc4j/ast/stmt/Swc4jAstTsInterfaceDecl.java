@@ -36,7 +36,7 @@ public class Swc4jAstTsInterfaceDecl
         extends Swc4jAst
         implements ISwc4jAstDecl, ISwc4jAstDefaultDecl {
     protected final List<Swc4jAstTsExprWithTypeArgs> _extends;
-    @Jni2RustField(value = "TsInterfaceBody { span: DUMMY_SP, body: Default::default() }")
+    @Jni2RustField(value = "TsInterfaceBody::get_default()")
     protected final Swc4jAstTsInterfaceBody body;
     protected final boolean declare;
     protected final Swc4jAstIdent id;

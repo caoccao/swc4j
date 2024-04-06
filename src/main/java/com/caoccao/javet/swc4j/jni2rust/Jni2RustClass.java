@@ -25,6 +25,8 @@ import java.lang.annotation.*;
 public @interface Jni2RustClass {
     String filePath() default "";
 
+    String getDefault() default "";
+
     boolean ignore() default false;
 
     String name() default "";

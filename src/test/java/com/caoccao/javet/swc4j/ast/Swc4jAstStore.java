@@ -32,17 +32,24 @@ import static org.junit.jupiter.api.Assertions.fail;
 public final class Swc4jAstStore {
     public static final Path SOURCE_PATH = new File(OSUtils.WORKING_DIRECTORY).toPath()
             .resolve("src/main/java");
+    public static final Pattern PATTERN_FOR_ENUM_NAME = Pattern.compile("^ISwc4jAst(\\w+)\\.java$");
     public static final Pattern PATTERN_FOR_STRUCT_NAME = Pattern.compile("^Swc4jAst(\\w+)\\.java$");
     private static final Swc4jAstStore instance = new Swc4jAstStore();
+    private final Map<String, Path> enumMap;
     private final Map<String, Path> structMap;
 
     private Swc4jAstStore() {
+        enumMap = new HashMap<>();
         structMap = new HashMap<>();
         init();
     }
 
     public static Swc4jAstStore getInstance() {
         return instance;
+    }
+
+    public Map<String, Path> getEnumMap() {
+        return enumMap;
     }
 
     public Map<String, Path> getStructMap() {
@@ -61,6 +68,12 @@ public final class Swc4jAstStore {
                                 if (matcherFileName.matches()) {
                                     String className = matcherFileName.group(1);
                                     structMap.put(className, filePath);
+                                } else {
+                                    matcherFileName = PATTERN_FOR_ENUM_NAME.matcher(fileName);
+                                    if (matcherFileName.matches()) {
+                                        String className = matcherFileName.group(1);
+                                        enumMap.put(className, filePath);
+                                    }
                                 }
                             }
                         } catch (Exception e) {

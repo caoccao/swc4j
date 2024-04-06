@@ -30,7 +30,7 @@ public class Swc4jAstTsAsExpr
         implements ISwc4jAstExpr {
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr expr;
-    @Jni2RustField(box = true, value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
+    @Jni2RustField(box = true, value = "Box::new(TsType::get_default())")
     protected final ISwc4jAstTsType typeAnn;
 
     public Swc4jAstTsAsExpr(

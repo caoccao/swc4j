@@ -45,12 +45,46 @@ public class TestSwc4jAst {
         assertTrue(rustTestFile.isFile());
         assertTrue(rustTestFile.canRead());
         assertTrue(rustTestFile.canWrite());
-        String startSign = "fn test_structs() {";
+        String startSign = "\n/* GetDefault Begin */\n";
+        String endSign = "\n/* GetDefault End */\n";
         byte[] originalBuffer = Files.readAllBytes(rustTestFilePath);
         String fileContent = new String(originalBuffer, StandardCharsets.UTF_8);
         final int startPosition = fileContent.indexOf(startSign) + startSign.length();
+        final int endPosition = fileContent.indexOf(endSign);
         assertTrue(startPosition > 0, "Start position is invalid");
+        assertTrue(endPosition > startPosition, "End position is invalid");
         List<String> lines = new ArrayList<>();
+        Swc4jAstStore.getInstance().getEnumMap().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> {
+                    Path filePath = entry.getValue();
+                    try {
+                        Path relativeFilePath = Swc4jAstStore.SOURCE_PATH.relativize(filePath);
+                        String className = relativeFilePath.toString()
+                                .replace('/', '.')
+                                .replace('\\', '.');
+                        className = className.substring(0, className.length() - 5);
+                        Class<?> clazz = Class.forName(className);
+                        assertNotNull(clazz, className + " should exist");
+                        Optional<Jni2RustClass> jni2RustClass =
+                                Optional.ofNullable(clazz.getAnnotation(Jni2RustClass.class));
+                        if (!jni2RustClass.map(Jni2RustClass::ignore).orElse(false)
+                                && ISwc4jAst.class.isAssignableFrom(clazz)) {
+                            String enumName = jni2RustClass.map(Jni2RustClass::name).filter(StringUtils::isNotEmpty)
+                                    .orElse(entry.getKey());
+                            lines.add(String.format("impl GetDefault<%s> for %s {", enumName, enumName));
+                            lines.add(String.format("  fn get_default() -> %s {", enumName));
+                            String defaultLine = jni2RustClass.map(Jni2RustClass::getDefault)
+                                    .filter(StringUtils::isNotEmpty)
+                                    .orElse(String.format("%s::dummy()", enumName));
+                            lines.add(String.format("    %s", defaultLine));
+                            lines.add("  }");
+                            lines.add("}\n");
+                        }
+                    } catch (Exception e) {
+                        fail(e);
+                    }
+                });
         Swc4jAstStore.getInstance().getStructMap().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .forEach(entry -> {
@@ -69,9 +103,11 @@ public class TestSwc4jAst {
                                 && Swc4jAst.class.isAssignableFrom(clazz)) {
                             String structName = jni2RustClass.map(Jni2RustClass::name).filter(StringUtils::isNotEmpty)
                                     .orElse(entry.getKey());
-                            lines.add(String.format("  let _ = %s {", structName));
+                            lines.add(String.format("impl GetDefault<%s> for %s {", structName, structName));
+                            lines.add(String.format("  fn get_default() -> %s {", structName));
+                            lines.add(String.format("    %s {", structName));
                             if (jni2RustClass.map(Jni2RustClass::span).orElse(true)) {
-                                lines.add("    span: DUMMY_SP,");
+                                lines.add("      span: DUMMY_SP,");
                             }
                             for (Field field : clazz.getDeclaredFields()) {
                                 Optional<Jni2RustField> jni2RustField =
@@ -92,7 +128,7 @@ public class TestSwc4jAst {
                                     boolean fieldGenerated = false;
                                     if (jni2RustField.map(Jni2RustField::value).map(StringUtils::isNotEmpty)
                                             .orElse(false)) {
-                                        lines.add(String.format("    %s: %s,", fieldName, jni2RustField.get().value()));
+                                        lines.add(String.format("      %s: %s,", fieldName, jni2RustField.get().value()));
                                         fieldGenerated = true;
                                     } else {
                                         Class<?> fieldClass = field.getType();
@@ -107,19 +143,21 @@ public class TestSwc4jAst {
                                                             .orElse(fieldClass.getSimpleName().substring(
                                                                     fieldClass.isInterface() ? 9 : 8));
                                             if (jni2RustField.map(Jni2RustField::box).orElse(false)) {
-                                                lines.add(String.format("    %s: Box::new(%s::dummy()),", fieldName, subTypeName));
+                                                lines.add(String.format("      %s: Box::new(%s::get_default()),", fieldName, subTypeName));
                                             } else {
-                                                lines.add(String.format("    %s: %s::dummy(),", fieldName, subTypeName));
+                                                lines.add(String.format("      %s: %s::get_default(),", fieldName, subTypeName));
                                             }
                                             fieldGenerated = true;
                                         }
                                     }
                                     if (!fieldGenerated) {
-                                        lines.add(String.format("    %s: Default::default(),", fieldName));
+                                        lines.add(String.format("      %s: Default::default(),", fieldName));
                                     }
                                 }
                             }
-                            lines.add("  };");
+                            lines.add("    }");
+                            lines.add("  }");
+                            lines.add("}\n");
                         }
                     } catch (Exception e) {
                         fail(e);
@@ -127,10 +165,9 @@ public class TestSwc4jAst {
                 });
         StringBuilder sb = new StringBuilder(fileContent.length());
         sb.append(fileContent, 0, startPosition);
-        sb.append("\n");
         String code = StringUtils.join("\n", lines);
         sb.append(code);
-        sb.append("\n}\n");
+        sb.append(fileContent, endPosition, fileContent.length());
         byte[] newBuffer = sb.toString().getBytes(StandardCharsets.UTF_8);
         if (!Arrays.equals(originalBuffer, newBuffer)) {
             // Only generate document when content is changed.

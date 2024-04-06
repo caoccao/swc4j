@@ -16,5 +16,8 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+
+@Jni2RustClass(getDefault = "TsTypeElement::TsConstructSignatureDecl(TsConstructSignatureDecl::get_default())")
 public interface ISwc4jAstTsTypeElement extends ISwc4jAst {
 }

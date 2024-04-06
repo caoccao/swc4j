@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.interfaces;
 
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ import java.util.Optional;
  * @param <AST> the type parameter
  * @since 0.2.0
  */
+@Jni2RustClass(getDefault = "Program::Script(Script::dummy())")
 public interface ISwc4jAstProgram<AST extends ISwc4jAst> extends ISwc4jAst {
     /**
      * As module ast module.
