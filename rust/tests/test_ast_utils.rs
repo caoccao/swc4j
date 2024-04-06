@@ -713,6 +713,16 @@ fn test_structs() {
     init: Default::default(),
     name: Pat::dummy(),
   };
+  let _ = WhileStmt {
+    span: DUMMY_SP,
+    body: Box::new(Stmt::dummy()),
+    test: Box::new(Expr::dummy()),
+  };
+  let _ = WithStmt {
+    span: DUMMY_SP,
+    body: Box::new(Stmt::dummy()),
+    obj: Box::new(Expr::dummy()),
+  };
   let _ = YieldExpr {
     span: DUMMY_SP,
     arg: Default::default(),

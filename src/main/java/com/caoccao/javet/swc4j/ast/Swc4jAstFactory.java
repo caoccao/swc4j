@@ -1174,6 +1174,22 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstWhileStmt createWhileStmt(
+            ISwc4jAstExpr test,
+            ISwc4jAstStmt body,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstWhileStmt(test, body, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstWithStmt createWithStmt(
+            ISwc4jAstExpr obj,
+            ISwc4jAstStmt body,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstWithStmt(obj, body, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstYieldExpr createYieldExpr(
             @Jni2RustParam(optional = true) ISwc4jAstExpr arg,
             boolean delegate,

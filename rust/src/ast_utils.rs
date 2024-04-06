@@ -161,6 +161,8 @@ struct JavaSwc4jAstFactory {
   method_create_using_decl: JStaticMethodID,
   method_create_var_decl: JStaticMethodID,
   method_create_var_declarator: JStaticMethodID,
+  method_create_while_stmt: JStaticMethodID,
+  method_create_with_stmt: JStaticMethodID,
   method_create_yield_expr: JStaticMethodID,
 }
 unsafe impl Send for JavaSwc4jAstFactory {}
@@ -1098,6 +1100,20 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstVarDeclarator;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createVarDeclarator");
+    let method_create_while_stmt = env
+      .get_static_method_id(
+        &class,
+        "createWhileStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstWhileStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createWhileStmt");
+    let method_create_with_stmt = env
+      .get_static_method_id(
+        &class,
+        "createWithStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstWithStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createWithStmt");
     let method_create_yield_expr = env
       .get_static_method_id(
         &class,
@@ -1239,6 +1255,8 @@ impl JavaSwc4jAstFactory {
       method_create_using_decl,
       method_create_var_decl,
       method_create_var_declarator,
+      method_create_while_stmt,
+      method_create_with_stmt,
       method_create_yield_expr,
     }
   }
@@ -4402,6 +4420,52 @@ impl JavaSwc4jAstFactory {
         self.method_create_var_declarator,
         &[name, init, definite, span],
         "Swc4jAstVarDeclarator create_var_declarator()"
+      );
+    return_value
+  }
+
+  pub fn create_while_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    test: &JObject<'_>,
+    body: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let test = object_to_jvalue!(test);
+    let body = object_to_jvalue!(body);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_while_stmt,
+        &[test, body, span],
+        "Swc4jAstWhileStmt create_while_stmt()"
+      );
+    return_value
+  }
+
+  pub fn create_with_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+    body: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let obj = object_to_jvalue!(obj);
+    let body = object_to_jvalue!(body);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_with_stmt,
+        &[obj, body, span],
+        "Swc4jAstWithStmt create_with_stmt()"
       );
     return_value
   }
@@ -8697,6 +8761,36 @@ pub mod program {
     return_value
   }
 
+  fn create_while_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &WhileStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_test = enum_create_expr(env, map, &node.test);
+    let java_body = enum_create_stmt(env, map, &node.body);
+    let return_value = java_ast_factory.create_while_stmt(env, &java_test, &java_body, &java_range);
+    delete_local_ref!(env, java_test);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_with_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &WithStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_obj = enum_create_expr(env, map, &node.obj);
+    let java_body = enum_create_stmt(env, map, &node.body);
+    let return_value = java_ast_factory.create_with_stmt(env, &java_obj, &java_body, &java_range);
+    delete_local_ref!(env, java_obj);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_yield_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &YieldExpr) -> JObject<'a>
   where
     'local: 'a,
@@ -9208,10 +9302,8 @@ pub mod program {
       Stmt::Switch(node) => create_switch_stmt(env, map, node),
       Stmt::Throw(node) => create_throw_stmt(env, map, node),
       Stmt::Try(node) => create_try_stmt(env, map, node),
-      // Stmt::While(node) => create_while_stmt(env, map, node),
-      // Stmt::With(node) => create_with_stmt(env, map, node),
-      default => panic!("{:?}", default),
-      // TODO
+      Stmt::While(node) => create_while_stmt(env, map, node),
+      Stmt::With(node) => create_with_stmt(env, map, node),
     }
   }
 
