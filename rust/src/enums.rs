@@ -928,6 +928,43 @@ pub mod swc_enums {
     }
   }
 
+  impl IdentifiableEnum<TsKeywordTypeKind> for TsKeywordTypeKind {
+    fn get_id(&self) -> i32 {
+      match self {
+        TsKeywordTypeKind::TsAnyKeyword => 0,
+        TsKeywordTypeKind::TsBigIntKeyword => 1,
+        TsKeywordTypeKind::TsBooleanKeyword => 2,
+        TsKeywordTypeKind::TsIntrinsicKeyword => 3,
+        TsKeywordTypeKind::TsNeverKeyword => 4,
+        TsKeywordTypeKind::TsNullKeyword => 5,
+        TsKeywordTypeKind::TsNumberKeyword => 6,
+        TsKeywordTypeKind::TsObjectKeyword => 7,
+        TsKeywordTypeKind::TsStringKeyword => 8,
+        TsKeywordTypeKind::TsSymbolKeyword => 9,
+        TsKeywordTypeKind::TsUndefinedKeyword => 10,
+        TsKeywordTypeKind::TsUnknownKeyword => 11,
+        TsKeywordTypeKind::TsVoidKeyword => 12,
+      }
+    }
+    fn parse_by_id(id: i32) -> TsKeywordTypeKind {
+      match id {
+        1 => TsKeywordTypeKind::TsBigIntKeyword,
+        2 => TsKeywordTypeKind::TsBooleanKeyword,
+        3 => TsKeywordTypeKind::TsIntrinsicKeyword,
+        4 => TsKeywordTypeKind::TsNeverKeyword,
+        5 => TsKeywordTypeKind::TsNullKeyword,
+        6 => TsKeywordTypeKind::TsNumberKeyword,
+        7 => TsKeywordTypeKind::TsObjectKeyword,
+        8 => TsKeywordTypeKind::TsStringKeyword,
+        9 => TsKeywordTypeKind::TsSymbolKeyword,
+        10 => TsKeywordTypeKind::TsUndefinedKeyword,
+        11 => TsKeywordTypeKind::TsUnknownKeyword,
+        12 => TsKeywordTypeKind::TsVoidKeyword,
+        _ => TsKeywordTypeKind::TsAnyKeyword,
+      }
+    }
+  }
+
   impl IdentifiableEnum<UnaryOp> for UnaryOp {
     fn get_id(&self) -> i32 {
       match self {

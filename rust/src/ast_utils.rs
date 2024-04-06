@@ -156,6 +156,7 @@ struct JavaSwc4jAstFactory {
   method_create_ts_instantiation: JStaticMethodID,
   method_create_ts_interface_body: JStaticMethodID,
   method_create_ts_interface_decl: JStaticMethodID,
+  method_create_ts_keyword_type: JStaticMethodID,
   method_create_ts_method_signature: JStaticMethodID,
   method_create_ts_module_decl: JStaticMethodID,
   method_create_ts_namespace_export_decl: JStaticMethodID,
@@ -1081,6 +1082,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsInterfaceDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsInterfaceDecl");
+    let method_create_ts_keyword_type = env
+      .get_static_method_id(
+        &class,
+        "createTsKeywordType",
+        "(ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsKeywordType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsKeywordType");
     let method_create_ts_method_signature = env
       .get_static_method_id(
         &class,
@@ -1378,6 +1386,7 @@ impl JavaSwc4jAstFactory {
       method_create_ts_instantiation,
       method_create_ts_interface_body,
       method_create_ts_interface_decl,
+      method_create_ts_keyword_type,
       method_create_ts_method_signature,
       method_create_ts_module_decl,
       method_create_ts_namespace_export_decl,
@@ -4443,6 +4452,27 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_interface_decl,
         &[id, declare, type_params, extends, body, span],
         "Swc4jAstTsInterfaceDecl create_ts_interface_decl()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_keyword_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    kind_id: i32,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let kind_id = int_to_jvalue!(kind_id);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_keyword_type,
+        &[kind_id, span],
+        "Swc4jAstTsKeywordType create_ts_keyword_type()"
       );
     return_value
   }
@@ -9247,6 +9277,18 @@ pub mod program {
     return_type
   }
 
+  fn create_ts_keyword_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsKeywordType) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let kind = node.kind.get_id();
+    let return_value = java_ast_factory.create_ts_keyword_type(env, kind, &java_range);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_ts_method_signature<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -10504,7 +10546,7 @@ pub mod program {
       TsType::TsImportType(node) => create_ts_import_type(env, map, node),
       TsType::TsIndexedAccessType(node) => create_ts_indexed_access_type(env, map, node),
       TsType::TsInferType(node) => create_ts_infer_type(env, map, node),
-      // TsType::TsKeywordType(node) => create_ts_keyword_type(env, map, node),
+      TsType::TsKeywordType(node) => create_ts_keyword_type(env, map, node),
       // TsType::TsLitType(node) => create_ts_lit_type(env, map, node),
       // TsType::TsMappedType(node) => create_ts_mapped_type(env, map, node),
       // TsType::TsOptionalType(node) => create_ts_optional_type(env, map, node),

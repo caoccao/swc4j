@@ -685,6 +685,10 @@ fn test_structs() {
     id: Ident::dummy(),
     type_params: Default::default(),
   };
+  let _ = TsKeywordType {
+    span: DUMMY_SP,
+    kind: TsKeywordTypeKind::TsAnyKeyword,
+  };
   let _ = TsMethodSignature {
     span: DUMMY_SP,
     computed: Default::default(),

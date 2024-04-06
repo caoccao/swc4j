@@ -1129,6 +1129,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsKeywordType createTsKeywordType(
+            int kindId,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsKeywordType(Swc4jAstTsKeywordTypeKind.parse(kindId), span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsMethodSignature createTsMethodSignature(
             boolean readonly,
             ISwc4jAstExpr key,

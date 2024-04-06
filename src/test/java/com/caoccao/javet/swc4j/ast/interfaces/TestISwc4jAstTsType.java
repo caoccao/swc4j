@@ -29,5 +29,6 @@ public class TestISwc4jAstTsType {
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsImportType.class));
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsIndexedAccessType.class));
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsInferType.class));
+        assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsKeywordType.class));
     }
 }
