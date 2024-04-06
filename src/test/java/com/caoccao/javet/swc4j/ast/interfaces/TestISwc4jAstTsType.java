@@ -39,5 +39,7 @@ public class TestISwc4jAstTsType {
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsRestType.class));
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsThisType.class));
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsTupleType.class));
+        assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsTypeLit.class));
+        assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsTypeOperator.class));
     }
 }

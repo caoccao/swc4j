@@ -72,11 +72,11 @@ public final class Swc4jAstFactory {
 
     @Jni2RustMethod
     public static Swc4jAstAssignExpr createAssignExpr(
-            int op,
+            int opId,
             ISwc4jAstPatOrExpr left,
             ISwc4jAstExpr right,
             @Jni2RustParam Swc4jAstSpan span) {
-        return new Swc4jAstAssignExpr(Swc4jAstAssignOp.parse(op), left, right, span);
+        return new Swc4jAstAssignExpr(Swc4jAstAssignOp.parse(opId), left, right, span);
     }
 
     @Jni2RustMethod
@@ -127,19 +127,19 @@ public final class Swc4jAstFactory {
 
     @Jni2RustMethod
     public static Swc4jAstBigInt createBigInt(
-            int sign,
+            int signId,
             @Jni2RustParam(optional = true) String raw,
             @Jni2RustParam Swc4jAstSpan span) {
-        return new Swc4jAstBigInt(Swc4jAstBigIntSign.parse(sign), raw, span);
+        return new Swc4jAstBigInt(Swc4jAstBigIntSign.parse(signId), raw, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstBinExpr createBinExpr(
-            int op,
+            int opId,
             ISwc4jAstExpr left,
             ISwc4jAstExpr right,
             @Jni2RustParam Swc4jAstSpan span) {
-        return new Swc4jAstBinExpr(Swc4jAstBinaryOp.parse(op), left, right, span);
+        return new Swc4jAstBinExpr(Swc4jAstBinaryOp.parse(opId), left, right, span);
     }
 
     @Jni2RustMethod
@@ -223,7 +223,7 @@ public final class Swc4jAstFactory {
     public static Swc4jAstClassMethod createClassMethod(
             ISwc4jAstPropName key,
             Swc4jAstFunction function,
-            int kind,
+            int kindId,
             boolean isStatic,
             int accessibilityId,
             boolean isAbstract,
@@ -231,7 +231,7 @@ public final class Swc4jAstFactory {
             boolean isOverride,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstClassMethod(
-                key, function, Swc4jAstMethodKind.parse(kind), isStatic,
+                key, function, Swc4jAstMethodKind.parse(kindId), isStatic,
                 accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
                 isAbstract, optional, isOverride, span);
     }
@@ -654,9 +654,9 @@ public final class Swc4jAstFactory {
 
     @Jni2RustMethod
     public static Swc4jAstMetaPropExpr createMetaPropExpr(
-            int kind,
+            int kindId,
             @Jni2RustParam Swc4jAstSpan span) {
-        return new Swc4jAstMetaPropExpr(Swc4jAstMetaPropKind.parse(kind), span);
+        return new Swc4jAstMetaPropExpr(Swc4jAstMetaPropKind.parse(kindId), span);
     }
 
     @Jni2RustMethod
@@ -760,7 +760,7 @@ public final class Swc4jAstFactory {
     public static Swc4jAstPrivateMethod createPrivateMethod(
             Swc4jAstPrivateName key,
             Swc4jAstFunction function,
-            int kind,
+            int kindId,
             boolean isStatic,
             int accessibilityId,
             boolean isAbstract,
@@ -768,7 +768,7 @@ public final class Swc4jAstFactory {
             boolean isOverride,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstPrivateMethod(
-                key, function, Swc4jAstMethodKind.parse(kind), isStatic,
+                key, function, Swc4jAstMethodKind.parse(kindId), isStatic,
                 accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
                 isAbstract, optional, isOverride, span);
     }
@@ -1144,16 +1144,16 @@ public final class Swc4jAstFactory {
 
     @Jni2RustMethod
     public static Swc4jAstTsMappedType createTsMappedType(
-            int readonly,
+            int readonlyId,
             Swc4jAstTsTypeParam typeParam,
             @Jni2RustParam(optional = true) ISwc4jAstTsType nameType,
-            int optional,
+            int optionalId,
             @Jni2RustParam(optional = true) ISwc4jAstTsType typeAnn,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsMappedType(
-                readonly >= 0 ? Swc4jAstTruePlusMinus.parse(readonly) : null,
+                readonlyId >= 0 ? Swc4jAstTruePlusMinus.parse(readonlyId) : null,
                 typeParam, nameType,
-                optional >= 0 ? Swc4jAstTruePlusMinus.parse(optional) : null,
+                optionalId >= 0 ? Swc4jAstTruePlusMinus.parse(optionalId) : null,
                 typeAnn, span);
     }
 
@@ -1324,6 +1324,21 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsTypeLit createTsTypeLit(
+            List<ISwc4jAstTsTypeElement> members,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTypeLit(members, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsTypeOperator createTsTypeOperator(
+            int opId,
+            ISwc4jAstTsType typeAnn,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTypeOperator(Swc4jAstTsTypeOperatorOp.parse(opId), typeAnn, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsTypeParam createTsTypeParam(
             Swc4jAstIdent name,
             boolean isIn,
@@ -1351,19 +1366,19 @@ public final class Swc4jAstFactory {
 
     @Jni2RustMethod
     public static Swc4jAstUnaryExpr createUnaryExpr(
-            int op,
+            int opId,
             ISwc4jAstExpr arg,
             @Jni2RustParam Swc4jAstSpan span) {
-        return new Swc4jAstUnaryExpr(Swc4jAstUnaryOp.parse(op), arg, span);
+        return new Swc4jAstUnaryExpr(Swc4jAstUnaryOp.parse(opId), arg, span);
     }
 
     @Jni2RustMethod
     public static Swc4jAstUpdateExpr createUpdateExpr(
-            int op,
+            int opId,
             boolean prefix,
             ISwc4jAstExpr arg,
             @Jni2RustParam Swc4jAstSpan span) {
-        return new Swc4jAstUpdateExpr(Swc4jAstUpdateOp.parse(op), prefix, arg, span);
+        return new Swc4jAstUpdateExpr(Swc4jAstUpdateOp.parse(opId), prefix, arg, span);
     }
 
     @Jni2RustMethod

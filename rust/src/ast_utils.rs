@@ -178,6 +178,8 @@ struct JavaSwc4jAstFactory {
   method_create_ts_type_alias_decl: JStaticMethodID,
   method_create_ts_type_ann: JStaticMethodID,
   method_create_ts_type_assertion: JStaticMethodID,
+  method_create_ts_type_lit: JStaticMethodID,
+  method_create_ts_type_operator: JStaticMethodID,
   method_create_ts_type_param: JStaticMethodID,
   method_create_ts_type_param_decl: JStaticMethodID,
   method_create_ts_type_param_instantiation: JStaticMethodID,
@@ -1244,6 +1246,20 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsTypeAssertion;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeAssertion");
+    let method_create_ts_type_lit = env
+      .get_static_method_id(
+        &class,
+        "createTsTypeLit",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeLit;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTypeLit");
+    let method_create_ts_type_operator = env
+      .get_static_method_id(
+        &class,
+        "createTsTypeOperator",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeOperator;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTypeOperator");
     let method_create_ts_type_param = env
       .get_static_method_id(
         &class,
@@ -1472,6 +1488,8 @@ impl JavaSwc4jAstFactory {
       method_create_ts_type_alias_decl,
       method_create_ts_type_ann,
       method_create_ts_type_assertion,
+      method_create_ts_type_lit,
+      method_create_ts_type_operator,
       method_create_ts_type_param,
       method_create_ts_type_param_decl,
       method_create_ts_type_param_instantiation,
@@ -1566,7 +1584,7 @@ impl JavaSwc4jAstFactory {
   pub fn create_assign_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    op: i32,
+    op_id: i32,
     left: &JObject<'_>,
     right: &JObject<'_>,
     span: &JObject<'_>,
@@ -1574,7 +1592,7 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let op = int_to_jvalue!(op);
+    let op_id = int_to_jvalue!(op_id);
     let left = object_to_jvalue!(left);
     let right = object_to_jvalue!(right);
     let span = object_to_jvalue!(span);
@@ -1582,7 +1600,7 @@ impl JavaSwc4jAstFactory {
         env,
         &self.class,
         self.method_create_assign_expr,
-        &[op, left, right, span],
+        &[op_id, left, right, span],
         "Swc4jAstAssignExpr create_assign_expr()"
       );
     return_value
@@ -1712,14 +1730,14 @@ impl JavaSwc4jAstFactory {
   pub fn create_big_int<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    sign: i32,
+    sign_id: i32,
     raw: &Option<String>,
     span: &JObject<'_>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let sign = int_to_jvalue!(sign);
+    let sign_id = int_to_jvalue!(sign_id);
     let java_raw = optional_string_to_jstring!(env, &raw);
     let raw = object_to_jvalue!(java_raw);
     let span = object_to_jvalue!(span);
@@ -1727,7 +1745,7 @@ impl JavaSwc4jAstFactory {
         env,
         &self.class,
         self.method_create_big_int,
-        &[sign, raw, span],
+        &[sign_id, raw, span],
         "Swc4jAstBigInt create_big_int()"
       );
     delete_local_ref!(env, java_raw);
@@ -1737,7 +1755,7 @@ impl JavaSwc4jAstFactory {
   pub fn create_bin_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    op: i32,
+    op_id: i32,
     left: &JObject<'_>,
     right: &JObject<'_>,
     span: &JObject<'_>,
@@ -1745,7 +1763,7 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let op = int_to_jvalue!(op);
+    let op_id = int_to_jvalue!(op_id);
     let left = object_to_jvalue!(left);
     let right = object_to_jvalue!(right);
     let span = object_to_jvalue!(span);
@@ -1753,7 +1771,7 @@ impl JavaSwc4jAstFactory {
         env,
         &self.class,
         self.method_create_bin_expr,
-        &[op, left, right, span],
+        &[op_id, left, right, span],
         "Swc4jAstBinExpr create_bin_expr()"
       );
     return_value
@@ -1979,7 +1997,7 @@ impl JavaSwc4jAstFactory {
     env: &mut JNIEnv<'local>,
     key: &JObject<'_>,
     function: &JObject<'_>,
-    kind: i32,
+    kind_id: i32,
     is_static: bool,
     accessibility_id: i32,
     is_abstract: bool,
@@ -1992,7 +2010,7 @@ impl JavaSwc4jAstFactory {
   {
     let key = object_to_jvalue!(key);
     let function = object_to_jvalue!(function);
-    let kind = int_to_jvalue!(kind);
+    let kind_id = int_to_jvalue!(kind_id);
     let is_static = boolean_to_jvalue!(is_static);
     let accessibility_id = int_to_jvalue!(accessibility_id);
     let is_abstract = boolean_to_jvalue!(is_abstract);
@@ -2003,7 +2021,7 @@ impl JavaSwc4jAstFactory {
         env,
         &self.class,
         self.method_create_class_method,
-        &[key, function, kind, is_static, accessibility_id, is_abstract, optional, is_override, span],
+        &[key, function, kind_id, is_static, accessibility_id, is_abstract, optional, is_override, span],
         "Swc4jAstClassMethod create_class_method()"
       );
     return_value
@@ -3184,19 +3202,19 @@ impl JavaSwc4jAstFactory {
   pub fn create_meta_prop_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    kind: i32,
+    kind_id: i32,
     span: &JObject<'_>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let kind = int_to_jvalue!(kind);
+    let kind_id = int_to_jvalue!(kind_id);
     let span = object_to_jvalue!(span);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_meta_prop_expr,
-        &[kind, span],
+        &[kind_id, span],
         "Swc4jAstMetaPropExpr create_meta_prop_expr()"
       );
     return_value
@@ -3489,7 +3507,7 @@ impl JavaSwc4jAstFactory {
     env: &mut JNIEnv<'local>,
     key: &JObject<'_>,
     function: &JObject<'_>,
-    kind: i32,
+    kind_id: i32,
     is_static: bool,
     accessibility_id: i32,
     is_abstract: bool,
@@ -3502,7 +3520,7 @@ impl JavaSwc4jAstFactory {
   {
     let key = object_to_jvalue!(key);
     let function = object_to_jvalue!(function);
-    let kind = int_to_jvalue!(kind);
+    let kind_id = int_to_jvalue!(kind_id);
     let is_static = boolean_to_jvalue!(is_static);
     let accessibility_id = int_to_jvalue!(accessibility_id);
     let is_abstract = boolean_to_jvalue!(is_abstract);
@@ -3513,7 +3531,7 @@ impl JavaSwc4jAstFactory {
         env,
         &self.class,
         self.method_create_private_method,
-        &[key, function, kind, is_static, accessibility_id, is_abstract, optional, is_override, span],
+        &[key, function, kind_id, is_static, accessibility_id, is_abstract, optional, is_override, span],
         "Swc4jAstPrivateMethod create_private_method()"
       );
     return_value
@@ -4573,27 +4591,27 @@ impl JavaSwc4jAstFactory {
   pub fn create_ts_mapped_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    readonly: i32,
+    readonly_id: i32,
     type_param: &JObject<'_>,
     name_type: &Option<JObject>,
-    optional: i32,
+    optional_id: i32,
     type_ann: &Option<JObject>,
     span: &JObject<'_>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let readonly = int_to_jvalue!(readonly);
+    let readonly_id = int_to_jvalue!(readonly_id);
     let type_param = object_to_jvalue!(type_param);
     let name_type = optional_object_to_jvalue!(name_type);
-    let optional = int_to_jvalue!(optional);
+    let optional_id = int_to_jvalue!(optional_id);
     let type_ann = optional_object_to_jvalue!(type_ann);
     let span = object_to_jvalue!(span);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_ts_mapped_type,
-        &[readonly, type_param, name_type, optional, type_ann, span],
+        &[readonly_id, type_param, name_type, optional_id, type_ann, span],
         "Swc4jAstTsMappedType create_ts_mapped_type()"
       );
     return_value
@@ -5060,6 +5078,50 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_ts_type_lit<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    members: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let members = object_to_jvalue!(members);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_type_lit,
+        &[members, span],
+        "Swc4jAstTsTypeLit create_ts_type_lit()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_type_operator<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    op_id: i32,
+    type_ann: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let op_id = int_to_jvalue!(op_id);
+    let type_ann = object_to_jvalue!(type_ann);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_type_operator,
+        &[op_id, type_ann, span],
+        "Swc4jAstTsTypeOperator create_ts_type_operator()"
+      );
+    return_value
+  }
+
   pub fn create_ts_type_param<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -5136,21 +5198,21 @@ impl JavaSwc4jAstFactory {
   pub fn create_unary_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    op: i32,
+    op_id: i32,
     arg: &JObject<'_>,
     span: &JObject<'_>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let op = int_to_jvalue!(op);
+    let op_id = int_to_jvalue!(op_id);
     let arg = object_to_jvalue!(arg);
     let span = object_to_jvalue!(span);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_unary_expr,
-        &[op, arg, span],
+        &[op_id, arg, span],
         "Swc4jAstUnaryExpr create_unary_expr()"
       );
     return_value
@@ -5159,7 +5221,7 @@ impl JavaSwc4jAstFactory {
   pub fn create_update_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    op: i32,
+    op_id: i32,
     prefix: bool,
     arg: &JObject<'_>,
     span: &JObject<'_>,
@@ -5167,7 +5229,7 @@ impl JavaSwc4jAstFactory {
   where
     'local: 'a,
   {
-    let op = int_to_jvalue!(op);
+    let op_id = int_to_jvalue!(op_id);
     let prefix = boolean_to_jvalue!(prefix);
     let arg = object_to_jvalue!(arg);
     let span = object_to_jvalue!(span);
@@ -5175,7 +5237,7 @@ impl JavaSwc4jAstFactory {
         env,
         &self.class,
         self.method_create_update_expr,
-        &[op, prefix, arg, span],
+        &[op_id, prefix, arg, span],
         "Swc4jAstUpdateExpr create_update_expr()"
       );
     return_value
@@ -10027,6 +10089,39 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_type_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeLit) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_members = java_array_list.construct(env, node.members.len());
+    node.members.iter().for_each(|node| {
+      let java_node = enum_create_ts_type_element(env, map, node);
+      java_array_list.add(env, &java_members, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = java_ast_factory.create_ts_type_lit(env, &java_members, &java_range);
+    delete_local_ref!(env, java_members);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_type_operator<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeOperator) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let op = node.op.get_id();
+    let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
+    let return_value = java_ast_factory.create_ts_type_operator(env, op, &java_type_ann, &java_range);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_ts_type_param<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeParam) -> JObject<'a>
   where
     'local: 'a,
@@ -10946,8 +11041,8 @@ pub mod program {
       TsType::TsRestType(node) => create_ts_rest_type(env, map, node),
       TsType::TsThisType(node) => create_ts_this_type(env, map, node),
       TsType::TsTupleType(node) => create_ts_tuple_type(env, map, node),
-      // TsType::TsTypeLit(node) => create_ts_type_lit(env, map, node),
-      // TsType::TsTypeOperator(node) => create_ts_type_operator(env, map, node),
+      TsType::TsTypeLit(node) => create_ts_type_lit(env, map, node),
+      TsType::TsTypeOperator(node) => create_ts_type_operator(env, map, node),
       // TsType::TsTypePredicate(node) => create_ts_type_predicate(env, map, node),
       // TsType::TsTypeQuery(node) => create_ts_type_query(env, map, node),
       // TsType::TsTypeRef(node) => create_ts_type_ref(env, map, node),

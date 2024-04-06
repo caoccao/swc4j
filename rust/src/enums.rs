@@ -982,6 +982,23 @@ pub mod swc_enums {
     }
   }
 
+  impl IdentifiableEnum<TsTypeOperatorOp> for TsTypeOperatorOp {
+    fn get_id(&self) -> i32 {
+      match self {
+        TsTypeOperatorOp::KeyOf => 0,
+        TsTypeOperatorOp::ReadOnly => 1,
+        TsTypeOperatorOp::Unique => 2,
+      }
+    }
+    fn parse_by_id(id: i32) -> TsTypeOperatorOp {
+      match id {
+        1 => TsTypeOperatorOp::ReadOnly,
+        2 => TsTypeOperatorOp::Unique,
+        _ => TsTypeOperatorOp::KeyOf,
+      }
+    }
+  }
+
   impl IdentifiableEnum<UnaryOp> for UnaryOp {
     fn get_id(&self) -> i32 {
       match self {

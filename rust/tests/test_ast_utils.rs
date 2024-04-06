@@ -807,6 +807,15 @@ fn test_structs() {
     expr: Box::new(Expr::dummy()),
     type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
   };
+  let _ = TsTypeLit {
+    span: DUMMY_SP,
+    members: Default::default(),
+  };
+  let _ = TsTypeOperator {
+    span: DUMMY_SP,
+    op: TsTypeOperatorOp::KeyOf,
+    type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+  };
   let _ = TsTypeParam {
     span: DUMMY_SP,
     is_const: Default::default(),
