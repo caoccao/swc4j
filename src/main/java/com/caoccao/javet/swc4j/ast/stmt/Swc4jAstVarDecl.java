@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstForHead;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -30,7 +31,7 @@ import java.util.List;
 
 public class Swc4jAstVarDecl
         extends Swc4jAst
-        implements ISwc4jAstDecl, ISwc4jAstVarDeclOrExpr {
+        implements ISwc4jAstDecl, ISwc4jAstVarDeclOrExpr, ISwc4jAstForHead {
     protected final boolean declare;
     protected final List<Swc4jAstVarDeclarator> decls;
     @Jni2RustField(value = "VarDeclKind::Const")

@@ -522,6 +522,14 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstJsxAttr createJsxAttr(
+            ISwc4jAstJsxAttrName name,
+            @Jni2RustParam(optional = true) ISwc4jAstJsxAttrValue value,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstJsxAttr(name, value, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstJsxClosingElement createJsxClosingElement(
             ISwc4jAstJsxElementName name,
             @Jni2RustParam Swc4jAstSpan span) {

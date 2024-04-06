@@ -324,6 +324,11 @@ fn test_structs() {
   let _ = Invalid {
     span: DUMMY_SP,
   };
+  let _ = JSXAttr {
+    span: DUMMY_SP,
+    name: JSXAttrName::Ident(Ident::dummy()),
+    value: Default::default(),
+  };
   let _ = JSXClosingElement {
     span: DUMMY_SP,
     name: JSXElementName::dummy(),

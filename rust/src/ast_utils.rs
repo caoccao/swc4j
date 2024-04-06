@@ -83,6 +83,7 @@ struct JavaSwc4jAstFactory {
   method_create_import_named_specifier: JStaticMethodID,
   method_create_import_star_as_specifier: JStaticMethodID,
   method_create_invalid: JStaticMethodID,
+  method_create_jsx_attr: JStaticMethodID,
   method_create_jsx_closing_element: JStaticMethodID,
   method_create_jsx_closing_fragment: JStaticMethodID,
   method_create_jsx_element: JStaticMethodID,
@@ -557,6 +558,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstInvalid;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createInvalid");
+    let method_create_jsx_attr = env
+      .get_static_method_id(
+        &class,
+        "createJsxAttr",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxAttrName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxAttrValue;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxAttr;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createJsxAttr");
     let method_create_jsx_closing_element = env
       .get_static_method_id(
         &class,
@@ -1201,6 +1209,7 @@ impl JavaSwc4jAstFactory {
       method_create_import_named_specifier,
       method_create_import_star_as_specifier,
       method_create_invalid,
+      method_create_jsx_attr,
       method_create_jsx_closing_element,
       method_create_jsx_closing_fragment,
       method_create_jsx_element,
@@ -2594,6 +2603,29 @@ impl JavaSwc4jAstFactory {
         self.method_create_invalid,
         &[span],
         "Swc4jAstInvalid create_invalid()"
+      );
+    return_value
+  }
+
+  pub fn create_jsx_attr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    name: &JObject<'_>,
+    value: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let name = object_to_jvalue!(name);
+    let value = optional_object_to_jvalue!(value);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_jsx_attr,
+        &[name, value, span],
+        "Swc4jAstJsxAttr create_jsx_attr()"
       );
     return_value
   }
@@ -7253,6 +7285,24 @@ pub mod program {
     return_value
   }
 
+  fn create_jsx_attr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXAttr) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_name = enum_create_jsx_attr_name(env, map, &node.name);
+    let java_optional_value = node
+      .value
+      .as_ref()
+      .map(|node| enum_create_jsx_attr_value(env, map, node));
+    let return_value = java_ast_factory.create_jsx_attr(env, &java_name, &java_optional_value, &java_range);
+    delete_local_ref!(env, java_name);
+    delete_local_optional_ref!(env, java_optional_value);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_jsx_closing_element<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -9105,8 +9155,9 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      ForHead::Pat(node) => enum_create_pat(env, map, node),
+      ForHead::VarDecl(node) => create_var_decl(env, map, node),
+      ForHead::UsingDecl(node) => create_using_decl(env, map, node),
     }
   }
 
@@ -9148,8 +9199,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      JSXAttrOrSpread::JSXAttr(node) => create_jsx_attr(env, map, node),
+      JSXAttrOrSpread::SpreadElement(node) => create_spread_element(env, map, node),
     }
   }
 

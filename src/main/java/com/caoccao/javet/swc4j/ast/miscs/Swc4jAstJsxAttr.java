@@ -14,48 +14,50 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.stmt;
+package com.caoccao.javet.swc4j.ast.miscs;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstForHead;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxAttrName;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxAttrOrSpread;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxAttrValue;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-import java.util.List;
+import java.util.Optional;
 
-public class Swc4jAstUsingDecl
+@Jni2RustClass(name = "JSXAttr")
+public class Swc4jAstJsxAttr
         extends Swc4jAst
-        implements ISwc4jAstDecl, ISwc4jAstVarDeclOrExpr, ISwc4jAstForHead {
-    @Jni2RustField(name = "is_await")
-    protected final boolean await;
-    protected final List<Swc4jAstVarDeclarator> decls;
+        implements ISwc4jAstJsxAttrOrSpread {
+    @Jni2RustField(value = "JSXAttrName::Ident(Ident::dummy())")
+    protected final ISwc4jAstJsxAttrName name;
+    protected final Optional<ISwc4jAstJsxAttrValue> value;
 
-    public Swc4jAstUsingDecl(
-            boolean await,
-            List<Swc4jAstVarDeclarator> decls,
+    public Swc4jAstJsxAttr(
+            ISwc4jAstJsxAttrName name,
+            ISwc4jAstJsxAttrValue value,
             Swc4jAstSpan span) {
         super(span);
-        this.await = await;
-        this.decls = SimpleList.immutableCopyOf(AssertionUtils.notNull(decls, "Decls"));
-        childNodes = SimpleList.immutableCopyOf(decls);
+        this.name = AssertionUtils.notNull(name, "Name");
+        this.value = Optional.ofNullable(value);
+        childNodes = SimpleList.immutableOf(name, value);
         updateParent();
     }
 
-    public List<Swc4jAstVarDeclarator> getDecls() {
-        return decls;
+    public ISwc4jAstJsxAttrName getName() {
+        return name;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.UsingDecl;
+        return Swc4jAstType.JsxAttr;
     }
 
-    public boolean isAwait() {
-        return await;
+    public Optional<ISwc4jAstJsxAttrValue> getValue() {
+        return value;
     }
 }
