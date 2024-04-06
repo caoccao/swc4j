@@ -575,7 +575,7 @@ fn test_structs() {
   };
   let _ = TsArrayType {
     span: DUMMY_SP,
-    elem_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
+    elem_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
   };
   let _ = TsAsExpr {
     span: DUMMY_SP,
@@ -590,10 +590,10 @@ fn test_structs() {
   };
   let _ = TsConditionalType {
     span: DUMMY_SP,
-    check_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
-    extends_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
-    false_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
-    true_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
+    check_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+    extends_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+    false_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+    true_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
   };
   let _ = TsConstAssertion {
     span: DUMMY_SP,
@@ -660,8 +660,8 @@ fn test_structs() {
   };
   let _ = TsIndexedAccessType {
     span: DUMMY_SP,
-    index_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
-    obj_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
+    index_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+    obj_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
     readonly: Default::default(),
   };
   let _ = TsInferType {
@@ -728,7 +728,7 @@ fn test_structs() {
   };
   let _ = TsOptionalType {
     span: DUMMY_SP,
-    type_ann: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
+    type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
   };
   let _ = TsParamProp {
     span: DUMMY_SP,
@@ -740,7 +740,7 @@ fn test_structs() {
   };
   let _ = TsParenthesizedType {
     span: DUMMY_SP,
-    type_ann: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
+    type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
   };
   let _ = TsPropertySignature {
     span: DUMMY_SP,
@@ -759,7 +759,7 @@ fn test_structs() {
   };
   let _ = TsRestType {
     span: DUMMY_SP,
-    type_ann: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
+    type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
   };
   let _ = TsSatisfiesExpr {
     span: DUMMY_SP,
@@ -774,10 +774,22 @@ fn test_structs() {
     param: TsFnParam::Ident(BindingIdent::dummy()),
     readonly: Default::default(),
   };
+  let _ = TsThisType {
+    span: DUMMY_SP,
+  };
   let _ = TsTplLitType {
     span: DUMMY_SP,
     quasis: Default::default(),
     types: Default::default(),
+  };
+  let _ = TsTupleElement {
+    span: DUMMY_SP,
+    label: Default::default(),
+    ty: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+  };
+  let _ = TsTupleType {
+    span: DUMMY_SP,
+    elem_types: Default::default(),
   };
   let _ = TsTypeAliasDecl {
     span: DUMMY_SP,

@@ -27,13 +27,13 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 public class Swc4jAstTsConditionalType
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    @Jni2RustField(box = true, value = "Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword }))")
+    @Jni2RustField(box = true, value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
     protected final ISwc4jAstTsType checkType;
-    @Jni2RustField(box = true, value = "Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword }))")
+    @Jni2RustField(box = true, value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
     protected final ISwc4jAstTsType extendsType;
-    @Jni2RustField(box = true, value = "Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword }))")
+    @Jni2RustField(box = true, value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
     protected final ISwc4jAstTsType falseType;
-    @Jni2RustField(box = true, value = "Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword }))")
+    @Jni2RustField(box = true, value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
     protected final ISwc4jAstTsType trueType;
 
     public Swc4jAstTsConditionalType(

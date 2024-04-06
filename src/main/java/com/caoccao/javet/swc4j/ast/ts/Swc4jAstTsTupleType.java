@@ -20,31 +20,31 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstTsArrayType
+import java.util.List;
+
+public class Swc4jAstTsTupleType
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    @Jni2RustField(box = true, value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
-    protected final ISwc4jAstTsType elemType;
+    protected final List<Swc4jAstTsTupleElement> elemTypes;
 
-    public Swc4jAstTsArrayType(
-            ISwc4jAstTsType elemType,
+    public Swc4jAstTsTupleType(
+            List<Swc4jAstTsTupleElement> elemTypes,
             Swc4jAstSpan span) {
         super(span);
-        this.elemType = AssertionUtils.notNull(elemType, "ElemType");
-        childNodes = SimpleList.immutableOf(elemType);
+        this.elemTypes = SimpleList.immutableCopyOf(AssertionUtils.notNull(elemTypes, "ElemTypes"));
+        childNodes = SimpleList.immutableCopyOf(elemTypes);
         updateParent();
     }
 
-    public ISwc4jAstTsType getElemType() {
-        return elemType;
+    public List<Swc4jAstTsTupleElement> getElemTypes() {
+        return elemTypes;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.TsArrayType;
+        return Swc4jAstType.TsTupleType;
     }
 }

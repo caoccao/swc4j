@@ -27,7 +27,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 public class Swc4jAstTsParenthesizedType
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    @Jni2RustField(box = true, value = "Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword }))")
+    @Jni2RustField(box = true, value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
     protected final ISwc4jAstTsType typeAnn;
 
     public Swc4jAstTsParenthesizedType(

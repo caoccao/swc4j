@@ -19,32 +19,41 @@ package com.caoccao.javet.swc4j.ast.ts;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstTsArrayType
-        extends Swc4jAst
-        implements ISwc4jAstTsType {
-    @Jni2RustField(box = true, value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
-    protected final ISwc4jAstTsType elemType;
+import java.util.Optional;
 
-    public Swc4jAstTsArrayType(
-            ISwc4jAstTsType elemType,
+public class Swc4jAstTsTupleElement
+        extends Swc4jAst {
+    protected final Optional<ISwc4jAstPat> label;
+    @Jni2RustField(box = true, value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
+    protected final ISwc4jAstTsType ty;
+
+    public Swc4jAstTsTupleElement(
+            ISwc4jAstPat label,
+            ISwc4jAstTsType ty,
             Swc4jAstSpan span) {
         super(span);
-        this.elemType = AssertionUtils.notNull(elemType, "ElemType");
-        childNodes = SimpleList.immutableOf(elemType);
+        this.label = Optional.ofNullable(label);
+        this.ty = AssertionUtils.notNull(ty, "Ty");
+        childNodes = SimpleList.immutableOf(label, ty);
         updateParent();
     }
 
-    public ISwc4jAstTsType getElemType() {
-        return elemType;
+    public Optional<ISwc4jAstPat> getLabel() {
+        return label;
+    }
+
+    public ISwc4jAstTsType getTy() {
+        return ty;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.TsArrayType;
+        return Swc4jAstType.TsTupleElement;
     }
 }

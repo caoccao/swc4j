@@ -171,7 +171,10 @@ struct JavaSwc4jAstFactory {
   method_create_ts_rest_type: JStaticMethodID,
   method_create_ts_satisfies_expr: JStaticMethodID,
   method_create_ts_setter_signature: JStaticMethodID,
+  method_create_ts_this_type: JStaticMethodID,
   method_create_ts_tpl_lit_type: JStaticMethodID,
+  method_create_ts_tuple_element: JStaticMethodID,
+  method_create_ts_tuple_type: JStaticMethodID,
   method_create_ts_type_alias_decl: JStaticMethodID,
   method_create_ts_type_ann: JStaticMethodID,
   method_create_ts_type_assertion: JStaticMethodID,
@@ -1192,6 +1195,13 @@ impl JavaSwc4jAstFactory {
         "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsFnParam;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsSetterSignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsSetterSignature");
+    let method_create_ts_this_type = env
+      .get_static_method_id(
+        &class,
+        "createTsThisType",
+        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsThisType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsThisType");
     let method_create_ts_tpl_lit_type = env
       .get_static_method_id(
         &class,
@@ -1199,6 +1209,20 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTplLitType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTplLitType");
+    let method_create_ts_tuple_element = env
+      .get_static_method_id(
+        &class,
+        "createTsTupleElement",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTupleElement;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTupleElement");
+    let method_create_ts_tuple_type = env
+      .get_static_method_id(
+        &class,
+        "createTsTupleType",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTupleType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTupleType");
     let method_create_ts_type_alias_decl = env
       .get_static_method_id(
         &class,
@@ -1441,7 +1465,10 @@ impl JavaSwc4jAstFactory {
       method_create_ts_rest_type,
       method_create_ts_satisfies_expr,
       method_create_ts_setter_signature,
+      method_create_ts_this_type,
       method_create_ts_tpl_lit_type,
+      method_create_ts_tuple_element,
+      method_create_ts_tuple_type,
       method_create_ts_type_alias_decl,
       method_create_ts_type_ann,
       method_create_ts_type_assertion,
@@ -4876,6 +4903,25 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_ts_this_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_this_type,
+        &[span],
+        "Swc4jAstTsThisType create_ts_this_type()"
+      );
+    return_value
+  }
+
   pub fn create_ts_tpl_lit_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -4895,6 +4941,50 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_tpl_lit_type,
         &[types, quasis, span],
         "Swc4jAstTsTplLitType create_ts_tpl_lit_type()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_tuple_element<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    label: &Option<JObject>,
+    ty: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let label = optional_object_to_jvalue!(label);
+    let ty = object_to_jvalue!(ty);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_tuple_element,
+        &[label, ty, span],
+        "Swc4jAstTsTupleElement create_ts_tuple_element()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_tuple_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    elem_types: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let elem_types = object_to_jvalue!(elem_types);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_tuple_type,
+        &[elem_types, span],
+        "Swc4jAstTsTupleType create_ts_tuple_type()"
       );
     return_value
   }
@@ -9599,7 +9689,11 @@ pub mod program {
     return_value
   }
 
-  fn create_ts_optional_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsOptionalType) -> JObject<'a>
+  fn create_ts_optional_type<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsOptionalType,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -9644,7 +9738,11 @@ pub mod program {
     return_type
   }
 
-  fn create_ts_parenthesized_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsParenthesizedType) -> JObject<'a>
+  fn create_ts_parenthesized_type<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsParenthesizedType,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -9782,6 +9880,55 @@ pub mod program {
     );
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_param);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_this_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsThisType) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let return_value = java_ast_factory.create_ts_this_type(env, &java_range);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_tuple_element<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsTupleElement,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_optional_label = node.label.as_ref().map(|node| enum_create_pat(env, map, node));
+    let java_type = enum_create_ts_type(env, map, &node.ty);
+    let return_value = java_ast_factory.create_ts_tuple_element(env, &java_optional_label, &java_type, &java_range);
+    delete_local_optional_ref!(env, java_optional_label);
+    delete_local_ref!(env, java_type);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_tuple_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTupleType) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_elem_types = java_array_list.construct(env, node.elem_types.len());
+    node.elem_types.iter().for_each(|node| {
+      let java_node = create_ts_tuple_element(env, map, node);
+      java_array_list.add(env, &java_elem_types, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = java_ast_factory.create_ts_tuple_type(env, &java_elem_types, &java_range);
+    delete_local_ref!(env, java_elem_types);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -10797,8 +10944,8 @@ pub mod program {
       TsType::TsOptionalType(node) => create_ts_optional_type(env, map, node),
       TsType::TsParenthesizedType(node) => create_ts_parenthesized_type(env, map, node),
       TsType::TsRestType(node) => create_ts_rest_type(env, map, node),
-      // TsType::TsThisType(node) => create_ts_this_type(env, map, node),
-      // TsType::TsTupleType(node) => create_ts_tuple_type(env, map, node),
+      TsType::TsThisType(node) => create_ts_this_type(env, map, node),
+      TsType::TsTupleType(node) => create_ts_tuple_type(env, map, node),
       // TsType::TsTypeLit(node) => create_ts_type_lit(env, map, node),
       // TsType::TsTypeOperator(node) => create_ts_type_operator(env, map, node),
       // TsType::TsTypePredicate(node) => create_ts_type_predicate(env, map, node),

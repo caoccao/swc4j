@@ -1270,11 +1270,32 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsThisType createTsThisType(
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsThisType(span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsTplLitType createTsTplLitType(
             List<ISwc4jAstTsType> types,
             List<Swc4jAstTplElement> quasis,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsTplLitType(types, quasis, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsTupleElement createTsTupleElement(
+            @Jni2RustParam(optional = true) ISwc4jAstPat label,
+            ISwc4jAstTsType ty,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTupleElement(label, ty, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsTupleType createTsTupleType(
+            List<Swc4jAstTsTupleElement> elemTypes,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTupleType(elemTypes, span);
     }
 
     @Jni2RustMethod
