@@ -1087,6 +1087,22 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsIndexedAccessType createTsIndexedAccessType(
+            boolean readonly,
+            ISwc4jAstTsType objType,
+            ISwc4jAstTsType indexType,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsIndexedAccessType(readonly, objType, indexType, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsInferType createTsInferType(
+            Swc4jAstTsTypeParam typeParam,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsInferType(typeParam, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsInstantiation createTsInstantiation(
             ISwc4jAstExpr expr,
             Swc4jAstTsTypeParamInstantiation typeArgs,

@@ -16,9 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsArrayType;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsConditionalType;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsImportType;
+import com.caoccao.javet.swc4j.ast.ts.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,5 +27,7 @@ public class TestISwc4jAstTsType {
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsArrayType.class));
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsConditionalType.class));
         assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsImportType.class));
+        assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsIndexedAccessType.class));
+        assertTrue(ISwc4jAstTsType.class.isAssignableFrom(Swc4jAstTsInferType.class));
     }
 }

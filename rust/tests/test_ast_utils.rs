@@ -658,6 +658,16 @@ fn test_structs() {
     readonly: Default::default(),
     type_ann: Default::default(),
   };
+  let _ = TsIndexedAccessType {
+    span: DUMMY_SP,
+    index_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
+    obj_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
+    readonly: Default::default(),
+  };
+  let _ = TsInferType {
+    span: DUMMY_SP,
+    type_param: TsTypeParam { span: DUMMY_SP, name: Ident::dummy(), is_in: false, is_out: false, is_const: false, constraint: None, default: None },
+  };
   let _ = TsInstantiation {
     span: DUMMY_SP,
     expr: Box::new(Expr::dummy()),

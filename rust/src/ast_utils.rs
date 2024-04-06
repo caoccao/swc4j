@@ -151,6 +151,8 @@ struct JavaSwc4jAstFactory {
   method_create_ts_import_equals_decl: JStaticMethodID,
   method_create_ts_import_type: JStaticMethodID,
   method_create_ts_index_signature: JStaticMethodID,
+  method_create_ts_indexed_access_type: JStaticMethodID,
+  method_create_ts_infer_type: JStaticMethodID,
   method_create_ts_instantiation: JStaticMethodID,
   method_create_ts_interface_body: JStaticMethodID,
   method_create_ts_interface_decl: JStaticMethodID,
@@ -1044,6 +1046,20 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIndexSignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsIndexSignature");
+    let method_create_ts_indexed_access_type = env
+      .get_static_method_id(
+        &class,
+        "createTsIndexedAccessType",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIndexedAccessType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsIndexedAccessType");
+    let method_create_ts_infer_type = env
+      .get_static_method_id(
+        &class,
+        "createTsInferType",
+        "(Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInferType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsInferType");
     let method_create_ts_instantiation = env
       .get_static_method_id(
         &class,
@@ -1357,6 +1373,8 @@ impl JavaSwc4jAstFactory {
       method_create_ts_import_equals_decl,
       method_create_ts_import_type,
       method_create_ts_index_signature,
+      method_create_ts_indexed_access_type,
+      method_create_ts_infer_type,
       method_create_ts_instantiation,
       method_create_ts_interface_body,
       method_create_ts_interface_decl,
@@ -4306,6 +4324,52 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_index_signature,
         &[params, type_ann, readonly, is_static, span],
         "Swc4jAstTsIndexSignature create_ts_index_signature()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_indexed_access_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    readonly: bool,
+    obj_type: &JObject<'_>,
+    index_type: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let readonly = boolean_to_jvalue!(readonly);
+    let obj_type = object_to_jvalue!(obj_type);
+    let index_type = object_to_jvalue!(index_type);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_indexed_access_type,
+        &[readonly, obj_type, index_type, span],
+        "Swc4jAstTsIndexedAccessType create_ts_indexed_access_type()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_infer_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    type_param: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let type_param = object_to_jvalue!(type_param);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_infer_type,
+        &[type_param, span],
+        "Swc4jAstTsInferType create_ts_infer_type()"
       );
     return_value
   }
@@ -9066,6 +9130,40 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_indexed_access_type<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsIndexedAccessType,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let readonly = node.readonly;
+    let java_obj_type = enum_create_ts_type(env, map, &node.obj_type);
+    let java_index_type = enum_create_ts_type(env, map, &node.index_type);
+    let return_value =
+      java_ast_factory.create_ts_indexed_access_type(env, readonly, &java_obj_type, &java_index_type, &java_range);
+    delete_local_ref!(env, java_obj_type);
+    delete_local_ref!(env, java_index_type);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_infer_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsInferType) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_type_param = create_ts_type_param(env, map, &node.type_param);
+    let return_value = java_ast_factory.create_ts_infer_type(env, &java_type_param, &java_range);
+    delete_local_ref!(env, java_type_param);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_ts_instantiation<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -10404,8 +10502,8 @@ pub mod program {
       TsType::TsConditionalType(node) => create_ts_conditional_type(env, map, node),
       TsType::TsFnOrConstructorType(node) => enum_create_ts_fn_or_constructor_type(env, map, node),
       TsType::TsImportType(node) => create_ts_import_type(env, map, node),
-      // TsType::TsIndexedAccessType(node) => create_ts_indexed_access_type(env, map, node),
-      // TsType::TsInferType(node) => create_ts_infer_type(env, map, node),
+      TsType::TsIndexedAccessType(node) => create_ts_indexed_access_type(env, map, node),
+      TsType::TsInferType(node) => create_ts_infer_type(env, map, node),
       // TsType::TsKeywordType(node) => create_ts_keyword_type(env, map, node),
       // TsType::TsLitType(node) => create_ts_lit_type(env, map, node),
       // TsType::TsMappedType(node) => create_ts_mapped_type(env, map, node),
