@@ -578,9 +578,21 @@ fn test_structs() {
     expr: Box::new(Expr::dummy()),
     type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
   };
+  let _ = TsCallSignatureDecl {
+    span: DUMMY_SP,
+    params: Default::default(),
+    type_ann: Default::default(),
+    type_params: Default::default(),
+  };
   let _ = TsConstAssertion {
     span: DUMMY_SP,
     expr: Box::new(Expr::dummy()),
+  };
+  let _ = TsConstructSignatureDecl {
+    span: DUMMY_SP,
+    params: Default::default(),
+    type_ann: Default::default(),
+    type_params: Default::default(),
   };
   let _ = TsEnumDecl {
     span: DUMMY_SP,
@@ -606,6 +618,14 @@ fn test_structs() {
   let _ = TsExternalModuleRef {
     span: DUMMY_SP,
     expr: Str::dummy(),
+  };
+  let _ = TsGetterSignature {
+    span: DUMMY_SP,
+    computed: Default::default(),
+    key: Box::new(Expr::dummy()),
+    optional: Default::default(),
+    readonly: Default::default(),
+    type_ann: Default::default(),
   };
   let _ = TsImportEqualsDecl {
     span: DUMMY_SP,

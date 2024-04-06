@@ -965,10 +965,28 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsCallSignatureDecl createTsCallSignatureDecl(
+            List<ISwc4jAstTsFnParam> params,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsCallSignatureDecl(params, typeAnn, typeParams, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsConstAssertion createTsConstAssertion(
             ISwc4jAstExpr expr,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsConstAssertion(expr, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsConstructSignatureDecl createTsConstructSignatureDecl(
+            List<ISwc4jAstTsFnParam> params,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsConstructSignatureDecl(params, typeAnn, typeParams, span);
     }
 
     @Jni2RustMethod
@@ -1009,6 +1027,17 @@ public final class Swc4jAstFactory {
             Swc4jAstStr expr,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsExternalModuleRef(expr, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsGetterSignature createTsGetterSignature(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsGetterSignature(readonly, key, computed, optional, typeAnn, span);
     }
 
     @Jni2RustMethod
