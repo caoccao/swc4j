@@ -1111,6 +1111,14 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsTplLitType createTsTplLitType(
+            List<ISwc4jAstTsType> types,
+            List<Swc4jAstTplElement> quasis,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTplLitType(types, quasis, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsTypeAliasDecl createTsTypeAliasDecl(
             Swc4jAstIdent id,
             boolean declare,

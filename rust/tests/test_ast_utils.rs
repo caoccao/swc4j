@@ -670,6 +670,11 @@ fn test_structs() {
     expr: Box::new(Expr::dummy()),
     type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
   };
+  let _ = TsTplLitType {
+    span: DUMMY_SP,
+    quasis: Default::default(),
+    types: Default::default(),
+  };
   let _ = TsTypeAliasDecl {
     span: DUMMY_SP,
     declare: Default::default(),

@@ -21,12 +21,13 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
 
 import java.util.Optional;
 
 public class Swc4jAstNumber
         extends Swc4jAst
-        implements ISwc4jAstLit, ISwc4jAstPropName {
+        implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit {
     protected final Optional<String> raw;
     protected final double value;
 

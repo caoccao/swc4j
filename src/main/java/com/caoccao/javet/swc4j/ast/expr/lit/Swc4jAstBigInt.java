@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.StringUtils;
@@ -31,7 +32,7 @@ import java.util.Optional;
 
 public class Swc4jAstBigInt
         extends Swc4jAst
-        implements ISwc4jAstLit, ISwc4jAstPropName {
+        implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit {
     protected final Optional<String> raw;
     @Jni2RustField(ignore = true)
     protected final Swc4jAstBigIntSign sign;

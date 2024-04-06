@@ -16,6 +16,18 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-public interface ISwc4jAstLit
-        extends ISwc4jAstExpr, ISwc4jAstJsxAttrValue {
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstJsxNamespacedName;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstSpreadElement;
+import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxAttr;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class TestISwc4jAstJsxAttrName {
+    @Test
+    public void testAssignable() {
+        assertTrue(ISwc4jAstJsxAttrName.class.isAssignableFrom(Swc4jAstIdent.class));
+        assertTrue(ISwc4jAstJsxAttrName.class.isAssignableFrom(Swc4jAstJsxNamespacedName.class));
+    }
 }

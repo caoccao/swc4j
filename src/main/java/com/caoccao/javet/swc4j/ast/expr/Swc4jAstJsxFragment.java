@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxAttrValue;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxElementChild;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxClosingFragment;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxOpeningFragment;
@@ -32,7 +33,7 @@ import java.util.List;
 @Jni2RustClass(name = "JSXFragment")
 public class Swc4jAstJsxFragment
         extends Swc4jAst
-        implements ISwc4jAstExpr, ISwc4jAstJsxElementChild {
+        implements ISwc4jAstExpr, ISwc4jAstJsxElementChild, ISwc4jAstJsxAttrValue {
     protected final List<ISwc4jAstJsxElementChild> children;
     protected final Swc4jAstJsxClosingFragment closing;
     protected final Swc4jAstJsxOpeningFragment opening;

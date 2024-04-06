@@ -20,10 +20,11 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
 
 public class Swc4jAstBool
         extends Swc4jAst
-        implements ISwc4jAstLit {
+        implements ISwc4jAstLit, ISwc4jAstTsLit {
     protected final boolean value;
 
     public Swc4jAstBool(

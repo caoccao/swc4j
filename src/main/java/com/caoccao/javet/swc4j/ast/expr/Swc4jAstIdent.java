@@ -26,7 +26,7 @@ public class Swc4jAstIdent
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstProp, ISwc4jAstModuleRef, ISwc4jAstModuleExportName, ISwc4jAstTsEntityName,
         ISwc4jAstPropName, ISwc4jAstTsModuleName, ISwc4jAstJsxObject, ISwc4jAstJsxElementName, ISwc4jAstMemberProp,
-        ISwc4jAstSuperProp {
+        ISwc4jAstSuperProp, ISwc4jAstJsxAttrName {
     protected static final String QUESTION_MARK = "?";
     protected final boolean optional;
     protected final String sym;

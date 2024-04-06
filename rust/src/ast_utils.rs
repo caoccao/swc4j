@@ -154,6 +154,7 @@ struct JavaSwc4jAstFactory {
   method_create_ts_param_prop: JStaticMethodID,
   method_create_ts_qualified_name: JStaticMethodID,
   method_create_ts_satisfies_expr: JStaticMethodID,
+  method_create_ts_tpl_lit_type: JStaticMethodID,
   method_create_ts_type_alias_decl: JStaticMethodID,
   method_create_ts_type_ann: JStaticMethodID,
   method_create_ts_type_assertion: JStaticMethodID,
@@ -1055,6 +1056,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsSatisfiesExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsSatisfiesExpr");
+    let method_create_ts_tpl_lit_type = env
+      .get_static_method_id(
+        &class,
+        "createTsTplLitType",
+        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTplLitType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTplLitType");
     let method_create_ts_type_alias_decl = env
       .get_static_method_id(
         &class,
@@ -1280,6 +1288,7 @@ impl JavaSwc4jAstFactory {
       method_create_ts_param_prop,
       method_create_ts_qualified_name,
       method_create_ts_satisfies_expr,
+      method_create_ts_tpl_lit_type,
       method_create_ts_type_alias_decl,
       method_create_ts_type_ann,
       method_create_ts_type_assertion,
@@ -4281,6 +4290,29 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_satisfies_expr,
         &[expr, type_ann, span],
         "Swc4jAstTsSatisfiesExpr create_ts_satisfies_expr()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_tpl_lit_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    types: &JObject<'_>,
+    quasis: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let types = object_to_jvalue!(types);
+    let quasis = object_to_jvalue!(quasis);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_tpl_lit_type,
+        &[types, quasis, span],
+        "Swc4jAstTsTplLitType create_ts_tpl_lit_type()"
       );
     return_value
   }
@@ -8738,6 +8770,36 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_tpl_lit_type<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsTplLitType,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_types = java_array_list.construct(env, node.types.len());
+    node.types.iter().for_each(|node| {
+      let java_node = enum_create_ts_type(env, map, node);
+      java_array_list.add(env, &java_types, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_quasis = java_array_list.construct(env, node.quasis.len());
+    node.quasis.iter().for_each(|node| {
+      let java_node = create_tpl_element(env, map, node);
+      java_array_list.add(env, &java_quasis, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = java_ast_factory.create_ts_tpl_lit_type(env, &java_types, &java_quasis, &java_range);
+    delete_local_ref!(env, java_types);
+    delete_local_ref!(env, java_quasis);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_ts_type_alias_decl<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -9185,8 +9247,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      JSXAttrName::Ident(node) => create_ident(env, map, node),
+      JSXAttrName::JSXNamespacedName(node) => create_jsx_namespaced_name(env, map, node),
     }
   }
 
@@ -9213,8 +9275,10 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      JSXAttrValue::JSXElement(node) => create_jsx_element(env, map, node),
+      JSXAttrValue::JSXExprContainer(node) => create_jsx_expr_container(env, map, node),
+      JSXAttrValue::JSXFragment(node) => create_jsx_fragment(env, map, node),
+      JSXAttrValue::Lit(node) => enum_create_lit(env, map, node),
     }
   }
 
@@ -9589,8 +9653,11 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      TsLit::BigInt(node) => create_big_int(env, map, node),
+      TsLit::Bool(node) => create_bool(env, map, node),
+      TsLit::Number(node) => create_number(env, map, node),
+      TsLit::Str(node) => create_str(env, map, node),
+      TsLit::Tpl(node) => create_ts_tpl_lit_type(env, map, node),
     }
   }
 

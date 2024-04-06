@@ -19,17 +19,14 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleExportName;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsModuleName;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.Optional;
 
 public class Swc4jAstStr
         extends Swc4jAst
-        implements ISwc4jAstLit, ISwc4jAstModuleExportName, ISwc4jAstPropName, ISwc4jAstTsModuleName {
+        implements ISwc4jAstLit, ISwc4jAstModuleExportName, ISwc4jAstPropName, ISwc4jAstTsModuleName, ISwc4jAstTsLit {
     protected final Optional<String> raw;
     protected final String value;
 

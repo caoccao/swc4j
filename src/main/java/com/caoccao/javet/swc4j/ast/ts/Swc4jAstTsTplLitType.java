@@ -14,42 +14,48 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.expr;
+package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxAttrValue;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxElementChild;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxExpr;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
+import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstTplElement;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-@Jni2RustClass(name = "JSXExprContainer")
-public class Swc4jAstJsxExprContainer
-        extends Swc4jAst
-        implements ISwc4jAstExpr, ISwc4jAstJsxElementChild, ISwc4jAstJsxAttrValue {
-    @Jni2RustField(value = "JSXExpr::Expr(Box::new(Expr::dummy()))")
-    protected final ISwc4jAstJsxExpr expr;
+import java.util.List;
 
-    public Swc4jAstJsxExprContainer(
-            ISwc4jAstJsxExpr expr,
+public class Swc4jAstTsTplLitType
+        extends Swc4jAst
+        implements ISwc4jAstTsLit {
+    protected final List<Swc4jAstTplElement> quasis;
+    protected final List<ISwc4jAstTsType> types;
+
+    public Swc4jAstTsTplLitType(
+            List<ISwc4jAstTsType> types,
+            List<Swc4jAstTplElement> quasis,
             Swc4jAstSpan span) {
         super(span);
-        this.expr = AssertionUtils.notNull(expr, "Expr");
-        childNodes = SimpleList.immutableOf(expr);
+        this.quasis = AssertionUtils.notNull(quasis, "Quasis");
+        this.types = AssertionUtils.notNull(types, "Types");
+        childNodes = SimpleList.copyOf(types);
+        childNodes.addAll(quasis);
+        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 
-    public ISwc4jAstJsxExpr getExpr() {
-        return expr;
+    public List<Swc4jAstTplElement> getQuasis() {
+        return quasis;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.JsxExprContainer;
+        return Swc4jAstType.TsTplLitType;
+    }
+
+    public List<ISwc4jAstTsType> getTypes() {
+        return types;
     }
 }
