@@ -151,12 +151,15 @@ struct JavaSwc4jAstFactory {
   method_create_ts_instantiation: JStaticMethodID,
   method_create_ts_interface_body: JStaticMethodID,
   method_create_ts_interface_decl: JStaticMethodID,
+  method_create_ts_method_signature: JStaticMethodID,
   method_create_ts_module_decl: JStaticMethodID,
   method_create_ts_namespace_export_decl: JStaticMethodID,
   method_create_ts_non_null_expr: JStaticMethodID,
   method_create_ts_param_prop: JStaticMethodID,
+  method_create_ts_property_signature: JStaticMethodID,
   method_create_ts_qualified_name: JStaticMethodID,
   method_create_ts_satisfies_expr: JStaticMethodID,
+  method_create_ts_setter_signature: JStaticMethodID,
   method_create_ts_tpl_lit_type: JStaticMethodID,
   method_create_ts_type_alias_decl: JStaticMethodID,
   method_create_ts_type_ann: JStaticMethodID,
@@ -1014,7 +1017,7 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createTsIndexSignature",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstTsIndexSignature;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIndexSignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsIndexSignature");
     let method_create_ts_instantiation = env
@@ -1038,6 +1041,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsInterfaceDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsInterfaceDecl");
+    let method_create_ts_method_signature = env
+      .get_static_method_id(
+        &class,
+        "createTsMethodSignature",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsMethodSignature;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsMethodSignature");
     let method_create_ts_module_decl = env
       .get_static_method_id(
         &class,
@@ -1066,6 +1076,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;IZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsParamPropParam;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsParamProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsParamProp");
+    let method_create_ts_property_signature = env
+      .get_static_method_id(
+        &class,
+        "createTsPropertySignature",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsPropertySignature;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsPropertySignature");
     let method_create_ts_qualified_name = env
       .get_static_method_id(
         &class,
@@ -1080,6 +1097,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsSatisfiesExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsSatisfiesExpr");
+    let method_create_ts_setter_signature = env
+      .get_static_method_id(
+        &class,
+        "createTsSetterSignature",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsFnParam;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsSetterSignature;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsSetterSignature");
     let method_create_ts_tpl_lit_type = env
       .get_static_method_id(
         &class,
@@ -1309,12 +1333,15 @@ impl JavaSwc4jAstFactory {
       method_create_ts_instantiation,
       method_create_ts_interface_body,
       method_create_ts_interface_decl,
+      method_create_ts_method_signature,
       method_create_ts_module_decl,
       method_create_ts_namespace_export_decl,
       method_create_ts_non_null_expr,
       method_create_ts_param_prop,
+      method_create_ts_property_signature,
       method_create_ts_qualified_name,
       method_create_ts_satisfies_expr,
+      method_create_ts_setter_signature,
       method_create_ts_tpl_lit_type,
       method_create_ts_type_alias_decl,
       method_create_ts_type_ann,
@@ -4256,6 +4283,39 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_ts_method_signature<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    readonly: bool,
+    key: &JObject<'_>,
+    computed: bool,
+    optional: bool,
+    params: &JObject<'_>,
+    type_ann: &Option<JObject>,
+    type_params: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let readonly = boolean_to_jvalue!(readonly);
+    let key = object_to_jvalue!(key);
+    let computed = boolean_to_jvalue!(computed);
+    let optional = boolean_to_jvalue!(optional);
+    let params = object_to_jvalue!(params);
+    let type_ann = optional_object_to_jvalue!(type_ann);
+    let type_params = optional_object_to_jvalue!(type_params);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_method_signature,
+        &[readonly, key, computed, optional, params, type_ann, type_params, span],
+        "Swc4jAstTsMethodSignature create_ts_method_signature()"
+      );
+    return_value
+  }
+
   pub fn create_ts_module_decl<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -4354,6 +4414,41 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_ts_property_signature<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    readonly: bool,
+    key: &JObject<'_>,
+    computed: bool,
+    optional: bool,
+    init: &Option<JObject>,
+    params: &JObject<'_>,
+    type_ann: &Option<JObject>,
+    type_params: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let readonly = boolean_to_jvalue!(readonly);
+    let key = object_to_jvalue!(key);
+    let computed = boolean_to_jvalue!(computed);
+    let optional = boolean_to_jvalue!(optional);
+    let init = optional_object_to_jvalue!(init);
+    let params = object_to_jvalue!(params);
+    let type_ann = optional_object_to_jvalue!(type_ann);
+    let type_params = optional_object_to_jvalue!(type_params);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_property_signature,
+        &[readonly, key, computed, optional, init, params, type_ann, type_params, span],
+        "Swc4jAstTsPropertySignature create_ts_property_signature()"
+      );
+    return_value
+  }
+
   pub fn create_ts_qualified_name<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -4396,6 +4491,35 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_satisfies_expr,
         &[expr, type_ann, span],
         "Swc4jAstTsSatisfiesExpr create_ts_satisfies_expr()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_setter_signature<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    readonly: bool,
+    key: &JObject<'_>,
+    computed: bool,
+    optional: bool,
+    param: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let readonly = boolean_to_jvalue!(readonly);
+    let key = object_to_jvalue!(key);
+    let computed = boolean_to_jvalue!(computed);
+    let optional = boolean_to_jvalue!(optional);
+    let param = object_to_jvalue!(param);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_setter_signature,
+        &[readonly, key, computed, optional, param, span],
+        "Swc4jAstTsSetterSignature create_ts_setter_signature()"
       );
     return_value
   }
@@ -8849,6 +8973,51 @@ pub mod program {
     return_type
   }
 
+  fn create_ts_method_signature<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsMethodSignature,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let readonly = node.readonly;
+    let java_key = enum_create_expr(env, map, &node.key);
+    let computed = node.computed;
+    let optional = node.optional;
+    let java_params = java_array_list.construct(env, node.params.len());
+    node.params.iter().for_each(|node| {
+      let java_node = enum_create_ts_fn_param(env, map, node);
+      java_array_list.add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let java_optional_type_params = node
+      .type_params
+      .as_ref()
+      .map(|node| create_ts_type_param_decl(env, map, node));
+    let return_value = java_ast_factory.create_ts_method_signature(
+      env,
+      readonly,
+      &java_key,
+      computed,
+      optional,
+      &java_params,
+      &java_optional_type_ann,
+      &java_optional_type_params,
+      &java_range,
+    );
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_params);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_ts_module_decl<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -8940,6 +9109,54 @@ pub mod program {
     return_type
   }
 
+  fn create_ts_property_signature<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsPropertySignature,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let readonly = node.readonly;
+    let java_key = enum_create_expr(env, map, &node.key);
+    let computed = node.computed;
+    let optional = node.optional;
+    let java_optional_init = node.init.as_ref().map(|node| enum_create_expr(env, map, node));
+    let java_params = java_array_list.construct(env, node.params.len());
+    node.params.iter().for_each(|node| {
+      let java_node = enum_create_ts_fn_param(env, map, node);
+      java_array_list.add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let java_optional_type_params = node
+      .type_params
+      .as_ref()
+      .map(|node| create_ts_type_param_decl(env, map, node));
+    let return_value = java_ast_factory.create_ts_property_signature(
+      env,
+      readonly,
+      &java_key,
+      computed,
+      optional,
+      &java_optional_init,
+      &java_params,
+      &java_optional_type_ann,
+      &java_optional_type_params,
+      &java_range,
+    );
+    delete_local_ref!(env, java_key);
+    delete_local_optional_ref!(env, java_optional_init);
+    delete_local_ref!(env, java_params);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_ts_qualified_name<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -8974,6 +9191,37 @@ pub mod program {
     let return_value = java_ast_factory.create_ts_satisfies_expr(env, &java_expr, &java_type_ann, &java_range);
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_setter_signature<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsSetterSignature,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let readonly = node.readonly;
+    let java_key = enum_create_expr(env, map, &node.key);
+    let computed = node.computed;
+    let optional = node.optional;
+    let java_param = enum_create_ts_fn_param(env, map, &node.param);
+    let return_value = java_ast_factory.create_ts_setter_signature(
+      env,
+      readonly,
+      &java_key,
+      computed,
+      optional,
+      &java_param,
+      &java_range,
+    );
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_param);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -9951,12 +10199,10 @@ pub mod program {
       TsTypeElement::TsCallSignatureDecl(node) => create_ts_call_signature_decl(env, map, node),
       TsTypeElement::TsConstructSignatureDecl(node) => create_ts_construct_signature_decl(env, map, node),
       TsTypeElement::TsGetterSignature(node) => create_ts_getter_signature(env, map, node),
-      // TsTypeElement::TsIndexSignature(node) => create_ts_index_signature(env, map, node),
-      // TsTypeElement::TsMethodSignature(node) => create_ts_method_signature(env, map, node),
-      // TsTypeElement::TsPropertySignature(node) => create_ts_property_signature(env, map, node),
-      // TsTypeElement::TsSetterSignature(node) => create_ts_setter_signature(env, map, node),
-      default => panic!("{:?}", default),
-      // TODO
+      TsTypeElement::TsIndexSignature(node) => create_ts_index_signature(env, map, node),
+      TsTypeElement::TsMethodSignature(node) => create_ts_method_signature(env, map, node),
+      TsTypeElement::TsPropertySignature(node) => create_ts_property_signature(env, map, node),
+      TsTypeElement::TsSetterSignature(node) => create_ts_setter_signature(env, map, node),
     }
   }
 

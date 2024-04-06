@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.interfaces;
 
 import com.caoccao.javet.swc4j.ast.clazz.*;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstEmptyStmt;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsIndexSignature;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

@@ -658,6 +658,16 @@ fn test_structs() {
     id: Ident::dummy(),
     type_params: Default::default(),
   };
+  let _ = TsMethodSignature {
+    span: DUMMY_SP,
+    computed: Default::default(),
+    key: Box::new(Expr::dummy()),
+    optional: Default::default(),
+    params: Default::default(),
+    readonly: Default::default(),
+    type_ann: Default::default(),
+    type_params: Default::default(),
+  };
   let _ = TsModuleDecl {
     span: DUMMY_SP,
     body: Default::default(),
@@ -681,6 +691,17 @@ fn test_structs() {
     param: TsParamPropParam::Ident(BindingIdent::dummy()),
     readonly: Default::default(),
   };
+  let _ = TsPropertySignature {
+    span: DUMMY_SP,
+    computed: Default::default(),
+    init: Default::default(),
+    key: Box::new(Expr::dummy()),
+    optional: Default::default(),
+    params: Default::default(),
+    readonly: Default::default(),
+    type_ann: Default::default(),
+    type_params: Default::default(),
+  };
   let _ = TsQualifiedName {
     left: TsEntityName::Ident(Ident::dummy()),
     right: Ident::dummy(),
@@ -689,6 +710,14 @@ fn test_structs() {
     span: DUMMY_SP,
     expr: Box::new(Expr::dummy()),
     type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+  };
+  let _ = TsSetterSignature {
+    span: DUMMY_SP,
+    computed: Default::default(),
+    key: Box::new(Expr::dummy()),
+    optional: Default::default(),
+    param: TsFnParam::Ident(BindingIdent::dummy()),
+    readonly: Default::default(),
   };
   let _ = TsTplLitType {
     span: DUMMY_SP,

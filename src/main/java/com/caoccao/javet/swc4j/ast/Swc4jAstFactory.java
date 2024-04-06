@@ -1087,6 +1087,19 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsMethodSignature createTsMethodSignature(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional,
+            List<ISwc4jAstTsFnParam> params,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsMethodSignature(readonly, key, computed, optional, params, typeAnn, typeParams, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsModuleDecl createTsModuleDecl(
             boolean declare,
             boolean global,
@@ -1124,6 +1137,20 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsPropertySignature createTsPropertySignature(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional,
+            @Jni2RustParam(optional = true) ISwc4jAstExpr init,
+            List<ISwc4jAstTsFnParam> params,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsPropertySignature(readonly, key, computed, optional, init, params, typeAnn, typeParams, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsQualifiedName createTsQualifiedName(
             ISwc4jAstTsEntityName left,
             Swc4jAstIdent right,
@@ -1137,6 +1164,17 @@ public final class Swc4jAstFactory {
             ISwc4jAstTsType typeAnn,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsSatisfiesExpr(expr, typeAnn, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsSetterSignature createTsSetterSignature(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional,
+            ISwc4jAstTsFnParam param,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsSetterSignature(readonly, key, computed, optional, param, span);
     }
 
     @Jni2RustMethod

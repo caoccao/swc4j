@@ -16,8 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsCallSignatureDecl;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsConstructSignatureDecl;
+import com.caoccao.javet.swc4j.ast.ts.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,5 +26,10 @@ public class TestISwc4jAstTsTypeElement {
     public void testAssignable() {
         assertTrue(ISwc4jAstTsTypeElement.class.isAssignableFrom(Swc4jAstTsCallSignatureDecl.class));
         assertTrue(ISwc4jAstTsTypeElement.class.isAssignableFrom(Swc4jAstTsConstructSignatureDecl.class));
+        assertTrue(ISwc4jAstTsTypeElement.class.isAssignableFrom(Swc4jAstTsGetterSignature.class));
+        assertTrue(ISwc4jAstTsTypeElement.class.isAssignableFrom(Swc4jAstTsIndexSignature.class));
+        assertTrue(ISwc4jAstTsTypeElement.class.isAssignableFrom(Swc4jAstTsMethodSignature.class));
+        assertTrue(ISwc4jAstTsTypeElement.class.isAssignableFrom(Swc4jAstTsPropertySignature.class));
+        assertTrue(ISwc4jAstTsTypeElement.class.isAssignableFrom(Swc4jAstTsSetterSignature.class));
     }
 }
