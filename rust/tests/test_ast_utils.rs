@@ -573,6 +573,10 @@ fn test_structs() {
     finalizer: Default::default(),
     handler: Default::default(),
   };
+  let _ = TsArrayType {
+    span: DUMMY_SP,
+    elem_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
+  };
   let _ = TsAsExpr {
     span: DUMMY_SP,
     expr: Box::new(Expr::dummy()),
@@ -583,6 +587,13 @@ fn test_structs() {
     params: Default::default(),
     type_ann: Default::default(),
     type_params: Default::default(),
+  };
+  let _ = TsConditionalType {
+    span: DUMMY_SP,
+    check_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
+    extends_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
+    false_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
+    true_type: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
   };
   let _ = TsConstAssertion {
     span: DUMMY_SP,
@@ -633,6 +644,12 @@ fn test_structs() {
     id: Ident::dummy(),
     module_ref: TsModuleRef::TsEntityName(TsEntityName::Ident(Ident::dummy())),
     is_type_only: Default::default(),
+  };
+  let _ = TsImportType {
+    span: DUMMY_SP,
+    arg: Str::dummy(),
+    qualifier: Default::default(),
+    type_args: Default::default(),
   };
   let _ = TsIndexSignature {
     span: DUMMY_SP,

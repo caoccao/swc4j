@@ -957,6 +957,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsArrayType createTsArrayType(
+            ISwc4jAstTsType elemType,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsArrayType(elemType, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsAsExpr createTsAsExpr(
             ISwc4jAstExpr expr,
             ISwc4jAstTsType typeAnn,
@@ -971,6 +978,16 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsCallSignatureDecl(params, typeAnn, typeParams, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsConditionalType createTsConditionalType(
+            ISwc4jAstTsType checkType,
+            ISwc4jAstTsType extendsType,
+            ISwc4jAstTsType trueType,
+            ISwc4jAstTsType falseType,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsConditionalType(checkType, extendsType, trueType, falseType, span);
     }
 
     @Jni2RustMethod
@@ -1048,6 +1065,15 @@ public final class Swc4jAstFactory {
             ISwc4jAstTsModuleRef moduleRef,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsImportEqualsDecl(export, typeOnly, id, moduleRef, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsImportType createTsImportType(
+            Swc4jAstStr arg,
+            @Jni2RustParam(optional = true) ISwc4jAstTsEntityName qualifier,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsImportType(arg, qualifier, typeArgs, span);
     }
 
     @Jni2RustMethod

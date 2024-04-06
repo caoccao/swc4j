@@ -136,8 +136,10 @@ struct JavaSwc4jAstFactory {
   method_create_tpl: JStaticMethodID,
   method_create_tpl_element: JStaticMethodID,
   method_create_try_stmt: JStaticMethodID,
+  method_create_ts_array_type: JStaticMethodID,
   method_create_ts_as_expr: JStaticMethodID,
   method_create_ts_call_signature_decl: JStaticMethodID,
+  method_create_ts_conditional_type: JStaticMethodID,
   method_create_ts_const_assertion: JStaticMethodID,
   method_create_ts_construct_signature_decl: JStaticMethodID,
   method_create_ts_enum_decl: JStaticMethodID,
@@ -147,6 +149,7 @@ struct JavaSwc4jAstFactory {
   method_create_ts_external_module_ref: JStaticMethodID,
   method_create_ts_getter_signature: JStaticMethodID,
   method_create_ts_import_equals_decl: JStaticMethodID,
+  method_create_ts_import_type: JStaticMethodID,
   method_create_ts_index_signature: JStaticMethodID,
   method_create_ts_instantiation: JStaticMethodID,
   method_create_ts_interface_body: JStaticMethodID,
@@ -936,6 +939,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstCatchClause;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTryStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTryStmt");
+    let method_create_ts_array_type = env
+      .get_static_method_id(
+        &class,
+        "createTsArrayType",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsArrayType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsArrayType");
     let method_create_ts_as_expr = env
       .get_static_method_id(
         &class,
@@ -950,6 +960,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsCallSignatureDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsCallSignatureDecl");
+    let method_create_ts_conditional_type = env
+      .get_static_method_id(
+        &class,
+        "createTsConditionalType",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsConditionalType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsConditionalType");
     let method_create_ts_const_assertion = env
       .get_static_method_id(
         &class,
@@ -1013,6 +1030,13 @@ impl JavaSwc4jAstFactory {
         "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleRef;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsImportEqualsDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsImportEqualsDecl");
+    let method_create_ts_import_type = env
+      .get_static_method_id(
+        &class,
+        "createTsImportType",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsImportType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsImportType");
     let method_create_ts_index_signature = env
       .get_static_method_id(
         &class,
@@ -1318,8 +1342,10 @@ impl JavaSwc4jAstFactory {
       method_create_tpl,
       method_create_tpl_element,
       method_create_try_stmt,
+      method_create_ts_array_type,
       method_create_ts_as_expr,
       method_create_ts_call_signature_decl,
+      method_create_ts_conditional_type,
       method_create_ts_const_assertion,
       method_create_ts_construct_signature_decl,
       method_create_ts_enum_decl,
@@ -1329,6 +1355,7 @@ impl JavaSwc4jAstFactory {
       method_create_ts_external_module_ref,
       method_create_ts_getter_signature,
       method_create_ts_import_equals_decl,
+      method_create_ts_import_type,
       method_create_ts_index_signature,
       method_create_ts_instantiation,
       method_create_ts_interface_body,
@@ -3918,6 +3945,27 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_ts_array_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    elem_type: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let elem_type = object_to_jvalue!(elem_type);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_array_type,
+        &[elem_type, span],
+        "Swc4jAstTsArrayType create_ts_array_type()"
+      );
+    return_value
+  }
+
   pub fn create_ts_as_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -3962,6 +4010,33 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_call_signature_decl,
         &[params, type_ann, type_params, span],
         "Swc4jAstTsCallSignatureDecl create_ts_call_signature_decl()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_conditional_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    check_type: &JObject<'_>,
+    extends_type: &JObject<'_>,
+    true_type: &JObject<'_>,
+    false_type: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let check_type = object_to_jvalue!(check_type);
+    let extends_type = object_to_jvalue!(extends_type);
+    let true_type = object_to_jvalue!(true_type);
+    let false_type = object_to_jvalue!(false_type);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_conditional_type,
+        &[check_type, extends_type, true_type, false_type, span],
+        "Swc4jAstTsConditionalType create_ts_conditional_type()"
       );
     return_value
   }
@@ -4179,6 +4254,31 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_import_equals_decl,
         &[export, type_only, id, module_ref, span],
         "Swc4jAstTsImportEqualsDecl create_ts_import_equals_decl()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_import_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    arg: &JObject<'_>,
+    qualifier: &Option<JObject>,
+    type_args: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let arg = object_to_jvalue!(arg);
+    let qualifier = optional_object_to_jvalue!(qualifier);
+    let type_args = optional_object_to_jvalue!(type_args);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_import_type,
+        &[arg, qualifier, type_args, span],
+        "Swc4jAstTsImportType create_ts_import_type()"
       );
     return_value
   }
@@ -8594,6 +8694,19 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_array_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsArrayType) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_elem_type = enum_create_ts_type(env, map, &node.elem_type);
+    let return_value = java_ast_factory.create_ts_array_type(env, &java_elem_type, &java_range);
+    delete_local_ref!(env, java_elem_type);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_ts_as_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsAsExpr) -> JObject<'a>
   where
     'local: 'a,
@@ -8641,6 +8754,36 @@ pub mod program {
     delete_local_ref!(env, java_params);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_conditional_type<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsConditionalType,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_check_type = enum_create_ts_type(env, map, &node.check_type);
+    let java_extends_type = enum_create_ts_type(env, map, &node.extends_type);
+    let java_true_type = enum_create_ts_type(env, map, &node.true_type);
+    let java_false_type = enum_create_ts_type(env, map, &node.false_type);
+    let return_value = java_ast_factory.create_ts_conditional_type(
+      env,
+      &java_check_type,
+      &java_extends_type,
+      &java_true_type,
+      &java_false_type,
+      &java_range,
+    );
+    delete_local_ref!(env, java_check_type);
+    delete_local_ref!(env, java_extends_type);
+    delete_local_ref!(env, java_true_type);
+    delete_local_ref!(env, java_false_type);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -8852,6 +8995,39 @@ pub mod program {
     );
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_module_ref);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_import_type<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsImportType,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_arg = create_str(env, map, &node.arg);
+    let java_optional_qualifier = node
+      .qualifier
+      .as_ref()
+      .map(|node| enum_create_ts_entity_name(env, map, node));
+    let java_optional_type_args = node
+      .type_args
+      .as_ref()
+      .map(|node| create_ts_type_param_instantiation(env, map, node));
+    let return_value = java_ast_factory.create_ts_import_type(
+      env,
+      &java_arg,
+      &java_optional_qualifier,
+      &java_optional_type_args,
+      &java_range,
+    );
+    delete_local_ref!(env, java_arg);
+    delete_local_optional_ref!(env, java_optional_qualifier);
+    delete_local_optional_ref!(env, java_optional_type_args);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -9204,7 +9380,6 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let readonly = node.readonly;
     let java_key = enum_create_expr(env, map, &node.key);
@@ -10225,6 +10400,26 @@ pub mod program {
     'local: 'a,
   {
     match node {
+      TsType::TsArrayType(node) => create_ts_array_type(env, map, node),
+      TsType::TsConditionalType(node) => create_ts_conditional_type(env, map, node),
+      TsType::TsFnOrConstructorType(node) => enum_create_ts_fn_or_constructor_type(env, map, node),
+      TsType::TsImportType(node) => create_ts_import_type(env, map, node),
+      // TsType::TsIndexedAccessType(node) => create_ts_indexed_access_type(env, map, node),
+      // TsType::TsInferType(node) => create_ts_infer_type(env, map, node),
+      // TsType::TsKeywordType(node) => create_ts_keyword_type(env, map, node),
+      // TsType::TsLitType(node) => create_ts_lit_type(env, map, node),
+      // TsType::TsMappedType(node) => create_ts_mapped_type(env, map, node),
+      // TsType::TsOptionalType(node) => create_ts_optional_type(env, map, node),
+      // TsType::TsParenthesizedType(node) => create_ts_parenthesized_type(env, map, node),
+      // TsType::TsRestType(node) => create_ts_rest_type(env, map, node),
+      // TsType::TsThisType(node) => create_ts_this_type(env, map, node),
+      // TsType::TsTupleType(node) => create_ts_tuple_type(env, map, node),
+      // TsType::TsTypeLit(node) => create_ts_type_lit(env, map, node),
+      // TsType::TsTypeOperator(node) => create_ts_type_operator(env, map, node),
+      // TsType::TsTypePredicate(node) => create_ts_type_predicate(env, map, node),
+      // TsType::TsTypeQuery(node) => create_ts_type_query(env, map, node),
+      // TsType::TsTypeRef(node) => create_ts_type_ref(env, map, node),
+      TsType::TsUnionOrIntersectionType(node) => enum_create_ts_union_or_intersection_type(env, map, node),
       default => panic!("{:?}", default),
       // TODO
     }
