@@ -163,9 +163,12 @@ struct JavaSwc4jAstFactory {
   method_create_ts_module_decl: JStaticMethodID,
   method_create_ts_namespace_export_decl: JStaticMethodID,
   method_create_ts_non_null_expr: JStaticMethodID,
+  method_create_ts_optional_type: JStaticMethodID,
   method_create_ts_param_prop: JStaticMethodID,
+  method_create_ts_parenthesized_type: JStaticMethodID,
   method_create_ts_property_signature: JStaticMethodID,
   method_create_ts_qualified_name: JStaticMethodID,
+  method_create_ts_rest_type: JStaticMethodID,
   method_create_ts_satisfies_expr: JStaticMethodID,
   method_create_ts_setter_signature: JStaticMethodID,
   method_create_ts_tpl_lit_type: JStaticMethodID,
@@ -1133,6 +1136,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsNonNullExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsNonNullExpr");
+    let method_create_ts_optional_type = env
+      .get_static_method_id(
+        &class,
+        "createTsOptionalType",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsOptionalType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsOptionalType");
     let method_create_ts_param_prop = env
       .get_static_method_id(
         &class,
@@ -1140,6 +1150,13 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;IZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsParamPropParam;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsParamProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsParamProp");
+    let method_create_ts_parenthesized_type = env
+      .get_static_method_id(
+        &class,
+        "createTsParenthesizedType",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsParenthesizedType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsParenthesizedType");
     let method_create_ts_property_signature = env
       .get_static_method_id(
         &class,
@@ -1154,6 +1171,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsQualifiedName;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsQualifiedName");
+    let method_create_ts_rest_type = env
+      .get_static_method_id(
+        &class,
+        "createTsRestType",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsRestType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsRestType");
     let method_create_ts_satisfies_expr = env
       .get_static_method_id(
         &class,
@@ -1409,9 +1433,12 @@ impl JavaSwc4jAstFactory {
       method_create_ts_module_decl,
       method_create_ts_namespace_export_decl,
       method_create_ts_non_null_expr,
+      method_create_ts_optional_type,
       method_create_ts_param_prop,
+      method_create_ts_parenthesized_type,
       method_create_ts_property_signature,
       method_create_ts_qualified_name,
+      method_create_ts_rest_type,
       method_create_ts_satisfies_expr,
       method_create_ts_setter_signature,
       method_create_ts_tpl_lit_type,
@@ -4647,6 +4674,27 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_ts_optional_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    type_ann: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let type_ann = object_to_jvalue!(type_ann);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_optional_type,
+        &[type_ann, span],
+        "Swc4jAstTsOptionalType create_ts_optional_type()"
+      );
+    return_value
+  }
+
   pub fn create_ts_param_prop<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -4672,6 +4720,27 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_param_prop,
         &[decorators, accessibility_id, is_override, readonly, param, span],
         "Swc4jAstTsParamProp create_ts_param_prop()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_parenthesized_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    type_ann: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let type_ann = object_to_jvalue!(type_ann);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_parenthesized_type,
+        &[type_ann, span],
+        "Swc4jAstTsParenthesizedType create_ts_parenthesized_type()"
       );
     return_value
   }
@@ -4730,6 +4799,27 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_qualified_name,
         &[left, right, span],
         "Swc4jAstTsQualifiedName create_ts_qualified_name()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_rest_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    type_ann: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let type_ann = object_to_jvalue!(type_ann);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_rest_type,
+        &[type_ann, span],
+        "Swc4jAstTsRestType create_ts_rest_type()"
       );
     return_value
   }
@@ -9509,6 +9599,19 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_optional_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsOptionalType) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
+    let return_value = java_ast_factory.create_ts_optional_type(env, &java_type_ann, &java_range);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_ts_param_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsParamProp) -> JObject<'a>
   where
     'local: 'a,
@@ -9539,6 +9642,19 @@ pub mod program {
     delete_local_ref!(env, java_param);
     delete_local_ref!(env, java_range);
     return_type
+  }
+
+  fn create_ts_parenthesized_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsParenthesizedType) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
+    let return_value = java_ast_factory.create_ts_parenthesized_type(env, &java_type_ann, &java_range);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_range);
+    return_value
   }
 
   fn create_ts_property_signature<'local, 'a>(
@@ -9604,6 +9720,19 @@ pub mod program {
     let return_value = java_ast_factory.create_ts_qualified_name(env, &java_left, &java_right, &java_range);
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_rest_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsRestType) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
+    let return_value = java_ast_factory.create_ts_rest_type(env, &java_type_ann, &java_range);
+    delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -10665,9 +10794,9 @@ pub mod program {
       TsType::TsKeywordType(node) => create_ts_keyword_type(env, map, node),
       TsType::TsLitType(node) => create_ts_lit_type(env, map, node),
       TsType::TsMappedType(node) => create_ts_mapped_type(env, map, node),
-      // TsType::TsOptionalType(node) => create_ts_optional_type(env, map, node),
-      // TsType::TsParenthesizedType(node) => create_ts_parenthesized_type(env, map, node),
-      // TsType::TsRestType(node) => create_ts_rest_type(env, map, node),
+      TsType::TsOptionalType(node) => create_ts_optional_type(env, map, node),
+      TsType::TsParenthesizedType(node) => create_ts_parenthesized_type(env, map, node),
+      TsType::TsRestType(node) => create_ts_rest_type(env, map, node),
       // TsType::TsThisType(node) => create_ts_this_type(env, map, node),
       // TsType::TsTupleType(node) => create_ts_tuple_type(env, map, node),
       // TsType::TsTypeLit(node) => create_ts_type_lit(env, map, node),

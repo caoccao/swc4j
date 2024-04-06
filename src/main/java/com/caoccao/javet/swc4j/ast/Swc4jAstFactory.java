@@ -1195,6 +1195,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsOptionalType createTsOptionalType(
+            ISwc4jAstTsType typeAnn,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsOptionalType(typeAnn, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsParamProp createTsParamProp(
             List<Swc4jAstDecorator> decorators,
             int accessibilityId,
@@ -1205,6 +1212,13 @@ public final class Swc4jAstFactory {
         return new Swc4jAstTsParamProp(
                 decorators, accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
                 isOverride, readonly, param, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsParenthesizedType createTsParenthesizedType(
+            ISwc4jAstTsType typeAnn,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsParenthesizedType(typeAnn, span);
     }
 
     @Jni2RustMethod
@@ -1227,6 +1241,13 @@ public final class Swc4jAstFactory {
             Swc4jAstIdent right,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsQualifiedName(left, right, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsRestType createTsRestType(
+            ISwc4jAstTsType typeAnn,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsRestType(typeAnn, span);
     }
 
     @Jni2RustMethod

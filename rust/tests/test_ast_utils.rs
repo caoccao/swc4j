@@ -726,6 +726,10 @@ fn test_structs() {
     span: DUMMY_SP,
     expr: Box::new(Expr::dummy()),
   };
+  let _ = TsOptionalType {
+    span: DUMMY_SP,
+    type_ann: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
+  };
   let _ = TsParamProp {
     span: DUMMY_SP,
     is_override: Default::default(),
@@ -733,6 +737,10 @@ fn test_structs() {
     decorators: Default::default(),
     param: TsParamPropParam::Ident(BindingIdent::dummy()),
     readonly: Default::default(),
+  };
+  let _ = TsParenthesizedType {
+    span: DUMMY_SP,
+    type_ann: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
   };
   let _ = TsPropertySignature {
     span: DUMMY_SP,
@@ -748,6 +756,10 @@ fn test_structs() {
   let _ = TsQualifiedName {
     left: TsEntityName::Ident(Ident::dummy()),
     right: Ident::dummy(),
+  };
+  let _ = TsRestType {
+    span: DUMMY_SP,
+    type_ann: Box::new(TsType::TsKeywordType(TsKeywordType { span: DUMMY_SP, kind: TsKeywordTypeKind::TsAnyKeyword })),
   };
   let _ = TsSatisfiesExpr {
     span: DUMMY_SP,
