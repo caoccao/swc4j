@@ -63,6 +63,7 @@ struct JavaSwc4jAstFactory {
   method_create_export_decl: JStaticMethodID,
   method_create_export_default_decl: JStaticMethodID,
   method_create_export_default_expr: JStaticMethodID,
+  method_create_export_default_specifier: JStaticMethodID,
   method_create_expr_or_spread: JStaticMethodID,
   method_create_expr_stmt: JStaticMethodID,
   method_create_fn_decl: JStaticMethodID,
@@ -414,6 +415,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportDefaultExpr");
+    let method_create_export_default_specifier = env
+      .get_static_method_id(
+        &class,
+        "createExportDefaultSpecifier",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultSpecifier;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createExportDefaultSpecifier");
     let method_create_expr_or_spread = env
       .get_static_method_id(
         &class,
@@ -1157,6 +1165,7 @@ impl JavaSwc4jAstFactory {
       method_create_export_decl,
       method_create_export_default_decl,
       method_create_export_default_expr,
+      method_create_export_default_specifier,
       method_create_expr_or_spread,
       method_create_expr_stmt,
       method_create_fn_decl,
@@ -2089,6 +2098,27 @@ impl JavaSwc4jAstFactory {
         self.method_create_export_default_expr,
         &[decl, span],
         "Swc4jAstExportDefaultExpr create_export_default_expr()"
+      );
+    return_value
+  }
+
+  pub fn create_export_default_specifier<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    exported: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let exported = object_to_jvalue!(exported);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_export_default_specifier,
+        &[exported, span],
+        "Swc4jAstExportDefaultSpecifier create_export_default_specifier()"
       );
     return_value
   }
@@ -6793,6 +6823,23 @@ pub mod program {
     return_value
   }
 
+  fn create_export_default_specifier<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &ExportDefaultSpecifier,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_exported = create_ident(env, map, &node.exported);
+    let return_value = java_ast_factory.create_export_default_specifier(env, &java_exported, &java_range);
+    delete_local_ref!(env, java_exported);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_expr_or_spread<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -8891,6 +8938,7 @@ pub mod program {
     'local: 'a,
   {
     match node {
+      ExportSpecifier::Default(node) => create_export_default_specifier(env, map, node),
       default => panic!("{:?}", default),
       // TODO
     }
@@ -9312,8 +9360,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      SuperProp::Computed(node) => create_computed_prop_name(env, map, node),
+      SuperProp::Ident(node) => create_ident(env, map, node),
     }
   }
 
@@ -9436,8 +9484,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      TsParamPropParam::Assign(node) => create_assign_pat(env, map, node),
+      TsParamPropParam::Ident(node) => create_binding_ident(env, map, node),
     }
   }
 
@@ -9518,7 +9566,6 @@ pub mod program {
     match node {
       VarDeclOrExpr::Expr(node) => enum_create_expr(env, map, node),
       VarDeclOrExpr::VarDecl(node) => create_var_decl(env, map, node),
-      // TODO
     }
   }
 }

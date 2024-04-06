@@ -353,6 +353,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstExportDefaultSpecifier createExportDefaultSpecifier(
+            Swc4jAstIdent exported,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstExportDefaultSpecifier(exported, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstExprOrSpread createExprOrSpread(
             @Jni2RustParam(optional = true) Swc4jAstSpan spread,
             ISwc4jAstExpr expr,

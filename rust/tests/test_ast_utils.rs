@@ -220,6 +220,9 @@ fn test_structs() {
     span: DUMMY_SP,
     expr: Box::new(Expr::dummy()),
   };
+  let _ = ExportDefaultSpecifier {
+    exported: Ident::dummy(),
+  };
   let _ = ExprOrSpread {
     expr: Box::new(Expr::dummy()),
     spread: Default::default(),

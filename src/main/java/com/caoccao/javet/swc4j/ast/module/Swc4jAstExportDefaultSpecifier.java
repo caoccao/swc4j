@@ -14,47 +14,38 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.pat;
+package com.caoccao.javet.swc4j.ast.module;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsParamPropParam;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-public class Swc4jAstAssignPat
+@Jni2RustClass(span = false)
+public class Swc4jAstExportDefaultSpecifier
         extends Swc4jAst
-        implements ISwc4jAstPat, ISwc4jAstTsParamPropParam {
-    @Jni2RustField(box = true)
-    protected final ISwc4jAstPat left;
-    @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr right;
+        implements ISwc4jAstModuleDecl {
+    protected final Swc4jAstIdent exported;
 
-    public Swc4jAstAssignPat(
-            ISwc4jAstPat left,
-            ISwc4jAstExpr right,
+    public Swc4jAstExportDefaultSpecifier(
+            Swc4jAstIdent exported,
             Swc4jAstSpan span) {
         super(span);
-        this.left = AssertionUtils.notNull(left, "Left");
-        this.right = AssertionUtils.notNull(right, "Right");
-        childNodes = SimpleList.immutableOf(left, right);
+        this.exported = AssertionUtils.notNull(exported, "Exported");
+        childNodes = SimpleList.immutableOf(exported);
         updateParent();
     }
 
-    public ISwc4jAstPat getLeft() {
-        return left;
-    }
-
-    public ISwc4jAstExpr getRight() {
-        return right;
+    public Swc4jAstIdent getExported() {
+        return exported;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.AssignPat;
+        return Swc4jAstType.ExportDefaultSpecifier;
     }
 }
