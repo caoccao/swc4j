@@ -19,34 +19,33 @@ package com.caoccao.javet.swc4j.ast.module;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExportSpecifier;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleExportName;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-@Jni2RustClass(span = false)
-public class Swc4jAstExportDefaultSpecifier
+public class Swc4jAstExportNamespaceSpecifier
         extends Swc4jAst
-        implements ISwc4jAstModuleDecl, ISwc4jAstExportSpecifier {
-    protected final Swc4jAstIdent exported;
+        implements ISwc4jAstExportSpecifier {
+    @Jni2RustField(value = "ModuleExportName::Ident(Ident::dummy())")
+    protected final ISwc4jAstModuleExportName name;
 
-    public Swc4jAstExportDefaultSpecifier(
-            Swc4jAstIdent exported,
+    public Swc4jAstExportNamespaceSpecifier(
+            ISwc4jAstModuleExportName name,
             Swc4jAstSpan span) {
         super(span);
-        this.exported = AssertionUtils.notNull(exported, "Exported");
-        childNodes = SimpleList.immutableOf(exported);
+        this.name = AssertionUtils.notNull(name, "Name");
+        childNodes = SimpleList.immutableOf(name);
         updateParent();
     }
 
-    public Swc4jAstIdent getExported() {
-        return exported;
+    public ISwc4jAstModuleExportName getName() {
+        return name;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.ExportDefaultSpecifier;
+        return Swc4jAstType.ExportNamespaceSpecifier;
     }
 }

@@ -360,6 +360,22 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstExportNamedSpecifier createExportNamedSpecifier(
+            ISwc4jAstModuleExportName orig,
+            @Jni2RustParam(optional = true) ISwc4jAstModuleExportName exported,
+            boolean typeOnly,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstExportNamedSpecifier(orig, exported, typeOnly, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstExportNamespaceSpecifier createExportNamespaceSpecifier(
+            ISwc4jAstModuleExportName name,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstExportNamespaceSpecifier(name, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstExprOrSpread createExprOrSpread(
             @Jni2RustParam(optional = true) Swc4jAstSpan spread,
             ISwc4jAstExpr expr,

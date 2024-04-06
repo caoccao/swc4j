@@ -223,6 +223,16 @@ fn test_structs() {
   let _ = ExportDefaultSpecifier {
     exported: Ident::dummy(),
   };
+  let _ = ExportNamedSpecifier {
+    span: DUMMY_SP,
+    exported: Default::default(),
+    orig: ModuleExportName::Ident(Ident::dummy()),
+    is_type_only: Default::default(),
+  };
+  let _ = ExportNamespaceSpecifier {
+    span: DUMMY_SP,
+    name: ModuleExportName::Ident(Ident::dummy()),
+  };
   let _ = ExprOrSpread {
     expr: Box::new(Expr::dummy()),
     spread: Default::default(),

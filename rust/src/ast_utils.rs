@@ -64,6 +64,8 @@ struct JavaSwc4jAstFactory {
   method_create_export_default_decl: JStaticMethodID,
   method_create_export_default_expr: JStaticMethodID,
   method_create_export_default_specifier: JStaticMethodID,
+  method_create_export_named_specifier: JStaticMethodID,
+  method_create_export_namespace_specifier: JStaticMethodID,
   method_create_expr_or_spread: JStaticMethodID,
   method_create_expr_stmt: JStaticMethodID,
   method_create_fn_decl: JStaticMethodID,
@@ -422,6 +424,20 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportDefaultSpecifier");
+    let method_create_export_named_specifier = env
+      .get_static_method_id(
+        &class,
+        "createExportNamedSpecifier",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportNamedSpecifier;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createExportNamedSpecifier");
+    let method_create_export_namespace_specifier = env
+      .get_static_method_id(
+        &class,
+        "createExportNamespaceSpecifier",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportNamespaceSpecifier;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createExportNamespaceSpecifier");
     let method_create_expr_or_spread = env
       .get_static_method_id(
         &class,
@@ -1166,6 +1182,8 @@ impl JavaSwc4jAstFactory {
       method_create_export_default_decl,
       method_create_export_default_expr,
       method_create_export_default_specifier,
+      method_create_export_named_specifier,
+      method_create_export_namespace_specifier,
       method_create_expr_or_spread,
       method_create_expr_stmt,
       method_create_fn_decl,
@@ -2119,6 +2137,52 @@ impl JavaSwc4jAstFactory {
         self.method_create_export_default_specifier,
         &[exported, span],
         "Swc4jAstExportDefaultSpecifier create_export_default_specifier()"
+      );
+    return_value
+  }
+
+  pub fn create_export_named_specifier<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    orig: &JObject<'_>,
+    exported: &Option<JObject>,
+    type_only: bool,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let orig = object_to_jvalue!(orig);
+    let exported = optional_object_to_jvalue!(exported);
+    let type_only = boolean_to_jvalue!(type_only);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_export_named_specifier,
+        &[orig, exported, type_only, span],
+        "Swc4jAstExportNamedSpecifier create_export_named_specifier()"
+      );
+    return_value
+  }
+
+  pub fn create_export_namespace_specifier<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    name: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let name = object_to_jvalue!(name);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_export_namespace_specifier,
+        &[name, span],
+        "Swc4jAstExportNamespaceSpecifier create_export_namespace_specifier()"
       );
     return_value
   }
@@ -6840,6 +6904,52 @@ pub mod program {
     return_value
   }
 
+  fn create_export_named_specifier<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &ExportNamedSpecifier,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_orig = enum_create_module_export_name(env, map, &node.orig);
+    let java_optional_exported = node
+      .exported
+      .as_ref()
+      .map(|node| enum_create_module_export_name(env, map, node));
+    let is_type_only = node.is_type_only;
+    let return_value = java_ast_factory.create_export_named_specifier(
+      env,
+      &java_orig,
+      &java_optional_exported,
+      is_type_only,
+      &java_range,
+    );
+    delete_local_ref!(env, java_orig);
+    delete_local_optional_ref!(env, java_optional_exported);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_export_namespace_specifier<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &ExportNamespaceSpecifier,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_name = enum_create_module_export_name(env, map, &node.name);
+    let return_value = java_ast_factory.create_export_namespace_specifier(env, &java_name, &java_range);
+    delete_local_ref!(env, java_name);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_expr_or_spread<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -8939,8 +9049,8 @@ pub mod program {
   {
     match node {
       ExportSpecifier::Default(node) => create_export_default_specifier(env, map, node),
-      default => panic!("{:?}", default),
-      // TODO
+      ExportSpecifier::Named(node) => create_export_named_specifier(env, map, node),
+      ExportSpecifier::Namespace(node) => create_export_namespace_specifier(env, map, node),
     }
   }
 
