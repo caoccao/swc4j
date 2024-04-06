@@ -181,6 +181,14 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstCatchClause createCatchClause(
+            @Jni2RustParam(optional = true) ISwc4jAstPat param,
+            Swc4jAstBlockStmt body,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstCatchClause(param, body, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstClass createClass(
             List<Swc4jAstDecorator> decorators,
             List<ISwc4jAstClassMember> body,
@@ -885,6 +893,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstThrowStmt createThrowStmt(
+            ISwc4jAstExpr arg,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstThrowStmt(arg, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTpl createTpl(
             List<ISwc4jAstExpr> exprs,
             List<Swc4jAstTplElement> quasis,
@@ -899,6 +914,15 @@ public final class Swc4jAstFactory {
             String raw,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTplElement(tail, cooked, raw, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTryStmt createTryStmt(
+            Swc4jAstBlockStmt block,
+            @Jni2RustParam(optional = true) Swc4jAstCatchClause handler,
+            @Jni2RustParam(optional = true) Swc4jAstBlockStmt finalizer,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTryStmt(block, handler, finalizer, span);
     }
 
     @Jni2RustMethod

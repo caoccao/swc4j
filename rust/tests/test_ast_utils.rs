@@ -115,6 +115,11 @@ fn test_structs() {
     callee: Callee::dummy(),
     type_args: Default::default(),
   };
+  let _ = CatchClause {
+    span: DUMMY_SP,
+    body: BlockStmt::dummy(),
+    param: Default::default(),
+  };
   let _ = Class {
     span: DUMMY_SP,
     is_abstract: Default::default(),
@@ -529,6 +534,10 @@ fn test_structs() {
   let _ = ThisExpr {
     span: DUMMY_SP,
   };
+  let _ = ThrowStmt {
+    span: DUMMY_SP,
+    arg: Box::new(Expr::dummy()),
+  };
   let _ = Tpl {
     span: DUMMY_SP,
     exprs: Default::default(),
@@ -539,6 +548,12 @@ fn test_structs() {
     cooked: Default::default(),
     raw: Default::default(),
     tail: Default::default(),
+  };
+  let _ = TryStmt {
+    span: DUMMY_SP,
+    block: BlockStmt::dummy(),
+    finalizer: Default::default(),
+    handler: Default::default(),
   };
   let _ = TsAsExpr {
     span: DUMMY_SP,

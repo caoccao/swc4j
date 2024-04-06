@@ -45,6 +45,7 @@ struct JavaSwc4jAstFactory {
   method_create_bool: JStaticMethodID,
   method_create_break_stmt: JStaticMethodID,
   method_create_call_expr: JStaticMethodID,
+  method_create_catch_clause: JStaticMethodID,
   method_create_class: JStaticMethodID,
   method_create_class_decl: JStaticMethodID,
   method_create_class_expr: JStaticMethodID,
@@ -127,8 +128,10 @@ struct JavaSwc4jAstFactory {
   method_create_switch_stmt: JStaticMethodID,
   method_create_tagged_tpl: JStaticMethodID,
   method_create_this_expr: JStaticMethodID,
+  method_create_throw_stmt: JStaticMethodID,
   method_create_tpl: JStaticMethodID,
   method_create_tpl_element: JStaticMethodID,
+  method_create_try_stmt: JStaticMethodID,
   method_create_ts_as_expr: JStaticMethodID,
   method_create_ts_const_assertion: JStaticMethodID,
   method_create_ts_enum_decl: JStaticMethodID,
@@ -283,6 +286,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstCallee;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstCallExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createCallExpr");
+    let method_create_catch_clause = env
+      .get_static_method_id(
+        &class,
+        "createCatchClause",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstCatchClause;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createCatchClause");
     let method_create_class = env
       .get_static_method_id(
         &class,
@@ -857,6 +867,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstThisExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createThisExpr");
+    let method_create_throw_stmt = env
+      .get_static_method_id(
+        &class,
+        "createThrowStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstThrowStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createThrowStmt");
     let method_create_tpl = env
       .get_static_method_id(
         &class,
@@ -871,6 +888,13 @@ impl JavaSwc4jAstFactory {
         "(ZLjava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstTplElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTplElement");
+    let method_create_try_stmt = env
+      .get_static_method_id(
+        &class,
+        "createTryStmt",
+        "(Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstCatchClause;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTryStmt;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTryStmt");
     let method_create_ts_as_expr = env
       .get_static_method_id(
         &class,
@@ -1099,6 +1123,7 @@ impl JavaSwc4jAstFactory {
       method_create_bool,
       method_create_break_stmt,
       method_create_call_expr,
+      method_create_catch_clause,
       method_create_class,
       method_create_class_decl,
       method_create_class_expr,
@@ -1181,8 +1206,10 @@ impl JavaSwc4jAstFactory {
       method_create_switch_stmt,
       method_create_tagged_tpl,
       method_create_this_expr,
+      method_create_throw_stmt,
       method_create_tpl,
       method_create_tpl_element,
+      method_create_try_stmt,
       method_create_ts_as_expr,
       method_create_ts_const_assertion,
       method_create_ts_enum_decl,
@@ -1596,6 +1623,29 @@ impl JavaSwc4jAstFactory {
         self.method_create_call_expr,
         &[callee, args, type_args, span],
         "Swc4jAstCallExpr create_call_expr()"
+      );
+    return_value
+  }
+
+  pub fn create_catch_clause<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    param: &Option<JObject>,
+    body: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let param = optional_object_to_jvalue!(param);
+    let body = object_to_jvalue!(body);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_catch_clause,
+        &[param, body, span],
+        "Swc4jAstCatchClause create_catch_clause()"
       );
     return_value
   }
@@ -3563,6 +3613,27 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_throw_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    arg: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let arg = object_to_jvalue!(arg);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_throw_stmt,
+        &[arg, span],
+        "Swc4jAstThrowStmt create_throw_stmt()"
+      );
+    return_value
+  }
+
   pub fn create_tpl<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -3612,6 +3683,31 @@ impl JavaSwc4jAstFactory {
       );
     delete_local_ref!(env, java_cooked);
     delete_local_ref!(env, java_raw);
+    return_value
+  }
+
+  pub fn create_try_stmt<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    block: &JObject<'_>,
+    handler: &Option<JObject>,
+    finalizer: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let block = object_to_jvalue!(block);
+    let handler = optional_object_to_jvalue!(handler);
+    let finalizer = optional_object_to_jvalue!(finalizer);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_try_stmt,
+        &[block, handler, finalizer, span],
+        "Swc4jAstTryStmt create_try_stmt()"
+      );
     return_value
   }
 
@@ -6250,6 +6346,21 @@ pub mod program {
     return_type
   }
 
+  fn create_catch_clause<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &CatchClause) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_optional_param = node.param.as_ref().map(|node| enum_create_pat(env, map, node));
+    let java_body = create_block_stmt(env, map, &node.body);
+    let return_type = java_ast_factory.create_catch_clause(env, &java_optional_param, &java_body, &java_range);
+    delete_local_optional_ref!(env, java_optional_param);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_range);
+    return_type
+  }
+
   fn create_class<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Class) -> JObject<'a>
   where
     'local: 'a,
@@ -6827,17 +6938,8 @@ pub mod program {
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let java_test = enum_create_expr(env, map, &node.test);
     let java_cons = enum_create_stmt(env, map, &node.cons);
-    let java_optional_alt = node
-      .alt
-      .as_ref()
-      .map(|node| enum_create_stmt(env, map, node));
-    let return_value = java_ast_factory.create_if_stmt(
-      env,
-      &java_test,
-      &java_cons,
-      &java_optional_alt,
-      &java_range,
-    );
+    let java_optional_alt = node.alt.as_ref().map(|node| enum_create_stmt(env, map, node));
+    let return_value = java_ast_factory.create_if_stmt(env, &java_test, &java_cons, &java_optional_alt, &java_range);
     delete_local_ref!(env, java_test);
     delete_local_ref!(env, java_cons);
     delete_local_optional_ref!(env, java_optional_alt);
@@ -7256,12 +7358,7 @@ pub mod program {
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let java_label = create_ident(env, map, &node.label);
     let java_body = enum_create_stmt(env, map, &node.body);
-    let return_value = java_ast_factory.create_labeled_stmt(
-      env,
-      &java_label,
-      &java_body,
-      &java_range,
-    );
+    let return_value = java_ast_factory.create_labeled_stmt(env, &java_label, &java_body, &java_range);
     delete_local_ref!(env, java_label);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_range);
@@ -7676,11 +7773,7 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let java_optional_arg = node.arg.as_ref().map(|node| enum_create_expr(env, map, node));
-    let return_value = java_ast_factory.create_return_stmt(
-      env,
-      &java_optional_arg,
-      &java_range,
-    );
+    let return_value = java_ast_factory.create_return_stmt(env, &java_optional_arg, &java_range);
     delete_local_optional_ref!(env, java_optional_arg);
     delete_local_ref!(env, java_range);
     return_value
@@ -7832,12 +7925,7 @@ pub mod program {
       java_array_list.add(env, &java_cons, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_switch_case(
-      env,
-      &java_optional_test,
-      &java_cons,
-      &java_range,
-    );
+    let return_value = java_ast_factory.create_switch_case(env, &java_optional_test, &java_cons, &java_range);
     delete_local_optional_ref!(env, java_optional_test);
     delete_local_ref!(env, java_cons);
     delete_local_ref!(env, java_range);
@@ -7858,12 +7946,7 @@ pub mod program {
       java_array_list.add(env, &java_cases, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_switch_stmt(
-      env,
-      &java_discriminant,
-      &java_cases,
-      &java_range,
-    );
+    let return_value = java_ast_factory.create_switch_stmt(env, &java_discriminant, &java_cases, &java_range);
     delete_local_ref!(env, java_discriminant);
     delete_local_ref!(env, java_cases);
     delete_local_ref!(env, java_range);
@@ -7898,6 +7981,19 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let return_value = java_ast_factory.create_this_expr(env, &java_range);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_throw_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ThrowStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_arg = enum_create_expr(env, map, &node.arg);
+    let return_value = java_ast_factory.create_throw_stmt(env, &java_arg, &java_range);
+    delete_local_ref!(env, java_arg);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -7938,6 +8034,29 @@ pub mod program {
     let optional_cooked = node.cooked.as_ref().map(|node| node.to_string());
     let raw = node.raw.as_str();
     let return_value = java_ast_factory.create_tpl_element(env, tail, &optional_cooked, raw, &java_range);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_try_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TryStmt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_block = create_block_stmt(env, map, &node.block);
+    let java_optional_handler = node.handler.as_ref().map(|node| create_catch_clause(env, map, node));
+    let java_optional_finalizer = node.finalizer.as_ref().map(|node| create_block_stmt(env, map, node));
+    let return_value = java_ast_factory.create_try_stmt(
+      env,
+      &java_block,
+      &java_optional_handler,
+      &java_optional_finalizer,
+      &java_range,
+    );
+    delete_local_ref!(env, java_block);
+    delete_local_optional_ref!(env, java_optional_handler);
+    delete_local_optional_ref!(env, java_optional_finalizer);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -9087,8 +9206,8 @@ pub mod program {
       Stmt::Labeled(node) => create_labeled_stmt(env, map, node),
       Stmt::Return(node) => create_return_stmt(env, map, node),
       Stmt::Switch(node) => create_switch_stmt(env, map, node),
-      // Stmt::Throw(node) => create_throw_stmt(env, map, node),
-      // Stmt::Try(node) => create_try_stmt(env, map, node),
+      Stmt::Throw(node) => create_throw_stmt(env, map, node),
+      Stmt::Try(node) => create_try_stmt(env, map, node),
       // Stmt::While(node) => create_while_stmt(env, map, node),
       // Stmt::With(node) => create_with_stmt(env, map, node),
       default => panic!("{:?}", default),

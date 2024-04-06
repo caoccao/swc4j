@@ -39,5 +39,7 @@ public class TestISwc4jAstStmt {
         assertTrue(ISwc4jAstStmt.class.isAssignableFrom(Swc4jAstLabeledStmt.class));
         assertTrue(ISwc4jAstStmt.class.isAssignableFrom(Swc4jAstReturnStmt.class));
         assertTrue(ISwc4jAstStmt.class.isAssignableFrom(Swc4jAstSwitchStmt.class));
+        assertTrue(ISwc4jAstStmt.class.isAssignableFrom(Swc4jAstThrowStmt.class));
+        assertTrue(ISwc4jAstStmt.class.isAssignableFrom(Swc4jAstTryStmt.class));
     }
 }
