@@ -30,7 +30,7 @@ public class Swc4jAstTsInstantiation
         implements ISwc4jAstExpr {
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr expr;
-    @Jni2RustField(box = true, value = "Box::new(TsTypeParamInstantiation { span: DUMMY_SP, params: Default::default() })")
+    @Jni2RustField(box = true)
     protected final Swc4jAstTsTypeParamInstantiation typeArgs;
 
     public Swc4jAstTsInstantiation(

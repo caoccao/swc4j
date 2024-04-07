@@ -21,14 +21,12 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDefaultDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 public class Swc4jAstExportDefaultDecl
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
-    @Jni2RustField(value = "DefaultDecl::Class(ClassExpr::dummy())")
     protected final ISwc4jAstDefaultDecl decl;
 
     public Swc4jAstExportDefaultDecl(

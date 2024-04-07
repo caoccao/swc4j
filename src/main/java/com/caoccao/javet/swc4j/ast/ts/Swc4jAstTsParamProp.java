@@ -37,7 +37,6 @@ public class Swc4jAstTsParamProp
     protected final boolean _override;
     protected final Optional<Swc4jAstAccessibility> accessibility;
     protected final List<Swc4jAstDecorator> decorators;
-    @Jni2RustField(value = "TsParamPropParam::Ident(BindingIdent::dummy())")
     protected final ISwc4jAstTsParamPropParam param;
     protected final boolean readonly;
 

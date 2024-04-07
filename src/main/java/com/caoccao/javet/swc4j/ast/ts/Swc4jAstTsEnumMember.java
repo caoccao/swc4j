@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsEnumMemberId;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -29,7 +28,6 @@ import java.util.Optional;
 
 public class Swc4jAstTsEnumMember
         extends Swc4jAst {
-    @Jni2RustField(value = "TsEnumMemberId::Ident(Ident::dummy())")
     protected final ISwc4jAstTsEnumMemberId id;
     protected final Optional<ISwc4jAstExpr> init;
 

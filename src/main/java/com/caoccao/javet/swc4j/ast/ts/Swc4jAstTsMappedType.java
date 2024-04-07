@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstTruePlusMinus;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.Optional;
@@ -33,7 +32,6 @@ public class Swc4jAstTsMappedType
     protected final Optional<Swc4jAstTruePlusMinus> optional;
     protected final Optional<Swc4jAstTruePlusMinus> readonly;
     protected final Optional<ISwc4jAstTsType> typeAnn;
-    @Jni2RustField(value = "TsTypeParam::get_default()")
     protected final Swc4jAstTsTypeParam typeParam;
 
     public Swc4jAstTsMappedType(

@@ -30,7 +30,6 @@ public class Swc4jAstBinExpr
         implements ISwc4jAstExpr {
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr left;
-    @Jni2RustField(value = "BinaryOp::Add")
     protected final Swc4jAstBinaryOp op;
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr right;

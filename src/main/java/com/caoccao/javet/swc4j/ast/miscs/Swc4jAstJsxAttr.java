@@ -23,7 +23,6 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxAttrName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxAttrOrSpread;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxAttrValue;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -33,7 +32,6 @@ import java.util.Optional;
 public class Swc4jAstJsxAttr
         extends Swc4jAst
         implements ISwc4jAstJsxAttrOrSpread {
-    @Jni2RustField(value = "JSXAttrName::Ident(Ident::dummy())")
     protected final ISwc4jAstJsxAttrName name;
     protected final Optional<ISwc4jAstJsxAttrValue> value;
 

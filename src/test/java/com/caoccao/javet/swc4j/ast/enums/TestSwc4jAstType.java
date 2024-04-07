@@ -21,17 +21,21 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstType {
     @Test
     public void testTypeMatch() {
+        final AtomicInteger counter = new AtomicInteger();
         Pattern patternReturnType = Pattern.compile("return Swc4jAstType\\.(\\w+);");
-        Swc4jAstStore.getInstance().getStructMap().forEach((expectedReturnType, filePath) -> {
+        Swc4jAstStore.getInstance().getStructMap().forEach((expectedReturnType, clazz) -> {
+            String relativeFilePath = clazz.getName().replace(".", "/") + Swc4jAstStore.JAVA_FILE_EXT;
+            Path filePath = Swc4jAstStore.SOURCE_PATH.resolve(relativeFilePath);
             try {
                 String content = new String(Files.readAllBytes(filePath), StandardCharsets.UTF_8);
                 Matcher matcherReturnType = patternReturnType.matcher(content);
@@ -41,10 +45,12 @@ public class TestSwc4jAstType {
                             expectedReturnType,
                             returnType,
                             "Type of " + filePath.toFile().getName() + " should match");
+                    counter.incrementAndGet();
                 }
             } catch (Exception e) {
                 fail(e);
             }
         });
+        assertTrue(counter.get() > 0);
     }
 }

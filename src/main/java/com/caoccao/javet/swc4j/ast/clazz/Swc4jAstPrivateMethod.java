@@ -40,9 +40,7 @@ public class Swc4jAstPrivateMethod
     protected final Optional<Swc4jAstAccessibility> accessibility;
     @Jni2RustField(box = true)
     protected final Swc4jAstFunction function;
-    @Jni2RustField(value = "PrivateName { span: DUMMY_SP, id: Ident::dummy() }")
     protected final Swc4jAstPrivateName key;
-    @Jni2RustField(value = "MethodKind::Getter")
     protected final Swc4jAstMethodKind kind;
     @Jni2RustField(name = "is_optional")
     protected final boolean optional;

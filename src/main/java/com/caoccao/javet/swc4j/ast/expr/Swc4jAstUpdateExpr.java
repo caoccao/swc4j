@@ -30,7 +30,6 @@ public class Swc4jAstUpdateExpr
         implements ISwc4jAstExpr {
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr arg;
-    @Jni2RustField(value = "UpdateOp::PlusPlus")
     protected final Swc4jAstUpdateOp op;
     protected final boolean prefix;
 

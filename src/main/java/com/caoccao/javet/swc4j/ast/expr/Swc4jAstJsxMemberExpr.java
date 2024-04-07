@@ -23,7 +23,6 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxElementName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxObject;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -31,7 +30,6 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 public class Swc4jAstJsxMemberExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxObject, ISwc4jAstJsxElementName {
-    @Jni2RustField(value = "JSXObject::Ident(Ident::dummy())")
     protected final ISwc4jAstJsxObject obj;
     protected final Swc4jAstIdent prop;
 

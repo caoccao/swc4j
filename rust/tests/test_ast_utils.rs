@@ -20,6 +20,8 @@ use deno_ast::swc::{
   common::{util::take::Take, DUMMY_SP},
 };
 
+use swc4j::enums::IdentifiableEnum;
+
 /*
  * This test case is for detecting if ast structs are updated.
  * The rustc strictly checks that all properties of the struct must all be constructed,
@@ -62,6 +64,24 @@ impl GetDefault<TsUnionType> for TsUnionType {
 }
 
 /* GetDefault Begin */
+impl GetDefault<Accessibility> for Accessibility {
+  fn get_default() -> Accessibility {
+    Accessibility::parse_by_id(0)
+  }
+}
+
+impl GetDefault<AssignOp> for AssignOp {
+  fn get_default() -> AssignOp {
+    AssignOp::parse_by_id(0)
+  }
+}
+
+impl GetDefault<BinaryOp> for BinaryOp {
+  fn get_default() -> BinaryOp {
+    BinaryOp::parse_by_id(0)
+  }
+}
+
 impl GetDefault<BlockStmtOrExpr> for BlockStmtOrExpr {
   fn get_default() -> BlockStmtOrExpr {
     BlockStmtOrExpr::dummy()
@@ -176,6 +196,18 @@ impl GetDefault<MemberProp> for MemberProp {
   }
 }
 
+impl GetDefault<MetaPropKind> for MetaPropKind {
+  fn get_default() -> MetaPropKind {
+    MetaPropKind::parse_by_id(0)
+  }
+}
+
+impl GetDefault<MethodKind> for MethodKind {
+  fn get_default() -> MethodKind {
+    MethodKind::parse_by_id(0)
+  }
+}
+
 impl GetDefault<ModuleDecl> for ModuleDecl {
   fn get_default() -> ModuleDecl {
     ModuleDecl::dummy()
@@ -260,6 +292,12 @@ impl GetDefault<SuperProp> for SuperProp {
   }
 }
 
+impl GetDefault<TruePlusMinus> for TruePlusMinus {
+  fn get_default() -> TruePlusMinus {
+    TruePlusMinus::parse_by_id(0)
+  }
+}
+
 impl GetDefault<TsEntityName> for TsEntityName {
   fn get_default() -> TsEntityName {
     TsEntityName::Ident(Ident::get_default())
@@ -281,6 +319,12 @@ impl GetDefault<TsFnOrConstructorType> for TsFnOrConstructorType {
 impl GetDefault<TsFnParam> for TsFnParam {
   fn get_default() -> TsFnParam {
     TsFnParam::Ident(BindingIdent::get_default())
+  }
+}
+
+impl GetDefault<TsKeywordTypeKind> for TsKeywordTypeKind {
+  fn get_default() -> TsKeywordTypeKind {
+    TsKeywordTypeKind::parse_by_id(0)
   }
 }
 
@@ -332,6 +376,12 @@ impl GetDefault<TsTypeElement> for TsTypeElement {
   }
 }
 
+impl GetDefault<TsTypeOperatorOp> for TsTypeOperatorOp {
+  fn get_default() -> TsTypeOperatorOp {
+    TsTypeOperatorOp::parse_by_id(0)
+  }
+}
+
 impl GetDefault<TsTypeQueryExpr> for TsTypeQueryExpr {
   fn get_default() -> TsTypeQueryExpr {
     TsTypeQueryExpr::Import(TsImportType::get_default())
@@ -341,6 +391,24 @@ impl GetDefault<TsTypeQueryExpr> for TsTypeQueryExpr {
 impl GetDefault<TsUnionOrIntersectionType> for TsUnionOrIntersectionType {
   fn get_default() -> TsUnionOrIntersectionType {
     TsUnionOrIntersectionType::TsUnionType(TsUnionType::get_default())
+  }
+}
+
+impl GetDefault<UnaryOp> for UnaryOp {
+  fn get_default() -> UnaryOp {
+    UnaryOp::parse_by_id(0)
+  }
+}
+
+impl GetDefault<UpdateOp> for UpdateOp {
+  fn get_default() -> UpdateOp {
+    UpdateOp::parse_by_id(0)
+  }
+}
+
+impl GetDefault<VarDeclKind> for VarDeclKind {
+  fn get_default() -> VarDeclKind {
+    VarDeclKind::parse_by_id(0)
   }
 }
 
@@ -389,7 +457,7 @@ impl GetDefault<AssignExpr> for AssignExpr {
     AssignExpr {
       span: DUMMY_SP,
       left: PatOrExpr::get_default(),
-      op: AssignOp::AddAssign,
+      op: AssignOp::get_default(),
       right: Box::new(Expr::get_default()),
     }
   }
@@ -462,7 +530,7 @@ impl GetDefault<BinExpr> for BinExpr {
     BinExpr {
       span: DUMMY_SP,
       left: Box::new(Expr::get_default()),
-      op: BinaryOp::Add,
+      op: BinaryOp::get_default(),
       right: Box::new(Expr::get_default()),
     }
   }
@@ -569,7 +637,7 @@ impl GetDefault<ClassMethod> for ClassMethod {
       accessibility: Default::default(),
       function: Box::new(Function::get_default()),
       key: PropName::get_default(),
-      kind: MethodKind::Getter,
+      kind: MethodKind::get_default(),
       is_optional: Default::default(),
     }
   }
@@ -696,7 +764,7 @@ impl GetDefault<ExportDefaultDecl> for ExportDefaultDecl {
   fn get_default() -> ExportDefaultDecl {
     ExportDefaultDecl {
       span: DUMMY_SP,
-      decl: DefaultDecl::Class(ClassExpr::dummy()),
+      decl: DefaultDecl::get_default(),
     }
   }
 }
@@ -723,7 +791,7 @@ impl GetDefault<ExportNamedSpecifier> for ExportNamedSpecifier {
     ExportNamedSpecifier {
       span: DUMMY_SP,
       exported: Default::default(),
-      orig: ModuleExportName::Ident(Ident::dummy()),
+      orig: ModuleExportName::get_default(),
       is_type_only: Default::default(),
     }
   }
@@ -733,7 +801,7 @@ impl GetDefault<ExportNamespaceSpecifier> for ExportNamespaceSpecifier {
   fn get_default() -> ExportNamespaceSpecifier {
     ExportNamespaceSpecifier {
       span: DUMMY_SP,
-      name: ModuleExportName::Ident(Ident::dummy()),
+      name: ModuleExportName::get_default(),
     }
   }
 }
@@ -918,7 +986,7 @@ impl GetDefault<JSXAttr> for JSXAttr {
   fn get_default() -> JSXAttr {
     JSXAttr {
       span: DUMMY_SP,
-      name: JSXAttrName::Ident(Ident::dummy()),
+      name: JSXAttrName::get_default(),
       value: Default::default(),
     }
   }
@@ -964,7 +1032,7 @@ impl GetDefault<JSXExprContainer> for JSXExprContainer {
   fn get_default() -> JSXExprContainer {
     JSXExprContainer {
       span: DUMMY_SP,
-      expr: JSXExpr::Expr(Box::new(Expr::dummy())),
+      expr: JSXExpr::get_default(),
     }
   }
 }
@@ -983,7 +1051,7 @@ impl GetDefault<JSXFragment> for JSXFragment {
 impl GetDefault<JSXMemberExpr> for JSXMemberExpr {
   fn get_default() -> JSXMemberExpr {
     JSXMemberExpr {
-      obj: JSXObject::Ident(Ident::dummy()),
+      obj: JSXObject::get_default(),
       prop: Ident::get_default(),
     }
   }
@@ -1079,7 +1147,7 @@ impl GetDefault<MetaPropExpr> for MetaPropExpr {
   fn get_default() -> MetaPropExpr {
     MetaPropExpr {
       span: DUMMY_SP,
-      kind: MetaPropKind::NewTarget,
+      kind: MetaPropKind::get_default(),
     }
   }
 }
@@ -1169,7 +1237,7 @@ impl GetDefault<OptChainExpr> for OptChainExpr {
   fn get_default() -> OptChainExpr {
     OptChainExpr {
       span: DUMMY_SP,
-      base: Box::new(OptChainBase::Call(OptCall::dummy())),
+      base: Box::new(OptChainBase::get_default()),
       optional: Default::default(),
     }
   }
@@ -1203,8 +1271,8 @@ impl GetDefault<PrivateMethod> for PrivateMethod {
       is_static: Default::default(),
       accessibility: Default::default(),
       function: Box::new(Function::get_default()),
-      key: PrivateName { span: DUMMY_SP, id: Ident::dummy() },
-      kind: MethodKind::Getter,
+      key: PrivateName::get_default(),
+      kind: MethodKind::get_default(),
       is_optional: Default::default(),
     }
   }
@@ -1228,7 +1296,7 @@ impl GetDefault<PrivateProp> for PrivateProp {
       accessibility: Default::default(),
       decorators: Default::default(),
       definite: Default::default(),
-      key: PrivateName { span: DUMMY_SP, id: Ident::dummy() },
+      key: PrivateName::get_default(),
       is_optional: Default::default(),
       readonly: Default::default(),
       type_ann: Default::default(),
@@ -1417,7 +1485,7 @@ impl GetDefault<TsArrayType> for TsArrayType {
   fn get_default() -> TsArrayType {
     TsArrayType {
       span: DUMMY_SP,
-      elem_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+      elem_type: Box::new(TsType::get_default()),
     }
   }
 }
@@ -1447,10 +1515,10 @@ impl GetDefault<TsConditionalType> for TsConditionalType {
   fn get_default() -> TsConditionalType {
     TsConditionalType {
       span: DUMMY_SP,
-      check_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
-      extends_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
-      false_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
-      true_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+      check_type: Box::new(TsType::get_default()),
+      extends_type: Box::new(TsType::get_default()),
+      false_type: Box::new(TsType::get_default()),
+      true_type: Box::new(TsType::get_default()),
     }
   }
 }
@@ -1491,7 +1559,7 @@ impl GetDefault<TsEnumMember> for TsEnumMember {
   fn get_default() -> TsEnumMember {
     TsEnumMember {
       span: DUMMY_SP,
-      id: TsEnumMemberId::Ident(Ident::dummy()),
+      id: TsEnumMemberId::get_default(),
       init: Default::default(),
     }
   }
@@ -1544,7 +1612,7 @@ impl GetDefault<TsImportEqualsDecl> for TsImportEqualsDecl {
       span: DUMMY_SP,
       is_export: Default::default(),
       id: Ident::get_default(),
-      module_ref: TsModuleRef::TsEntityName(TsEntityName::Ident(Ident::dummy())),
+      module_ref: TsModuleRef::get_default(),
       is_type_only: Default::default(),
     }
   }
@@ -1577,8 +1645,8 @@ impl GetDefault<TsIndexedAccessType> for TsIndexedAccessType {
   fn get_default() -> TsIndexedAccessType {
     TsIndexedAccessType {
       span: DUMMY_SP,
-      index_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
-      obj_type: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+      index_type: Box::new(TsType::get_default()),
+      obj_type: Box::new(TsType::get_default()),
       readonly: Default::default(),
     }
   }
@@ -1598,7 +1666,7 @@ impl GetDefault<TsInstantiation> for TsInstantiation {
     TsInstantiation {
       span: DUMMY_SP,
       expr: Box::new(Expr::get_default()),
-      type_args: Box::new(TsTypeParamInstantiation { span: DUMMY_SP, params: Default::default() }),
+      type_args: Box::new(TsTypeParamInstantiation::get_default()),
     }
   }
 }
@@ -1629,7 +1697,7 @@ impl GetDefault<TsKeywordType> for TsKeywordType {
   fn get_default() -> TsKeywordType {
     TsKeywordType {
       span: DUMMY_SP,
-      kind: TsKeywordTypeKind::TsAnyKeyword,
+      kind: TsKeywordTypeKind::get_default(),
     }
   }
 }
@@ -1638,7 +1706,7 @@ impl GetDefault<TsLitType> for TsLitType {
   fn get_default() -> TsLitType {
     TsLitType {
       span: DUMMY_SP,
-      lit: TsLit::Bool(Bool::dummy()),
+      lit: TsLit::get_default(),
     }
   }
 }
@@ -1678,7 +1746,7 @@ impl GetDefault<TsModuleDecl> for TsModuleDecl {
       body: Default::default(),
       declare: Default::default(),
       global: Default::default(),
-      id: TsModuleName::Ident(Ident::dummy()),
+      id: TsModuleName::get_default(),
     }
   }
 }
@@ -1705,7 +1773,7 @@ impl GetDefault<TsOptionalType> for TsOptionalType {
   fn get_default() -> TsOptionalType {
     TsOptionalType {
       span: DUMMY_SP,
-      type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+      type_ann: Box::new(TsType::get_default()),
     }
   }
 }
@@ -1717,7 +1785,7 @@ impl GetDefault<TsParamProp> for TsParamProp {
       is_override: Default::default(),
       accessibility: Default::default(),
       decorators: Default::default(),
-      param: TsParamPropParam::Ident(BindingIdent::dummy()),
+      param: TsParamPropParam::get_default(),
       readonly: Default::default(),
     }
   }
@@ -1727,7 +1795,7 @@ impl GetDefault<TsParenthesizedType> for TsParenthesizedType {
   fn get_default() -> TsParenthesizedType {
     TsParenthesizedType {
       span: DUMMY_SP,
-      type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+      type_ann: Box::new(TsType::get_default()),
     }
   }
 }
@@ -1751,7 +1819,7 @@ impl GetDefault<TsPropertySignature> for TsPropertySignature {
 impl GetDefault<TsQualifiedName> for TsQualifiedName {
   fn get_default() -> TsQualifiedName {
     TsQualifiedName {
-      left: TsEntityName::Ident(Ident::dummy()),
+      left: TsEntityName::get_default(),
       right: Ident::get_default(),
     }
   }
@@ -1761,7 +1829,7 @@ impl GetDefault<TsRestType> for TsRestType {
   fn get_default() -> TsRestType {
     TsRestType {
       span: DUMMY_SP,
-      type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+      type_ann: Box::new(TsType::get_default()),
     }
   }
 }
@@ -1771,7 +1839,7 @@ impl GetDefault<TsSatisfiesExpr> for TsSatisfiesExpr {
     TsSatisfiesExpr {
       span: DUMMY_SP,
       expr: Box::new(Expr::get_default()),
-      type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+      type_ann: Box::new(TsType::get_default()),
     }
   }
 }
@@ -1783,7 +1851,7 @@ impl GetDefault<TsSetterSignature> for TsSetterSignature {
       computed: Default::default(),
       key: Box::new(Expr::get_default()),
       optional: Default::default(),
-      param: TsFnParam::Ident(BindingIdent::dummy()),
+      param: TsFnParam::get_default(),
       readonly: Default::default(),
     }
   }
@@ -1812,7 +1880,7 @@ impl GetDefault<TsTupleElement> for TsTupleElement {
     TsTupleElement {
       span: DUMMY_SP,
       label: Default::default(),
-      ty: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+      ty: Box::new(TsType::get_default()),
     }
   }
 }
@@ -1832,7 +1900,7 @@ impl GetDefault<TsTypeAliasDecl> for TsTypeAliasDecl {
       span: DUMMY_SP,
       declare: Default::default(),
       id: Ident::get_default(),
-      type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+      type_ann: Box::new(TsType::get_default()),
       type_params: Default::default(),
     }
   }
@@ -1842,7 +1910,7 @@ impl GetDefault<TsTypeAnn> for TsTypeAnn {
   fn get_default() -> TsTypeAnn {
     TsTypeAnn {
       span: DUMMY_SP,
-      type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+      type_ann: Box::new(TsType::get_default()),
     }
   }
 }
@@ -1852,7 +1920,7 @@ impl GetDefault<TsTypeAssertion> for TsTypeAssertion {
     TsTypeAssertion {
       span: DUMMY_SP,
       expr: Box::new(Expr::get_default()),
-      type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+      type_ann: Box::new(TsType::get_default()),
     }
   }
 }
@@ -1870,8 +1938,8 @@ impl GetDefault<TsTypeOperator> for TsTypeOperator {
   fn get_default() -> TsTypeOperator {
     TsTypeOperator {
       span: DUMMY_SP,
-      op: TsTypeOperatorOp::KeyOf,
-      type_ann: Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP })),
+      op: TsTypeOperatorOp::get_default(),
+      type_ann: Box::new(TsType::get_default()),
     }
   }
 }
@@ -1913,7 +1981,7 @@ impl GetDefault<UnaryExpr> for UnaryExpr {
     UnaryExpr {
       span: DUMMY_SP,
       arg: Box::new(Expr::get_default()),
-      op: UnaryOp::Void,
+      op: UnaryOp::get_default(),
     }
   }
 }
@@ -1923,7 +1991,7 @@ impl GetDefault<UpdateExpr> for UpdateExpr {
     UpdateExpr {
       span: DUMMY_SP,
       arg: Box::new(Expr::get_default()),
-      op: UpdateOp::PlusPlus,
+      op: UpdateOp::get_default(),
       prefix: Default::default(),
     }
   }
@@ -1945,7 +2013,7 @@ impl GetDefault<VarDecl> for VarDecl {
       span: DUMMY_SP,
       declare: Default::default(),
       decls: Default::default(),
-      kind: VarDeclKind::Const,
+      kind: VarDeclKind::get_default(),
     }
   }
 }

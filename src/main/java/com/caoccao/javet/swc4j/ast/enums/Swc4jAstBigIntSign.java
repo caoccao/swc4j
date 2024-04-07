@@ -17,9 +17,11 @@
 package com.caoccao.javet.swc4j.ast.enums;
 
 import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 
 import java.util.stream.Stream;
 
+@Jni2RustClass(ignore = true)
 public enum Swc4jAstBigIntSign implements ISwc4jEnumIdName {
     NoSign(0, ""),
     Minus(1, "-"),

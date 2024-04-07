@@ -21,14 +21,12 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 public class Swc4jAstTsLitType
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    @Jni2RustField(value = "TsLit::Bool(Bool::dummy())")
     protected final ISwc4jAstTsLit lit;
 
     public Swc4jAstTsLitType(

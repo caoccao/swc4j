@@ -28,9 +28,8 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 public class Swc4jAstTsTypeOperator
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    @Jni2RustField(value = "TsTypeOperatorOp::KeyOf")
     protected final Swc4jAstTsTypeOperatorOp op;
-    @Jni2RustField(box = true, value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
+    @Jni2RustField(box = true)
     protected final ISwc4jAstTsType typeAnn;
 
     public Swc4jAstTsTypeOperator(

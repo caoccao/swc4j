@@ -32,8 +32,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSwc4jAst {
     @Test
@@ -53,116 +54,91 @@ public class TestSwc4jAst {
         final int endPosition = fileContent.indexOf(endSign);
         assertTrue(startPosition > 0, "Start position is invalid");
         assertTrue(endPosition > startPosition, "End position is invalid");
+        final AtomicInteger enumCounter = new AtomicInteger();
+        final AtomicInteger structCounter = new AtomicInteger();
         List<String> lines = new ArrayList<>();
         Swc4jAstStore.getInstance().getEnumMap().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .forEach(entry -> {
-                    Path filePath = entry.getValue();
-                    try {
-                        Path relativeFilePath = Swc4jAstStore.SOURCE_PATH.relativize(filePath);
-                        String className = relativeFilePath.toString()
-                                .replace('/', '.')
-                                .replace('\\', '.');
-                        className = className.substring(0, className.length() - 5);
-                        Class<?> clazz = Class.forName(className);
-                        assertNotNull(clazz, className + " should exist");
-                        Optional<Jni2RustClass> jni2RustClass =
-                                Optional.ofNullable(clazz.getAnnotation(Jni2RustClass.class));
-                        if (!jni2RustClass.map(Jni2RustClass::ignore).orElse(false)
-                                && ISwc4jAst.class.isAssignableFrom(clazz)) {
-                            String enumName = jni2RustClass.map(Jni2RustClass::name).filter(StringUtils::isNotEmpty)
-                                    .orElse(entry.getKey());
-                            lines.add(String.format("impl GetDefault<%s> for %s {", enumName, enumName));
-                            lines.add(String.format("  fn get_default() -> %s {", enumName));
-                            String defaultLine = jni2RustClass.map(Jni2RustClass::getDefault)
-                                    .filter(StringUtils::isNotEmpty)
-                                    .orElse(String.format("%s::dummy()", enumName));
-                            lines.add(String.format("    %s", defaultLine));
-                            lines.add("  }");
-                            lines.add("}\n");
-                        }
-                    } catch (Exception e) {
-                        fail(e);
-                    }
+                    Class<?> clazz = entry.getValue();
+                    Optional<Jni2RustClass> jni2RustClass =
+                            Optional.ofNullable(clazz.getAnnotation(Jni2RustClass.class));
+                    String enumName = jni2RustClass.map(Jni2RustClass::name)
+                            .filter(StringUtils::isNotEmpty)
+                            .orElse(entry.getKey());
+                    String defaultLine = jni2RustClass.map(Jni2RustClass::getDefault)
+                            .filter(StringUtils::isNotEmpty)
+                            .orElse(clazz.isEnum()
+                                    ? String.format("%s::parse_by_id(0)", enumName)
+                                    : String.format("%s::dummy()", enumName));
+                    lines.add(String.format("impl GetDefault<%s> for %s {", enumName, enumName));
+                    lines.add(String.format("  fn get_default() -> %s {", enumName));
+                    lines.add(String.format("    %s", defaultLine));
+                    lines.add("  }");
+                    lines.add("}\n");
+                    enumCounter.incrementAndGet();
                 });
         Swc4jAstStore.getInstance().getStructMap().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .forEach(entry -> {
-                    Path filePath = entry.getValue();
-                    try {
-                        Path relativeFilePath = Swc4jAstStore.SOURCE_PATH.relativize(filePath);
-                        String className = relativeFilePath.toString()
-                                .replace('/', '.')
-                                .replace('\\', '.');
-                        className = className.substring(0, className.length() - 5);
-                        Class<?> clazz = Class.forName(className);
-                        assertNotNull(clazz, className + " should exist");
-                        Optional<Jni2RustClass> jni2RustClass =
-                                Optional.ofNullable(clazz.getAnnotation(Jni2RustClass.class));
-                        if (!jni2RustClass.map(Jni2RustClass::ignore).orElse(false)
-                                && Swc4jAst.class.isAssignableFrom(clazz)) {
-                            String structName = jni2RustClass.map(Jni2RustClass::name).filter(StringUtils::isNotEmpty)
-                                    .orElse(entry.getKey());
-                            lines.add(String.format("impl GetDefault<%s> for %s {", structName, structName));
-                            lines.add(String.format("  fn get_default() -> %s {", structName));
-                            lines.add(String.format("    %s {", structName));
-                            if (jni2RustClass.map(Jni2RustClass::span).orElse(true)) {
-                                lines.add("      span: DUMMY_SP,");
-                            }
-                            for (Field field : clazz.getDeclaredFields()) {
-                                Optional<Jni2RustField> jni2RustField =
-                                        Optional.ofNullable(field.getAnnotation(Jni2RustField.class));
-                                if (!Modifier.isStatic(field.getModifiers())
-                                        && !jni2RustField.map(Jni2RustField::ignore).orElse(false)) {
-                                    String fieldName;
-                                    if (jni2RustField.map(Jni2RustField::name).map(StringUtils::isNotEmpty)
-                                            .orElse(false)) {
-                                        fieldName = jni2RustField.get().name();
-                                    } else {
-                                        fieldName = field.getName();
-                                        while (fieldName.startsWith("_")) {
-                                            fieldName = fieldName.substring(1);
-                                        }
-                                        fieldName = StringUtils.toSnakeCase(fieldName);
-                                    }
-                                    boolean fieldGenerated = false;
-                                    if (jni2RustField.map(Jni2RustField::value).map(StringUtils::isNotEmpty)
-                                            .orElse(false)) {
-                                        lines.add(String.format("      %s: %s,", fieldName, jni2RustField.get().value()));
-                                        fieldGenerated = true;
-                                    } else {
-                                        Class<?> fieldClass = field.getType();
-                                        if ((fieldClass.isInterface()
-                                                && ISwc4jAst.class.isAssignableFrom(fieldClass)
-                                                && ISwc4jAst.class != fieldClass)
-                                                || (Swc4jAst.class.isAssignableFrom(fieldClass)
-                                                && Swc4jAst.class != fieldClass)) {
-                                            String subTypeName =
-                                                    Optional.ofNullable(fieldClass.getAnnotation(Jni2RustClass.class))
-                                                            .map(Jni2RustClass::name)
-                                                            .orElse(fieldClass.getSimpleName().substring(
-                                                                    fieldClass.isInterface() ? 9 : 8));
-                                            if (jni2RustField.map(Jni2RustField::box).orElse(false)) {
-                                                lines.add(String.format("      %s: Box::new(%s::get_default()),", fieldName, subTypeName));
-                                            } else {
-                                                lines.add(String.format("      %s: %s::get_default(),", fieldName, subTypeName));
-                                            }
-                                            fieldGenerated = true;
-                                        }
-                                    }
-                                    if (!fieldGenerated) {
-                                        lines.add(String.format("      %s: Default::default(),", fieldName));
-                                    }
-                                }
-                            }
-                            lines.add("    }");
-                            lines.add("  }");
-                            lines.add("}\n");
-                        }
-                    } catch (Exception e) {
-                        fail(e);
+                    Class<?> clazz = entry.getValue();
+                    Optional<Jni2RustClass> jni2RustClass = Optional.ofNullable(clazz.getAnnotation(Jni2RustClass.class));
+                    String structName = jni2RustClass.map(Jni2RustClass::name)
+                            .filter(StringUtils::isNotEmpty)
+                            .orElse(entry.getKey());
+                    lines.add(String.format("impl GetDefault<%s> for %s {", structName, structName));
+                    lines.add(String.format("  fn get_default() -> %s {", structName));
+                    lines.add(String.format("    %s {", structName));
+                    if (jni2RustClass.map(Jni2RustClass::span).orElse(true)) {
+                        lines.add("      span: DUMMY_SP,");
                     }
+                    for (Field field : clazz.getDeclaredFields()) {
+                        Optional<Jni2RustField> jni2RustField =
+                                Optional.ofNullable(field.getAnnotation(Jni2RustField.class));
+                        if (!Modifier.isStatic(field.getModifiers())
+                                && !jni2RustField.map(Jni2RustField::ignore).orElse(false)) {
+                            String fieldName;
+                            if (jni2RustField.map(Jni2RustField::name)
+                                    .map(StringUtils::isNotEmpty)
+                                    .orElse(false)) {
+                                fieldName = jni2RustField.get().name();
+                            } else {
+                                fieldName = field.getName();
+                                while (fieldName.startsWith("_")) {
+                                    fieldName = fieldName.substring(1);
+                                }
+                                fieldName = StringUtils.toSnakeCase(fieldName);
+                            }
+                            Class<?> fieldClass = field.getType();
+                            if ((fieldClass.isInterface()
+                                    && ISwc4jAst.class.isAssignableFrom(fieldClass)
+                                    && ISwc4jAst.class != fieldClass)
+                                    || fieldClass.isEnum()
+                                    || (Swc4jAst.class.isAssignableFrom(fieldClass)
+                                    && !Modifier.isAbstract(fieldClass.getModifiers()))) {
+                                String subTypeName =
+                                        Optional.ofNullable(fieldClass.getAnnotation(Jni2RustClass.class))
+                                                .map(Jni2RustClass::name)
+                                                .filter(StringUtils::isNotEmpty)
+                                                .orElse(fieldClass.getSimpleName().substring(
+                                                        fieldClass.isInterface() ? 9 : 8));
+                                if (jni2RustField.map(Jni2RustField::box).orElse(false)) {
+                                    lines.add(String.format("      %s: Box::new(%s::get_default()),", fieldName, subTypeName));
+                                } else {
+                                    lines.add(String.format("      %s: %s::get_default(),", fieldName, subTypeName));
+                                }
+                            } else {
+                                lines.add(String.format("      %s: Default::default(),", fieldName));
+                            }
+                        }
+                    }
+                    lines.add("    }");
+                    lines.add("  }");
+                    lines.add("}\n");
+                    structCounter.incrementAndGet();
                 });
+        assertTrue(enumCounter.get() > 0);
+        assertTrue(structCounter.get() > 0);
         StringBuilder sb = new StringBuilder(fileContent.length());
         sb.append(fileContent, 0, startPosition);
         String code = StringUtils.join("\n", lines);

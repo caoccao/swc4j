@@ -21,13 +21,11 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstTsKeywordTypeKind;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 public class Swc4jAstTsKeywordType
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    @Jni2RustField(value = "TsKeywordTypeKind::TsAnyKeyword")
     protected final Swc4jAstTsKeywordTypeKind kind;
 
     public Swc4jAstTsKeywordType(

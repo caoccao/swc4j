@@ -30,7 +30,6 @@ public class Swc4jAstAssignExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
     protected final ISwc4jAstPatOrExpr left;
-    @Jni2RustField(value = "AssignOp::AddAssign")
     protected final Swc4jAstAssignOp op;
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr right;

@@ -32,7 +32,6 @@ public class Swc4jAstTsImportEqualsDecl
     @Jni2RustField(name = "is_export")
     protected final boolean export;
     protected final Swc4jAstIdent id;
-    @Jni2RustField(value = "TsModuleRef::TsEntityName(TsEntityName::Ident(Ident::dummy()))")
     protected final ISwc4jAstTsModuleRef moduleRef;
     @Jni2RustField(name = "is_type_only")
     protected final boolean typeOnly;

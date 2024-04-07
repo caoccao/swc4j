@@ -30,7 +30,7 @@ import java.util.Optional;
 public class Swc4jAstTsTupleElement
         extends Swc4jAst {
     protected final Optional<ISwc4jAstPat> label;
-    @Jni2RustField(box = true, value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
+    @Jni2RustField(box = true)
     protected final ISwc4jAstTsType ty;
 
     public Swc4jAstTsTupleElement(

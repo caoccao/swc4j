@@ -28,7 +28,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 public class Swc4jAstOptChainExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
-    @Jni2RustField(box = true, value = "Box::new(OptChainBase::Call(OptCall::dummy()))")
+    @Jni2RustField(box = true)
     protected final ISwc4jAstOptChainBase base;
     protected final boolean optional;
 

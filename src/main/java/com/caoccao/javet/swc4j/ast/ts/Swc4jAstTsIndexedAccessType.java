@@ -27,9 +27,9 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 public class Swc4jAstTsIndexedAccessType
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    @Jni2RustField(box = true, value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
+    @Jni2RustField(box = true)
     protected final ISwc4jAstTsType indexType;
-    @Jni2RustField(box = true, value = "Box::new(TsType::TsThisType(TsThisType { span: DUMMY_SP }))")
+    @Jni2RustField(box = true)
     protected final ISwc4jAstTsType objType;
     protected final boolean readonly;
 

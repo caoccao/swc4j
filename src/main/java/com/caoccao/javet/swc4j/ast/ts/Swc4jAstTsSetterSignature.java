@@ -33,7 +33,6 @@ public class Swc4jAstTsSetterSignature
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr key;
     protected final boolean optional;
-    @Jni2RustField(value = "TsFnParam::Ident(BindingIdent::dummy())")
     protected final ISwc4jAstTsFnParam param;
     protected final boolean readonly;
 

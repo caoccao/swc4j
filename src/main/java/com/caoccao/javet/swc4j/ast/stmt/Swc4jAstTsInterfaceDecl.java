@@ -25,7 +25,6 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDefaultDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsInterfaceBody;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -36,7 +35,6 @@ public class Swc4jAstTsInterfaceDecl
         extends Swc4jAst
         implements ISwc4jAstDecl, ISwc4jAstDefaultDecl {
     protected final List<Swc4jAstTsExprWithTypeArgs> _extends;
-    @Jni2RustField(value = "TsInterfaceBody::get_default()")
     protected final Swc4jAstTsInterfaceBody body;
     protected final boolean declare;
     protected final Swc4jAstIdent id;

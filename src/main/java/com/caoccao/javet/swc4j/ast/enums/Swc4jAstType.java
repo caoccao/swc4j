@@ -16,6 +16,9 @@
 
 package com.caoccao.javet.swc4j.ast.enums;
 
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+
+@Jni2RustClass(ignore = true)
 public enum Swc4jAstType {
     ArrayLit,
     ArrayPat,

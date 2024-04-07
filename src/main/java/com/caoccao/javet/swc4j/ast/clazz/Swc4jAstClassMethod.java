@@ -42,7 +42,6 @@ public class Swc4jAstClassMethod
     @Jni2RustField(box = true)
     protected final Swc4jAstFunction function;
     protected final ISwc4jAstPropName key;
-    @Jni2RustField(value = "MethodKind::Getter")
     protected final Swc4jAstMethodKind kind;
     @Jni2RustField(name = "is_optional")
     protected final boolean optional;

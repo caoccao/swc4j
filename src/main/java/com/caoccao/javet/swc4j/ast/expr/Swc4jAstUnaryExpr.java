@@ -30,7 +30,6 @@ public class Swc4jAstUnaryExpr
         implements ISwc4jAstExpr {
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr arg;
-    @Jni2RustField(value = "UnaryOp::Void")
     protected final Swc4jAstUnaryOp op;
 
     public Swc4jAstUnaryExpr(

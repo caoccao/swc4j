@@ -28,6 +28,4 @@ public @interface Jni2RustField {
     boolean ignore() default false;
 
     String name() default "";
-
-    String value() default "";
 }

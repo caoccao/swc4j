@@ -31,7 +31,6 @@ public class Swc4jAstExportNamedSpecifier
         extends Swc4jAst
         implements ISwc4jAstExportSpecifier {
     protected final Optional<ISwc4jAstModuleExportName> exported;
-    @Jni2RustField(value = "ModuleExportName::Ident(Ident::dummy())")
     protected final ISwc4jAstModuleExportName orig;
     @Jni2RustField(name = "is_type_only")
     protected final boolean typeOnly;
