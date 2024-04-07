@@ -163,7 +163,9 @@ public abstract class Swc4jAst implements ISwc4jAst {
                     }
                 });
         if (!getChildNodes().isEmpty()) {
-            getChildNodes().forEach(node -> ((Swc4jAst) node).toDebugString(lines, newIndent));
+            getChildNodes().stream()
+                    .filter(Objects::nonNull)
+                    .forEach(node -> ((Swc4jAst) node).toDebugString(lines, newIndent));
         }
     }
 

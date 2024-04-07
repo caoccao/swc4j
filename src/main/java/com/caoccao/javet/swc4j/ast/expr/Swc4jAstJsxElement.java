@@ -52,6 +52,7 @@ public class Swc4jAstJsxElement
         childNodes.add(opening);
         childNodes.add(closing);
         childNodes = SimpleList.immutable(childNodes);
+        updateParent();
     }
 
     public List<ISwc4jAstJsxElementChild> getChildren() {

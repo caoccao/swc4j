@@ -26,11 +26,21 @@ import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
+    protected Swc4jParseOptions jsxModuleOptions;
+    protected Swc4jParseOptions jsxScriptOptions;
     protected Swc4jParseOptions tsModuleOptions;
     protected Swc4jParseOptions tsScriptOptions;
 
     public BaseTestSuiteSwc4jAst() {
         super();
+        this.jsxModuleOptions = new Swc4jParseOptions()
+                .setMediaType(Swc4jMediaType.Jsx)
+                .setParseMode(Swc4jParseMode.Module)
+                .setCaptureAst(true);
+        this.jsxScriptOptions = new Swc4jParseOptions()
+                .setMediaType(Swc4jMediaType.Jsx)
+                .setParseMode(Swc4jParseMode.Script)
+                .setCaptureAst(true);
         this.tsModuleOptions = new Swc4jParseOptions()
                 .setMediaType(Swc4jMediaType.TypeScript)
                 .setParseMode(Swc4jParseMode.Module)
@@ -47,10 +57,10 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
             Swc4jAstType type,
             int start,
             int end) {
-        assertEquals(parentNode, node.getParent());
-        assertEquals(type, node.getType());
-        assertEquals(start, node.getSpan().getStart());
-        assertEquals(end, node.getSpan().getEnd());
+        assertEquals(parentNode, node.getParent(), "Parent node mismatches");
+        assertEquals(type, node.getType(), "Type mismatches");
+        assertEquals(start, node.getSpan().getStart(), "Start mismatches");
+        assertEquals(end, node.getSpan().getEnd(), "End mismatches");
         return node;
     }
 }
