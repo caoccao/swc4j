@@ -17,9 +17,8 @@
 package com.caoccao.javet.swc4j.ast.program;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
 
 import java.util.List;
 
@@ -28,7 +27,6 @@ import java.util.List;
  *
  * @since 0.2.0
  */
-@Jni2RustClass(ignore = true)
 public class Swc4jAstModule extends Swc4jAstProgram<ISwc4jAstModuleItem> {
     /**
      * Instantiates a new Swc4j ast module.

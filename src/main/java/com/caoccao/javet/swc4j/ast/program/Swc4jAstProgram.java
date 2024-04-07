@@ -20,7 +20,6 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -33,7 +32,6 @@ import java.util.Optional;
  * @param <AST> the type parameter
  * @since 0.2.0
  */
-@Jni2RustClass(ignore = true)
 public abstract class Swc4jAstProgram<AST extends ISwc4jAst>
         extends Swc4jAst
         implements ISwc4jAstProgram<AST> {

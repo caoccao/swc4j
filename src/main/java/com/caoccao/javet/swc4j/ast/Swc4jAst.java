@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -40,18 +41,21 @@ public abstract class Swc4jAst implements ISwc4jAst {
      *
      * @since 0.2.0
      */
+    @Jni2RustField(ignore = true)
     protected final Swc4jAstSpan span;
     /**
      * The Children.
      *
      * @since 0.2.0
      */
+    @Jni2RustField(ignore = true)
     protected List<ISwc4jAst> childNodes;
     /**
      * The Parent.
      *
      * @since 0.2.0
      */
+    @Jni2RustField(ignore = true)
     protected ISwc4jAst parent;
 
     /**

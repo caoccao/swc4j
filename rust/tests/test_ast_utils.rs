@@ -1161,6 +1161,16 @@ impl GetDefault<MethodProp> for MethodProp {
   }
 }
 
+impl GetDefault<Module> for Module {
+  fn get_default() -> Module {
+    Module {
+      span: DUMMY_SP,
+      body: Default::default(),
+      shebang: Default::default(),
+    }
+  }
+}
+
 impl GetDefault<NamedExport> for NamedExport {
   fn get_default() -> NamedExport {
     NamedExport {
@@ -1331,6 +1341,16 @@ impl GetDefault<ReturnStmt> for ReturnStmt {
     ReturnStmt {
       span: DUMMY_SP,
       arg: Default::default(),
+    }
+  }
+}
+
+impl GetDefault<Script> for Script {
+  fn get_default() -> Script {
+    Script {
+      span: DUMMY_SP,
+      body: Default::default(),
+      shebang: Default::default(),
     }
   }
 }
