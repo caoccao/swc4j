@@ -66,4 +66,12 @@ public interface ISwc4jAst {
      * @since 0.2.0
      */
     void setParent(ISwc4jAst parent);
+
+    /**
+     * To debug string.
+     *
+     * @return the string
+     * @since 0.2.0
+     */
+    String toDebugString();
 }

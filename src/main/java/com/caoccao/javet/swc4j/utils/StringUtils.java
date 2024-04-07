@@ -90,6 +90,25 @@ public final class StringUtils {
     }
 
     /**
+     * Repeat string.
+     *
+     * @param str   the str
+     * @param count the count
+     * @return the string
+     * @since 0.2.0
+     */
+    public static String repeat(String str, int count) {
+        if (count <= 0 || isEmpty(str)) {
+            return EMPTY;
+        }
+        StringBuilder sb = new StringBuilder(str.length() * count);
+        for (int i = 0; i < count; ++i) {
+            sb.append(str);
+        }
+        return sb.toString();
+    }
+
+    /**
      * To snake case string.
      *
      * @param str the str
