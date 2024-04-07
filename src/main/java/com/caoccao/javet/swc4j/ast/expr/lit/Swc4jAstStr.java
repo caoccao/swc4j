@@ -26,7 +26,8 @@ import java.util.Optional;
 
 public class Swc4jAstStr
         extends Swc4jAst
-        implements ISwc4jAstLit, ISwc4jAstModuleExportName, ISwc4jAstPropName, ISwc4jAstTsModuleName, ISwc4jAstTsLit {
+        implements ISwc4jAstLit, ISwc4jAstModuleExportName, ISwc4jAstPropName, ISwc4jAstTsModuleName, ISwc4jAstTsLit,
+        ISwc4jAstTsEnumMemberId {
     protected final Optional<String> raw;
     protected final String value;
 

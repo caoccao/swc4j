@@ -16,9 +16,16 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsThisType;
+import org.junit.jupiter.api.Test;
 
-@Jni2RustClass(getDefault = "TsEntityName::Ident(Ident::get_default())")
-public interface ISwc4jAstTsEntityName
-        extends ISwc4jAstTsModuleRef, ISwc4jAstTsTypeQueryExpr {
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class TestISwc4jAstTsThisTypeOrIdent {
+    @Test
+    public void testAssignable() {
+        assertTrue(ISwc4jAstTsThisTypeOrIdent.class.isAssignableFrom(Swc4jAstIdent.class));
+        assertTrue(ISwc4jAstTsThisTypeOrIdent.class.isAssignableFrom(Swc4jAstTsThisType.class));
+    }
 }

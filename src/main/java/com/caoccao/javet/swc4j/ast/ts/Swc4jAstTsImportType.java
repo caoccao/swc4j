@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsEntityName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsTypeQueryExpr;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -29,7 +30,7 @@ import java.util.Optional;
 
 public class Swc4jAstTsImportType
         extends Swc4jAst
-        implements ISwc4jAstTsType {
+        implements ISwc4jAstTsType, ISwc4jAstTsTypeQueryExpr {
     protected final Swc4jAstStr arg;
     protected final Optional<ISwc4jAstTsEntityName> qualifier;
     protected final Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;

@@ -11385,8 +11385,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      TsEnumMemberId::Ident(node) => create_ident(env, map, node),
+      TsEnumMemberId::Str(node) => create_str(env, map, node),
     }
   }
 
@@ -11498,8 +11498,36 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      TsThisTypeOrIdent::Ident(node) => create_ident(env, map, node),
+      TsThisTypeOrIdent::TsThisType(node) => create_ts_this_type(env, map, node),
+    }
+  }
+
+  fn enum_create_ts_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsType) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      TsType::TsArrayType(node) => create_ts_array_type(env, map, node),
+      TsType::TsConditionalType(node) => create_ts_conditional_type(env, map, node),
+      TsType::TsFnOrConstructorType(node) => enum_create_ts_fn_or_constructor_type(env, map, node),
+      TsType::TsImportType(node) => create_ts_import_type(env, map, node),
+      TsType::TsIndexedAccessType(node) => create_ts_indexed_access_type(env, map, node),
+      TsType::TsInferType(node) => create_ts_infer_type(env, map, node),
+      TsType::TsKeywordType(node) => create_ts_keyword_type(env, map, node),
+      TsType::TsLitType(node) => create_ts_lit_type(env, map, node),
+      TsType::TsMappedType(node) => create_ts_mapped_type(env, map, node),
+      TsType::TsOptionalType(node) => create_ts_optional_type(env, map, node),
+      TsType::TsParenthesizedType(node) => create_ts_parenthesized_type(env, map, node),
+      TsType::TsRestType(node) => create_ts_rest_type(env, map, node),
+      TsType::TsThisType(node) => create_ts_this_type(env, map, node),
+      TsType::TsTupleType(node) => create_ts_tuple_type(env, map, node),
+      TsType::TsTypeLit(node) => create_ts_type_lit(env, map, node),
+      TsType::TsTypeOperator(node) => create_ts_type_operator(env, map, node),
+      TsType::TsTypePredicate(node) => create_ts_type_predicate(env, map, node),
+      TsType::TsTypeQuery(node) => create_ts_type_query(env, map, node),
+      TsType::TsTypeRef(node) => create_ts_type_ref(env, map, node),
+      TsType::TsUnionOrIntersectionType(node) => enum_create_ts_union_or_intersection_type(env, map, node),
     }
   }
 
@@ -11531,36 +11559,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
-    }
-  }
-
-  fn enum_create_ts_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsType) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match node {
-      TsType::TsArrayType(node) => create_ts_array_type(env, map, node),
-      TsType::TsConditionalType(node) => create_ts_conditional_type(env, map, node),
-      TsType::TsFnOrConstructorType(node) => enum_create_ts_fn_or_constructor_type(env, map, node),
-      TsType::TsImportType(node) => create_ts_import_type(env, map, node),
-      TsType::TsIndexedAccessType(node) => create_ts_indexed_access_type(env, map, node),
-      TsType::TsInferType(node) => create_ts_infer_type(env, map, node),
-      TsType::TsKeywordType(node) => create_ts_keyword_type(env, map, node),
-      TsType::TsLitType(node) => create_ts_lit_type(env, map, node),
-      TsType::TsMappedType(node) => create_ts_mapped_type(env, map, node),
-      TsType::TsOptionalType(node) => create_ts_optional_type(env, map, node),
-      TsType::TsParenthesizedType(node) => create_ts_parenthesized_type(env, map, node),
-      TsType::TsRestType(node) => create_ts_rest_type(env, map, node),
-      TsType::TsThisType(node) => create_ts_this_type(env, map, node),
-      TsType::TsTupleType(node) => create_ts_tuple_type(env, map, node),
-      TsType::TsTypeLit(node) => create_ts_type_lit(env, map, node),
-      TsType::TsTypeOperator(node) => create_ts_type_operator(env, map, node),
-      TsType::TsTypePredicate(node) => create_ts_type_predicate(env, map, node),
-      TsType::TsTypeQuery(node) => create_ts_type_query(env, map, node),
-      TsType::TsTypeRef(node) => create_ts_type_ref(env, map, node),
-      TsType::TsUnionOrIntersectionType(node) => enum_create_ts_union_or_intersection_type(env, map, node),
+      TsTypeQueryExpr::Import(node) => create_ts_import_type(env, map, node),
+      TsTypeQueryExpr::TsEntityName(node) => enum_create_ts_entity_name(env, map, node),
     }
   }
 
