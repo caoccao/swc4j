@@ -156,6 +156,7 @@ struct JavaSwc4jAstFactory {
   method_create_ts_instantiation: JStaticMethodID,
   method_create_ts_interface_body: JStaticMethodID,
   method_create_ts_interface_decl: JStaticMethodID,
+  method_create_ts_intersection_type: JStaticMethodID,
   method_create_ts_keyword_type: JStaticMethodID,
   method_create_ts_lit_type: JStaticMethodID,
   method_create_ts_mapped_type: JStaticMethodID,
@@ -188,6 +189,7 @@ struct JavaSwc4jAstFactory {
   method_create_ts_type_predicate: JStaticMethodID,
   method_create_ts_type_query: JStaticMethodID,
   method_create_ts_type_ref: JStaticMethodID,
+  method_create_ts_union_type: JStaticMethodID,
   method_create_unary_expr: JStaticMethodID,
   method_create_update_expr: JStaticMethodID,
   method_create_using_decl: JStaticMethodID,
@@ -1097,6 +1099,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsInterfaceDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsInterfaceDecl");
+    let method_create_ts_intersection_type = env
+      .get_static_method_id(
+        &class,
+        "createTsIntersectionType",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIntersectionType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsIntersectionType");
     let method_create_ts_keyword_type = env
       .get_static_method_id(
         &class,
@@ -1321,6 +1330,13 @@ impl JavaSwc4jAstFactory {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeRef;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeRef");
+    let method_create_ts_union_type = env
+      .get_static_method_id(
+        &class,
+        "createTsUnionType",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsUnionType;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsUnionType");
     let method_create_unary_expr = env
       .get_static_method_id(
         &class,
@@ -1506,6 +1522,7 @@ impl JavaSwc4jAstFactory {
       method_create_ts_instantiation,
       method_create_ts_interface_body,
       method_create_ts_interface_decl,
+      method_create_ts_intersection_type,
       method_create_ts_keyword_type,
       method_create_ts_lit_type,
       method_create_ts_mapped_type,
@@ -1538,6 +1555,7 @@ impl JavaSwc4jAstFactory {
       method_create_ts_type_predicate,
       method_create_ts_type_query,
       method_create_ts_type_ref,
+      method_create_ts_union_type,
       method_create_unary_expr,
       method_create_update_expr,
       method_create_using_decl,
@@ -4591,6 +4609,27 @@ impl JavaSwc4jAstFactory {
     return_value
   }
 
+  pub fn create_ts_intersection_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    types: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let types = object_to_jvalue!(types);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_intersection_type,
+        &[types, span],
+        "Swc4jAstTsIntersectionType create_ts_intersection_type()"
+      );
+    return_value
+  }
+
   pub fn create_ts_keyword_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -5355,6 +5394,27 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_type_ref,
         &[type_name, type_params, span],
         "Swc4jAstTsTypeRef create_ts_type_ref()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_union_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    types: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let types = object_to_jvalue!(types);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_union_type,
+        &[types, span],
+        "Swc4jAstTsUnionType create_ts_union_type()"
       );
     return_value
   }
@@ -9751,6 +9811,29 @@ pub mod program {
     return_type
   }
 
+  fn create_ts_intersection_type<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsIntersectionType,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_types = java_array_list.construct(env, node.types.len());
+    node.types.iter().for_each(|node| {
+      let java_node = enum_create_ts_type(env, map, node);
+      java_array_list.add(env, &java_types, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = java_ast_factory.create_ts_intersection_type(env, &java_types, &java_range);
+    delete_local_ref!(env, java_types);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_ts_keyword_type<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -10465,6 +10548,29 @@ pub mod program {
       java_ast_factory.create_ts_type_ref(env, &java_type_name, &java_optional_type_params, &java_range);
     delete_local_ref!(env, java_type_name);
     delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_union_type<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsUnionType,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_types = java_array_list.construct(env, node.types.len());
+    node.types.iter().for_each(|node| {
+      let java_node = enum_create_ts_type(env, map, node);
+      java_array_list.add(env, &java_types, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = java_ast_factory.create_ts_union_type(env, &java_types, &java_range);
+    delete_local_ref!(env, java_types);
     delete_local_ref!(env, java_range);
     return_value
   }
@@ -11331,8 +11437,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      default => panic!("{:?}", default),
-      // TODO
+      TsUnionOrIntersectionType::TsIntersectionType(node) => create_ts_intersection_type(env, map, node),
+      TsUnionOrIntersectionType::TsUnionType(node) => create_ts_union_type(env, map, node),
     }
   }
 

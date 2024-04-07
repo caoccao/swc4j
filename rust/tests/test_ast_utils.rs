@@ -45,15 +45,6 @@ impl GetDefault<TsFnType> for TsFnType {
   }
 }
 
-impl GetDefault<TsUnionType> for TsUnionType {
-  fn get_default() -> TsUnionType {
-    TsUnionType {
-      span: DUMMY_SP,
-      types: Default::default(),
-    }
-  }
-}
-
 /* GetDefault Begin */
 impl GetDefault<Accessibility> for Accessibility {
   fn get_default() -> Accessibility {
@@ -1704,6 +1695,15 @@ impl GetDefault<TsInterfaceDecl> for TsInterfaceDecl {
   }
 }
 
+impl GetDefault<TsIntersectionType> for TsIntersectionType {
+  fn get_default() -> TsIntersectionType {
+    TsIntersectionType {
+      span: DUMMY_SP,
+      types: Default::default(),
+    }
+  }
+}
+
 impl GetDefault<TsKeywordType> for TsKeywordType {
   fn get_default() -> TsKeywordType {
     TsKeywordType {
@@ -2035,6 +2035,15 @@ impl GetDefault<TsTypeRef> for TsTypeRef {
       span: DUMMY_SP,
       type_name: TsEntityName::get_default(),
       type_params: Default::default(),
+    }
+  }
+}
+
+impl GetDefault<TsUnionType> for TsUnionType {
+  fn get_default() -> TsUnionType {
+    TsUnionType {
+      span: DUMMY_SP,
+      types: Default::default(),
     }
   }
 }

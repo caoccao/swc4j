@@ -1129,6 +1129,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsIntersectionType createTsIntersectionType(
+            List<ISwc4jAstTsType> types,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsIntersectionType(types, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsKeywordType createTsKeywordType(
             int kindId,
             @Jni2RustParam Swc4jAstSpan span) {
@@ -1404,6 +1411,13 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeParams,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsTypeRef(typeName, typeParams, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsUnionType createTsUnionType(
+            List<ISwc4jAstTsType> types,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsUnionType(types, span);
     }
 
     @Jni2RustMethod
