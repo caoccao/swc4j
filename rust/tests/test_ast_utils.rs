@@ -34,17 +34,6 @@ trait GetDefault<T> {
   fn get_default() -> T;
 }
 
-impl GetDefault<TsFnType> for TsFnType {
-  fn get_default() -> TsFnType {
-    TsFnType {
-      span: DUMMY_SP,
-      params: Default::default(),
-      type_params: Default::default(),
-      type_ann: Box::new(TsTypeAnn::get_default()),
-    }
-  }
-}
-
 /* GetDefault Begin */
 impl GetDefault<Accessibility> for Accessibility {
   fn get_default() -> Accessibility {
@@ -1545,6 +1534,18 @@ impl GetDefault<TsConstructSignatureDecl> for TsConstructSignatureDecl {
   }
 }
 
+impl GetDefault<TsConstructorType> for TsConstructorType {
+  fn get_default() -> TsConstructorType {
+    TsConstructorType {
+      span: DUMMY_SP,
+      is_abstract: Default::default(),
+      params: Default::default(),
+      type_ann: Box::new(TsTypeAnn::get_default()),
+      type_params: Default::default(),
+    }
+  }
+}
+
 impl GetDefault<TsEnumDecl> for TsEnumDecl {
   fn get_default() -> TsEnumDecl {
     TsEnumDecl {
@@ -1591,6 +1592,17 @@ impl GetDefault<TsExternalModuleRef> for TsExternalModuleRef {
     TsExternalModuleRef {
       span: DUMMY_SP,
       expr: Str::get_default(),
+    }
+  }
+}
+
+impl GetDefault<TsFnType> for TsFnType {
+  fn get_default() -> TsFnType {
+    TsFnType {
+      span: DUMMY_SP,
+      params: Default::default(),
+      type_ann: Box::new(TsTypeAnn::get_default()),
+      type_params: Default::default(),
     }
   }
 }

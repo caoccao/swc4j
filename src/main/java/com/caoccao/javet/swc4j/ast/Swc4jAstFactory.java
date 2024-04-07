@@ -1007,6 +1007,16 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsConstructorType createTsConstructorType(
+            List<ISwc4jAstTsFnParam> params,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
+            Swc4jAstTsTypeAnn typeAnn,
+            boolean isAbstract,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsConstructorType(params, typeParams, typeAnn, isAbstract, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsEnumDecl createTsEnumDecl(
             boolean declare,
             boolean isConst,
@@ -1044,6 +1054,15 @@ public final class Swc4jAstFactory {
             Swc4jAstStr expr,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsExternalModuleRef(expr, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsFnType createTsFnType(
+            List<ISwc4jAstTsFnParam> params,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
+            Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsFnType(params, typeParams, typeAnn, span);
     }
 
     @Jni2RustMethod
