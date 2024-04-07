@@ -5943,7 +5943,7 @@ pub mod span {
   }
 
   fn enum_register_pat(map: &mut ByteToIndexMap, node: &Pat) {
-    match &node {
+    match node {
       Pat::Array(node) => register_array_pat(map, node),
       Pat::Assign(node) => register_assign_pat(map, node),
       Pat::Expr(node) => enum_register_expr(map, node),
@@ -6208,6 +6208,7 @@ pub mod span {
   }
 
   fn register_assign_prop(map: &mut ByteToIndexMap, node: &AssignProp) {
+    map.register_by_span(&node.span());
     register_ident(map, &node.key);
     enum_register_expr(map, &node.value);
   }
@@ -6387,6 +6388,7 @@ pub mod span {
   }
 
   fn register_export_default_specifier(map: &mut ByteToIndexMap, node: &ExportDefaultSpecifier) {
+    map.register_by_span(&node.span());
     register_ident(map, &node.exported);
   }
 
@@ -6405,6 +6407,7 @@ pub mod span {
   }
 
   fn register_expr_or_spread(map: &mut ByteToIndexMap, node: &ExprOrSpread) {
+    map.register_by_span(&node.span());
     node.spread.as_ref().map(|node| map.register_by_span(node));
     enum_register_expr(map, &node.expr);
   }
@@ -6601,11 +6604,13 @@ pub mod span {
   }
 
   fn register_key_value_pat_prop(map: &mut ByteToIndexMap, node: &KeyValuePatProp) {
+    map.register_by_span(&node.span());
     enum_register_prop_name(map, &node.key);
     enum_register_pat(map, &node.value);
   }
 
   fn register_key_value_prop(map: &mut ByteToIndexMap, node: &KeyValueProp) {
+    map.register_by_span(&node.span());
     enum_register_prop_name(map, &node.key);
     enum_register_expr(map, &node.value);
   }
@@ -6764,6 +6769,7 @@ pub mod span {
   }
 
   fn register_spread_element(map: &mut ByteToIndexMap, node: &SpreadElement) {
+    map.register_by_span(&node.span());
     map.register_by_span(&node.dot3_token);
     enum_register_expr(map, &node.expr);
   }
@@ -7240,6 +7246,7 @@ pub mod span {
   fn register_var_declarator(map: &mut ByteToIndexMap, node: &VarDeclarator) {
     map.register_by_span(&node.span);
     enum_register_pat(map, &node.name);
+    node.init.as_ref().map(|node| enum_register_expr(map, node));
   }
 
   fn register_while_stmt(map: &mut ByteToIndexMap, node: &WhileStmt) {
@@ -9116,7 +9123,6 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let optional_shebang: Option<String> = node.shebang.to_owned().map(|s| s.to_string());
     let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let java_body = java_array_list.construct(env, node.body.len());
     node.body.iter().for_each(|node| {
@@ -9124,6 +9130,7 @@ pub mod program {
       java_array_list.add(env, &java_body, &java_node);
       delete_local_ref!(env, java_node);
     });
+    let optional_shebang: Option<String> = node.shebang.to_owned().map(|s| s.to_string());
     let return_value = java_ast_factory.create_script(env, &java_body, &optional_shebang, &java_range);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_range);
@@ -10766,9 +10773,9 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let declare = node.declare;
     let kind_id = node.kind.get_id();
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let java_decls = java_array_list.construct(env, node.decls.len());
     node.decls.iter().for_each(|node| {
       let java_node = create_var_declarator(env, map, node);
@@ -10790,10 +10797,10 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let java_name = enum_create_pat(env, map, &node.name);
     let java_optional_init: Option<JObject> = node.init.as_ref().map(|node| enum_create_expr(env, map, node.as_ref()));
     let definite = node.definite;
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
     let return_value =
       java_ast_factory.create_var_declarator(env, &java_name, &java_optional_init, definite, &java_range);
     delete_local_ref!(env, java_name);
