@@ -185,6 +185,9 @@ struct JavaSwc4jAstFactory {
   method_create_ts_type_param: JStaticMethodID,
   method_create_ts_type_param_decl: JStaticMethodID,
   method_create_ts_type_param_instantiation: JStaticMethodID,
+  method_create_ts_type_predicate: JStaticMethodID,
+  method_create_ts_type_query: JStaticMethodID,
+  method_create_ts_type_ref: JStaticMethodID,
   method_create_unary_expr: JStaticMethodID,
   method_create_update_expr: JStaticMethodID,
   method_create_using_decl: JStaticMethodID,
@@ -1297,6 +1300,27 @@ impl JavaSwc4jAstFactory {
         "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeParamInstantiation");
+    let method_create_ts_type_predicate = env
+      .get_static_method_id(
+        &class,
+        "createTsTypePredicate",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsThisTypeOrIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypePredicate;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTypePredicate");
+    let method_create_ts_type_query = env
+      .get_static_method_id(
+        &class,
+        "createTsTypeQuery",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsTypeQueryExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeQuery;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTypeQuery");
+    let method_create_ts_type_ref = env
+      .get_static_method_id(
+        &class,
+        "createTsTypeRef",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeRef;",
+      )
+      .expect("Couldn't find method Swc4jAstFactory.createTsTypeRef");
     let method_create_unary_expr = env
       .get_static_method_id(
         &class,
@@ -1511,6 +1535,9 @@ impl JavaSwc4jAstFactory {
       method_create_ts_type_param,
       method_create_ts_type_param_decl,
       method_create_ts_type_param_instantiation,
+      method_create_ts_type_predicate,
+      method_create_ts_type_query,
+      method_create_ts_type_ref,
       method_create_unary_expr,
       method_create_update_expr,
       method_create_using_decl,
@@ -5257,6 +5284,77 @@ impl JavaSwc4jAstFactory {
         self.method_create_ts_type_param_instantiation,
         &[params, span],
         "Swc4jAstTsTypeParamInstantiation create_ts_type_param_instantiation()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_type_predicate<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    asserts: bool,
+    param_name: &JObject<'_>,
+    type_ann: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let asserts = boolean_to_jvalue!(asserts);
+    let param_name = object_to_jvalue!(param_name);
+    let type_ann = optional_object_to_jvalue!(type_ann);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_type_predicate,
+        &[asserts, param_name, type_ann, span],
+        "Swc4jAstTsTypePredicate create_ts_type_predicate()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_type_query<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    expr_name: &JObject<'_>,
+    type_args: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let expr_name = object_to_jvalue!(expr_name);
+    let type_args = optional_object_to_jvalue!(type_args);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_type_query,
+        &[expr_name, type_args, span],
+        "Swc4jAstTsTypeQuery create_ts_type_query()"
+      );
+    return_value
+  }
+
+  pub fn create_ts_type_ref<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    type_name: &JObject<'_>,
+    type_params: &Option<JObject>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let type_name = object_to_jvalue!(type_name);
+    let type_params = optional_object_to_jvalue!(type_params);
+    let span = object_to_jvalue!(span);
+    let return_value = call_static_as_object!(
+        env,
+        &self.class,
+        self.method_create_ts_type_ref,
+        &[type_name, type_params, span],
+        "Swc4jAstTsTypeRef create_ts_type_ref()"
       );
     return_value
   }
@@ -10312,6 +10410,65 @@ pub mod program {
     return_value
   }
 
+  fn create_ts_type_predicate<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsTypePredicate,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let asserts = node.asserts;
+    let java_param_name = enum_create_ts_this_type_or_ident(env, map, &node.param_name);
+    let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
+    let return_value =
+      java_ast_factory.create_ts_type_predicate(env, asserts, &java_param_name, &java_optional_type_ann, &java_range);
+    delete_local_ref!(env, java_param_name);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_type_query<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeQuery) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_expr_name = enum_create_ts_type_query_expr(env, map, &node.expr_name);
+    let java_optional_type_args = node
+      .type_args
+      .as_ref()
+      .map(|node| create_ts_type_param_instantiation(env, map, node));
+    let return_value =
+      java_ast_factory.create_ts_type_query(env, &java_expr_name, &java_optional_type_args, &java_range);
+    delete_local_ref!(env, java_expr_name);
+    delete_local_optional_ref!(env, java_optional_type_args);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
+  fn create_ts_type_ref<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeRef) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_type_name = enum_create_ts_entity_name(env, map, &node.type_name);
+    let java_optional_type_params = node
+      .type_params
+      .as_ref()
+      .map(|node| create_ts_type_param_instantiation(env, map, node));
+    let return_value =
+      java_ast_factory.create_ts_type_ref(env, &java_type_name, &java_optional_type_params, &java_range);
+    delete_local_ref!(env, java_type_name);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_range);
+    return_value
+  }
+
   fn create_unary_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UnaryExpr) -> JObject<'a>
   where
     'local: 'a,
@@ -11158,12 +11315,10 @@ pub mod program {
       TsType::TsTupleType(node) => create_ts_tuple_type(env, map, node),
       TsType::TsTypeLit(node) => create_ts_type_lit(env, map, node),
       TsType::TsTypeOperator(node) => create_ts_type_operator(env, map, node),
-      // TsType::TsTypePredicate(node) => create_ts_type_predicate(env, map, node),
-      // TsType::TsTypeQuery(node) => create_ts_type_query(env, map, node),
-      // TsType::TsTypeRef(node) => create_ts_type_ref(env, map, node),
+      TsType::TsTypePredicate(node) => create_ts_type_predicate(env, map, node),
+      TsType::TsTypeQuery(node) => create_ts_type_query(env, map, node),
+      TsType::TsTypeRef(node) => create_ts_type_ref(env, map, node),
       TsType::TsUnionOrIntersectionType(node) => enum_create_ts_union_or_intersection_type(env, map, node),
-      default => panic!("{:?}", default),
-      // TODO
     }
   }
 

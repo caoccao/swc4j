@@ -1382,6 +1382,31 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsTypePredicate createTsTypePredicate(
+            boolean asserts,
+            ISwc4jAstTsThisTypeOrIdent paramName,
+            @Jni2RustParam(optional = true) ISwc4jAstTsType typeAnn,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTypePredicate(asserts, paramName, typeAnn, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsTypeQuery createTsTypeQuery(
+            ISwc4jAstTsTypeQueryExpr exprName,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTypeQuery(exprName, typeArgs, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsTypeRef createTsTypeRef(
+            ISwc4jAstTsEntityName typeName,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeParams,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsTypeRef(typeName, typeParams, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstUnaryExpr createUnaryExpr(
             int opId,
             ISwc4jAstExpr arg,

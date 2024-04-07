@@ -2008,6 +2008,37 @@ impl GetDefault<TsTypeParamInstantiation> for TsTypeParamInstantiation {
   }
 }
 
+impl GetDefault<TsTypePredicate> for TsTypePredicate {
+  fn get_default() -> TsTypePredicate {
+    TsTypePredicate {
+      span: DUMMY_SP,
+      asserts: Default::default(),
+      param_name: TsThisTypeOrIdent::get_default(),
+      type_ann: Default::default(),
+    }
+  }
+}
+
+impl GetDefault<TsTypeQuery> for TsTypeQuery {
+  fn get_default() -> TsTypeQuery {
+    TsTypeQuery {
+      span: DUMMY_SP,
+      expr_name: TsTypeQueryExpr::get_default(),
+      type_args: Default::default(),
+    }
+  }
+}
+
+impl GetDefault<TsTypeRef> for TsTypeRef {
+  fn get_default() -> TsTypeRef {
+    TsTypeRef {
+      span: DUMMY_SP,
+      type_name: TsEntityName::get_default(),
+      type_params: Default::default(),
+    }
+  }
+}
+
 impl GetDefault<UnaryExpr> for UnaryExpr {
   fn get_default() -> UnaryExpr {
     UnaryExpr {
