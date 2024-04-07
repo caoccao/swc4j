@@ -33,6 +33,26 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstObjectLit extends BaseTestSuiteSwc4jAst {
     @Test
+    public void testEmptyObject() throws Swc4jCoreException {
+        String code = "a={}";
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jAstScript script = output.getProgram().asScript();
+        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
+                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 4);
+        Swc4jAstAssignExpr assignExpr = (Swc4jAstAssignExpr) assertAst(
+                exprStmt, exprStmt.getExpr(), Swc4jAstType.AssignExpr, 0, 4);
+        assertEquals(Swc4jAstAssignOp.Assign, assignExpr.getOp());
+        Swc4jAstBindingIdent bindingIdent = (Swc4jAstBindingIdent) assertAst(
+                assignExpr, assignExpr.getLeft(), Swc4jAstType.BindingIdent, 0, 1);
+        Swc4jAstIdent ident = assertAst(
+                bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 0, 1);
+        assertEquals("a", ident.getSym());
+        Swc4jAstObjectLit objectLit = (Swc4jAstObjectLit) assertAst(
+                assignExpr, assignExpr.getRight(), Swc4jAstType.ObjectLit, 2, 4);
+        assertTrue(objectLit.getProps().isEmpty());
+    }
+
+    @Test
     public void testNonEmptyObject() throws Swc4jCoreException {
         String code = "a={a:1,b:'x',c:true}";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);

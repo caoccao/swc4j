@@ -103,16 +103,22 @@ public abstract class Swc4jAst implements ISwc4jAst {
      * To debug string.
      *
      * @param lines  the lines
+     * @param name   the name
      * @param indent the indent
      * @since 0.2.0
      */
-    protected void toDebugString(List<String> lines, int indent) {
-        lines.add(String.format("%s%s (%d,%d) [%d]",
+    protected void toDebugString(List<String> lines, String name, int indent) {
+        if (StringUtils.isEmpty(name)) {
+            name = StringUtils.EMPTY;
+        } else {
+            name = name.trim() + " ";
+        }
+        lines.add(String.format("%s%s%s (%d,%d)",
                 StringUtils.repeat(INDENT_STRING, indent),
+                name,
                 getType().name(),
                 span.getStart(),
-                span.getEnd(),
-                getChildNodes().size()));
+                span.getEnd()));
         final int newIndent = indent + 1;
         ReflectionUtils.getDeclaredFields(getClass()).entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
@@ -121,7 +127,6 @@ public abstract class Swc4jAst implements ISwc4jAst {
                 .filter(field -> !Optional.ofNullable(field.getAnnotation(Jni2RustField.class))
                         .map(Jni2RustField::ignore)
                         .orElse(false))
-                .filter(field -> !ISwc4jAst.class.isAssignableFrom(field.getType()))
                 .forEach(field -> {
                     field.setAccessible(true);
                     Object value;
@@ -134,7 +139,12 @@ public abstract class Swc4jAst implements ISwc4jAst {
                         List<?> listValue = (List<?>) value;
                         int i = 0;
                         for (Object o : listValue) {
-                            if (!(o instanceof ISwc4jAst)) {
+                            if (o instanceof Swc4jAst) {
+                                ((Swc4jAst) o).toDebugString(
+                                        lines,
+                                        String.format("%s[%d]", field.getName(), i),
+                                        newIndent);
+                            } else {
                                 value = String.valueOf(o);
                                 lines.add(String.format("%s%s[%d] = %s",
                                         StringUtils.repeat(INDENT_STRING, newIndent),
@@ -147,14 +157,23 @@ public abstract class Swc4jAst implements ISwc4jAst {
                     } else if (value instanceof Optional) {
                         Optional<?> optionalValue = (Optional<?>) value;
                         if (optionalValue.isPresent()) {
-                            if (!(optionalValue.get() instanceof ISwc4jAst)) {
-                                value = String.valueOf(optionalValue.get());
+                            value = optionalValue.get();
+                            if (value instanceof Swc4jAst) {
+                                ((Swc4jAst) value).toDebugString(lines, field.getName(), newIndent);
+                            } else {
                                 lines.add(String.format("%s%s? = %s",
                                         StringUtils.repeat(INDENT_STRING, newIndent),
                                         field.getName(),
                                         value));
                             }
+                        } else {
+                            lines.add(String.format("%s%s? = %s",
+                                    StringUtils.repeat(INDENT_STRING, newIndent),
+                                    field.getName(),
+                                    "null"));
                         }
+                    } else if (value instanceof Swc4jAst) {
+                        ((Swc4jAst) value).toDebugString(lines, field.getName(), newIndent);
                     } else {
                         lines.add(String.format("%s%s = %s",
                                 StringUtils.repeat(INDENT_STRING, newIndent),
@@ -162,17 +181,12 @@ public abstract class Swc4jAst implements ISwc4jAst {
                                 value));
                     }
                 });
-        if (!getChildNodes().isEmpty()) {
-            getChildNodes().stream()
-                    .filter(Objects::nonNull)
-                    .forEach(node -> ((Swc4jAst) node).toDebugString(lines, newIndent));
-        }
     }
 
     @Override
     public String toDebugString() {
         List<String> lines = new ArrayList<>();
-        toDebugString(lines, 0);
+        toDebugString(lines, null, 0);
         return StringUtils.join("\n", lines);
     }
 
