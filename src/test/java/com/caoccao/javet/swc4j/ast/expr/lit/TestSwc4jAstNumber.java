@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.lit;
+package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -27,30 +27,30 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestSwc4jAstStr extends BaseTestSuiteSwc4jAst {
+public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
     @Test
-    public void testEmptyString() throws Swc4jCoreException {
-        String code = "''";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 2);
-        Swc4jAstStr str = (Swc4jAstStr) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.Str, 0, 2);
-        assertEquals("", str.getValue());
-        assertEquals("''", str.getRaw().get());
-    }
-
-    @Test
-    public void testValueAndRaw() throws Swc4jCoreException {
-        String code = "'abc'";
+    public void testDouble() throws Swc4jCoreException {
+        String code = "12.34";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         Swc4jAstScript script = output.getProgram().asScript();
         Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
                 script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 5);
-        Swc4jAstStr str = (Swc4jAstStr) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.Str, 0, 5);
-        assertEquals("abc", str.getValue());
-        assertEquals("'abc'", str.getRaw().get());
+        Swc4jAstNumber number = (Swc4jAstNumber) assertAst(
+                exprStmt, exprStmt.getExpr(), Swc4jAstType.Number, 0, 5);
+        assertEquals(12.34D, number.getValue(), 0.0001D);
+        assertEquals("12.34", number.getRaw().get());
+    }
+
+    @Test
+    public void testInt() throws Swc4jCoreException {
+        String code = "12345";
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jAstScript script = output.getProgram().asScript();
+        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
+                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 5);
+        Swc4jAstNumber number = (Swc4jAstNumber) assertAst(
+                exprStmt, exprStmt.getExpr(), Swc4jAstType.Number, 0, 5);
+        assertEquals(12345, number.getValueAsInt());
+        assertEquals("12345", number.getRaw().get());
     }
 }
