@@ -57,12 +57,14 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
         Swc4jAstNumber number = (Swc4jAstNumber) assertAst(
                 exprOrSpread, exprOrSpread.getExpr(), Swc4jAstType.Number, 1, 2);
         assertEquals(1, number.getValue());
+        assertTrue(number.getRaw().isPresent());
         assertEquals("1", number.getRaw().get());
         // Str
         exprOrSpread = assertAst(
                 arrayLit, arrayLit.getElems().get(1), Swc4jAstType.ExprOrSpread, 3, 6);
         Swc4jAstStr str = (Swc4jAstStr) assertAst(
                 exprOrSpread, exprOrSpread.getExpr(), Swc4jAstType.Str, 3, 6);
+        assertTrue(str.getRaw().isPresent());
         assertEquals("a", str.getValue());
         assertEquals("'a'", str.getRaw().get());
         // Bool
