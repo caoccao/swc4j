@@ -45,15 +45,6 @@ impl GetDefault<TsFnType> for TsFnType {
   }
 }
 
-impl GetDefault<TsModuleBlock> for TsModuleBlock {
-  fn get_default() -> TsModuleBlock {
-    TsModuleBlock {
-      span: DUMMY_SP,
-      body: Default::default(),
-    }
-  }
-}
-
 impl GetDefault<TsUnionType> for TsUnionType {
   fn get_default() -> TsUnionType {
     TsUnionType {
@@ -1759,6 +1750,15 @@ impl GetDefault<TsMethodSignature> for TsMethodSignature {
   }
 }
 
+impl GetDefault<TsModuleBlock> for TsModuleBlock {
+  fn get_default() -> TsModuleBlock {
+    TsModuleBlock {
+      span: DUMMY_SP,
+      body: Default::default(),
+    }
+  }
+}
+
 impl GetDefault<TsModuleDecl> for TsModuleDecl {
   fn get_default() -> TsModuleDecl {
     TsModuleDecl {
@@ -1767,6 +1767,18 @@ impl GetDefault<TsModuleDecl> for TsModuleDecl {
       declare: Default::default(),
       global: Default::default(),
       id: TsModuleName::get_default(),
+    }
+  }
+}
+
+impl GetDefault<TsNamespaceDecl> for TsNamespaceDecl {
+  fn get_default() -> TsNamespaceDecl {
+    TsNamespaceDecl {
+      span: DUMMY_SP,
+      body: Box::new(TsNamespaceBody::get_default()),
+      declare: Default::default(),
+      global: Default::default(),
+      id: Ident::get_default(),
     }
   }
 }

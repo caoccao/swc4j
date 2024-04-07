@@ -1171,6 +1171,13 @@ public final class Swc4jAstFactory {
     }
 
     @Jni2RustMethod
+    public static Swc4jAstTsModuleBlock createTsModuleBlock(
+            List<ISwc4jAstModuleItem> body,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsModuleBlock(body, span);
+    }
+
+    @Jni2RustMethod
     public static Swc4jAstTsModuleDecl createTsModuleDecl(
             boolean declare,
             boolean global,
@@ -1178,6 +1185,16 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) ISwc4jAstTsNamespaceBody body,
             @Jni2RustParam Swc4jAstSpan span) {
         return new Swc4jAstTsModuleDecl(declare, global, id, body, span);
+    }
+
+    @Jni2RustMethod
+    public static Swc4jAstTsNamespaceDecl createTsNamespaceDecl(
+            boolean declare,
+            boolean global,
+            Swc4jAstIdent id,
+            ISwc4jAstTsNamespaceBody body,
+            @Jni2RustParam Swc4jAstSpan span) {
+        return new Swc4jAstTsNamespaceDecl(declare, global, id, body, span);
     }
 
     @Jni2RustMethod

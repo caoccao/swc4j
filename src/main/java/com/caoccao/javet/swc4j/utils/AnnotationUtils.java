@@ -21,6 +21,11 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The type Annotation utils.
+ *
+ * @since 0.2.0
+ */
 @SuppressWarnings("unchecked")
 public final class AnnotationUtils {
     private static final Map<AnnotatedElement, Annotation> ANNOTATION_MAP = new HashMap<>();
@@ -28,6 +33,17 @@ public final class AnnotationUtils {
     private AnnotationUtils() {
     }
 
+    /**
+     * Gets annotation recursively.
+     * The built-in getAnnotation() doesn't look up the annotation in the declared annotations.
+     * This method is a fix to the built-in one.
+     *
+     * @param <A>              the type parameter
+     * @param annotatedElement the annotated element
+     * @param annotationClass  the annotation class
+     * @return the annotation
+     * @since 0.2.0
+     */
     public static <A extends Annotation> A getAnnotation(
             AnnotatedElement annotatedElement,
             Class<A> annotationClass) {
@@ -50,6 +66,17 @@ public final class AnnotationUtils {
         return null;
     }
 
+    /**
+     * Is annotation present recursively.
+     * The built-in isAnnotationPresent() doesn't look up the annotation in the declared annotations.
+     * This method is a fix to the built-in one.
+     *
+     * @param <A>              the type parameter
+     * @param annotatedElement the annotated element
+     * @param annotationClass  the annotation class
+     * @return the boolean
+     * @since 0.2.0
+     */
     public static <A extends Annotation> boolean isAnnotationPresent(
             AnnotatedElement annotatedElement,
             Class<A> annotationClass) {

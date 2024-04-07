@@ -14,38 +14,38 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.expr.lit;
+package com.caoccao.javet.swc4j.ast.module;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsNamespaceBody;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
-public class Swc4jAstArrayLit
+public class Swc4jAstTsModuleBlock
         extends Swc4jAst
-        implements ISwc4jAstExpr {
-    protected final List<Swc4jAstExprOrSpread> elems;
+        implements ISwc4jAstTsNamespaceBody {
+    protected final List<ISwc4jAstModuleItem> body;
 
-    public Swc4jAstArrayLit(
-            List<Swc4jAstExprOrSpread> elems,
+    public Swc4jAstTsModuleBlock(
+            List<ISwc4jAstModuleItem> body,
             Swc4jAstSpan span) {
         super(span);
-        this.elems = SimpleList.immutableCopyOf(AssertionUtils.notNull(elems, "Elems"));
-        childNodes = SimpleList.immutableCopyOf(elems);
+        this.body = SimpleList.immutableCopyOf(AssertionUtils.notNull(body, "Body"));
+        childNodes = SimpleList.immutableCopyOf(body);
         updateParent();
     }
 
-    public List<Swc4jAstExprOrSpread> getElems() {
-        return elems;
+    public List<ISwc4jAstModuleItem> getBody() {
+        return body;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.ArrayLit;
+        return Swc4jAstType.TsModuleBlock;
     }
 }

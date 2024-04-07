@@ -20,10 +20,24 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The type Reflection utils.
+ *
+ * @since 0.2.0
+ */
 public final class ReflectionUtils {
     private ReflectionUtils() {
     }
 
+    /**
+     * Gets declared fields recursively.
+     * The built-in getDeclaredFields() doesn't look up the declared fields in the super classes.
+     * This method is a fix to the built-in one.
+     *
+     * @param clazz the clazz
+     * @return the declared fields
+     * @since 0.2.0
+     */
     public static Map<String, Field> getDeclaredFields(Class<?> clazz) {
         Map<String, Field> fieldMap = new HashMap<>();
         for (Field field : clazz.getDeclaredFields()) {

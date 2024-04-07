@@ -14,48 +14,59 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.expr;
+package com.caoccao.javet.swc4j.ast.module;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxAttrOrSpread;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropOrSpread;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsNamespaceBody;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-@Jni2RustClass(span = false)
-public class Swc4jAstSpreadElement
+public class Swc4jAstTsNamespaceDecl
         extends Swc4jAst
-        implements ISwc4jAstPropOrSpread, ISwc4jAstJsxAttrOrSpread {
-    protected final Swc4jAstSpan dot3Token;
+        implements ISwc4jAstTsNamespaceBody {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr expr;
+    protected final ISwc4jAstTsNamespaceBody body;
+    protected final boolean declare;
+    protected final boolean global;
+    protected final Swc4jAstIdent id;
 
-    public Swc4jAstSpreadElement(
-            Swc4jAstSpan dot3Token,
-            ISwc4jAstExpr expr,
+    public Swc4jAstTsNamespaceDecl(
+            boolean declare,
+            boolean global,
+            Swc4jAstIdent id,
+            ISwc4jAstTsNamespaceBody body,
             Swc4jAstSpan span) {
         super(span);
-        this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
-        this.expr = AssertionUtils.notNull(expr, "Expr");
-        childNodes = SimpleList.immutableOf(expr);
+        this.declare = declare;
+        this.global = global;
+        this.body = AssertionUtils.notNull(body, "Body");
+        this.id = AssertionUtils.notNull(id, "Id");
+        childNodes = SimpleList.immutableOf(id, body);
         updateParent();
     }
 
-    public Swc4jAstSpan getDot3Token() {
-        return dot3Token;
+    public ISwc4jAstTsNamespaceBody getBody() {
+        return body;
     }
 
-    public ISwc4jAstExpr getExpr() {
-        return expr;
+    public Swc4jAstIdent getId() {
+        return id;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.SpreadElement;
+        return Swc4jAstType.TsNamespaceDecl;
+    }
+
+    public boolean isDeclare() {
+        return declare;
+    }
+
+    public boolean isGlobal() {
+        return global;
     }
 }
