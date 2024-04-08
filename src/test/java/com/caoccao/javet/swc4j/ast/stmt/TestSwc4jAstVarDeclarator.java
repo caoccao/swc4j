@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.stmt;
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -29,7 +30,33 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
     @Test
-    public void testLet() throws Swc4jCoreException {
+    public void testWithInit() throws Swc4jCoreException {
+        String code = "let a變量=1";
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        assertNotNull(output);
+        assertFalse(output.isModule());
+        assertTrue(output.isScript());
+        assertNotNull(output.getProgram());
+        Swc4jAstScript script = output.getProgram().asScript();
+        assertEquals(0, script.getSpan().getStart());
+        assertEquals(code.length(), script.getSpan().getEnd());
+        assertNotNull(script.getBody());
+        Swc4jAstVarDecl varDecl = (Swc4jAstVarDecl) assertAst(
+                script, script.getBody().get(0), Swc4jAstType.VarDecl, 0, 9);
+        assertEquals(Swc4jAstVarDeclKind.Let, varDecl.getKind());
+        Swc4jAstVarDeclarator varDeclarator = assertAst(
+                varDecl, varDecl.getDecls().get(0), Swc4jAstType.VarDeclarator, 4, 9);
+        Swc4jAstBindingIdent name = (Swc4jAstBindingIdent) assertAst(
+                varDeclarator, varDeclarator.getName(), Swc4jAstType.BindingIdent, 4, 7);
+        assertEquals("a變量", name.getId().getSym());
+        assertTrue(varDeclarator.getInit().isPresent());
+        Swc4jAstNumber number = (Swc4jAstNumber) assertAst(
+                varDeclarator, varDeclarator.getInit().get(), Swc4jAstType.Number, 8, 9);
+        assertEquals(1, number.getValue());
+    }
+
+    @Test
+    public void testWithoutInit() throws Swc4jCoreException {
         String code = "let a變量";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         assertNotNull(output);
@@ -45,8 +72,10 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
         assertEquals(Swc4jAstVarDeclKind.Let, varDecl.getKind());
         Swc4jAstVarDeclarator varDeclarator = assertAst(
                 varDecl, varDecl.getDecls().get(0), Swc4jAstType.VarDeclarator, 4, 7);
+        assertFalse(varDeclarator.isDefinite());
         Swc4jAstBindingIdent name = (Swc4jAstBindingIdent) assertAst(
                 varDeclarator, varDeclarator.getName(), Swc4jAstType.BindingIdent, 4, 7);
         assertEquals("a變量", name.getId().getSym());
+        assertFalse(varDeclarator.getInit().isPresent());
     }
 }
