@@ -21,11 +21,12 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBigInt;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
+import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -79,6 +80,25 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
         assertEquals("1n", bigInt.getRaw().get());
         assertEquals(BigInteger.ONE, bigInt.getValue());
         assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
+    }
+
+    @Test
+    public void testVisitor() {
+        assertVisitor(tsScriptOptions, SimpleList.of(
+                new VisitorCase("0n", SimpleMap.of(
+                        Swc4jAstType.Script, 1,
+                        Swc4jAstType.ExprStmt, 1,
+                        Swc4jAstType.BigInt, 1)),
+                new VisitorCase("-1n", SimpleMap.of(
+                        Swc4jAstType.Script, 1,
+                        Swc4jAstType.ExprStmt, 1,
+                        Swc4jAstType.UnaryExpr, 1,
+                        Swc4jAstType.BigInt, 1)),
+                new VisitorCase("+1n", SimpleMap.of(
+                        Swc4jAstType.Script, 1,
+                        Swc4jAstType.ExprStmt, 1,
+                        Swc4jAstType.UnaryExpr, 1,
+                        Swc4jAstType.BigInt, 1))));
     }
 
     @Test
