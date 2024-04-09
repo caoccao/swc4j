@@ -73,140 +73,140 @@ impl JavaSwc4jTokenFactory {
       .get_static_method_id(
         &class,
         "createAssignOperator",
-        "(ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(ILcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createAssignOperator");
     let method_create_big_int = env
       .get_static_method_id(
         &class,
         "createBigInt",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createBigInt");
     let method_create_binary_operator = env
       .get_static_method_id(
         &class,
         "createBinaryOperator",
-        "(ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(ILcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createBinaryOperator");
     let method_create_error = env
       .get_static_method_id(
         &class,
         "createError",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createError");
     let method_create_false = env
       .get_static_method_id(
         &class,
         "createFalse",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createFalse");
     let method_create_generic_operator = env
       .get_static_method_id(
         &class,
         "createGenericOperator",
-        "(ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(ILcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createGenericOperator");
     let method_create_ident_known = env
       .get_static_method_id(
         &class,
         "createIdentKnown",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createIdentKnown");
     let method_create_ident_other = env
       .get_static_method_id(
         &class,
         "createIdentOther",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createIdentOther");
     let method_create_jsx_tag_name = env
       .get_static_method_id(
         &class,
         "createJsxTagName",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createJsxTagName");
     let method_create_jsx_tag_text = env
       .get_static_method_id(
         &class,
         "createJsxTagText",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createJsxTagText");
     let method_create_keyword = env
       .get_static_method_id(
         &class,
         "createKeyword",
-        "(ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(ILcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createKeyword");
     let method_create_null = env
       .get_static_method_id(
         &class,
         "createNull",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createNull");
     let method_create_number = env
       .get_static_method_id(
         &class,
         "createNumber",
-        "(Ljava/lang/String;DLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        "(Ljava/lang/String;DLcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createNumber");
     let method_create_regex = env
       .get_static_method_id(
         &class,
         "createRegex",
-        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValueFlags;",
+        "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValueFlags;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createRegex");
     let method_create_shebang = env
       .get_static_method_id(
         &class,
         "createShebang",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createShebang");
     let method_create_span = env
       .get_static_method_id(
         &class,
         "createSpan",
-        "(II)Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;",
+        "(II)Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createSpan");
     let method_create_string = env
       .get_static_method_id(
         &class,
         "createString",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createString");
     let method_create_template = env
       .get_static_method_id(
         &class,
         "createTemplate",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createTemplate");
     let method_create_true = env
       .get_static_method_id(
         &class,
         "createTrue",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jToken;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createTrue");
     let method_create_unknown = env
       .get_static_method_id(
         &class,
         "createUnknown",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jAstSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createUnknown");
     JavaSwc4jTokenFactory {

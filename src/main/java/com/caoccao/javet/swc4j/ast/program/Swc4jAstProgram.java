@@ -17,7 +17,7 @@
 package com.caoccao.javet.swc4j.ast.program;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
+import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;

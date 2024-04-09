@@ -29,6 +29,7 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.ast.ts.*;
 import com.caoccao.javet.swc4j.jni2rust.*;
+import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 import java.util.List;
 

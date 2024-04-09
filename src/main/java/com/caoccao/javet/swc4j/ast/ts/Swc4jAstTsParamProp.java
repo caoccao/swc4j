@@ -17,7 +17,7 @@
 package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
+import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstDecorator;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;

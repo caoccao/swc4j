@@ -522,7 +522,7 @@ unsafe impl Sync for JavaTokenType {}
 impl JavaTokenType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
-      .find_class("com/caoccao/javet/swc4j/enums/Swc4jTokenType")
+      .find_class("com/caoccao/javet/swc4j/tokens/Swc4jTokenType")
       .expect("Couldn't find class Swc4jTokenType");
     let class = env
       .new_global_ref(class)
@@ -531,7 +531,7 @@ impl JavaTokenType {
       .get_method_id(&class, "getId", "()I")
       .expect("Couldn't find method Swc4jTokenType.getId");
     let method_parse = env
-      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/enums/Swc4jTokenType;")
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenType;")
       .expect("Couldn't find static method Swc4jTokenType.parse");
     JavaTokenType {
       class,

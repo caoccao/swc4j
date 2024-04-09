@@ -16,8 +16,7 @@
 
 package com.caoccao.javet.swc4j.tokens;
 
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
-import com.caoccao.javet.swc4j.enums.Swc4jTokenType;
+import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 /**
  * The type Base swc4j token text value.

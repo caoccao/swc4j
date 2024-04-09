@@ -18,7 +18,7 @@ package com.caoccao.javet.swc4j;
 
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
-import com.caoccao.javet.swc4j.enums.Swc4jTokenType;
+import com.caoccao.javet.swc4j.tokens.Swc4jTokenType;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
