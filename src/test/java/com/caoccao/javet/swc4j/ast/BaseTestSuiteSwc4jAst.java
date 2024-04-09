@@ -73,9 +73,16 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
     }
 
     protected void assertVisitor(Swc4jParseOptions options, List<VisitorCase> visitorCases) {
+        assertVisitor(options, visitorCases, false);
+    }
+
+    protected void assertVisitor(Swc4jParseOptions options, List<VisitorCase> visitorCases, boolean debugEnabled) {
         try {
             for (VisitorCase visitorCase : visitorCases) {
                 final Swc4jParseOutput output = swc4j.parse(visitorCase.getCode(), options);
+                if (debugEnabled) {
+                    logger.info(output.getProgram().toDebugString());
+                }
                 final Swc4jAstCounterVisitor visitor = new Swc4jAstCounterVisitor();
                 assertEquals(Swc4jAstVisitorResponse.OkAndContinue, output.getProgram().visit(visitor));
                 visitorCase.getVisitorMap().forEach((type, count) ->

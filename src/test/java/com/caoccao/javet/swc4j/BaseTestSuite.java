@@ -16,10 +16,15 @@
 
 package com.caoccao.javet.swc4j;
 
+import com.caoccao.javet.swc4j.interfaces.ISwc4jLogger;
+import com.caoccao.javet.swc4j.utils.Swc4jDefaultLogger;
+
 public abstract class BaseTestSuite {
+    protected ISwc4jLogger logger;
     protected Swc4j swc4j;
 
     public BaseTestSuite() {
+        logger = new Swc4jDefaultLogger(getClass().getName());
         swc4j = new Swc4j();
     }
 }

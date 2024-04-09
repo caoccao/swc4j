@@ -24,11 +24,30 @@ import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
+import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
+    @Test
+    public void testVisitor() {
+        assertVisitor(tsScriptOptions, SimpleList.of(
+                new VisitorCase("const a = 1", SimpleMap.of(
+                        Swc4jAstType.Script, 1,
+                        Swc4jAstType.VarDecl, 1,
+                        Swc4jAstType.VarDeclarator, 1,
+                        Swc4jAstType.Number, 1,
+                        Swc4jAstType.BindingIdent, 1)),
+                new VisitorCase("let a", SimpleMap.of(
+                        Swc4jAstType.Script, 1,
+                        Swc4jAstType.VarDecl, 1,
+                        Swc4jAstType.VarDeclarator, 1,
+                        Swc4jAstType.Number, 0,
+                        Swc4jAstType.BindingIdent, 1))));
+    }
+
     @Test
     public void testWithInit() throws Swc4jCoreException {
         String code = "let a變量=1";
