@@ -16,12 +16,14 @@
 
 package com.caoccao.javet.swc4j.ast.expr.lit;
 
+import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
+import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 import java.util.Optional;
 
@@ -63,5 +65,17 @@ public class Swc4jAstNumber
 
     public long getValueAsLong() {
         return ((Double) value).longValue();
+    }
+
+    @Override
+    public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
+        switch (visitor.visitNumber(this)) {
+            case Error:
+                return Swc4jAstVisitorResponse.Error;
+            case OkAndBreak:
+                return Swc4jAstVisitorResponse.OkAndContinue;
+            default:
+                return super.visit(visitor);
+        }
     }
 }

@@ -18,12 +18,20 @@ package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.BaseTestSuite;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstCounterVisitor;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
+import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
     protected Swc4jParseOptions jsxModuleOptions;
@@ -62,5 +70,40 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
         assertEquals(start, node.getSpan().getStart(), "Start mismatches");
         assertEquals(end, node.getSpan().getEnd(), "End mismatches");
         return node;
+    }
+
+    protected void assertVisitor(Swc4jParseOptions options, List<VisitorCase> visitorCases) {
+        try {
+            for (VisitorCase visitorCase : visitorCases) {
+                final Swc4jParseOutput output = swc4j.parse(visitorCase.getCode(), options);
+                final Swc4jAstCounterVisitor visitor = new Swc4jAstCounterVisitor();
+                assertEquals(Swc4jAstVisitorResponse.OkAndContinue, output.getProgram().visit(visitor));
+                visitorCase.getVisitorMap().forEach((type, count) ->
+                        assertEquals(
+                                count,
+                                visitor.get(type),
+                                type.name() + " count mismatches with code: " + visitorCase.getCode()));
+            }
+        } catch (Throwable t) {
+            fail(t);
+        }
+    }
+
+    public static final class VisitorCase {
+        private final String code;
+        private final Map<Swc4jAstType, Integer> visitorMap;
+
+        public VisitorCase(String code, Map<Swc4jAstType, Integer> visitorMap) {
+            this.code = Objects.requireNonNull(code);
+            this.visitorMap = Objects.requireNonNull(visitorMap);
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public Map<Swc4jAstType, Integer> getVisitorMap() {
+            return visitorMap;
+        }
     }
 }

@@ -16,9 +16,10 @@
 
 package com.caoccao.javet.swc4j.ast.stmt;
 
+import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
@@ -26,6 +27,7 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 import java.util.Optional;
 
@@ -72,5 +74,17 @@ public class Swc4jAstTsTypeAliasDecl
 
     public boolean isDeclare() {
         return declare;
+    }
+
+    @Override
+    public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
+        switch (visitor.visitTsTypeAliasDecl(this)) {
+            case Error:
+                return Swc4jAstVisitorResponse.Error;
+            case OkAndBreak:
+                return Swc4jAstVisitorResponse.OkAndContinue;
+            default:
+                return super.visit(visitor);
+        }
     }
 }

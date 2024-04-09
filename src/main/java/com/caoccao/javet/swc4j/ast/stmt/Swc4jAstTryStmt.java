@@ -16,13 +16,15 @@
 
 package com.caoccao.javet.swc4j.ast.stmt;
 
+import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstCatchClause;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 import java.util.Optional;
 
@@ -61,5 +63,17 @@ public class Swc4jAstTryStmt
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TryStmt;
+    }
+
+    @Override
+    public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
+        switch (visitor.visitTryStmt(this)) {
+            case Error:
+                return Swc4jAstVisitorResponse.Error;
+            case OkAndBreak:
+                return Swc4jAstVisitorResponse.OkAndContinue;
+            default:
+                return super.visit(visitor);
+        }
     }
 }

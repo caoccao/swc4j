@@ -16,9 +16,10 @@
 
 package com.caoccao.javet.swc4j.ast.expr;
 
+import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxAttrValue;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxElementChild;
@@ -26,6 +27,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxExpr;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 @Jni2RustClass(name = "JSXExprContainer")
 public class Swc4jAstJsxExprContainer
@@ -49,5 +51,17 @@ public class Swc4jAstJsxExprContainer
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.JsxExprContainer;
+    }
+
+    @Override
+    public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
+        switch (visitor.visitJsxExprContainer(this)) {
+            case Error:
+                return Swc4jAstVisitorResponse.Error;
+            case OkAndBreak:
+                return Swc4jAstVisitorResponse.OkAndContinue;
+            default:
+                return super.visit(visitor);
+        }
     }
 }

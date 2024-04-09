@@ -16,15 +16,17 @@
 
 package com.caoccao.javet.swc4j.ast.stmt;
 
+import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstForHead;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 import java.util.List;
 
@@ -63,5 +65,17 @@ public class Swc4jAstVarDecl
 
     public boolean isDeclare() {
         return declare;
+    }
+
+    @Override
+    public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
+        switch (visitor.visitVarDecl(this)) {
+            case Error:
+                return Swc4jAstVisitorResponse.Error;
+            case OkAndBreak:
+                return Swc4jAstVisitorResponse.OkAndContinue;
+            default:
+                return super.visit(visitor);
+        }
     }
 }

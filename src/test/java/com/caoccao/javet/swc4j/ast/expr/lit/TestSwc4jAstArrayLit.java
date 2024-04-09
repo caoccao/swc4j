@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024. caoccao.com Sam Cao
+ * Copyright (c) 2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
+import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -73,5 +75,22 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
         Swc4jAstBool b = (Swc4jAstBool) assertAst(
                 exprOrSpread, exprOrSpread.getExpr(), Swc4jAstType.Bool, 7, 11);
         assertTrue(b.getValue());
+    }
+
+    @Test
+    public void testVisitor() {
+        assertVisitor(tsScriptOptions, SimpleList.of(
+                new VisitorCase("[]", SimpleMap.of(
+                        Swc4jAstType.Script, 1,
+                        Swc4jAstType.ExprStmt, 1,
+                        Swc4jAstType.ArrayLit, 1)),
+                new VisitorCase("[1,'a',true]", SimpleMap.of(
+                        Swc4jAstType.Script, 1,
+                        Swc4jAstType.ExprStmt, 1,
+                        Swc4jAstType.ArrayLit, 1,
+                        Swc4jAstType.ExprOrSpread, 3,
+                        Swc4jAstType.Number, 1,
+                        Swc4jAstType.Str, 1,
+                        Swc4jAstType.Bool, 1))));
     }
 }

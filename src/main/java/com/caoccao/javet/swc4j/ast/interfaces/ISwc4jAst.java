@@ -16,8 +16,10 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
+import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 import java.util.List;
 
@@ -74,4 +76,25 @@ public interface ISwc4jAst {
      * @since 0.2.0
      */
     String toDebugString();
+
+    /**
+     * Visit the ast.
+     *
+     * @param visitor the visitor
+     * @return the ast visitor response
+     * @since 0.2.0
+     */
+    default Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
+        for (ISwc4jAst node : getChildNodes()) {
+            switch (node.visit(visitor)) {
+                case Error:
+                    return Swc4jAstVisitorResponse.Error;
+                case OkAndBreak:
+                    return Swc4jAstVisitorResponse.OkAndContinue;
+                default:
+                    break;
+            }
+        }
+        return Swc4jAstVisitorResponse.OkAndContinue;
+    }
 }
