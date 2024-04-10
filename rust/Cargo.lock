@@ -814,7 +814,7 @@ dependencies = [
 
 [[package]]
 name = "swc4j"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "debug_print",
  "deno_ast",
