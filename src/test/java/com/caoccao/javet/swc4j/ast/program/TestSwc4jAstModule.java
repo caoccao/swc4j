@@ -60,10 +60,39 @@ public class TestSwc4jAstModule extends BaseTestSuiteSwc4jAst {
                         Swc4jAstType.ArrayLit,
                         Swc4jAstType.VarDecl,
                         Swc4jAstType.VarDeclarator)
-                .forEach(type -> assertTrue(visitor.get(type) > 1));
+                .forEach(type -> assertTrue(visitor.get(type) > 1, type.name() + " should appear more than once"));
         SimpleList.of(Swc4jAstType.ClassDecl,
                         Swc4jAstType.Constructor)
-                .forEach(type -> assertEquals(1, visitor.get(type)));
+                .forEach(type -> assertEquals(1, visitor.get(type), type.name() + " should appear once"));
+        assertSpan(code, module);
+    }
+
+    @Test
+    public void testCopySwc4jLib() throws Swc4jCoreException, IOException {
+        File scriptFile = new File(OSUtils.WORKING_DIRECTORY, "scripts/ts/copy_swc4j_lib.ts");
+        String code = new String(Files.readAllBytes(scriptFile.toPath()));
+        Swc4jParseOutput output = swc4j.parse(code, tsModuleOptions);
+        Swc4jAstModule module = output.getProgram().asModule();
+        Swc4jAstCounterVisitor visitor = new Swc4jAstCounterVisitor();
+        module.visit(visitor);
+        int totalNodeCount = visitor.getCounterMap().values().stream().mapToInt(AtomicInteger::get).sum();
+        assertTrue(totalNodeCount > 500);
+        SimpleList.of(Swc4jAstType.ImportDecl,
+                        Swc4jAstType.ImportStarAsSpecifier,
+                        Swc4jAstType.KeyValueProp,
+                        Swc4jAstType.ExprStmt,
+                        Swc4jAstType.ExprOrSpread,
+                        Swc4jAstType.CallExpr,
+                        Swc4jAstType.Str,
+                        Swc4jAstType.Number,
+                        Swc4jAstType.TplElement,
+                        Swc4jAstType.Ident,
+                        Swc4jAstType.BindingIdent,
+                        Swc4jAstType.ArrayLit,
+                        Swc4jAstType.BlockStmt,
+                        Swc4jAstType.VarDecl,
+                        Swc4jAstType.VarDeclarator)
+                .forEach(type -> assertTrue(visitor.get(type) > 1, type.name() + " should appear more than once"));
         assertSpan(code, module);
     }
 }
