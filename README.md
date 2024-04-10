@@ -12,9 +12,10 @@
 
 * Linux (x86_64) + MacOS (x86_64, arm64) + Windows (x86_64)
 * JavaScript, TypeScript, JSX, TSX, etc.
-* Parse (Implementing)
-* Transpile (Partially Completed)
-* AST (TODO)
+* Parse
+  * AST
+  * Tokens
+* Transpile
 
 ## Quick Start
 
