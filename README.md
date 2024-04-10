@@ -25,18 +25,18 @@
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 
 ```kotlin
 // Gradle Kotlin DSL
-implementation("com.caoccao.javet:swc4j:0.1.0")
+implementation("com.caoccao.javet:swc4j:0.2.0")
 ```
 
 ```groovy
 // Gradle Groovy DSL
-implementation 'com.caoccao.javet:swc4j:0.1.0'
+implementation 'com.caoccao.javet:swc4j:0.2.0'
 ```
 
 * Run the following Java code.
