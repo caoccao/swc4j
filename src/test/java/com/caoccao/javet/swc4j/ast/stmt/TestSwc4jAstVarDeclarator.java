@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
+import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -53,8 +54,7 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
         String code = "let a變量=1";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         assertNotNull(output);
-        assertFalse(output.isModule());
-        assertTrue(output.isScript());
+        assertEquals(Swc4jParseMode.Script, output.getParseMode());
         assertNotNull(output.getProgram());
         Swc4jAstScript script = output.getProgram().asScript();
         assertEquals(0, script.getSpan().getStart());
@@ -80,8 +80,7 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
         String code = "let a變量";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         assertNotNull(output);
-        assertFalse(output.isModule());
-        assertTrue(output.isScript());
+        assertEquals(Swc4jParseMode.Script, output.getParseMode());
         assertNotNull(output.getProgram());
         Swc4jAstScript script = output.getProgram().asScript();
         assertEquals(0, script.getSpan().getStart());

@@ -54,8 +54,7 @@ public class TestSwc4j extends BaseTestSuite {
                 .setMediaType(Swc4jMediaType.Jsx);
         Swc4jParseOutput output = swc4j.parse(code, options);
         assertNotNull(output);
-        assertTrue(output.isModule());
-        assertFalse(output.isScript());
+        assertEquals(Swc4jParseMode.Module, output.getParseMode());
         assertEquals(code, output.getSourceText());
         assertEquals(Swc4jMediaType.Jsx, output.getMediaType());
         assertNull(output.getTokens());
@@ -100,8 +99,7 @@ public class TestSwc4j extends BaseTestSuite {
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
         assertNotNull(output);
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
-        assertTrue(output.isModule());
-        assertFalse(output.isScript());
+        assertEquals(Swc4jParseMode.Module, output.getParseMode());
         assertEquals(
                 expectedSourceMapPrefix,
                 output.getCode().substring(
@@ -133,8 +131,7 @@ public class TestSwc4j extends BaseTestSuite {
         assertNotNull(output);
         assertEquals(code, output.getSourceText());
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
-        assertTrue(output.isModule());
-        assertFalse(output.isScript());
+        assertEquals(Swc4jParseMode.Module, output.getParseMode());
         assertEquals(Swc4jMediaType.Jsx, output.getMediaType());
         assertEquals(
                 expectedSourceMapPrefix,
@@ -152,8 +149,7 @@ public class TestSwc4j extends BaseTestSuite {
         String code = "function add加法(a變量:number, b變量:number) { return a變量+b變量; }";
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
         assertNotNull(output);
-        assertTrue(output.isModule());
-        assertFalse(output.isScript());
+        assertEquals(Swc4jParseMode.Module, output.getParseMode());
         List<Swc4jToken> tokens = output.getTokens();
         assertNotNull(tokens);
         assertEquals(18, tokens.size());
@@ -179,8 +175,7 @@ public class TestSwc4j extends BaseTestSuite {
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
         assertNotNull(output);
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
-        assertTrue(output.isModule());
-        assertFalse(output.isScript());
+        assertEquals(Swc4jParseMode.Module, output.getParseMode());
         assertEquals(
                 expectedSourceMapPrefix,
                 output.getCode().substring(
@@ -207,16 +202,7 @@ public class TestSwc4j extends BaseTestSuite {
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
         assertNotNull(output);
         assertEquals(expectedCode, output.getCode());
-        switch (parseMode) {
-            case Script:
-                assertFalse(output.isModule());
-                assertTrue(output.isScript());
-                break;
-            default:
-                assertTrue(output.isModule());
-                assertFalse(output.isScript());
-                break;
-        }
+        assertEquals(parseMode, output.getParseMode());
         assertNotNull(output.getSourceMap());
         Stream.of(expectedProperties).forEach(p -> assertTrue(
                 output.getSourceMap().contains("\"" + p + "\""),

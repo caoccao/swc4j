@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.outputs;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
@@ -49,10 +50,10 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
     /**
      * Instantiates a new Swc4j transpile output.
      *
+     * @param program    the program
      * @param code       the code
      * @param mediaType  the media type
-     * @param module     the module
-     * @param script     the script
+     * @param parseMode  the parse mode
      * @param sourceMap  the source map
      * @param sourceText the source text
      * @param tokens     the tokens
@@ -63,12 +64,11 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
             ISwc4jAstProgram<? extends ISwc4jAst> program,
             String code,
             Swc4jMediaType mediaType,
-            boolean module,
-            boolean script,
+            Swc4jParseMode parseMode,
             String sourceMap,
             String sourceText,
             List<Swc4jToken> tokens) {
-        super(program, mediaType, module, script, sourceText, tokens);
+        super(program, mediaType, parseMode, sourceText, tokens);
         this.code = code;
         this.sourceMap = sourceMap;
     }

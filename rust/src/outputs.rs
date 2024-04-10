@@ -53,7 +53,7 @@ impl JavaSwc4jParseOutput {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstProgram;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/util/List;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstProgram;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;Ljava/lang/String;Ljava/util/List;)V",
       )
       .expect("Couldn't find method Swc4jParseOutput::new");
     JavaSwc4jParseOutput {
@@ -68,13 +68,14 @@ impl JavaSwc4jParseOutput {
     'local: 'a,
   {
     let byte_to_index_map = parse_output.get_byte_to_index_map();
+    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
+    let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
     let program = ast_utils::program::enum_create_program(env, &byte_to_index_map, &parse_output.program);
     let program = object_to_jvalue!(program);
-    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let media_type = java_media_type.parse(env, parse_output.media_type.get_id());
     let media_type = object_to_jvalue!(media_type);
-    let module = boolean_to_jvalue!(parse_output.module);
-    let script = boolean_to_jvalue!(parse_output.script);
+    let parse_mode = java_parse_mode.parse(env, if parse_output.module { 0 } else { 1 });
+    let parse_mode = object_to_jvalue!(parse_mode);
     let java_source_text = string_to_jstring!(env, &parse_output.source_text);
     let source_text = object_to_jvalue!(java_source_text);
     let tokens = token_utils::token_and_spans_to_java_list(
@@ -87,7 +88,7 @@ impl JavaSwc4jParseOutput {
       env,
       &self.class,
       self.method_construct,
-      &[program, media_type, module, script, source_text, tokens],
+      &[program, media_type, parse_mode, source_text, tokens],
       "Swc4jParseOutput"
     )
   }
@@ -114,7 +115,7 @@ impl JavaSwc4jTranspileOutput {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstProgram;Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;ZZLjava/lang/String;Ljava/lang/String;Ljava/util/List;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstProgram;Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V",
       )
       .expect("Couldn't find method Swc4jTranspileOutput::new");
     JavaSwc4jTranspileOutput {
@@ -129,16 +130,17 @@ impl JavaSwc4jTranspileOutput {
     'local: 'a,
   {
     let byte_to_index_map = transpile_output.parse_output.get_byte_to_index_map();
+    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
+    let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
     let program =
       ast_utils::program::enum_create_program(env, &byte_to_index_map, &transpile_output.parse_output.program);
     let program = object_to_jvalue!(program);
     let java_code = string_to_jstring!(env, &transpile_output.code);
     let code = object_to_jvalue!(java_code);
-    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let media_type = java_media_type.parse(env, transpile_output.parse_output.media_type.get_id());
     let media_type = object_to_jvalue!(media_type);
-    let module = boolean_to_jvalue!(transpile_output.parse_output.module);
-    let script = boolean_to_jvalue!(transpile_output.parse_output.script);
+    let parse_mode = java_parse_mode.parse(env, if transpile_output.parse_output.module { 0 } else { 1 });
+    let parse_mode = object_to_jvalue!(parse_mode);
     let java_source_map = optional_string_to_jstring!(env, &transpile_output.source_map);
     let source_map = object_to_jvalue!(java_source_map);
     let java_source_text = string_to_jstring!(env, &transpile_output.parse_output.source_text);
@@ -153,16 +155,7 @@ impl JavaSwc4jTranspileOutput {
       env,
       &self.class,
       self.method_construct,
-      &[
-        program,
-        code,
-        media_type,
-        module,
-        script,
-        source_map,
-        source_text,
-        tokens,
-      ],
+      &[program, code, media_type, parse_mode, source_map, source_text, tokens,],
       "Swc4jTranspileOutput"
     )
   }

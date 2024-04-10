@@ -19,10 +19,12 @@ package com.caoccao.javet.swc4j.outputs;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
 import com.caoccao.javet.swc4j.tokens.Swc4jToken;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
 
@@ -40,23 +42,17 @@ public class Swc4jParseOutput {
      */
     protected final Swc4jMediaType mediaType;
     /**
-     * The Module.
+     * The Parse mode.
      *
      * @since 0.2.0
      */
-    protected final boolean module;
+    protected final Swc4jParseMode parseMode;
     /**
      * The Ast program.
      *
      * @since 0.2.0
      */
     protected final ISwc4jAstProgram<? extends ISwc4jAst> program;
-    /**
-     * The Script.
-     *
-     * @since 0.2.0
-     */
-    protected final boolean script;
     /**
      * The Source text.
      *
@@ -75,8 +71,7 @@ public class Swc4jParseOutput {
      *
      * @param program    the program
      * @param mediaType  the media type
-     * @param module     the module
-     * @param script     the script
+     * @param parseMode  the parse mode
      * @param sourceText the source text
      * @param tokens     the tokens
      * @since 0.2.0
@@ -85,15 +80,13 @@ public class Swc4jParseOutput {
     public Swc4jParseOutput(
             ISwc4jAstProgram<? extends ISwc4jAst> program,
             Swc4jMediaType mediaType,
-            boolean module,
-            boolean script,
+            Swc4jParseMode parseMode,
             String sourceText,
             List<Swc4jToken> tokens) {
-        this.mediaType = mediaType;
-        this.module = module;
+        this.mediaType = AssertionUtils.notNull(mediaType, "Media type");
+        this.parseMode = AssertionUtils.notNull(parseMode, "Parse mode");
         this.program = program;
-        this.script = script;
-        this.sourceText = sourceText;
+        this.sourceText = AssertionUtils.notNull(sourceText, "Source text");
         this.tokens = tokens;
     }
 
@@ -105,6 +98,16 @@ public class Swc4jParseOutput {
      */
     public Swc4jMediaType getMediaType() {
         return mediaType;
+    }
+
+    /**
+     * Gets parse mode.
+     *
+     * @return the parse mode
+     * @since 0.2.0
+     */
+    public Swc4jParseMode getParseMode() {
+        return parseMode;
     }
 
     /**
@@ -135,25 +138,5 @@ public class Swc4jParseOutput {
      */
     public List<Swc4jToken> getTokens() {
         return tokens;
-    }
-
-    /**
-     * Gets if this source is a module.
-     *
-     * @return true : module, false : not module
-     * @since 0.2.0
-     */
-    public boolean isModule() {
-        return module;
-    }
-
-    /**
-     * Gets if this source is a script.
-     *
-     * @return true : script, false : not script
-     * @since 0.2.0
-     */
-    public boolean isScript() {
-        return script;
     }
 }

@@ -715,6 +715,7 @@ pub struct JavaParseMode {
   #[allow(dead_code)]
   class: GlobalRef,
   method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
 }
 unsafe impl Send for JavaParseMode {}
 unsafe impl Sync for JavaParseMode {}
@@ -730,12 +731,27 @@ impl JavaParseMode {
     let method_get_id = env
       .get_method_id(&class, "getId", "()I")
       .expect("Couldn't find method Swc4jParseMode.getId");
-    JavaParseMode { class, method_get_id }
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;")
+      .expect("Couldn't find static method Swc4jParseMode.parse");
+    JavaParseMode {
+      class,
+      method_get_id,
+      method_parse,
+    }
   }
 
   pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> ParseMode {
     let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
     ParseMode::parse_by_id(id)
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
   }
 }
 

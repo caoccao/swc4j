@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.tokens;
 
 import com.caoccao.javet.swc4j.BaseTestSuite;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
@@ -79,8 +80,7 @@ public class TestSwc4jToken extends BaseTestSuite {
         String code = "function add加法(a變量:number, b變量:number) { return a變量+b變量; }";
         Swc4jParseOutput output = swc4j.parse(code, options);
         assertNotNull(output);
-        assertTrue(output.isModule());
-        assertFalse(output.isScript());
+        assertEquals(Swc4jParseMode.Module, output.getParseMode());
         List<Swc4jToken> tokens = output.getTokens();
         assertNotNull(tokens);
         assertEquals(18, tokens.size());
