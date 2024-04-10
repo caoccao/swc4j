@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.tutorials;
 
-import com.caoccao.javet.exceptions.JavetException;
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
@@ -25,7 +24,7 @@ import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 
 public class Tutorial02TranspileJsx {
-    public static void main(String[] args) throws Swc4jCoreException, JavetException {
+    public static void main(String[] args) throws Swc4jCoreException {
         // Create an instance of swc4j.
         Swc4j swc4j = new Swc4j();
         // Prepare a simple React Hello World Jsx code snippet.

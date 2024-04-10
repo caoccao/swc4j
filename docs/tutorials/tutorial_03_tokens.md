@@ -7,7 +7,7 @@ In this tutorial, we are going to learn the follows.
 
 ## Parse TypeScript
 
-* Create a quick sort function in TypeScript as follows. Please make sure capture tokens is true. Then parse the code and get the output.
+* Create a quick sort function in TypeScript as follows. Please make sure capture tokens is set to true. Then parse the code and get the output.
 
 ```java
 // Create an instance of swc4j.
@@ -50,7 +50,7 @@ System.out.println("*********************************************/");
 output.getTokens().forEach(System.out::println);
 ```
 
-* The tokens in the output is printed as follows. As you can see, the Jsx code is transpiled into JavaScript code with the source map inlined.
+* The tokens in the output is printed as follows.
 
 ```js
 /*********************************************
@@ -93,7 +93,7 @@ output.getTokens().forEach(System.out::println);
 
 ## What Can I Do with Tokens?
 
-* **Script Sanitization** - Sometimes you may want to prevent script from calling `eval()`, using `var`. You can simply scan the tokens for ident `eval`, keyword `var` and raise exceptions with precise detailed error messages.
+* **Script Sanitization** - Sometimes you may want to prevent script from calling `eval()`, using `var`. You can simply scan the tokens for ident `eval`, keyword `var` and raise exceptions with detailed error messages.
 * **Script Data Mining** - Sometimes you may want to generate reports on the ratio among `let`, `const`, `var`, enforce coding conventions. You can build your data mining algorithms by scanning the tokens.
 
 ## Conclusion
