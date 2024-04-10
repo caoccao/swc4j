@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.tokens;
 
+import com.caoccao.javet.swc4j.utils.JsonUtils;
 import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 /**
@@ -60,5 +61,19 @@ public class Swc4jTokenTextValueFlags<T> extends Swc4jTokenTextValue<T> {
      */
     public String getFlags() {
         return flags;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{ \"lineBreakAhead\": ").append(lineBreakAhead);
+        sb.append(", \"start\": ").append(span.getStart());
+        sb.append(", \"end\": ").append(span.getEnd());
+        sb.append(", \"type\": \"").append(type.name()).append("\"");
+        sb.append(", \"text\": \"").append(JsonUtils.escape(getText())).append("\"");
+        sb.append(", \"value\": \"").append(JsonUtils.escape(String.valueOf(getValue()))).append("\"");
+        sb.append(", \"flags\": \"").append(JsonUtils.escape(String.valueOf(getFlags()))).append("\"");
+        sb.append(" }");
+        return sb.toString();
     }
 }
