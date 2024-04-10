@@ -26,7 +26,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.utils.SimpleMap;
+import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -46,6 +46,7 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
         assertEquals("1234567890123456789012345678901234567890n", bigInt.getRaw().get());
         assertEquals("1234567890123456789012345678901234567890", bigInt.getValue().toString());
         assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
+        assertSpan(code, script);
     }
 
     @Test
@@ -63,6 +64,7 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
         assertEquals("1n", bigInt.getRaw().get());
         assertEquals(BigInteger.ONE, bigInt.getValue());
         assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
+        assertSpan(code, script);
     }
 
     @Test
@@ -80,6 +82,7 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
         assertEquals("1n", bigInt.getRaw().get());
         assertEquals(BigInteger.ONE, bigInt.getValue());
         assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
+        assertSpan(code, script);
     }
 
     @Test
@@ -113,5 +116,6 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
         assertEquals("0n", bigInt.getRaw().get());
         assertEquals(BigInteger.ZERO, bigInt.getValue());
         assertEquals(Swc4jAstBigIntSign.NoSign, bigInt.getSign());
+        assertSpan(code, script);
     }
 }

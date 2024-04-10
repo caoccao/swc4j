@@ -47,6 +47,10 @@ public class Swc4jAstCounterVisitor extends Swc4jAstVisitor {
         return counterMap.get(type).get();
     }
 
+    public Map<Swc4jAstType, AtomicInteger> getCounterMap() {
+        return counterMap;
+    }
+
     public int incrementAndGet(Swc4jAstType type) {
         return counterMap.get(type).incrementAndGet();
     }

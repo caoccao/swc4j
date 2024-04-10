@@ -25,6 +25,7 @@ import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
+import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,39 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
         assertEquals(start, node.getSpan().getStart(), "Start mismatches");
         assertEquals(end, node.getSpan().getEnd(), "End mismatches");
         return node;
+    }
+
+    protected void assertSpan(String code, ISwc4jAst node) {
+        if (node != null) {
+            String text = null;
+            switch (node.getType()) {
+                case BigInt:
+                case Bool:
+                case DebuggerStmt:
+                    // There is a bug in swc.
+                    // case Ident:
+                case JsxClosingElement:
+                case JsxOpeningElement:
+                case JsxText:
+                case Number:
+                case Null:
+                case Regex:
+                case Str:
+                case ThisExpr:
+                case TsKeywordType:
+                    text = node.toString();
+                    break;
+                default:
+                    break;
+            }
+            if (text != null) {
+                Swc4jAstSpan span = node.getSpan();
+                String expectedText = code.substring(span.getStart(), span.getEnd());
+                String errorMessage = "Text mismatches at " + span;
+                assertEquals(expectedText, text, errorMessage);
+            }
+            node.getChildNodes().forEach(childNode -> assertSpan(code, childNode));
+        }
     }
 
     protected void assertVisitor(Swc4jParseOptions options, List<VisitorCase> visitorCases) {

@@ -33,5 +33,6 @@ public class TestSwc4jAstNull extends BaseTestSuiteSwc4jAst {
         Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
                 script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 4);
         assertAst(exprStmt, exprStmt.getExpr(), Swc4jAstType.Null, 0, 4);
+        assertSpan(code, script);
     }
 }

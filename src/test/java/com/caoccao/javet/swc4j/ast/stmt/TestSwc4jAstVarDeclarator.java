@@ -25,7 +25,7 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.utils.SimpleMap;
+import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,6 +72,7 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
         Swc4jAstNumber number = (Swc4jAstNumber) assertAst(
                 varDeclarator, varDeclarator.getInit().get(), Swc4jAstType.Number, 8, 9);
         assertEquals(1, number.getValue());
+        assertSpan(code, script);
     }
 
     @Test
@@ -96,5 +97,6 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
                 varDeclarator, varDeclarator.getName(), Swc4jAstType.BindingIdent, 4, 7);
         assertEquals("a變量", name.getId().getSym());
         assertFalse(varDeclarator.getInit().isPresent());
+        assertSpan(code, script);
     }
 }

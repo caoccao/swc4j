@@ -45,5 +45,6 @@ public class TestSwc4jAstJsxClosing extends BaseTestSuiteSwc4jAst {
                 jsxClosingElement, jsxClosingElement.getName(), Swc4jAstType.Ident, 10, 12);
         assertEquals("h1", ident.getSym());
         assertFalse(ident.isOptional());
+        assertSpan(code, script);
     }
 }

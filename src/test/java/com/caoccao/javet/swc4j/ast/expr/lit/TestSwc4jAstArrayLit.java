@@ -24,7 +24,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.utils.SimpleMap;
+import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,6 +41,7 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
         Swc4jAstArrayLit arrayLit = (Swc4jAstArrayLit) assertAst(
                 exprStmt, exprStmt.getExpr(), Swc4jAstType.ArrayLit, 0, 2);
         assertTrue(arrayLit.getElems().isEmpty());
+        assertSpan(code, script);
     }
 
     @Test
@@ -75,6 +76,7 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
         Swc4jAstBool b = (Swc4jAstBool) assertAst(
                 exprOrSpread, exprOrSpread.getExpr(), Swc4jAstType.Bool, 7, 11);
         assertTrue(b.getValue());
+        assertSpan(code, script);
     }
 
     @Test

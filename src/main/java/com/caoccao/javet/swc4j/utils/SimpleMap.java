@@ -283,4 +283,15 @@ public final class SimpleMap {
         map.put(k8, v8);
         return map;
     }
+
+    @SuppressWarnings("unchecked")
+    public static <K, V> Map<K, V> of(Object... objects) {
+        final int length = objects.length;
+        AssertionUtils.notTrue(length > 0 && length % 2 == 0, "Object count must be an odd number.");
+        HashMap<K, V> map = new HashMap<K, V>();
+        for (int i = 0; i < length; i += 2) {
+            map.put((K) objects[i], (V) objects[i + 1]);
+        }
+        return map;
+    }
 }

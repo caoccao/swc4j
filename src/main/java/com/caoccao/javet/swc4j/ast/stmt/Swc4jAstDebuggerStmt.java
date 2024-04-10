@@ -16,11 +16,11 @@
 
 package com.caoccao.javet.swc4j.ast.stmt;
 
-import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 public class Swc4jAstDebuggerStmt
@@ -34,6 +34,11 @@ public class Swc4jAstDebuggerStmt
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.DebuggerStmt;
+    }
+
+    @Override
+    public String toString() {
+        return "debugger;";
     }
 
     @Override

@@ -32,4 +32,9 @@ public class Swc4jAstSpan {
     public int getStart() {
         return start;
     }
+
+    @Override
+    public String toString() {
+        return "{ start: " + start + ", end: " + end + "}";
+    }
 }

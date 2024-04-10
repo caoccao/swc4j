@@ -39,6 +39,7 @@ public class TestSwc4jAstRegex extends BaseTestSuiteSwc4jAst {
                 exprStmt, exprStmt.getExpr(), Swc4jAstType.Regex, 0, 7);
         assertEquals("abc", regex.getExp());
         assertEquals("ig", regex.getFlags());
+        assertSpan(code, script);
     }
 
     @Test
@@ -52,5 +53,6 @@ public class TestSwc4jAstRegex extends BaseTestSuiteSwc4jAst {
                 exprStmt, exprStmt.getExpr(), Swc4jAstType.Regex, 0, 5);
         assertEquals("abc", regex.getExp());
         assertEquals("", regex.getFlags());
+        assertSpan(code, script);
     }
 }

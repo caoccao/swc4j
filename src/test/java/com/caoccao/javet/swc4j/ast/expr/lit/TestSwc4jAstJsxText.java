@@ -41,5 +41,6 @@ public class TestSwc4jAstJsxText extends BaseTestSuiteSwc4jAst {
                 jsxElement, jsxElement.getChildren().get(0), Swc4jAstType.JsxText, 4, 8);
         assertEquals("test", jsxText.getValue());
         assertEquals("test", jsxText.getRaw());
+        assertSpan(code, script);
     }
 }

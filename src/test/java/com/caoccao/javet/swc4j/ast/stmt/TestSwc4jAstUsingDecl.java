@@ -44,5 +44,6 @@ public class TestSwc4jAstUsingDecl extends BaseTestSuiteSwc4jAst {
         Swc4jAstIdent ident = assertAst(
                 bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 6, 7);
         assertEquals("a", ident.getSym());
+        assertSpan(code, script);
     }
 }

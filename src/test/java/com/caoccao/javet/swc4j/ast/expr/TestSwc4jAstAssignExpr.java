@@ -54,5 +54,6 @@ public class TestSwc4jAstAssignExpr extends BaseTestSuiteSwc4jAst {
         assertTrue(number.getRaw().isPresent());
         assertEquals(1, number.getValue());
         assertEquals("1", number.getRaw().get());
+        assertSpan(code, script);
     }
 }

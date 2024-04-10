@@ -50,6 +50,7 @@ public class TestSwc4jAstObjectLit extends BaseTestSuiteSwc4jAst {
         Swc4jAstObjectLit objectLit = (Swc4jAstObjectLit) assertAst(
                 assignExpr, assignExpr.getRight(), Swc4jAstType.ObjectLit, 2, 4);
         assertTrue(objectLit.getProps().isEmpty());
+        assertSpan(code, script);
     }
 
     @Test
@@ -103,5 +104,6 @@ public class TestSwc4jAstObjectLit extends BaseTestSuiteSwc4jAst {
         Swc4jAstBool b = (Swc4jAstBool) assertAst(
                 keyValueProp, keyValueProp.getValue(), Swc4jAstType.Bool, 15, 19);
         assertTrue(b.getValue());
+        assertSpan(code, script);
     }
 }

@@ -39,6 +39,7 @@ public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
                 exprStmt, exprStmt.getExpr(), Swc4jAstType.Number, 0, 5);
         assertEquals(12.34D, number.getValue(), 0.0001D);
         assertEquals("12.34", number.getRaw().get());
+        assertSpan(code, script);
     }
 
     @Test
@@ -52,5 +53,6 @@ public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
                 exprStmt, exprStmt.getExpr(), Swc4jAstType.Number, 0, 5);
         assertEquals(12345, number.getValueAsInt());
         assertEquals("12345", number.getRaw().get());
+        assertSpan(code, script);
     }
 }

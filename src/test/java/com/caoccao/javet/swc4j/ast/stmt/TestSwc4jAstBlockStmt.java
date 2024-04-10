@@ -34,5 +34,6 @@ public class TestSwc4jAstBlockStmt extends BaseTestSuiteSwc4jAst {
         Swc4jAstBlockStmt blockStmt = (Swc4jAstBlockStmt) assertAst(
                 script, script.getBody().get(0), Swc4jAstType.BlockStmt, 0, 2);
         assertTrue(blockStmt.getStmts().isEmpty());
+        assertSpan(code, script);
     }
 }

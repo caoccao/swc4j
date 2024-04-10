@@ -47,6 +47,7 @@ public class TestSwc4jAstUnaryExpr extends BaseTestSuiteSwc4jAst {
             Swc4jAstIdent ident = (Swc4jAstIdent) assertAst(
                     unaryExpr, unaryExpr.getArg(), Swc4jAstType.Ident, code.length() - 1, code.length());
             assertEquals("a", ident.getSym());
+            assertSpan(code, script);
         }
     }
 
@@ -66,6 +67,7 @@ public class TestSwc4jAstUnaryExpr extends BaseTestSuiteSwc4jAst {
             Swc4jAstIdent ident = (Swc4jAstIdent) assertAst(
                     unaryExpr, unaryExpr.getArg(), Swc4jAstType.Ident, code.length() - 1, code.length());
             assertEquals("a", ident.getSym());
+            assertSpan(code, script);
         }
     }
 }

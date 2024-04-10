@@ -26,12 +26,11 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstJsxOpening extends BaseTestSuiteSwc4jAst {
     @Test
-    public void test() throws Swc4jCoreException {
+    public void testNoSelfClosing() throws Swc4jCoreException {
         String code = "<h1>test</h1>";
         Swc4jParseOutput output = swc4j.parse(code, jsxScriptOptions);
         Swc4jAstScript script = output.getProgram().asScript();
@@ -46,5 +45,21 @@ public class TestSwc4jAstJsxOpening extends BaseTestSuiteSwc4jAst {
                 jsxOpeningElement, jsxOpeningElement.getName(), Swc4jAstType.Ident, 1, 3);
         assertEquals("h1", ident.getSym());
         assertFalse(ident.isOptional());
+        assertSpan(code, script);
+    }
+
+    @Test
+    public void testSelfClosing() throws Swc4jCoreException {
+        String code = "<h1/>";
+        Swc4jParseOutput output = swc4j.parse(code, jsxScriptOptions);
+        Swc4jAstScript script = output.getProgram().asScript();
+        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
+                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 5);
+        Swc4jAstJsxElement jsxElement = (Swc4jAstJsxElement) assertAst(
+                exprStmt, exprStmt.getExpr(), Swc4jAstType.JsxElement, 0, 5);
+        Swc4jAstJsxOpeningElement jsxOpeningElement = assertAst(
+                jsxElement, jsxElement.getOpening(), Swc4jAstType.JsxOpeningElement, 0, 5);
+        assertTrue(jsxOpeningElement.isSelfClosing());
+        assertSpan(code, script);
     }
 }
