@@ -25,7 +25,6 @@ import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
-import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 import java.util.List;
 import java.util.Map;

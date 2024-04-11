@@ -32,7 +32,6 @@ public class TestSwc4jAstNewExpr extends BaseTestSuiteSwc4jAst {
         String code = "new A()";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         Swc4jAstScript script = output.getProgram().asScript();
-        System.out.println(script.toDebugString());
         Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
                 script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 7);
         Swc4jAstNewExpr newExpr = (Swc4jAstNewExpr) assertAst(
@@ -51,7 +50,6 @@ public class TestSwc4jAstNewExpr extends BaseTestSuiteSwc4jAst {
         String code = "new A";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
         Swc4jAstScript script = output.getProgram().asScript();
-        System.out.println(script.toDebugString());
         Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
                 script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 5);
         Swc4jAstNewExpr newExpr = (Swc4jAstNewExpr) assertAst(

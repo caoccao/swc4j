@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j.tokens;
 
-import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 
 public class Swc4jTokenText extends Swc4jToken {
     protected final String text;

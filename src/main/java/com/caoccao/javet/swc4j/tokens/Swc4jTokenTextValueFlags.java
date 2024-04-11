@@ -16,8 +16,8 @@
 
 package com.caoccao.javet.swc4j.tokens;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.utils.JsonUtils;
-import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 /**
  * The type Swc4j token text value flags.

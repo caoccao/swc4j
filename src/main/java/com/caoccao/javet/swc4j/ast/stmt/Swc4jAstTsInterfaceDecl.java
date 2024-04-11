@@ -16,8 +16,8 @@
 
 package com.caoccao.javet.swc4j.ast.stmt;
 
-import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
@@ -26,9 +26,9 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDefaultDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsInterfaceBody;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
+import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.utils.Swc4jAstSpan;
 
 import java.util.List;
 import java.util.Optional;
