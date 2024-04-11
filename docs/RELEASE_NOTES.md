@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.3.0
+
+* Fixed null pointer exception in AstNewExpr
+
 ## 0.2.0
 
 * Fully supported `parse()` with AST, tokens available

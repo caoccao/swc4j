@@ -16,12 +16,12 @@
 
 package com.caoccao.javet.swc4j.ast.expr;
 
-import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
+import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -47,7 +47,7 @@ public class Swc4jAstNewExpr
         this.args = Optional.ofNullable(args).map(SimpleList::immutableCopyOf);
         this.callee = AssertionUtils.notNull(callee, "Callee");
         this.typeArgs = Optional.ofNullable(typeArgs);
-        childNodes = SimpleList.copyOf(args);
+        childNodes = args == null ? SimpleList.of() : SimpleList.copyOf(args);
         childNodes.add(callee);
         childNodes.add(typeArgs);
         childNodes = SimpleList.immutable(childNodes);
