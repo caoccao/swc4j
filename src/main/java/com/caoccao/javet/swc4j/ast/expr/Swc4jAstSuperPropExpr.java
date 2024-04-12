@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstSuper;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
@@ -26,6 +25,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstSuperProp;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 public class Swc4jAstSuperPropExpr
         extends Swc4jAst
@@ -36,7 +36,7 @@ public class Swc4jAstSuperPropExpr
     public Swc4jAstSuperPropExpr(
             Swc4jAstSuper obj,
             ISwc4jAstSuperProp prop,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.prop = AssertionUtils.notNull(prop, "Prop");
         this.obj = AssertionUtils.notNull(obj, "Obj");

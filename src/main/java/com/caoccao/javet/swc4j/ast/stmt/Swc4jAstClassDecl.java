@@ -17,7 +17,7 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
@@ -42,7 +42,7 @@ public class Swc4jAstClassDecl
             Swc4jAstIdent ident,
             boolean declare,
             Swc4jAstClass clazz,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.clazz = AssertionUtils.notNull(clazz, "Class");
         this.declare = declare;

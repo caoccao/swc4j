@@ -18,10 +18,7 @@ package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
-import com.caoccao.javet.swc4j.utils.AssertionUtils;
-import com.caoccao.javet.swc4j.utils.ReflectionUtils;
-import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.utils.StringUtils;
+import com.caoccao.javet.swc4j.utils.*;
 
 import java.lang.reflect.Modifier;
 import java.util.*;
@@ -50,7 +47,7 @@ public abstract class Swc4jAst implements ISwc4jAst {
      * @since 0.2.0
      */
     @Jni2RustField(ignore = true)
-    protected final Swc4jAstSpan span;
+    protected final Swc4jSpan span;
     /**
      * The Children.
      *
@@ -73,7 +70,7 @@ public abstract class Swc4jAst implements ISwc4jAst {
      * @since 0.2.0
      */
     protected Swc4jAst(
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         childNodes = EMPTY_CHILD_NODES;
         parent = null;
         this.span = AssertionUtils.notNull(span, "Span");
@@ -90,7 +87,7 @@ public abstract class Swc4jAst implements ISwc4jAst {
     }
 
     @Override
-    public Swc4jAstSpan getSpan() {
+    public Swc4jSpan getSpan() {
         return span;
     }
 
@@ -113,12 +110,14 @@ public abstract class Swc4jAst implements ISwc4jAst {
         } else {
             name = name.trim() + " ";
         }
-        lines.add(String.format("%s%s%s (%d,%d)",
+        lines.add(String.format("%s%s%s (%d,%d,%d,%d)",
                 StringUtils.repeat(INDENT_STRING, indent),
                 name,
                 getType().name(),
                 span.getStart(),
-                span.getEnd()));
+                span.getEnd(),
+                span.getLine(),
+                span.getColumn()));
         final int newIndent = indent + 1;
         ReflectionUtils.getDeclaredFields(getClass()).entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())

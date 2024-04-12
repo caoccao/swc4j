@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -28,19 +27,20 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 @Jni2RustClass(span = false)
 public class Swc4jAstSpreadElement
         extends Swc4jAst
         implements ISwc4jAstPropOrSpread, ISwc4jAstJsxAttrOrSpread {
-    protected final Swc4jAstSpan dot3Token;
+    protected final Swc4jSpan dot3Token;
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr expr;
 
     public Swc4jAstSpreadElement(
-            Swc4jAstSpan dot3Token,
+            Swc4jSpan dot3Token,
             ISwc4jAstExpr expr,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
         this.expr = AssertionUtils.notNull(expr, "Expr");
@@ -48,7 +48,7 @@ public class Swc4jAstSpreadElement
         updateParent();
     }
 
-    public Swc4jAstSpan getDot3Token() {
+    public Swc4jSpan getDot3Token() {
         return dot3Token;
     }
 

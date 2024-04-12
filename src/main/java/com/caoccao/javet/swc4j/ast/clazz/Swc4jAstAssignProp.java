@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
@@ -28,6 +27,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 @Jni2RustClass(span = false)
 public class Swc4jAstAssignProp
@@ -40,7 +40,7 @@ public class Swc4jAstAssignProp
     public Swc4jAstAssignProp(
             Swc4jAstIdent key,
             ISwc4jAstExpr value,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.key = AssertionUtils.notNull(key, "Key");
         this.value = AssertionUtils.notNull(value, "Value");

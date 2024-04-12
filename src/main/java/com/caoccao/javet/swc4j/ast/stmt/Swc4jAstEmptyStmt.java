@@ -17,7 +17,7 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
@@ -28,7 +28,7 @@ public class Swc4jAstEmptyStmt
         extends Swc4jAst
         implements ISwc4jAstStmt, ISwc4jAstClassMember {
     public Swc4jAstEmptyStmt(
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
     }
 

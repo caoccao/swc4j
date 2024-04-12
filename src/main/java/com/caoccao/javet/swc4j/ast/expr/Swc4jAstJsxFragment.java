@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -29,6 +28,7 @@ import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class Swc4jAstJsxFragment
             Swc4jAstJsxOpeningFragment opening,
             List<ISwc4jAstJsxElementChild> children,
             Swc4jAstJsxClosingFragment closing,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.children = SimpleList.immutableCopyOf(AssertionUtils.notNull(children, "Children"));
         this.closing = AssertionUtils.notNull(closing, "Closing");

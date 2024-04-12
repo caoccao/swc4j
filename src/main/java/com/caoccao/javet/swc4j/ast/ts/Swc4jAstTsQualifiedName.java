@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
@@ -26,6 +25,7 @@ import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 @Jni2RustClass(span = false)
 public class Swc4jAstTsQualifiedName
@@ -37,7 +37,7 @@ public class Swc4jAstTsQualifiedName
     public Swc4jAstTsQualifiedName(
             ISwc4jAstTsEntityName left,
             Swc4jAstIdent right,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.left = AssertionUtils.notNull(left, "Left");
         this.right = AssertionUtils.notNull(right, "Right");

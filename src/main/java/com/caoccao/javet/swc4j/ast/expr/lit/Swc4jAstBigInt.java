@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
@@ -28,6 +27,7 @@ import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.StringUtils;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.math.BigInteger;
 import java.util.Optional;
@@ -43,7 +43,7 @@ public class Swc4jAstBigInt
     public Swc4jAstBigInt(
             Swc4jAstBigIntSign sign,
             String raw,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.sign = AssertionUtils.notNull(sign, "Sign");
         this.raw = Optional.ofNullable(raw);

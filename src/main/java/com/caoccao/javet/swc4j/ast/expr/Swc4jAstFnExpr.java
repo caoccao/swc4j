@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
@@ -28,6 +27,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.Optional;
 
@@ -42,7 +42,7 @@ public class Swc4jAstFnExpr
     public Swc4jAstFnExpr(
             Swc4jAstIdent ident,
             Swc4jAstFunction function,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.function = AssertionUtils.notNull(function, "Function");
         this.ident = Optional.ofNullable(ident);

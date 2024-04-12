@@ -17,11 +17,11 @@
 package com.caoccao.javet.swc4j.ast.program;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,7 +59,7 @@ public abstract class Swc4jAstProgram<AST extends ISwc4jAst>
     protected Swc4jAstProgram(
             List<AST> body,
             String shebang,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.body = SimpleList.immutableCopyOf(AssertionUtils.notNull(body, "Body"));
         this.shebang = Optional.ofNullable(shebang);

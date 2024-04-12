@@ -16,11 +16,11 @@
 
 package com.caoccao.javet.swc4j.ast.program;
 
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.List;
 
@@ -41,7 +41,7 @@ public class Swc4jAstModule extends Swc4jAstProgram<ISwc4jAstModuleItem> {
     public Swc4jAstModule(
             List<ISwc4jAstModuleItem> body,
             String shebang,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(body, shebang, span);
     }
 

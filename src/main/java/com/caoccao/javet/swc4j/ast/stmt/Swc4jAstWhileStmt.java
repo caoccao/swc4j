@@ -17,7 +17,7 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -38,7 +38,7 @@ public class Swc4jAstWhileStmt
     public Swc4jAstWhileStmt(
             ISwc4jAstExpr test,
             ISwc4jAstStmt body,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.body = AssertionUtils.notNull(body, "Body");
         this.test = AssertionUtils.notNull(test, "Test");

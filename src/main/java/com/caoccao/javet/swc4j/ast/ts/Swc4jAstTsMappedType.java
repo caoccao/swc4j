@@ -17,13 +17,13 @@
 package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstTruePlusMinus;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.Optional;
 
@@ -42,7 +42,7 @@ public class Swc4jAstTsMappedType
             ISwc4jAstTsType nameType,
             Swc4jAstTruePlusMinus optional,
             ISwc4jAstTsType typeAnn,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.nameType = Optional.ofNullable(nameType);
         this.optional = Optional.ofNullable(optional);

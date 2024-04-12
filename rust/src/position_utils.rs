@@ -16,13 +16,30 @@
 */
 
 use std::collections::BTreeMap;
-use std::ops::Range;
 
 use deno_ast::swc::common::source_map::Pos;
 use deno_ast::swc::common::Span;
 
+pub struct SpanEx {
+  pub start: u32,
+  pub end: u32,
+  pub line: u32,
+  pub column: u32,
+}
+
+impl Default for SpanEx {
+  fn default() -> Self {
+    SpanEx {
+      start: 0,
+      end: 0,
+      line: 0,
+      column: 0,
+    }
+  }
+}
+
 pub struct ByteToIndexMap {
-  map: BTreeMap<usize, usize>,
+  map: BTreeMap<usize, SpanEx>,
 }
 
 impl ByteToIndexMap {
@@ -30,16 +47,14 @@ impl ByteToIndexMap {
     ByteToIndexMap { map: BTreeMap::new() }
   }
 
-  pub fn get_range_by_span(&self, span: &Span) -> Range<usize> {
-    Range {
-      start: *self
-        .map
-        .get(&(span.lo().to_usize() - 1))
-        .expect("Couldn't find start index"),
-      end: *self
-        .map
-        .get(&(span.hi().to_usize() - 1))
-        .expect("Couldn't find end index"),
+  pub fn get_span_ex_by_span(&self, span: &Span) -> SpanEx {
+    let span_start = self.map.get(&(span.lo().to_usize() - 1)).expect("Couldn't find start");
+    let span_end = self.map.get(&(span.hi().to_usize() - 1)).expect("Couldn't find end");
+    SpanEx {
+      start: span_start.start,
+      end: span_end.end,
+      line: span_start.line,
+      column: span_start.column,
     }
   }
 
@@ -48,12 +63,17 @@ impl ByteToIndexMap {
       .into_iter()
       .for_each(|position| {
         if !self.map.contains_key(&position) {
-          self.map.insert(position, 0);
+          self.map.insert(position, Default::default());
         }
       });
   }
 
-  pub fn update(&mut self, key: &usize, value: usize) {
-    self.map.get_mut(&key).map(|v| *v = value);
+  pub fn update(&mut self, key: &usize, position: u32, line: u32, column: u32) {
+    self.map.get_mut(&key).map(|v| {
+      v.start = position;
+      v.end = position;
+      v.line = line;
+      v.column = column;
+    });
   }
 }

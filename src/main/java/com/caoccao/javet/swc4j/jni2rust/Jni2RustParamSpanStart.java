@@ -23,7 +23,7 @@ import java.lang.annotation.*;
 @Target({ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Jni2RustParam(
-        rustType = "range: &Range<usize>",
-        preCalls = "    let start = int_to_jvalue!(range.start);")
+        rustType = "span_ex: &SpanEx",
+        preCalls = "    let start = int_to_jvalue!(span_ex.start);")
 public @interface Jni2RustParamSpanStart {
 }

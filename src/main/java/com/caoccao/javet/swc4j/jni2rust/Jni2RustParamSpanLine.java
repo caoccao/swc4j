@@ -24,6 +24,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Jni2RustParam(
         rustType = "span_ex: &SpanEx",
-        preCalls = "    let end = int_to_jvalue!(span_ex.end);")
-public @interface Jni2RustParamSpanEnd {
+        preCalls = "    let line = int_to_jvalue!(span_ex.line);")
+public @interface Jni2RustParamSpanLine {
 }

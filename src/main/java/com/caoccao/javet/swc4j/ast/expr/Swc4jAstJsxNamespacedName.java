@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -27,6 +26,7 @@ import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 @Jni2RustClass(name = "JSXNamespacedName", span = false)
 public class Swc4jAstJsxNamespacedName
@@ -38,7 +38,7 @@ public class Swc4jAstJsxNamespacedName
     public Swc4jAstJsxNamespacedName(
             Swc4jAstIdent ns,
             Swc4jAstIdent name,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.name = AssertionUtils.notNull(name, "Name");
         this.ns = AssertionUtils.notNull(ns, "Ns");

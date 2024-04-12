@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.pat;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
@@ -26,6 +25,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.Optional;
 
@@ -38,7 +38,7 @@ public class Swc4jAstAssignPatProp
     public Swc4jAstAssignPatProp(
             Swc4jAstIdent key,
             ISwc4jAstExpr value,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.key = AssertionUtils.notNull(key, "Key");
         this.value = Optional.ofNullable(value);

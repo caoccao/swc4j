@@ -21,8 +21,8 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use crate::jni_utils::*;
+use crate::position_utils::SpanEx;
 
-use std::ops::Range;
 use std::ptr::null_mut;
 
 /* JavaSwc4jAstFactory Begin */
@@ -216,1197 +216,1197 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createArrayLit",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createArrayLit");
     let method_create_array_pat = env
       .get_static_method_id(
         &class,
         "createArrayPat",
-        "(Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstArrayPat;",
+        "(Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstArrayPat;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createArrayPat");
     let method_create_arrow_expr = env
       .get_static_method_id(
         &class,
         "createArrowExpr",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstBlockStmtOrExpr;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstBlockStmtOrExpr;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createArrowExpr");
     let method_create_assign_expr = env
       .get_static_method_id(
         &class,
         "createAssignExpr",
-        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPatOrExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstAssignExpr;",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPatOrExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstAssignExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAssignExpr");
     let method_create_assign_pat = env
       .get_static_method_id(
         &class,
         "createAssignPat",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstAssignPat;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstAssignPat;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAssignPat");
     let method_create_assign_pat_prop = env
       .get_static_method_id(
         &class,
         "createAssignPatProp",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstAssignPatProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstAssignPatProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAssignPatProp");
     let method_create_assign_prop = env
       .get_static_method_id(
         &class,
         "createAssignProp",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstAssignProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstAssignProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAssignProp");
     let method_create_auto_accessor = env
       .get_static_method_id(
         &class,
         "createAutoAccessor",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstAutoAccessor;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;ILcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstAutoAccessor;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAutoAccessor");
     let method_create_await_expr = env
       .get_static_method_id(
         &class,
         "createAwaitExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstAwaitExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstAwaitExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAwaitExpr");
     let method_create_big_int = env
       .get_static_method_id(
         &class,
         "createBigInt",
-        "(ILjava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBigInt;",
+        "(ILjava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBigInt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBigInt");
     let method_create_bin_expr = env
       .get_static_method_id(
         &class,
         "createBinExpr",
-        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstBinExpr;",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstBinExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBinExpr");
     let method_create_binding_ident = env
       .get_static_method_id(
         &class,
         "createBindingIdent",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstBindingIdent;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstBindingIdent;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBindingIdent");
     let method_create_block_stmt = env
       .get_static_method_id(
         &class,
         "createBlockStmt",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBlockStmt");
     let method_create_bool = env
       .get_static_method_id(
         &class,
         "createBool",
-        "(ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBool;",
+        "(ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBool;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBool");
     let method_create_break_stmt = env
       .get_static_method_id(
         &class,
         "createBreakStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBreakStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBreakStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBreakStmt");
     let method_create_call_expr = env
       .get_static_method_id(
         &class,
         "createCallExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstCallee;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstCallExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstCallee;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstCallExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createCallExpr");
     let method_create_catch_clause = env
       .get_static_method_id(
         &class,
         "createCatchClause",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstCatchClause;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstCatchClause;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createCatchClause");
     let method_create_class = env
       .get_static_method_id(
         &class,
         "createClass",
-        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;",
+        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClass");
     let method_create_class_decl = env
       .get_static_method_id(
         &class,
         "createClassDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstClassDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstClassDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClassDecl");
     let method_create_class_expr = env
       .get_static_method_id(
         &class,
         "createClassExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstClassExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstClassExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClassExpr");
     let method_create_class_method = env
       .get_static_method_id(
         &class,
         "createClassMethod",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;IZIZZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClassMethod;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;IZIZZZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClassMethod;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClassMethod");
     let method_create_class_prop = env
       .get_static_method_id(
         &class,
         "createClassProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClassProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZZZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClassProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClassProp");
     let method_create_computed_prop_name = env
       .get_static_method_id(
         &class,
         "createComputedPropName",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstComputedPropName;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstComputedPropName;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createComputedPropName");
     let method_create_cond_expr = env
       .get_static_method_id(
         &class,
         "createCondExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstCondExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstCondExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createCondExpr");
     let method_create_constructor = env
       .get_static_method_id(
         &class,
         "createConstructor",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;IZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstConstructor;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;IZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstConstructor;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createConstructor");
     let method_create_continue_stmt = env
       .get_static_method_id(
         &class,
         "createContinueStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstContinueStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstContinueStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createContinueStmt");
     let method_create_debugger_stmt = env
       .get_static_method_id(
         &class,
         "createDebuggerStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstDebuggerStmt;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstDebuggerStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createDebuggerStmt");
     let method_create_decorator = env
       .get_static_method_id(
         &class,
         "createDecorator",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstDecorator;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstDecorator;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createDecorator");
     let method_create_do_while_stmt = env
       .get_static_method_id(
         &class,
         "createDoWhileStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstDoWhileStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstDoWhileStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createDoWhileStmt");
     let method_create_empty_stmt = env
       .get_static_method_id(
         &class,
         "createEmptyStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstEmptyStmt;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstEmptyStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createEmptyStmt");
     let method_create_export_all = env
       .get_static_method_id(
         &class,
         "createExportAll",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportAll;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportAll;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportAll");
     let method_create_export_decl = env
       .get_static_method_id(
         &class,
         "createExportDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstDecl;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstDecl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportDecl");
     let method_create_export_default_decl = env
       .get_static_method_id(
         &class,
         "createExportDefaultDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstDefaultDecl;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstDefaultDecl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportDefaultDecl");
     let method_create_export_default_expr = env
       .get_static_method_id(
         &class,
         "createExportDefaultExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportDefaultExpr");
     let method_create_export_default_specifier = env
       .get_static_method_id(
         &class,
         "createExportDefaultSpecifier",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultSpecifier;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportDefaultSpecifier");
     let method_create_export_named_specifier = env
       .get_static_method_id(
         &class,
         "createExportNamedSpecifier",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportNamedSpecifier;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportNamedSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportNamedSpecifier");
     let method_create_export_namespace_specifier = env
       .get_static_method_id(
         &class,
         "createExportNamespaceSpecifier",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportNamespaceSpecifier;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportNamespaceSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportNamespaceSpecifier");
     let method_create_expr_or_spread = env
       .get_static_method_id(
         &class,
         "createExprOrSpread",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstExprOrSpread;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstExprOrSpread;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExprOrSpread");
     let method_create_expr_stmt = env
       .get_static_method_id(
         &class,
         "createExprStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstExprStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstExprStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExprStmt");
     let method_create_fn_decl = env
       .get_static_method_id(
         &class,
         "createFnDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstFnDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstFnDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createFnDecl");
     let method_create_fn_expr = env
       .get_static_method_id(
         &class,
         "createFnExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstFnExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstFnExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createFnExpr");
     let method_create_for_in_stmt = env
       .get_static_method_id(
         &class,
         "createForInStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstForHead;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForInStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstForHead;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForInStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createForInStmt");
     let method_create_for_of_stmt = env
       .get_static_method_id(
         &class,
         "createForOfStmt",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstForHead;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForOfStmt;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstForHead;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForOfStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createForOfStmt");
     let method_create_for_stmt = env
       .get_static_method_id(
         &class,
         "createForStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstVarDeclOrExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstVarDeclOrExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createForStmt");
     let method_create_function = env
       .get_static_method_id(
         &class,
         "createFunction",
-        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;",
+        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createFunction");
     let method_create_getter_prop = env
       .get_static_method_id(
         &class,
         "createGetterProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstGetterProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstGetterProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createGetterProp");
     let method_create_ident = env
       .get_static_method_id(
         &class,
         "createIdent",
-        "(Ljava/lang/String;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+        "(Ljava/lang/String;ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createIdent");
     let method_create_if_stmt = env
       .get_static_method_id(
         &class,
         "createIfStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstIfStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstIfStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createIfStmt");
     let method_create_import = env
       .get_static_method_id(
         &class,
         "createImport",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImport;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImport;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImport");
     let method_create_import_decl = env
       .get_static_method_id(
         &class,
         "createImportDecl",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportDecl;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImportDecl");
     let method_create_import_default_specifier = env
       .get_static_method_id(
         &class,
         "createImportDefaultSpecifier",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportDefaultSpecifier;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportDefaultSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImportDefaultSpecifier");
     let method_create_import_named_specifier = env
       .get_static_method_id(
         &class,
         "createImportNamedSpecifier",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportNamedSpecifier;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportNamedSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImportNamedSpecifier");
     let method_create_import_star_as_specifier = env
       .get_static_method_id(
         &class,
         "createImportStarAsSpecifier",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportStarAsSpecifier;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportStarAsSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImportStarAsSpecifier");
     let method_create_invalid = env
       .get_static_method_id(
         &class,
         "createInvalid",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstInvalid;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstInvalid;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createInvalid");
     let method_create_jsx_attr = env
       .get_static_method_id(
         &class,
         "createJsxAttr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxAttrName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxAttrValue;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxAttr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxAttrName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxAttrValue;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxAttr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxAttr");
     let method_create_jsx_closing_element = env
       .get_static_method_id(
         &class,
         "createJsxClosingElement",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxElementName;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingElement;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxElementName;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxClosingElement");
     let method_create_jsx_closing_fragment = env
       .get_static_method_id(
         &class,
         "createJsxClosingFragment",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingFragment;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingFragment;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxClosingFragment");
     let method_create_jsx_element = env
       .get_static_method_id(
         &class,
         "createJsxElement",
-        "(Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningElement;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingElement;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxElement;",
+        "(Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningElement;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingElement;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxElement");
     let method_create_jsx_empty_expr = env
       .get_static_method_id(
         &class,
         "createJsxEmptyExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxEmptyExpr;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxEmptyExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxEmptyExpr");
     let method_create_jsx_expr_container = env
       .get_static_method_id(
         &class,
         "createJsxExprContainer",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxExprContainer;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxExprContainer;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxExprContainer");
     let method_create_jsx_fragment = env
       .get_static_method_id(
         &class,
         "createJsxFragment",
-        "(Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningFragment;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingFragment;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxFragment;",
+        "(Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningFragment;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingFragment;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxFragment;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxFragment");
     let method_create_jsx_member_expr = env
       .get_static_method_id(
         &class,
         "createJsxMemberExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxObject;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxMemberExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxObject;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxMemberExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxMemberExpr");
     let method_create_jsx_namespaced_name = env
       .get_static_method_id(
         &class,
         "createJsxNamespacedName",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxNamespacedName;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxNamespacedName;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxNamespacedName");
     let method_create_jsx_opening_element = env
       .get_static_method_id(
         &class,
         "createJsxOpeningElement",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxElementName;Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningElement;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxElementName;Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxOpeningElement");
     let method_create_jsx_opening_fragment = env
       .get_static_method_id(
         &class,
         "createJsxOpeningFragment",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningFragment;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningFragment;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxOpeningFragment");
     let method_create_jsx_spread_child = env
       .get_static_method_id(
         &class,
         "createJsxSpreadChild",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxSpreadChild;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxSpreadChild;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxSpreadChild");
     let method_create_jsx_text = env
       .get_static_method_id(
         &class,
         "createJsxText",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstJsxText;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstJsxText;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxText");
     let method_create_key_value_pat_prop = env
       .get_static_method_id(
         &class,
         "createKeyValuePatProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstKeyValuePatProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstKeyValuePatProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createKeyValuePatProp");
     let method_create_key_value_prop = env
       .get_static_method_id(
         &class,
         "createKeyValueProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstKeyValueProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstKeyValueProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createKeyValueProp");
     let method_create_labeled_stmt = env
       .get_static_method_id(
         &class,
         "createLabeledStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstLabeledStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstLabeledStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createLabeledStmt");
     let method_create_member_expr = env
       .get_static_method_id(
         &class,
         "createMemberExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstMemberProp;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstMemberExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstMemberProp;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstMemberExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createMemberExpr");
     let method_create_meta_prop_expr = env
       .get_static_method_id(
         &class,
         "createMetaPropExpr",
-        "(ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstMetaPropExpr;",
+        "(ILcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstMetaPropExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createMetaPropExpr");
     let method_create_method_prop = env
       .get_static_method_id(
         &class,
         "createMethodProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstMethodProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstMethodProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createMethodProp");
     let method_create_module = env
       .get_static_method_id(
         &class,
         "createModule",
-        "(Ljava/util/List;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstModule;",
+        "(Ljava/util/List;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstModule;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createModule");
     let method_create_named_export = env
       .get_static_method_id(
         &class,
         "createNamedExport",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstNamedExport;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstNamedExport;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createNamedExport");
     let method_create_new_expr = env
       .get_static_method_id(
         &class,
         "createNewExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstNewExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstNewExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createNewExpr");
     let method_create_null = env
       .get_static_method_id(
         &class,
         "createNull",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstNull;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstNull;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createNull");
     let method_create_number = env
       .get_static_method_id(
         &class,
         "createNumber",
-        "(DLjava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstNumber;",
+        "(DLjava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstNumber;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createNumber");
     let method_create_object_lit = env
       .get_static_method_id(
         &class,
         "createObjectLit",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createObjectLit");
     let method_create_object_pat = env
       .get_static_method_id(
         &class,
         "createObjectPat",
-        "(Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstObjectPat;",
+        "(Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstObjectPat;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createObjectPat");
     let method_create_opt_call = env
       .get_static_method_id(
         &class,
         "createOptCall",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstOptCall;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstOptCall;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createOptCall");
     let method_create_opt_chain_expr = env
       .get_static_method_id(
         &class,
         "createOptChainExpr",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstOptChainBase;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstOptChainExpr;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstOptChainBase;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstOptChainExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createOptChainExpr");
     let method_create_param = env
       .get_static_method_id(
         &class,
         "createParam",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstParam;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstParam;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createParam");
     let method_create_paren_expr = env
       .get_static_method_id(
         &class,
         "createParenExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstParenExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstParenExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createParenExpr");
     let method_create_private_method = env
       .get_static_method_id(
         &class,
         "createPrivateMethod",
-        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;IZIZZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateMethod;",
+        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;IZIZZZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateMethod;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createPrivateMethod");
     let method_create_private_name = env
       .get_static_method_id(
         &class,
         "createPrivateName",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createPrivateName");
     let method_create_private_prop = env
       .get_static_method_id(
         &class,
         "createPrivateProp",
-        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createPrivateProp");
     let method_create_regex = env
       .get_static_method_id(
         &class,
         "createRegex",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstRegex;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstRegex;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createRegex");
     let method_create_rest_pat = env
       .get_static_method_id(
         &class,
         "createRestPat",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstRestPat;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstRestPat;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createRestPat");
     let method_create_return_stmt = env
       .get_static_method_id(
         &class,
         "createReturnStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstReturnStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstReturnStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createReturnStmt");
     let method_create_script = env
       .get_static_method_id(
         &class,
         "createScript",
-        "(Ljava/util/List;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstScript;",
+        "(Ljava/util/List;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstScript;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createScript");
     let method_create_seq_expr = env
       .get_static_method_id(
         &class,
         "createSeqExpr",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSeqExpr;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSeqExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSeqExpr");
     let method_create_setter_prop = env
       .get_static_method_id(
         &class,
         "createSetterProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSetterProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSetterProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSetterProp");
     let method_create_span = env
       .get_static_method_id(
         &class,
         "createSpan",
-        "(II)Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;",
+        "(IIII)Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSpan");
     let method_create_spread_element = env
       .get_static_method_id(
         &class,
         "createSpreadElement",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSpreadElement;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSpreadElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSpreadElement");
     let method_create_static_block = env
       .get_static_method_id(
         &class,
         "createStaticBlock",
-        "(Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstStaticBlock;",
+        "(Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstStaticBlock;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createStaticBlock");
     let method_create_str = env
       .get_static_method_id(
         &class,
         "createStr",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createStr");
     let method_create_super = env
       .get_static_method_id(
         &class,
         "createSuper",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSuper;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSuper;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSuper");
     let method_create_super_prop_expr = env
       .get_static_method_id(
         &class,
         "createSuperPropExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSuper;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstSuperProp;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSuperPropExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSuper;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstSuperProp;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSuperPropExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSuperPropExpr");
     let method_create_switch_case = env
       .get_static_method_id(
         &class,
         "createSwitchCase",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstSwitchCase;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstSwitchCase;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSwitchCase");
     let method_create_switch_stmt = env
       .get_static_method_id(
         &class,
         "createSwitchStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstSwitchStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstSwitchStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSwitchStmt");
     let method_create_tagged_tpl = env
       .get_static_method_id(
         &class,
         "createTaggedTpl",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTpl;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTaggedTpl;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTpl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTaggedTpl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTaggedTpl");
     let method_create_this_expr = env
       .get_static_method_id(
         &class,
         "createThisExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstThisExpr;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstThisExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createThisExpr");
     let method_create_throw_stmt = env
       .get_static_method_id(
         &class,
         "createThrowStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstThrowStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstThrowStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createThrowStmt");
     let method_create_tpl = env
       .get_static_method_id(
         &class,
         "createTpl",
-        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTpl;",
+        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTpl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTpl");
     let method_create_tpl_element = env
       .get_static_method_id(
         &class,
         "createTplElement",
-        "(ZLjava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstTplElement;",
+        "(ZLjava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstTplElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTplElement");
     let method_create_try_stmt = env
       .get_static_method_id(
         &class,
         "createTryStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstCatchClause;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTryStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstCatchClause;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTryStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTryStmt");
     let method_create_ts_array_type = env
       .get_static_method_id(
         &class,
         "createTsArrayType",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsArrayType;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsArrayType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsArrayType");
     let method_create_ts_as_expr = env
       .get_static_method_id(
         &class,
         "createTsAsExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsAsExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsAsExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsAsExpr");
     let method_create_ts_call_signature_decl = env
       .get_static_method_id(
         &class,
         "createTsCallSignatureDecl",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsCallSignatureDecl;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsCallSignatureDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsCallSignatureDecl");
     let method_create_ts_conditional_type = env
       .get_static_method_id(
         &class,
         "createTsConditionalType",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsConditionalType;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsConditionalType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsConditionalType");
     let method_create_ts_const_assertion = env
       .get_static_method_id(
         &class,
         "createTsConstAssertion",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsConstAssertion;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsConstAssertion;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsConstAssertion");
     let method_create_ts_construct_signature_decl = env
       .get_static_method_id(
         &class,
         "createTsConstructSignatureDecl",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsConstructSignatureDecl;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsConstructSignatureDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsConstructSignatureDecl");
     let method_create_ts_constructor_type = env
       .get_static_method_id(
         &class,
         "createTsConstructorType",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsConstructorType;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsConstructorType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsConstructorType");
     let method_create_ts_enum_decl = env
       .get_static_method_id(
         &class,
         "createTsEnumDecl",
-        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsEnumDecl;",
+        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsEnumDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsEnumDecl");
     let method_create_ts_enum_member = env
       .get_static_method_id(
         &class,
         "createTsEnumMember",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEnumMemberId;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsEnumMember;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEnumMemberId;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsEnumMember;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsEnumMember");
     let method_create_ts_export_assignment = env
       .get_static_method_id(
         &class,
         "createTsExportAssignment",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsExportAssignment;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsExportAssignment;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsExportAssignment");
     let method_create_ts_expr_with_type_args = env
       .get_static_method_id(
         &class,
         "createTsExprWithTypeArgs",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsExprWithTypeArgs;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsExprWithTypeArgs;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsExprWithTypeArgs");
     let method_create_ts_external_module_ref = env
       .get_static_method_id(
         &class,
         "createTsExternalModuleRef",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsExternalModuleRef;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsExternalModuleRef;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsExternalModuleRef");
     let method_create_ts_fn_type = env
       .get_static_method_id(
         &class,
         "createTsFnType",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsFnType;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsFnType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsFnType");
     let method_create_ts_getter_signature = env
       .get_static_method_id(
         &class,
         "createTsGetterSignature",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsGetterSignature;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsGetterSignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsGetterSignature");
     let method_create_ts_import_equals_decl = env
       .get_static_method_id(
         &class,
         "createTsImportEqualsDecl",
-        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleRef;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsImportEqualsDecl;",
+        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleRef;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsImportEqualsDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsImportEqualsDecl");
     let method_create_ts_import_type = env
       .get_static_method_id(
         &class,
         "createTsImportType",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsImportType;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsImportType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsImportType");
     let method_create_ts_index_signature = env
       .get_static_method_id(
         &class,
         "createTsIndexSignature",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIndexSignature;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIndexSignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsIndexSignature");
     let method_create_ts_indexed_access_type = env
       .get_static_method_id(
         &class,
         "createTsIndexedAccessType",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIndexedAccessType;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIndexedAccessType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsIndexedAccessType");
     let method_create_ts_infer_type = env
       .get_static_method_id(
         &class,
         "createTsInferType",
-        "(Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInferType;",
+        "(Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInferType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsInferType");
     let method_create_ts_instantiation = env
       .get_static_method_id(
         &class,
         "createTsInstantiation",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsInstantiation;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsInstantiation;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsInstantiation");
     let method_create_ts_interface_body = env
       .get_static_method_id(
         &class,
         "createTsInterfaceBody",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsInterfaceBody");
     let method_create_ts_interface_decl = env
       .get_static_method_id(
         &class,
         "createTsInterfaceDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsInterfaceDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsInterfaceDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsInterfaceDecl");
     let method_create_ts_intersection_type = env
       .get_static_method_id(
         &class,
         "createTsIntersectionType",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIntersectionType;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIntersectionType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsIntersectionType");
     let method_create_ts_keyword_type = env
       .get_static_method_id(
         &class,
         "createTsKeywordType",
-        "(ILcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsKeywordType;",
+        "(ILcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsKeywordType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsKeywordType");
     let method_create_ts_lit_type = env
       .get_static_method_id(
         &class,
         "createTsLitType",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsLit;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsLitType;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsLit;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsLitType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsLitType");
     let method_create_ts_mapped_type = env
       .get_static_method_id(
         &class,
         "createTsMappedType",
-        "(ILcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsMappedType;",
+        "(ILcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsMappedType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsMappedType");
     let method_create_ts_method_signature = env
       .get_static_method_id(
         &class,
         "createTsMethodSignature",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsMethodSignature;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsMethodSignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsMethodSignature");
     let method_create_ts_module_block = env
       .get_static_method_id(
         &class,
         "createTsModuleBlock",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsModuleBlock;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsModuleBlock;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsModuleBlock");
     let method_create_ts_module_decl = env
       .get_static_method_id(
         &class,
         "createTsModuleDecl",
-        "(ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsNamespaceBody;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsModuleDecl;",
+        "(ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsNamespaceBody;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsModuleDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsModuleDecl");
     let method_create_ts_namespace_decl = env
       .get_static_method_id(
         &class,
         "createTsNamespaceDecl",
-        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsNamespaceBody;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsNamespaceDecl;",
+        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsNamespaceBody;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsNamespaceDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsNamespaceDecl");
     let method_create_ts_namespace_export_decl = env
       .get_static_method_id(
         &class,
         "createTsNamespaceExportDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsNamespaceExportDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsNamespaceExportDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsNamespaceExportDecl");
     let method_create_ts_non_null_expr = env
       .get_static_method_id(
         &class,
         "createTsNonNullExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsNonNullExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsNonNullExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsNonNullExpr");
     let method_create_ts_optional_type = env
       .get_static_method_id(
         &class,
         "createTsOptionalType",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsOptionalType;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsOptionalType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsOptionalType");
     let method_create_ts_param_prop = env
       .get_static_method_id(
         &class,
         "createTsParamProp",
-        "(Ljava/util/List;IZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsParamPropParam;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsParamProp;",
+        "(Ljava/util/List;IZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsParamPropParam;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsParamProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsParamProp");
     let method_create_ts_parenthesized_type = env
       .get_static_method_id(
         &class,
         "createTsParenthesizedType",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsParenthesizedType;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsParenthesizedType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsParenthesizedType");
     let method_create_ts_property_signature = env
       .get_static_method_id(
         &class,
         "createTsPropertySignature",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsPropertySignature;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsPropertySignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsPropertySignature");
     let method_create_ts_qualified_name = env
       .get_static_method_id(
         &class,
         "createTsQualifiedName",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsQualifiedName;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsQualifiedName;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsQualifiedName");
     let method_create_ts_rest_type = env
       .get_static_method_id(
         &class,
         "createTsRestType",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsRestType;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsRestType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsRestType");
     let method_create_ts_satisfies_expr = env
       .get_static_method_id(
         &class,
         "createTsSatisfiesExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsSatisfiesExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsSatisfiesExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsSatisfiesExpr");
     let method_create_ts_setter_signature = env
       .get_static_method_id(
         &class,
         "createTsSetterSignature",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsFnParam;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsSetterSignature;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsFnParam;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsSetterSignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsSetterSignature");
     let method_create_ts_this_type = env
       .get_static_method_id(
         &class,
         "createTsThisType",
-        "(Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsThisType;",
+        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsThisType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsThisType");
     let method_create_ts_tpl_lit_type = env
       .get_static_method_id(
         &class,
         "createTsTplLitType",
-        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTplLitType;",
+        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTplLitType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTplLitType");
     let method_create_ts_tuple_element = env
       .get_static_method_id(
         &class,
         "createTsTupleElement",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTupleElement;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTupleElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTupleElement");
     let method_create_ts_tuple_type = env
       .get_static_method_id(
         &class,
         "createTsTupleType",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTupleType;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTupleType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTupleType");
     let method_create_ts_type_alias_decl = env
       .get_static_method_id(
         &class,
         "createTsTypeAliasDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsTypeAliasDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsTypeAliasDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeAliasDecl");
     let method_create_ts_type_ann = env
       .get_static_method_id(
         &class,
         "createTsTypeAnn",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeAnn");
     let method_create_ts_type_assertion = env
       .get_static_method_id(
         &class,
         "createTsTypeAssertion",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsTypeAssertion;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsTypeAssertion;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeAssertion");
     let method_create_ts_type_lit = env
       .get_static_method_id(
         &class,
         "createTsTypeLit",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeLit;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeLit;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeLit");
     let method_create_ts_type_operator = env
       .get_static_method_id(
         &class,
         "createTsTypeOperator",
-        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeOperator;",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeOperator;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeOperator");
     let method_create_ts_type_param = env
       .get_static_method_id(
         &class,
         "createTsTypeParam",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeParam");
     let method_create_ts_type_param_decl = env
       .get_static_method_id(
         &class,
         "createTsTypeParamDecl",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeParamDecl");
     let method_create_ts_type_param_instantiation = env
       .get_static_method_id(
         &class,
         "createTsTypeParamInstantiation",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeParamInstantiation");
     let method_create_ts_type_predicate = env
       .get_static_method_id(
         &class,
         "createTsTypePredicate",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsThisTypeOrIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypePredicate;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsThisTypeOrIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypePredicate;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypePredicate");
     let method_create_ts_type_query = env
       .get_static_method_id(
         &class,
         "createTsTypeQuery",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsTypeQueryExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeQuery;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsTypeQueryExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeQuery;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeQuery");
     let method_create_ts_type_ref = env
       .get_static_method_id(
         &class,
         "createTsTypeRef",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeRef;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeRef;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeRef");
     let method_create_ts_union_type = env
       .get_static_method_id(
         &class,
         "createTsUnionType",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsUnionType;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsUnionType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsUnionType");
     let method_create_unary_expr = env
       .get_static_method_id(
         &class,
         "createUnaryExpr",
-        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstUnaryExpr;",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstUnaryExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createUnaryExpr");
     let method_create_update_expr = env
       .get_static_method_id(
         &class,
         "createUpdateExpr",
-        "(IZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstUpdateExpr;",
+        "(IZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstUpdateExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createUpdateExpr");
     let method_create_using_decl = env
       .get_static_method_id(
         &class,
         "createUsingDecl",
-        "(ZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstUsingDecl;",
+        "(ZLjava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstUsingDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createUsingDecl");
     let method_create_var_decl = env
       .get_static_method_id(
         &class,
         "createVarDecl",
-        "(IZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstVarDecl;",
+        "(IZLjava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstVarDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createVarDecl");
     let method_create_var_declarator = env
       .get_static_method_id(
         &class,
         "createVarDeclarator",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstVarDeclarator;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstVarDeclarator;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createVarDeclarator");
     let method_create_while_stmt = env
       .get_static_method_id(
         &class,
         "createWhileStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstWhileStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstWhileStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createWhileStmt");
     let method_create_with_stmt = env
       .get_static_method_id(
         &class,
         "createWithStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstWithStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstWithStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createWithStmt");
     let method_create_yield_expr = env
       .get_static_method_id(
         &class,
         "createYieldExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/Swc4jAstSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstYieldExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstYieldExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createYieldExpr");
     JavaSwc4jAstFactory {
@@ -3825,19 +3825,21 @@ impl JavaSwc4jAstFactory {
   pub fn create_span<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    range: &Range<usize>,
+    span_ex: &SpanEx,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let start = int_to_jvalue!(range.start);
-    let end = int_to_jvalue!(range.end);
+    let start = int_to_jvalue!(span_ex.start);
+    let end = int_to_jvalue!(span_ex.end);
+    let line = int_to_jvalue!(span_ex.line);
+    let column = int_to_jvalue!(span_ex.column);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_span,
-        &[start, end],
-        "Swc4jAstSpan create_span()"
+        &[start, end, line, column],
+        "Swc4jSpan create_span()"
       );
     return_value
   }
@@ -7287,7 +7289,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_elems = java_array_list.construct(env, node.elems.len());
     node.elems.iter().for_each(|node| {
       let java_node = node
@@ -7296,9 +7298,9 @@ pub mod program {
       java_array_list.add(env, &java_elems, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_type = java_ast_factory.create_array_lit(env, &java_elems, &java_range);
+    let return_type = java_ast_factory.create_array_lit(env, &java_elems, &java_span_ex);
     delete_local_ref!(env, java_elems);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7308,7 +7310,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_elems = java_array_list.construct(env, node.elems.len());
     node.elems.iter().for_each(|node| {
       let java_node = node
@@ -7320,10 +7322,10 @@ pub mod program {
     let optional = node.optional;
     let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
     let return_type =
-      java_ast_factory.create_array_pat(env, &java_elems, optional, &java_optional_type_ann, &java_range);
+      java_ast_factory.create_array_pat(env, &java_elems, optional, &java_optional_type_ann, &java_span_ex);
     delete_local_ref!(env, java_elems);
     delete_local_optional_ref!(env, java_optional_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7333,7 +7335,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_params = java_array_list.construct(env, node.params.len());
     node.params.iter().for_each(|node| {
       let java_node = enum_create_pat(env, map, node);
@@ -7356,13 +7358,13 @@ pub mod program {
       is_generator,
       &java_optional_type_params,
       &java_optional_return_type,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_body);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_optional_ref!(env, java_optional_return_type);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7371,14 +7373,14 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let op = node.op.get_id();
     let java_left = enum_create_pat_or_expr(env, map, &node.left);
     let java_right = enum_create_expr(env, map, &node.right);
-    let return_type = java_ast_factory.create_assign_expr(env, op, &java_left, &java_right, &java_range);
+    let return_type = java_ast_factory.create_assign_expr(env, op, &java_left, &java_right, &java_span_ex);
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7387,13 +7389,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_left = enum_create_pat(env, map, &node.left);
     let java_right = enum_create_expr(env, map, &node.right);
-    let return_type = java_ast_factory.create_assign_pat(env, &java_left, &java_right, &java_range);
+    let return_type = java_ast_factory.create_assign_pat(env, &java_left, &java_right, &java_span_ex);
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7406,13 +7408,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_key = create_ident(env, map, &node.key);
     let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
-    let return_type = java_ast_factory.create_assign_pat_prop(env, &java_key, &java_optional_value, &java_range);
+    let return_type = java_ast_factory.create_assign_pat_prop(env, &java_key, &java_optional_value, &java_span_ex);
     delete_local_ref!(env, java_key);
     delete_local_optional_ref!(env, java_optional_value);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7421,13 +7423,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_key = create_ident(env, map, &node.key);
     let java_value = enum_create_expr(env, map, &node.value);
-    let return_type = java_ast_factory.create_assign_prop(env, &java_key, &java_value, &java_range);
+    let return_type = java_ast_factory.create_assign_prop(env, &java_key, &java_value, &java_span_ex);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_value);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7441,7 +7443,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_key = enum_create_key(env, map, &node.key);
     let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
     let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
@@ -7461,13 +7463,13 @@ pub mod program {
       is_static,
       &java_decorators,
       accessibility,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_key);
     delete_local_optional_ref!(env, java_optional_value);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_decorators);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7476,11 +7478,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_arg = enum_create_expr(env, map, &node.arg);
-    let return_type = java_ast_factory.create_await_expr(env, &java_arg, &java_range);
+    let return_type = java_ast_factory.create_await_expr(env, &java_arg, &java_span_ex);
     delete_local_ref!(env, java_arg);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7489,11 +7491,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let sign = node.value.sign().get_id();
     let optional_raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
-    let return_value = java_ast_factory.create_big_int(env, sign, &optional_raw, &java_range);
-    delete_local_ref!(env, java_range);
+    let return_value = java_ast_factory.create_big_int(env, sign, &optional_raw, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -7502,14 +7504,14 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let op = node.op.get_id();
     let java_left = enum_create_expr(env, map, &node.left);
     let java_right = enum_create_expr(env, map, &node.right);
-    let return_type = java_ast_factory.create_bin_expr(env, op, &java_left, &java_right, &java_range);
+    let return_type = java_ast_factory.create_bin_expr(env, op, &java_left, &java_right, &java_span_ex);
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7522,13 +7524,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_id = create_ident(env, map, &node.id);
     let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-    let return_value = java_ast_factory.create_binding_ident(env, &java_id, &java_optional_type_ann, &java_range);
+    let return_value = java_ast_factory.create_binding_ident(env, &java_id, &java_optional_type_ann, &java_span_ex);
     delete_local_ref!(env, java_id);
     delete_local_optional_ref!(env, java_optional_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -7538,16 +7540,16 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_stmts = java_array_list.construct(env, node.stmts.len());
     node.stmts.iter().for_each(|node| {
       let java_node = enum_create_stmt(env, map, node);
       java_array_list.add(env, &java_stmts, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_block_stmt(env, &java_stmts, &java_range);
+    let return_value = java_ast_factory.create_block_stmt(env, &java_stmts, &java_span_ex);
     delete_local_ref!(env, java_stmts);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -7556,10 +7558,10 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let value = node.value;
-    let return_value = java_ast_factory.create_bool(env, value, &java_range);
-    delete_local_ref!(env, java_range);
+    let return_value = java_ast_factory.create_bool(env, value, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -7568,11 +7570,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_optional_label = node.label.as_ref().map(|node| create_ident(env, map, node));
-    let return_value = java_ast_factory.create_break_stmt(env, &java_optional_label, &java_range);
+    let return_value = java_ast_factory.create_break_stmt(env, &java_optional_label, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_label);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -7582,7 +7584,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_callee = enum_create_callee(env, map, &node.callee);
     let java_args = java_array_list.construct(env, node.args.len());
     node.args.iter().for_each(|node| {
@@ -7595,11 +7597,11 @@ pub mod program {
       .as_ref()
       .map(|node| create_ts_type_param_instantiation(env, map, node));
     let return_type =
-      java_ast_factory.create_call_expr(env, &java_callee, &java_args, &java_optional_type_args, &java_range);
+      java_ast_factory.create_call_expr(env, &java_callee, &java_args, &java_optional_type_args, &java_span_ex);
     delete_local_ref!(env, java_callee);
     delete_local_ref!(env, java_args);
     delete_local_optional_ref!(env, java_optional_type_args);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7608,13 +7610,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_optional_param = node.param.as_ref().map(|node| enum_create_pat(env, map, node));
     let java_body = create_block_stmt(env, map, &node.body);
-    let return_type = java_ast_factory.create_catch_clause(env, &java_optional_param, &java_body, &java_range);
+    let return_type = java_ast_factory.create_catch_clause(env, &java_optional_param, &java_body, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_param);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7624,7 +7626,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_decorators = java_array_list.construct(env, node.decorators.len());
     node.decorators.iter().for_each(|node| {
       let java_node = create_decorator(env, map, node);
@@ -7662,7 +7664,7 @@ pub mod program {
       &java_optional_type_params,
       &java_optional_super_type_params,
       &java_implements,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_decorators);
     delete_local_ref!(env, java_body);
@@ -7670,7 +7672,7 @@ pub mod program {
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_optional_ref!(env, java_optional_super_type_params);
     delete_local_ref!(env, java_implements);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -7679,14 +7681,14 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_ident = create_ident(env, map, &node.ident);
     let declare = node.declare;
     let java_class = create_class(env, map, &node.class);
-    let return_value = java_ast_factory.create_class_decl(env, &java_ident, declare, &java_class, &java_range);
+    let return_value = java_ast_factory.create_class_decl(env, &java_ident, declare, &java_class, &java_span_ex);
     delete_local_ref!(env, java_ident);
     delete_local_ref!(env, java_class);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -7695,13 +7697,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_optional_ident = node.ident.as_ref().map(|node| create_ident(env, map, node));
     let java_class = create_class(env, map, &node.class);
-    let return_type = java_ast_factory.create_class_expr(env, &java_optional_ident, &java_class, &java_range);
+    let return_type = java_ast_factory.create_class_expr(env, &java_optional_ident, &java_class, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_ident);
     delete_local_ref!(env, java_class);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7710,7 +7712,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_key = enum_create_prop_name(env, map, &node.key);
     let java_function = create_function(env, map, &node.function);
     let kind = node.kind.get_id();
@@ -7729,11 +7731,11 @@ pub mod program {
       is_abstract,
       is_optional,
       is_override,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_function);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7743,7 +7745,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_key = enum_create_prop_name(env, map, &node.key);
     let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
     let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
@@ -7775,13 +7777,13 @@ pub mod program {
       readonly,
       declare,
       definite,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_key);
     delete_local_optional_ref!(env, java_optional_value);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_decorators);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7794,11 +7796,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
-    let return_type = java_ast_factory.create_computed_prop_name(env, &java_expr, &java_range);
+    let return_type = java_ast_factory.create_computed_prop_name(env, &java_expr, &java_span_ex);
     delete_local_ref!(env, java_expr);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7807,15 +7809,15 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_test = enum_create_expr(env, map, &node.test);
     let java_cons = enum_create_expr(env, map, &node.cons);
     let java_alt = enum_create_expr(env, map, &node.alt);
-    let return_type = java_ast_factory.create_cond_expr(env, &java_test, &java_cons, &java_alt, &java_range);
+    let return_type = java_ast_factory.create_cond_expr(env, &java_test, &java_cons, &java_alt, &java_span_ex);
     delete_local_ref!(env, java_test);
     delete_local_ref!(env, java_cons);
     delete_local_ref!(env, java_alt);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7825,7 +7827,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_key = enum_create_prop_name(env, map, &node.key);
     let java_params = java_array_list.construct(env, node.params.len());
     node.params.iter().for_each(|node| {
@@ -7843,12 +7845,12 @@ pub mod program {
       &java_optional_body,
       accessibility,
       is_optional,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_params);
     delete_local_optional_ref!(env, java_optional_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7861,11 +7863,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_optional_label = node.label.as_ref().map(|node| create_ident(env, map, node));
-    let return_value = java_ast_factory.create_continue_stmt(env, &java_optional_label, &java_range);
+    let return_value = java_ast_factory.create_continue_stmt(env, &java_optional_label, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_label);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -7874,11 +7876,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
-    let return_type = java_ast_factory.create_decorator(env, &java_expr, &java_range);
+    let return_type = java_ast_factory.create_decorator(env, &java_expr, &java_span_ex);
     delete_local_ref!(env, java_expr);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7891,9 +7893,9 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let return_type = java_ast_factory.create_debugger_stmt(env, &java_range);
-    delete_local_ref!(env, java_range);
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
+    let return_type = java_ast_factory.create_debugger_stmt(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7902,13 +7904,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.test);
     let java_body = enum_create_stmt(env, map, &node.body);
-    let return_value = java_ast_factory.create_do_while_stmt(env, &java_expr, &java_body, &java_range);
+    let return_value = java_ast_factory.create_do_while_stmt(env, &java_expr, &java_body, &java_span_ex);
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -7917,9 +7919,9 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let return_type = java_ast_factory.create_empty_stmt(env, &java_range);
-    delete_local_ref!(env, java_range);
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
+    let return_type = java_ast_factory.create_empty_stmt(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -7928,14 +7930,15 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_src = create_str(env, map, &node.src);
     let type_only = node.type_only;
     let java_optional_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
-    let return_value = java_ast_factory.create_export_all(env, &java_src, type_only, &java_optional_with, &java_range);
+    let return_value =
+      java_ast_factory.create_export_all(env, &java_src, type_only, &java_optional_with, &java_span_ex);
     delete_local_ref!(env, java_src);
     delete_local_optional_ref!(env, java_optional_with);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -7944,11 +7947,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_decl = enum_create_decl(env, map, &node.decl);
-    let return_value = java_ast_factory.create_export_decl(env, &java_decl, &java_range);
+    let return_value = java_ast_factory.create_export_decl(env, &java_decl, &java_span_ex);
     delete_local_ref!(env, java_decl);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -7961,11 +7964,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_decl = enum_create_default_decl(env, map, &node.decl);
-    let return_value = java_ast_factory.create_export_default_decl(env, &java_decl, &java_range);
+    let return_value = java_ast_factory.create_export_default_decl(env, &java_decl, &java_span_ex);
     delete_local_ref!(env, java_decl);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -7978,11 +7981,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
-    let return_value = java_ast_factory.create_export_default_expr(env, &java_expr, &java_range);
+    let return_value = java_ast_factory.create_export_default_expr(env, &java_expr, &java_span_ex);
     delete_local_ref!(env, java_expr);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -7995,11 +7998,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_exported = create_ident(env, map, &node.exported);
-    let return_value = java_ast_factory.create_export_default_specifier(env, &java_exported, &java_range);
+    let return_value = java_ast_factory.create_export_default_specifier(env, &java_exported, &java_span_ex);
     delete_local_ref!(env, java_exported);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8012,7 +8015,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_orig = enum_create_module_export_name(env, map, &node.orig);
     let java_optional_exported = node
       .exported
@@ -8024,11 +8027,11 @@ pub mod program {
       &java_orig,
       &java_optional_exported,
       is_type_only,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_orig);
     delete_local_optional_ref!(env, java_optional_exported);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8041,11 +8044,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_name = enum_create_module_export_name(env, map, &node.name);
-    let return_value = java_ast_factory.create_export_namespace_specifier(env, &java_name, &java_range);
+    let return_value = java_ast_factory.create_export_namespace_specifier(env, &java_name, &java_span_ex);
     delete_local_ref!(env, java_name);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8058,16 +8061,16 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_optional_spread = node
       .spread
       .as_ref()
-      .map(|node| java_ast_factory.create_span(env, &map.get_range_by_span(node)));
+      .map(|node| java_ast_factory.create_span(env, &map.get_span_ex_by_span(node)));
     let java_expr = enum_create_expr(env, map, &node.expr);
-    let return_value = java_ast_factory.create_expr_or_spread(env, &java_optional_spread, &java_expr, &java_range);
+    let return_value = java_ast_factory.create_expr_or_spread(env, &java_optional_spread, &java_expr, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_spread);
     delete_local_ref!(env, java_expr);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8076,11 +8079,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
-    let return_value = java_ast_factory.create_expr_stmt(env, &java_expr, &java_range);
+    let return_value = java_ast_factory.create_expr_stmt(env, &java_expr, &java_span_ex);
     delete_local_ref!(env, java_expr);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8089,14 +8092,14 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_ident = create_ident(env, map, &node.ident);
     let declare = node.declare;
     let java_function = create_function(env, map, &node.function);
-    let return_value = java_ast_factory.create_fn_decl(env, &java_ident, declare, &java_function, &java_range);
+    let return_value = java_ast_factory.create_fn_decl(env, &java_ident, declare, &java_function, &java_span_ex);
     delete_local_ref!(env, java_ident);
     delete_local_ref!(env, java_function);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8105,13 +8108,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_optional_ident = node.ident.as_ref().map(|node| create_ident(env, map, node));
     let java_function = create_function(env, map, &node.function);
-    let return_type = java_ast_factory.create_fn_expr(env, &java_optional_ident, &java_function, &java_range);
+    let return_type = java_ast_factory.create_fn_expr(env, &java_optional_ident, &java_function, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_ident);
     delete_local_ref!(env, java_function);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8120,15 +8123,15 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_left = enum_create_for_head(env, map, &node.left);
     let java_right = enum_create_expr(env, map, &node.right);
     let java_body = enum_create_stmt(env, map, &node.body);
-    let return_value = java_ast_factory.create_for_in_stmt(env, &java_left, &java_right, &java_body, &java_range);
+    let return_value = java_ast_factory.create_for_in_stmt(env, &java_left, &java_right, &java_body, &java_span_ex);
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8137,17 +8140,17 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let is_await = node.is_await;
     let java_left = enum_create_for_head(env, map, &node.left);
     let java_right = enum_create_expr(env, map, &node.right);
     let java_body = enum_create_stmt(env, map, &node.body);
     let return_value =
-      java_ast_factory.create_for_of_stmt(env, is_await, &java_left, &java_right, &java_body, &java_range);
+      java_ast_factory.create_for_of_stmt(env, is_await, &java_left, &java_right, &java_body, &java_span_ex);
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8156,7 +8159,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_optional_init = node
       .init
       .as_ref()
@@ -8170,13 +8173,13 @@ pub mod program {
       &java_optional_test,
       &java_optional_update,
       &java_body,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_optional_ref!(env, java_optional_init);
     delete_local_optional_ref!(env, java_optional_test);
     delete_local_optional_ref!(env, java_optional_update);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8186,7 +8189,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_params = java_array_list.construct(env, node.params.len());
     node.params.iter().for_each(|node| {
       let java_node = create_param(env, map, node);
@@ -8216,14 +8219,14 @@ pub mod program {
       is_async,
       &java_optional_type_params,
       &java_optional_return_type,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_decorators);
     delete_local_optional_ref!(env, java_optional_body);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_optional_ref!(env, java_optional_return_type);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8232,7 +8235,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_key = enum_create_prop_name(env, map, &node.key);
     let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
     let java_optional_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
@@ -8241,12 +8244,12 @@ pub mod program {
       &java_key,
       &java_optional_type_ann,
       &java_optional_body,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_key);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8255,15 +8258,15 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_test = enum_create_expr(env, map, &node.test);
     let java_cons = enum_create_stmt(env, map, &node.cons);
     let java_optional_alt = node.alt.as_ref().map(|node| enum_create_stmt(env, map, node));
-    let return_value = java_ast_factory.create_if_stmt(env, &java_test, &java_cons, &java_optional_alt, &java_range);
+    let return_value = java_ast_factory.create_if_stmt(env, &java_test, &java_cons, &java_optional_alt, &java_span_ex);
     delete_local_ref!(env, java_test);
     delete_local_ref!(env, java_cons);
     delete_local_optional_ref!(env, java_optional_alt);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8272,9 +8275,9 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let return_type = java_ast_factory.create_import(env, &java_range);
-    delete_local_ref!(env, java_range);
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
+    let return_type = java_ast_factory.create_import(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8287,11 +8290,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_local = create_ident(env, map, &node.local);
-    let return_value = java_ast_factory.create_import_default_specifier(env, &java_local, &java_range);
+    let return_value = java_ast_factory.create_import_default_specifier(env, &java_local, &java_span_ex);
     delete_local_ref!(env, java_local);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8304,7 +8307,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_local = create_ident(env, map, &node.local);
     let java_optional_imported = node
       .imported
@@ -8316,11 +8319,11 @@ pub mod program {
       &java_local,
       &java_optional_imported,
       is_type_only,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_local);
     delete_local_optional_ref!(env, java_optional_imported);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8333,11 +8336,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_local = create_ident(env, map, &node.local);
-    let return_value = java_ast_factory.create_import_star_as_specifier(env, &java_local, &java_range);
+    let return_value = java_ast_factory.create_import_star_as_specifier(env, &java_local, &java_span_ex);
     delete_local_ref!(env, java_local);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8346,9 +8349,9 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let return_value = java_ast_factory.create_invalid(env, &java_range);
-    delete_local_ref!(env, java_range);
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
+    let return_value = java_ast_factory.create_invalid(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8357,16 +8360,16 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_name = enum_create_jsx_attr_name(env, map, &node.name);
     let java_optional_value = node
       .value
       .as_ref()
       .map(|node| enum_create_jsx_attr_value(env, map, node));
-    let return_value = java_ast_factory.create_jsx_attr(env, &java_name, &java_optional_value, &java_range);
+    let return_value = java_ast_factory.create_jsx_attr(env, &java_name, &java_optional_value, &java_span_ex);
     delete_local_ref!(env, java_name);
     delete_local_optional_ref!(env, java_optional_value);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8379,11 +8382,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_name = enum_create_jsx_element_name(env, map, &node.name);
-    let return_value = java_ast_factory.create_jsx_closing_element(env, &java_name, &java_range);
+    let return_value = java_ast_factory.create_jsx_closing_element(env, &java_name, &java_span_ex);
     delete_local_ref!(env, java_name);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8396,9 +8399,9 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let return_value = java_ast_factory.create_jsx_closing_fragment(env, &java_range);
-    delete_local_ref!(env, java_range);
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
+    let return_value = java_ast_factory.create_jsx_closing_fragment(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8408,7 +8411,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_opening = create_jsx_opening_element(env, map, &node.opening);
     let java_children = java_array_list.construct(env, node.children.len());
     node.children.iter().for_each(|node| {
@@ -8420,12 +8423,17 @@ pub mod program {
       .closing
       .as_ref()
       .map(|node| create_jsx_closing_element(env, map, node));
-    let return_type =
-      java_ast_factory.create_jsx_element(env, &java_opening, &java_children, &java_optional_closing, &java_range);
+    let return_type = java_ast_factory.create_jsx_element(
+      env,
+      &java_opening,
+      &java_children,
+      &java_optional_closing,
+      &java_span_ex,
+    );
     delete_local_ref!(env, java_opening);
     delete_local_ref!(env, java_children);
     delete_local_optional_ref!(env, java_optional_closing);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8438,11 +8446,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_jsx_expr(env, map, &node.expr);
-    let return_type = java_ast_factory.create_jsx_expr_container(env, &java_expr, &java_range);
+    let return_type = java_ast_factory.create_jsx_expr_container(env, &java_expr, &java_span_ex);
     delete_local_ref!(env, java_expr);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8455,9 +8463,9 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let return_type = java_ast_factory.create_jsx_empty_expr(env, &java_range);
-    delete_local_ref!(env, java_range);
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
+    let return_type = java_ast_factory.create_jsx_empty_expr(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8467,7 +8475,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_opening = create_jsx_opening_fragment(env, map, &node.opening);
     let java_children = java_array_list.construct(env, node.children.len());
     node.children.iter().for_each(|node| {
@@ -8477,11 +8485,11 @@ pub mod program {
     });
     let java_closing = create_jsx_closing_fragment(env, map, &node.closing);
     let return_type =
-      java_ast_factory.create_jsx_fragment(env, &java_opening, &java_children, &java_closing, &java_range);
+      java_ast_factory.create_jsx_fragment(env, &java_opening, &java_children, &java_closing, &java_span_ex);
     delete_local_ref!(env, java_opening);
     delete_local_ref!(env, java_children);
     delete_local_ref!(env, java_closing);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8494,13 +8502,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_obj = enum_create_jsx_object(env, map, &node.obj);
     let java_prop = create_ident(env, map, &node.prop);
-    let return_type = java_ast_factory.create_jsx_member_expr(env, &java_obj, &java_prop, &java_range);
+    let return_type = java_ast_factory.create_jsx_member_expr(env, &java_obj, &java_prop, &java_span_ex);
     delete_local_ref!(env, java_obj);
     delete_local_ref!(env, java_prop);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8513,13 +8521,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_ns = create_ident(env, map, &node.ns);
     let java_name = create_ident(env, map, &node.name);
-    let return_type = java_ast_factory.create_jsx_namespaced_name(env, &java_ns, &java_name, &java_range);
+    let return_type = java_ast_factory.create_jsx_namespaced_name(env, &java_ns, &java_name, &java_span_ex);
     delete_local_ref!(env, java_ns);
     delete_local_ref!(env, java_name);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8533,7 +8541,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_name = enum_create_jsx_element_name(env, map, &node.name);
     let java_attrs = java_array_list.construct(env, node.attrs.len());
     node.attrs.iter().for_each(|node| {
@@ -8552,12 +8560,12 @@ pub mod program {
       &java_attrs,
       self_closing,
       &java_optional_type_args,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_name);
     delete_local_ref!(env, java_attrs);
     delete_local_optional_ref!(env, java_optional_type_args);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8570,9 +8578,9 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let return_value = java_ast_factory.create_jsx_opening_fragment(env, &java_range);
-    delete_local_ref!(env, java_range);
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
+    let return_value = java_ast_factory.create_jsx_opening_fragment(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8585,11 +8593,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
-    let return_type = java_ast_factory.create_jsx_spread_child(env, &java_expr, &java_range);
+    let return_type = java_ast_factory.create_jsx_spread_child(env, &java_expr, &java_span_ex);
     delete_local_ref!(env, java_expr);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8598,11 +8606,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let value = node.value.as_str();
     let raw = node.raw.as_str();
-    let return_value = java_ast_factory.create_jsx_text(env, value, raw, &java_range);
-    delete_local_ref!(env, java_range);
+    let return_value = java_ast_factory.create_jsx_text(env, value, raw, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8611,11 +8619,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let sym = node.sym.as_str();
     let optional = node.optional;
-    let return_value = java_ast_factory.create_ident(env, sym, optional, &java_range);
-    delete_local_ref!(env, java_range);
+    let return_value = java_ast_factory.create_ident(env, sym, optional, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8625,7 +8633,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_specifiers = java_array_list.construct(env, node.specifiers.len());
     node.specifiers.iter().for_each(|node| {
       let java_node = enum_create_import_specifier(env, map, node);
@@ -8641,12 +8649,12 @@ pub mod program {
       &java_src,
       type_only,
       &java_optional_with,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_specifiers);
     delete_local_ref!(env, java_src);
     delete_local_optional_ref!(env, java_optional_with);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8659,13 +8667,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_key = enum_create_prop_name(env, map, &node.key);
     let java_value = enum_create_pat(env, map, &node.value);
-    let return_type = java_ast_factory.create_key_value_pat_prop(env, &java_key, &java_value, &java_range);
+    let return_type = java_ast_factory.create_key_value_pat_prop(env, &java_key, &java_value, &java_span_ex);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_value);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8678,13 +8686,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_key = enum_create_prop_name(env, map, &node.key);
     let java_value = enum_create_expr(env, map, &node.value);
-    let return_type = java_ast_factory.create_key_value_prop(env, &java_key, &java_value, &java_range);
+    let return_type = java_ast_factory.create_key_value_prop(env, &java_key, &java_value, &java_span_ex);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_value);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8693,13 +8701,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_label = create_ident(env, map, &node.label);
     let java_body = enum_create_stmt(env, map, &node.body);
-    let return_value = java_ast_factory.create_labeled_stmt(env, &java_label, &java_body, &java_range);
+    let return_value = java_ast_factory.create_labeled_stmt(env, &java_label, &java_body, &java_span_ex);
     delete_local_ref!(env, java_label);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8708,13 +8716,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_obj = enum_create_expr(env, map, &node.obj);
     let java_prop = enum_create_member_prop(env, map, &node.prop);
-    let return_type = java_ast_factory.create_member_expr(env, &java_obj, &java_prop, &java_range);
+    let return_type = java_ast_factory.create_member_expr(env, &java_obj, &java_prop, &java_span_ex);
     delete_local_ref!(env, java_obj);
     delete_local_ref!(env, java_prop);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8727,10 +8735,10 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let kind = node.kind.get_id();
-    let return_type = java_ast_factory.create_meta_prop_expr(env, kind, &java_range);
-    delete_local_ref!(env, java_range);
+    let return_type = java_ast_factory.create_meta_prop_expr(env, kind, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8739,13 +8747,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_key = enum_create_prop_name(env, map, &node.key);
     let java_function = create_function(env, map, &node.function);
-    let return_type = java_ast_factory.create_method_prop(env, &java_key, &java_function, &java_range);
+    let return_type = java_ast_factory.create_method_prop(env, &java_key, &java_function, &java_span_ex);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_function);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8756,16 +8764,16 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
     let optional_shebang: Option<String> = node.shebang.to_owned().map(|s| s.to_string());
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_body = java_array_list.construct(env, node.body.len());
     node.body.iter().for_each(|node| {
       let java_node = enum_create_module_item(env, map, node);
       java_array_list.add(env, &java_body, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_module(env, &java_body, &optional_shebang, &java_range);
+    let return_value = java_ast_factory.create_module(env, &java_body, &optional_shebang, &java_span_ex);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8775,7 +8783,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_specifiers = java_array_list.construct(env, node.specifiers.len());
     node.specifiers.iter().for_each(|node| {
       let java_node = enum_create_export_specifier(env, map, node);
@@ -8791,12 +8799,12 @@ pub mod program {
       &java_optional_src,
       type_only,
       &java_optional_with,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_specifiers);
     delete_local_optional_ref!(env, java_optional_src);
     delete_local_optional_ref!(env, java_optional_with);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8806,7 +8814,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_callee = enum_create_expr(env, map, &node.callee);
     let java_optional_args = node.args.as_ref().map(|node| {
       let java_args = java_array_list.construct(env, node.len());
@@ -8826,12 +8834,12 @@ pub mod program {
       &java_callee,
       &java_optional_args,
       &java_optional_type_args,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_callee);
     delete_local_optional_ref!(env, java_optional_args);
     delete_local_optional_ref!(env, java_optional_type_args);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8840,9 +8848,9 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let return_value = java_ast_factory.create_null(env, &java_range);
-    delete_local_ref!(env, java_range);
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
+    let return_value = java_ast_factory.create_null(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8851,11 +8859,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let value = node.value;
     let optional_raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
-    let return_value = java_ast_factory.create_number(env, value, &optional_raw, &java_range);
-    delete_local_ref!(env, java_range);
+    let return_value = java_ast_factory.create_number(env, value, &optional_raw, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8865,16 +8873,16 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_props = java_array_list.construct(env, node.props.len());
     node.props.iter().for_each(|node| {
       let java_node = enum_create_prop_or_spread(env, map, node);
       java_array_list.add(env, &java_props, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_object_lit(env, &java_props, &java_range);
+    let return_value = java_ast_factory.create_object_lit(env, &java_props, &java_span_ex);
     delete_local_ref!(env, java_props);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8884,7 +8892,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_props = java_array_list.construct(env, node.props.len());
     node.props.iter().for_each(|node| {
       let java_node = enum_create_object_pat_prop(env, map, node);
@@ -8894,10 +8902,10 @@ pub mod program {
     let optional = node.optional;
     let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
     let return_type =
-      java_ast_factory.create_object_pat(env, &java_props, optional, &java_optional_type_ann, &java_range);
+      java_ast_factory.create_object_pat(env, &java_props, optional, &java_optional_type_ann, &java_span_ex);
     delete_local_ref!(env, java_props);
     delete_local_optional_ref!(env, java_optional_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8907,7 +8915,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_callee = enum_create_expr(env, map, &node.callee);
     let java_args = java_array_list.construct(env, node.args.len());
     node.args.iter().for_each(|node| {
@@ -8920,11 +8928,11 @@ pub mod program {
       .as_ref()
       .map(|node| create_ts_type_param_instantiation(env, map, node));
     let return_value =
-      java_ast_factory.create_opt_call(env, &java_callee, &java_args, &java_optional_type_args, &java_range);
+      java_ast_factory.create_opt_call(env, &java_callee, &java_args, &java_optional_type_args, &java_span_ex);
     delete_local_ref!(env, java_callee);
     delete_local_ref!(env, java_args);
     delete_local_optional_ref!(env, java_optional_type_args);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8937,12 +8945,12 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let optional = node.optional;
     let java_base = enum_create_opt_chain_base(env, map, &node.base);
-    let return_value = java_ast_factory.create_opt_chain_expr(env, optional, &java_base, &java_range);
+    let return_value = java_ast_factory.create_opt_chain_expr(env, optional, &java_base, &java_span_ex);
     delete_local_ref!(env, java_base);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -8952,7 +8960,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_decorators = java_array_list.construct(env, node.decorators.len());
     node.decorators.iter().for_each(|node| {
       let java_node = create_decorator(env, map, node);
@@ -8960,10 +8968,10 @@ pub mod program {
       delete_local_ref!(env, java_node);
     });
     let java_pat = enum_create_pat(env, map, &node.pat);
-    let return_type = java_ast_factory.create_param(env, &java_decorators, &java_pat, &java_range);
+    let return_type = java_ast_factory.create_param(env, &java_decorators, &java_pat, &java_span_ex);
     delete_local_ref!(env, java_decorators);
     delete_local_ref!(env, java_pat);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8972,11 +8980,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
-    let return_type = java_ast_factory.create_paren_expr(env, &java_expr, &java_range);
+    let return_type = java_ast_factory.create_paren_expr(env, &java_expr, &java_span_ex);
     delete_local_ref!(env, java_expr);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -8989,7 +8997,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_key = create_private_name(env, map, &node.key);
     let java_function = create_function(env, map, &node.function);
     let kind = node.kind.get_id();
@@ -9008,11 +9016,11 @@ pub mod program {
       is_abstract,
       is_optional,
       is_override,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_function);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -9021,11 +9029,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_id = create_ident(env, map, &node.id);
-    let return_type = java_ast_factory.create_private_name(env, &java_id, &java_range);
+    let return_type = java_ast_factory.create_private_name(env, &java_id, &java_span_ex);
     delete_local_ref!(env, java_id);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -9035,7 +9043,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_key = create_private_name(env, map, &node.key);
     let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
     let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
@@ -9063,13 +9071,13 @@ pub mod program {
       is_override,
       readonly,
       definite,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_key);
     delete_local_optional_ref!(env, java_optional_value);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_decorators);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -9078,11 +9086,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let exp = node.exp.as_str();
     let flags = node.flags.as_str();
-    let return_value = java_ast_factory.create_regex(env, exp, flags, &java_range);
-    delete_local_ref!(env, java_range);
+    let return_value = java_ast_factory.create_regex(env, exp, flags, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9091,16 +9099,16 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
-    let java_dot3_token = java_ast_factory.create_span(env, &map.get_range_by_span(&node.dot3_token));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
+    let java_dot3_token = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.dot3_token));
     let java_arg = enum_create_pat(env, map, &node.arg);
     let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
     let return_value =
-      java_ast_factory.create_rest_pat(env, &java_dot3_token, &java_arg, &java_optional_type_ann, &java_range);
+      java_ast_factory.create_rest_pat(env, &java_dot3_token, &java_arg, &java_optional_type_ann, &java_span_ex);
     delete_local_ref!(env, java_dot3_token);
     delete_local_ref!(env, java_arg);
     delete_local_optional_ref!(env, java_optional_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9109,11 +9117,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_optional_arg = node.arg.as_ref().map(|node| enum_create_expr(env, map, node));
-    let return_value = java_ast_factory.create_return_stmt(env, &java_optional_arg, &java_range);
+    let return_value = java_ast_factory.create_return_stmt(env, &java_optional_arg, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_arg);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9123,7 +9131,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_body = java_array_list.construct(env, node.body.len());
     node.body.iter().for_each(|node| {
       let java_node = enum_create_stmt(env, map, node);
@@ -9131,9 +9139,9 @@ pub mod program {
       delete_local_ref!(env, java_node);
     });
     let optional_shebang: Option<String> = node.shebang.to_owned().map(|s| s.to_string());
-    let return_value = java_ast_factory.create_script(env, &java_body, &optional_shebang, &java_range);
+    let return_value = java_ast_factory.create_script(env, &java_body, &optional_shebang, &java_span_ex);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9143,16 +9151,16 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_exprs = java_array_list.construct(env, node.exprs.len());
     node.exprs.iter().for_each(|node| {
       let java_node = enum_create_expr(env, map, node);
       java_array_list.add(env, &java_exprs, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_type = java_ast_factory.create_seq_expr(env, &java_exprs, &java_range);
+    let return_type = java_ast_factory.create_seq_expr(env, &java_exprs, &java_span_ex);
     delete_local_ref!(env, java_exprs);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -9161,16 +9169,16 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_key = enum_create_prop_name(env, map, &node.key);
     let java_param = enum_create_pat(env, map, &node.param);
     let java_optional_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
     let return_type =
-      java_ast_factory.create_setter_prop(env, &java_key, &java_param, &java_optional_body, &java_range);
+      java_ast_factory.create_setter_prop(env, &java_key, &java_param, &java_optional_body, &java_span_ex);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_param);
     delete_local_optional_ref!(env, java_optional_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -9183,13 +9191,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
-    let java_dot3_token = java_ast_factory.create_span(env, &map.get_range_by_span(&node.dot3_token));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
+    let java_dot3_token = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.dot3_token));
     let java_expr = enum_create_expr(env, map, &node.expr);
-    let return_value = java_ast_factory.create_spread_element(env, &java_dot3_token, &java_expr, &java_range);
+    let return_value = java_ast_factory.create_spread_element(env, &java_dot3_token, &java_expr, &java_span_ex);
     delete_local_ref!(env, java_dot3_token);
     delete_local_ref!(env, java_expr);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9198,11 +9206,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_body = create_block_stmt(env, map, &node.body);
-    let return_value = java_ast_factory.create_static_block(env, &java_body, &java_range);
+    let return_value = java_ast_factory.create_static_block(env, &java_body, &java_span_ex);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9211,11 +9219,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let value = node.value.as_str();
     let optional_raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
-    let return_value = java_ast_factory.create_str(env, value, &optional_raw, &java_range);
-    delete_local_ref!(env, java_range);
+    let return_value = java_ast_factory.create_str(env, value, &optional_raw, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9224,9 +9232,9 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let return_type = java_ast_factory.create_super(env, &java_range);
-    delete_local_ref!(env, java_range);
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
+    let return_type = java_ast_factory.create_super(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -9239,13 +9247,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_obj = create_super(env, map, &node.obj);
     let java_prop = enum_create_super_prop(env, map, &node.prop);
-    let return_type = java_ast_factory.create_super_prop_expr(env, &java_obj, &java_prop, &java_range);
+    let return_type = java_ast_factory.create_super_prop_expr(env, &java_obj, &java_prop, &java_span_ex);
     delete_local_ref!(env, java_obj);
     delete_local_ref!(env, java_prop);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -9255,7 +9263,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_optional_test = node.test.as_ref().map(|node| enum_create_expr(env, map, node));
     let java_cons = java_array_list.construct(env, node.cons.len());
     node.cons.iter().for_each(|node| {
@@ -9263,10 +9271,10 @@ pub mod program {
       java_array_list.add(env, &java_cons, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_switch_case(env, &java_optional_test, &java_cons, &java_range);
+    let return_value = java_ast_factory.create_switch_case(env, &java_optional_test, &java_cons, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_test);
     delete_local_ref!(env, java_cons);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9276,7 +9284,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_discriminant = enum_create_expr(env, map, &node.discriminant);
     let java_cases = java_array_list.construct(env, node.cases.len());
     node.cases.iter().for_each(|node| {
@@ -9284,10 +9292,10 @@ pub mod program {
       java_array_list.add(env, &java_cases, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_switch_stmt(env, &java_discriminant, &java_cases, &java_range);
+    let return_value = java_ast_factory.create_switch_stmt(env, &java_discriminant, &java_cases, &java_span_ex);
     delete_local_ref!(env, java_discriminant);
     delete_local_ref!(env, java_cases);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9296,7 +9304,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_tag = enum_create_expr(env, map, &node.tag);
     let java_optional_type_params = node
       .type_params
@@ -9304,11 +9312,11 @@ pub mod program {
       .map(|node| create_ts_type_param_instantiation(env, map, node));
     let java_tpl = create_tpl(env, map, &node.tpl);
     let return_value =
-      java_ast_factory.create_tagged_tpl(env, &java_tag, &java_optional_type_params, &java_tpl, &java_range);
+      java_ast_factory.create_tagged_tpl(env, &java_tag, &java_optional_type_params, &java_tpl, &java_span_ex);
     delete_local_ref!(env, java_tag);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_tpl);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9317,9 +9325,9 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let return_value = java_ast_factory.create_this_expr(env, &java_range);
-    delete_local_ref!(env, java_range);
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
+    let return_value = java_ast_factory.create_this_expr(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9328,11 +9336,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_arg = enum_create_expr(env, map, &node.arg);
-    let return_value = java_ast_factory.create_throw_stmt(env, &java_arg, &java_range);
+    let return_value = java_ast_factory.create_throw_stmt(env, &java_arg, &java_span_ex);
     delete_local_ref!(env, java_arg);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9342,7 +9350,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_exprs = java_array_list.construct(env, node.exprs.len());
     node.exprs.iter().for_each(|node| {
       let java_node = enum_create_expr(env, map, node);
@@ -9355,10 +9363,10 @@ pub mod program {
       java_array_list.add(env, &java_quasis, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_tpl(env, &java_exprs, &java_quasis, &java_range);
+    let return_value = java_ast_factory.create_tpl(env, &java_exprs, &java_quasis, &java_span_ex);
     delete_local_ref!(env, java_exprs);
     delete_local_ref!(env, java_quasis);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9367,12 +9375,12 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let tail = node.tail;
     let optional_cooked = node.cooked.as_ref().map(|node| node.to_string());
     let raw = node.raw.as_str();
-    let return_value = java_ast_factory.create_tpl_element(env, tail, &optional_cooked, raw, &java_range);
-    delete_local_ref!(env, java_range);
+    let return_value = java_ast_factory.create_tpl_element(env, tail, &optional_cooked, raw, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9381,7 +9389,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_block = create_block_stmt(env, map, &node.block);
     let java_optional_handler = node.handler.as_ref().map(|node| create_catch_clause(env, map, node));
     let java_optional_finalizer = node.finalizer.as_ref().map(|node| create_block_stmt(env, map, node));
@@ -9390,12 +9398,12 @@ pub mod program {
       &java_block,
       &java_optional_handler,
       &java_optional_finalizer,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_block);
     delete_local_optional_ref!(env, java_optional_handler);
     delete_local_optional_ref!(env, java_optional_finalizer);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9404,11 +9412,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_elem_type = enum_create_ts_type(env, map, &node.elem_type);
-    let return_value = java_ast_factory.create_ts_array_type(env, &java_elem_type, &java_range);
+    let return_value = java_ast_factory.create_ts_array_type(env, &java_elem_type, &java_span_ex);
     delete_local_ref!(env, java_elem_type);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9417,13 +9425,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
     let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-    let return_value = java_ast_factory.create_ts_as_expr(env, &java_expr, &java_type_ann, &java_range);
+    let return_value = java_ast_factory.create_ts_as_expr(env, &java_expr, &java_type_ann, &java_span_ex);
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9437,7 +9445,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_params = java_array_list.construct(env, node.params.len());
     node.params.iter().for_each(|node| {
       let java_node = enum_create_ts_fn_param(env, map, node);
@@ -9454,12 +9462,12 @@ pub mod program {
       &java_params,
       &java_optional_type_ann,
       &java_optional_type_params,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_params);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_type_params);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9472,7 +9480,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_check_type = enum_create_ts_type(env, map, &node.check_type);
     let java_extends_type = enum_create_ts_type(env, map, &node.extends_type);
     let java_true_type = enum_create_ts_type(env, map, &node.true_type);
@@ -9483,13 +9491,13 @@ pub mod program {
       &java_extends_type,
       &java_true_type,
       &java_false_type,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_check_type);
     delete_local_ref!(env, java_extends_type);
     delete_local_ref!(env, java_true_type);
     delete_local_ref!(env, java_false_type);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9502,11 +9510,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
-    let return_value = java_ast_factory.create_ts_const_assertion(env, &java_expr, &java_range);
+    let return_value = java_ast_factory.create_ts_const_assertion(env, &java_expr, &java_span_ex);
     delete_local_ref!(env, java_expr);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9520,7 +9528,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_params = java_array_list.construct(env, node.params.len());
     node.params.iter().for_each(|node| {
       let java_node = enum_create_ts_fn_param(env, map, node);
@@ -9537,12 +9545,12 @@ pub mod program {
       &java_params,
       &java_optional_type_ann,
       &java_optional_type_params,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_params);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_type_params);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9556,7 +9564,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_params = java_array_list.construct(env, node.params.len());
     node.params.iter().for_each(|node| {
       let java_node = enum_create_ts_fn_param(env, map, node);
@@ -9575,12 +9583,12 @@ pub mod program {
       &java_optional_type_params,
       &java_type_ann,
       is_abstract,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_params);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9590,7 +9598,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let declare = node.declare;
     let is_const = node.is_const;
     let java_id = create_ident(env, map, &node.id);
@@ -9601,10 +9609,10 @@ pub mod program {
       delete_local_ref!(env, java_node);
     });
     let return_type =
-      java_ast_factory.create_ts_enum_decl(env, declare, is_const, &java_id, &java_members, &java_range);
+      java_ast_factory.create_ts_enum_decl(env, declare, is_const, &java_id, &java_members, &java_span_ex);
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_members);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -9617,13 +9625,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_id = enum_create_ts_enum_member_id(env, map, &node.id);
     let java_optional_init = node.init.as_ref().map(|node| enum_create_expr(env, map, node));
-    let return_value = java_ast_factory.create_ts_enum_member(env, &java_id, &java_optional_init, &java_range);
+    let return_value = java_ast_factory.create_ts_enum_member(env, &java_id, &java_optional_init, &java_span_ex);
     delete_local_ref!(env, java_id);
     delete_local_optional_ref!(env, java_optional_init);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9636,11 +9644,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
-    let return_value = java_ast_factory.create_ts_export_assignment(env, &java_expr, &java_range);
+    let return_value = java_ast_factory.create_ts_export_assignment(env, &java_expr, &java_span_ex);
     delete_local_ref!(env, java_expr);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9653,17 +9661,17 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
     let java_optional_type_args = node
       .type_args
       .as_ref()
       .map(|node| create_ts_type_param_instantiation(env, map, node));
     let return_value =
-      java_ast_factory.create_ts_expr_with_type_args(env, &java_expr, &java_optional_type_args, &java_range);
+      java_ast_factory.create_ts_expr_with_type_args(env, &java_expr, &java_optional_type_args, &java_span_ex);
     delete_local_ref!(env, java_expr);
     delete_local_optional_ref!(env, java_optional_type_args);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9676,11 +9684,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = create_str(env, map, &node.expr);
-    let return_value = java_ast_factory.create_ts_external_module_ref(env, &java_expr, &java_range);
+    let return_value = java_ast_factory.create_ts_external_module_ref(env, &java_expr, &java_span_ex);
     delete_local_ref!(env, java_expr);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9690,7 +9698,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_params = java_array_list.construct(env, node.params.len());
     node.params.iter().for_each(|node| {
       let java_node = enum_create_ts_fn_param(env, map, node);
@@ -9707,12 +9715,12 @@ pub mod program {
       &java_params,
       &java_optional_type_params,
       &java_type_ann,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_params);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9725,7 +9733,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let readonly = node.readonly;
     let java_key = enum_create_expr(env, map, &node.key);
     let computed = node.computed;
@@ -9738,11 +9746,11 @@ pub mod program {
       computed,
       optional,
       &java_optional_type_ann,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_key);
     delete_local_optional_ref!(env, java_optional_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9755,7 +9763,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let is_export = node.is_export;
     let is_type_only = node.is_type_only;
     let java_id = create_ident(env, map, &node.id);
@@ -9766,11 +9774,11 @@ pub mod program {
       is_type_only,
       &java_id,
       &java_module_ref,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_module_ref);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9783,7 +9791,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_arg = create_str(env, map, &node.arg);
     let java_optional_qualifier = node
       .qualifier
@@ -9798,12 +9806,12 @@ pub mod program {
       &java_arg,
       &java_optional_qualifier,
       &java_optional_type_args,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_arg);
     delete_local_optional_ref!(env, java_optional_qualifier);
     delete_local_optional_ref!(env, java_optional_type_args);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9817,7 +9825,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_params = java_array_list.construct(env, node.params.len());
     node.params.iter().for_each(|node| {
       let java_node = enum_create_ts_fn_param(env, map, node);
@@ -9833,11 +9841,11 @@ pub mod program {
       &java_optional_type_ann,
       readonly,
       is_static,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_params);
     delete_local_optional_ref!(env, java_optional_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9850,15 +9858,15 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let readonly = node.readonly;
     let java_obj_type = enum_create_ts_type(env, map, &node.obj_type);
     let java_index_type = enum_create_ts_type(env, map, &node.index_type);
     let return_value =
-      java_ast_factory.create_ts_indexed_access_type(env, readonly, &java_obj_type, &java_index_type, &java_range);
+      java_ast_factory.create_ts_indexed_access_type(env, readonly, &java_obj_type, &java_index_type, &java_span_ex);
     delete_local_ref!(env, java_obj_type);
     delete_local_ref!(env, java_index_type);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9867,11 +9875,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_type_param = create_ts_type_param(env, map, &node.type_param);
-    let return_value = java_ast_factory.create_ts_infer_type(env, &java_type_param, &java_range);
+    let return_value = java_ast_factory.create_ts_infer_type(env, &java_type_param, &java_span_ex);
     delete_local_ref!(env, java_type_param);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9884,13 +9892,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_expr = enum_create_expr(env, map, &node.expr);
     let java_type_args = create_ts_type_param_instantiation(env, map, &node.type_args);
-    let return_type = java_ast_factory.create_ts_instantiation(env, &java_expr, &java_type_args, &java_range);
+    let return_type = java_ast_factory.create_ts_instantiation(env, &java_expr, &java_type_args, &java_span_ex);
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_type_args);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -9904,16 +9912,16 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_body = java_array_list.construct(env, node.body.len());
     node.body.iter().for_each(|node| {
       let java_node = enum_create_ts_type_element(env, map, node);
       java_array_list.add(env, &java_body, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_type = java_ast_factory.create_ts_interface_body(env, &java_body, &java_range);
+    let return_type = java_ast_factory.create_ts_interface_body(env, &java_body, &java_span_ex);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -9927,7 +9935,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_id = create_ident(env, map, &node.id);
     let declare = node.declare;
     let java_optional_type_params = node
@@ -9948,13 +9956,13 @@ pub mod program {
       &java_optional_type_params,
       &java_extends,
       &java_body,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_id);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_extends);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -9968,16 +9976,16 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_types = java_array_list.construct(env, node.types.len());
     node.types.iter().for_each(|node| {
       let java_node = enum_create_ts_type(env, map, node);
       java_array_list.add(env, &java_types, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_ts_intersection_type(env, &java_types, &java_range);
+    let return_value = java_ast_factory.create_ts_intersection_type(env, &java_types, &java_span_ex);
     delete_local_ref!(env, java_types);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -9990,10 +9998,10 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let kind = node.kind.get_id();
-    let return_value = java_ast_factory.create_ts_keyword_type(env, kind, &java_range);
-    delete_local_ref!(env, java_range);
+    let return_value = java_ast_factory.create_ts_keyword_type(env, kind, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10002,11 +10010,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_lit = enum_create_ts_lit(env, map, &node.lit);
-    let return_value = java_ast_factory.create_ts_lit_type(env, &java_lit, &java_range);
+    let return_value = java_ast_factory.create_ts_lit_type(env, &java_lit, &java_span_ex);
     delete_local_ref!(env, java_lit);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10019,7 +10027,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let readonly = node.readonly.as_ref().map_or(-1, |node| node.get_id());
     let java_type_param = create_ts_type_param(env, map, &node.type_param);
     let java_optional_name_type = node.name_type.as_ref().map(|node| enum_create_ts_type(env, map, node));
@@ -10032,12 +10040,12 @@ pub mod program {
       &java_optional_name_type,
       optional,
       &java_optional_type_ann,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_type_param);
     delete_local_optional_ref!(env, java_optional_name_type);
     delete_local_optional_ref!(env, java_optional_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10051,7 +10059,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let readonly = node.readonly;
     let java_key = enum_create_expr(env, map, &node.key);
     let computed = node.computed;
@@ -10076,13 +10084,13 @@ pub mod program {
       &java_params,
       &java_optional_type_ann,
       &java_optional_type_params,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_params);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_type_params);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10096,16 +10104,16 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_body = java_array_list.construct(env, node.body.len());
     node.body.iter().for_each(|node| {
       let java_node = enum_create_module_item(env, map, node);
       java_array_list.add(env, &java_body, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_type = java_ast_factory.create_ts_module_block(env, &java_body, &java_range);
+    let return_type = java_ast_factory.create_ts_module_block(env, &java_body, &java_span_ex);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -10118,7 +10126,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let declare = node.declare;
     let global = node.global;
     let java_id = enum_create_ts_module_name(env, map, &node.id);
@@ -10127,10 +10135,10 @@ pub mod program {
       .as_ref()
       .map(|node| enum_create_ts_namespace_body(env, map, node));
     let return_type =
-      java_ast_factory.create_ts_module_decl(env, declare, global, &java_id, &java_optional_body, &java_range);
+      java_ast_factory.create_ts_module_decl(env, declare, global, &java_id, &java_optional_body, &java_span_ex);
     delete_local_ref!(env, java_id);
     delete_local_optional_ref!(env, java_optional_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -10143,16 +10151,16 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let declare = node.declare;
     let global = node.global;
     let java_id = create_ident(env, map, &node.id);
     let java_body = enum_create_ts_namespace_body(env, map, &node.body);
     let return_type =
-      java_ast_factory.create_ts_namespace_decl(env, declare, global, &java_id, &java_body, &java_range);
+      java_ast_factory.create_ts_namespace_decl(env, declare, global, &java_id, &java_body, &java_span_ex);
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -10165,11 +10173,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_id = create_ident(env, map, &node.id);
-    let return_value = java_ast_factory.create_ts_namespace_export_decl(env, &java_id, &java_range);
+    let return_value = java_ast_factory.create_ts_namespace_export_decl(env, &java_id, &java_span_ex);
     delete_local_ref!(env, java_id);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10182,11 +10190,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
-    let return_value = java_ast_factory.create_ts_non_null_expr(env, &java_expr, &java_range);
+    let return_value = java_ast_factory.create_ts_non_null_expr(env, &java_expr, &java_span_ex);
     delete_local_ref!(env, java_expr);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10199,11 +10207,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-    let return_value = java_ast_factory.create_ts_optional_type(env, &java_type_ann, &java_range);
+    let return_value = java_ast_factory.create_ts_optional_type(env, &java_type_ann, &java_span_ex);
     delete_local_ref!(env, java_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10213,7 +10221,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_decorators = java_array_list.construct(env, node.decorators.len());
     node.decorators.iter().for_each(|node| {
       let java_node = create_decorator(env, map, node);
@@ -10231,11 +10239,11 @@ pub mod program {
       is_override,
       readonly,
       &java_param,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_decorators);
     delete_local_ref!(env, java_param);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -10248,11 +10256,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-    let return_value = java_ast_factory.create_ts_parenthesized_type(env, &java_type_ann, &java_range);
+    let return_value = java_ast_factory.create_ts_parenthesized_type(env, &java_type_ann, &java_span_ex);
     delete_local_ref!(env, java_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10266,7 +10274,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let readonly = node.readonly;
     let java_key = enum_create_expr(env, map, &node.key);
     let computed = node.computed;
@@ -10293,14 +10301,14 @@ pub mod program {
       &java_params,
       &java_optional_type_ann,
       &java_optional_type_params,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_key);
     delete_local_optional_ref!(env, java_optional_init);
     delete_local_ref!(env, java_params);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_type_params);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10313,13 +10321,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_left = enum_create_ts_entity_name(env, map, &node.left);
     let java_right = create_ident(env, map, &node.right);
-    let return_value = java_ast_factory.create_ts_qualified_name(env, &java_left, &java_right, &java_range);
+    let return_value = java_ast_factory.create_ts_qualified_name(env, &java_left, &java_right, &java_span_ex);
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10328,11 +10336,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-    let return_value = java_ast_factory.create_ts_rest_type(env, &java_type_ann, &java_range);
+    let return_value = java_ast_factory.create_ts_rest_type(env, &java_type_ann, &java_span_ex);
     delete_local_ref!(env, java_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10345,13 +10353,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
     let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-    let return_value = java_ast_factory.create_ts_satisfies_expr(env, &java_expr, &java_type_ann, &java_range);
+    let return_value = java_ast_factory.create_ts_satisfies_expr(env, &java_expr, &java_type_ann, &java_span_ex);
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10364,7 +10372,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let readonly = node.readonly;
     let java_key = enum_create_expr(env, map, &node.key);
     let computed = node.computed;
@@ -10377,11 +10385,11 @@ pub mod program {
       computed,
       optional,
       &java_param,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_param);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10390,9 +10398,9 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
-    let return_value = java_ast_factory.create_ts_this_type(env, &java_range);
-    delete_local_ref!(env, java_range);
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
+    let return_value = java_ast_factory.create_ts_this_type(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10405,13 +10413,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_optional_label = node.label.as_ref().map(|node| enum_create_pat(env, map, node));
     let java_type = enum_create_ts_type(env, map, &node.ty);
-    let return_value = java_ast_factory.create_ts_tuple_element(env, &java_optional_label, &java_type, &java_range);
+    let return_value = java_ast_factory.create_ts_tuple_element(env, &java_optional_label, &java_type, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_label);
     delete_local_ref!(env, java_type);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10421,16 +10429,16 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_elem_types = java_array_list.construct(env, node.elem_types.len());
     node.elem_types.iter().for_each(|node| {
       let java_node = create_ts_tuple_element(env, map, node);
       java_array_list.add(env, &java_elem_types, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_ts_tuple_type(env, &java_elem_types, &java_range);
+    let return_value = java_ast_factory.create_ts_tuple_type(env, &java_elem_types, &java_span_ex);
     delete_local_ref!(env, java_elem_types);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10444,7 +10452,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_types = java_array_list.construct(env, node.types.len());
     node.types.iter().for_each(|node| {
       let java_node = enum_create_ts_type(env, map, node);
@@ -10457,10 +10465,10 @@ pub mod program {
       java_array_list.add(env, &java_quasis, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_ts_tpl_lit_type(env, &java_types, &java_quasis, &java_range);
+    let return_value = java_ast_factory.create_ts_tpl_lit_type(env, &java_types, &java_quasis, &java_span_ex);
     delete_local_ref!(env, java_types);
     delete_local_ref!(env, java_quasis);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10473,7 +10481,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span()));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span()));
     let java_id = create_ident(env, map, &node.id);
     let declare = node.declare;
     let java_optional_type_params = node
@@ -10487,12 +10495,12 @@ pub mod program {
       declare,
       &java_optional_type_params,
       &java_type_ann,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_id);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_type
   }
 
@@ -10501,11 +10509,11 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-    let return_value = java_ast_factory.create_ts_type_ann(env, &java_type_ann, &java_range);
+    let return_value = java_ast_factory.create_ts_type_ann(env, &java_type_ann, &java_span_ex);
     delete_local_ref!(env, java_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10518,13 +10526,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr = enum_create_expr(env, map, &node.expr);
     let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-    let return_value = java_ast_factory.create_ts_type_assertion(env, &java_expr, &java_type_ann, &java_range);
+    let return_value = java_ast_factory.create_ts_type_assertion(env, &java_expr, &java_type_ann, &java_span_ex);
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10534,16 +10542,16 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_members = java_array_list.construct(env, node.members.len());
     node.members.iter().for_each(|node| {
       let java_node = enum_create_ts_type_element(env, map, node);
       java_array_list.add(env, &java_members, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_ts_type_lit(env, &java_members, &java_range);
+    let return_value = java_ast_factory.create_ts_type_lit(env, &java_members, &java_span_ex);
     delete_local_ref!(env, java_members);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10556,12 +10564,12 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let op = node.op.get_id();
     let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-    let return_value = java_ast_factory.create_ts_type_operator(env, op, &java_type_ann, &java_range);
+    let return_value = java_ast_factory.create_ts_type_operator(env, op, &java_type_ann, &java_span_ex);
     delete_local_ref!(env, java_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10570,7 +10578,7 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_name = create_ident(env, map, &node.name);
     let is_in = node.is_in;
     let is_out = node.is_out;
@@ -10585,12 +10593,12 @@ pub mod program {
       is_const,
       &java_optional_constraint,
       &java_optional_default,
-      &java_range,
+      &java_span_ex,
     );
     delete_local_ref!(env, java_name);
     delete_local_optional_ref!(env, java_optional_constraint);
     delete_local_optional_ref!(env, java_optional_default);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10604,16 +10612,16 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_params = java_array_list.construct(env, node.params.len());
     node.params.iter().for_each(|node| {
       let java_node = create_ts_type_param(env, map, node);
       java_array_list.add(env, &java_params, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_ts_type_param_decl(env, &java_params, &java_range);
+    let return_value = java_ast_factory.create_ts_type_param_decl(env, &java_params, &java_span_ex);
     delete_local_ref!(env, java_params);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10627,16 +10635,16 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_params = java_array_list.construct(env, node.params.len());
     node.params.iter().for_each(|node| {
       let java_node = enum_create_ts_type(env, map, node);
       java_array_list.add(env, &java_params, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_ts_type_param_instantiation(env, &java_params, &java_range);
+    let return_value = java_ast_factory.create_ts_type_param_instantiation(env, &java_params, &java_span_ex);
     delete_local_ref!(env, java_params);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10649,15 +10657,15 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let asserts = node.asserts;
     let java_param_name = enum_create_ts_this_type_or_ident(env, map, &node.param_name);
     let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
     let return_value =
-      java_ast_factory.create_ts_type_predicate(env, asserts, &java_param_name, &java_optional_type_ann, &java_range);
+      java_ast_factory.create_ts_type_predicate(env, asserts, &java_param_name, &java_optional_type_ann, &java_span_ex);
     delete_local_ref!(env, java_param_name);
     delete_local_optional_ref!(env, java_optional_type_ann);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10666,17 +10674,17 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_expr_name = enum_create_ts_type_query_expr(env, map, &node.expr_name);
     let java_optional_type_args = node
       .type_args
       .as_ref()
       .map(|node| create_ts_type_param_instantiation(env, map, node));
     let return_value =
-      java_ast_factory.create_ts_type_query(env, &java_expr_name, &java_optional_type_args, &java_range);
+      java_ast_factory.create_ts_type_query(env, &java_expr_name, &java_optional_type_args, &java_span_ex);
     delete_local_ref!(env, java_expr_name);
     delete_local_optional_ref!(env, java_optional_type_args);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10685,17 +10693,17 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_type_name = enum_create_ts_entity_name(env, map, &node.type_name);
     let java_optional_type_params = node
       .type_params
       .as_ref()
       .map(|node| create_ts_type_param_instantiation(env, map, node));
     let return_value =
-      java_ast_factory.create_ts_type_ref(env, &java_type_name, &java_optional_type_params, &java_range);
+      java_ast_factory.create_ts_type_ref(env, &java_type_name, &java_optional_type_params, &java_span_ex);
     delete_local_ref!(env, java_type_name);
     delete_local_optional_ref!(env, java_optional_type_params);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10705,16 +10713,16 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_types = java_array_list.construct(env, node.types.len());
     node.types.iter().for_each(|node| {
       let java_node = enum_create_ts_type(env, map, node);
       java_array_list.add(env, &java_types, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_ts_union_type(env, &java_types, &java_range);
+    let return_value = java_ast_factory.create_ts_union_type(env, &java_types, &java_span_ex);
     delete_local_ref!(env, java_types);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10723,12 +10731,12 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let op = node.op.get_id();
     let java_arg = enum_create_expr(env, map, &node.arg);
-    let return_value = java_ast_factory.create_unary_expr(env, op, &java_arg, &java_range);
+    let return_value = java_ast_factory.create_unary_expr(env, op, &java_arg, &java_span_ex);
     delete_local_ref!(env, java_arg);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10737,13 +10745,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let op = node.op.get_id();
     let prefix = node.prefix;
     let java_arg = enum_create_expr(env, map, &node.arg);
-    let return_value = java_ast_factory.create_update_expr(env, op, prefix, &java_arg, &java_range);
+    let return_value = java_ast_factory.create_update_expr(env, op, prefix, &java_arg, &java_span_ex);
     delete_local_ref!(env, java_arg);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10753,7 +10761,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let is_await = node.is_await;
     let java_decls = java_array_list.construct(env, node.decls.len());
     node.decls.iter().for_each(|node| {
@@ -10761,9 +10769,9 @@ pub mod program {
       java_array_list.add(env, &java_decls, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_using_decl(env, is_await, &java_decls, &java_range);
+    let return_value = java_ast_factory.create_using_decl(env, is_await, &java_decls, &java_span_ex);
     delete_local_ref!(env, java_decls);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10773,7 +10781,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_array_list = unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let declare = node.declare;
     let kind_id = node.kind.get_id();
     let java_decls = java_array_list.construct(env, node.decls.len());
@@ -10782,9 +10790,9 @@ pub mod program {
       java_array_list.add(env, &java_decls, &java_node);
       delete_local_ref!(env, java_node);
     });
-    let return_value = java_ast_factory.create_var_decl(env, kind_id, declare, &java_decls, &java_range);
+    let return_value = java_ast_factory.create_var_decl(env, kind_id, declare, &java_decls, &java_span_ex);
     delete_local_ref!(env, java_decls);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10797,15 +10805,15 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_name = enum_create_pat(env, map, &node.name);
     let java_optional_init: Option<JObject> = node.init.as_ref().map(|node| enum_create_expr(env, map, node.as_ref()));
     let definite = node.definite;
     let return_value =
-      java_ast_factory.create_var_declarator(env, &java_name, &java_optional_init, definite, &java_range);
+      java_ast_factory.create_var_declarator(env, &java_name, &java_optional_init, definite, &java_span_ex);
     delete_local_ref!(env, java_name);
     delete_local_optional_ref!(env, java_optional_init);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10814,13 +10822,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_test = enum_create_expr(env, map, &node.test);
     let java_body = enum_create_stmt(env, map, &node.body);
-    let return_value = java_ast_factory.create_while_stmt(env, &java_test, &java_body, &java_range);
+    let return_value = java_ast_factory.create_while_stmt(env, &java_test, &java_body, &java_span_ex);
     delete_local_ref!(env, java_test);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10829,13 +10837,13 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_obj = enum_create_expr(env, map, &node.obj);
     let java_body = enum_create_stmt(env, map, &node.body);
-    let return_value = java_ast_factory.create_with_stmt(env, &java_obj, &java_body, &java_range);
+    let return_value = java_ast_factory.create_with_stmt(env, &java_obj, &java_body, &java_span_ex);
     delete_local_ref!(env, java_obj);
     delete_local_ref!(env, java_body);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 
@@ -10844,12 +10852,12 @@ pub mod program {
     'local: 'a,
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_range = java_ast_factory.create_span(env, &map.get_range_by_span(&node.span));
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_optional_arg = node.arg.as_ref().map(|node| enum_create_expr(env, map, node));
     let java_delegate = node.delegate;
-    let return_value = java_ast_factory.create_yield_expr(env, &java_optional_arg, java_delegate, &java_range);
+    let return_value = java_ast_factory.create_yield_expr(env, &java_optional_arg, java_delegate, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_arg);
-    delete_local_ref!(env, java_range);
+    delete_local_ref!(env, java_span_ex);
     return_value
   }
 

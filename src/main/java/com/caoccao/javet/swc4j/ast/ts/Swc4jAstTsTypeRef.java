@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsEntityName;
@@ -25,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.Optional;
 
@@ -37,7 +37,7 @@ public class Swc4jAstTsTypeRef
     public Swc4jAstTsTypeRef(
             ISwc4jAstTsEntityName typeName,
             Swc4jAstTsTypeParamInstantiation typeParams,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.typeName = AssertionUtils.notNull(typeName, "ExprName");
         this.typeParams = Optional.ofNullable(typeParams);

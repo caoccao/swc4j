@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
@@ -29,6 +28,7 @@ import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +49,7 @@ public class Swc4jAstConstructor
             Swc4jAstBlockStmt body,
             Swc4jAstAccessibility accessibility,
             boolean optional,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.accessibility = Optional.ofNullable(accessibility);
         this.body = Optional.ofNullable(body);

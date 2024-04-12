@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -26,6 +25,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.Optional;
 
@@ -34,12 +34,12 @@ public class Swc4jAstExprOrSpread
         extends Swc4jAst {
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr expr;
-    protected final Optional<Swc4jAstSpan> spread;
+    protected final Optional<Swc4jSpan> spread;
 
     public Swc4jAstExprOrSpread(
-            Swc4jAstSpan spread,
+            Swc4jSpan spread,
             ISwc4jAstExpr expr,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.spread = Optional.ofNullable(spread);
         this.expr = AssertionUtils.notNull(expr, "Expr");
@@ -51,7 +51,7 @@ public class Swc4jAstExprOrSpread
         return expr;
     }
 
-    public Optional<Swc4jAstSpan> getSpread() {
+    public Optional<Swc4jSpan> getSpread() {
         return spread;
     }
 

@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
@@ -29,6 +28,7 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +48,7 @@ public class Swc4jAstTsInterfaceDecl
             Swc4jAstTsTypeParamDecl typeParams,
             List<Swc4jAstTsExprWithTypeArgs> _extends,
             Swc4jAstTsInterfaceBody body,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this._extends = SimpleList.immutableCopyOf(AssertionUtils.notNull(_extends, "Extends"));
         this.body = AssertionUtils.notNull(body, "Body");

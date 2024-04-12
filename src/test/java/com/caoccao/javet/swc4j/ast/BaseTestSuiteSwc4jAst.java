@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.BaseTestSuite;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
@@ -96,7 +97,7 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
                     break;
             }
             if (text != null) {
-                Swc4jAstSpan span = node.getSpan();
+                Swc4jSpan span = node.getSpan();
                 String expectedText = code.substring(span.getStart(), span.getEnd());
                 String errorMessage = "Text mismatches at " + span;
                 assertEquals(expectedText, text, errorMessage);

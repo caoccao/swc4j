@@ -16,8 +16,8 @@
 
 package com.caoccao.javet.swc4j.tokens;
 
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.utils.JsonUtils;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 /**
  * The type Base swc4j token text value.
@@ -47,7 +47,7 @@ public class Swc4jTokenTextValue<T> extends Swc4jTokenText {
             Swc4jTokenType type,
             String text,
             T value,
-            Swc4jAstSpan span,
+            Swc4jSpan span,
             boolean lineBreakAhead) {
         super(type, text, span, lineBreakAhead);
         this.value = value;

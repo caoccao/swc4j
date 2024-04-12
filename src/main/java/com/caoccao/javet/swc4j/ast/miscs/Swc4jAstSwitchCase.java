@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.miscs;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -25,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +37,7 @@ public class Swc4jAstSwitchCase
     public Swc4jAstSwitchCase(
             ISwc4jAstExpr test,
             List<ISwc4jAstStmt> cons,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.test = Optional.ofNullable(test);
         this.cons = SimpleList.immutableCopyOf(AssertionUtils.notNull(cons, "Cons"));

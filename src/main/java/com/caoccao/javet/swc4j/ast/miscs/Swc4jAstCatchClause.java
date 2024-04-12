@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.miscs;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
@@ -25,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.Optional;
 
@@ -36,7 +36,7 @@ public class Swc4jAstCatchClause
     public Swc4jAstCatchClause(
             ISwc4jAstPat param,
             Swc4jAstBlockStmt body,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.param = Optional.ofNullable(param);
         this.body = AssertionUtils.notNull(body, "Body");

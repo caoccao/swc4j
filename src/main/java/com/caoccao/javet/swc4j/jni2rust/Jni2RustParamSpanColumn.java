@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024. caoccao.com Sam Cao
+ * Copyright (c) 2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast;
+package com.caoccao.javet.swc4j.jni2rust;
 
-public class Swc4jAstSpan {
-    protected final int end;
-    protected final int start;
+import java.lang.annotation.*;
 
-    public Swc4jAstSpan(int start, int end) {
-        this.end = end;
-        this.start = start;
-    }
-
-    public int getEnd() {
-        return end;
-    }
-
-    public int getStart() {
-        return start;
-    }
-
-    @Override
-    public String toString() {
-        return "{ start: " + start + ", end: " + end + "}";
-    }
+@Documented
+@Inherited
+@Target({ElementType.ANNOTATION_TYPE, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+@Jni2RustParam(
+        rustType = "span_ex: &SpanEx",
+        preCalls = "    let column = int_to_jvalue!(span_ex.column);")
+public @interface Jni2RustParamSpanColumn {
 }

@@ -48,77 +48,77 @@ System.out.println(output.getProgram().toDebugString());
 /*********************************************
          The ast is as follows.
 *********************************************/
-Module (0,247)
-  body[0] ImportDecl (0,40)
-    specifiers[0] ImportNamedSpecifier (9,18)
+Module (0,247,1,1)
+  body[0] ImportDecl (0,40,1,1)
+    specifiers[0] ImportNamedSpecifier (9,18,1,10)
       imported? = null
-      local Ident (9,18)
+      local Ident (9,18,1,10)
         optional = false
         sym = Validator
       typeOnly = false
-    src Str (26,39)
+    src Str (26,39,1,27)
       raw? = './Validator'
       value = ./Validator
     typeOnly = false
     with? = null
-  body[1] ClassDecl (42,219)
-    clazz Class (42,219)
+  body[1] ClassDecl (42,219,3,1)
+    clazz Class (42,219,3,1)
       _abstract = false
-      _implements[0] TsExprWithTypeArgs (74,83)
-        expr Ident (74,83)
+      _implements[0] TsExprWithTypeArgs (74,83,3,33)
+        expr Ident (74,83,3,33)
           optional = false
           sym = Validator
         typeArgs? = null
-      body[0] ClassMethod (90,217)
+      body[0] ClassMethod (90,217,4,5)
         _abstract = false
         _override = false
         _static = false
         accessibility? = null
-        function Function (90,217)
+        function Function (90,217,4,5)
           _async = false
-          body BlockStmt (118,217)
-            stmts[0] VarDecl (128,176)
+          body BlockStmt (118,217,4,33)
+            stmts[0] VarDecl (128,176,5,9)
               declare = false
-              decls[0] VarDeclarator (134,175)
+              decls[0] VarDeclarator (134,175,5,15)
                 definite = false
-                init Regex (147,175)
+                init Regex (147,175,5,28)
                   exp = ^[^\s@]+@[^\s@]+\.[^\s@]+$
                   flags = 
-                name BindingIdent (134,144)
-                  id Ident (134,144)
+                name BindingIdent (134,144,5,15)
+                  id Ident (134,144,5,15)
                     optional = false
                     sym = emailRegex
                   typeAnn? = null
               kind = Const
-            stmts[1] ReturnStmt (185,211)
-              arg CallExpr (192,210)
-                args[0] ExprOrSpread (208,209)
-                  expr Ident (208,209)
+            stmts[1] ReturnStmt (185,211,6,9)
+              arg CallExpr (192,210,6,16)
+                args[0] ExprOrSpread (208,209,6,32)
+                  expr Ident (208,209,6,32)
                     optional = false
                     sym = s
                   spread? = null
-                callee MemberExpr (192,207)
-                  obj Ident (192,202)
+                callee MemberExpr (192,207,6,16)
+                  obj Ident (192,202,6,16)
                     optional = false
                     sym = emailRegex
-                  prop Ident (203,207)
+                  prop Ident (203,207,6,27)
                     optional = false
                     sym = test
                 typeArgs? = null
           generator = false
-          params[0] Param (98,107)
-            pat BindingIdent (98,107)
-              id Ident (98,107)
+          params[0] Param (98,107,4,13)
+            pat BindingIdent (98,107,4,13)
+              id Ident (98,107,4,13)
                 optional = false
                 sym = s
-              typeAnn TsTypeAnn (99,107)
-                typeAnn TsKeywordType (101,107)
+              typeAnn TsTypeAnn (99,107,4,14)
+                typeAnn TsKeywordType (101,107,4,16)
                   kind = TsStringKeyword
-          returnType TsTypeAnn (108,117)
-            typeAnn TsKeywordType (110,117)
+          returnType TsTypeAnn (108,117,4,23)
+            typeAnn TsKeywordType (110,117,4,25)
               kind = TsBooleanKeyword
           typeParams? = null
-        key Ident (90,97)
+        key Ident (90,97,4,5)
           optional = false
           sym = isValid
         kind = Method
@@ -127,13 +127,13 @@ Module (0,247)
       superTypeParams? = null
       typeParams? = null
     declare = false
-    ident Ident (48,62)
+    ident Ident (48,62,3,7)
       optional = false
       sym = EmailValidator
-  body[2] NamedExport (221,247)
-    specifiers[0] ExportNamedSpecifier (230,244)
+  body[2] NamedExport (221,247,10,1)
+    specifiers[0] ExportNamedSpecifier (230,244,10,10)
       exported? = null
-      orig Ident (230,244)
+      orig Ident (230,244,10,10)
         optional = false
         sym = EmailValidator
       typeOnly = false

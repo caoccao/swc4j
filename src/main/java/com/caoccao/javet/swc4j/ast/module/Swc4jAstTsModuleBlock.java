@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.module;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
@@ -25,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsNamespaceBody;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class Swc4jAstTsModuleBlock
 
     public Swc4jAstTsModuleBlock(
             List<ISwc4jAstModuleItem> body,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.body = SimpleList.immutableCopyOf(AssertionUtils.notNull(body, "Body"));
         childNodes = SimpleList.immutableCopyOf(body);

@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -26,6 +25,7 @@ import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 public class Swc4jAstExprStmt
         extends Swc4jAst
@@ -35,7 +35,7 @@ public class Swc4jAstExprStmt
 
     public Swc4jAstExprStmt(
             ISwc4jAstExpr expr,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.expr = AssertionUtils.notNull(expr, "Expr");
         childNodes = SimpleList.immutableOf(expr);

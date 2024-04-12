@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxElementChild;
@@ -25,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 @Jni2RustClass(name = "JSXText")
 public class Swc4jAstJsxText
@@ -36,7 +36,7 @@ public class Swc4jAstJsxText
     public Swc4jAstJsxText(
             String value,
             String raw,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.value = AssertionUtils.notNull(value, "Value");
         this.raw = AssertionUtils.notNull(raw, "Raw");

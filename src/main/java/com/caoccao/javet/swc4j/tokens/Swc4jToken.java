@@ -16,9 +16,9 @@
 
 package com.caoccao.javet.swc4j.tokens;
 
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.JsonUtils;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 /**
  * The type swc4j token.
@@ -38,7 +38,7 @@ public class Swc4jToken {
      *
      * @since 0.2.0
      */
-    protected final Swc4jAstSpan span;
+    protected final Swc4jSpan span;
     /**
      * The token Type.
      *
@@ -56,7 +56,7 @@ public class Swc4jToken {
      */
     public Swc4jToken(
             Swc4jTokenType type,
-            Swc4jAstSpan span,
+            Swc4jSpan span,
             boolean lineBreakAhead) {
         this.lineBreakAhead = lineBreakAhead;
         this.span = span;
@@ -69,7 +69,7 @@ public class Swc4jToken {
      * @return the span
      * @since 0.2.0
      */
-    public Swc4jAstSpan getSpan() {
+    public Swc4jSpan getSpan() {
         return span;
     }
 
@@ -107,8 +107,7 @@ public class Swc4jToken {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{ \"lineBreakAhead\": ").append(lineBreakAhead);
-        sb.append(", \"start\": ").append(span.getStart());
-        sb.append(", \"end\": ").append(span.getEnd());
+        sb.append(", \"span\": ").append(span);
         sb.append(", \"type\": \"").append(type.name()).append("\"");
         sb.append(", \"text\": \"").append(JsonUtils.escape(getText())).append("\"");
         sb.append(" }");

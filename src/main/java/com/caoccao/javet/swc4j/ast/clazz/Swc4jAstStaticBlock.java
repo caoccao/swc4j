@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.clazz;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
@@ -25,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 public class Swc4jAstStaticBlock
         extends Swc4jAst
@@ -33,7 +33,7 @@ public class Swc4jAstStaticBlock
 
     public Swc4jAstStaticBlock(
             Swc4jAstBlockStmt body,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.body = AssertionUtils.notNull(body, "Body");
         childNodes = SimpleList.immutableOf(body);

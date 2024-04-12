@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.pat;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
@@ -28,6 +27,7 @@ import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.Optional;
 
@@ -36,14 +36,14 @@ public class Swc4jAstRestPat
         implements ISwc4jAstPat, ISwc4jAstObjectPatProp, ISwc4jAstTsFnParam {
     @Jni2RustField(box = true)
     protected final ISwc4jAstPat arg;
-    protected final Swc4jAstSpan dot3Token;
+    protected final Swc4jSpan dot3Token;
     protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     public Swc4jAstRestPat(
-            Swc4jAstSpan dot3Token,
+            Swc4jSpan dot3Token,
             ISwc4jAstPat arg,
             Swc4jAstTsTypeAnn typeAnn,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
         this.arg = AssertionUtils.notNull(arg, "Expr");
@@ -56,7 +56,7 @@ public class Swc4jAstRestPat
         return arg;
     }
 
-    public Swc4jAstSpan getDot3Token() {
+    public Swc4jSpan getDot3Token() {
         return dot3Token;
     }
 

@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
@@ -25,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsTypeElement;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +40,7 @@ public class Swc4jAstTsConstructSignatureDecl
             List<ISwc4jAstTsFnParam> params,
             Swc4jAstTsTypeAnn typeAnn,
             Swc4jAstTsTypeParamDecl typeParams,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.params = SimpleList.immutableCopyOf(AssertionUtils.notNull(params, "Params"));
         this.typeAnn = Optional.ofNullable(typeAnn);

@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
@@ -25,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 public class Swc4jAstTsLitType
         extends Swc4jAst
@@ -33,7 +33,7 @@ public class Swc4jAstTsLitType
 
     public Swc4jAstTsLitType(
             ISwc4jAstTsLit lit,
-            Swc4jAstSpan span) {
+            Swc4jSpan span) {
         super(span);
         this.lit = AssertionUtils.notNull(lit, "Lit");
         childNodes = SimpleList.immutableOf(lit);
