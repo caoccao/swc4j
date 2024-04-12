@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstSimpleAssignTarget;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -32,7 +33,7 @@ import java.util.Optional;
 
 public class Swc4jAstArrayPat
         extends Swc4jAst
-        implements ISwc4jAstPat, ISwc4jAstTsFnParam {
+        implements ISwc4jAstPat, ISwc4jAstTsFnParam, ISwc4jAstSimpleAssignTarget {
     protected final List<ISwc4jAstPat> elems;
     protected final boolean optional;
     protected final Optional<Swc4jAstTsTypeAnn> typeAnn;

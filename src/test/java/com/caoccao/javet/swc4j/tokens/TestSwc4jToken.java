@@ -188,22 +188,22 @@ public class TestSwc4jToken extends BaseTestSuite {
         parseAndAssert("1 && 2", options, Swc4jTokenType.LogicalAnd, "&&", 2, 4, 1, 3);
         parseAndAssert("1 ?? 2", options, Swc4jTokenType.NullishCoalescing, "??", 2, 4, 1, 3);
         // Operator - Assign
-        parseAndAssert("1 = 2", options, Swc4jTokenType.Assign, "=", 2, 3, 1, 3);
-        parseAndAssert("1 += 2", options, Swc4jTokenType.AddAssign, "+=", 2, 4, 1, 3);
-        parseAndAssert("1 -= 2", options, Swc4jTokenType.SubAssign, "-=", 2, 4, 1, 3);
-        parseAndAssert("1 *= 2", options, Swc4jTokenType.MulAssign, "*=", 2, 4, 1, 3);
-        parseAndAssert("1 /= 2", options, Swc4jTokenType.DivAssign, "/=", 2, 4, 1, 3);
-        parseAndAssert("1 %= 2", options, Swc4jTokenType.ModAssign, "%=", 2, 4, 1, 3);
-        parseAndAssert("1 <<= 2", options, Swc4jTokenType.LShiftAssign, "<<=", 2, 5, 1, 3);
-        parseAndAssert("1 >>= 2", options, Swc4jTokenType.RShiftAssign, ">>=", 2, 5, 1, 3);
-        parseAndAssert("1 >>>= 2", options, Swc4jTokenType.ZeroFillRShiftAssign, ">>>=", 2, 6, 1, 3);
-        parseAndAssert("1 |= 2", options, Swc4jTokenType.BitOrAssign, "|=", 2, 4, 1, 3);
-        parseAndAssert("1 ^= 2", options, Swc4jTokenType.BitXorAssign, "^=", 2, 4, 1, 3);
-        parseAndAssert("1 &= 2", options, Swc4jTokenType.BitAndAssign, "&=", 2, 4, 1, 3);
-        parseAndAssert("1 **= 2", options, Swc4jTokenType.ExpAssign, "**=", 2, 5, 1, 3);
-        parseAndAssert("1 &&= 2", options, Swc4jTokenType.AndAssign, "&&=", 2, 5, 1, 3);
-        parseAndAssert("1 ||= 2", options, Swc4jTokenType.OrAssign, "||=", 2, 5, 1, 3);
-        parseAndAssert("1 ??= 2", options, Swc4jTokenType.NullishAssign, "??=", 2, 5, 1, 3);
+        parseAndAssert("a = 2", options, Swc4jTokenType.Assign, "=", 2, 3, 1, 3);
+        parseAndAssert("a += 2", options, Swc4jTokenType.AddAssign, "+=", 2, 4, 1, 3);
+        parseAndAssert("a -= 2", options, Swc4jTokenType.SubAssign, "-=", 2, 4, 1, 3);
+        parseAndAssert("a *= 2", options, Swc4jTokenType.MulAssign, "*=", 2, 4, 1, 3);
+        parseAndAssert("a /= 2", options, Swc4jTokenType.DivAssign, "/=", 2, 4, 1, 3);
+        parseAndAssert("a %= 2", options, Swc4jTokenType.ModAssign, "%=", 2, 4, 1, 3);
+        parseAndAssert("a <<= 2", options, Swc4jTokenType.LShiftAssign, "<<=", 2, 5, 1, 3);
+        parseAndAssert("a >>= 2", options, Swc4jTokenType.RShiftAssign, ">>=", 2, 5, 1, 3);
+        parseAndAssert("a >>>= 2", options, Swc4jTokenType.ZeroFillRShiftAssign, ">>>=", 2, 6, 1, 3);
+        parseAndAssert("a |= 2", options, Swc4jTokenType.BitOrAssign, "|=", 2, 4, 1, 3);
+        parseAndAssert("a ^= 2", options, Swc4jTokenType.BitXorAssign, "^=", 2, 4, 1, 3);
+        parseAndAssert("a &= 2", options, Swc4jTokenType.BitAndAssign, "&=", 2, 4, 1, 3);
+        parseAndAssert("a **= 2", options, Swc4jTokenType.ExpAssign, "**=", 2, 5, 1, 3);
+        parseAndAssert("a &&= 2", options, Swc4jTokenType.AndAssign, "&&=", 2, 5, 1, 3);
+        parseAndAssert("a ||= 2", options, Swc4jTokenType.OrAssign, "||=", 2, 5, 1, 3);
+        parseAndAssert("a ??= 2", options, Swc4jTokenType.NullishAssign, "??=", 2, 5, 1, 3);
         // TextValue
         assertTokenValue("/usr/bin/env -S -i node", parseAndAssert("#!/usr/bin/env -S -i node", options, Swc4jTokenType.Shebang, "#!/usr/bin/env -S -i node", 0, 25, 0, 1));
         assertTokenValue("x", parseAndAssert("a = 'x';", options, Swc4jTokenType.Str, "'x'", 4, 7, 2, 4));

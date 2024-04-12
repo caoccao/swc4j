@@ -18,13 +18,14 @@ package com.caoccao.javet.swc4j;
 
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
-import com.caoccao.javet.swc4j.tokens.Swc4jTokenType;
+import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import com.caoccao.javet.swc4j.tokens.Swc4jToken;
+import com.caoccao.javet.swc4j.tokens.Swc4jTokenType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -89,7 +90,7 @@ public class TestSwc4j extends BaseTestSuite {
         String expectedCode = "import React from 'react';\n" +
                 "import './App.css';\n" +
                 "function App() {\n" +
-                "  return /*#__PURE__*/ CustomJsxFactory.createElement(\"h1\", null, \" Hello World! \");\n" +
+                "  return CustomJsxFactory.createElement(\"h1\", null, \" Hello World! \");\n" +
                 "}\n" +
                 "export default App;\n";
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
@@ -105,7 +106,7 @@ public class TestSwc4j extends BaseTestSuite {
                 output.getCode().substring(
                         expectedCode.length(),
                         expectedCode.length() + expectedSourceMapPrefix.length()));
-        assertNull(output.getSourceMap());
+        assertFalse(output.getSourceMap().isPresent());
     }
 
     @Test
@@ -121,7 +122,7 @@ public class TestSwc4j extends BaseTestSuite {
         String expectedCode = "import React from 'react';\n" +
                 "import './App.css';\n" +
                 "function App() {\n" +
-                "  return /*#__PURE__*/ React.createElement(\"h1\", null, \" Hello World! \");\n" +
+                "  return React.createElement(\"h1\", null, \" Hello World! \");\n" +
                 "}\n" +
                 "export default App;\n";
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
@@ -138,7 +139,7 @@ public class TestSwc4j extends BaseTestSuite {
                 output.getCode().substring(
                         expectedCode.length(),
                         expectedCode.length() + expectedSourceMapPrefix.length()));
-        assertNull(output.getSourceMap());
+        assertFalse(output.getSourceMap().isPresent());
     }
 
     @Test
@@ -181,7 +182,7 @@ public class TestSwc4j extends BaseTestSuite {
                 output.getCode().substring(
                         expectedCode.length(),
                         expectedCode.length() + expectedSourceMapPrefix.length()));
-        assertNull(output.getSourceMap());
+        assertFalse(output.getSourceMap().isPresent());
     }
 
     @ParameterizedTest
@@ -198,14 +199,14 @@ public class TestSwc4j extends BaseTestSuite {
                 .setInlineSourceMap(false)
                 .setSpecifier(specifier)
                 .setMediaType(Swc4jMediaType.TypeScript)
-                .setSourceMap(true);
+                .setSourceMap(Swc4jSourceMapOption.Separate);
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
         assertNotNull(output);
         assertEquals(expectedCode, output.getCode());
         assertEquals(parseMode, output.getParseMode());
         assertNotNull(output.getSourceMap());
         Stream.of(expectedProperties).forEach(p -> assertTrue(
-                output.getSourceMap().contains("\"" + p + "\""),
+                output.getSourceMap().get().contains("\"" + p + "\""),
                 p + " should exist in the source map"));
     }
 

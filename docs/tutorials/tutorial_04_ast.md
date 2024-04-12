@@ -50,6 +50,7 @@ System.out.println(output.getProgram().toDebugString());
 *********************************************/
 Module (0,247,1,1)
   body[0] ImportDecl (0,40,1,1)
+    phase = Evaluation
     specifiers[0] ImportNamedSpecifier (9,18,1,10)
       imported? = null
       local Ident (9,18,1,10)

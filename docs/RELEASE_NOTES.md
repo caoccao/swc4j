@@ -2,6 +2,7 @@
 
 ## 0.3.0
 
+* Upgraded deno_ast to v0.36.1
 * Fixed null pointer exception in AstNewExpr
 
 ## 0.2.0

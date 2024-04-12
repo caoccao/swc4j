@@ -47,6 +47,12 @@ impl GetDefault<AssignOp> for AssignOp {
   }
 }
 
+impl GetDefault<AssignTarget> for AssignTarget {
+  fn get_default() -> AssignTarget {
+    AssignTarget::dummy()
+  }
+}
+
 impl GetDefault<BinaryOp> for BinaryOp {
   fn get_default() -> BinaryOp {
     BinaryOp::parse_by_id(0)
@@ -98,6 +104,12 @@ impl GetDefault<Expr> for Expr {
 impl GetDefault<ForHead> for ForHead {
   fn get_default() -> ForHead {
     ForHead::dummy()
+  }
+}
+
+impl GetDefault<ImportPhase> for ImportPhase {
+  fn get_default() -> ImportPhase {
+    ImportPhase::parse_by_id(0)
   }
 }
 
@@ -221,12 +233,6 @@ impl GetDefault<Pat> for Pat {
   }
 }
 
-impl GetDefault<PatOrExpr> for PatOrExpr {
-  fn get_default() -> PatOrExpr {
-    PatOrExpr::dummy()
-  }
-}
-
 impl GetDefault<Program> for Program {
   fn get_default() -> Program {
     Program::Script(Script::dummy())
@@ -248,6 +254,12 @@ impl GetDefault<PropName> for PropName {
 impl GetDefault<PropOrSpread> for PropOrSpread {
   fn get_default() -> PropOrSpread {
     PropOrSpread::dummy()
+  }
+}
+
+impl GetDefault<SimpleAssignTarget> for SimpleAssignTarget {
+  fn get_default() -> SimpleAssignTarget {
+    SimpleAssignTarget::dummy()
   }
 }
 
@@ -427,7 +439,7 @@ impl GetDefault<AssignExpr> for AssignExpr {
   fn get_default() -> AssignExpr {
     AssignExpr {
       span: DUMMY_SP,
-      left: PatOrExpr::get_default(),
+      left: AssignTarget::get_default(),
       op: AssignOp::get_default(),
       right: Box::new(Expr::get_default()),
     }
@@ -448,7 +460,7 @@ impl GetDefault<AssignPatProp> for AssignPatProp {
   fn get_default() -> AssignPatProp {
     AssignPatProp {
       span: DUMMY_SP,
-      key: Ident::get_default(),
+      key: BindingIdent::get_default(),
       value: Default::default(),
     }
   }
@@ -467,9 +479,11 @@ impl GetDefault<AutoAccessor> for AutoAccessor {
   fn get_default() -> AutoAccessor {
     AutoAccessor {
       span: DUMMY_SP,
+      is_override: Default::default(),
       is_static: Default::default(),
       accessibility: Default::default(),
       decorators: Default::default(),
+      definite: Default::default(),
       key: Key::get_default(),
       type_ann: Default::default(),
       value: Default::default(),
@@ -900,6 +914,7 @@ impl GetDefault<Import> for Import {
   fn get_default() -> Import {
     Import {
       span: DUMMY_SP,
+      phase: ImportPhase::get_default(),
     }
   }
 }
@@ -908,6 +923,7 @@ impl GetDefault<ImportDecl> for ImportDecl {
   fn get_default() -> ImportDecl {
     ImportDecl {
       span: DUMMY_SP,
+      phase: ImportPhase::get_default(),
       specifiers: Default::default(),
       src: Box::new(Str::get_default()),
       type_only: Default::default(),
@@ -1342,6 +1358,7 @@ impl GetDefault<SetterProp> for SetterProp {
       body: Default::default(),
       key: PropName::get_default(),
       param: Box::new(Pat::get_default()),
+      this_param: Default::default(),
     }
   }
 }

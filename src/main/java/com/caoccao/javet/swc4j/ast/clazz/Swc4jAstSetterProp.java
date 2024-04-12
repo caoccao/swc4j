@@ -38,9 +38,11 @@ public class Swc4jAstSetterProp
     protected final ISwc4jAstPropName key;
     @Jni2RustField(box = true)
     protected final ISwc4jAstPat param;
+    protected final Optional<ISwc4jAstPat> thisParam;
 
     public Swc4jAstSetterProp(
             ISwc4jAstPropName key,
+            ISwc4jAstPat thisParam,
             ISwc4jAstPat param,
             Swc4jAstBlockStmt body,
             Swc4jSpan span) {
@@ -48,7 +50,8 @@ public class Swc4jAstSetterProp
         this.body = Optional.ofNullable(body);
         this.key = AssertionUtils.notNull(key, "Key");
         this.param = AssertionUtils.notNull(param, "Param");
-        childNodes = SimpleList.immutableOf(key, param, body);
+        this.thisParam = Optional.ofNullable(thisParam);
+        childNodes = SimpleList.immutableOf(key, thisParam, param, body);
         updateParent();
     }
 
@@ -62,6 +65,10 @@ public class Swc4jAstSetterProp
 
     public ISwc4jAstPat getParam() {
         return param;
+    }
+
+    public Optional<ISwc4jAstPat> getThisParam() {
+        return thisParam;
     }
 
     @Override

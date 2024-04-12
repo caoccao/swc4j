@@ -16,15 +16,14 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.ast.pat.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TestISwc4jAstPatOrExpr {
+public class TestISwc4JAstAssignTarget {
     @Test
     public void testAssignable() {
-        assertTrue(ISwc4jAstPatOrExpr.class.isAssignableFrom(ISwc4jAstExpr.class));
-        assertTrue(ISwc4jAstPatOrExpr.class.isAssignableFrom(ISwc4jAstPat.class));
+        assertTrue(ISwc4jAstAssignTarget.class.isAssignableFrom(ISwc4jAstSimpleAssignTarget.class));
+        assertTrue(ISwc4jAstAssignTarget.class.isAssignableFrom(ISwc4jAstPat.class));
     }
 }

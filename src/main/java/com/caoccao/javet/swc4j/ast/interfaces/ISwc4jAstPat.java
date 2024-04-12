@@ -16,5 +16,5 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-public interface ISwc4jAstPat extends ISwc4jAstPatOrExpr, ISwc4jAstForHead {
+public interface ISwc4jAstPat extends ISwc4jAstAssignTarget, ISwc4jAstForHead {
 }

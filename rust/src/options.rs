@@ -211,6 +211,7 @@ struct JavaSwc4jTranspileOptions {
   method_get_jsx_import_source: JMethodID,
   method_get_media_type: JMethodID,
   method_get_parse_mode: JMethodID,
+  method_get_source_map: JMethodID,
   method_get_specifier: JMethodID,
   method_is_capture_ast: JMethodID,
   method_is_capture_tokens: JMethodID,
@@ -219,10 +220,12 @@ struct JavaSwc4jTranspileOptions {
   method_is_inline_sources: JMethodID,
   method_is_jsx_automatic: JMethodID,
   method_is_jsx_development: JMethodID,
+  method_is_keep_comments: JMethodID,
   method_is_precompile_jsx: JMethodID,
   method_is_scope_analysis: JMethodID,
-  method_is_source_map: JMethodID,
   method_is_transform_jsx: JMethodID,
+  method_is_use_decorators_proposal: JMethodID,
+  method_is_use_ts_decorators: JMethodID,
   method_is_var_decl_imports: JMethodID,
 }
 unsafe impl Send for JavaSwc4jTranspileOptions {}
@@ -278,6 +281,13 @@ impl JavaSwc4jTranspileOptions {
         "()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getParseMode");
+    let method_get_source_map = env
+      .get_method_id(
+        &class,
+        "getSourceMap",
+        "()Lcom/caoccao/javet/swc4j/enums/Swc4jSourceMapOption;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getSourceMap");
     let method_get_specifier = env
       .get_method_id(
         &class,
@@ -334,6 +344,13 @@ impl JavaSwc4jTranspileOptions {
         "()Z",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isJsxDevelopment");
+    let method_is_keep_comments = env
+      .get_method_id(
+        &class,
+        "isKeepComments",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.isKeepComments");
     let method_is_precompile_jsx = env
       .get_method_id(
         &class,
@@ -348,13 +365,6 @@ impl JavaSwc4jTranspileOptions {
         "()Z",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isScopeAnalysis");
-    let method_is_source_map = env
-      .get_method_id(
-        &class,
-        "isSourceMap",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jTranspileOptions.isSourceMap");
     let method_is_transform_jsx = env
       .get_method_id(
         &class,
@@ -362,6 +372,20 @@ impl JavaSwc4jTranspileOptions {
         "()Z",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isTransformJsx");
+    let method_is_use_decorators_proposal = env
+      .get_method_id(
+        &class,
+        "isUseDecoratorsProposal",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.isUseDecoratorsProposal");
+    let method_is_use_ts_decorators = env
+      .get_method_id(
+        &class,
+        "isUseTsDecorators",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.isUseTsDecorators");
     let method_is_var_decl_imports = env
       .get_method_id(
         &class,
@@ -377,6 +401,7 @@ impl JavaSwc4jTranspileOptions {
       method_get_jsx_import_source,
       method_get_media_type,
       method_get_parse_mode,
+      method_get_source_map,
       method_get_specifier,
       method_is_capture_ast,
       method_is_capture_tokens,
@@ -385,10 +410,12 @@ impl JavaSwc4jTranspileOptions {
       method_is_inline_sources,
       method_is_jsx_automatic,
       method_is_jsx_development,
+      method_is_keep_comments,
       method_is_precompile_jsx,
       method_is_scope_analysis,
-      method_is_source_map,
       method_is_transform_jsx,
+      method_is_use_decorators_proposal,
+      method_is_use_ts_decorators,
       method_is_var_decl_imports,
     }
   }
@@ -494,6 +521,24 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_parse_mode,
         &[],
         "Swc4jParseMode get_parse_mode()"
+      );
+    return_value
+  }
+
+  pub fn get_source_map<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_source_map,
+        &[],
+        "Swc4jSourceMapOption get_source_map()"
       );
     return_value
   }
@@ -627,6 +672,22 @@ impl JavaSwc4jTranspileOptions {
     return_value
   }
 
+  pub fn is_keep_comments<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_keep_comments,
+        &[],
+        "boolean is_keep_comments()"
+      );
+    return_value
+  }
+
   pub fn is_precompile_jsx<'local>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -659,22 +720,6 @@ impl JavaSwc4jTranspileOptions {
     return_value
   }
 
-  pub fn is_source_map<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> bool
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_source_map,
-        &[],
-        "boolean is_source_map()"
-      );
-    return_value
-  }
-
   pub fn is_transform_jsx<'local>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -687,6 +732,38 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_transform_jsx,
         &[],
         "boolean is_transform_jsx()"
+      );
+    return_value
+  }
+
+  pub fn is_use_decorators_proposal<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_use_decorators_proposal,
+        &[],
+        "boolean is_use_decorators_proposal()"
+      );
+    return_value
+  }
+
+  pub fn is_use_ts_decorators<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_use_ts_decorators,
+        &[],
+        "boolean is_use_ts_decorators()"
       );
     return_value
   }
@@ -815,6 +892,8 @@ pub struct TranspileOptions {
   /// The string module specifier to implicitly import JSX factories from when
   /// transpiling JSX.
   pub jsx_import_source: Option<String>,
+  /// Whether to keep comments in the output. Defaults to `false`.
+  pub keep_comments: bool,
   /// Media type of the source text.
   pub media_type: MediaType,
   /// Should the code to be parsed as Module or Script,
@@ -825,13 +904,16 @@ pub struct TranspileOptions {
   pub precompile_jsx: bool,
   /// Whether to apply swc's scope analysis.
   pub scope_analysis: bool,
-  /// Should a corresponding .map file be created for the output. This should be
-  /// false if inline_source_map is true. Defaults to `false`.
-  pub source_map: bool,
+  /// How and if source maps should be generated.
+  pub source_map: SourceMapOption,
   /// Specifier of the source text.
   pub specifier: String,
   /// Should JSX be transformed. Defaults to `true`.
   pub transform_jsx: bool,
+  /// TC39 Decorators Proposal - https://github.com/tc39/proposal-decorators
+  pub use_decorators_proposal: bool,
+  /// TypeScript experimental decorators.
+  pub use_ts_decorators: bool,
   /// Should import declarations be transformed to variable declarations using
   /// a dynamic import. This is useful for import & export declaration support
   /// in script contexts such as the Deno REPL.  Defaults to `false`.
@@ -852,14 +934,17 @@ impl Default for TranspileOptions {
       jsx_factory: "React.createElement".into(),
       jsx_fragment_factory: "React.Fragment".into(),
       jsx_import_source: None,
+      keep_comments: false,
       media_type: MediaType::TypeScript,
       parse_mode: ParseMode::Module,
       precompile_jsx: false,
       scope_analysis: false,
-      source_map: false,
+      source_map: SourceMapOption::Inline,
       specifier: "file:///main.js".to_owned(),
       transform_jsx: true,
       var_decl_imports: false,
+      use_decorators_proposal: false,
+      use_ts_decorators: false,
     }
   }
 }
@@ -871,33 +956,39 @@ impl FromJniType for TranspileOptions {
     let java_imports_not_used_as_values = unsafe { JAVA_IMPORTS_NOT_USED_AS_VALUES.as_ref().unwrap() };
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
-    let java_transpiler_options = unsafe { JAVA_TRANSPILE_OPTIONS.as_ref().unwrap() };
-    let capture_ast = java_transpiler_options.is_capture_ast(env, obj);
-    let capture_tokens = java_transpiler_options.is_capture_tokens(env, obj);
-    let emit_metadata = java_transpiler_options.is_emit_metadata(env, obj);
-    let imports_not_used_as_values = java_transpiler_options.get_imports_not_used_as_values(env, obj);
+    let java_source_map_option = unsafe { JAVA_SOURCE_MAP_OPTION.as_ref().unwrap() };
+    let java_transpile_options = unsafe { JAVA_TRANSPILE_OPTIONS.as_ref().unwrap() };
+    let capture_ast = java_transpile_options.is_capture_ast(env, obj);
+    let capture_tokens = java_transpile_options.is_capture_tokens(env, obj);
+    let emit_metadata = java_transpile_options.is_emit_metadata(env, obj);
+    let imports_not_used_as_values = java_transpile_options.get_imports_not_used_as_values(env, obj);
     let imports_not_used_as_values = imports_not_used_as_values.as_ref();
     let imports_not_used_as_values =
       java_imports_not_used_as_values.get_imports_not_used_as_values(env, imports_not_used_as_values);
-    let inline_source_map = java_transpiler_options.is_inline_source_map(env, obj);
-    let inline_sources = java_transpiler_options.is_inline_sources(env, obj);
-    let jsx_automatic = java_transpiler_options.is_jsx_automatic(env, obj);
-    let jsx_development = java_transpiler_options.is_jsx_development(env, obj);
-    let jsx_factory = java_transpiler_options.get_jsx_factory(env, obj);
-    let jsx_fragment_factory = java_transpiler_options.get_jsx_fragment_factory(env, obj);
-    let jsx_import_source = java_transpiler_options.get_jsx_import_source(env, obj);
-    let media_type = java_transpiler_options.get_media_type(env, obj);
+    let inline_source_map = java_transpile_options.is_inline_source_map(env, obj);
+    let inline_sources = java_transpile_options.is_inline_sources(env, obj);
+    let jsx_automatic = java_transpile_options.is_jsx_automatic(env, obj);
+    let jsx_development = java_transpile_options.is_jsx_development(env, obj);
+    let jsx_factory = java_transpile_options.get_jsx_factory(env, obj);
+    let jsx_fragment_factory = java_transpile_options.get_jsx_fragment_factory(env, obj);
+    let jsx_import_source = java_transpile_options.get_jsx_import_source(env, obj);
+    let keep_comments = java_transpile_options.is_keep_comments(env, obj);
+    let media_type = java_transpile_options.get_media_type(env, obj);
     let media_type = media_type.as_ref();
     let media_type = java_media_type.get_media_type(env, media_type);
-    let parse_mode = java_transpiler_options.get_parse_mode(env, obj);
+    let parse_mode = java_transpile_options.get_parse_mode(env, obj);
     let parse_mode = parse_mode.as_ref();
     let parse_mode = java_parse_mode.get_parse_mode(env, parse_mode);
-    let precompile_jsx = java_transpiler_options.is_precompile_jsx(env, obj);
-    let scope_analysis = java_transpiler_options.is_scope_analysis(env, obj);
-    let source_map = java_transpiler_options.is_source_map(env, obj);
-    let specifier = java_transpiler_options.get_specifier(env, obj);
-    let transform_jsx = java_transpiler_options.is_transform_jsx(env, obj);
-    let var_decl_imports = java_transpiler_options.is_var_decl_imports(env, obj);
+    let precompile_jsx = java_transpile_options.is_precompile_jsx(env, obj);
+    let scope_analysis = java_transpile_options.is_scope_analysis(env, obj);
+    let source_map = java_transpile_options.get_source_map(env, obj);
+    let source_map = source_map.as_ref();
+    let source_map = java_source_map_option.get_source_map(env, source_map);
+    let specifier = java_transpile_options.get_specifier(env, obj);
+    let transform_jsx = java_transpile_options.is_transform_jsx(env, obj);
+    let var_decl_imports = java_transpile_options.is_var_decl_imports(env, obj);
+    let use_decorators_proposal = java_transpile_options.is_use_decorators_proposal(env, obj);
+    let use_ts_decorators = java_transpile_options.is_use_ts_decorators(env, obj);
     TranspileOptions {
       capture_ast,
       capture_tokens,
@@ -910,6 +1001,7 @@ impl FromJniType for TranspileOptions {
       jsx_factory,
       jsx_fragment_factory,
       jsx_import_source,
+      keep_comments,
       media_type,
       parse_mode,
       precompile_jsx,
@@ -918,6 +1010,8 @@ impl FromJniType for TranspileOptions {
       specifier,
       transform_jsx,
       var_decl_imports,
+      use_decorators_proposal,
+      use_ts_decorators,
     }
   }
 }

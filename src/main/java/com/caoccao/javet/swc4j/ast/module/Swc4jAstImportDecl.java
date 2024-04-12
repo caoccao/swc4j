@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.module;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstImportPhase;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
@@ -35,6 +36,7 @@ import java.util.Optional;
 public class Swc4jAstImportDecl
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
+    protected final Swc4jAstImportPhase phase;
     protected final List<ISwc4jAstImportSpecifier> specifiers;
     @Jni2RustField(box = true)
     protected final Swc4jAstStr src;
@@ -46,17 +48,23 @@ public class Swc4jAstImportDecl
             Swc4jAstStr src,
             boolean typeOnly,
             Swc4jAstObjectLit with,
+            Swc4jAstImportPhase phase,
             Swc4jSpan span) {
         super(span);
         this.specifiers = AssertionUtils.notNull(specifiers, "Specifiers");
         this.src = AssertionUtils.notNull(src, "Src");
         this.typeOnly = typeOnly;
         this.with = Optional.ofNullable(with);
+        this.phase = AssertionUtils.notNull(phase, "Phase");
         childNodes = SimpleList.copyOf(specifiers);
         childNodes.add(src);
         childNodes.add(with);
         childNodes = SimpleList.immutable(childNodes);
         updateParent();
+    }
+
+    public Swc4jAstImportPhase getPhase() {
+        return phase;
     }
 
     public List<ISwc4jAstImportSpecifier> getSpecifiers() {

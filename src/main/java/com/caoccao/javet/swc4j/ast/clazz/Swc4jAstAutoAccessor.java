@@ -36,10 +36,13 @@ import java.util.Optional;
 public class Swc4jAstAutoAccessor
         extends Swc4jAst
         implements ISwc4jAstClassMember {
+    @Jni2RustField(name = "is_override")
+    protected final boolean _override;
     @Jni2RustField(name = "is_static")
     protected final boolean _static;
     protected final Optional<Swc4jAstAccessibility> accessibility;
     protected final List<Swc4jAstDecorator> decorators;
+    protected final boolean definite;
     protected final ISwc4jAstKey key;
     protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
     protected final Optional<ISwc4jAstExpr> value;
@@ -51,11 +54,15 @@ public class Swc4jAstAutoAccessor
             boolean _static,
             List<Swc4jAstDecorator> decorators,
             Swc4jAstAccessibility accessibility,
+            boolean _override,
+            boolean definite,
             Swc4jSpan span) {
         super(span);
+        this._override = _override;
         this._static = _static;
         this.accessibility = Optional.ofNullable(accessibility);
         this.decorators = SimpleList.immutableCopyOf(AssertionUtils.notNull(decorators, "Decorators"));
+        this.definite = definite;
         this.key = AssertionUtils.notNull(key, "Key");
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.value = Optional.ofNullable(value);
@@ -69,6 +76,10 @@ public class Swc4jAstAutoAccessor
 
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
+    }
+
+    public List<Swc4jAstDecorator> getDecorators() {
+        return decorators;
     }
 
     public ISwc4jAstKey getKey() {
@@ -88,7 +99,15 @@ public class Swc4jAstAutoAccessor
         return value;
     }
 
-    public boolean is_static() {
+    public boolean isDefinite() {
+        return definite;
+    }
+
+    public boolean isOverride() {
+        return _override;
+    }
+
+    public boolean isStatic() {
         return _static;
     }
 

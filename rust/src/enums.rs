@@ -22,7 +22,7 @@ use jni::JNIEnv;
 
 use deno_ast::swc::ast::AssignOp;
 use deno_ast::swc::parser::token::{BinOpToken, Keyword, Token};
-pub use deno_ast::{ImportsNotUsedAsValues, MediaType};
+pub use deno_ast::{ImportsNotUsedAsValues, MediaType, SourceMapOption};
 
 use crate::jni_utils::*;
 
@@ -393,78 +393,78 @@ impl IdentifiableEnum<TokenType> for TokenType {
 impl TokenType {
   pub fn parse_by_assign_operator(token: &AssignOp) -> TokenType {
     match token {
-      AssignOp::Assign => TokenType::Assign,
       AssignOp::AddAssign => TokenType::AddAssign,
-      AssignOp::SubAssign => TokenType::SubAssign,
-      AssignOp::MulAssign => TokenType::MulAssign,
-      AssignOp::DivAssign => TokenType::DivAssign,
-      AssignOp::ModAssign => TokenType::ModAssign,
-      AssignOp::LShiftAssign => TokenType::LShiftAssign,
-      AssignOp::RShiftAssign => TokenType::RShiftAssign,
-      AssignOp::ZeroFillRShiftAssign => TokenType::ZeroFillRShiftAssign,
+      AssignOp::AndAssign => TokenType::AndAssign,
+      AssignOp::Assign => TokenType::Assign,
+      AssignOp::BitAndAssign => TokenType::BitAndAssign,
       AssignOp::BitOrAssign => TokenType::BitOrAssign,
       AssignOp::BitXorAssign => TokenType::BitXorAssign,
-      AssignOp::BitAndAssign => TokenType::BitAndAssign,
+      AssignOp::DivAssign => TokenType::DivAssign,
       AssignOp::ExpAssign => TokenType::ExpAssign,
-      AssignOp::AndAssign => TokenType::AndAssign,
-      AssignOp::OrAssign => TokenType::OrAssign,
+      AssignOp::LShiftAssign => TokenType::LShiftAssign,
+      AssignOp::ModAssign => TokenType::ModAssign,
+      AssignOp::MulAssign => TokenType::MulAssign,
       AssignOp::NullishAssign => TokenType::NullishAssign,
+      AssignOp::OrAssign => TokenType::OrAssign,
+      AssignOp::RShiftAssign => TokenType::RShiftAssign,
+      AssignOp::SubAssign => TokenType::SubAssign,
+      AssignOp::ZeroFillRShiftAssign => TokenType::ZeroFillRShiftAssign,
     }
   }
 
   pub fn parse_by_binary_operator(token: &BinOpToken) -> TokenType {
     match token {
+      BinOpToken::Add => TokenType::Add,
+      BinOpToken::BitAnd => TokenType::BitAnd,
+      BinOpToken::BitOr => TokenType::BitOr,
+      BinOpToken::BitXor => TokenType::BitXor,
+      BinOpToken::Div => TokenType::Div,
       BinOpToken::EqEq => TokenType::EqEq,
-      BinOpToken::NotEq => TokenType::NotEq,
       BinOpToken::EqEqEq => TokenType::EqEqEq,
-      BinOpToken::NotEqEq => TokenType::NotEqEq,
-      BinOpToken::Lt => TokenType::Lt,
-      BinOpToken::LtEq => TokenType::LtEq,
+      BinOpToken::Exp => TokenType::Exp,
       BinOpToken::Gt => TokenType::Gt,
       BinOpToken::GtEq => TokenType::GtEq,
       BinOpToken::LShift => TokenType::LShift,
-      BinOpToken::RShift => TokenType::RShift,
-      BinOpToken::ZeroFillRShift => TokenType::ZeroFillRShift,
-      BinOpToken::Add => TokenType::Add,
-      BinOpToken::Sub => TokenType::Sub,
-      BinOpToken::Mul => TokenType::Mul,
-      BinOpToken::Div => TokenType::Div,
-      BinOpToken::Mod => TokenType::Mod,
-      BinOpToken::BitOr => TokenType::BitOr,
-      BinOpToken::BitXor => TokenType::BitXor,
-      BinOpToken::BitAnd => TokenType::BitAnd,
-      BinOpToken::Exp => TokenType::Exp,
-      BinOpToken::LogicalOr => TokenType::LogicalOr,
       BinOpToken::LogicalAnd => TokenType::LogicalAnd,
+      BinOpToken::LogicalOr => TokenType::LogicalOr,
+      BinOpToken::Lt => TokenType::Lt,
+      BinOpToken::LtEq => TokenType::LtEq,
+      BinOpToken::Mod => TokenType::Mod,
+      BinOpToken::Mul => TokenType::Mul,
+      BinOpToken::NotEq => TokenType::NotEq,
+      BinOpToken::NotEqEq => TokenType::NotEqEq,
       BinOpToken::NullishCoalescing => TokenType::NullishCoalescing,
+      BinOpToken::RShift => TokenType::RShift,
+      BinOpToken::Sub => TokenType::Sub,
+      BinOpToken::ZeroFillRShift => TokenType::ZeroFillRShift,
     }
   }
 
   pub fn parse_by_generic_operator(token: &Token) -> TokenType {
     match token {
       Token::Arrow => TokenType::Arrow,
-      Token::Hash => TokenType::Hash,
       Token::At => TokenType::At,
+      Token::BackQuote => TokenType::BackQuote,
+      Token::Bang => TokenType::Bang,
+      Token::Colon => TokenType::Colon,
+      Token::Comma => TokenType::Comma,
+      Token::DollarLBrace => TokenType::DollarLBrace,
       Token::Dot => TokenType::Dot,
       Token::DotDotDot => TokenType::DotDotDot,
-      Token::Bang => TokenType::Bang,
-      Token::LParen => TokenType::LParen,
-      Token::RParen => TokenType::RParen,
-      Token::LBracket => TokenType::LBracket,
-      Token::RBracket => TokenType::RBracket,
-      Token::LBrace => TokenType::LBrace,
-      Token::RBrace => TokenType::RBrace,
-      Token::Semi => TokenType::Semi,
-      Token::Comma => TokenType::Comma,
-      Token::BackQuote => TokenType::BackQuote,
-      Token::Colon => TokenType::Colon,
-      Token::DollarLBrace => TokenType::DollarLBrace,
-      Token::QuestionMark => TokenType::QuestionMark,
-      Token::PlusPlus => TokenType::PlusPlus,
-      Token::MinusMinus => TokenType::MinusMinus,
-      Token::Tilde => TokenType::Tilde,
-      Token::JSXTagStart => TokenType::JSXTagStart,
+      Token::Hash => TokenType::Hash,
       Token::JSXTagEnd => TokenType::JSXTagEnd,
+      Token::JSXTagStart => TokenType::JSXTagStart,
+      Token::LBrace => TokenType::LBrace,
+      Token::LBracket => TokenType::LBracket,
+      Token::LParen => TokenType::LParen,
+      Token::MinusMinus => TokenType::MinusMinus,
+      Token::PlusPlus => TokenType::PlusPlus,
+      Token::QuestionMark => TokenType::QuestionMark,
+      Token::RBrace => TokenType::RBrace,
+      Token::RBracket => TokenType::RBracket,
+      Token::RParen => TokenType::RParen,
+      Token::Semi => TokenType::Semi,
+      Token::Tilde => TokenType::Tilde,
       _ => TokenType::Unknown,
     }
   }
@@ -755,10 +755,63 @@ impl JavaParseMode {
   }
 }
 
+impl IdentifiableEnum<SourceMapOption> for SourceMapOption {
+  fn get_id(&self) -> i32 {
+    match self {
+      SourceMapOption::Inline => 0,
+      SourceMapOption::Separate => 1,
+      SourceMapOption::None => 2,
+    }
+  }
+  fn parse_by_id(id: i32) -> SourceMapOption {
+    match id {
+      0 => SourceMapOption::Inline,
+      1 => SourceMapOption::Separate,
+      _ => SourceMapOption::None,
+    }
+  }
+}
+
+pub struct JavaSourceMapOption {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+}
+unsafe impl Send for JavaSourceMapOption {}
+unsafe impl Sync for JavaSourceMapOption {}
+
+impl JavaSourceMapOption {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jSourceMapOption")
+      .expect("Couldn't find class Swc4jSourceMapOption");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jSourceMapOption");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jSourceMapOption.getId");
+    JavaSourceMapOption {
+      class,
+      method_get_id,
+    }
+  }
+
+  pub fn get_source_map<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'a>,
+  ) -> SourceMapOption {
+    let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
+    SourceMapOption::parse_by_id(id)
+  }
+}
+
 pub static mut JAVA_TOKEN_TYPE: Option<JavaTokenType> = None;
 pub static mut JAVA_IMPORTS_NOT_USED_AS_VALUES: Option<JavaImportsNotUsedAsValues> = None;
 pub static mut JAVA_MEDIA_TYPE: Option<JavaMediaType> = None;
 pub static mut JAVA_PARSE_MODE: Option<JavaParseMode> = None;
+pub static mut JAVA_SOURCE_MAP_OPTION: Option<JavaSourceMapOption> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
@@ -766,6 +819,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
     JAVA_IMPORTS_NOT_USED_AS_VALUES = Some(JavaImportsNotUsedAsValues::new(env));
     JAVA_MEDIA_TYPE = Some(JavaMediaType::new(env));
     JAVA_PARSE_MODE = Some(JavaParseMode::new(env));
+    JAVA_SOURCE_MAP_OPTION = Some(JavaSourceMapOption::new(env));
   }
 }
 
@@ -891,6 +945,23 @@ pub mod swc_enums {
         1 => Accessibility::Protected,
         2 => Accessibility::Private,
         _ => Accessibility::Public,
+      }
+    }
+  }
+
+  impl IdentifiableEnum<ImportPhase> for ImportPhase {
+    fn get_id(&self) -> i32 {
+      match self {
+        ImportPhase::Defer => 0,
+        ImportPhase::Evaluation => 1,
+        ImportPhase::Source => 2,
+      }
+    }
+    fn parse_by_id(id: i32) -> ImportPhase {
+      match id {
+        1 => ImportPhase::Evaluation,
+        2 => ImportPhase::Source,
+        _ => ImportPhase::Defer,
       }
     }
   }

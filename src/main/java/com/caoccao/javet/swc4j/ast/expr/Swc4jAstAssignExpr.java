@@ -21,7 +21,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAssignOp;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPatOrExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstAssignTarget;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -31,14 +31,14 @@ import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 public class Swc4jAstAssignExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
-    protected final ISwc4jAstPatOrExpr left;
+    protected final ISwc4jAstAssignTarget left;
     protected final Swc4jAstAssignOp op;
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr right;
 
     public Swc4jAstAssignExpr(
             Swc4jAstAssignOp op,
-            ISwc4jAstPatOrExpr left,
+            ISwc4jAstAssignTarget left,
             ISwc4jAstExpr right,
             Swc4jSpan span) {
         super(span);
@@ -49,7 +49,7 @@ public class Swc4jAstAssignExpr
         updateParent();
     }
 
-    public ISwc4jAstPatOrExpr getLeft() {
+    public ISwc4jAstAssignTarget getLeft() {
         return left;
     }
 

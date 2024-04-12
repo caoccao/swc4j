@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.options;
 import com.caoccao.javet.swc4j.enums.Swc4jImportsNotUsedAsValues;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
+import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -97,6 +98,12 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     protected String jsxImportSource;
     /**
+     * The Keep comments.
+     *
+     * @since 0.3.0
+     */
+    protected boolean keepComments;
+    /**
      * The Precompile jsx.
      *
      * @since 0.1.0
@@ -107,13 +114,25 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      *
      * @since 0.1.0
      */
-    protected boolean sourceMap;
+    protected Swc4jSourceMapOption sourceMap;
     /**
      * The Transform jsx.
      *
      * @since 0.1.0
      */
     protected boolean transformJsx;
+    /**
+     * The Use decorator proposal.
+     *
+     * @since 0.3.0
+     */
+    protected boolean useDecoratorsProposal;
+    /**
+     * The Use ts decorators.
+     *
+     * @since 0.3.0
+     */
+    protected boolean useTsDecorators;
     /**
      * The Var decl imports.
      *
@@ -137,10 +156,12 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
         setJsxImportSource(null);
         setInlineSourceMap(true);
         setInlineSources(true);
+        setKeepComments(false);
         setPrecompileJsx(false);
-        setSourceMap(false);
+        setSourceMap(Swc4jSourceMapOption.Inline);
         setTransformJsx(true);
         setVarDeclImports(false);
+        setUseTsDecorators(false);
     }
 
     /**
@@ -189,6 +210,17 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     @Jni2RustMethod(optional = true)
     public String getJsxImportSource() {
         return jsxImportSource;
+    }
+
+    /**
+     * How and if source maps should be generated.
+     *
+     * @return the source map
+     * @since 0.3.0
+     */
+    @Jni2RustMethod
+    public Swc4jSourceMapOption getSourceMap() {
+        return sourceMap;
     }
 
     /**
@@ -251,6 +283,17 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
+     * Whether to keep comments in the output. Defaults to `false`.
+     *
+     * @return true : keep comments, false : remove comments
+     * @since 0.3.0
+     */
+    @Jni2RustMethod
+    public boolean isKeepComments() {
+        return keepComments;
+    }
+
+    /**
      * Should JSX be precompiled into static strings that need to be concatenated
      * with dynamic content. Defaults to `false`, mutually exclusive with `transform_jsx`.
      *
@@ -263,18 +306,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * Should a corresponding map string be created for the output.
-     * This should be false if isInlineSourceMap() is true. Defaults to `false`.
-     *
-     * @return true : source map string is separated, false : source map string is not separated
-     * @since 0.1.0
-     */
-    @Jni2RustMethod
-    public boolean isSourceMap() {
-        return sourceMap;
-    }
-
-    /**
      * Should JSX be transformed. Defaults to `true`.
      *
      * @return true : be transformed, false : not be transformed
@@ -283,6 +314,28 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     @Jni2RustMethod
     public boolean isTransformJsx() {
         return transformJsx;
+    }
+
+    /**
+     * TC39 Decorators Proposal - https://github.com/tc39/proposal-decorators
+     *
+     * @return true : use decorators proposal, false : not use decorators proposal
+     * @since 0.3.0
+     */
+    @Jni2RustMethod
+    public boolean isUseDecoratorsProposal() {
+        return useDecoratorsProposal;
+    }
+
+    /**
+     * TypeScript experimental decorators.
+     *
+     * @return true : use TypeScript experimental decorators, false : not use TypeScript experimental decorators
+     * @since 0.3.0
+     */
+    @Jni2RustMethod
+    public boolean isUseTsDecorators() {
+        return useTsDecorators;
     }
 
     /**
@@ -420,6 +473,18 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
+     * Sets keep comments.
+     *
+     * @param keepComments the keep comments
+     * @return the self
+     * @since 0.3.0
+     */
+    public Swc4jTranspileOptions setKeepComments(boolean keepComments) {
+        this.keepComments = keepComments;
+        return this;
+    }
+
+    /**
      * Sets Media type of the source text.
      *
      * @param mediaType the Media type of the source text
@@ -474,8 +539,8 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return the self
      * @since 0.1.0
      */
-    public Swc4jTranspileOptions setSourceMap(boolean sourceMap) {
-        this.sourceMap = sourceMap;
+    public Swc4jTranspileOptions setSourceMap(Swc4jSourceMapOption sourceMap) {
+        this.sourceMap = AssertionUtils.notNull(sourceMap, "Source map");
         return this;
     }
 
@@ -500,6 +565,30 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     public Swc4jTranspileOptions setTransformJsx(boolean transformJsx) {
         this.transformJsx = transformJsx;
+        return this;
+    }
+
+    /**
+     * Sets use decorator proposal.
+     *
+     * @param useDecoratorsProposal the use decorator proposal
+     * @return the self
+     * @since 0.3.0
+     */
+    public Swc4jTranspileOptions setUseDecoratorsProposal(boolean useDecoratorsProposal) {
+        this.useDecoratorsProposal = useDecoratorsProposal;
+        return this;
+    }
+
+    /**
+     * Sets use ts decorators.
+     *
+     * @param useTsDecorators the use ts decorators
+     * @return the self
+     * @since 0.3.0
+     */
+    public Swc4jTranspileOptions setUseTsDecorators(boolean useTsDecorators) {
+        this.useTsDecorators = useTsDecorators;
         return this;
     }
 

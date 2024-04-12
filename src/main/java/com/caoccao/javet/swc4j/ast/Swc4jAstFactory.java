@@ -74,7 +74,7 @@ public final class Swc4jAstFactory {
     @Jni2RustMethod
     public static Swc4jAstAssignExpr createAssignExpr(
             int opId,
-            ISwc4jAstPatOrExpr left,
+            ISwc4jAstAssignTarget left,
             ISwc4jAstExpr right,
             @Jni2RustParam Swc4jSpan span) {
         return new Swc4jAstAssignExpr(Swc4jAstAssignOp.parse(opId), left, right, span);
@@ -90,7 +90,7 @@ public final class Swc4jAstFactory {
 
     @Jni2RustMethod
     public static Swc4jAstAssignPatProp createAssignPatProp(
-            Swc4jAstIdent key,
+            Swc4jAstBindingIdent key,
             @Jni2RustParam(optional = true) ISwc4jAstExpr value,
             @Jni2RustParam Swc4jSpan span) {
         return new Swc4jAstAssignPatProp(key, value, span);
@@ -112,11 +112,13 @@ public final class Swc4jAstFactory {
             boolean isStatic,
             List<Swc4jAstDecorator> decorators,
             int accessibilityId,
+            boolean isOverride,
+            boolean definite,
             @Jni2RustParam Swc4jSpan span) {
         return new Swc4jAstAutoAccessor(
                 key, value, typeAnn, isStatic, decorators,
                 accessibilityId >= 0 ? Swc4jAstAccessibility.parse(accessibilityId) : null,
-                span);
+                isOverride, definite, span);
     }
 
     @Jni2RustMethod
@@ -479,8 +481,9 @@ public final class Swc4jAstFactory {
 
     @Jni2RustMethod
     public static Swc4jAstImport createImport(
+            int phaseId,
             @Jni2RustParam Swc4jSpan span) {
-        return new Swc4jAstImport(span);
+        return new Swc4jAstImport(Swc4jAstImportPhase.parse(phaseId), span);
     }
 
     @Jni2RustMethod
@@ -489,8 +492,9 @@ public final class Swc4jAstFactory {
             Swc4jAstStr src,
             boolean typeOnly,
             @Jni2RustParam(optional = true) Swc4jAstObjectLit with,
+            int phaseId,
             @Jni2RustParam Swc4jSpan span) {
-        return new Swc4jAstImportDecl(specifiers, src, typeOnly, with, span);
+        return new Swc4jAstImportDecl(specifiers, src, typeOnly, with, Swc4jAstImportPhase.parse(phaseId), span);
     }
 
     @Jni2RustMethod
@@ -843,10 +847,11 @@ public final class Swc4jAstFactory {
     @Jni2RustMethod
     public static Swc4jAstSetterProp createSetterProp(
             ISwc4jAstPropName key,
+            @Jni2RustParam(optional = true) ISwc4jAstPat thisParam,
             ISwc4jAstPat param,
             @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
             @Jni2RustParam Swc4jSpan span) {
-        return new Swc4jAstSetterProp(key, param, body, span);
+        return new Swc4jAstSetterProp(key, thisParam, param, body, span);
     }
 
     @Jni2RustMethod

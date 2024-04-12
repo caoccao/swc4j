@@ -10,6 +10,23 @@ crate_type = ["cdylib", "rlib"]
 
 [dependencies]
 debug_print = "1.0.0"
-deno_ast = { version = "1.0.1", features = ["module_specifier", "transpiling", "transforms"] }
+deno_ast = { version = "0.36.1", features = [
+  "bundler",
+  "cjs",
+  "codegen",
+  "compat",
+  "dep_analysis",
+  "emit",
+  "proposal",
+  "react",
+  "scopes",
+  "sourcemap",
+  "transforms",
+  "transpiling",
+  "typescript",
+  "utils",
+  "view",
+  "visit",
+] }
 jni = "0.21.1"
 num-bigint = "0.4.4"

@@ -81,7 +81,7 @@ You may want to generate a separate source map as the inline source map sometime
 
 ```java
 // Remove the inline source map.
-options.setInlineSourceMap(false).setSourceMap(true);
+options.setInlineSourceMap(false).setSourceMap(Swc4jSourceMapOption.Separate);
 output = swc4j.transpile(code, options);
 // Print the transpiled code.
 System.out.println("/*********************************************");
@@ -91,7 +91,7 @@ System.out.println(output.getCode());
 System.out.println("/*********************************************");
 System.out.println("   The transpiled source map is as follows.");
 System.out.println("*********************************************/");
-System.out.println(output.getSourceMap());
+System.out.println(output.getSourceMap().get());
 ```
 
 * The output is as follows. As you can see, the source map is not inlined. Note: The actual source map is a minified Json string. The output below shows a beautified Json string for better readability.

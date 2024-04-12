@@ -47,7 +47,7 @@ System.out.println(output.getCode());
 import React from 'react';
 import './App.css';
 function App() {
-  return /*#__PURE__*/ React.createElement("h1", null, " Hello World! ");
+  return React.createElement("h1", null, " Hello World! ");
 }
 export default App;
 //# sourceMappingURL=data:application/json;base64,...
@@ -61,7 +61,7 @@ You may want to replace the default Jsx factory with a customized one. Yes, that
 
 ```java
 // Remove the inline source map.
-options.setInlineSourceMap(false).setSourceMap(true);
+options.setInlineSourceMap(false).setSourceMap(Swc4jSourceMapOption.None);
 // Customize the Jsx factory.
 options.setJsxFactory("CustomJsxFactory.createElement");
 output = swc4j.transpile(code, options);
@@ -81,7 +81,7 @@ System.out.println(output.getCode());
 import React from 'react';
 import './App.css';
 function App() {
-  return /*#__PURE__*/ CustomJsxFactory.createElement("h1", null, " Hello World! ");
+  return CustomJsxFactory.createElement("h1", null, " Hello World! ");
 }
 export default App;
 ```

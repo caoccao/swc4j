@@ -237,7 +237,7 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createAssignExpr",
-        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPatOrExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstAssignExpr;",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstAssignTarget;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstAssignExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAssignExpr");
     let method_create_assign_pat = env
@@ -251,7 +251,7 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createAssignPatProp",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstAssignPatProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstBindingIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstAssignPatProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAssignPatProp");
     let method_create_assign_prop = env
@@ -265,7 +265,7 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createAutoAccessor",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;ILcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstAutoAccessor;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstAutoAccessor;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAutoAccessor");
     let method_create_await_expr = env
@@ -552,14 +552,14 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createImport",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImport;",
+        "(ILcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImport;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImport");
     let method_create_import_decl = env
       .get_static_method_id(
         &class,
         "createImportDecl",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportDecl;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;ILcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImportDecl");
     let method_create_import_default_specifier = env
@@ -860,7 +860,7 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createSetterProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSetterProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSetterProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSetterProp");
     let method_create_span = env
@@ -1765,6 +1765,8 @@ impl JavaSwc4jAstFactory {
     is_static: bool,
     decorators: &JObject<'_>,
     accessibility_id: i32,
+    is_override: bool,
+    definite: bool,
     span: &JObject<'_>,
   ) -> JObject<'a>
   where
@@ -1776,12 +1778,14 @@ impl JavaSwc4jAstFactory {
     let is_static = boolean_to_jvalue!(is_static);
     let decorators = object_to_jvalue!(decorators);
     let accessibility_id = int_to_jvalue!(accessibility_id);
+    let is_override = boolean_to_jvalue!(is_override);
+    let definite = boolean_to_jvalue!(definite);
     let span = object_to_jvalue!(span);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_auto_accessor,
-        &[key, value, type_ann, is_static, decorators, accessibility_id, span],
+        &[key, value, type_ann, is_static, decorators, accessibility_id, is_override, definite, span],
         "Swc4jAstAutoAccessor create_auto_accessor()"
       );
     return_value
@@ -2766,17 +2770,19 @@ impl JavaSwc4jAstFactory {
   pub fn create_import<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    phase_id: i32,
     span: &JObject<'_>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
+    let phase_id = int_to_jvalue!(phase_id);
     let span = object_to_jvalue!(span);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_import,
-        &[span],
+        &[phase_id, span],
         "Swc4jAstImport create_import()"
       );
     return_value
@@ -2789,6 +2795,7 @@ impl JavaSwc4jAstFactory {
     src: &JObject<'_>,
     type_only: bool,
     with: &Option<JObject>,
+    phase_id: i32,
     span: &JObject<'_>,
   ) -> JObject<'a>
   where
@@ -2798,12 +2805,13 @@ impl JavaSwc4jAstFactory {
     let src = object_to_jvalue!(src);
     let type_only = boolean_to_jvalue!(type_only);
     let with = optional_object_to_jvalue!(with);
+    let phase_id = int_to_jvalue!(phase_id);
     let span = object_to_jvalue!(span);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_import_decl,
-        &[specifiers, src, type_only, with, span],
+        &[specifiers, src, type_only, with, phase_id, span],
         "Swc4jAstImportDecl create_import_decl()"
       );
     return_value
@@ -3801,6 +3809,7 @@ impl JavaSwc4jAstFactory {
     &self,
     env: &mut JNIEnv<'local>,
     key: &JObject<'_>,
+    this_param: &Option<JObject>,
     param: &JObject<'_>,
     body: &Option<JObject>,
     span: &JObject<'_>,
@@ -3809,6 +3818,7 @@ impl JavaSwc4jAstFactory {
     'local: 'a,
   {
     let key = object_to_jvalue!(key);
+    let this_param = optional_object_to_jvalue!(this_param);
     let param = object_to_jvalue!(param);
     let body = optional_object_to_jvalue!(body);
     let span = object_to_jvalue!(span);
@@ -3816,7 +3826,7 @@ impl JavaSwc4jAstFactory {
         env,
         &self.class,
         self.method_create_setter_prop,
-        &[key, param, body, span],
+        &[key, this_param, param, body, span],
         "Swc4jAstSetterProp create_setter_prop()"
       );
     return_value
@@ -5695,6 +5705,21 @@ pub mod span {
   use crate::position_utils::ByteToIndexMap;
   use deno_ast::swc::{ast::*, common::Spanned};
 
+  fn enum_register_assign_target(map: &mut ByteToIndexMap, node: &AssignTarget) {
+    match node {
+      AssignTarget::Simple(node) => enum_register_simple_assign_target(map, node),
+      AssignTarget::Pat(node) => enum_register_assign_target_pat(map, node),
+    }
+  }
+
+  fn enum_register_assign_target_pat(map: &mut ByteToIndexMap, node: &AssignTargetPat) {
+    match node {
+      AssignTargetPat::Array(node) => register_array_pat(map, node),
+      AssignTargetPat::Invalid(node) => register_invalid(map, node),
+      AssignTargetPat::Object(node) => register_object_pat(map, node),
+    }
+  }
+
   fn enum_register_block_stmt_or_expr(map: &mut ByteToIndexMap, node: &BlockStmtOrExpr) {
     match node {
       BlockStmtOrExpr::BlockStmt(node) => register_block_stmt(map, node),
@@ -5956,13 +5981,6 @@ pub mod span {
     }
   }
 
-  fn enum_register_pat_or_expr(map: &mut ByteToIndexMap, node: &PatOrExpr) {
-    match node {
-      PatOrExpr::Expr(node) => enum_register_expr(map, node),
-      PatOrExpr::Pat(node) => enum_register_pat(map, node),
-    }
-  }
-
   pub fn enum_register_program(map: &mut ByteToIndexMap, node: &Program) {
     match node {
       Program::Module(node) => register_module(map, node),
@@ -5995,6 +6013,22 @@ pub mod span {
     match node {
       PropOrSpread::Prop(node) => enum_register_prop(map, node),
       PropOrSpread::Spread(node) => register_spread_element(map, node),
+    }
+  }
+
+  fn enum_register_simple_assign_target(map: &mut ByteToIndexMap, node: &SimpleAssignTarget) {
+    match node {
+      SimpleAssignTarget::Ident(node) => register_binding_ident(map, node),
+      SimpleAssignTarget::Invalid(node) => register_invalid(map, node),
+      SimpleAssignTarget::Member(node) => register_member_expr(map, node),
+      SimpleAssignTarget::OptChain(node) => register_opt_chain_expr(map, node),
+      SimpleAssignTarget::Paren(node) => register_paren_expr(map, node),
+      SimpleAssignTarget::SuperProp(node) => register_super_prop_expr(map, node),
+      SimpleAssignTarget::TsAs(node) => register_ts_as_expr(map, node),
+      SimpleAssignTarget::TsInstantiation(node) => register_ts_instantiation(map, node),
+      SimpleAssignTarget::TsNonNull(node) => register_ts_non_null_expr(map, node),
+      SimpleAssignTarget::TsSatisfies(node) => register_ts_satisfies_expr(map, node),
+      SimpleAssignTarget::TsTypeAssertion(node) => register_ts_type_assertion(map, node),
     }
   }
 
@@ -6193,7 +6227,7 @@ pub mod span {
 
   fn register_assign_expr(map: &mut ByteToIndexMap, node: &AssignExpr) {
     map.register_by_span(&node.span);
-    enum_register_pat_or_expr(map, &node.left);
+    enum_register_assign_target(map, &node.left);
     enum_register_expr(map, &node.right);
   }
 
@@ -6205,7 +6239,7 @@ pub mod span {
 
   fn register_assign_pat_prop(map: &mut ByteToIndexMap, node: &AssignPatProp) {
     map.register_by_span(&node.span);
-    register_ident(map, &node.key);
+    register_binding_ident(map, &node.key);
     node.value.as_ref().map(|node| enum_register_expr(map, node));
   }
 
@@ -6766,6 +6800,7 @@ pub mod span {
   fn register_setter_prop(map: &mut ByteToIndexMap, node: &SetterProp) {
     map.register_by_span(&node.span);
     enum_register_prop_name(map, &node.key);
+    node.this_param.as_ref().map(|node| enum_register_pat(map, node));
     enum_register_pat(map, &node.param);
     node.body.as_ref().map(|node| register_block_stmt(map, node));
   }
@@ -7375,7 +7410,7 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let op = node.op.get_id();
-    let java_left = enum_create_pat_or_expr(env, map, &node.left);
+    let java_left = enum_create_assign_target(env, map, &node.left);
     let java_right = enum_create_expr(env, map, &node.right);
     let return_type = java_ast_factory.create_assign_expr(env, op, &java_left, &java_right, &java_span_ex);
     delete_local_ref!(env, java_left);
@@ -7409,7 +7444,7 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
-    let java_key = create_ident(env, map, &node.key);
+    let java_key = create_binding_ident(env, map, &node.key);
     let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
     let return_type = java_ast_factory.create_assign_pat_prop(env, &java_key, &java_optional_value, &java_span_ex);
     delete_local_ref!(env, java_key);
@@ -7455,6 +7490,8 @@ pub mod program {
       delete_local_ref!(env, java_node);
     });
     let accessibility = node.accessibility.map_or(-1, |node| node.get_id());
+    let is_override = node.is_override;
+    let definite = node.definite;
     let return_type = java_ast_factory.create_auto_accessor(
       env,
       &java_key,
@@ -7463,6 +7500,8 @@ pub mod program {
       is_static,
       &java_decorators,
       accessibility,
+      is_override,
+      definite,
       &java_span_ex,
     );
     delete_local_ref!(env, java_key);
@@ -8276,7 +8315,8 @@ pub mod program {
   {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
-    let return_type = java_ast_factory.create_import(env, &java_span_ex);
+    let phase = node.phase.get_id();
+    let return_type = java_ast_factory.create_import(env, phase, &java_span_ex);
     delete_local_ref!(env, java_span_ex);
     return_type
   }
@@ -8643,12 +8683,14 @@ pub mod program {
     let java_src = create_str(env, map, &node.src);
     let type_only = node.type_only;
     let java_optional_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
+    let phase = node.phase.get_id();
     let return_value = java_ast_factory.create_import_decl(
       env,
       &java_specifiers,
       &java_src,
       type_only,
       &java_optional_with,
+      phase,
       &java_span_ex,
     );
     delete_local_ref!(env, java_specifiers);
@@ -9171,11 +9213,19 @@ pub mod program {
     let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
     let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
     let java_key = enum_create_prop_name(env, map, &node.key);
+    let java_optional_this_param = node.this_param.as_ref().map(|node| enum_create_pat(env, map, node));
     let java_param = enum_create_pat(env, map, &node.param);
     let java_optional_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
-    let return_type =
-      java_ast_factory.create_setter_prop(env, &java_key, &java_param, &java_optional_body, &java_span_ex);
+    let return_type = java_ast_factory.create_setter_prop(
+      env,
+      &java_key,
+      &java_optional_this_param,
+      &java_param,
+      &java_optional_body,
+      &java_span_ex,
+    );
     delete_local_ref!(env, java_key);
+    delete_local_optional_ref!(env, java_optional_this_param);
     delete_local_ref!(env, java_param);
     delete_local_optional_ref!(env, java_optional_body);
     delete_local_ref!(env, java_span_ex);
@@ -10861,6 +10911,35 @@ pub mod program {
     return_value
   }
 
+  fn enum_create_assign_target<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &AssignTarget,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      AssignTarget::Simple(node) => enum_create_simple_assign_target(env, map, node),
+      AssignTarget::Pat(node) => enum_create_assign_target_pat(env, map, node),
+    }
+  }
+
+  fn enum_create_assign_target_pat<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &AssignTargetPat,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      AssignTargetPat::Array(node) => create_array_pat(env, map, node),
+      AssignTargetPat::Invalid(node) => create_invalid(env, map, node),
+      AssignTargetPat::Object(node) => create_object_pat(env, map, node),
+    }
+  }
+
   fn enum_create_block_stmt_or_expr<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -11225,6 +11304,29 @@ pub mod program {
     }
   }
 
+  fn enum_create_simple_assign_target<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &SimpleAssignTarget,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      SimpleAssignTarget::Ident(node) => create_binding_ident(env, map, node),
+      SimpleAssignTarget::Invalid(node) => create_invalid(env, map, node),
+      SimpleAssignTarget::Member(node) => create_member_expr(env, map, node),
+      SimpleAssignTarget::OptChain(node) => create_opt_chain_expr(env, map, node),
+      SimpleAssignTarget::Paren(node) => create_paren_expr(env, map, node),
+      SimpleAssignTarget::SuperProp(node) => create_super_prop_expr(env, map, node),
+      SimpleAssignTarget::TsAs(node) => create_ts_as_expr(env, map, node),
+      SimpleAssignTarget::TsInstantiation(node) => create_ts_instantiation(env, map, node),
+      SimpleAssignTarget::TsNonNull(node) => create_ts_non_null_expr(env, map, node),
+      SimpleAssignTarget::TsSatisfies(node) => create_ts_satisfies_expr(env, map, node),
+      SimpleAssignTarget::TsTypeAssertion(node) => create_ts_type_assertion(env, map, node),
+    }
+  }
+
   fn enum_create_opt_chain_base<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -11265,20 +11367,6 @@ pub mod program {
       Pat::Invalid(node) => create_invalid(env, map, node),
       Pat::Object(node) => create_object_pat(env, map, node),
       Pat::Rest(node) => create_rest_pat(env, map, node),
-    }
-  }
-
-  fn enum_create_pat_or_expr<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    map: &ByteToIndexMap,
-    node: &PatOrExpr,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match node {
-      PatOrExpr::Expr(node) => enum_create_expr(env, map, node),
-      PatOrExpr::Pat(node) => enum_create_pat(env, map, node),
     }
   }
 

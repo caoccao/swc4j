@@ -26,6 +26,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
 import com.caoccao.javet.swc4j.tokens.Swc4jToken;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The type Swc4j transpile output.
@@ -45,7 +46,7 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
      *
      * @since 0.1.0
      */
-    protected final String sourceMap;
+    protected final Optional<String> sourceMap;
 
     /**
      * Instantiates a new Swc4j transpile output.
@@ -70,7 +71,7 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
             List<Swc4jToken> tokens) {
         super(program, mediaType, parseMode, sourceText, tokens);
         this.code = code;
-        this.sourceMap = sourceMap;
+        this.sourceMap = Optional.ofNullable(sourceMap);
     }
 
     /**
@@ -89,7 +90,7 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
      * @return the source map
      * @since 0.1.0
      */
-    public String getSourceMap() {
+    public Optional<String> getSourceMap() {
         return sourceMap;
     }
 }

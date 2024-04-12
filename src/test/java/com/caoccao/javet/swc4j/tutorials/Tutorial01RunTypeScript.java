@@ -21,6 +21,7 @@ import com.caoccao.javet.interop.V8Host;
 import com.caoccao.javet.interop.V8Runtime;
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
@@ -55,7 +56,7 @@ public class Tutorial01RunTypeScript {
                             "add", 1, 2));
         }
         // Remove the inline source map.
-        options.setInlineSourceMap(false).setSourceMap(true);
+        options.setInlineSourceMap(false).setSourceMap(Swc4jSourceMapOption.Separate);
         output = swc4j.transpile(code, options);
         // Print the transpiled code.
         System.out.println("/*********************************************");
@@ -65,6 +66,6 @@ public class Tutorial01RunTypeScript {
         System.out.println("/*********************************************");
         System.out.println("   The transpiled source map is as follows.");
         System.out.println("*********************************************/");
-        System.out.println(output.getSourceMap());
+        System.out.println(output.getSourceMap().get());
     }
 }

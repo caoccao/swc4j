@@ -17,7 +17,7 @@
 
 use deno_ast::swc::ast::*;
 use deno_ast::swc::parser::token::TokenAndSpan;
-use deno_ast::{ParsedSource, TranspiledSource};
+use deno_ast::{EmittedSource, ParsedSource};
 
 use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::sys::jvalue;
@@ -267,9 +267,9 @@ impl TranspileOutput {
   pub fn new(
     transpile_options: &TranspileOptions,
     parsed_source: &ParsedSource,
-    transpiled_source: &TranspiledSource,
+    emitted_source: &EmittedSource,
   ) -> Self {
-    let code = transpiled_source.text.to_owned();
+    let code = emitted_source.text.to_owned();
     let media_type = parsed_source.media_type();
     let module = parsed_source.is_module();
     let program = if transpile_options.capture_ast {
@@ -278,7 +278,7 @@ impl TranspileOutput {
       None
     };
     let script = parsed_source.is_script();
-    let source_map = transpiled_source.source_map.to_owned();
+    let source_map = emitted_source.source_map.to_owned();
     let source_text = parsed_source.text_info().text().to_string();
     let tokens = if transpile_options.capture_tokens {
       Some(Arc::new(parsed_source.tokens().to_vec()))

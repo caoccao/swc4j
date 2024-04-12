@@ -147,7 +147,7 @@ fn test_transpile_jsx_with_custom_jsx_factory() {
   let expected_code = String::from("import React from 'react';\n")
     + "import './App.css';\n"
     + "function App() {\n"
-    + "  return /*#__PURE__*/ CustomJsxFactory.createElement(\"h1\", null, \" Hello World! \");\n"
+    + "  return CustomJsxFactory.createElement(\"h1\", null, \" Hello World! \");\n"
     + "}\n"
     + "export default App;\n";
   let expected_source_map_prefix = "//# sourceMappingURL=data:application/json;base64,";
@@ -179,7 +179,7 @@ fn test_transpile_jsx_with_default_options() {
   let expected_code = String::from("import React from 'react';\n")
     + "import './App.css';\n"
     + "function App() {\n"
-    + "  return /*#__PURE__*/ React.createElement(\"h1\", null, \" Hello World! \");\n"
+    + "  return React.createElement(\"h1\", null, \" Hello World! \");\n"
     + "}\n"
     + "export default App;\n";
   let expected_source_map_prefix = "//# sourceMappingURL=data:application/json;base64,";
@@ -218,21 +218,13 @@ fn test_transpile_type_script_with_inline_source_map() {
 fn test_transpile_type_script_without_inline_source_map() {
   let code = "function add(a:number, b:number) { return a+b; }";
   let expected_code = "function add(a, b) {\n  return a + b;\n}\n";
-  let expected_properties = vec![
-    "version",
-    "sources",
-    "sourcesContent",
-    "file:///main.ts",
-    "names",
-    "mappings",
-  ];
   vec![enums::ParseMode::Module, enums::ParseMode::Script]
     .iter()
     .for_each(|parse_mode| {
       let options = options::TranspileOptions {
         inline_source_map: false,
         parse_mode: parse_mode.clone(),
-        source_map: true,
+        source_map: enums::SourceMapOption::None,
         specifier: "file:///main.ts".to_owned(),
         ..Default::default()
       };
@@ -251,10 +243,7 @@ fn test_transpile_type_script_without_inline_source_map() {
       }
       let output_code = output.code;
       assert_eq!(expected_code, output_code);
-      let source_map = output.source_map.unwrap();
-      expected_properties
-        .iter()
-        .for_each(|p| assert!(source_map.contains(p), "{} is not found", p));
+      assert!(output.source_map.is_none());
     });
 }
 
