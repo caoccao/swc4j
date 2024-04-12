@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.BaseTestSuite;
-import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
@@ -26,6 +25,7 @@ import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
+import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.List;
 import java.util.Map;
@@ -66,10 +66,23 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
             Swc4jAstType type,
             int start,
             int end) {
+        return assertAst(parentNode, node, type, start, end, 1, start + 1);
+    }
+
+    protected <AST extends ISwc4jAst> AST assertAst(
+            ISwc4jAst parentNode,
+            AST node,
+            Swc4jAstType type,
+            int start,
+            int end,
+            int line,
+            int column) {
         assertEquals(parentNode, node.getParent(), "Parent node mismatches");
         assertEquals(type, node.getType(), "Type mismatches");
         assertEquals(start, node.getSpan().getStart(), "Start mismatches");
         assertEquals(end, node.getSpan().getEnd(), "End mismatches");
+        assertEquals(line, node.getSpan().getLine(), "Line mismatches");
+        assertEquals(column, node.getSpan().getColumn(), "Column mismatches");
         return node;
     }
 

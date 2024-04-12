@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestSwc4j extends BaseTestSuite {
     @Test
     public void testGetVersion() {
-        assertEquals("0.3.0", swc4j.getVersion());
+        assertEquals("0.4.0", swc4j.getVersion());
     }
 
     @Test
