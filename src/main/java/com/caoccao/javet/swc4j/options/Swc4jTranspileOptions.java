@@ -24,6 +24,8 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
+import java.net.URL;
+
 /**
  * The type Swc4j transpile options.
  *
@@ -551,7 +553,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @return the self
      * @since 0.1.0
      */
-    public Swc4jTranspileOptions setSpecifier(String specifier) {
+    public Swc4jTranspileOptions setSpecifier(URL specifier) {
         super.setSpecifier(specifier);
         return this;
     }

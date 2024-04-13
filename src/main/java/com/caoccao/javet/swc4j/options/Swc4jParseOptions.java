@@ -22,6 +22,9 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * The type Swc4j parse options.
  *
@@ -34,7 +37,16 @@ public class Swc4jParseOptions {
      *
      * @since 0.2.0
      */
-    public static final String DEFAULT_SPECIFIER = "file:///main.js";
+    public static final URL DEFAULT_SPECIFIER;
+
+    static {
+        try {
+            DEFAULT_SPECIFIER = new URL("file://main.js");
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * The Capture ast.
      *
@@ -70,7 +82,7 @@ public class Swc4jParseOptions {
      *
      * @since 0.2.0
      */
-    protected String specifier;
+    protected URL specifier;
 
     /**
      * Instantiates a new Swc4j parse options.
@@ -115,7 +127,7 @@ public class Swc4jParseOptions {
      * @since 0.2.0
      */
     @Jni2RustMethod
-    public String getSpecifier() {
+    public URL getSpecifier() {
         return specifier;
     }
 
@@ -219,7 +231,7 @@ public class Swc4jParseOptions {
      * @return the self
      * @since 0.2.0
      */
-    public Swc4jParseOptions setSpecifier(String specifier) {
+    public Swc4jParseOptions setSpecifier(URL specifier) {
         this.specifier = AssertionUtils.notNull(specifier, "Specifier");
         return this;
     }

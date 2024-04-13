@@ -15,7 +15,7 @@
 * limitations under the License.
 */
 
-use jni::objects::{GlobalRef, JMethodID, JObject};
+use jni::objects::{GlobalRef, JMethodID, JObject, JString};
 use jni::signature::{Primitive, ReturnType};
 use jni::sys::jvalue;
 use jni::JNIEnv;
@@ -319,10 +319,43 @@ impl JavaArrayList {
   }
 }
 
+struct JavaURL {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_to_string: JMethodID,
+}
+unsafe impl Send for JavaURL {}
+unsafe impl Sync for JavaURL {}
+
+impl JavaURL {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env.find_class("java/net/URL").expect("Couldn't find class URL");
+    let class = env.new_global_ref(class).expect("Couldn't globalize class URL");
+    let method_to_string = env
+      .get_method_id(&class, "toString", "()Ljava/lang/String;")
+      .expect("Couldn't find method URL.toString");
+    JavaURL {
+      class,
+      method_to_string,
+    }
+  }
+
+  pub fn to_string<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> String {
+    let url_string = call_as_object!(env, obj, &self.method_to_string, &[], "toString()");
+    jstring_to_string!(env, *url_string)
+  }
+}
+
 pub static mut JAVA_ARRAY_LIST: Option<JavaArrayList> = None;
+static mut JAVA_URL: Option<JavaURL> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
     JAVA_ARRAY_LIST = Some(JavaArrayList::new(env));
+    JAVA_URL = Some(JavaURL::new(env));
   }
+}
+
+pub fn url_to_string<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> String {
+  unsafe { JAVA_URL.as_ref().unwrap() }.to_string(env, obj)
 }

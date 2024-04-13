@@ -30,6 +30,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -67,7 +69,7 @@ public class TestSwc4j extends BaseTestSuite {
         Swc4jParseOptions options = new Swc4jParseOptions()
                 .setMediaType(Swc4jMediaType.JavaScript);
         assertEquals(
-                "Expected ',', got ':' at file:///main.js:1:15\n" +
+                "Expected ',', got ':' at file://main.js/:1:15\n" +
                         "\n" +
                         "  function add(a:number, b:number) { return a+b; }\n" +
                         "                ~",
@@ -187,13 +189,15 @@ public class TestSwc4j extends BaseTestSuite {
 
     @ParameterizedTest
     @EnumSource(Swc4jParseMode.class)
-    public void testTranspileTypeScriptWithoutInlineSourceMap(Swc4jParseMode parseMode) throws Swc4jCoreException {
+    public void testTranspileTypeScriptWithoutInlineSourceMap(Swc4jParseMode parseMode)
+            throws Swc4jCoreException, MalformedURLException {
         String code = "function add(a:number, b:number) { return a+b; }";
         String expectedCode = "function add(a, b) {\n" +
                 "  return a + b;\n" +
                 "}\n";
-        String specifier = "file:///abc.ts";
-        String[] expectedProperties = new String[]{"version", "sources", "sourcesContent", specifier, "names", "mappings"};
+        URL specifier = new URL("file://abc.ts");
+        String[] expectedProperties = new String[]{
+                "version", "sources", "sourcesContent", specifier.toString() + "/", "names", "mappings"};
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
                 .setParseMode(parseMode)
                 .setInlineSourceMap(false)
@@ -216,7 +220,7 @@ public class TestSwc4j extends BaseTestSuite {
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
                 .setMediaType(Swc4jMediaType.JavaScript);
         assertEquals(
-                "Expected ',', got ':' at file:///main.js:1:15\n" +
+                "Expected ',', got ':' at file://main.js/:1:15\n" +
                         "\n" +
                         "  function add(a:number, b:number) { return a+b; }\n" +
                         "                ~",

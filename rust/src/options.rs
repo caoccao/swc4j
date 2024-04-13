@@ -20,6 +20,8 @@ use jni::signature::{Primitive, ReturnType};
 use jni::sys::jobject;
 use jni::JNIEnv;
 
+use deno_ast::ModuleSpecifier;
+
 use crate::enums::*;
 use crate::jni_utils::*;
 
@@ -63,7 +65,7 @@ impl JavaSwc4jParseOptions {
       .get_method_id(
         &class,
         "getSpecifier",
-        "()Ljava/lang/String;",
+        "()Ljava/net/URL;",
       )
       .expect("Couldn't find method Swc4jParseOptions.getSpecifier");
     let method_is_capture_ast = env
@@ -134,20 +136,21 @@ impl JavaSwc4jParseOptions {
     return_value
   }
 
-  pub fn get_specifier<'local>(
+  pub fn get_specifier<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> String
+  ) -> JObject<'a>
+  where
+    'local: 'a,
   {
     let return_value = call_as_object!(
         env,
         obj,
         self.method_get_specifier,
         &[],
-        "String get_specifier()"
+        "URL get_specifier()"
       );
-    let return_value = jstring_to_string!(env, return_value.as_raw());
     return_value
   }
 
@@ -292,7 +295,7 @@ impl JavaSwc4jTranspileOptions {
       .get_method_id(
         &class,
         "getSpecifier",
-        "()Ljava/lang/String;",
+        "()Ljava/net/URL;",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getSpecifier");
     let method_is_capture_ast = env
@@ -543,20 +546,21 @@ impl JavaSwc4jTranspileOptions {
     return_value
   }
 
-  pub fn get_specifier<'local>(
+  pub fn get_specifier<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> String
+  ) -> JObject<'a>
+  where
+    'local: 'a,
   {
     let return_value = call_as_object!(
         env,
         obj,
         self.method_get_specifier,
         &[],
-        "String get_specifier()"
+        "URL get_specifier()"
       );
-    let return_value = jstring_to_string!(env, return_value.as_raw());
     return_value
   }
 
@@ -816,6 +820,13 @@ pub struct ParseOptions {
   pub specifier: String,
 }
 
+impl ParseOptions {
+  pub fn get_specifier(&self) -> ModuleSpecifier {
+    ModuleSpecifier::parse(self.specifier.as_str())
+      .unwrap_or_else(|_| ModuleSpecifier::parse(&"file://main.ts").unwrap())
+  }
+}
+
 impl Default for ParseOptions {
   fn default() -> Self {
     ParseOptions {
@@ -843,6 +854,7 @@ impl FromJniType for ParseOptions {
     let media_type = java_media_type.get_media_type(env, media_type);
     let scope_analysis = java_parse_options.is_scope_analysis(env, obj);
     let specifier = java_parse_options.get_specifier(env, obj);
+    let specifier = url_to_string(env, &specifier);
     let parse_mode = java_parse_options.get_parse_mode(env, obj);
     let parse_mode = parse_mode.as_ref();
     let parse_mode = java_parse_mode.get_parse_mode(env, parse_mode);
@@ -920,6 +932,13 @@ pub struct TranspileOptions {
   pub var_decl_imports: bool,
 }
 
+impl TranspileOptions {
+  pub fn get_specifier(&self) -> ModuleSpecifier {
+    ModuleSpecifier::parse(self.specifier.as_str())
+      .unwrap_or_else(|_| ModuleSpecifier::parse(&"file://main.ts").unwrap())
+  }
+}
+
 impl Default for TranspileOptions {
   fn default() -> Self {
     TranspileOptions {
@@ -985,6 +1004,7 @@ impl FromJniType for TranspileOptions {
     let source_map = source_map.as_ref();
     let source_map = java_source_map_option.get_source_map(env, source_map);
     let specifier = java_transpile_options.get_specifier(env, obj);
+    let specifier = url_to_string(env, &specifier);
     let transform_jsx = java_transpile_options.is_transform_jsx(env, obj);
     let var_decl_imports = java_transpile_options.is_var_decl_imports(env, obj);
     let use_decorators_proposal = java_transpile_options.is_use_decorators_proposal(env, obj);

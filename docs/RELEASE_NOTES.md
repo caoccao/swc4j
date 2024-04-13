@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.4.0
+
+* Updated specifier from String to URL
+
 ## 0.3.0
 
 * Upgraded deno_ast to v0.36.1

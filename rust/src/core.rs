@@ -23,7 +23,7 @@ const VERSION: &'static str = "0.4.0";
 
 pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<outputs::ParseOutput, String> {
   let parse_params = ParseParams {
-    specifier: ModuleSpecifier::parse(&options.specifier).unwrap(),
+    specifier: options.get_specifier(),
     text_info: SourceTextInfo::from_string(code),
     media_type: options.media_type,
     capture_tokens: options.capture_tokens,
@@ -42,7 +42,7 @@ pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<out
 
 pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Result<outputs::TranspileOutput, String> {
   let parse_params = ParseParams {
-    specifier: ModuleSpecifier::parse(&options.specifier).unwrap(),
+    specifier: options.get_specifier(),
     text_info: SourceTextInfo::from_string(code),
     media_type: options.media_type,
     capture_tokens: options.capture_tokens,
