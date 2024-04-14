@@ -27,7 +27,7 @@ import java.math.BigInteger;
  *
  * @since 0.2.0
  */
-@Jni2RustClass(filePath = "rust/src/token_utils.rs")
+@Jni2RustClass(filePath = Jni2RustFilePath.TokenUtils)
 public final class Swc4jTokenFactory {
     private Swc4jTokenFactory() {
     }

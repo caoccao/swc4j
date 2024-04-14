@@ -16,20 +16,21 @@
 
 package com.caoccao.javet.swc4j.jni2rust;
 
-import java.lang.annotation.*;
+public enum Jni2RustFilePath {
+    AstUtils("rust/src/ast_utils.rs"),
+    None(null),
+    Options("rust/src/options.rs"),
+    Outputs("rust/src/outputs.rs"),
+    TokenUtils("rust/src/token_utils.rs"),
+    ;
 
-@Documented
-@Inherited
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Jni2RustClass {
-    Jni2RustFilePath filePath() default Jni2RustFilePath.None;
+    private final String filePath;
 
-    String getDefault() default "";
+    Jni2RustFilePath(String filePath) {
+        this.filePath = filePath;
+    }
 
-    boolean ignore() default false;
-
-    String name() default "";
-
-    boolean span() default true;
+    public String getFilePath() {
+        return filePath;
+    }
 }

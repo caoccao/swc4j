@@ -38,7 +38,7 @@ import java.util.List;
  *
  * @since 0.2.0
  */
-@Jni2RustClass(filePath = "rust/src/ast_utils.rs")
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public final class Swc4jAstFactory {
     private Swc4jAstFactory() {
     }

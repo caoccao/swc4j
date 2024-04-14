@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.options;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
@@ -30,7 +31,7 @@ import java.net.URL;
  *
  * @since 0.2.0
  */
-@Jni2RustClass(filePath = "rust/src/options.rs")
+@Jni2RustClass(filePath = Jni2RustFilePath.Options)
 public class Swc4jParseOptions {
     /**
      * The constant DEFAULT_SPECIFIER.

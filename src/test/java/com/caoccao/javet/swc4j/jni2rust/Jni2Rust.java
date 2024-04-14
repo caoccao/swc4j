@@ -387,18 +387,17 @@ public class Jni2Rust<T> {
     }
 
     protected void init() {
-        Jni2RustClass jni2RustClass = AnnotationUtils.getAnnotation(clazz, Jni2RustClass.class);
+        Optional<Jni2RustClass> jni2RustClass =
+                Optional.ofNullable(AnnotationUtils.getAnnotation(clazz, Jni2RustClass.class));
         // filePath and structName
-        setFilePath(null);
-        setStructName(PREFIX_NAME + clazz.getSimpleName());
-        if (jni2RustClass != null) {
-            if (StringUtils.isNotEmpty(jni2RustClass.filePath())) {
-                setFilePath(jni2RustClass.filePath());
-            }
-            if (StringUtils.isNotEmpty(jni2RustClass.name())) {
-                setStructName(jni2RustClass.name());
-            }
-        }
+        setFilePath(jni2RustClass
+                .map(Jni2RustClass::filePath)
+                .map(Jni2RustFilePath::getFilePath)
+                .orElse(null));
+        setStructName(jni2RustClass
+                .map(Jni2RustClass::name)
+                .filter(StringUtils::isNotEmpty)
+                .orElse(PREFIX_NAME + clazz.getSimpleName()));
         // constructor
         constructor = (Constructor<T>) Stream.of(clazz.getConstructors())
                 .filter(method -> AnnotationUtils.isAnnotationPresent(method, Jni2RustMethod.class))

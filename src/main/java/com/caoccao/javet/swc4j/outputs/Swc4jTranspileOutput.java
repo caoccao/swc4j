@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
 import com.caoccao.javet.swc4j.tokens.Swc4jToken;
@@ -33,7 +34,7 @@ import java.util.Optional;
  *
  * @since 0.1.0
  */
-@Jni2RustClass(filePath = "rust/src/outputs.rs")
+@Jni2RustClass(filePath = Jni2RustFilePath.Outputs)
 public class Swc4jTranspileOutput extends Swc4jParseOutput {
     /**
      * The Code.
