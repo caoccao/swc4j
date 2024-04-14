@@ -346,7 +346,7 @@ impl JavaURL {
   }
 }
 
-pub static mut JAVA_ARRAY_LIST: Option<JavaArrayList> = None;
+static mut JAVA_ARRAY_LIST: Option<JavaArrayList> = None;
 static mut JAVA_URL: Option<JavaURL> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
@@ -354,6 +354,17 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
     JAVA_ARRAY_LIST = Some(JavaArrayList::new(env));
     JAVA_URL = Some(JavaURL::new(env));
   }
+}
+
+pub fn list_add<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> bool {
+  unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.add(env, obj, element)
+}
+
+pub fn list_new<'local, 'a>(env: &mut JNIEnv<'local>, initial_capacity: usize) -> JObject<'a>
+where
+  'local: 'a,
+{
+  unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.construct(env, initial_capacity)
 }
 
 pub fn url_to_string<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> String {
