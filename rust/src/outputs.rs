@@ -24,6 +24,7 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use std::sync::Arc;
+use std::ptr::null_mut;
 
 use crate::ast_utils;
 use crate::enums::*;
@@ -70,8 +71,11 @@ impl JavaSwc4jParseOutput {
     let byte_to_index_map = parse_output.get_byte_to_index_map();
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
-    let program = ast_utils::program::enum_create_program(env, &byte_to_index_map, &parse_output.program);
-    let program = object_to_jvalue!(program);
+    let optional_program = parse_output
+      .program
+      .as_ref()
+      .map(|program| ast_utils::program::enum_create_program(env, &byte_to_index_map, &program));
+    let program = optional_object_to_jvalue!(optional_program);
     let media_type = java_media_type.parse(env, parse_output.media_type.get_id());
     let media_type = object_to_jvalue!(media_type);
     let parse_mode = java_parse_mode.parse(env, if parse_output.module { 0 } else { 1 });
@@ -132,9 +136,12 @@ impl JavaSwc4jTranspileOutput {
     let byte_to_index_map = transpile_output.parse_output.get_byte_to_index_map();
     let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
     let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
-    let program =
-      ast_utils::program::enum_create_program(env, &byte_to_index_map, &transpile_output.parse_output.program);
-    let program = object_to_jvalue!(program);
+    let optional_program = transpile_output
+      .parse_output
+      .program
+      .as_ref()
+      .map(|program| ast_utils::program::enum_create_program(env, &byte_to_index_map, &program));
+    let program = optional_object_to_jvalue!(optional_program);
     let java_code = string_to_jstring!(env, &transpile_output.code);
     let code = object_to_jvalue!(java_code);
     let media_type = java_media_type.parse(env, transpile_output.parse_output.media_type.get_id());

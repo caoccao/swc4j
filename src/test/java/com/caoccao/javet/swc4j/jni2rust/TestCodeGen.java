@@ -42,6 +42,91 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestCodeGen {
     @Test
+    public void testEnumCreation() throws IOException {
+        Path rustFilePath = new File(OSUtils.WORKING_DIRECTORY).toPath()
+                .resolve(Jni2RustFilePath.AstUtils.getFilePath());
+        File rustFile = rustFilePath.toFile();
+        assertTrue(rustFile.exists());
+        assertTrue(rustFile.isFile());
+        assertTrue(rustFile.canRead());
+        assertTrue(rustFile.canWrite());
+        String startSign = "\n  /* Enum Creation Begin */\n";
+        String endSign = "  /* Enum Creation End */\n";
+        byte[] originalBuffer = Files.readAllBytes(rustFilePath);
+        String fileContent = new String(originalBuffer, StandardCharsets.UTF_8);
+        final int startPosition = fileContent.indexOf(startSign) + startSign.length();
+        final int endPosition = fileContent.indexOf(endSign);
+        assertTrue(startPosition > 0, "Start position is invalid");
+        assertTrue(endPosition > startPosition, "End position is invalid");
+        final AtomicInteger enumCounter = new AtomicInteger();
+        List<String> lines = new ArrayList<>();
+        Swc4jAstStore.getInstance().getEnumMap().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .filter(entry -> entry.getValue().isInterface())
+                .filter(entry -> entry.getValue().isAnnotationPresent(Jni2RustClass.class))
+                .filter(entry -> ArrayUtils.isNotEmpty(entry.getValue().getAnnotation(Jni2RustClass.class).mappings()))
+                .forEach(entry -> {
+                    Class<?> clazz = entry.getValue();
+                    Jni2RustClass jni2RustClass = clazz.getAnnotation(Jni2RustClass.class);
+                    String enumName = StringUtils.isNotEmpty(jni2RustClass.name())
+                            ? jni2RustClass.name()
+                            : entry.getKey();
+                    lines.add(String.format("  %sfn enum_create_%s<'local, 'a>(",
+                            jni2RustClass.open() ? "pub " : "",
+                            StringUtils.toSnakeCase(enumName),
+                            enumName));
+                    lines.add("    env: &mut JNIEnv<'local>,");
+                    lines.add("    map: &ByteToIndexMap,");
+                    lines.add(String.format("    node: &%s,", enumName));
+                    lines.add("  ) -> JObject<'a>");
+                    lines.add("  where");
+                    lines.add("    'local: 'a,");
+                    lines.add("  {");
+                    lines.add("    match node {");
+                    Stream.of(jni2RustClass.mappings())
+                            .sorted(Comparator.comparing(Jni2RustEnumMapping::name))
+                            .forEach(mapping -> {
+                                assertTrue(
+                                        clazz.isAssignableFrom(mapping.type()),
+                                        mapping.type().getSimpleName() + " should implement " + clazz.getSimpleName());
+                                if (mapping.type().isInterface()) {
+                                    String typeName = Optional.ofNullable(mapping.type().getAnnotation(Jni2RustClass.class))
+                                            .map(Jni2RustClass::name)
+                                            .filter(StringUtils::isNotEmpty)
+                                            .orElse(mapping.type().getSimpleName().substring(9));
+                                    lines.add(String.format("      %s::%s(node) => enum_create_%s(env, map, node),",
+                                            enumName,
+                                            mapping.name(),
+                                            StringUtils.toSnakeCase(typeName)));
+                                } else {
+                                    String typeName = Optional.ofNullable(mapping.type().getAnnotation(Jni2RustClass.class))
+                                            .map(Jni2RustClass::name)
+                                            .filter(StringUtils::isNotEmpty)
+                                            .orElse(mapping.type().getSimpleName().substring(8));
+                                    lines.add(String.format("      %s::%s(node) => create_%s(env, map, node),",
+                                            enumName,
+                                            mapping.name(),
+                                            StringUtils.toSnakeCase(typeName)));
+                                }
+                            });
+                    lines.add("    }");
+                    lines.add("  }\n");
+                    enumCounter.incrementAndGet();
+                });
+        assertTrue(enumCounter.get() > 0);
+        StringBuilder sb = new StringBuilder(fileContent.length());
+        sb.append(fileContent, 0, startPosition);
+        String code = StringUtils.join("\n", lines);
+        sb.append(code);
+        sb.append(fileContent, endPosition, fileContent.length());
+        byte[] newBuffer = sb.toString().getBytes(StandardCharsets.UTF_8);
+        if (!Arrays.equals(originalBuffer, newBuffer)) {
+            // Only generate document when content is changed.
+            Files.write(rustFilePath, newBuffer, StandardOpenOption.TRUNCATE_EXISTING);
+        }
+    }
+
+    @Test
     public void testSpanEnumRegistration() throws IOException {
         Path rustFilePath = new File(OSUtils.WORKING_DIRECTORY).toPath()
                 .resolve(Jni2RustFilePath.AstUtils.getFilePath());

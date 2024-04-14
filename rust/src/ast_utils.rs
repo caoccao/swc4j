@@ -7315,8 +7315,6 @@ pub mod program {
   use crate::jni_utils::*;
   use crate::position_utils::ByteToIndexMap;
 
-  use std::sync::Arc;
-
   use deno_ast::swc::ast::*;
   use deno_ast::swc::common::Spanned;
 
@@ -10866,6 +10864,7 @@ pub mod program {
     return_value
   }
 
+  /* Enum Creation Begin */
   fn enum_create_assign_target<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -10875,8 +10874,8 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      AssignTarget::Simple(node) => enum_create_simple_assign_target(env, map, node),
       AssignTarget::Pat(node) => enum_create_assign_target_pat(env, map, node),
+      AssignTarget::Simple(node) => enum_create_simple_assign_target(env, map, node),
     }
   }
 
@@ -10909,7 +10908,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_callee<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Callee) -> JObject<'a>
+  fn enum_create_callee<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &Callee,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -10930,8 +10933,8 @@ pub mod program {
   {
     match node {
       ClassMember::AutoAccessor(node) => create_auto_accessor(env, map, node),
-      ClassMember::Constructor(node) => create_constructor(env, map, node),
       ClassMember::ClassProp(node) => create_class_prop(env, map, node),
+      ClassMember::Constructor(node) => create_constructor(env, map, node),
       ClassMember::Empty(node) => create_empty_stmt(env, map, node),
       ClassMember::Method(node) => create_class_method(env, map, node),
       ClassMember::PrivateMethod(node) => create_private_method(env, map, node),
@@ -10941,7 +10944,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Decl) -> JObject<'a>
+  fn enum_create_decl<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &Decl,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -10987,7 +10994,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Expr) -> JObject<'a>
+  fn enum_create_expr<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &Expr,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -11033,14 +11044,18 @@ pub mod program {
     }
   }
 
-  fn enum_create_for_head<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ForHead) -> JObject<'a>
+  fn enum_create_for_head<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &ForHead,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
     match node {
       ForHead::Pat(node) => enum_create_pat(env, map, node),
-      ForHead::VarDecl(node) => create_var_decl(env, map, node),
       ForHead::UsingDecl(node) => create_using_decl(env, map, node),
+      ForHead::VarDecl(node) => create_var_decl(env, map, node),
     }
   }
 
@@ -11135,7 +11150,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_jsx_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXExpr) -> JObject<'a>
+  fn enum_create_jsx_expr<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXExpr,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -11145,7 +11164,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_jsx_object<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXObject) -> JObject<'a>
+  fn enum_create_jsx_object<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &JSXObject,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -11155,7 +11178,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_key<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Key) -> JObject<'a>
+  fn enum_create_key<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &Key,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -11165,7 +11192,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Lit) -> JObject<'a>
+  fn enum_create_lit<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &Lit,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -11259,29 +11290,6 @@ pub mod program {
     }
   }
 
-  fn enum_create_simple_assign_target<'local, 'a>(
-    env: &mut JNIEnv<'local>,
-    map: &ByteToIndexMap,
-    node: &SimpleAssignTarget,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    match node {
-      SimpleAssignTarget::Ident(node) => create_binding_ident(env, map, node),
-      SimpleAssignTarget::Invalid(node) => create_invalid(env, map, node),
-      SimpleAssignTarget::Member(node) => create_member_expr(env, map, node),
-      SimpleAssignTarget::OptChain(node) => create_opt_chain_expr(env, map, node),
-      SimpleAssignTarget::Paren(node) => create_paren_expr(env, map, node),
-      SimpleAssignTarget::SuperProp(node) => create_super_prop_expr(env, map, node),
-      SimpleAssignTarget::TsAs(node) => create_ts_as_expr(env, map, node),
-      SimpleAssignTarget::TsInstantiation(node) => create_ts_instantiation(env, map, node),
-      SimpleAssignTarget::TsNonNull(node) => create_ts_non_null_expr(env, map, node),
-      SimpleAssignTarget::TsSatisfies(node) => create_ts_satisfies_expr(env, map, node),
-      SimpleAssignTarget::TsTypeAssertion(node) => create_ts_type_assertion(env, map, node),
-    }
-  }
-
   fn enum_create_opt_chain_base<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
@@ -11310,7 +11318,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Pat) -> JObject<'a>
+  fn enum_create_pat<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &Pat,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -11328,21 +11340,22 @@ pub mod program {
   pub fn enum_create_program<'local, 'a>(
     env: &mut JNIEnv<'local>,
     map: &ByteToIndexMap,
-    node: &Option<Arc<Program>>,
+    node: &Program,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
     match node {
-      Some(node) => match node.as_ref() {
-        Program::Module(node) => create_module(env, map, node),
-        Program::Script(node) => create_script(env, map, node),
-      },
-      None => Default::default(),
+      Program::Module(node) => create_module(env, map, node),
+      Program::Script(node) => create_script(env, map, node),
     }
   }
 
-  fn enum_create_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Prop) -> JObject<'a>
+  fn enum_create_prop<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &Prop,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -11356,7 +11369,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_prop_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &PropName) -> JObject<'a>
+  fn enum_create_prop_name<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &PropName,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -11378,12 +11395,39 @@ pub mod program {
     'local: 'a,
   {
     match node {
-      PropOrSpread::Spread(node) => create_spread_element(env, map, node),
       PropOrSpread::Prop(node) => enum_create_prop(env, map, node),
+      PropOrSpread::Spread(node) => create_spread_element(env, map, node),
     }
   }
 
-  fn enum_create_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Stmt) -> JObject<'a>
+  fn enum_create_simple_assign_target<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &SimpleAssignTarget,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match node {
+      SimpleAssignTarget::Ident(node) => create_binding_ident(env, map, node),
+      SimpleAssignTarget::Invalid(node) => create_invalid(env, map, node),
+      SimpleAssignTarget::Member(node) => create_member_expr(env, map, node),
+      SimpleAssignTarget::OptChain(node) => create_opt_chain_expr(env, map, node),
+      SimpleAssignTarget::Paren(node) => create_paren_expr(env, map, node),
+      SimpleAssignTarget::SuperProp(node) => create_super_prop_expr(env, map, node),
+      SimpleAssignTarget::TsAs(node) => create_ts_as_expr(env, map, node),
+      SimpleAssignTarget::TsInstantiation(node) => create_ts_instantiation(env, map, node),
+      SimpleAssignTarget::TsNonNull(node) => create_ts_non_null_expr(env, map, node),
+      SimpleAssignTarget::TsSatisfies(node) => create_ts_satisfies_expr(env, map, node),
+      SimpleAssignTarget::TsTypeAssertion(node) => create_ts_type_assertion(env, map, node),
+    }
+  }
+
+  fn enum_create_stmt<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &Stmt,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -11392,8 +11436,8 @@ pub mod program {
       Stmt::Break(node) => create_break_stmt(env, map, node),
       Stmt::Continue(node) => create_continue_stmt(env, map, node),
       Stmt::Debugger(node) => create_debugger_stmt(env, map, node),
-      Stmt::DoWhile(node) => create_do_while_stmt(env, map, node),
       Stmt::Decl(node) => enum_create_decl(env, map, node),
+      Stmt::DoWhile(node) => create_do_while_stmt(env, map, node),
       Stmt::Empty(node) => create_empty_stmt(env, map, node),
       Stmt::Expr(node) => create_expr_stmt(env, map, node),
       Stmt::For(node) => create_for_stmt(env, map, node),
@@ -11410,7 +11454,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_super_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SuperProp) -> JObject<'a>
+  fn enum_create_super_prop<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &SuperProp,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -11478,7 +11526,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_ts_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsLit) -> JObject<'a>
+  fn enum_create_ts_lit<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsLit,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -11561,7 +11613,11 @@ pub mod program {
     }
   }
 
-  fn enum_create_ts_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsType) -> JObject<'a>
+  fn enum_create_ts_type<'local, 'a>(
+    env: &mut JNIEnv<'local>,
+    map: &ByteToIndexMap,
+    node: &TsType,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
@@ -11649,4 +11705,5 @@ pub mod program {
       VarDeclOrExpr::VarDecl(node) => create_var_decl(env, map, node),
     }
   }
+  /* Enum Creation End */
 }
