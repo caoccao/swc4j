@@ -16,5 +16,14 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
+
+@Jni2RustClass(
+        mappings = {
+                @Jni2RustEnumMapping(name = "Simple", type = ISwc4jAstSimpleAssignTarget.class),
+                @Jni2RustEnumMapping(name = "Pat", type = ISwc4jAstAssignTargetPat.class),
+        }
+)
 public interface ISwc4jAstAssignTarget extends ISwc4jAst {
 }

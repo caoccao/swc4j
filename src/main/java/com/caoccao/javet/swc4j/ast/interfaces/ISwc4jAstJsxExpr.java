@@ -16,8 +16,17 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstJsxEmptyExpr;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(name = "JSXExpr", getDefault = "JSXExpr::Expr(Box::new(Expr::get_default()))")
+@Jni2RustClass(
+        name = "JSXExpr",
+        getDefault = "JSXExpr::Expr(Box::new(Expr::get_default()))",
+        mappings = {
+                @Jni2RustEnumMapping(name = "Expr", type = ISwc4jAstExpr.class),
+                @Jni2RustEnumMapping(name = "JSXEmptyExpr", type = Swc4jAstJsxEmptyExpr.class),
+        }
+)
 public interface ISwc4jAstJsxExpr extends ISwc4jAst {
 }

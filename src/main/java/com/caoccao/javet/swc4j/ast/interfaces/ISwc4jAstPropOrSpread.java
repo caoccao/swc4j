@@ -16,5 +16,15 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstSpreadElement;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
+
+@Jni2RustClass(
+        mappings = {
+                @Jni2RustEnumMapping(name = "Prop", type = ISwc4jAstProp.class),
+                @Jni2RustEnumMapping(name = "Spread", type = Swc4jAstSpreadElement.class),
+        }
+)
 public interface ISwc4jAstPropOrSpread extends ISwc4jAst {
 }

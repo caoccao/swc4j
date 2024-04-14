@@ -16,8 +16,19 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstAssignPatProp;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstKeyValuePatProp;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "ObjectPatProp::Rest(RestPat::get_default())")
+@Jni2RustClass(
+        getDefault = "ObjectPatProp::Rest(RestPat::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "Assign", type = Swc4jAstAssignPatProp.class),
+                @Jni2RustEnumMapping(name = "KeyValue", type = Swc4jAstKeyValuePatProp.class),
+                @Jni2RustEnumMapping(name = "Rest", type = Swc4jAstRestPat.class),
+        }
+)
 public interface ISwc4jAstObjectPatProp extends ISwc4jAst {
 }

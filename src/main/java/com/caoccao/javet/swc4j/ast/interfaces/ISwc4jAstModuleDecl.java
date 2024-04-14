@@ -16,5 +16,22 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.module.*;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
+
+@Jni2RustClass(
+        mappings = {
+                @Jni2RustEnumMapping(name = "ExportAll", type = Swc4jAstExportAll.class),
+                @Jni2RustEnumMapping(name = "ExportDecl", type = Swc4jAstExportDecl.class),
+                @Jni2RustEnumMapping(name = "ExportDefaultDecl", type = Swc4jAstExportDefaultDecl.class),
+                @Jni2RustEnumMapping(name = "ExportDefaultExpr", type = Swc4jAstExportDefaultExpr.class),
+                @Jni2RustEnumMapping(name = "ExportNamed", type = Swc4jAstNamedExport.class),
+                @Jni2RustEnumMapping(name = "Import", type = Swc4jAstImportDecl.class),
+                @Jni2RustEnumMapping(name = "TsExportAssignment", type = Swc4jAstTsExportAssignment.class),
+                @Jni2RustEnumMapping(name = "TsImportEquals", type = Swc4jAstTsImportEqualsDecl.class),
+                @Jni2RustEnumMapping(name = "TsNamespaceExport", type = Swc4jAstTsNamespaceExportDecl.class),
+        }
+)
 public interface ISwc4jAstModuleDecl extends ISwc4jAstModuleItem {
 }

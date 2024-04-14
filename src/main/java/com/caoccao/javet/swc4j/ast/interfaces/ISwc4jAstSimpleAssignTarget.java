@@ -16,5 +16,26 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.expr.*;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstInvalid;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
+
+@Jni2RustClass(
+        mappings = {
+                @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstBindingIdent.class),
+                @Jni2RustEnumMapping(name = "Invalid", type = Swc4jAstInvalid.class),
+                @Jni2RustEnumMapping(name = "Member", type = Swc4jAstMemberExpr.class),
+                @Jni2RustEnumMapping(name = "OptChain", type = Swc4jAstOptChainExpr.class),
+                @Jni2RustEnumMapping(name = "Paren", type = Swc4jAstParenExpr.class),
+                @Jni2RustEnumMapping(name = "SuperProp", type = Swc4jAstSuperPropExpr.class),
+                @Jni2RustEnumMapping(name = "TsAs", type = Swc4jAstTsAsExpr.class),
+                @Jni2RustEnumMapping(name = "TsInstantiation", type = Swc4jAstTsInstantiation.class),
+                @Jni2RustEnumMapping(name = "TsNonNull", type = Swc4jAstTsNonNullExpr.class),
+                @Jni2RustEnumMapping(name = "TsSatisfies", type = Swc4jAstTsSatisfiesExpr.class),
+                @Jni2RustEnumMapping(name = "TsTypeAssertion", type = Swc4jAstTsTypeAssertion.class),
+        }
+)
 public interface ISwc4jAstSimpleAssignTarget extends ISwc4jAstAssignTarget {
 }

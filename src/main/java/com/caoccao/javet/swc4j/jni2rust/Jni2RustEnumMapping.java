@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.interfaces;
+package com.caoccao.javet.swc4j.jni2rust;
 
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
-import org.junit.jupiter.api.Test;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.lang.annotation.*;
 
-public class TestISwc4jAstVarDeclOrExpr {
-    @Test
-    public void testAssignable() {
-        assertTrue(ISwc4jAstVarDeclOrExpr.class.isAssignableFrom(ISwc4jAstExpr.class));
-        assertTrue(ISwc4jAstVarDeclOrExpr.class.isAssignableFrom(Swc4jAstVarDecl.class));
-    }
+@Documented
+@Inherited
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Jni2RustEnumMapping {
+    String name();
+
+    Class<? extends ISwc4jAst> type();
 }

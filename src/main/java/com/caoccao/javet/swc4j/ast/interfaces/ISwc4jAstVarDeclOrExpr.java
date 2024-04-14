@@ -16,5 +16,15 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
+
+@Jni2RustClass(
+        mappings = {
+                @Jni2RustEnumMapping(name = "Expr", type = ISwc4jAstExpr.class),
+                @Jni2RustEnumMapping(name = "VarDecl", type = Swc4jAstVarDecl.class),
+        }
+)
 public interface ISwc4jAstVarDeclOrExpr extends ISwc4jAst {
 }

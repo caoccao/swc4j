@@ -22,15 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Jni2RustOptions {
-    protected static final Map<String, String> DEFAULT_JAVA_TYPE_TO_JNI_CAST_TYPE_MAP = SimpleMap.of(
-            "int", "i32",
-            "long", "i64",
-            "short", "i32",
-            "char", "u16",
-            "byte", "i8",
-            "boolean", "u8",
-            "float", "f32",
-            "double", "f64");
     protected static final Map<String, String> DEFAULT_JAVA_TYPE_TO_JNI_SIMPLE_TYPE_MAP = SimpleMap.of(
             "int", "I",
             "long", "J",
@@ -49,18 +40,12 @@ public class Jni2RustOptions {
             "boolean", "bool",
             "float", "f32",
             "double", "f64");
-    protected final Map<String, String> javaTypeToJniCastTypeMap;
     protected final Map<String, String> javaTypeToJniSimpleTypeMap;
     protected final Map<String, String> javaTypeToRustTypeMap;
 
     public Jni2RustOptions() {
-        javaTypeToJniCastTypeMap = new HashMap<>(DEFAULT_JAVA_TYPE_TO_JNI_CAST_TYPE_MAP);
         javaTypeToJniSimpleTypeMap = new HashMap<>(DEFAULT_JAVA_TYPE_TO_JNI_SIMPLE_TYPE_MAP);
         javaTypeToRustTypeMap = new HashMap<>(DEFAULT_JAVA_TYPE_TO_RUST_TYPE_MAP);
-    }
-
-    public Map<String, String> getJavaTypeToJniCastTypeMap() {
-        return javaTypeToJniCastTypeMap;
     }
 
     public Map<String, String> getJavaTypeToJniSimpleTypeMap() {

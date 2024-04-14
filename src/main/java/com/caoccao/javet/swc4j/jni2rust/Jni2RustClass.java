@@ -29,7 +29,11 @@ public @interface Jni2RustClass {
 
     boolean ignore() default false;
 
+    Jni2RustEnumMapping[] mappings() default {};
+
     String name() default "";
+
+    boolean open() default false;
 
     boolean span() default true;
 }

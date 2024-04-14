@@ -16,8 +16,18 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstSpreadElement;
+import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxAttr;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(name = "JSXAttrOrSpread", getDefault = "JSXAttrOrSpread::JSXAttr(JSXAttr::get_default())")
+@Jni2RustClass(
+        name = "JSXAttrOrSpread",
+        getDefault = "JSXAttrOrSpread::JSXAttr(JSXAttr::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "JSXAttr", type = Swc4jAstJsxAttr.class),
+                @Jni2RustEnumMapping(name = "SpreadElement", type = Swc4jAstSpreadElement.class),
+        }
+)
 public interface ISwc4jAstJsxAttrOrSpread extends ISwc4jAst {
 }

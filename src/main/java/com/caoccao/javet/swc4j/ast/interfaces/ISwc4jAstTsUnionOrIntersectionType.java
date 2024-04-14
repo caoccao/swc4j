@@ -16,8 +16,17 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsIntersectionType;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsUnionType;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "TsUnionOrIntersectionType::TsUnionType(TsUnionType::get_default())")
+@Jni2RustClass(
+        getDefault = "TsUnionOrIntersectionType::TsUnionType(TsUnionType::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "TsIntersectionType", type = Swc4jAstTsIntersectionType.class),
+                @Jni2RustEnumMapping(name = "TsUnionType", type = Swc4jAstTsUnionType.class),
+        }
+)
 public interface ISwc4jAstTsUnionOrIntersectionType extends ISwc4jAstTsType {
 }

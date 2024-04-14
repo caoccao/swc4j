@@ -16,9 +16,22 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.clazz.*;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "Prop::Shorthand(Ident::get_default())")
+@Jni2RustClass(
+        getDefault = "Prop::Shorthand(Ident::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "Assign", type = Swc4jAstAssignProp.class),
+                @Jni2RustEnumMapping(name = "Getter", type = Swc4jAstGetterProp.class),
+                @Jni2RustEnumMapping(name = "KeyValue", type = Swc4jAstKeyValueProp.class),
+                @Jni2RustEnumMapping(name = "Method", type = Swc4jAstMethodProp.class),
+                @Jni2RustEnumMapping(name = "Setter", type = Swc4jAstSetterProp.class),
+                @Jni2RustEnumMapping(name = "Shorthand", type = Swc4jAstIdent.class),
+        }
+)
 public interface ISwc4jAstProp
         extends ISwc4jAstPropOrSpread {
 }

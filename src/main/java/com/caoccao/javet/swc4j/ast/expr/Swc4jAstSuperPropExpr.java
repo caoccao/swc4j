@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstSuper;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstSimpleAssignTarget;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstSuperProp;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -29,7 +30,7 @@ import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 public class Swc4jAstSuperPropExpr
         extends Swc4jAst
-        implements ISwc4jAstExpr {
+        implements ISwc4jAstExpr, ISwc4jAstSimpleAssignTarget {
     protected final Swc4jAstSuper obj;
     protected final ISwc4jAstSuperProp prop;
 

@@ -16,5 +16,17 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstSuper;
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstImport;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
+
+@Jni2RustClass(
+        mappings = {
+                @Jni2RustEnumMapping(name = "Expr", type = ISwc4jAstExpr.class),
+                @Jni2RustEnumMapping(name = "Import", type = Swc4jAstImport.class),
+                @Jni2RustEnumMapping(name = "Super", type = Swc4jAstSuper.class),
+        }
+)
 public interface ISwc4jAstCallee extends ISwc4jAst {
 }

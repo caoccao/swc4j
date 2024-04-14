@@ -16,5 +16,17 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstUsingDecl;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
+
+@Jni2RustClass(
+        mappings = {
+                @Jni2RustEnumMapping(name = "Pat", type = ISwc4jAstPat.class),
+                @Jni2RustEnumMapping(name = "UsingDecl", type = Swc4jAstUsingDecl.class),
+                @Jni2RustEnumMapping(name = "VarDecl", type = Swc4jAstVarDecl.class),
+        }
+)
 public interface ISwc4jAstForHead extends ISwc4jAst {
 }

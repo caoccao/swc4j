@@ -16,8 +16,24 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstJsxElement;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstJsxExprContainer;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstJsxFragment;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstJsxSpreadChild;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstJsxText;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(name = "JSXElementChild", getDefault = "JSXElementChild::JSXText(JSXText::get_default())")
+@Jni2RustClass(
+        name = "JSXElementChild",
+        getDefault = "JSXElementChild::JSXText(JSXText::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "JSXElement", type = Swc4jAstJsxElement.class),
+                @Jni2RustEnumMapping(name = "JSXExprContainer", type = Swc4jAstJsxExprContainer.class),
+                @Jni2RustEnumMapping(name = "JSXFragment", type = Swc4jAstJsxFragment.class),
+                @Jni2RustEnumMapping(name = "JSXSpreadChild", type = Swc4jAstJsxSpreadChild.class),
+                @Jni2RustEnumMapping(name = "JSXText", type = Swc4jAstJsxText.class),
+        }
+)
 public interface ISwc4jAstJsxElementChild extends ISwc4jAst {
 }

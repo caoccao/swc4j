@@ -5705,10 +5705,11 @@ pub mod span {
   use crate::position_utils::ByteToIndexMap;
   use deno_ast::swc::{ast::*, common::Spanned};
 
+  /* Span Enum Registration Begin */
   fn enum_register_assign_target(map: &mut ByteToIndexMap, node: &AssignTarget) {
     match node {
-      AssignTarget::Simple(node) => enum_register_simple_assign_target(map, node),
       AssignTarget::Pat(node) => enum_register_assign_target_pat(map, node),
+      AssignTarget::Simple(node) => enum_register_simple_assign_target(map, node),
     }
   }
 
@@ -5751,15 +5752,15 @@ pub mod span {
 
   fn enum_register_decl(map: &mut ByteToIndexMap, node: &Decl) {
     match node {
-      Decl::Class(node) => register_class_decl(map, &node),
-      Decl::Fn(node) => register_fn_decl(map, &node),
-      Decl::TsEnum(node) => register_ts_enum_decl(map, &node.as_ref()),
-      Decl::TsInterface(node) => register_ts_interface_decl(map, &node.as_ref()),
-      Decl::TsModule(node) => register_ts_module_decl(map, &node.as_ref()),
-      Decl::TsTypeAlias(node) => register_ts_type_alias_decl(map, &node.as_ref()),
-      Decl::Using(node) => register_using_decl(map, &node.as_ref()),
-      Decl::Var(node) => register_var_decl(map, node.as_ref()),
-    };
+      Decl::Class(node) => register_class_decl(map, node),
+      Decl::Fn(node) => register_fn_decl(map, node),
+      Decl::TsEnum(node) => register_ts_enum_decl(map, node),
+      Decl::TsInterface(node) => register_ts_interface_decl(map, node),
+      Decl::TsModule(node) => register_ts_module_decl(map, node),
+      Decl::TsTypeAlias(node) => register_ts_type_alias_decl(map, node),
+      Decl::Using(node) => register_using_decl(map, node),
+      Decl::Var(node) => register_var_decl(map, node),
+    }
   }
 
   fn enum_register_default_decl(map: &mut ByteToIndexMap, node: &DefaultDecl) {
@@ -5942,8 +5943,8 @@ pub mod span {
 
   fn enum_register_module_item(map: &mut ByteToIndexMap, node: &ModuleItem) {
     match node {
-      ModuleItem::ModuleDecl(node) => enum_register_module_decl(map, &node),
-      ModuleItem::Stmt(node) => enum_register_stmt(map, &node),
+      ModuleItem::ModuleDecl(node) => enum_register_module_decl(map, node),
+      ModuleItem::Stmt(node) => enum_register_stmt(map, node),
     }
   }
 
@@ -6053,7 +6054,7 @@ pub mod span {
       Stmt::Try(node) => register_try_stmt(map, node),
       Stmt::While(node) => register_while_stmt(map, node),
       Stmt::With(node) => register_with_stmt(map, node),
-    };
+    }
   }
 
   fn enum_register_super_prop(map: &mut ByteToIndexMap, node: &SuperProp) {
@@ -6195,6 +6196,7 @@ pub mod span {
       VarDeclOrExpr::VarDecl(node) => register_var_decl(map, node),
     }
   }
+  /* Span Enum Registration End */
 
   fn register_array_lit(map: &mut ByteToIndexMap, node: &ArrayLit) {
     map.register_by_span(&node.span);

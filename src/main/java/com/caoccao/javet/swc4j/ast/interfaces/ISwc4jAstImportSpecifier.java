@@ -16,8 +16,19 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstImportDefaultSpecifier;
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstImportNamedSpecifier;
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstImportStarAsSpecifier;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "ImportSpecifier::Default(ImportDefaultSpecifier::get_default())")
+@Jni2RustClass(
+        getDefault = "ImportSpecifier::Default(ImportDefaultSpecifier::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "Default", type = Swc4jAstImportDefaultSpecifier.class),
+                @Jni2RustEnumMapping(name = "Named", type = Swc4jAstImportNamedSpecifier.class),
+                @Jni2RustEnumMapping(name = "Namespace", type = Swc4jAstImportStarAsSpecifier.class),
+        }
+)
 public interface ISwc4jAstImportSpecifier extends ISwc4jAst {
 }

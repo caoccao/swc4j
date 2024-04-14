@@ -16,5 +16,32 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.stmt.*;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
+
+@Jni2RustClass(
+        mappings = {
+                @Jni2RustEnumMapping(name = "Block", type = Swc4jAstBlockStmt.class),
+                @Jni2RustEnumMapping(name = "Break", type = Swc4jAstBreakStmt.class),
+                @Jni2RustEnumMapping(name = "Continue", type = Swc4jAstContinueStmt.class),
+                @Jni2RustEnumMapping(name = "Debugger", type = Swc4jAstDebuggerStmt.class),
+                @Jni2RustEnumMapping(name = "Decl", type = ISwc4jAstDecl.class),
+                @Jni2RustEnumMapping(name = "DoWhile", type = Swc4jAstDoWhileStmt.class),
+                @Jni2RustEnumMapping(name = "Empty", type = Swc4jAstEmptyStmt.class),
+                @Jni2RustEnumMapping(name = "Expr", type = Swc4jAstExprStmt.class),
+                @Jni2RustEnumMapping(name = "For", type = Swc4jAstForStmt.class),
+                @Jni2RustEnumMapping(name = "ForIn", type = Swc4jAstForInStmt.class),
+                @Jni2RustEnumMapping(name = "ForOf", type = Swc4jAstForOfStmt.class),
+                @Jni2RustEnumMapping(name = "If", type = Swc4jAstIfStmt.class),
+                @Jni2RustEnumMapping(name = "Labeled", type = Swc4jAstLabeledStmt.class),
+                @Jni2RustEnumMapping(name = "Return", type = Swc4jAstReturnStmt.class),
+                @Jni2RustEnumMapping(name = "Switch", type = Swc4jAstSwitchStmt.class),
+                @Jni2RustEnumMapping(name = "Throw", type = Swc4jAstThrowStmt.class),
+                @Jni2RustEnumMapping(name = "Try", type = Swc4jAstTryStmt.class),
+                @Jni2RustEnumMapping(name = "While", type = Swc4jAstWhileStmt.class),
+                @Jni2RustEnumMapping(name = "With", type = Swc4jAstWithStmt.class),
+        }
+)
 public interface ISwc4jAstStmt extends ISwc4jAstModuleItem {
 }

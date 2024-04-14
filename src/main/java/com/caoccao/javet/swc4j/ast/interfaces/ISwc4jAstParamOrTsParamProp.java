@@ -16,8 +16,17 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsParamProp;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "ParamOrTsParamProp::Param(Param::get_default())")
+@Jni2RustClass(
+        getDefault = "ParamOrTsParamProp::Param(Param::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "Param", type = Swc4jAstParam.class),
+                @Jni2RustEnumMapping(name = "TsParamProp", type = Swc4jAstTsParamProp.class),
+        }
+)
 public interface ISwc4jAstParamOrTsParamProp extends ISwc4jAst {
 }

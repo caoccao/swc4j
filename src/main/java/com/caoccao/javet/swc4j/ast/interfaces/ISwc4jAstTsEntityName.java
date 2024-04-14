@@ -16,9 +16,18 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsQualifiedName;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "TsEntityName::Ident(Ident::get_default())")
+@Jni2RustClass(
+        getDefault = "TsEntityName::Ident(Ident::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstIdent.class),
+                @Jni2RustEnumMapping(name = "TsQualifiedName", type = Swc4jAstTsQualifiedName.class),
+        }
+)
 public interface ISwc4jAstTsEntityName
         extends ISwc4jAstTsModuleRef, ISwc4jAstTsTypeQueryExpr {
 }

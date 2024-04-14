@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.interfaces;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +30,14 @@ import java.util.Optional;
  * @param <AST> the type parameter
  * @since 0.2.0
  */
-@Jni2RustClass(getDefault = "Program::Script(Script::dummy())")
+@Jni2RustClass(
+        getDefault = "Program::Script(Script::dummy())",
+        open = true,
+        mappings = {
+                @Jni2RustEnumMapping(name = "Module", type = Swc4jAstModule.class),
+                @Jni2RustEnumMapping(name = "Script", type = Swc4jAstScript.class),
+        }
+)
 public interface ISwc4jAstProgram<AST extends ISwc4jAst> extends ISwc4jAst {
     /**
      * As module ast module.

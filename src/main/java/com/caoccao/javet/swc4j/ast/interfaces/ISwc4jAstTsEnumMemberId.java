@@ -16,8 +16,17 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "TsEnumMemberId::Ident(Ident::get_default())")
+@Jni2RustClass(
+        getDefault = "TsEnumMemberId::Ident(Ident::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstIdent.class),
+                @Jni2RustEnumMapping(name = "Str", type = Swc4jAstStr.class),
+        }
+)
 public interface ISwc4jAstTsEnumMemberId extends ISwc4jAst {
 }

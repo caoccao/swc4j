@@ -16,8 +16,19 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstClassExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstFnExpr;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsInterfaceDecl;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "DefaultDecl::Class(ClassExpr::get_default())")
+@Jni2RustClass(
+        getDefault = "DefaultDecl::Class(ClassExpr::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "Class", type = Swc4jAstClassExpr.class),
+                @Jni2RustEnumMapping(name = "Fn", type = Swc4jAstFnExpr.class),
+                @Jni2RustEnumMapping(name = "TsInterfaceDecl", type = Swc4jAstTsInterfaceDecl.class),
+        }
+)
 public interface ISwc4jAstDefaultDecl extends ISwc4jAst {
 }

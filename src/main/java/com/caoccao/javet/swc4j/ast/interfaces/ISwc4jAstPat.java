@@ -16,5 +16,20 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.pat.*;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
+
+@Jni2RustClass(
+        mappings = {
+                @Jni2RustEnumMapping(name = "Array", type = Swc4jAstArrayPat.class),
+                @Jni2RustEnumMapping(name = "Assign", type = Swc4jAstAssignPat.class),
+                @Jni2RustEnumMapping(name = "Expr", type = ISwc4jAstExpr.class),
+                @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstBindingIdent.class),
+                @Jni2RustEnumMapping(name = "Invalid", type = Swc4jAstInvalid.class),
+                @Jni2RustEnumMapping(name = "Object", type = Swc4jAstObjectPat.class),
+                @Jni2RustEnumMapping(name = "Rest", type = Swc4jAstRestPat.class),
+        }
+)
 public interface ISwc4jAstPat extends ISwc4jAstAssignTarget, ISwc4jAstForHead {
 }

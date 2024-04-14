@@ -16,5 +16,24 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.clazz.*;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstEmptyStmt;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsIndexSignature;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
+
+@Jni2RustClass(
+        mappings = {
+                @Jni2RustEnumMapping(name = "AutoAccessor", type = Swc4jAstAutoAccessor.class),
+                @Jni2RustEnumMapping(name = "ClassProp", type = Swc4jAstClassProp.class),
+                @Jni2RustEnumMapping(name = "Constructor", type = Swc4jAstConstructor.class),
+                @Jni2RustEnumMapping(name = "Empty", type = Swc4jAstEmptyStmt.class),
+                @Jni2RustEnumMapping(name = "Method", type = Swc4jAstClassMethod.class),
+                @Jni2RustEnumMapping(name = "PrivateMethod", type = Swc4jAstPrivateMethod.class),
+                @Jni2RustEnumMapping(name = "PrivateProp", type = Swc4jAstPrivateProp.class),
+                @Jni2RustEnumMapping(name = "StaticBlock", type = Swc4jAstStaticBlock.class),
+                @Jni2RustEnumMapping(name = "TsIndexSignature", type = Swc4jAstTsIndexSignature.class),
+        }
+)
 public interface ISwc4jAstClassMember extends ISwc4jAst {
 }

@@ -16,8 +16,17 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsConstructorType;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsFnType;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "TsFnOrConstructorType::TsFnType(TsFnType::get_default())")
+@Jni2RustClass(
+        getDefault = "TsFnOrConstructorType::TsFnType(TsFnType::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "TsConstructorType", type = Swc4jAstTsConstructorType.class),
+                @Jni2RustEnumMapping(name = "TsFnType", type = Swc4jAstTsFnType.class),
+        }
+)
 public interface ISwc4jAstTsFnOrConstructorType extends ISwc4jAstTsType {
 }

@@ -16,8 +16,18 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstJsxMemberExpr;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(name = "JSXObject", getDefault = "JSXObject::Ident(Ident::get_default())")
+@Jni2RustClass(
+        name = "JSXObject",
+        getDefault = "JSXObject::Ident(Ident::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstIdent.class),
+                @Jni2RustEnumMapping(name = "JSXMemberExpr", type = Swc4jAstJsxMemberExpr.class),
+        }
+)
 public interface ISwc4jAstJsxObject extends ISwc4jAst {
 }

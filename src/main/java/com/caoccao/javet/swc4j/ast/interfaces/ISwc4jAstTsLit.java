@@ -16,8 +16,23 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBigInt;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTplLitType;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "TsLit::Bool(Bool::get_default())")
+@Jni2RustClass(
+        getDefault = "TsLit::Bool(Bool::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "BigInt", type = Swc4jAstBigInt.class),
+                @Jni2RustEnumMapping(name = "Bool", type = Swc4jAstBool.class),
+                @Jni2RustEnumMapping(name = "Number", type = Swc4jAstNumber.class),
+                @Jni2RustEnumMapping(name = "Str", type = Swc4jAstStr.class),
+                @Jni2RustEnumMapping(name = "Tpl", type = Swc4jAstTsTplLitType.class),
+        }
+)
 public interface ISwc4jAstTsLit extends ISwc4jAst {
 }

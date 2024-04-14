@@ -16,8 +16,34 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.ts.*;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "TsType::TsThisType(TsThisType::get_default())")
+@Jni2RustClass(
+        getDefault = "TsType::TsThisType(TsThisType::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "TsArrayType", type = Swc4jAstTsArrayType.class),
+                @Jni2RustEnumMapping(name = "TsConditionalType", type = Swc4jAstTsConditionalType.class),
+                @Jni2RustEnumMapping(name = "TsFnOrConstructorType", type = ISwc4jAstTsFnOrConstructorType.class),
+                @Jni2RustEnumMapping(name = "TsImportType", type = Swc4jAstTsImportType.class),
+                @Jni2RustEnumMapping(name = "TsIndexedAccessType", type = Swc4jAstTsIndexedAccessType.class),
+                @Jni2RustEnumMapping(name = "TsInferType", type = Swc4jAstTsInferType.class),
+                @Jni2RustEnumMapping(name = "TsKeywordType", type = Swc4jAstTsKeywordType.class),
+                @Jni2RustEnumMapping(name = "TsLitType", type = Swc4jAstTsLitType.class),
+                @Jni2RustEnumMapping(name = "TsMappedType", type = Swc4jAstTsMappedType.class),
+                @Jni2RustEnumMapping(name = "TsOptionalType", type = Swc4jAstTsOptionalType.class),
+                @Jni2RustEnumMapping(name = "TsParenthesizedType", type = Swc4jAstTsParenthesizedType.class),
+                @Jni2RustEnumMapping(name = "TsRestType", type = Swc4jAstTsRestType.class),
+                @Jni2RustEnumMapping(name = "TsThisType", type = Swc4jAstTsThisType.class),
+                @Jni2RustEnumMapping(name = "TsTupleType", type = Swc4jAstTsTupleType.class),
+                @Jni2RustEnumMapping(name = "TsTypeLit", type = Swc4jAstTsTypeLit.class),
+                @Jni2RustEnumMapping(name = "TsTypeOperator", type = Swc4jAstTsTypeOperator.class),
+                @Jni2RustEnumMapping(name = "TsTypePredicate", type = Swc4jAstTsTypePredicate.class),
+                @Jni2RustEnumMapping(name = "TsTypeQuery", type = Swc4jAstTsTypeQuery.class),
+                @Jni2RustEnumMapping(name = "TsTypeRef", type = Swc4jAstTsTypeRef.class),
+                @Jni2RustEnumMapping(name = "TsUnionOrIntersectionType", type = ISwc4jAstTsUnionOrIntersectionType.class),
+        }
+)
 public interface ISwc4jAstTsType extends ISwc4jAst {
 }

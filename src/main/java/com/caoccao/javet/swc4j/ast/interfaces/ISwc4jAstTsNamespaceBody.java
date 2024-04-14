@@ -16,8 +16,17 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsNamespaceDecl;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "TsNamespaceBody::TsModuleBlock(TsModuleBlock::get_default())")
+@Jni2RustClass(
+        getDefault = "TsNamespaceBody::TsModuleBlock(TsModuleBlock::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "TsModuleBlock", type = Swc4jAstTsModuleBlock.class),
+                @Jni2RustEnumMapping(name = "TsNamespaceDecl", type = Swc4jAstTsNamespaceDecl.class),
+        }
+)
 public interface ISwc4jAstTsNamespaceBody extends ISwc4jAst {
 }

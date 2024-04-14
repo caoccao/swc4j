@@ -19,10 +19,7 @@ package com.caoccao.javet.swc4j.ast.pat;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstSimpleAssignTarget;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -34,7 +31,7 @@ import java.util.Optional;
 
 public class Swc4jAstObjectPat
         extends Swc4jAst
-        implements ISwc4jAstPat, ISwc4jAstTsFnParam, ISwc4jAstSimpleAssignTarget {
+        implements ISwc4jAstPat, ISwc4jAstAssignTargetPat, ISwc4jAstTsFnParam, ISwc4jAstSimpleAssignTarget {
     protected final boolean optional;
     protected final List<ISwc4jAstObjectPatProp> props;
     protected final Optional<Swc4jAstTsTypeAnn> typeAnn;

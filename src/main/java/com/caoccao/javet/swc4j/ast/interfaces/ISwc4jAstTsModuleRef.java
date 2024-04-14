@@ -16,8 +16,16 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsExternalModuleRef;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "TsModuleRef::TsEntityName(TsEntityName::get_default())")
+@Jni2RustClass(
+        getDefault = "TsModuleRef::TsEntityName(TsEntityName::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "TsEntityName", type = ISwc4jAstTsEntityName.class),
+                @Jni2RustEnumMapping(name = "TsExternalModuleRef", type = Swc4jAstTsExternalModuleRef.class),
+        }
+)
 public interface ISwc4jAstTsModuleRef extends ISwc4jAst {
 }

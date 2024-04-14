@@ -16,8 +16,17 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
+import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstOptCall;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "OptChainBase::Call(OptCall::get_default())")
+@Jni2RustClass(
+        getDefault = "OptChainBase::Call(OptCall::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "Call", type = Swc4jAstOptCall.class),
+                @Jni2RustEnumMapping(name = "Member", type = Swc4jAstMemberExpr.class),
+        }
+)
 public interface ISwc4jAstOptChainBase extends ISwc4jAst {
 }

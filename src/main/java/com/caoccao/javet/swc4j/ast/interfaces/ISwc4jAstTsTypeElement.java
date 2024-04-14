@@ -16,8 +16,21 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.ts.*;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "TsTypeElement::TsConstructSignatureDecl(TsConstructSignatureDecl::get_default())")
+@Jni2RustClass(
+        getDefault = "TsTypeElement::TsConstructSignatureDecl(TsConstructSignatureDecl::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "TsCallSignatureDecl", type = Swc4jAstTsCallSignatureDecl.class),
+                @Jni2RustEnumMapping(name = "TsConstructSignatureDecl", type = Swc4jAstTsConstructSignatureDecl.class),
+                @Jni2RustEnumMapping(name = "TsGetterSignature", type = Swc4jAstTsGetterSignature.class),
+                @Jni2RustEnumMapping(name = "TsIndexSignature", type = Swc4jAstTsIndexSignature.class),
+                @Jni2RustEnumMapping(name = "TsMethodSignature", type = Swc4jAstTsMethodSignature.class),
+                @Jni2RustEnumMapping(name = "TsPropertySignature", type = Swc4jAstTsPropertySignature.class),
+                @Jni2RustEnumMapping(name = "TsSetterSignature", type = Swc4jAstTsSetterSignature.class),
+        }
+)
 public interface ISwc4jAstTsTypeElement extends ISwc4jAst {
 }

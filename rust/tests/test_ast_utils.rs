@@ -53,6 +53,12 @@ impl GetDefault<AssignTarget> for AssignTarget {
   }
 }
 
+impl GetDefault<AssignTargetPat> for AssignTargetPat {
+  fn get_default() -> AssignTargetPat {
+    AssignTargetPat::dummy()
+  }
+}
+
 impl GetDefault<BinaryOp> for BinaryOp {
   fn get_default() -> BinaryOp {
     BinaryOp::parse_by_id(0)

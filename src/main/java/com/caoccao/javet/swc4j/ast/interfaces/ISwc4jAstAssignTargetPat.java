@@ -16,15 +16,18 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstArrayPat;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstInvalid;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstObjectPat;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
         mappings = {
-                @Jni2RustEnumMapping(name = "Private", type = Swc4jAstPrivateName.class),
-                @Jni2RustEnumMapping(name = "Public", type = ISwc4jAstPropName.class),
+                @Jni2RustEnumMapping(name = "Array", type = Swc4jAstArrayPat.class),
+                @Jni2RustEnumMapping(name = "Invalid", type = Swc4jAstInvalid.class),
+                @Jni2RustEnumMapping(name = "Object", type = Swc4jAstObjectPat.class),
         }
 )
-public interface ISwc4jAstKey extends ISwc4jAst {
+public interface ISwc4jAstAssignTargetPat extends ISwc4jAstAssignTarget {
 }

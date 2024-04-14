@@ -16,8 +16,21 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstArrayPat;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstObjectPat;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
-@Jni2RustClass(getDefault = "TsFnParam::Ident(BindingIdent::get_default())")
+@Jni2RustClass(
+        getDefault = "TsFnParam::Ident(BindingIdent::get_default())",
+        mappings = {
+                @Jni2RustEnumMapping(name = "Array", type = Swc4jAstArrayPat.class),
+                @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstBindingIdent.class),
+                @Jni2RustEnumMapping(name = "Object", type = Swc4jAstObjectPat.class),
+                @Jni2RustEnumMapping(name = "Rest", type = Swc4jAstRestPat.class),
+        }
+)
 public interface ISwc4jAstTsFnParam extends ISwc4jAst {
 }
