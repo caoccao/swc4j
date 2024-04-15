@@ -27,22 +27,26 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Swc4jAstArrayLit
         extends Swc4jAst
         implements ISwc4jAstExpr {
-    protected final List<Swc4jAstExprOrSpread> elems;
+    protected final List<Optional<Swc4jAstExprOrSpread>> elems;
 
     public Swc4jAstArrayLit(
             List<Swc4jAstExprOrSpread> elems,
             Swc4jSpan span) {
         super(span);
-        this.elems = SimpleList.immutableCopyOf(AssertionUtils.notNull(elems, "Elems"));
+        this.elems = SimpleList.immutable(AssertionUtils.notNull(elems, "Elems").stream()
+                .map(Optional::ofNullable)
+                .collect(Collectors.toList()));
         childNodes = SimpleList.immutableCopyOf(elems);
         updateParent();
     }
 
-    public List<Swc4jAstExprOrSpread> getElems() {
+    public List<Optional<Swc4jAstExprOrSpread>> getElems() {
         return elems;
     }
 

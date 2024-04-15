@@ -55,7 +55,7 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
                 exprStmt, exprStmt.getExpr(), Swc4jAstType.ArrayLit, 0, 12);
         assertEquals(3, arrayLit.getElems().size());
         Swc4jAstExprOrSpread exprOrSpread = assertAst(
-                arrayLit, arrayLit.getElems().get(0), Swc4jAstType.ExprOrSpread, 1, 2);
+                arrayLit, arrayLit.getElems().get(0).get(), Swc4jAstType.ExprOrSpread, 1, 2);
         // Number
         Swc4jAstNumber number = (Swc4jAstNumber) assertAst(
                 exprOrSpread, exprOrSpread.getExpr(), Swc4jAstType.Number, 1, 2);
@@ -64,7 +64,7 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
         assertEquals("1", number.getRaw().get());
         // Str
         exprOrSpread = assertAst(
-                arrayLit, arrayLit.getElems().get(1), Swc4jAstType.ExprOrSpread, 3, 6);
+                arrayLit, arrayLit.getElems().get(1).get(), Swc4jAstType.ExprOrSpread, 3, 6);
         Swc4jAstStr str = (Swc4jAstStr) assertAst(
                 exprOrSpread, exprOrSpread.getExpr(), Swc4jAstType.Str, 3, 6);
         assertTrue(str.getRaw().isPresent());
@@ -72,7 +72,7 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
         assertEquals("'a'", str.getRaw().get());
         // Bool
         exprOrSpread = assertAst(
-                arrayLit, arrayLit.getElems().get(2), Swc4jAstType.ExprOrSpread, 7, 11);
+                arrayLit, arrayLit.getElems().get(2).get(), Swc4jAstType.ExprOrSpread, 7, 11);
         Swc4jAstBool b = (Swc4jAstBool) assertAst(
                 exprOrSpread, exprOrSpread.getExpr(), Swc4jAstType.Bool, 7, 11);
         assertTrue(b.getValue());

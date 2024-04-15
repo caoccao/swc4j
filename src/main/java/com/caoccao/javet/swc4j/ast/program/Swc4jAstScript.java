@@ -16,20 +16,40 @@
 
 package com.caoccao.javet.swc4j.ast.program;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.SimpleList;
 import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The type Swc4j ast script.
  *
  * @since 0.2.0
  */
-public class Swc4jAstScript extends Swc4jAstProgram<ISwc4jAstStmt> {
+public class Swc4jAstScript
+        extends Swc4jAst
+        implements ISwc4jAstProgram<ISwc4jAstStmt> {
+    /**
+     * The Body.
+     *
+     * @since 0.2.0
+     */
+    protected final List<ISwc4jAstStmt> body;
+    /**
+     * The Shebang.
+     *
+     * @since 0.2.0
+     */
+    protected final Optional<String> shebang;
+
     /**
      * Instantiates a new Swc4j ast script.
      *
@@ -42,7 +62,21 @@ public class Swc4jAstScript extends Swc4jAstProgram<ISwc4jAstStmt> {
             List<ISwc4jAstStmt> body,
             String shebang,
             Swc4jSpan span) {
-        super(body, shebang, span);
+        super(span);
+        this.body = SimpleList.immutableCopyOf(AssertionUtils.notNull(body, "Body"));
+        this.shebang = Optional.ofNullable(shebang);
+        childNodes = SimpleList.immutableCopyOf(body);
+        updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAstStmt> getBody() {
+        return body;
+    }
+
+    @Override
+    public Optional<String> getShebang() {
+        return shebang;
     }
 
     @Override

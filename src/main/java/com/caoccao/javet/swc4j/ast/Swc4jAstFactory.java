@@ -1419,7 +1419,7 @@ public final class Swc4jAstFactory {
     public static Swc4jAstTsTypePredicate createTsTypePredicate(
             boolean asserts,
             ISwc4jAstTsThisTypeOrIdent paramName,
-            @Jni2RustParam(optional = true) ISwc4jAstTsType typeAnn,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             @Jni2RustParam Swc4jSpan span) {
         return new Swc4jAstTsTypePredicate(asserts, paramName, typeAnn, span);
     }

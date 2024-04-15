@@ -16,20 +16,46 @@
 
 package com.caoccao.javet.swc4j.ast.program;
 
+import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.SimpleList;
 import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The type Swc4j ast module.
  *
  * @since 0.2.0
  */
-public class Swc4jAstModule extends Swc4jAstProgram<ISwc4jAstModuleItem> {
+public class Swc4jAstModule
+        extends Swc4jAst
+        implements ISwc4jAstProgram<ISwc4jAstModuleItem> {
+    /**
+     * The Body.
+     *
+     * @since 0.2.0
+     */
+    protected final List<ISwc4jAstModuleItem> body;
+    /**
+     * The Shebang.
+     *
+     * @since 0.2.0
+     */
+    protected final Optional<String> shebang;
+
+    public Swc4jAstModule(Swc4jSpan span, List<ISwc4jAstModuleItem> body, Optional<String> shebang) {
+        super(span);
+        this.body = body;
+        this.shebang = shebang;
+    }
+
     /**
      * Instantiates a new Swc4j ast module.
      *
@@ -42,7 +68,21 @@ public class Swc4jAstModule extends Swc4jAstProgram<ISwc4jAstModuleItem> {
             List<ISwc4jAstModuleItem> body,
             String shebang,
             Swc4jSpan span) {
-        super(body, shebang, span);
+        super(span);
+        this.body = SimpleList.immutableCopyOf(AssertionUtils.notNull(body, "Body"));
+        this.shebang = Optional.ofNullable(shebang);
+        childNodes = SimpleList.immutableCopyOf(body);
+        updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAstModuleItem> getBody() {
+        return body;
+    }
+
+    @Override
+    public Optional<String> getShebang() {
+        return shebang;
     }
 
     @Override

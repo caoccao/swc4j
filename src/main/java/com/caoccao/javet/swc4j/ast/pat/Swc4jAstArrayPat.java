@@ -31,11 +31,12 @@ import com.caoccao.javet.swc4j.utils.Swc4jSpan;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Swc4jAstArrayPat
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstAssignTargetPat, ISwc4jAstTsFnParam, ISwc4jAstSimpleAssignTarget {
-    protected final List<ISwc4jAstPat> elems;
+    protected final List<Optional<ISwc4jAstPat>> elems;
     protected final boolean optional;
     protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
 
@@ -45,7 +46,9 @@ public class Swc4jAstArrayPat
             Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.elems = SimpleList.immutableCopyOf(AssertionUtils.notNull(elems, "Elems"));
+        this.elems = SimpleList.immutable(AssertionUtils.notNull(elems, "Elems").stream()
+                .map(Optional::ofNullable)
+                .collect(Collectors.toList()));
         this.optional = optional;
         this.typeAnn = Optional.ofNullable(typeAnn);
         childNodes = SimpleList.copyOf(elems);
@@ -54,7 +57,7 @@ public class Swc4jAstArrayPat
         updateParent();
     }
 
-    public List<ISwc4jAstPat> getElems() {
+    public List<Optional<ISwc4jAstPat>> getElems() {
         return elems;
     }
 

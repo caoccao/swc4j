@@ -33,12 +33,12 @@ public class Swc4jAstTsTypePredicate
         implements ISwc4jAstTsType {
     protected final boolean asserts;
     protected final ISwc4jAstTsThisTypeOrIdent paramName;
-    protected final Optional<ISwc4jAstTsType> typeAnn;
+    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     public Swc4jAstTsTypePredicate(
             boolean asserts,
             ISwc4jAstTsThisTypeOrIdent paramName,
-            ISwc4jAstTsType typeAnn,
+            Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
         this.asserts = asserts;
@@ -57,7 +57,7 @@ public class Swc4jAstTsTypePredicate
         return Swc4jAstType.TsTypePredicate;
     }
 
-    public Optional<ISwc4jAstTsType> getTypeAnn() {
+    public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 

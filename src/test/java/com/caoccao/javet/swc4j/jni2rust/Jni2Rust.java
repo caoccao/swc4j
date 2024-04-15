@@ -77,7 +77,8 @@ public class Jni2Rust<T> {
                         || (Objects.requireNonNull(AnnotationUtils.getAnnotation(method, Jni2RustMethod.class)).mode()
                         == Jni2RustMethodMode.Auto))
                 .forEach(method -> {
-                    Jni2RustMethod jni2RustMethod = AnnotationUtils.getAnnotation(method, Jni2RustMethod.class);
+                    Optional<Jni2RustMethod> jni2RustMethod =
+                            Optional.ofNullable(AnnotationUtils.getAnnotation(method, Jni2RustMethod.class));
                     boolean isStatic = Modifier.isStatic(method.getModifiers());
                     boolean isPrimitive = method.getReturnType().isPrimitive();
                     boolean isString = method.getReturnType() == String.class;
@@ -148,7 +149,7 @@ public class Jni2Rust<T> {
                         lines.add(String.format("  ) -> %s",
                                 options.getJavaTypeToRustTypeMap().get(method.getReturnType().getName())));
                     } else if (isString) {
-                        if (jni2RustMethod != null && jni2RustMethod.optional()) {
+                        if (jni2RustMethod.map(Jni2RustMethod::optional).orElse(false)) {
                             lines.add("  ) -> Option<String>");
                         } else {
                             lines.add("  ) -> String");
@@ -216,7 +217,7 @@ public class Jni2Rust<T> {
                     lines.add(String.format("        \"%s %s()\"", returnTypeName, methodName));
                     lines.add("      );");
                     if (isString) {
-                        if (jni2RustMethod != null && jni2RustMethod.optional()) {
+                        if (jni2RustMethod.map(Jni2RustMethod::optional).orElse(false)) {
                             lines.add("    let return_value = jstring_to_optional_string!(env, return_value.as_raw());");
                         } else {
                             lines.add("    let return_value = jstring_to_string!(env, return_value.as_raw());");
