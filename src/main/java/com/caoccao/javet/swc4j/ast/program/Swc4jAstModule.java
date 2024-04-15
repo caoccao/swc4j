@@ -50,12 +50,6 @@ public class Swc4jAstModule
      */
     protected final Optional<String> shebang;
 
-    public Swc4jAstModule(Swc4jSpan span, List<ISwc4jAstModuleItem> body, Optional<String> shebang) {
-        super(span);
-        this.body = body;
-        this.shebang = shebang;
-    }
-
     /**
      * Instantiates a new Swc4j ast module.
      *

@@ -30,9 +30,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -230,6 +228,17 @@ public class TestCodeGen {
                 .sorted(Map.Entry.comparingByKey())
                 .forEach(entry -> {
                     Class<?> clazz = entry.getValue();
+                    Constructor<?>[] constructors = clazz.getConstructors();
+                    assertEquals(1, constructors.length);
+                    Constructor<?> constructor = constructors[0];
+                    final Map<String, Integer> fieldOrderMap = new HashMap<>(constructor.getParameterCount());
+                    int fieldOrder = 0;
+                    for (Parameter parameter : constructor.getParameters()) {
+                        if (!"span".equals(parameter.getName())) {
+                            fieldOrderMap.put(parameter.getName(), fieldOrder);
+                            ++fieldOrder;
+                        }
+                    }
                     Optional<Jni2RustClass> jni2RustClass = Optional.ofNullable(clazz.getAnnotation(Jni2RustClass.class));
                     String enumName = jni2RustClass
                             .map(Jni2RustClass::name)
@@ -244,13 +253,12 @@ public class TestCodeGen {
                             .map(noSpan -> "()")
                             .orElse("");
                     lines.add(String.format("    map.register_by_span(&node.span%s);", spanCall));
-                    ReflectionUtils.getDeclaredFields(clazz).entrySet().stream()
-                            .sorted(Map.Entry.comparingByKey())
-                            .map(Map.Entry::getValue)
+                    ReflectionUtils.getDeclaredFields(clazz).values().stream()
                             .filter(field -> !Modifier.isStatic(field.getModifiers()))
                             .filter(field -> !Optional.ofNullable(field.getAnnotation(Jni2RustField.class))
                                     .map(Jni2RustField::ignore)
                                     .orElse(false))
+                            .sorted(Comparator.comparingInt(field -> fieldOrderMap.getOrDefault(field.getName(), Integer.MAX_VALUE)))
                             .forEach(field -> {
                                 Optional<Jni2RustField> jni2RustField =
                                         Optional.ofNullable(field.getAnnotation(Jni2RustField.class));
