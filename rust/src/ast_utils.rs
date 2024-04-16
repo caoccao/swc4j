@@ -7294,6 +7294,24 @@ pub mod program {
   use deno_ast::swc::ast::*;
   use deno_ast::swc::common::Spanned;
 
+  fn create_big_int<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BigInt) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
+    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
+    let sign = node.value.sign().get_id();
+    let optional_raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
+    let return_value = java_ast_factory.create_big_int(env, sign, &optional_raw, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+
+  /* AST Creation Begin */
+
+
+  /* AST Creation End */
+
   fn create_array_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ArrayLit) -> JObject<'a>
   where
     'local: 'a,
@@ -7495,19 +7513,6 @@ pub mod program {
     delete_local_ref!(env, java_arg);
     delete_local_ref!(env, java_span_ex);
     return_type
-  }
-
-  fn create_big_int<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BigInt) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };
-    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span));
-    let sign = node.value.sign().get_id();
-    let optional_raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
-    let return_value = java_ast_factory.create_big_int(env, sign, &optional_raw, &java_span_ex);
-    delete_local_ref!(env, java_span_ex);
-    return_value
   }
 
   fn create_bin_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BinExpr) -> JObject<'a>

@@ -65,15 +65,13 @@ public class TestCodeGen {
                 .sorted(Map.Entry.comparingByKey())
                 .filter(entry -> entry.getValue().isInterface())
                 .filter(entry -> entry.getValue().isAnnotationPresent(Jni2RustClass.class))
-                .filter(entry -> ArrayUtils.isNotEmpty(entry.getValue().getAnnotation(Jni2RustClass.class).mappings()))
+                .filter(entry -> ArrayUtils.isNotEmpty(new Jni2RustClassUtils<>(entry.getValue()).getMappings()))
                 .forEach(entry -> {
                     Class<?> clazz = entry.getValue();
-                    Jni2RustClass jni2RustClass = clazz.getAnnotation(Jni2RustClass.class);
-                    String enumName = StringUtils.isNotEmpty(jni2RustClass.name())
-                            ? jni2RustClass.name()
-                            : entry.getKey();
+                    Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
+                    String enumName = jni2RustClassUtils.getName();
                     lines.add(String.format("  %sfn enum_create_%s<'local, 'a>(",
-                            jni2RustClass.open() ? "pub " : "",
+                            jni2RustClassUtils.isOpen() ? "pub " : "",
                             StringUtils.toSnakeCase(enumName),
                             enumName));
                     lines.add("    env: &mut JNIEnv<'local>,");
@@ -84,26 +82,19 @@ public class TestCodeGen {
                     lines.add("    'local: 'a,");
                     lines.add("  {");
                     lines.add("    match node {");
-                    Stream.of(jni2RustClass.mappings())
+                    Stream.of(jni2RustClassUtils.getMappings())
                             .sorted(Comparator.comparing(Jni2RustEnumMapping::name))
                             .forEach(mapping -> {
                                 assertTrue(
                                         clazz.isAssignableFrom(mapping.type()),
                                         mapping.type().getSimpleName() + " should implement " + clazz.getSimpleName());
+                                String typeName = new Jni2RustClassUtils<>(mapping.type()).getName();
                                 if (mapping.type().isInterface()) {
-                                    String typeName = Optional.ofNullable(mapping.type().getAnnotation(Jni2RustClass.class))
-                                            .map(Jni2RustClass::name)
-                                            .filter(StringUtils::isNotEmpty)
-                                            .orElse(mapping.type().getSimpleName().substring(9));
                                     lines.add(String.format("      %s::%s(node) => enum_create_%s(env, map, node),",
                                             enumName,
                                             mapping.name(),
                                             StringUtils.toSnakeCase(typeName)));
                                 } else {
-                                    String typeName = Optional.ofNullable(mapping.type().getAnnotation(Jni2RustClass.class))
-                                            .map(Jni2RustClass::name)
-                                            .filter(StringUtils::isNotEmpty)
-                                            .orElse(mapping.type().getSimpleName().substring(8));
                                     lines.add(String.format("      %s::%s(node) => create_%s(env, map, node),",
                                             enumName,
                                             mapping.name(),
@@ -150,38 +141,30 @@ public class TestCodeGen {
                 .sorted(Map.Entry.comparingByKey())
                 .filter(entry -> entry.getValue().isInterface())
                 .filter(entry -> entry.getValue().isAnnotationPresent(Jni2RustClass.class))
-                .filter(entry -> ArrayUtils.isNotEmpty(entry.getValue().getAnnotation(Jni2RustClass.class).mappings()))
+                .filter(entry -> ArrayUtils.isNotEmpty(new Jni2RustClassUtils<>(entry.getValue()).getMappings()))
                 .forEach(entry -> {
                     Class<?> clazz = entry.getValue();
-                    Jni2RustClass jni2RustClass = clazz.getAnnotation(Jni2RustClass.class);
-                    String enumName = StringUtils.isNotEmpty(jni2RustClass.name())
-                            ? jni2RustClass.name()
-                            : entry.getKey();
+                    Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
+                    String enumName = jni2RustClassUtils.getName();
                     lines.add(String.format("  %sfn enum_register_%s(map: &mut ByteToIndexMap, node: &%s) {",
-                            jni2RustClass.open() ? "pub " : "",
+                            jni2RustClassUtils.isOpen() ? "pub " : "",
                             StringUtils.toSnakeCase(enumName),
                             enumName));
                     lines.add("    match node {");
-                    Stream.of(jni2RustClass.mappings())
+                    Stream.of(jni2RustClassUtils.getMappings())
                             .sorted(Comparator.comparing(Jni2RustEnumMapping::name))
                             .forEach(mapping -> {
                                 assertTrue(
                                         clazz.isAssignableFrom(mapping.type()),
                                         mapping.type().getSimpleName() + " should implement " + clazz.getSimpleName());
                                 if (mapping.type().isInterface()) {
-                                    String typeName = Optional.ofNullable(mapping.type().getAnnotation(Jni2RustClass.class))
-                                            .map(Jni2RustClass::name)
-                                            .filter(StringUtils::isNotEmpty)
-                                            .orElse(mapping.type().getSimpleName().substring(9));
+                                    String typeName = new Jni2RustClassUtils<>(mapping.type()).getName();
                                     lines.add(String.format("      %s::%s(node) => enum_register_%s(map, node),",
                                             enumName,
                                             mapping.name(),
                                             StringUtils.toSnakeCase(typeName)));
                                 } else {
-                                    String typeName = Optional.ofNullable(mapping.type().getAnnotation(Jni2RustClass.class))
-                                            .map(Jni2RustClass::name)
-                                            .filter(StringUtils::isNotEmpty)
-                                            .orElse(mapping.type().getSimpleName().substring(8));
+                                    String typeName = new Jni2RustClassUtils<>(mapping.type()).getName();
                                     lines.add(String.format("      %s::%s(node) => register_%s(map, node),",
                                             enumName,
                                             mapping.name(),
@@ -239,33 +222,20 @@ public class TestCodeGen {
                             ++fieldOrder;
                         }
                     }
-                    Optional<Jni2RustClass> jni2RustClass = Optional.ofNullable(clazz.getAnnotation(Jni2RustClass.class));
-                    String enumName = jni2RustClass
-                            .map(Jni2RustClass::name)
-                            .filter(StringUtils::isNotEmpty)
-                            .orElse(entry.getKey());
+                    Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
+                    String enumName = jni2RustClassUtils.getName();
                     lines.add(String.format("  fn register_%s(map: &mut ByteToIndexMap, node: &%s) {",
                             StringUtils.toSnakeCase(enumName),
                             enumName));
-                    String spanCall = jni2RustClass
-                            .map(Jni2RustClass::span)
-                            .filter(span -> !span)
-                            .map(noSpan -> "()")
-                            .orElse("");
+                    String spanCall = jni2RustClassUtils.isSpan() ? "" : "()";
                     lines.add(String.format("    map.register_by_span(&node.span%s);", spanCall));
                     ReflectionUtils.getDeclaredFields(clazz).values().stream()
                             .filter(field -> !Modifier.isStatic(field.getModifiers()))
-                            .filter(field -> !Optional.ofNullable(field.getAnnotation(Jni2RustField.class))
-                                    .map(Jni2RustField::ignore)
-                                    .orElse(false))
+                            .filter(field -> !new Jni2RustFieldUtils(field).isIgnore())
                             .sorted(Comparator.comparingInt(field -> fieldOrderMap.getOrDefault(field.getName(), Integer.MAX_VALUE)))
                             .forEach(field -> {
-                                Optional<Jni2RustField> jni2RustField =
-                                        Optional.ofNullable(field.getAnnotation(Jni2RustField.class));
-                                String fieldName = jni2RustField
-                                        .map(Jni2RustField::name)
-                                        .filter(StringUtils::isNotEmpty)
-                                        .orElse(StringUtils.toSnakeCase(field.getName()));
+                                Jni2RustFieldUtils jni2RustFieldUtils = new Jni2RustFieldUtils(field);
+                                String fieldName = jni2RustFieldUtils.getName();
                                 Class<?> fieldType = field.getType();
                                 if (Optional.class.isAssignableFrom(fieldType)) {
                                     if (field.getGenericType() instanceof ParameterizedType) {
@@ -274,27 +244,21 @@ public class TestCodeGen {
                                             Class<?> innerClass = (Class<?>) innerType;
                                             if (ISwc4jAst.class.isAssignableFrom(innerClass)) {
                                                 if (innerClass.isInterface()) {
-                                                    String fieldTypeName = Optional.ofNullable(innerClass.getAnnotation(Jni2RustField.class))
-                                                            .map(Jni2RustField::name)
-                                                            .filter(StringUtils::isNotEmpty)
-                                                            .orElse(innerClass.getSimpleName().substring(9));
+                                                    String fieldTypeName = new Jni2RustClassUtils<>(innerClass).getName();
                                                     lines.add(String.format("    node.%s.as_ref().map(|node| enum_register_%s(map, node));",
-                                                            fieldName,
+                                                            StringUtils.toSnakeCase(fieldName),
                                                             StringUtils.toSnakeCase(fieldTypeName)));
                                                 } else if (Swc4jAst.class.isAssignableFrom(innerClass)) {
-                                                    String fieldTypeName = Optional.ofNullable(innerClass.getAnnotation(Jni2RustField.class))
-                                                            .map(Jni2RustField::name)
-                                                            .filter(StringUtils::isNotEmpty)
-                                                            .orElse(innerClass.getSimpleName().substring(8));
+                                                    String fieldTypeName = new Jni2RustClassUtils<>(innerClass).getName();
                                                     lines.add(String.format("    node.%s.as_ref().map(|node| register_%s(map, node));",
-                                                            fieldName,
+                                                            StringUtils.toSnakeCase(fieldName),
                                                             StringUtils.toSnakeCase(fieldTypeName)));
                                                 } else {
                                                     fail(innerClass.getName() + " is not expected");
                                                 }
                                             } else if (Swc4jSpan.class.isAssignableFrom(innerClass)) {
                                                 lines.add(String.format("    node.%s.as_ref().map(|node| map.register_by_span(node));",
-                                                        fieldName));
+                                                        StringUtils.toSnakeCase(fieldName)));
                                             }
                                         } else if (innerType instanceof ParameterizedType) {
                                             assertTrue(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
@@ -302,20 +266,14 @@ public class TestCodeGen {
                                             assertInstanceOf(Class.class, innerType2);
                                             Class<?> innerClass2 = (Class<?>) innerType2;
                                             if (innerClass2.isInterface()) {
-                                                String fieldTypeName = Optional.ofNullable(innerClass2.getAnnotation(Jni2RustField.class))
-                                                        .map(Jni2RustField::name)
-                                                        .filter(StringUtils::isNotEmpty)
-                                                        .orElse(innerClass2.getSimpleName().substring(9));
+                                                String fieldTypeName = new Jni2RustClassUtils<>(innerClass2).getName();
                                                 lines.add(String.format("    node.%s.as_ref().map(|nodes| nodes.iter().for_each(|node| enum_register_%s(map, node)));",
-                                                        fieldName,
+                                                        StringUtils.toSnakeCase(fieldName),
                                                         StringUtils.toSnakeCase(fieldTypeName)));
                                             } else if (Swc4jAst.class.isAssignableFrom(innerClass2)) {
-                                                String fieldTypeName = Optional.ofNullable(innerClass2.getAnnotation(Jni2RustField.class))
-                                                        .map(Jni2RustField::name)
-                                                        .filter(StringUtils::isNotEmpty)
-                                                        .orElse(innerClass2.getSimpleName().substring(8));
+                                                String fieldTypeName = new Jni2RustClassUtils<>(innerClass2).getName();
                                                 lines.add(String.format("    node.%s.as_ref().map(|nodes| nodes.iter().for_each(|node| register_%s(map, node)));",
-                                                        fieldName,
+                                                        StringUtils.toSnakeCase(fieldName),
                                                         StringUtils.toSnakeCase(fieldTypeName)));
                                             } else {
                                                 fail(innerClass2.getName() + " is not expected");
@@ -328,23 +286,18 @@ public class TestCodeGen {
                                     }
                                 } else if (List.class.isAssignableFrom(fieldType)) {
                                     if (field.getGenericType() instanceof ParameterizedType) {
-                                        lines.add(String.format("    node.%s.iter().for_each(|node| {", fieldName));
+                                        lines.add(String.format("    node.%s.iter().for_each(|node| {",
+                                                StringUtils.toSnakeCase(fieldName)));
                                         Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                                         if (innerType instanceof Class) {
                                             Class<?> innerClass = (Class<?>) innerType;
                                             if (ISwc4jAst.class.isAssignableFrom(innerClass)) {
                                                 if (innerClass.isInterface()) {
-                                                    String fieldTypeName = Optional.ofNullable(innerClass.getAnnotation(Jni2RustField.class))
-                                                            .map(Jni2RustField::name)
-                                                            .filter(StringUtils::isNotEmpty)
-                                                            .orElse(innerClass.getSimpleName().substring(9));
+                                                    String fieldTypeName = new Jni2RustClassUtils<>(innerClass).getName();
                                                     lines.add(String.format("      enum_register_%s(map, node);",
                                                             StringUtils.toSnakeCase(fieldTypeName)));
                                                 } else if (Swc4jAst.class.isAssignableFrom(innerClass)) {
-                                                    String fieldTypeName = Optional.ofNullable(innerClass.getAnnotation(Jni2RustField.class))
-                                                            .map(Jni2RustField::name)
-                                                            .filter(StringUtils::isNotEmpty)
-                                                            .orElse(innerClass.getSimpleName().substring(8));
+                                                    String fieldTypeName = new Jni2RustClassUtils<>(innerClass).getName();
                                                     lines.add(String.format("      register_%s(map, node);",
                                                             StringUtils.toSnakeCase(fieldTypeName)));
                                                 } else {
@@ -359,17 +312,11 @@ public class TestCodeGen {
                                             assertInstanceOf(Class.class, innerType2);
                                             Class<?> innerClass2 = (Class<?>) innerType2;
                                             if (innerClass2.isInterface()) {
-                                                String fieldTypeName = Optional.ofNullable(innerClass2.getAnnotation(Jni2RustField.class))
-                                                        .map(Jni2RustField::name)
-                                                        .filter(StringUtils::isNotEmpty)
-                                                        .orElse(innerClass2.getSimpleName().substring(9));
+                                                String fieldTypeName = new Jni2RustClassUtils<>(innerClass2).getName();
                                                 lines.add(String.format("      node.as_ref().map(|node| enum_register_%s(map, node));",
                                                         StringUtils.toSnakeCase(fieldTypeName)));
                                             } else if (Swc4jAst.class.isAssignableFrom(innerClass2)) {
-                                                String fieldTypeName = Optional.ofNullable(innerClass2.getAnnotation(Jni2RustField.class))
-                                                        .map(Jni2RustField::name)
-                                                        .filter(StringUtils::isNotEmpty)
-                                                        .orElse(innerClass2.getSimpleName().substring(8));
+                                                String fieldTypeName = new Jni2RustClassUtils<>(innerClass2).getName();
                                                 lines.add(String.format("      node.as_ref().map(|node| register_%s(map, node));",
                                                         StringUtils.toSnakeCase(fieldTypeName)));
                                             } else {
@@ -384,26 +331,21 @@ public class TestCodeGen {
                                     }
                                 } else if (ISwc4jAst.class.isAssignableFrom(fieldType)) {
                                     if (fieldType.isInterface()) {
-                                        String fieldTypeName = Optional.ofNullable(fieldType.getAnnotation(Jni2RustField.class))
-                                                .map(Jni2RustField::name)
-                                                .filter(StringUtils::isNotEmpty)
-                                                .orElse(fieldType.getSimpleName().substring(9));
+                                        String fieldTypeName = new Jni2RustClassUtils<>(fieldType).getName();
                                         lines.add(String.format("    enum_register_%s(map, &node.%s);",
                                                 StringUtils.toSnakeCase(fieldTypeName),
-                                                fieldName));
+                                                StringUtils.toSnakeCase(fieldName)));
                                     } else if (Swc4jAst.class.isAssignableFrom(fieldType)) {
-                                        String fieldTypeName = Optional.ofNullable(fieldType.getAnnotation(Jni2RustField.class))
-                                                .map(Jni2RustField::name)
-                                                .filter(StringUtils::isNotEmpty)
-                                                .orElse(fieldType.getSimpleName().substring(8));
+                                        String fieldTypeName = new Jni2RustClassUtils<>(fieldType).getName();
                                         lines.add(String.format("    register_%s(map, &node.%s);",
                                                 StringUtils.toSnakeCase(fieldTypeName),
-                                                fieldName));
+                                                StringUtils.toSnakeCase(fieldName)));
                                     } else {
                                         fail(fieldType.getName() + " is not expected");
                                     }
                                 } else if (Swc4jSpan.class.isAssignableFrom(fieldType)) {
-                                    lines.add(String.format("    map.register_by_span(&node.%s);", fieldName));
+                                    lines.add(String.format("    map.register_by_span(&node.%s);",
+                                            StringUtils.toSnakeCase(fieldName)));
                                 }
                             });
                     lines.add("  }\n");

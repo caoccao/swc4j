@@ -77,8 +77,7 @@ public class Jni2Rust<T> {
                         || (Objects.requireNonNull(AnnotationUtils.getAnnotation(method, Jni2RustMethod.class)).mode()
                         == Jni2RustMethodMode.Auto))
                 .forEach(method -> {
-                    Optional<Jni2RustMethod> jni2RustMethod =
-                            Optional.ofNullable(AnnotationUtils.getAnnotation(method, Jni2RustMethod.class));
+                    Jni2RustMethodUtils jni2RustMethodUtils = new Jni2RustMethodUtils(method);
                     boolean isStatic = Modifier.isStatic(method.getModifiers());
                     boolean isPrimitive = method.getReturnType().isPrimitive();
                     boolean isString = method.getReturnType() == String.class;
@@ -149,7 +148,7 @@ public class Jni2Rust<T> {
                         lines.add(String.format("  ) -> %s",
                                 options.getJavaTypeToRustTypeMap().get(method.getReturnType().getName())));
                     } else if (isString) {
-                        if (jni2RustMethod.map(Jni2RustMethod::optional).orElse(false)) {
+                        if (jni2RustMethodUtils.isOptional()) {
                             lines.add("  ) -> Option<String>");
                         } else {
                             lines.add("  ) -> String");
@@ -217,7 +216,7 @@ public class Jni2Rust<T> {
                     lines.add(String.format("        \"%s %s()\"", returnTypeName, methodName));
                     lines.add("      );");
                     if (isString) {
-                        if (jni2RustMethod.map(Jni2RustMethod::optional).orElse(false)) {
+                        if (jni2RustMethodUtils.isOptional()) {
                             lines.add("    let return_value = jstring_to_optional_string!(env, return_value.as_raw());");
                         } else {
                             lines.add("    let return_value = jstring_to_string!(env, return_value.as_raw());");
@@ -334,14 +333,7 @@ public class Jni2Rust<T> {
     }
 
     protected String getExecutableName(Executable executable) {
-        String executableName = null;
-        if (AnnotationUtils.isAnnotationPresent(executable, Jni2RustMethod.class)) {
-            executableName = Objects.requireNonNull(AnnotationUtils.getAnnotation(executable, Jni2RustMethod.class)).name();
-        }
-        if (StringUtils.isEmpty(executableName)) {
-            executableName = StringUtils.toSnakeCase(executable.getName());
-        }
-        return executableName;
+        return StringUtils.toSnakeCase(executable.getName());
     }
 
     public String getFilePath() {
@@ -388,17 +380,10 @@ public class Jni2Rust<T> {
     }
 
     protected void init() {
-        Optional<Jni2RustClass> jni2RustClass =
-                Optional.ofNullable(AnnotationUtils.getAnnotation(clazz, Jni2RustClass.class));
+        Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
         // filePath and structName
-        setFilePath(jni2RustClass
-                .map(Jni2RustClass::filePath)
-                .map(Jni2RustFilePath::getFilePath)
-                .orElse(null));
-        setStructName(jni2RustClass
-                .map(Jni2RustClass::name)
-                .filter(StringUtils::isNotEmpty)
-                .orElse(PREFIX_NAME + clazz.getSimpleName()));
+        setFilePath(jni2RustClassUtils.getFilePath().getFilePath());
+        setStructName(jni2RustClassUtils.getName(PREFIX_NAME + clazz.getSimpleName()));
         // constructor
         constructor = (Constructor<T>) Stream.of(clazz.getConstructors())
                 .filter(method -> AnnotationUtils.isAnnotationPresent(method, Jni2RustMethod.class))

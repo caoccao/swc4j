@@ -16,14 +16,21 @@
 
 package com.caoccao.javet.swc4j.jni2rust;
 
-import java.lang.annotation.*;
+import com.caoccao.javet.swc4j.utils.AnnotationUtils;
 
-@Documented
-@Inherited
-@Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Jni2RustMethod {
-    Jni2RustMethodMode mode() default Jni2RustMethodMode.Auto;
+import java.lang.reflect.Method;
+import java.util.Optional;
 
-    boolean optional() default false;
+public class Jni2RustMethodUtils {
+    protected final Method method;
+    protected final Optional<Jni2RustMethod> optionalJni2RustMethod;
+
+    public Jni2RustMethodUtils(Method method) {
+        this.method = method;
+        optionalJni2RustMethod = Optional.ofNullable(AnnotationUtils.getAnnotation(method, Jni2RustMethod.class));
+    }
+
+    public boolean isOptional() {
+        return optionalJni2RustMethod.map(Jni2RustMethod::optional).orElse(false);
+    }
 }

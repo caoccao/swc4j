@@ -17,7 +17,7 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClassUtils;
 import com.caoccao.javet.swc4j.utils.OSUtils;
 
 import java.io.File;
@@ -27,7 +27,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,11 +79,9 @@ public final class Swc4jAstStore {
                             return null;
                         }
                     })
-                    .filter(c -> c.isInterface() || !Modifier.isAbstract(c.getModifiers()))
-                    .filter(c -> c != ISwc4jAst.class)
-                    .filter(c -> !Optional.ofNullable(c.getAnnotation(Jni2RustClass.class))
-                            .map(Jni2RustClass::ignore)
-                            .orElse(false))
+                    .filter(clazz -> clazz.isInterface() || !Modifier.isAbstract(clazz.getModifiers()))
+                    .filter(clazz -> clazz != ISwc4jAst.class)
+                    .filter(clazz -> !new Jni2RustClassUtils<>(clazz).isIgnore())
                     .forEach(clazz -> {
                         if (clazz.isEnum()) {
                             Matcher matcherFileName = PATTERN_FOR_CLASS_NAME.matcher(clazz.getSimpleName());
