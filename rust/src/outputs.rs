@@ -17,7 +17,7 @@
 
 use deno_ast::swc::ast::*;
 use deno_ast::swc::parser::token::TokenAndSpan;
-use deno_ast::{EmittedSource, ParsedSource};
+use deno_ast::{ParsedSource, TranspileResult};
 
 use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::sys::jvalue;
@@ -274,8 +274,9 @@ impl TranspileOutput {
   pub fn new(
     transpile_options: &TranspileOptions,
     parsed_source: &ParsedSource,
-    emitted_source: &EmittedSource,
+    transpile_result: &TranspileResult,
   ) -> Self {
+    let emitted_source = transpile_result.clone().into_source();
     let code = emitted_source.text.to_owned();
     let media_type = parsed_source.media_type();
     let module = parsed_source.is_module();

@@ -74,11 +74,11 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
         keep_comments: options.keep_comments,
         source_map: options.source_map,
       };
-      match parsed_source.transpile(&transpile_options, &emit_options) {
-        Ok(emitted_source) => Ok(outputs::TranspileOutput::new(
+      match parsed_source.clone().transpile(&transpile_options, &emit_options) {
+        Ok(transpile_result) => Ok(outputs::TranspileOutput::new(
           &options,
           &parsed_source,
-          &emitted_source,
+          &transpile_result,
         )),
         Err(e) => Err(e.to_string()),
       }
