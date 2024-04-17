@@ -33,14 +33,14 @@ public class TestSwc4jAstUsingDecl extends BaseTestSuiteSwc4jAst {
     public void testUsingInTypeScript() throws Swc4jCoreException {
         String code = "using a";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstUsingDecl usingDecl = (Swc4jAstUsingDecl) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.UsingDecl, 0, 7);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstUsingDecl usingDecl = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstUsingDecl.class), Swc4jAstType.UsingDecl, 0, 7);
         assertFalse(usingDecl.await);
         Swc4jAstVarDeclarator varDeclarator = assertAst(
                 usingDecl, usingDecl.getDecls().get(0), Swc4jAstType.VarDeclarator, 6, 7);
-        Swc4jAstBindingIdent bindingIdent = (Swc4jAstBindingIdent) assertAst(
-                varDeclarator, varDeclarator.getName(), Swc4jAstType.BindingIdent, 6, 7);
+        Swc4jAstBindingIdent bindingIdent = assertAst(
+                varDeclarator, varDeclarator.getName().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 6, 7);
         Swc4jAstIdent ident = assertAst(
                 bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 6, 7);
         assertEquals("a", ident.getSym());

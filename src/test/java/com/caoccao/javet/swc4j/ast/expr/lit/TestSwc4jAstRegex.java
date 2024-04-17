@@ -32,11 +32,11 @@ public class TestSwc4jAstRegex extends BaseTestSuiteSwc4jAst {
     public void testExpAndFlags() throws Swc4jCoreException {
         String code = "/abc/ig";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 7);
-        Swc4jAstRegex regex = (Swc4jAstRegex) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.Regex, 0, 7);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 7);
+        Swc4jAstRegex regex = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstRegex.class), Swc4jAstType.Regex, 0, 7);
         assertEquals("abc", regex.getExp());
         assertEquals("ig", regex.getFlags());
         assertSpan(code, script);
@@ -46,11 +46,11 @@ public class TestSwc4jAstRegex extends BaseTestSuiteSwc4jAst {
     public void testExpOnly() throws Swc4jCoreException {
         String code = "/abc/";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 5);
-        Swc4jAstRegex regex = (Swc4jAstRegex) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.Regex, 0, 5);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 5);
+        Swc4jAstRegex regex = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstRegex.class), Swc4jAstType.Regex, 0, 5);
         assertEquals("abc", regex.getExp());
         assertEquals("", regex.getFlags());
         assertSpan(code, script);

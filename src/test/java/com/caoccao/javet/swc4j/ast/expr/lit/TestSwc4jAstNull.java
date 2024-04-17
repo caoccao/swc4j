@@ -29,9 +29,9 @@ public class TestSwc4jAstNull extends BaseTestSuiteSwc4jAst {
     public void test() throws Swc4jCoreException {
         String code = "null";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 4);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 4);
         assertAst(exprStmt, exprStmt.getExpr(), Swc4jAstType.Null, 0, 4);
         assertSpan(code, script);
     }

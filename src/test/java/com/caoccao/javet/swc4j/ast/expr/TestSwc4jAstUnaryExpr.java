@@ -38,14 +38,14 @@ public class TestSwc4jAstUnaryExpr extends BaseTestSuiteSwc4jAst {
         for (Swc4jAstUnaryOp op : opList) {
             String code = op.getName() + "a";
             Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-            Swc4jAstScript script = output.getProgram().asScript();
-            Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                    script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, code.length());
-            Swc4jAstUnaryExpr unaryExpr = (Swc4jAstUnaryExpr) assertAst(
-                    exprStmt, exprStmt.getExpr(), Swc4jAstType.UnaryExpr, 0, code.length());
+            Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+            Swc4jAstExprStmt exprStmt = assertAst(
+                    script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, code.length());
+            Swc4jAstUnaryExpr unaryExpr = assertAst(
+                    exprStmt, exprStmt.getExpr().as(Swc4jAstUnaryExpr.class), Swc4jAstType.UnaryExpr, 0, code.length());
             assertEquals(op, unaryExpr.getOp());
-            Swc4jAstIdent ident = (Swc4jAstIdent) assertAst(
-                    unaryExpr, unaryExpr.getArg(), Swc4jAstType.Ident, code.length() - 1, code.length());
+            Swc4jAstIdent ident = assertAst(
+                    unaryExpr, unaryExpr.getArg().as(Swc4jAstIdent.class), Swc4jAstType.Ident, code.length() - 1, code.length());
             assertEquals("a", ident.getSym());
             assertSpan(code, script);
         }
@@ -58,14 +58,14 @@ public class TestSwc4jAstUnaryExpr extends BaseTestSuiteSwc4jAst {
         for (Swc4jAstUnaryOp op : opList) {
             String code = op.getName() + " a";
             Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-            Swc4jAstScript script = output.getProgram().asScript();
-            Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                    script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, code.length());
-            Swc4jAstUnaryExpr unaryExpr = (Swc4jAstUnaryExpr) assertAst(
-                    exprStmt, exprStmt.getExpr(), Swc4jAstType.UnaryExpr, 0, code.length());
+            Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+            Swc4jAstExprStmt exprStmt = assertAst(
+                    script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, code.length());
+            Swc4jAstUnaryExpr unaryExpr = assertAst(
+                    exprStmt, exprStmt.getExpr().as(Swc4jAstUnaryExpr.class), Swc4jAstType.UnaryExpr, 0, code.length());
             assertEquals(op, unaryExpr.getOp());
-            Swc4jAstIdent ident = (Swc4jAstIdent) assertAst(
-                    unaryExpr, unaryExpr.getArg(), Swc4jAstType.Ident, code.length() - 1, code.length());
+            Swc4jAstIdent ident = assertAst(
+                    unaryExpr, unaryExpr.getArg().as(Swc4jAstIdent.class), Swc4jAstType.Ident, code.length() - 1, code.length());
             assertEquals("a", ident.getSym());
             assertSpan(code, script);
         }

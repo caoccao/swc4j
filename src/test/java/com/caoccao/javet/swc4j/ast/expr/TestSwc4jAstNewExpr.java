@@ -31,16 +31,16 @@ public class TestSwc4jAstNewExpr extends BaseTestSuiteSwc4jAst {
     public void testNewWithParenthesis() throws Swc4jCoreException {
         String code = "new A()";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 7);
-        Swc4jAstNewExpr newExpr = (Swc4jAstNewExpr) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.NewExpr, 0, 7);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 7);
+        Swc4jAstNewExpr newExpr = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstNewExpr.class), Swc4jAstType.NewExpr, 0, 7);
         assertTrue(newExpr.getArgs().isPresent());
         assertTrue(newExpr.getArgs().get().isEmpty());
         assertFalse(newExpr.getTypeArgs().isPresent());
-        Swc4jAstIdent ident = (Swc4jAstIdent) assertAst(
-                newExpr, newExpr.getCallee(), Swc4jAstType.Ident, 4, 5);
+        Swc4jAstIdent ident = assertAst(
+                newExpr, newExpr.getCallee().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 4, 5);
         assertEquals("A", ident.getSym());
         assertSpan(code, script);
     }
@@ -49,15 +49,15 @@ public class TestSwc4jAstNewExpr extends BaseTestSuiteSwc4jAst {
     public void testNewWithoutParenthesis() throws Swc4jCoreException {
         String code = "new A";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 5);
-        Swc4jAstNewExpr newExpr = (Swc4jAstNewExpr) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.NewExpr, 0, 5);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 5);
+        Swc4jAstNewExpr newExpr = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstNewExpr.class), Swc4jAstType.NewExpr, 0, 5);
         assertFalse(newExpr.getArgs().isPresent());
         assertFalse(newExpr.getTypeArgs().isPresent());
-        Swc4jAstIdent ident = (Swc4jAstIdent) assertAst(
-                newExpr, newExpr.getCallee(), Swc4jAstType.Ident, 4, 5);
+        Swc4jAstIdent ident = assertAst(
+                newExpr, newExpr.getCallee().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 4, 5);
         assertEquals("A", ident.getSym());
         assertSpan(code, script);
     }

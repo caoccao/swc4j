@@ -34,28 +34,28 @@ public class TestSwc4jAstAssignPat extends BaseTestSuiteSwc4jAst {
     public void testWithTsTypeAnn() throws Swc4jCoreException {
         String code = "(a: number = 1) => {}";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 21);
-        Swc4jAstArrowExpr arrowExpr = (Swc4jAstArrowExpr) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.ArrowExpr, 0, 21);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 21);
+        Swc4jAstArrowExpr arrowExpr = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstArrowExpr.class), Swc4jAstType.ArrowExpr, 0, 21);
         assertFalse(arrowExpr.isAsync());
         assertFalse(arrowExpr.isGenerator());
         assertFalse(arrowExpr.getReturnType().isPresent());
         assertFalse(arrowExpr.getTypeParams().isPresent());
         assertEquals(1, arrowExpr.getParams().size());
-        Swc4jAstAssignPat assignPat = (Swc4jAstAssignPat) assertAst(
-                arrowExpr, arrowExpr.getParams().get(0), Swc4jAstType.AssignPat, 1, 14);
-        Swc4jAstBindingIdent bindingIdent = (Swc4jAstBindingIdent) assertAst(
-                assignPat, assignPat.getLeft(), Swc4jAstType.BindingIdent, 1, 10);
+        Swc4jAstAssignPat assignPat = assertAst(
+                arrowExpr, arrowExpr.getParams().get(0).as(Swc4jAstAssignPat.class), Swc4jAstType.AssignPat, 1, 14);
+        Swc4jAstBindingIdent bindingIdent = assertAst(
+                assignPat, assignPat.getLeft().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 1, 10);
         // TODO There is a bug that the span of Ident is the same with the BindingIdent.
         Swc4jAstIdent ident = assertAst(
                 bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 1, 10);
         assertEquals("a", ident.getSym());
         assertTrue(bindingIdent.getTypeAnn().isPresent());
         assertAst(bindingIdent, bindingIdent.getTypeAnn().get(), Swc4jAstType.TsTypeAnn, 2, 10);
-        Swc4jAstNumber number = (Swc4jAstNumber) assertAst(
-                assignPat, assignPat.getRight(), Swc4jAstType.Number, 13, 14);
+        Swc4jAstNumber number = assertAst(
+                assignPat, assignPat.getRight().as(Swc4jAstNumber.class), Swc4jAstType.Number, 13, 14);
         assertTrue(number.getRaw().isPresent());
         assertEquals("1", number.getRaw().get());
         assertEquals(1, number.getValue());

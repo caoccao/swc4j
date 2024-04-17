@@ -35,11 +35,11 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
     public void testEmptyArray() throws Swc4jCoreException {
         String code = "[]";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 2);
-        Swc4jAstArrayLit arrayLit = (Swc4jAstArrayLit) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.ArrayLit, 0, 2);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 2);
+        Swc4jAstArrayLit arrayLit = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstArrayLit.class), Swc4jAstType.ArrayLit, 0, 2);
         assertTrue(arrayLit.getElems().isEmpty());
         assertSpan(code, script);
     }
@@ -48,33 +48,33 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
     public void testNonEmptyArray() throws Swc4jCoreException {
         String code = "[1,'a',true]";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 12);
-        Swc4jAstArrayLit arrayLit = (Swc4jAstArrayLit) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.ArrayLit, 0, 12);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 12);
+        Swc4jAstArrayLit arrayLit = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstArrayLit.class), Swc4jAstType.ArrayLit, 0, 12);
         assertEquals(3, arrayLit.getElems().size());
         Swc4jAstExprOrSpread exprOrSpread = assertAst(
                 arrayLit, arrayLit.getElems().get(0).get(), Swc4jAstType.ExprOrSpread, 1, 2);
         // Number
-        Swc4jAstNumber number = (Swc4jAstNumber) assertAst(
-                exprOrSpread, exprOrSpread.getExpr(), Swc4jAstType.Number, 1, 2);
+        Swc4jAstNumber number = assertAst(
+                exprOrSpread, exprOrSpread.getExpr().as(Swc4jAstNumber.class), Swc4jAstType.Number, 1, 2);
         assertEquals(1, number.getValue());
         assertTrue(number.getRaw().isPresent());
         assertEquals("1", number.getRaw().get());
         // Str
         exprOrSpread = assertAst(
                 arrayLit, arrayLit.getElems().get(1).get(), Swc4jAstType.ExprOrSpread, 3, 6);
-        Swc4jAstStr str = (Swc4jAstStr) assertAst(
-                exprOrSpread, exprOrSpread.getExpr(), Swc4jAstType.Str, 3, 6);
+        Swc4jAstStr str = assertAst(
+                exprOrSpread, exprOrSpread.getExpr().as(Swc4jAstStr.class), Swc4jAstType.Str, 3, 6);
         assertTrue(str.getRaw().isPresent());
         assertEquals("a", str.getValue());
         assertEquals("'a'", str.getRaw().get());
         // Bool
         exprOrSpread = assertAst(
                 arrayLit, arrayLit.getElems().get(2).get(), Swc4jAstType.ExprOrSpread, 7, 11);
-        Swc4jAstBool b = (Swc4jAstBool) assertAst(
-                exprOrSpread, exprOrSpread.getExpr(), Swc4jAstType.Bool, 7, 11);
+        Swc4jAstBool b = assertAst(
+                exprOrSpread, exprOrSpread.getExpr().as(Swc4jAstBool.class), Swc4jAstType.Bool, 7, 11);
         assertTrue(b.getValue());
         assertSpan(code, script);
     }

@@ -34,14 +34,14 @@ public class TestSwc4jAstFunction extends BaseTestSuiteSwc4jAst {
     public void testAnonymousFunction() throws Swc4jCoreException {
         String code = "const a = function() {}";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstVarDecl varDecl = (Swc4jAstVarDecl) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.VarDecl, 0, 23);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstVarDecl varDecl = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstVarDecl.class), Swc4jAstType.VarDecl, 0, 23);
         Swc4jAstVarDeclarator varDeclarator = assertAst(
                 varDecl, varDecl.getDecls().get(0), Swc4jAstType.VarDeclarator, 6, 23);
         assertTrue(varDeclarator.getInit().isPresent());
-        Swc4jAstFnExpr fnExpr = (Swc4jAstFnExpr) assertAst(
-                varDeclarator, varDeclarator.getInit().get(), Swc4jAstType.FnExpr, 10, 23);
+        Swc4jAstFnExpr fnExpr = assertAst(
+                varDeclarator, varDeclarator.getInit().get().as(Swc4jAstFnExpr.class), Swc4jAstType.FnExpr, 10, 23);
         assertFalse(fnExpr.getIdent().isPresent());
         Swc4jAstFunction function = assertAst(
                 fnExpr, fnExpr.getFunction(), Swc4jAstType.Function, 10, 23);

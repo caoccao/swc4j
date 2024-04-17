@@ -34,18 +34,18 @@ public class TestSwc4jAstReturnExpr extends BaseTestSuiteSwc4jAst {
     public void testReturnBinExpr() throws Swc4jCoreException {
         String code = "return a+b";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstReturnStmt returnStmt = (Swc4jAstReturnStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ReturnStmt, 0, 10);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstReturnStmt returnStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstReturnStmt.class), Swc4jAstType.ReturnStmt, 0, 10);
         assertTrue(returnStmt.getArg().isPresent());
-        Swc4jAstBinExpr binExpr = (Swc4jAstBinExpr) assertAst(
-                returnStmt, returnStmt.getArg().get(), Swc4jAstType.BinExpr, 7, 10);
-        Swc4jAstIdent ident = (Swc4jAstIdent) assertAst(
-                binExpr, binExpr.getLeft(), Swc4jAstType.Ident, 7, 8);
+        Swc4jAstBinExpr binExpr = assertAst(
+                returnStmt, returnStmt.getArg().get().as(Swc4jAstBinExpr.class), Swc4jAstType.BinExpr, 7, 10);
+        Swc4jAstIdent ident = assertAst(
+                binExpr, binExpr.getLeft().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 7, 8);
         assertEquals("a", ident.getSym());
         assertEquals(Swc4jAstBinaryOp.Add, binExpr.getOp());
-        ident = (Swc4jAstIdent) assertAst(
-                binExpr, binExpr.getRight(), Swc4jAstType.Ident, 9, 10);
+        ident = assertAst(
+                binExpr, binExpr.getRight().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 9, 10);
         assertEquals("b", ident.getSym());
         assertSpan(code, script);
     }

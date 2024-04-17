@@ -31,7 +31,7 @@ import java.util.Optional;
  * @since 0.2.0
  */
 @Jni2RustClass(
-        getDefault = "Program::Script(Script::dummy())",
+        getDefault = "Program::Script(Script::get_default())",
         open = true,
         mappings = {
                 @Jni2RustEnumMapping(name = "Module", type = Swc4jAstModule.class),
@@ -39,26 +39,6 @@ import java.util.Optional;
         }
 )
 public interface ISwc4jAstProgram<AST extends ISwc4jAst> extends ISwc4jAst {
-    /**
-     * As module ast module.
-     *
-     * @return the ast module
-     * @since 0.2.0
-     */
-    default Swc4jAstModule asModule() {
-        return (this instanceof Swc4jAstModule) ? (Swc4jAstModule) this : null;
-    }
-
-    /**
-     * As script ast script.
-     *
-     * @return the ast script
-     * @since 0.2.0
-     */
-    default Swc4jAstScript asScript() {
-        return (this instanceof Swc4jAstScript) ? (Swc4jAstScript) this : null;
-    }
-
     /**
      * Gets body.
      *

@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.BaseTestSuite;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstCounterVisitor;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
@@ -31,8 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
     protected Swc4jParseOptions jsxModuleOptions;
@@ -88,6 +88,11 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
 
     protected void assertSpan(String code, ISwc4jAst node) {
         if (node != null) {
+            if (node instanceof ISwc4jAstProgram) {
+                assertNull(node.getParent());
+            } else {
+                assertNotNull(node.getParent());
+            }
             String text = null;
             switch (node.getType()) {
                 case BigInt:

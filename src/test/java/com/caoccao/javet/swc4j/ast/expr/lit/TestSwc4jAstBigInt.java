@@ -32,17 +32,18 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
     @Test
     public void testExtraLongNumber() throws Swc4jCoreException {
         String code = "1234567890123456789012345678901234567890n";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 41);
-        Swc4jAstBigInt bigInt = (Swc4jAstBigInt) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.BigInt, 0, 41);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 41);
+        Swc4jAstBigInt bigInt = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstBigInt.class), Swc4jAstType.BigInt, 0, 41);
         assertEquals("1234567890123456789012345678901234567890n", bigInt.getRaw().get());
         assertEquals("1234567890123456789012345678901234567890", bigInt.getValue().toString());
         assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
@@ -53,14 +54,14 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
     public void testSignMinus() throws Swc4jCoreException {
         String code = "-1n";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 3);
-        Swc4jAstUnaryExpr unaryExpr = (Swc4jAstUnaryExpr) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.UnaryExpr, 0, 3);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 3);
+        Swc4jAstUnaryExpr unaryExpr = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstUnaryExpr.class), Swc4jAstType.UnaryExpr, 0, 3);
         assertEquals(Swc4jAstUnaryOp.Minus, unaryExpr.getOp());
-        Swc4jAstBigInt bigInt = (Swc4jAstBigInt) assertAst(
-                unaryExpr, unaryExpr.getArg(), Swc4jAstType.BigInt, 1, 3);
+        Swc4jAstBigInt bigInt = assertAst(
+                unaryExpr, unaryExpr.getArg().as(Swc4jAstBigInt.class), Swc4jAstType.BigInt, 1, 3);
         assertEquals("1n", bigInt.getRaw().get());
         assertEquals(BigInteger.ONE, bigInt.getValue());
         assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
@@ -71,14 +72,14 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
     public void testSignPlus() throws Swc4jCoreException {
         String code = "+1n";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 3);
-        Swc4jAstUnaryExpr unaryExpr = (Swc4jAstUnaryExpr) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.UnaryExpr, 0, 3);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 3);
+        Swc4jAstUnaryExpr unaryExpr = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstUnaryExpr.class), Swc4jAstType.UnaryExpr, 0, 3);
         assertEquals(Swc4jAstUnaryOp.Plus, unaryExpr.getOp());
-        Swc4jAstBigInt bigInt = (Swc4jAstBigInt) assertAst(
-                unaryExpr, unaryExpr.getArg(), Swc4jAstType.BigInt, 1, 3);
+        Swc4jAstBigInt bigInt = assertAst(
+                unaryExpr, unaryExpr.getArg().as(Swc4jAstBigInt.class), Swc4jAstType.BigInt, 1, 3);
         assertEquals("1n", bigInt.getRaw().get());
         assertEquals(BigInteger.ONE, bigInt.getValue());
         assertEquals(Swc4jAstBigIntSign.Plus, bigInt.getSign());
@@ -108,11 +109,12 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
     public void testZero() throws Swc4jCoreException {
         String code = "0n";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 2);
-        Swc4jAstBigInt bigInt = (Swc4jAstBigInt) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.BigInt, 0, 2);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 2);
+        Swc4jAstBigInt bigInt = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstBigInt.class), Swc4jAstType.BigInt, 0, 2);
+        assertTrue(bigInt.getRaw().isPresent());
         assertEquals("0n", bigInt.getRaw().get());
         assertEquals(BigInteger.ZERO, bigInt.getValue());
         assertEquals(Swc4jAstBigIntSign.NoSign, bigInt.getSign());

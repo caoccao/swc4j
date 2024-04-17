@@ -56,21 +56,21 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
         assertNotNull(output);
         assertEquals(Swc4jParseMode.Script, output.getParseMode());
         assertNotNull(output.getProgram());
-        Swc4jAstScript script = output.getProgram().asScript();
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         assertEquals(0, script.getSpan().getStart());
         assertEquals(code.length(), script.getSpan().getEnd());
         assertNotNull(script.getBody());
-        Swc4jAstVarDecl varDecl = (Swc4jAstVarDecl) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.VarDecl, 0, 9);
+        Swc4jAstVarDecl varDecl = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstVarDecl.class), Swc4jAstType.VarDecl, 0, 9);
         assertEquals(Swc4jAstVarDeclKind.Let, varDecl.getKind());
         Swc4jAstVarDeclarator varDeclarator = assertAst(
                 varDecl, varDecl.getDecls().get(0), Swc4jAstType.VarDeclarator, 4, 9);
-        Swc4jAstBindingIdent name = (Swc4jAstBindingIdent) assertAst(
-                varDeclarator, varDeclarator.getName(), Swc4jAstType.BindingIdent, 4, 7);
+        Swc4jAstBindingIdent name = assertAst(
+                varDeclarator, varDeclarator.getName().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 4, 7);
         assertEquals("a變量", name.getId().getSym());
         assertTrue(varDeclarator.getInit().isPresent());
-        Swc4jAstNumber number = (Swc4jAstNumber) assertAst(
-                varDeclarator, varDeclarator.getInit().get(), Swc4jAstType.Number, 8, 9);
+        Swc4jAstNumber number = assertAst(
+                varDeclarator, varDeclarator.getInit().get().as(Swc4jAstNumber.class), Swc4jAstType.Number, 8, 9);
         assertEquals(1, number.getValue());
         assertSpan(code, script);
     }
@@ -82,18 +82,18 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
         assertNotNull(output);
         assertEquals(Swc4jParseMode.Script, output.getParseMode());
         assertNotNull(output.getProgram());
-        Swc4jAstScript script = output.getProgram().asScript();
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         assertEquals(0, script.getSpan().getStart());
         assertEquals(code.length(), script.getSpan().getEnd());
         assertNotNull(script.getBody());
-        Swc4jAstVarDecl varDecl = (Swc4jAstVarDecl) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.VarDecl, 0, 7);
+        Swc4jAstVarDecl varDecl = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstVarDecl.class), Swc4jAstType.VarDecl, 0, 7);
         assertEquals(Swc4jAstVarDeclKind.Let, varDecl.getKind());
         Swc4jAstVarDeclarator varDeclarator = assertAst(
                 varDecl, varDecl.getDecls().get(0), Swc4jAstType.VarDeclarator, 4, 7);
         assertFalse(varDeclarator.isDefinite());
-        Swc4jAstBindingIdent name = (Swc4jAstBindingIdent) assertAst(
-                varDeclarator, varDeclarator.getName(), Swc4jAstType.BindingIdent, 4, 7);
+        Swc4jAstBindingIdent name = assertAst(
+                varDeclarator, varDeclarator.getName().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 4, 7);
         assertEquals("a變量", name.getId().getSym());
         assertFalse(varDeclarator.getInit().isPresent());
         assertSpan(code, script);

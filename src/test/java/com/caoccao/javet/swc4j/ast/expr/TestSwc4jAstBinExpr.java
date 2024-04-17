@@ -35,17 +35,17 @@ public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
             try {
                 String code = "a " + op.getName() + " b";
                 Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-                Swc4jAstScript script = output.getProgram().asScript();
-                Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                        script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 4 + op.getName().length());
-                Swc4jAstBinExpr binExpr = (Swc4jAstBinExpr) assertAst(
-                        exprStmt, exprStmt.getExpr(), Swc4jAstType.BinExpr, 0, 4 + op.getName().length());
-                Swc4jAstIdent ident = (Swc4jAstIdent) assertAst(
-                        binExpr, binExpr.getLeft(), Swc4jAstType.Ident, 0, 1);
+                Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+                Swc4jAstExprStmt exprStmt = assertAst(
+                        script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 4 + op.getName().length());
+                Swc4jAstBinExpr binExpr = assertAst(
+                        exprStmt, exprStmt.getExpr().as(Swc4jAstBinExpr.class), Swc4jAstType.BinExpr, 0, 4 + op.getName().length());
+                Swc4jAstIdent ident = assertAst(
+                        binExpr, binExpr.getLeft().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 0, 1);
                 assertEquals("a", ident.getSym());
                 assertEquals(op, binExpr.getOp());
-                ident = (Swc4jAstIdent) assertAst(
-                        binExpr, binExpr.getRight(), Swc4jAstType.Ident, 3 + op.getName().length(), 4 + op.getName().length());
+                ident = assertAst(
+                        binExpr, binExpr.getRight().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 3 + op.getName().length(), 4 + op.getName().length());
                 assertEquals("b", ident.getSym());
                 assertSpan(code, script);
             } catch (Throwable e) {
@@ -84,17 +84,17 @@ public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
             try {
                 String code = "a" + op.getName() + "b";
                 Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-                Swc4jAstScript script = output.getProgram().asScript();
-                Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                        script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 2 + op.getName().length());
-                Swc4jAstBinExpr binExpr = (Swc4jAstBinExpr) assertAst(
-                        exprStmt, exprStmt.getExpr(), Swc4jAstType.BinExpr, 0, 2 + op.getName().length());
-                Swc4jAstIdent ident = (Swc4jAstIdent) assertAst(
-                        binExpr, binExpr.getLeft(), Swc4jAstType.Ident, 0, 1);
+                Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+                Swc4jAstExprStmt exprStmt = assertAst(
+                        script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 2 + op.getName().length());
+                Swc4jAstBinExpr binExpr = assertAst(
+                        exprStmt, exprStmt.getExpr().as(Swc4jAstBinExpr.class), Swc4jAstType.BinExpr, 0, 2 + op.getName().length());
+                Swc4jAstIdent ident = assertAst(
+                        binExpr, binExpr.getLeft().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 0, 1);
                 assertEquals("a", ident.getSym());
                 assertEquals(op, binExpr.getOp());
-                ident = (Swc4jAstIdent) assertAst(
-                        binExpr, binExpr.getRight(), Swc4jAstType.Ident, 1 + op.getName().length(), 2 + op.getName().length());
+                ident = assertAst(
+                        binExpr, binExpr.getRight().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 1 + op.getName().length(), 2 + op.getName().length());
                 assertEquals("b", ident.getSym());
                 assertSpan(code, script);
             } catch (Throwable e) {

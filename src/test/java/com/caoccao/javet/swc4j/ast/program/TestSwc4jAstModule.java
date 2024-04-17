@@ -39,7 +39,7 @@ public class TestSwc4jAstModule extends BaseTestSuiteSwc4jAst {
         File scriptFile = new File(OSUtils.WORKING_DIRECTORY, "scripts/ts/change_swc4j_version.ts");
         String code = new String(Files.readAllBytes(scriptFile.toPath()));
         Swc4jParseOutput output = swc4j.parse(code, tsModuleOptions);
-        Swc4jAstModule module = output.getProgram().asModule();
+        Swc4jAstModule module = output.getProgram().as(Swc4jAstModule.class);
         Swc4jAstCounterVisitor visitor = new Swc4jAstCounterVisitor();
         module.visit(visitor);
         int totalNodeCount = visitor.getCounterMap().values().stream().mapToInt(AtomicInteger::get).sum();
@@ -72,7 +72,7 @@ public class TestSwc4jAstModule extends BaseTestSuiteSwc4jAst {
         File scriptFile = new File(OSUtils.WORKING_DIRECTORY, "scripts/ts/copy_swc4j_lib.ts");
         String code = new String(Files.readAllBytes(scriptFile.toPath()));
         Swc4jParseOutput output = swc4j.parse(code, tsModuleOptions);
-        Swc4jAstModule module = output.getProgram().asModule();
+        Swc4jAstModule module = output.getProgram().as(Swc4jAstModule.class);
         Swc4jAstCounterVisitor visitor = new Swc4jAstCounterVisitor();
         module.visit(visitor);
         int totalNodeCount = visitor.getCounterMap().values().stream().mapToInt(AtomicInteger::get).sum();

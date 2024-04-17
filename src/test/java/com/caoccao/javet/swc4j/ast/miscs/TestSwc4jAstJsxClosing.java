@@ -33,16 +33,16 @@ public class TestSwc4jAstJsxClosing extends BaseTestSuiteSwc4jAst {
     public void test() throws Swc4jCoreException {
         String code = "<h1>test</h1>";
         Swc4jParseOutput output = swc4j.parse(code, jsxScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 13);
-        Swc4jAstJsxElement jsxElement = (Swc4jAstJsxElement) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.JsxElement, 0, 13);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 13);
+        Swc4jAstJsxElement jsxElement = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstJsxElement.class), Swc4jAstType.JsxElement, 0, 13);
         assertTrue(jsxElement.getClosing().isPresent());
         Swc4jAstJsxClosingElement jsxClosingElement = assertAst(
                 jsxElement, jsxElement.getClosing().get(), Swc4jAstType.JsxClosingElement, 8, 13);
-        Swc4jAstIdent ident = (Swc4jAstIdent) assertAst(
-                jsxClosingElement, jsxClosingElement.getName(), Swc4jAstType.Ident, 10, 12);
+        Swc4jAstIdent ident = assertAst(
+                jsxClosingElement, jsxClosingElement.getName().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 10, 12);
         assertEquals("h1", ident.getSym());
         assertFalse(ident.isOptional());
         assertSpan(code, script);

@@ -35,17 +35,17 @@ public class TestSwc4jAstArrowExpr extends BaseTestSuiteSwc4jAst {
     public void testEmptyFunction() throws Swc4jCoreException {
         String code = "()=>{}";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 6);
-        Swc4jAstArrowExpr arrowExpr = (Swc4jAstArrowExpr) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.ArrowExpr, 0, 6);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 6);
+        Swc4jAstArrowExpr arrowExpr = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstArrowExpr.class), Swc4jAstType.ArrowExpr, 0, 6);
         assertFalse(arrowExpr.isAsync());
         assertFalse(arrowExpr.isGenerator());
         assertFalse(arrowExpr.getReturnType().isPresent());
         assertFalse(arrowExpr.getTypeParams().isPresent());
-        Swc4jAstBlockStmt blockStmt = (Swc4jAstBlockStmt) assertAst(
-                arrowExpr, arrowExpr.getBody(), Swc4jAstType.BlockStmt, 4, 6);
+        Swc4jAstBlockStmt blockStmt = assertAst(
+                arrowExpr, arrowExpr.getBody().as(Swc4jAstBlockStmt.class), Swc4jAstType.BlockStmt, 4, 6);
         assertTrue(blockStmt.getStmts().isEmpty());
         assertSpan(code, script);
     }
@@ -54,37 +54,37 @@ public class TestSwc4jAstArrowExpr extends BaseTestSuiteSwc4jAst {
     public void testNonEmptyFunction() throws Swc4jCoreException {
         String code = "(a,b)=>{ return a+b; }";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 22);
-        Swc4jAstArrowExpr arrowExpr = (Swc4jAstArrowExpr) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.ArrowExpr, 0, 22);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 22);
+        Swc4jAstArrowExpr arrowExpr = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstArrowExpr.class), Swc4jAstType.ArrowExpr, 0, 22);
         assertFalse(arrowExpr.isAsync());
         assertFalse(arrowExpr.isGenerator());
         assertFalse(arrowExpr.getReturnType().isPresent());
         assertFalse(arrowExpr.getTypeParams().isPresent());
-        Swc4jAstBlockStmt blockStmt = (Swc4jAstBlockStmt) assertAst(
-                arrowExpr, arrowExpr.getBody(), Swc4jAstType.BlockStmt, 7, 22);
+        Swc4jAstBlockStmt blockStmt = assertAst(
+                arrowExpr, arrowExpr.getBody().as(Swc4jAstBlockStmt.class), Swc4jAstType.BlockStmt, 7, 22);
         assertEquals(1, blockStmt.getStmts().size());
-        Swc4jAstReturnStmt returnStmt = (Swc4jAstReturnStmt) assertAst(
-                blockStmt, blockStmt.getStmts().get(0), Swc4jAstType.ReturnStmt, 9, 20);
+        Swc4jAstReturnStmt returnStmt = assertAst(
+                blockStmt, blockStmt.getStmts().get(0).as(Swc4jAstReturnStmt.class), Swc4jAstType.ReturnStmt, 9, 20);
         assertTrue(returnStmt.getArg().isPresent());
-        Swc4jAstBinExpr binExpr = (Swc4jAstBinExpr) assertAst(
-                returnStmt, returnStmt.getArg().get(), Swc4jAstType.BinExpr, 16, 19);
-        Swc4jAstIdent ident = (Swc4jAstIdent) assertAst(
-                binExpr, binExpr.getLeft(), Swc4jAstType.Ident, 16, 17);
+        Swc4jAstBinExpr binExpr = assertAst(
+                returnStmt, returnStmt.getArg().get().as(Swc4jAstBinExpr.class), Swc4jAstType.BinExpr, 16, 19);
+        Swc4jAstIdent ident = assertAst(
+                binExpr, binExpr.getLeft().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 16, 17);
         assertEquals("a", ident.getSym());
         assertEquals(Swc4jAstBinaryOp.Add, binExpr.getOp());
-        ident = (Swc4jAstIdent) assertAst(
-                binExpr, binExpr.getRight(), Swc4jAstType.Ident, 18, 19);
+        ident = assertAst(
+                binExpr, binExpr.getRight().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 18, 19);
         assertEquals("b", ident.getSym());
         assertEquals(2, arrowExpr.getParams().size());
-        Swc4jAstBindingIdent bindingIdent = (Swc4jAstBindingIdent) assertAst(
-                arrowExpr, arrowExpr.getParams().get(0), Swc4jAstType.BindingIdent, 1, 2);
+        Swc4jAstBindingIdent bindingIdent = assertAst(
+                arrowExpr, arrowExpr.getParams().get(0).as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 1, 2);
         ident = assertAst(bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 1, 2);
         assertEquals("a", ident.getSym());
-        bindingIdent = (Swc4jAstBindingIdent) assertAst(
-                arrowExpr, arrowExpr.getParams().get(1), Swc4jAstType.BindingIdent, 3, 4);
+        bindingIdent = assertAst(
+                arrowExpr, arrowExpr.getParams().get(1).as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 3, 4);
         ident = assertAst(bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 3, 4);
         assertEquals("b", ident.getSym());
         assertSpan(code, script);

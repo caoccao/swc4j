@@ -18,7 +18,6 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -32,11 +31,11 @@ public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
     public void testDouble() throws Swc4jCoreException {
         String code = "12.34";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 5);
-        Swc4jAstNumber number = (Swc4jAstNumber) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.Number, 0, 5);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 5);
+        Swc4jAstNumber number = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstNumber.class), Swc4jAstType.Number, 0, 5);
         assertEquals(12.34D, number.getValue(), 0.0001D);
         assertEquals("12.34", number.getRaw().get());
         assertSpan(code, script);
@@ -46,11 +45,11 @@ public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
     public void testInt() throws Swc4jCoreException {
         String code = "12345";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 5);
-        Swc4jAstNumber number = (Swc4jAstNumber) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.Number, 0, 5);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 5);
+        Swc4jAstNumber number = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstNumber.class), Swc4jAstType.Number, 0, 5);
         assertEquals(12345, number.getValueAsInt());
         assertEquals("12345", number.getRaw().get());
         assertSpan(code, script);

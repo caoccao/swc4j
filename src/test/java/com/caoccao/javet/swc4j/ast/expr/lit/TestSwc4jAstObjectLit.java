@@ -36,19 +36,19 @@ public class TestSwc4jAstObjectLit extends BaseTestSuiteSwc4jAst {
     public void testEmptyObject() throws Swc4jCoreException {
         String code = "a={}";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 4);
-        Swc4jAstAssignExpr assignExpr = (Swc4jAstAssignExpr) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.AssignExpr, 0, 4);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 4);
+        Swc4jAstAssignExpr assignExpr = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstAssignExpr.class), Swc4jAstType.AssignExpr, 0, 4);
         assertEquals(Swc4jAstAssignOp.Assign, assignExpr.getOp());
-        Swc4jAstBindingIdent bindingIdent = (Swc4jAstBindingIdent) assertAst(
-                assignExpr, assignExpr.getLeft(), Swc4jAstType.BindingIdent, 0, 1);
+        Swc4jAstBindingIdent bindingIdent = assertAst(
+                assignExpr, assignExpr.getLeft().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 0, 1);
         Swc4jAstIdent ident = assertAst(
                 bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 0, 1);
         assertEquals("a", ident.getSym());
-        Swc4jAstObjectLit objectLit = (Swc4jAstObjectLit) assertAst(
-                assignExpr, assignExpr.getRight(), Swc4jAstType.ObjectLit, 2, 4);
+        Swc4jAstObjectLit objectLit = assertAst(
+                assignExpr, assignExpr.getRight().as(Swc4jAstObjectLit.class), Swc4jAstType.ObjectLit, 2, 4);
         assertTrue(objectLit.getProps().isEmpty());
         assertSpan(code, script);
     }
@@ -57,52 +57,52 @@ public class TestSwc4jAstObjectLit extends BaseTestSuiteSwc4jAst {
     public void testNonEmptyObject() throws Swc4jCoreException {
         String code = "a={a:1,b:'x',c:true}";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 20);
-        Swc4jAstAssignExpr assignExpr = (Swc4jAstAssignExpr) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.AssignExpr, 0, 20);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 20);
+        Swc4jAstAssignExpr assignExpr = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstAssignExpr.class), Swc4jAstType.AssignExpr, 0, 20);
         assertEquals(Swc4jAstAssignOp.Assign, assignExpr.getOp());
-        Swc4jAstBindingIdent bindingIdent = (Swc4jAstBindingIdent) assertAst(
-                assignExpr, assignExpr.getLeft(), Swc4jAstType.BindingIdent, 0, 1);
+        Swc4jAstBindingIdent bindingIdent = assertAst(
+                assignExpr, assignExpr.getLeft().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 0, 1);
         Swc4jAstIdent ident = assertAst(
                 bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 0, 1);
         assertEquals("a", ident.getSym());
-        Swc4jAstObjectLit objectLit = (Swc4jAstObjectLit) assertAst(
-                assignExpr, assignExpr.getRight(), Swc4jAstType.ObjectLit, 2, 20);
+        Swc4jAstObjectLit objectLit = assertAst(
+                assignExpr, assignExpr.getRight().as(Swc4jAstObjectLit.class), Swc4jAstType.ObjectLit, 2, 20);
         // Number
-        Swc4jAstKeyValueProp keyValueProp = (Swc4jAstKeyValueProp) assertAst(
-                objectLit, objectLit.getProps().get(0), Swc4jAstType.KeyValueProp, 3, 6);
-        ident = (Swc4jAstIdent) assertAst(
-                keyValueProp, keyValueProp.getKey(), Swc4jAstType.Ident, 3, 4);
+        Swc4jAstKeyValueProp keyValueProp = assertAst(
+                objectLit, objectLit.getProps().get(0).as(Swc4jAstKeyValueProp.class), Swc4jAstType.KeyValueProp, 3, 6);
+        ident = assertAst(
+                keyValueProp, keyValueProp.getKey().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 3, 4);
         assertFalse(ident.isOptional());
         assertEquals("a", ident.getSym());
-        Swc4jAstNumber number = (Swc4jAstNumber) assertAst(
-                keyValueProp, keyValueProp.getValue(), Swc4jAstType.Number, 5, 6);
+        Swc4jAstNumber number = assertAst(
+                keyValueProp, keyValueProp.getValue().as(Swc4jAstNumber.class), Swc4jAstType.Number, 5, 6);
         assertEquals(1, number.getValue());
         assertTrue(number.getRaw().isPresent());
         assertEquals("1", number.getRaw().get());
         // Str
-        keyValueProp = (Swc4jAstKeyValueProp) assertAst(
-                objectLit, objectLit.getProps().get(1), Swc4jAstType.KeyValueProp, 7, 12);
-        ident = (Swc4jAstIdent) assertAst(
-                keyValueProp, keyValueProp.getKey(), Swc4jAstType.Ident, 7, 8);
+        keyValueProp = assertAst(
+                objectLit, objectLit.getProps().get(1).as(Swc4jAstKeyValueProp.class), Swc4jAstType.KeyValueProp, 7, 12);
+        ident = assertAst(
+                keyValueProp, keyValueProp.getKey().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 7, 8);
         assertFalse(ident.isOptional());
         assertEquals("b", ident.getSym());
-        Swc4jAstStr str = (Swc4jAstStr) assertAst(
-                keyValueProp, keyValueProp.getValue(), Swc4jAstType.Str, 9, 12);
+        Swc4jAstStr str = assertAst(
+                keyValueProp, keyValueProp.getValue().as(Swc4jAstStr.class), Swc4jAstType.Str, 9, 12);
         assertTrue(str.getRaw().isPresent());
         assertEquals("x", str.getValue());
         assertEquals("'x'", str.getRaw().get());
         // Bool
-        keyValueProp = (Swc4jAstKeyValueProp) assertAst(
-                objectLit, objectLit.getProps().get(2), Swc4jAstType.KeyValueProp, 13, 19);
-        ident = (Swc4jAstIdent) assertAst(
-                keyValueProp, keyValueProp.getKey(), Swc4jAstType.Ident, 13, 14);
+        keyValueProp = assertAst(
+                objectLit, objectLit.getProps().get(2).as(Swc4jAstKeyValueProp.class), Swc4jAstType.KeyValueProp, 13, 19);
+        ident = assertAst(
+                keyValueProp, keyValueProp.getKey().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 13, 14);
         assertFalse(ident.isOptional());
         assertEquals("c", ident.getSym());
-        Swc4jAstBool b = (Swc4jAstBool) assertAst(
-                keyValueProp, keyValueProp.getValue(), Swc4jAstType.Bool, 15, 19);
+        Swc4jAstBool b = assertAst(
+                keyValueProp, keyValueProp.getValue().as(Swc4jAstBool.class), Swc4jAstType.Bool, 15, 19);
         assertTrue(b.getValue());
         assertSpan(code, script);
     }

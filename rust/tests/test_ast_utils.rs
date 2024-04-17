@@ -241,7 +241,7 @@ impl GetDefault<Pat> for Pat {
 
 impl GetDefault<Program> for Program {
   fn get_default() -> Program {
-    Program::Script(Script::dummy())
+    Program::Script(Script::get_default())
   }
 }
 

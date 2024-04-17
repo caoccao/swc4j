@@ -31,6 +31,19 @@ import java.util.List;
  */
 public interface ISwc4jAst {
     /**
+     * As a given type.
+     *
+     * @param <T>   the type parameter
+     * @param clazz the clazz
+     * @return the given type
+     * @since 0.4.0
+     */
+    @SuppressWarnings("unchecked")
+    default <T extends ISwc4jAst> T as(Class<T> clazz) {
+        return clazz.isAssignableFrom(getClass()) ? (T) this : null;
+    }
+
+    /**
      * Gets children.
      *
      * @return the children

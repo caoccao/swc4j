@@ -28,7 +28,7 @@ public class TestSwc4jAstDebuggerStmt extends BaseTestSuiteSwc4jAst {
     public void testEmpty() throws Swc4jCoreException {
         String code = "debugger;";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         assertAst(script, script.getBody().get(0), Swc4jAstType.DebuggerStmt, 0, 9);
         assertSpan(code, script);
     }

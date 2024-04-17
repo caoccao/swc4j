@@ -32,11 +32,11 @@ public class TestSwc4jAstStr extends BaseTestSuiteSwc4jAst {
     public void testEmptyString() throws Swc4jCoreException {
         String code = "''";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 2);
-        Swc4jAstStr str = (Swc4jAstStr) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.Str, 0, 2);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 2);
+        Swc4jAstStr str = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstStr.class), Swc4jAstType.Str, 0, 2);
         assertEquals("", str.getValue());
         assertEquals("''", str.getRaw().get());
         assertSpan(code, script);
@@ -46,11 +46,11 @@ public class TestSwc4jAstStr extends BaseTestSuiteSwc4jAst {
     public void testValueAndRaw() throws Swc4jCoreException {
         String code = "'abc'";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 5);
-        Swc4jAstStr str = (Swc4jAstStr) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.Str, 0, 5);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 5);
+        Swc4jAstStr str = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstStr.class), Swc4jAstType.Str, 0, 5);
         assertEquals("abc", str.getValue());
         assertEquals("'abc'", str.getRaw().get());
         assertSpan(code, script);

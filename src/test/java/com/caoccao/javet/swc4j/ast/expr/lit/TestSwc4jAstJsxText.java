@@ -32,13 +32,13 @@ public class TestSwc4jAstJsxText extends BaseTestSuiteSwc4jAst {
     public void test() throws Swc4jCoreException {
         String code = "<h1>test</h1>";
         Swc4jParseOutput output = swc4j.parse(code, jsxScriptOptions);
-        Swc4jAstScript script = output.getProgram().asScript();
-        Swc4jAstExprStmt exprStmt = (Swc4jAstExprStmt) assertAst(
-                script, script.getBody().get(0), Swc4jAstType.ExprStmt, 0, 13);
-        Swc4jAstJsxElement jsxElement = (Swc4jAstJsxElement) assertAst(
-                exprStmt, exprStmt.getExpr(), Swc4jAstType.JsxElement, 0, 13);
-        Swc4jAstJsxText jsxText = (Swc4jAstJsxText) assertAst(
-                jsxElement, jsxElement.getChildren().get(0), Swc4jAstType.JsxText, 4, 8);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 13);
+        Swc4jAstJsxElement jsxElement = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstJsxElement.class), Swc4jAstType.JsxElement, 0, 13);
+        Swc4jAstJsxText jsxText = assertAst(
+                jsxElement, jsxElement.getChildren().get(0).as(Swc4jAstJsxText.class), Swc4jAstType.JsxText, 4, 8);
         assertEquals("test", jsxText.getValue());
         assertEquals("test", jsxText.getRaw());
         assertSpan(code, script);
