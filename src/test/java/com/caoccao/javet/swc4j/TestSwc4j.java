@@ -200,6 +200,19 @@ public class TestSwc4j extends BaseTestSuite {
         assertFalse(output.getSourceMap().isPresent());
     }
 
+    @Test
+    public void testTranspileTypeScriptWithoutComments() throws Swc4jCoreException {
+        Swc4jTranspileOptions options = new Swc4jTranspileOptions()
+                .setMediaType(Swc4jMediaType.TypeScript)
+                .setKeepComments(false)
+                .setSourceMap(Swc4jSourceMapOption.None);
+        String code = "let a: /* Comment 1 */ number = 1; // Comment 2";
+        Swc4jTranspileOutput output = swc4j.transpile(code, options);
+        assertNotNull(output);
+        assertEquals(Swc4jParseMode.Module, output.getParseMode());
+        assertEquals("let a = 1;\n", output.getCode());
+    }
+
     @ParameterizedTest
     @EnumSource(Swc4jParseMode.class)
     public void testTranspileTypeScriptWithoutInlineSourceMap(Swc4jParseMode parseMode)
