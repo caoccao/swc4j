@@ -16,7 +16,13 @@
 */
 
 use deno_ast::{
-  swc::{atoms::JsWord, common::Spanned, common::BytePos, parser::token::{IdentLike, Keyword, Token, Word}}, MediaType,
+  swc::{
+    atoms::JsWord,
+    common::comments::CommentKind,
+    common::{BytePos, Span, Spanned},
+    parser::token::{IdentLike, Keyword, Token, Word},
+  },
+  MediaType,
 };
 
 use swc4j::*;
@@ -46,21 +52,6 @@ fn test_parse_jsx_with_default_options() {
   assert!(output.module);
   assert!(!output.script);
   assert_eq!(MediaType::Jsx, output.media_type);
-}
-
-#[test]
-fn test_parse_typescript_with_default_options() {
-  let code = "function add(a:number, b:number) { return a+b; }";
-  let options = options::ParseOptions {
-    media_type: MediaType::TypeScript,
-    ..Default::default()
-  };
-  let output = core::parse(code.to_owned(), options);
-  assert!(output.is_ok());
-  let output = output.unwrap();
-  assert!(output.module);
-  assert!(!output.script);
-  assert!(output.tokens.is_none());
 }
 
 #[test]
@@ -115,6 +106,59 @@ fn test_parse_typescript_with_capture_tokens() {
   assert!(!t12.had_line_break);
   assert_eq!(BytePos(1), t0.span_lo());
   assert_eq!(BytePos(9), t0.span_hi());
+}
+
+#[test]
+fn test_parse_typescript_with_default_options() {
+  let code = "function add(a:number, b:number) { return a+b; }";
+  let options = options::ParseOptions {
+    media_type: MediaType::TypeScript,
+    ..Default::default()
+  };
+  let output = core::parse(code.to_owned(), options);
+  assert!(output.is_ok());
+  let output = output.unwrap();
+  assert!(output.module);
+  assert!(!output.script);
+  assert!(output.tokens.is_none());
+}
+
+#[test]
+fn test_parse_typescript_with_comments() {
+  let code = "let a: /* Comment 1 */ number = 1; // Comment 2";
+  let options = options::ParseOptions {
+    media_type: MediaType::TypeScript,
+    ..Default::default()
+  };
+  let output = core::parse(code.to_owned(), options);
+  assert!(output.is_ok());
+  let output = output.unwrap();
+  let comments = output.comments.get_vec();
+  assert_eq!(2, comments.len());
+  assert_eq!(CommentKind::Block, comments[0].kind);
+  assert_eq!(
+    Span {
+      lo: BytePos(8),
+      hi: BytePos(23),
+      ..Default::default()
+    },
+    comments[0].span
+  );
+  assert_eq!(" Comment 1 ", comments[0].text.as_str());
+  assert_eq!(CommentKind::Line, comments[1].kind);
+  assert_eq!(
+    Span {
+      lo: BytePos(36),
+      hi: BytePos(48),
+      ..Default::default()
+    },
+    comments[1].span
+  );
+  assert_eq!(" Comment 2", comments[1].text.as_str());
+  let leading_comment_map = output.comments.leading_map();
+  assert_eq!(1, leading_comment_map.len());
+  let tailing_comment_map = output.comments.trailing_map();
+  assert_eq!(1, tailing_comment_map.len());
 }
 
 #[test]

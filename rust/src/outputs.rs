@@ -17,14 +17,14 @@
 
 use deno_ast::swc::ast::*;
 use deno_ast::swc::parser::token::TokenAndSpan;
-use deno_ast::{ParsedSource, TranspileResult};
+use deno_ast::{MultiThreadedComments, ParsedSource, TranspileResult};
 
 use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
-use std::sync::Arc;
 use std::ptr::null_mut;
+use std::sync::Arc;
 
 use crate::ast_utils;
 use crate::enums::*;
@@ -85,7 +85,7 @@ impl JavaSwc4jParseOutput {
     let tokens = token_utils::token_and_spans_to_java_list(
       env,
       &byte_to_index_map,
-      &parse_output.source_text.to_string(),
+      parse_output.source_text.as_str(),
       parse_output.tokens.clone(),
     );
     call_as_construct!(
@@ -155,7 +155,7 @@ impl JavaSwc4jTranspileOutput {
     let tokens = token_utils::token_and_spans_to_java_list(
       env,
       &byte_to_index_map,
-      &transpile_output.parse_output.source_text.to_string(),
+      transpile_output.parse_output.source_text.as_str(),
       transpile_output.parse_output.tokens.clone(),
     );
     call_as_construct!(
@@ -180,6 +180,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 
 #[derive(Debug)]
 pub struct ParseOutput {
+  pub comments: MultiThreadedComments,
   pub media_type: MediaType,
   pub module: bool,
   pub program: Option<Arc<Program>>,
@@ -190,6 +191,7 @@ pub struct ParseOutput {
 
 impl ParseOutput {
   pub fn new(parse_options: &ParseOptions, parsed_source: &ParsedSource) -> Self {
+    let comments = parsed_source.comments().clone();
     let media_type = parsed_source.media_type();
     let module = parsed_source.is_module();
     let program = if parse_options.capture_ast {
@@ -205,6 +207,7 @@ impl ParseOutput {
       None
     };
     ParseOutput {
+      comments,
       media_type,
       module,
       program,
@@ -217,20 +220,16 @@ impl ParseOutput {
   pub fn get_byte_to_index_map(&self) -> ByteToIndexMap {
     // Register the keys
     let mut byte_to_index_map = ByteToIndexMap::new();
-    match &self.program {
-      Some(program) => {
-        ast_utils::span::enum_register_program(&mut byte_to_index_map, program);
-      }
-      None => {}
-    }
-    match &self.tokens {
-      Some(token_and_spans) => {
-        token_and_spans.iter().for_each(|token_and_span| {
-          byte_to_index_map.register_by_span(&token_and_span.span);
-        });
-      }
-      None => {}
-    }
+    self.comments.get_vec().iter().for_each(|comment| byte_to_index_map.register_by_span(&comment.span));
+    self
+      .program
+      .as_ref()
+      .map(|program| ast_utils::span::enum_register_program(&mut byte_to_index_map, program));
+    self.tokens.as_ref().map(|token_and_spans| {
+      token_and_spans.iter().for_each(|token_and_span| {
+        byte_to_index_map.register_by_span(&token_and_span.span);
+      })
+    });
     // Fill the values
     let mut utf8_byte_length: usize = 0;
     let chars = self.source_text.chars();
@@ -276,6 +275,7 @@ impl TranspileOutput {
     parsed_source: &ParsedSource,
     transpile_result: &TranspileResult,
   ) -> Self {
+    let comments = parsed_source.comments().clone();
     let emitted_source = transpile_result.clone().into_source();
     let code = emitted_source.text.to_owned();
     let media_type = parsed_source.media_type();
@@ -294,6 +294,7 @@ impl TranspileOutput {
       None
     };
     let parse_output = ParseOutput {
+      comments,
       media_type,
       module,
       program,

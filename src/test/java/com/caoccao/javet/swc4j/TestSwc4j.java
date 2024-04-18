@@ -172,11 +172,11 @@ public class TestSwc4j extends BaseTestSuite {
                 .setMediaType(Swc4jMediaType.TypeScript)
                 .setKeepComments(true)
                 .setSourceMap(Swc4jSourceMapOption.None);
-        String code = "let a: number = 1; // Comment";
+        String code = "let a: /* Comment 1 */ number = 1; // Comment 2";
         Swc4jTranspileOutput output = swc4j.transpile(code, options);
         assertNotNull(output);
         assertEquals(Swc4jParseMode.Module, output.getParseMode());
-        assertEquals("let a = 1; // Comment\n", output.getCode());
+        assertEquals("let a = 1; // Comment 2\n", output.getCode());
     }
 
     @Test
