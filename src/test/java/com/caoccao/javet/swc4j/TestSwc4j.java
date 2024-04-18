@@ -167,6 +167,19 @@ public class TestSwc4j extends BaseTestSuite {
     }
 
     @Test
+    public void testTranspileTypeScriptWithComments() throws Swc4jCoreException {
+        Swc4jTranspileOptions options = new Swc4jTranspileOptions()
+                .setMediaType(Swc4jMediaType.TypeScript)
+                .setKeepComments(true)
+                .setSourceMap(Swc4jSourceMapOption.None);
+        String code = "let a: number = 1; // Comment";
+        Swc4jTranspileOutput output = swc4j.transpile(code, options);
+        assertNotNull(output);
+        assertEquals(Swc4jParseMode.Module, output.getParseMode());
+        assertEquals("let a = 1; // Comment\n", output.getCode());
+    }
+
+    @Test
     public void testTranspileTypeScriptWithInlineSourceMap() throws Swc4jCoreException {
         String code = "function add(a:number, b:number) { return a+b; }";
         String expectedCode = "function add(a, b) {\n" +
