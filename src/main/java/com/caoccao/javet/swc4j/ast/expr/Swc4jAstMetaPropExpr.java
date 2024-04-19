@@ -23,7 +23,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
-import com.caoccao.javet.swc4j.utils.Swc4jSpan;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 public class Swc4jAstMetaPropExpr
         extends Swc4jAst

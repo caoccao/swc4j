@@ -221,1197 +221,1197 @@ impl JavaSwc4jAstFactory {
       .get_static_method_id(
         &class,
         "createArrayLit",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createArrayLit");
     let method_create_array_pat = env
       .get_static_method_id(
         &class,
         "createArrayPat",
-        "(Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstArrayPat;",
+        "(Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstArrayPat;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createArrayPat");
     let method_create_arrow_expr = env
       .get_static_method_id(
         &class,
         "createArrowExpr",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstBlockStmtOrExpr;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstBlockStmtOrExpr;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstArrowExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createArrowExpr");
     let method_create_assign_expr = env
       .get_static_method_id(
         &class,
         "createAssignExpr",
-        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstAssignTarget;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstAssignExpr;",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstAssignTarget;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstAssignExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAssignExpr");
     let method_create_assign_pat = env
       .get_static_method_id(
         &class,
         "createAssignPat",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstAssignPat;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstAssignPat;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAssignPat");
     let method_create_assign_pat_prop = env
       .get_static_method_id(
         &class,
         "createAssignPatProp",
-        "(Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstBindingIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstAssignPatProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstBindingIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstAssignPatProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAssignPatProp");
     let method_create_assign_prop = env
       .get_static_method_id(
         &class,
         "createAssignProp",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstAssignProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstAssignProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAssignProp");
     let method_create_auto_accessor = env
       .get_static_method_id(
         &class,
         "createAutoAccessor",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstAutoAccessor;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstAutoAccessor;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAutoAccessor");
     let method_create_await_expr = env
       .get_static_method_id(
         &class,
         "createAwaitExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstAwaitExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstAwaitExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createAwaitExpr");
     let method_create_big_int = env
       .get_static_method_id(
         &class,
         "createBigInt",
-        "(ILjava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBigInt;",
+        "(ILjava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBigInt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBigInt");
     let method_create_bin_expr = env
       .get_static_method_id(
         &class,
         "createBinExpr",
-        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstBinExpr;",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstBinExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBinExpr");
     let method_create_binding_ident = env
       .get_static_method_id(
         &class,
         "createBindingIdent",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstBindingIdent;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstBindingIdent;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBindingIdent");
     let method_create_block_stmt = env
       .get_static_method_id(
         &class,
         "createBlockStmt",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBlockStmt");
     let method_create_bool = env
       .get_static_method_id(
         &class,
         "createBool",
-        "(ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBool;",
+        "(ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstBool;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBool");
     let method_create_break_stmt = env
       .get_static_method_id(
         &class,
         "createBreakStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBreakStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBreakStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createBreakStmt");
     let method_create_call_expr = env
       .get_static_method_id(
         &class,
         "createCallExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstCallee;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstCallExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstCallee;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstCallExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createCallExpr");
     let method_create_catch_clause = env
       .get_static_method_id(
         &class,
         "createCatchClause",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstCatchClause;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstCatchClause;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createCatchClause");
     let method_create_class = env
       .get_static_method_id(
         &class,
         "createClass",
-        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;",
+        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClass");
     let method_create_class_decl = env
       .get_static_method_id(
         &class,
         "createClassDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstClassDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstClassDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClassDecl");
     let method_create_class_expr = env
       .get_static_method_id(
         &class,
         "createClassExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstClassExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClass;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstClassExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClassExpr");
     let method_create_class_method = env
       .get_static_method_id(
         &class,
         "createClassMethod",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;IZIZZZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClassMethod;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;IZIZZZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClassMethod;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClassMethod");
     let method_create_class_prop = env
       .get_static_method_id(
         &class,
         "createClassProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZZZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClassProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZZZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstClassProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createClassProp");
     let method_create_computed_prop_name = env
       .get_static_method_id(
         &class,
         "createComputedPropName",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstComputedPropName;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstComputedPropName;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createComputedPropName");
     let method_create_cond_expr = env
       .get_static_method_id(
         &class,
         "createCondExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstCondExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstCondExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createCondExpr");
     let method_create_constructor = env
       .get_static_method_id(
         &class,
         "createConstructor",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;IZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstConstructor;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;IZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstConstructor;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createConstructor");
     let method_create_continue_stmt = env
       .get_static_method_id(
         &class,
         "createContinueStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstContinueStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstContinueStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createContinueStmt");
     let method_create_debugger_stmt = env
       .get_static_method_id(
         &class,
         "createDebuggerStmt",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstDebuggerStmt;",
+        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstDebuggerStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createDebuggerStmt");
     let method_create_decorator = env
       .get_static_method_id(
         &class,
         "createDecorator",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstDecorator;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstDecorator;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createDecorator");
     let method_create_do_while_stmt = env
       .get_static_method_id(
         &class,
         "createDoWhileStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstDoWhileStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstDoWhileStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createDoWhileStmt");
     let method_create_empty_stmt = env
       .get_static_method_id(
         &class,
         "createEmptyStmt",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstEmptyStmt;",
+        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstEmptyStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createEmptyStmt");
     let method_create_export_all = env
       .get_static_method_id(
         &class,
         "createExportAll",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportAll;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportAll;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportAll");
     let method_create_export_decl = env
       .get_static_method_id(
         &class,
         "createExportDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstDecl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstDecl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportDecl");
     let method_create_export_default_decl = env
       .get_static_method_id(
         &class,
         "createExportDefaultDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstDefaultDecl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstDefaultDecl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportDefaultDecl");
     let method_create_export_default_expr = env
       .get_static_method_id(
         &class,
         "createExportDefaultExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportDefaultExpr");
     let method_create_export_default_specifier = env
       .get_static_method_id(
         &class,
         "createExportDefaultSpecifier",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultSpecifier;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportDefaultSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportDefaultSpecifier");
     let method_create_export_named_specifier = env
       .get_static_method_id(
         &class,
         "createExportNamedSpecifier",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportNamedSpecifier;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportNamedSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportNamedSpecifier");
     let method_create_export_namespace_specifier = env
       .get_static_method_id(
         &class,
         "createExportNamespaceSpecifier",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportNamespaceSpecifier;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstExportNamespaceSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExportNamespaceSpecifier");
     let method_create_expr_or_spread = env
       .get_static_method_id(
         &class,
         "createExprOrSpread",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstExprOrSpread;",
+        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstExprOrSpread;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExprOrSpread");
     let method_create_expr_stmt = env
       .get_static_method_id(
         &class,
         "createExprStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstExprStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstExprStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createExprStmt");
     let method_create_fn_decl = env
       .get_static_method_id(
         &class,
         "createFnDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstFnDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstFnDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createFnDecl");
     let method_create_fn_expr = env
       .get_static_method_id(
         &class,
         "createFnExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstFnExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstFnExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createFnExpr");
     let method_create_for_in_stmt = env
       .get_static_method_id(
         &class,
         "createForInStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstForHead;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForInStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstForHead;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForInStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createForInStmt");
     let method_create_for_of_stmt = env
       .get_static_method_id(
         &class,
         "createForOfStmt",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstForHead;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForOfStmt;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstForHead;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForOfStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createForOfStmt");
     let method_create_for_stmt = env
       .get_static_method_id(
         &class,
         "createForStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstVarDeclOrExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstVarDeclOrExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstForStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createForStmt");
     let method_create_function = env
       .get_static_method_id(
         &class,
         "createFunction",
-        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;",
+        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createFunction");
     let method_create_getter_prop = env
       .get_static_method_id(
         &class,
         "createGetterProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstGetterProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstGetterProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createGetterProp");
     let method_create_ident = env
       .get_static_method_id(
         &class,
         "createIdent",
-        "(Ljava/lang/String;ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+        "(Ljava/lang/String;ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createIdent");
     let method_create_if_stmt = env
       .get_static_method_id(
         &class,
         "createIfStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstIfStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstIfStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createIfStmt");
     let method_create_import = env
       .get_static_method_id(
         &class,
         "createImport",
-        "(ILcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImport;",
+        "(ILcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImport;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImport");
     let method_create_import_decl = env
       .get_static_method_id(
         &class,
         "createImportDecl",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;ILcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportDecl;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;ILcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImportDecl");
     let method_create_import_default_specifier = env
       .get_static_method_id(
         &class,
         "createImportDefaultSpecifier",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportDefaultSpecifier;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportDefaultSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImportDefaultSpecifier");
     let method_create_import_named_specifier = env
       .get_static_method_id(
         &class,
         "createImportNamedSpecifier",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportNamedSpecifier;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportNamedSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImportNamedSpecifier");
     let method_create_import_star_as_specifier = env
       .get_static_method_id(
         &class,
         "createImportStarAsSpecifier",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportStarAsSpecifier;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstImportStarAsSpecifier;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createImportStarAsSpecifier");
     let method_create_invalid = env
       .get_static_method_id(
         &class,
         "createInvalid",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstInvalid;",
+        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstInvalid;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createInvalid");
     let method_create_jsx_attr = env
       .get_static_method_id(
         &class,
         "createJsxAttr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxAttrName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxAttrValue;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxAttr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxAttrName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxAttrValue;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxAttr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxAttr");
     let method_create_jsx_closing_element = env
       .get_static_method_id(
         &class,
         "createJsxClosingElement",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxElementName;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingElement;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxElementName;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxClosingElement");
     let method_create_jsx_closing_fragment = env
       .get_static_method_id(
         &class,
         "createJsxClosingFragment",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingFragment;",
+        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingFragment;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxClosingFragment");
     let method_create_jsx_element = env
       .get_static_method_id(
         &class,
         "createJsxElement",
-        "(Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningElement;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingElement;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxElement;",
+        "(Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningElement;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingElement;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxElement");
     let method_create_jsx_empty_expr = env
       .get_static_method_id(
         &class,
         "createJsxEmptyExpr",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxEmptyExpr;",
+        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxEmptyExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxEmptyExpr");
     let method_create_jsx_expr_container = env
       .get_static_method_id(
         &class,
         "createJsxExprContainer",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxExprContainer;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxExprContainer;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxExprContainer");
     let method_create_jsx_fragment = env
       .get_static_method_id(
         &class,
         "createJsxFragment",
-        "(Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningFragment;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingFragment;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxFragment;",
+        "(Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningFragment;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxClosingFragment;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxFragment;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxFragment");
     let method_create_jsx_member_expr = env
       .get_static_method_id(
         &class,
         "createJsxMemberExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxObject;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxMemberExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxObject;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxMemberExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxMemberExpr");
     let method_create_jsx_namespaced_name = env
       .get_static_method_id(
         &class,
         "createJsxNamespacedName",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxNamespacedName;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxNamespacedName;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxNamespacedName");
     let method_create_jsx_opening_element = env
       .get_static_method_id(
         &class,
         "createJsxOpeningElement",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxElementName;Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningElement;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxElementName;Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxOpeningElement");
     let method_create_jsx_opening_fragment = env
       .get_static_method_id(
         &class,
         "createJsxOpeningFragment",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningFragment;",
+        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstJsxOpeningFragment;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxOpeningFragment");
     let method_create_jsx_spread_child = env
       .get_static_method_id(
         &class,
         "createJsxSpreadChild",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxSpreadChild;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstJsxSpreadChild;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxSpreadChild");
     let method_create_jsx_text = env
       .get_static_method_id(
         &class,
         "createJsxText",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstJsxText;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstJsxText;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createJsxText");
     let method_create_key_value_pat_prop = env
       .get_static_method_id(
         &class,
         "createKeyValuePatProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstKeyValuePatProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstKeyValuePatProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createKeyValuePatProp");
     let method_create_key_value_prop = env
       .get_static_method_id(
         &class,
         "createKeyValueProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstKeyValueProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstKeyValueProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createKeyValueProp");
     let method_create_labeled_stmt = env
       .get_static_method_id(
         &class,
         "createLabeledStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstLabeledStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstLabeledStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createLabeledStmt");
     let method_create_member_expr = env
       .get_static_method_id(
         &class,
         "createMemberExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstMemberProp;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstMemberExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstMemberProp;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstMemberExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createMemberExpr");
     let method_create_meta_prop_expr = env
       .get_static_method_id(
         &class,
         "createMetaPropExpr",
-        "(ILcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstMetaPropExpr;",
+        "(ILcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstMetaPropExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createMetaPropExpr");
     let method_create_method_prop = env
       .get_static_method_id(
         &class,
         "createMethodProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstMethodProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstMethodProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createMethodProp");
     let method_create_module = env
       .get_static_method_id(
         &class,
         "createModule",
-        "(Ljava/util/List;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstModule;",
+        "(Ljava/util/List;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstModule;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createModule");
     let method_create_named_export = env
       .get_static_method_id(
         &class,
         "createNamedExport",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstNamedExport;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstNamedExport;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createNamedExport");
     let method_create_new_expr = env
       .get_static_method_id(
         &class,
         "createNewExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstNewExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstNewExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createNewExpr");
     let method_create_null = env
       .get_static_method_id(
         &class,
         "createNull",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstNull;",
+        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstNull;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createNull");
     let method_create_number = env
       .get_static_method_id(
         &class,
         "createNumber",
-        "(DLjava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstNumber;",
+        "(DLjava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstNumber;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createNumber");
     let method_create_object_lit = env
       .get_static_method_id(
         &class,
         "createObjectLit",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createObjectLit");
     let method_create_object_pat = env
       .get_static_method_id(
         &class,
         "createObjectPat",
-        "(Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstObjectPat;",
+        "(Ljava/util/List;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstObjectPat;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createObjectPat");
     let method_create_opt_call = env
       .get_static_method_id(
         &class,
         "createOptCall",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstOptCall;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstOptCall;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createOptCall");
     let method_create_opt_chain_expr = env
       .get_static_method_id(
         &class,
         "createOptChainExpr",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstOptChainBase;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstOptChainExpr;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstOptChainBase;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstOptChainExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createOptChainExpr");
     let method_create_param = env
       .get_static_method_id(
         &class,
         "createParam",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstParam;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstParam;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createParam");
     let method_create_paren_expr = env
       .get_static_method_id(
         &class,
         "createParenExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstParenExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstParenExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createParenExpr");
     let method_create_private_method = env
       .get_static_method_id(
         &class,
         "createPrivateMethod",
-        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;IZIZZZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateMethod;",
+        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;IZIZZZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateMethod;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createPrivateMethod");
     let method_create_private_name = env
       .get_static_method_id(
         &class,
         "createPrivateName",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createPrivateName");
     let method_create_private_prop = env
       .get_static_method_id(
         &class,
         "createPrivateProp",
-        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;IZZZZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createPrivateProp");
     let method_create_regex = env
       .get_static_method_id(
         &class,
         "createRegex",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstRegex;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstRegex;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createRegex");
     let method_create_rest_pat = env
       .get_static_method_id(
         &class,
         "createRestPat",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstRestPat;",
+        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/pat/Swc4jAstRestPat;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createRestPat");
     let method_create_return_stmt = env
       .get_static_method_id(
         &class,
         "createReturnStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstReturnStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstReturnStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createReturnStmt");
     let method_create_script = env
       .get_static_method_id(
         &class,
         "createScript",
-        "(Ljava/util/List;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstScript;",
+        "(Ljava/util/List;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/program/Swc4jAstScript;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createScript");
     let method_create_seq_expr = env
       .get_static_method_id(
         &class,
         "createSeqExpr",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSeqExpr;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSeqExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSeqExpr");
     let method_create_setter_prop = env
       .get_static_method_id(
         &class,
         "createSetterProp",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSetterProp;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSetterProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSetterProp");
     let method_create_span = env
       .get_static_method_id(
         &class,
         "createSpan",
-        "(IIII)Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;",
+        "(IIII)Lcom/caoccao/javet/swc4j/span/Swc4jSpan;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSpan");
     let method_create_spread_element = env
       .get_static_method_id(
         &class,
         "createSpreadElement",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSpreadElement;",
+        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSpreadElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSpreadElement");
     let method_create_static_block = env
       .get_static_method_id(
         &class,
         "createStaticBlock",
-        "(Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstStaticBlock;",
+        "(Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstStaticBlock;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createStaticBlock");
     let method_create_str = env
       .get_static_method_id(
         &class,
         "createStr",
-        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createStr");
     let method_create_super = env
       .get_static_method_id(
         &class,
         "createSuper",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSuper;",
+        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSuper;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSuper");
     let method_create_super_prop_expr = env
       .get_static_method_id(
         &class,
         "createSuperPropExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSuper;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstSuperProp;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSuperPropExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstSuper;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstSuperProp;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstSuperPropExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSuperPropExpr");
     let method_create_switch_case = env
       .get_static_method_id(
         &class,
         "createSwitchCase",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstSwitchCase;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstSwitchCase;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSwitchCase");
     let method_create_switch_stmt = env
       .get_static_method_id(
         &class,
         "createSwitchStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstSwitchStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstSwitchStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createSwitchStmt");
     let method_create_tagged_tpl = env
       .get_static_method_id(
         &class,
         "createTaggedTpl",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTpl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTaggedTpl;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTpl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTaggedTpl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTaggedTpl");
     let method_create_this_expr = env
       .get_static_method_id(
         &class,
         "createThisExpr",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstThisExpr;",
+        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstThisExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createThisExpr");
     let method_create_throw_stmt = env
       .get_static_method_id(
         &class,
         "createThrowStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstThrowStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstThrowStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createThrowStmt");
     let method_create_tpl = env
       .get_static_method_id(
         &class,
         "createTpl",
-        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTpl;",
+        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTpl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTpl");
     let method_create_tpl_element = env
       .get_static_method_id(
         &class,
         "createTplElement",
-        "(ZLjava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstTplElement;",
+        "(ZLjava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstTplElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTplElement");
     let method_create_try_stmt = env
       .get_static_method_id(
         &class,
         "createTryStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstCatchClause;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTryStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/miscs/Swc4jAstCatchClause;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTryStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTryStmt");
     let method_create_ts_array_type = env
       .get_static_method_id(
         &class,
         "createTsArrayType",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsArrayType;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsArrayType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsArrayType");
     let method_create_ts_as_expr = env
       .get_static_method_id(
         &class,
         "createTsAsExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsAsExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsAsExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsAsExpr");
     let method_create_ts_call_signature_decl = env
       .get_static_method_id(
         &class,
         "createTsCallSignatureDecl",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsCallSignatureDecl;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsCallSignatureDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsCallSignatureDecl");
     let method_create_ts_conditional_type = env
       .get_static_method_id(
         &class,
         "createTsConditionalType",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsConditionalType;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsConditionalType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsConditionalType");
     let method_create_ts_const_assertion = env
       .get_static_method_id(
         &class,
         "createTsConstAssertion",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsConstAssertion;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsConstAssertion;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsConstAssertion");
     let method_create_ts_construct_signature_decl = env
       .get_static_method_id(
         &class,
         "createTsConstructSignatureDecl",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsConstructSignatureDecl;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsConstructSignatureDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsConstructSignatureDecl");
     let method_create_ts_constructor_type = env
       .get_static_method_id(
         &class,
         "createTsConstructorType",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsConstructorType;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsConstructorType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsConstructorType");
     let method_create_ts_enum_decl = env
       .get_static_method_id(
         &class,
         "createTsEnumDecl",
-        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsEnumDecl;",
+        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsEnumDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsEnumDecl");
     let method_create_ts_enum_member = env
       .get_static_method_id(
         &class,
         "createTsEnumMember",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEnumMemberId;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsEnumMember;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEnumMemberId;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsEnumMember;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsEnumMember");
     let method_create_ts_export_assignment = env
       .get_static_method_id(
         &class,
         "createTsExportAssignment",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsExportAssignment;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsExportAssignment;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsExportAssignment");
     let method_create_ts_expr_with_type_args = env
       .get_static_method_id(
         &class,
         "createTsExprWithTypeArgs",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsExprWithTypeArgs;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsExprWithTypeArgs;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsExprWithTypeArgs");
     let method_create_ts_external_module_ref = env
       .get_static_method_id(
         &class,
         "createTsExternalModuleRef",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsExternalModuleRef;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsExternalModuleRef;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsExternalModuleRef");
     let method_create_ts_fn_type = env
       .get_static_method_id(
         &class,
         "createTsFnType",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsFnType;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsFnType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsFnType");
     let method_create_ts_getter_signature = env
       .get_static_method_id(
         &class,
         "createTsGetterSignature",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsGetterSignature;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsGetterSignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsGetterSignature");
     let method_create_ts_import_equals_decl = env
       .get_static_method_id(
         &class,
         "createTsImportEqualsDecl",
-        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleRef;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsImportEqualsDecl;",
+        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleRef;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsImportEqualsDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsImportEqualsDecl");
     let method_create_ts_import_type = env
       .get_static_method_id(
         &class,
         "createTsImportType",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsImportType;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsImportType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsImportType");
     let method_create_ts_index_signature = env
       .get_static_method_id(
         &class,
         "createTsIndexSignature",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIndexSignature;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIndexSignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsIndexSignature");
     let method_create_ts_indexed_access_type = env
       .get_static_method_id(
         &class,
         "createTsIndexedAccessType",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIndexedAccessType;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIndexedAccessType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsIndexedAccessType");
     let method_create_ts_infer_type = env
       .get_static_method_id(
         &class,
         "createTsInferType",
-        "(Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInferType;",
+        "(Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInferType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsInferType");
     let method_create_ts_instantiation = env
       .get_static_method_id(
         &class,
         "createTsInstantiation",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsInstantiation;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsInstantiation;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsInstantiation");
     let method_create_ts_interface_body = env
       .get_static_method_id(
         &class,
         "createTsInterfaceBody",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsInterfaceBody");
     let method_create_ts_interface_decl = env
       .get_static_method_id(
         &class,
         "createTsInterfaceDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsInterfaceDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsInterfaceBody;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsInterfaceDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsInterfaceDecl");
     let method_create_ts_intersection_type = env
       .get_static_method_id(
         &class,
         "createTsIntersectionType",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIntersectionType;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsIntersectionType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsIntersectionType");
     let method_create_ts_keyword_type = env
       .get_static_method_id(
         &class,
         "createTsKeywordType",
-        "(ILcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsKeywordType;",
+        "(ILcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsKeywordType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsKeywordType");
     let method_create_ts_lit_type = env
       .get_static_method_id(
         &class,
         "createTsLitType",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsLit;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsLitType;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsLit;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsLitType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsLitType");
     let method_create_ts_mapped_type = env
       .get_static_method_id(
         &class,
         "createTsMappedType",
-        "(ILcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsMappedType;",
+        "(ILcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsMappedType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsMappedType");
     let method_create_ts_method_signature = env
       .get_static_method_id(
         &class,
         "createTsMethodSignature",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsMethodSignature;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsMethodSignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsMethodSignature");
     let method_create_ts_module_block = env
       .get_static_method_id(
         &class,
         "createTsModuleBlock",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsModuleBlock;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsModuleBlock;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsModuleBlock");
     let method_create_ts_module_decl = env
       .get_static_method_id(
         &class,
         "createTsModuleDecl",
-        "(ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsNamespaceBody;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsModuleDecl;",
+        "(ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsNamespaceBody;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsModuleDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsModuleDecl");
     let method_create_ts_namespace_decl = env
       .get_static_method_id(
         &class,
         "createTsNamespaceDecl",
-        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsNamespaceBody;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsNamespaceDecl;",
+        "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsNamespaceBody;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsNamespaceDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsNamespaceDecl");
     let method_create_ts_namespace_export_decl = env
       .get_static_method_id(
         &class,
         "createTsNamespaceExportDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsNamespaceExportDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/module/Swc4jAstTsNamespaceExportDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsNamespaceExportDecl");
     let method_create_ts_non_null_expr = env
       .get_static_method_id(
         &class,
         "createTsNonNullExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsNonNullExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsNonNullExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsNonNullExpr");
     let method_create_ts_optional_type = env
       .get_static_method_id(
         &class,
         "createTsOptionalType",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsOptionalType;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsOptionalType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsOptionalType");
     let method_create_ts_param_prop = env
       .get_static_method_id(
         &class,
         "createTsParamProp",
-        "(Ljava/util/List;IZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsParamPropParam;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsParamProp;",
+        "(Ljava/util/List;IZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsParamPropParam;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsParamProp;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsParamProp");
     let method_create_ts_parenthesized_type = env
       .get_static_method_id(
         &class,
         "createTsParenthesizedType",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsParenthesizedType;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsParenthesizedType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsParenthesizedType");
     let method_create_ts_property_signature = env
       .get_static_method_id(
         &class,
         "createTsPropertySignature",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsPropertySignature;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsPropertySignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsPropertySignature");
     let method_create_ts_qualified_name = env
       .get_static_method_id(
         &class,
         "createTsQualifiedName",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsQualifiedName;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsQualifiedName;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsQualifiedName");
     let method_create_ts_rest_type = env
       .get_static_method_id(
         &class,
         "createTsRestType",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsRestType;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsRestType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsRestType");
     let method_create_ts_satisfies_expr = env
       .get_static_method_id(
         &class,
         "createTsSatisfiesExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsSatisfiesExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsSatisfiesExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsSatisfiesExpr");
     let method_create_ts_setter_signature = env
       .get_static_method_id(
         &class,
         "createTsSetterSignature",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsFnParam;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsSetterSignature;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsFnParam;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsSetterSignature;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsSetterSignature");
     let method_create_ts_this_type = env
       .get_static_method_id(
         &class,
         "createTsThisType",
-        "(Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsThisType;",
+        "(Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsThisType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsThisType");
     let method_create_ts_tpl_lit_type = env
       .get_static_method_id(
         &class,
         "createTsTplLitType",
-        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTplLitType;",
+        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTplLitType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTplLitType");
     let method_create_ts_tuple_element = env
       .get_static_method_id(
         &class,
         "createTsTupleElement",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTupleElement;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTupleElement;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTupleElement");
     let method_create_ts_tuple_type = env
       .get_static_method_id(
         &class,
         "createTsTupleType",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTupleType;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTupleType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTupleType");
     let method_create_ts_type_alias_decl = env
       .get_static_method_id(
         &class,
         "createTsTypeAliasDecl",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsTypeAliasDecl;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstTsTypeAliasDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeAliasDecl");
     let method_create_ts_type_ann = env
       .get_static_method_id(
         &class,
         "createTsTypeAnn",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeAnn");
     let method_create_ts_type_assertion = env
       .get_static_method_id(
         &class,
         "createTsTypeAssertion",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsTypeAssertion;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTsTypeAssertion;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeAssertion");
     let method_create_ts_type_lit = env
       .get_static_method_id(
         &class,
         "createTsTypeLit",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeLit;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeLit;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeLit");
     let method_create_ts_type_operator = env
       .get_static_method_id(
         &class,
         "createTsTypeOperator",
-        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeOperator;",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeOperator;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeOperator");
     let method_create_ts_type_param = env
       .get_static_method_id(
         &class,
         "createTsTypeParam",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;ZZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsType;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParam;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeParam");
     let method_create_ts_type_param_decl = env
       .get_static_method_id(
         &class,
         "createTsTypeParamDecl",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeParamDecl");
     let method_create_ts_type_param_instantiation = env
       .get_static_method_id(
         &class,
         "createTsTypeParamInstantiation",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeParamInstantiation");
     let method_create_ts_type_predicate = env
       .get_static_method_id(
         &class,
         "createTsTypePredicate",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsThisTypeOrIdent;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypePredicate;",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsThisTypeOrIdent;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypePredicate;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypePredicate");
     let method_create_ts_type_query = env
       .get_static_method_id(
         &class,
         "createTsTypeQuery",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsTypeQueryExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeQuery;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsTypeQueryExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeQuery;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeQuery");
     let method_create_ts_type_ref = env
       .get_static_method_id(
         &class,
         "createTsTypeRef",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeRef;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeRef;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsTypeRef");
     let method_create_ts_union_type = env
       .get_static_method_id(
         &class,
         "createTsUnionType",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsUnionType;",
+        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsUnionType;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createTsUnionType");
     let method_create_unary_expr = env
       .get_static_method_id(
         &class,
         "createUnaryExpr",
-        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstUnaryExpr;",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstUnaryExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createUnaryExpr");
     let method_create_update_expr = env
       .get_static_method_id(
         &class,
         "createUpdateExpr",
-        "(IZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstUpdateExpr;",
+        "(IZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstUpdateExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createUpdateExpr");
     let method_create_using_decl = env
       .get_static_method_id(
         &class,
         "createUsingDecl",
-        "(ZLjava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstUsingDecl;",
+        "(ZLjava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstUsingDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createUsingDecl");
     let method_create_var_decl = env
       .get_static_method_id(
         &class,
         "createVarDecl",
-        "(IZLjava/util/List;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstVarDecl;",
+        "(IZLjava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstVarDecl;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createVarDecl");
     let method_create_var_declarator = env
       .get_static_method_id(
         &class,
         "createVarDeclarator",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstVarDeclarator;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPat;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstVarDeclarator;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createVarDeclarator");
     let method_create_while_stmt = env
       .get_static_method_id(
         &class,
         "createWhileStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstWhileStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstWhileStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createWhileStmt");
     let method_create_with_stmt = env
       .get_static_method_id(
         &class,
         "createWithStmt",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstWithStmt;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstStmt;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstWithStmt;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createWithStmt");
     let method_create_yield_expr = env
       .get_static_method_id(
         &class,
         "createYieldExpr",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/utils/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstYieldExpr;",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstYieldExpr;",
       )
       .expect("Couldn't find method Swc4jAstFactory.createYieldExpr");
     JavaSwc4jAstFactory {

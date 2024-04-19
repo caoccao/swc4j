@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.utils;
+package com.caoccao.javet.swc4j.span;
 
 /**
  * The type Swc4j span.

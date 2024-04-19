@@ -23,7 +23,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.utils.Swc4jSpan;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.Optional;
 

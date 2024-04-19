@@ -24,7 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstSimpleAssignTarget;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.utils.Swc4jSpan;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 public class Swc4jAstInvalid
         extends Swc4jAst

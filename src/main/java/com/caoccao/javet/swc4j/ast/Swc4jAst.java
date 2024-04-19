@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.*;
 
 import java.lang.reflect.Modifier;

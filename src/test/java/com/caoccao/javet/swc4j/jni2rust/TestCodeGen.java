@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.tokens.Swc4jTokenFactory;
 import com.caoccao.javet.swc4j.utils.*;
 import org.junit.jupiter.api.Test;
