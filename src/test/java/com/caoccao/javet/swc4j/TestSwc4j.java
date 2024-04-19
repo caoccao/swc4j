@@ -16,6 +16,8 @@
 
 package com.caoccao.javet.swc4j;
 
+import com.caoccao.javet.swc4j.comments.Swc4jComment;
+import com.caoccao.javet.swc4j.comments.Swc4jCommentKind;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
@@ -177,6 +179,26 @@ public class TestSwc4j extends BaseTestSuite {
         assertNotNull(output);
         assertEquals(Swc4jParseMode.Module, output.getParseMode());
         assertEquals("let a = 1; // Comment 2\n", output.getCode());
+        assertEquals(1, output.getComments().getLeading().size());
+        assertEquals(1, output.getComments().getTrailing().size());
+        List<Swc4jComment> comments = output.getComments().getLeading().get(23);
+        assertEquals(1, comments.size());
+        Swc4jComment comment = comments.get(0);
+        assertEquals(Swc4jCommentKind.Block, comment.getKind());
+        assertEquals(7, comment.getSpan().getStart());
+        assertEquals(22, comment.getSpan().getEnd());
+        assertEquals(1, comment.getSpan().getLine());
+        assertEquals(8, comment.getSpan().getColumn());
+        assertEquals(" Comment 1 ", comment.getText());
+        comments = output.getComments().getTrailing().get(34);
+        assertEquals(1, comments.size());
+        comment = comments.get(0);
+        assertEquals(Swc4jCommentKind.Line, comment.getKind());
+        assertEquals(35, comment.getSpan().getStart());
+        assertEquals(47, comment.getSpan().getEnd());
+        assertEquals(1, comment.getSpan().getLine());
+        assertEquals(36, comment.getSpan().getColumn());
+        assertEquals(" Comment 2", comment.getText());
     }
 
     @Test
@@ -211,6 +233,8 @@ public class TestSwc4j extends BaseTestSuite {
         assertNotNull(output);
         assertEquals(Swc4jParseMode.Module, output.getParseMode());
         assertEquals("let a = 1;\n", output.getCode());
+        assertEquals(1, output.getComments().getLeading().size());
+        assertEquals(1, output.getComments().getTrailing().size());
     }
 
     @ParameterizedTest
@@ -223,7 +247,7 @@ public class TestSwc4j extends BaseTestSuite {
                 "}\n";
         URL specifier = new URL("file://abc.ts");
         String[] expectedProperties = new String[]{
-                "version", "sources", "sourcesContent", specifier.toString() + "/", "names", "mappings"};
+                "version", "sources", "sourcesContent", specifier + "/", "names", "mappings"};
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
                 .setParseMode(parseMode)
                 .setInlineSourceMap(false)
@@ -238,6 +262,8 @@ public class TestSwc4j extends BaseTestSuite {
         Stream.of(expectedProperties).forEach(p -> assertTrue(
                 output.getSourceMap().get().contains("\"" + p + "\""),
                 p + " should exist in the source map"));
+        assertTrue(output.getComments().getLeading().isEmpty());
+        assertTrue(output.getComments().getTrailing().isEmpty());
     }
 
     @Test

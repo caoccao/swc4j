@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.outputs;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
+import com.caoccao.javet.swc4j.comments.Swc4jComments;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
@@ -69,8 +70,9 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
             Swc4jParseMode parseMode,
             String sourceMap,
             String sourceText,
-            List<Swc4jToken> tokens) {
-        super(program, mediaType, parseMode, sourceText, tokens);
+            List<Swc4jToken> tokens,
+            Swc4jComments comments) {
+        super(program, mediaType, parseMode, sourceText, tokens, comments);
         this.code = code;
         this.sourceMap = Optional.ofNullable(sourceMap);
     }

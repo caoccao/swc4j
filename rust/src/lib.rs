@@ -25,6 +25,7 @@ use std::ffi::c_void;
 use std::ptr::null_mut;
 
 pub mod ast_utils;
+pub mod comment_utils;
 pub mod core;
 pub mod enums;
 pub mod error;
@@ -40,14 +41,15 @@ use crate::jni_utils::{jstring_to_optional_string, jstring_to_string, string_to_
 pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
   debug_println!("JNI_OnLoad()");
   let mut env = java_vm.get_env().expect("Cannot get JNI env");
-  span_utils::init(&mut env);
   ast_utils::init(&mut env);
-  token_utils::init(&mut env);
+  comment_utils::init(&mut env);
   enums::init(&mut env);
   error::init(&mut env);
   jni_utils::init(&mut env);
   options::init(&mut env);
   outputs::init(&mut env);
+  span_utils::init(&mut env);
+  token_utils::init(&mut env);
   JNI_VERSION_1_8
 }
 

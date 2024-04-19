@@ -15,16 +15,14 @@
 * limitations under the License.
 */
 
-use deno_ast::{
-  swc::{
-    atoms::JsWord,
-    common::comments::CommentKind,
-    common::{BytePos, Span, Spanned},
-    parser::token::{IdentLike, Keyword, Token, Word},
-  },
-  MediaType,
+use deno_ast::swc::{
+  atoms::JsWord,
+  common::comments::CommentKind,
+  common::{BytePos, Span, Spanned},
+  parser::token::{IdentLike, Keyword, Token, Word},
 };
 
+use enums::*;
 use swc4j::*;
 
 #[test]
@@ -49,8 +47,7 @@ fn test_parse_jsx_with_default_options() {
   let output = core::parse(code.to_owned(), options);
   assert!(output.is_ok());
   let output = output.unwrap();
-  assert!(output.module);
-  assert!(!output.script);
+  assert!(matches!(output.parse_mode, ParseMode::Module));
   assert_eq!(MediaType::Jsx, output.media_type);
 }
 
@@ -65,8 +62,7 @@ fn test_parse_typescript_with_capture_tokens() {
   let output = core::parse(code.to_owned(), options);
   assert!(output.is_ok());
   let output = output.unwrap();
-  assert!(output.module);
-  assert!(!output.script);
+  assert!(matches!(output.parse_mode, ParseMode::Module));
   assert!(output.tokens.is_some());
   let tokens = output.tokens.unwrap();
   /*
@@ -118,8 +114,7 @@ fn test_parse_typescript_with_default_options() {
   let output = core::parse(code.to_owned(), options);
   assert!(output.is_ok());
   let output = output.unwrap();
-  assert!(output.module);
-  assert!(!output.script);
+  assert!(matches!(output.parse_mode, ParseMode::Module));
   assert!(output.tokens.is_none());
 }
 
@@ -203,8 +198,7 @@ fn test_transpile_jsx_with_custom_jsx_factory() {
   let output = core::transpile(code.to_owned(), options);
   assert!(output.is_ok());
   let output = output.unwrap();
-  assert!(output.parse_output.module);
-  assert!(!output.parse_output.script);
+  assert!(matches!(output.parse_output.parse_mode, ParseMode::Module));
   let output_code = output.code;
   assert_eq!(expected_code, &output_code[0..expected_code.len()]);
   assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
@@ -234,8 +228,7 @@ fn test_transpile_jsx_with_default_options() {
   let output = core::transpile(code.to_owned(), options);
   assert!(output.is_ok());
   let output = output.unwrap();
-  assert!(output.parse_output.module);
-  assert!(!output.parse_output.script);
+  assert!(matches!(output.parse_output.parse_mode, ParseMode::Module));
   assert_eq!(MediaType::Jsx, output.parse_output.media_type);
   let output_code = output.code;
   assert_eq!(expected_code, &output_code[0..expected_code.len()]);
@@ -251,8 +244,7 @@ fn test_transpile_type_script_with_inline_source_map() {
   let output = core::transpile(code.to_owned(), options);
   assert!(output.is_ok());
   let output = output.unwrap();
-  assert!(output.parse_output.module);
-  assert!(!output.parse_output.script);
+  assert!(matches!(output.parse_output.parse_mode, ParseMode::Module));
   let output_code = output.code;
   assert_eq!(expected_code, &output_code[0..expected_code.len()]);
   assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
@@ -275,16 +267,6 @@ fn test_transpile_type_script_without_inline_source_map() {
       let output = core::transpile(code.to_owned(), options);
       assert!(output.is_ok());
       let output = output.unwrap();
-      match parse_mode {
-        enums::ParseMode::Script => {
-          assert!(!output.parse_output.module);
-          assert!(output.parse_output.script);
-        }
-        _ => {
-          assert!(output.parse_output.module);
-          assert!(!output.parse_output.script);
-        }
-      }
       let output_code = output.code;
       assert_eq!(expected_code, output_code);
       assert!(output.source_map.is_none());

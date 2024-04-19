@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.jni2rust;
 
 public enum Jni2RustFilePath {
     AstUtils("rust/src/ast_utils.rs"),
+    CommentUtils("rust/src/comment_utils.rs"),
     None(null),
     Options("rust/src/options.rs"),
     Outputs("rust/src/outputs.rs"),

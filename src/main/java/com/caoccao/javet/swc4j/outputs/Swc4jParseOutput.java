@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.outputs;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
+import com.caoccao.javet.swc4j.comments.Swc4jComments;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
@@ -36,6 +37,12 @@ import java.util.List;
  */
 @Jni2RustClass(filePath = Jni2RustFilePath.Outputs)
 public class Swc4jParseOutput {
+    /**
+     * The Comments.
+     *
+     * @since 0.4.0
+     */
+    protected final Swc4jComments comments;
     /**
      * The Media type.
      *
@@ -75,6 +82,7 @@ public class Swc4jParseOutput {
      * @param parseMode  the parse mode
      * @param sourceText the source text
      * @param tokens     the tokens
+     * @param comments   the comments
      * @since 0.2.0
      */
     @Jni2RustMethod(mode = Jni2RustMethodMode.DefinitionOnly)
@@ -83,12 +91,24 @@ public class Swc4jParseOutput {
             Swc4jMediaType mediaType,
             Swc4jParseMode parseMode,
             String sourceText,
-            List<Swc4jToken> tokens) {
+            List<Swc4jToken> tokens,
+            Swc4jComments comments) {
+        this.comments = comments;
         this.mediaType = AssertionUtils.notNull(mediaType, "Media type");
         this.parseMode = AssertionUtils.notNull(parseMode, "Parse mode");
         this.program = program;
         this.sourceText = AssertionUtils.notNull(sourceText, "Source text");
         this.tokens = tokens;
+    }
+
+    /**
+     * Gets comments.
+     *
+     * @return the comments
+     * @since 0.4.0
+     */
+    public Swc4jComments getComments() {
+        return comments;
     }
 
     /**

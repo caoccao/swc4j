@@ -15,7 +15,7 @@
 * limitations under the License.
 */
 
-use jni::objects::{GlobalRef, JMethodID, JObject, JString};
+use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID, JString};
 use jni::signature::{Primitive, ReturnType};
 use jni::sys::jvalue;
 use jni::JNIEnv;
@@ -314,8 +314,97 @@ impl JavaArrayList {
   }
 
   pub fn add<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> bool {
-    let element = jvalue { l: element.as_raw() };
+    let element = object_to_jvalue!(element);
     call_as_boolean!(env, obj, &self.method_add, &[element], "add()")
+  }
+}
+
+pub struct JavaHashMap {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_construct: JMethodID,
+  method_put: JMethodID,
+}
+unsafe impl Send for JavaHashMap {}
+unsafe impl Sync for JavaHashMap {}
+
+impl JavaHashMap {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("java/util/HashMap")
+      .expect("Couldn't find class HashMap");
+    let class = env.new_global_ref(class).expect("Couldn't globalize class HashMap");
+    let method_construct = env
+      .get_method_id(&class, "<init>", "(I)V")
+      .expect("Couldn't find method HashMap::new");
+    let method_put = env
+      .get_method_id(
+        &class,
+        "put",
+        "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+      )
+      .expect("Couldn't find method HashMap.put");
+    JavaHashMap {
+      class,
+      method_construct,
+      method_put,
+    }
+  }
+
+  pub fn construct<'local, 'a>(&self, env: &mut JNIEnv<'local>, initial_capacity: usize) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let initial_capacity = int_to_jvalue!(initial_capacity);
+    call_as_construct!(env, &self.class, self.method_construct, &[initial_capacity], "HashMap")
+  }
+
+  pub fn put<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+    key: &JObject<'_>,
+    value: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let key = object_to_jvalue!(key);
+    let value = object_to_jvalue!(value);
+    call_as_object!(env, obj, &self.method_put, &[key, value], "put()")
+  }
+}
+
+pub struct JavaInteger {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_value_of: JStaticMethodID,
+}
+unsafe impl Send for JavaInteger {}
+unsafe impl Sync for JavaInteger {}
+
+impl JavaInteger {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("java/lang/Integer")
+      .expect("Couldn't find class Integer");
+    let class = env.new_global_ref(class).expect("Couldn't globalize class Integer");
+    let method_value_of = env
+      .get_static_method_id(&class, "valueOf", "(I)Ljava/lang/Integer;")
+      .expect("Couldn't find method Integer.valueOf");
+    JavaInteger { class, method_value_of }
+  }
+
+  pub fn value_of<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    i: i32,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let i = int_to_jvalue!(i);
+    call_static_as_object!(env, &self.class, &self.method_value_of, &[i], "valueOf()")
   }
 }
 
@@ -347,13 +436,24 @@ impl JavaURL {
 }
 
 static mut JAVA_ARRAY_LIST: Option<JavaArrayList> = None;
+static mut JAVA_HASH_MAP: Option<JavaHashMap> = None;
+static mut JAVA_INTEGER: Option<JavaInteger> = None;
 static mut JAVA_URL: Option<JavaURL> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
     JAVA_ARRAY_LIST = Some(JavaArrayList::new(env));
+    JAVA_HASH_MAP = Some(JavaHashMap::new(env));
+    JAVA_INTEGER = Some(JavaInteger::new(env));
     JAVA_URL = Some(JavaURL::new(env));
   }
+}
+
+pub fn integer_value_of<'local, 'a>(env: &mut JNIEnv<'local>, i: i32) -> JObject<'a>
+where
+  'local: 'a,
+{
+  unsafe { JAVA_INTEGER.as_ref().unwrap() }.value_of(env, i)
 }
 
 pub fn list_add<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> bool {
@@ -365,6 +465,25 @@ where
   'local: 'a,
 {
   unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.construct(env, initial_capacity)
+}
+
+pub fn map_new<'local, 'a>(env: &mut JNIEnv<'local>, initial_capacity: usize) -> JObject<'a>
+where
+  'local: 'a,
+{
+  unsafe { JAVA_HASH_MAP.as_ref().unwrap() }.construct(env, initial_capacity)
+}
+
+pub fn map_put<'local, 'a>(
+  env: &mut JNIEnv<'local>,
+  obj: &JObject<'_>,
+  key: &JObject<'_>,
+  value: &JObject<'_>,
+) -> JObject<'a>
+where
+  'local: 'a,
+{
+  unsafe { JAVA_HASH_MAP.as_ref().unwrap() }.put(env, obj, key, value)
 }
 
 pub fn url_to_string<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> String {

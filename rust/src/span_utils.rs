@@ -22,10 +22,11 @@ use jni::JNIEnv;
 use std::collections::BTreeMap;
 
 use deno_ast::swc::common::source_map::Pos;
-use deno_ast::swc::common::Span;
+use deno_ast::swc::common::{BytePos, Span};
 
 use crate::jni_utils::*;
 
+#[derive(Debug, Copy, Clone)]
 pub struct SpanEx {
   pub start: u32,
   pub end: u32,
@@ -64,6 +65,7 @@ impl ToJniType for SpanEx {
   }
 }
 
+#[derive(Debug)]
 pub struct ByteToIndexMap {
   map: BTreeMap<usize, SpanEx>,
 }
@@ -71,6 +73,14 @@ pub struct ByteToIndexMap {
 impl ByteToIndexMap {
   pub fn new() -> Self {
     ByteToIndexMap { map: BTreeMap::new() }
+  }
+
+  pub fn get_span_ex_by_byte_pos(&self, byte_pos: &BytePos) -> SpanEx {
+    self
+      .map
+      .get(&(byte_pos.to_usize() - 1))
+      .expect(format!("Couldn't find {}", byte_pos.to_usize() - 1).as_str())
+      .clone()
   }
 
   pub fn get_span_ex_by_span(&self, span: &Span) -> SpanEx {
@@ -84,14 +94,16 @@ impl ByteToIndexMap {
     }
   }
 
+  pub fn register_by_byte_pos(&mut self, byte_pos: &BytePos) {
+    let position = byte_pos.to_usize() - 1;
+    if !self.map.contains_key(&position) {
+      self.map.insert(position, Default::default());
+    }
+  }
+
   pub fn register_by_span(&mut self, span: &Span) {
-    [span.lo().to_usize() - 1, span.hi().to_usize() - 1]
-      .into_iter()
-      .for_each(|position| {
-        if !self.map.contains_key(&position) {
-          self.map.insert(position, Default::default());
-        }
-      });
+    self.register_by_byte_pos(&span.lo());
+    self.register_by_byte_pos(&span.hi());
   }
 
   pub fn update(&mut self, key: &usize, position: u32, line: u32, column: u32) {

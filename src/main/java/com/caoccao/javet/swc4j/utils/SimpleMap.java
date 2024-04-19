@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.utils;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +27,19 @@ import java.util.Map;
  */
 public final class SimpleMap {
     private SimpleMap() {
+    }
+
+    /**
+     * Immutable map.
+     *
+     * @param <K> the type parameter
+     * @param <V> the type parameter
+     * @param map the map
+     * @return the map
+     * @since 0.4.0
+     */
+    public static <K, V> Map<K, V> immutable(Map<K, V> map) {
+        return Collections.unmodifiableMap(map);
     }
 
     /**
@@ -284,6 +298,14 @@ public final class SimpleMap {
         return map;
     }
 
+    /**
+     * Of map.
+     *
+     * @param <K>     the type parameter
+     * @param <V>     the type parameter
+     * @param objects the objects
+     * @return the map
+     */
     @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> of(Object... objects) {
         final int length = objects.length;

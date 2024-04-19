@@ -110,6 +110,6 @@ public class Swc4jSpan {
 
     @Override
     public String toString() {
-        return "{ start: " + start + ", end: " + end + ", line: " + line + ", column: " + column + "}";
+        return "{ start: " + start + ", end: " + end + ", line: " + line + ", column: " + column + " }";
     }
 }

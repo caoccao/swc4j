@@ -20,31 +20,28 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
-import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.SimpleMap;
+
+import java.util.List;
+import java.util.Map;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.CommentUtils)
-public class Swc4jComment {
-    protected final Swc4jCommentKind kind;
-    protected final Swc4jSpan span;
-    protected final String text;
+public class Swc4jComments {
+    protected final Map<Integer, List<Swc4jComment>> leading;
+    protected final Map<Integer, List<Swc4jComment>> trailing;
 
     @Jni2RustMethod(mode = Jni2RustMethodMode.Manual)
-    public Swc4jComment(String text, Swc4jCommentKind kind, Swc4jSpan span) {
-        this.kind = AssertionUtils.notNull(kind, "Kind");
-        this.span = AssertionUtils.notNull(span, "Span");
-        this.text = AssertionUtils.notNull(text, "Text");
+    public Swc4jComments(Map<Integer, List<Swc4jComment>> leading, Map<Integer, List<Swc4jComment>> trailing) {
+        this.leading = SimpleMap.immutable(AssertionUtils.notNull(leading, "Leading"));
+        this.trailing = SimpleMap.immutable(AssertionUtils.notNull(trailing, "Trailing"));
     }
 
-    public Swc4jCommentKind getKind() {
-        return kind;
+    public Map<Integer, List<Swc4jComment>> getLeading() {
+        return leading;
     }
 
-    public Swc4jSpan getSpan() {
-        return span;
-    }
-
-    public String getText() {
-        return text;
+    public Map<Integer, List<Swc4jComment>> getTrailing() {
+        return trailing;
     }
 }

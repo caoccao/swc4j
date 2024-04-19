@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstFactory;
 import com.caoccao.javet.swc4j.ast.Swc4jAstStore;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.comments.Swc4jComment;
+import com.caoccao.javet.swc4j.comments.Swc4jComments;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
@@ -640,6 +641,12 @@ public class TestCodeGen {
     @Test
     public void testSwc4jComment() throws IOException {
         Jni2Rust<Swc4jComment> jni2Rust = new Jni2Rust<>(Swc4jComment.class);
+        jni2Rust.updateFile();
+    }
+
+    @Test
+    public void testSwc4jComments() throws IOException {
+        Jni2Rust<Swc4jComments> jni2Rust = new Jni2Rust<>(Swc4jComments.class);
         jni2Rust.updateFile();
     }
 
