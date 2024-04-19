@@ -17,8 +17,8 @@
 package com.caoccao.javet.swc4j.tokens;
 
 import com.caoccao.javet.swc4j.jni2rust.*;
-import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
+import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.math.BigInteger;
 
@@ -327,23 +327,6 @@ public final class Swc4jTokenFactory {
                 value,
                 span,
                 lineBreakAhead);
-    }
-
-    /**
-     * Create ast span.
-     *
-     * @param start the start
-     * @param end   the end
-     * @return the ast span
-     * @since 0.2.0
-     */
-    @Jni2RustMethod
-    public static Swc4jSpan createSpan(
-            @Jni2RustParamSpanStart int start,
-            @Jni2RustParamSpanEnd int end,
-            @Jni2RustParamSpanLine int line,
-            @Jni2RustParamSpanColumn int column) {
-        return new Swc4jSpan(start, end, line, column);
     }
 
     /**

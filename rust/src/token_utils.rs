@@ -27,7 +27,7 @@ use deno_ast::swc::parser::token::{IdentLike, Token, TokenAndSpan, Word};
 
 use crate::enums::*;
 use crate::jni_utils::*;
-use crate::position_utils::{ByteToIndexMap, SpanEx};
+use crate::span_utils::ByteToIndexMap;
 
 use std::ops::Range;
 use std::ptr::null_mut;
@@ -52,7 +52,6 @@ struct JavaSwc4jTokenFactory {
   method_create_number: JStaticMethodID,
   method_create_regex: JStaticMethodID,
   method_create_shebang: JStaticMethodID,
-  method_create_span: JStaticMethodID,
   method_create_string: JStaticMethodID,
   method_create_template: JStaticMethodID,
   method_create_true: JStaticMethodID,
@@ -174,13 +173,6 @@ impl JavaSwc4jTokenFactory {
         "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createShebang");
-    let method_create_span = env
-      .get_static_method_id(
-        &class,
-        "createSpan",
-        "(IIII)Lcom/caoccao/javet/swc4j/span/Swc4jSpan;",
-      )
-      .expect("Couldn't find method Swc4jTokenFactory.createSpan");
     let method_create_string = env
       .get_static_method_id(
         &class,
@@ -226,7 +218,6 @@ impl JavaSwc4jTokenFactory {
       method_create_number,
       method_create_regex,
       method_create_shebang,
-      method_create_span,
       method_create_string,
       method_create_template,
       method_create_true,
@@ -613,28 +604,6 @@ impl JavaSwc4jTokenFactory {
     return_value
   }
 
-  pub fn create_span<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    span_ex: &SpanEx,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let start = int_to_jvalue!(span_ex.start);
-    let end = int_to_jvalue!(span_ex.end);
-    let line = int_to_jvalue!(span_ex.line);
-    let column = int_to_jvalue!(span_ex.column);
-    let return_value = call_static_as_object!(
-        env,
-        &self.class,
-        self.method_create_span,
-        &[start, end, line, column],
-        "Swc4jSpan create_span()"
-      );
-    return_value
-  }
-
   pub fn create_string<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -751,7 +720,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 
 pub fn token_and_spans_to_java_list<'local>(
   env: &mut JNIEnv<'local>,
-  byte_to_index_map: &ByteToIndexMap,
+  map: &ByteToIndexMap,
   source_text: &str,
   token_and_spans: Option<Arc<Vec<TokenAndSpan>>>,
 ) -> jvalue {
@@ -766,8 +735,7 @@ pub fn token_and_spans_to_java_list<'local>(
             start: token_and_span.span.lo().to_usize() - 1,
             end: token_and_span.span.hi().to_usize() - 1,
           }];
-          let java_span_ex =
-            java_token_factory.create_span(env, &byte_to_index_map.get_span_ex_by_span(&token_and_span.span));
+          let java_span_ex = map.get_span_ex_by_span(&token_and_span.span).to_jni_type(env);
           let java_token = match &token_and_span.token {
             Token::Word(word) => match word {
               Word::Keyword(keyword) => java_token_factory.create_keyword(

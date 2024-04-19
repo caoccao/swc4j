@@ -16,11 +16,17 @@
 
 package com.caoccao.javet.swc4j.span;
 
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
+
 /**
  * The type Swc4j span.
  *
  * @since 0.2.0
  */
+@Jni2RustClass(filePath = Jni2RustFilePath.SpanUtils)
 public class Swc4jSpan {
     /**
      * The Column.
@@ -54,6 +60,7 @@ public class Swc4jSpan {
      * @param end   the end
      * @since 0.2.0
      */
+    @Jni2RustMethod(mode = Jni2RustMethodMode.DefinitionOnly)
     public Swc4jSpan(int start, int end, int line, int column) {
         this.column = column;
         this.end = end;

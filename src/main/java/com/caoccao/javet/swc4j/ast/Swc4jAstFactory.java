@@ -28,7 +28,10 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstModule;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.ast.ts.*;
-import com.caoccao.javet.swc4j.jni2rust.*;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
@@ -852,15 +855,6 @@ public final class Swc4jAstFactory {
             @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
             @Jni2RustParam Swc4jSpan span) {
         return new Swc4jAstSetterProp(key, thisParam, param, body, span);
-    }
-
-    @Jni2RustMethod
-    public static Swc4jSpan createSpan(
-            @Jni2RustParamSpanStart int start,
-            @Jni2RustParamSpanEnd int end,
-            @Jni2RustParamSpanLine int line,
-            @Jni2RustParamSpanColumn int column) {
-        return new Swc4jSpan(start, end, line, column);
     }
 
     @Jni2RustMethod

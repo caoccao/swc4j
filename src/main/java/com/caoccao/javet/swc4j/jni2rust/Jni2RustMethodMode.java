@@ -18,5 +18,6 @@ package com.caoccao.javet.swc4j.jni2rust;
 
 public enum Jni2RustMethodMode {
     Auto,
+    DefinitionOnly,
     Manual,
 }

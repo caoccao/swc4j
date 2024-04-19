@@ -31,7 +31,7 @@ pub mod error;
 pub mod jni_utils;
 pub mod options;
 pub mod outputs;
-pub mod position_utils;
+pub mod span_utils;
 pub mod token_utils;
 
 use crate::jni_utils::{jstring_to_optional_string, jstring_to_string, string_to_jstring, ToJniType};
@@ -40,6 +40,7 @@ use crate::jni_utils::{jstring_to_optional_string, jstring_to_string, string_to_
 pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
   debug_println!("JNI_OnLoad()");
   let mut env = java_vm.get_env().expect("Cannot get JNI env");
+  span_utils::init(&mut env);
   ast_utils::init(&mut env);
   token_utils::init(&mut env);
   enums::init(&mut env);

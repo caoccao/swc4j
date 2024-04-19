@@ -15,10 +15,16 @@
 * limitations under the License.
 */
 
+use jni::objects::{GlobalRef, JMethodID, JObject};
+use jni::sys::jvalue;
+use jni::JNIEnv;
+
 use std::collections::BTreeMap;
 
 use deno_ast::swc::common::source_map::Pos;
 use deno_ast::swc::common::Span;
+
+use crate::jni_utils::*;
 
 pub struct SpanEx {
   pub start: u32,
@@ -35,6 +41,26 @@ impl Default for SpanEx {
       line: 0,
       column: 0,
     }
+  }
+}
+
+impl ToJniType for SpanEx {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span = unsafe { JAVA_SPAN.as_ref().unwrap() };
+    let start = int_to_jvalue!(self.start);
+    let end = int_to_jvalue!(self.end);
+    let line = int_to_jvalue!(self.line);
+    let column = int_to_jvalue!(self.column);
+    call_as_construct!(
+      env,
+      &java_span.class,
+      java_span.method_construct,
+      &[start, end, line, column],
+      "Swc4jComment"
+    )
   }
 }
 
@@ -75,5 +101,45 @@ impl ByteToIndexMap {
       v.line = line;
       v.column = column;
     });
+  }
+}
+
+/* JavaSwc4jSpan Begin */
+struct JavaSwc4jSpan {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_construct: JMethodID,
+}
+unsafe impl Send for JavaSwc4jSpan {}
+unsafe impl Sync for JavaSwc4jSpan {}
+
+impl JavaSwc4jSpan {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/span/Swc4jSpan")
+      .expect("Couldn't find class Swc4jSpan");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jSpan");
+    let method_construct = env
+      .get_method_id(
+        &class,
+        "<init>",
+        "(IIII)V",
+      )
+      .expect("Couldn't find method Swc4jSpan::new");
+    JavaSwc4jSpan {
+      class,
+      method_construct,
+    }
+  }
+}
+/* JavaSwc4jSpan End */
+
+static mut JAVA_SPAN: Option<JavaSwc4jSpan> = None;
+
+pub fn init<'local>(env: &mut JNIEnv<'local>) {
+  unsafe {
+    JAVA_SPAN = Some(JavaSwc4jSpan::new(env));
   }
 }

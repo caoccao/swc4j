@@ -77,7 +77,7 @@ public class Swc4jParseOutput {
      * @param tokens     the tokens
      * @since 0.2.0
      */
-    @Jni2RustMethod(mode = Jni2RustMethodMode.Manual)
+    @Jni2RustMethod(mode = Jni2RustMethodMode.DefinitionOnly)
     public Swc4jParseOutput(
             ISwc4jAstProgram<? extends ISwc4jAst> program,
             Swc4jMediaType mediaType,

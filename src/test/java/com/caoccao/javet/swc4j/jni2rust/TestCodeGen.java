@@ -20,13 +20,17 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstFactory;
 import com.caoccao.javet.swc4j.ast.Swc4jAstStore;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.comments.Swc4jComment;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.tokens.Swc4jTokenFactory;
-import com.caoccao.javet.swc4j.utils.*;
+import com.caoccao.javet.swc4j.utils.ArrayUtils;
+import com.caoccao.javet.swc4j.utils.OSUtils;
+import com.caoccao.javet.swc4j.utils.ReflectionUtils;
+import com.caoccao.javet.swc4j.utils.StringUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -89,7 +93,7 @@ public class TestCodeGen {
                     lines.add("  {");
                     lines.add("    let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };");
                     String spanCall = jni2RustClassUtils.isSpan() ? "" : "()";
-                    lines.add(String.format("    let java_span_ex = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.span%s));", spanCall));
+                    lines.add(String.format("    let java_span_ex = map.get_span_ex_by_span(&node.span%s).to_jni_type(env);", spanCall));
                     ReflectionUtils.getDeclaredFields(clazz).values().stream()
                             .filter(field -> !Modifier.isStatic(field.getModifiers()))
                             .filter(field -> !new Jni2RustFieldUtils(field).isIgnore())
@@ -126,7 +130,7 @@ public class TestCodeGen {
                                                 String javaOptionalVar = String.format("java_optional_%s", StringUtils.toSnakeCase(fieldName));
                                                 args.add("&" + javaOptionalVar);
                                                 javaOptionalVars.add(javaOptionalVar);
-                                                lines.add(String.format("    let %s = node.%s.as_ref().map(|node| java_ast_factory.create_span(env, &map.get_span_ex_by_span(node)));",
+                                                lines.add(String.format("    let %s = node.%s.as_ref().map(|node| map.get_span_ex_by_span(node).to_jni_type(env));",
                                                         javaOptionalVar,
                                                         StringUtils.toSnakeCase(fieldName)));
                                             } else if (innerClass == String.class) {
@@ -264,7 +268,7 @@ public class TestCodeGen {
                                     String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
                                     args.add("&" + javaVar);
                                     javaVars.add(javaVar);
-                                    lines.add(String.format("    let %s = java_ast_factory.create_span(env, &map.get_span_ex_by_span(&node.%s));",
+                                    lines.add(String.format("    let %s = map.get_span_ex_by_span(&node.%s).to_jni_type(env);",
                                             javaVar,
                                             StringUtils.toSnakeCase(fieldName)));
                                 } else if (fieldType.isPrimitive()) {
@@ -634,6 +638,12 @@ public class TestCodeGen {
     }
 
     @Test
+    public void testSwc4jComment() throws IOException {
+        Jni2Rust<Swc4jComment> jni2Rust = new Jni2Rust<>(Swc4jComment.class);
+        jni2Rust.updateFile();
+    }
+
+    @Test
     public void testSwc4jParseOptions() throws IOException {
         Jni2Rust<Swc4jParseOptions> jni2Rust = new Jni2Rust<>(Swc4jParseOptions.class);
         jni2Rust.updateFile();
@@ -642,6 +652,12 @@ public class TestCodeGen {
     @Test
     public void testSwc4jParseOutput() throws IOException {
         Jni2Rust<Swc4jParseOutput> jni2Rust = new Jni2Rust<>(Swc4jParseOutput.class);
+        jni2Rust.updateFile();
+    }
+
+    @Test
+    public void testSwc4jSpan() throws IOException {
+        Jni2Rust<Swc4jSpan> jni2Rust = new Jni2Rust<>(Swc4jSpan.class);
         jni2Rust.updateFile();
     }
 

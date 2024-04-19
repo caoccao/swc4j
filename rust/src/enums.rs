@@ -21,6 +21,7 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use deno_ast::swc::ast::AssignOp;
+pub use deno_ast::swc::common::comments::CommentKind;
 use deno_ast::swc::parser::token::{BinOpToken, Keyword, Token};
 pub use deno_ast::{ImportsNotUsedAsValues, MediaType, SourceMapOption};
 
@@ -554,6 +555,55 @@ impl JavaTokenType {
   }
 }
 
+pub struct JavaCommentKind {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaCommentKind {}
+unsafe impl Sync for JavaCommentKind {}
+
+impl JavaCommentKind {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/comments/Swc4jCommentKind")
+      .expect("Couldn't find class Swc4jCommentKind");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jCommentKind");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/comments/Swc4jCommentKind;")
+      .expect("Couldn't find static method Swc4jCommentKind.parse");
+    JavaCommentKind {
+      class,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+impl IdentifiableEnum<CommentKind> for CommentKind {
+  fn get_id(&self) -> i32 {
+    match self {
+      CommentKind::Line => 0,
+      CommentKind::Block => 1,
+    }
+  }
+  fn parse_by_id(id: i32) -> CommentKind {
+    match id {
+      1 => CommentKind::Block,
+      _ => CommentKind::Line,
+    }
+  }
+}
+
 impl IdentifiableEnum<ImportsNotUsedAsValues> for ImportsNotUsedAsValues {
   fn get_id(&self) -> i32 {
     match self {
@@ -791,35 +841,30 @@ impl JavaSourceMapOption {
     let method_get_id = env
       .get_method_id(&class, "getId", "()I")
       .expect("Couldn't find method Swc4jSourceMapOption.getId");
-    JavaSourceMapOption {
-      class,
-      method_get_id,
-    }
+    JavaSourceMapOption { class, method_get_id }
   }
 
-  pub fn get_source_map<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'a>,
-  ) -> SourceMapOption {
+  pub fn get_source_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> SourceMapOption {
     let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
     SourceMapOption::parse_by_id(id)
   }
 }
 
-pub static mut JAVA_TOKEN_TYPE: Option<JavaTokenType> = None;
+pub static mut JAVA_COMMENT_KIND: Option<JavaCommentKind> = None;
 pub static mut JAVA_IMPORTS_NOT_USED_AS_VALUES: Option<JavaImportsNotUsedAsValues> = None;
 pub static mut JAVA_MEDIA_TYPE: Option<JavaMediaType> = None;
 pub static mut JAVA_PARSE_MODE: Option<JavaParseMode> = None;
 pub static mut JAVA_SOURCE_MAP_OPTION: Option<JavaSourceMapOption> = None;
+pub static mut JAVA_TOKEN_TYPE: Option<JavaTokenType> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
-    JAVA_TOKEN_TYPE = Some(JavaTokenType::new(env));
+    JAVA_COMMENT_KIND = Some(JavaCommentKind::new(env));
     JAVA_IMPORTS_NOT_USED_AS_VALUES = Some(JavaImportsNotUsedAsValues::new(env));
     JAVA_MEDIA_TYPE = Some(JavaMediaType::new(env));
     JAVA_PARSE_MODE = Some(JavaParseMode::new(env));
     JAVA_SOURCE_MAP_OPTION = Some(JavaSourceMapOption::new(env));
+    JAVA_TOKEN_TYPE = Some(JavaTokenType::new(env));
   }
 }
 

@@ -21,6 +21,7 @@ public enum Jni2RustFilePath {
     None(null),
     Options("rust/src/options.rs"),
     Outputs("rust/src/outputs.rs"),
+    SpanUtils("rust/src/span_utils.rs"),
     TokenUtils("rust/src/token_utils.rs"),
     ;
 
