@@ -26,18 +26,18 @@
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 
 ```kotlin
 // Gradle Kotlin DSL
-implementation("com.caoccao.javet:swc4j:0.3.0")
+implementation("com.caoccao.javet:swc4j:0.4.0")
 ```
 
 ```groovy
 // Gradle Groovy DSL
-implementation 'com.caoccao.javet:swc4j:0.3.0'
+implementation 'com.caoccao.javet:swc4j:0.4.0'
 ```
 
 * Run the following Java code.
@@ -46,7 +46,7 @@ implementation 'com.caoccao.javet:swc4j:0.3.0'
 // Prepare a simple TypeScript code snippet.
 String code = "function add(a:number, b:number) { return a+b; }";
 // Prepare a script name.
-String specifier = "file:///abc.ts";
+URL specifier = new URL("file://abc.ts");
 // Prepare an option with script name and media type.
 Swc4jTranspileOptions options = new Swc4jTranspileOptions()
         .setSpecifier(specifier)

@@ -22,7 +22,7 @@ String code = "import React from 'react';\n" +
         "}\n" +
         "export default App;";
 // Prepare a script name.
-String specifier = "file:///abc.ts";
+URL specifier = new URL("file://abc.ts");
 // Prepare an option with script name and media type.
 Swc4jTranspileOptions options = new Swc4jTranspileOptions()
         .setSpecifier(specifier)

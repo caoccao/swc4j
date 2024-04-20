@@ -33,7 +33,7 @@ String code = "function quickSort(arr: number[]): number[] {\n" +
         "  return [...quickSort(leftArr), pivot, ...quickSort(rightArr)];\n" +
         "}";
 // Prepare a script name.
-String specifier = "file:///abc.ts";
+URL specifier = new URL("file://abc.ts");
 // Prepare an option with script name and media type.
 Swc4jTranspileOptions options = new Swc4jTranspileOptions()
         .setSpecifier(specifier)
