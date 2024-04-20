@@ -93,8 +93,8 @@ output.getTokens().forEach(System.out::println);
 
 ## What Can I Do with Tokens?
 
-* **Script Sanitization** - Sometimes you may want to prevent script from calling `eval()`, using `var`. You can simply scan the tokens for ident `eval`, keyword `var` and raise exceptions with detailed error messages.
-* **Script Data Mining** - Sometimes you may want to generate reports on the ratio among `let`, `const`, `var`, enforce coding conventions. You can build your data mining algorithms by scanning the tokens.
+* **Script Sanitization** - Sometimes we may want to prevent script from calling `eval()`, using `var`. We can simply scan the tokens for ident `eval`, keyword `var` and raise exceptions with detailed error messages.
+* **Script Data Mining** - Sometimes we may want to generate reports on the ratio among `let`, `const`, `var`, enforce coding conventions. We can build our data mining algorithms by scanning the tokens.
 
 ## Conclusion
 

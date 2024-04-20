@@ -60,7 +60,7 @@ public class TestSwc4jParseOptions extends BaseTestSuite {
         assertEquals(Swc4jParseMode.Module, output.getParseMode());
         assertEquals(1, output.getComments().getLeading().size());
         assertEquals(1, output.getComments().getTrailing().size());
-        List<Swc4jComment> comments = output.getComments().getLeading().get(23);
+        List<Swc4jComment> comments = output.getComments().getLeading(23);
         assertEquals(1, comments.size());
         Swc4jComment comment = comments.get(0);
         assertEquals(Swc4jCommentKind.Block, comment.getKind());
@@ -69,7 +69,7 @@ public class TestSwc4jParseOptions extends BaseTestSuite {
         assertEquals(1, comment.getSpan().getLine());
         assertEquals(8, comment.getSpan().getColumn());
         assertEquals(" Comment 1 ", comment.getText());
-        comments = output.getComments().getTrailing().get(34);
+        comments = output.getComments().getTrailing(34);
         assertEquals(1, comments.size());
         comment = comments.get(0);
         assertEquals(Swc4jCommentKind.Line, comment.getKind());

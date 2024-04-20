@@ -8,8 +8,8 @@ In this tutorial, we are going to learn the follows.
 
 ## Preparation
 
-* Follow the [instructions](../../) to add swc4j to your project.
-* Follow the [instructions](https://github.com/caoccao/Javet) to add Javet to your project.
+* Follow the [instructions](../../) to add swc4j to our project.
+* Follow the [instructions](https://github.com/caoccao/Javet) to add Javet to our project.
 
 ## Transpile from TypeScript to JavaScript
 
@@ -35,7 +35,7 @@ System.out.println("*********************************************/");
 System.out.println(output.getCode());
 ```
 
-* The output is as follows. As you can see, the TypeScript code is transpiled into JavaScript code with the source map inlined.
+* The output is as follows. As we can see, the TypeScript code is transpiled into JavaScript code with the source map inlined.
 
 ```js
 /*********************************************
@@ -64,7 +64,7 @@ try (V8Runtime v8Runtime = V8Host.getV8Instance().createV8Runtime()) {
 }
 ```
 
-* The output is as follows. As you can see, the JavaScript code is executed in Javet successfully.
+* The output is as follows. As we can see, the JavaScript code is executed in Javet successfully.
 
 ```js
 /*********************************************
@@ -75,7 +75,7 @@ try (V8Runtime v8Runtime = V8Host.getV8Instance().createV8Runtime()) {
 
 ## Generate a Separate Source Map
 
-You may want to generate a separate source map as the inline source map sometimes only slows down the script execution a little bit and a separate source map file can be useful in other cases. Yes, it's so easy to do so in swc4j.
+We may want to generate a separate source map as the inline source map sometimes only slows down the script execution a little bit and a separate source map file can be useful in other cases. Yes, it's so easy to do so in swc4j.
 
 * Append the following code to that Java application.
 
@@ -94,7 +94,7 @@ System.out.println("*********************************************/");
 System.out.println(output.getSourceMap());
 ```
 
-* The output is as follows. As you can see, the source map is not inlined. Note: The actual source map is a minified Json string. The output below shows a beautified Json string for better readability.
+* The output is as follows. As we can see, the source map is not inlined. Note: The actual source map is a minified Json string. The output below shows a beautified Json string for better readability.
 
 ```js
 /*********************************************

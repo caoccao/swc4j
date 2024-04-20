@@ -21,7 +21,10 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstRegex;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
+import com.caoccao.javet.swc4j.comments.Swc4jComment;
+import com.caoccao.javet.swc4j.comments.Swc4jComments;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -40,6 +43,7 @@ public class Tutorial04Ast {
                 "\n" +
                 "class EmailValidator implements Validator {\n" +
                 "    isValid(s: string): boolean {\n" +
+                "        // This is a regex for email validation.\n" +
                 "        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n" +
                 "        return emailRegex.test(s);\n" +
                 "    }\n" +
@@ -57,7 +61,7 @@ public class Tutorial04Ast {
                 .setParseMode(Swc4jParseMode.Module);
         // Parse the code.
         Swc4jParseOutput output = swc4j.parse(code, options);
-        // Print the tokens.
+        // Print the ast.
         System.out.println("/*********************************************");
         System.out.println("         The ast is as follows.");
         System.out.println("*********************************************/");
@@ -67,9 +71,27 @@ public class Tutorial04Ast {
         System.out.println("      The visitor output is as follows.");
         System.out.println("*********************************************/");
         output.getProgram().visit(new Visitor());
+        // Turn on the comments.
+        options.setCaptureComments(true);
+        // Parse the code again.
+        output = swc4j.parse(code, options);
+        System.out.println("/*********************************************");
+        System.out.println("      The visitor output is as follows.");
+        System.out.println("*********************************************/");
+        output.getProgram().visit(new Visitor(output.getComments()));
     }
 
     public static class Visitor extends Swc4jAstVisitor {
+        private final Swc4jComments comments;
+
+        public Visitor() {
+            this(null);
+        }
+
+        public Visitor(Swc4jComments comments) {
+            this.comments = comments;
+        }
+
         @Override
         public Swc4jAstVisitorResponse visitClassDecl(Swc4jAstClassDecl node) {
             System.out.println("Class name is " + node.getIdent());
@@ -88,6 +110,16 @@ public class Tutorial04Ast {
         public Swc4jAstVisitorResponse visitRegex(Swc4jAstRegex node) {
             System.out.println("Regex is " + node);
             return super.visitRegex(node);
+        }
+
+        @Override
+        public Swc4jAstVisitorResponse visitVarDecl(Swc4jAstVarDecl node) {
+            if (comments != null) {
+                Swc4jComment comment = comments.getLeading(node.getSpan()).get(0);
+                System.out.println("Leading comment is a " + comment.getKind().name() + " comment.");
+                System.out.println("  And the comment text is '" + comment.getText() + "'");
+            }
+            return super.visitVarDecl(node);
         }
     }
 }

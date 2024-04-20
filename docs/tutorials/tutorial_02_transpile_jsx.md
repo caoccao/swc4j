@@ -38,7 +38,7 @@ System.out.println("*********************************************/");
 System.out.println(output.getCode());
 ```
 
-* The output is as follows. As you can see, the Jsx code is transpiled into JavaScript code with the source map inlined.
+* The output is as follows. As we can see, the Jsx code is transpiled into JavaScript code with the source map inlined.
 
 ```js
 /*********************************************
@@ -55,7 +55,7 @@ export default App;
 
 ## Customize the Jsx Factory for React
 
-You may want to replace the default Jsx factory with a customized one. Yes, that's supported.
+We may want to replace the default Jsx factory with a customized one. Yes, that's supported.
 
 * Append the following code to that Java application.
 
@@ -72,7 +72,7 @@ System.out.println("*********************************************/");
 System.out.println(output.getCode());
 ```
 
-* The output is as follows. As you can see, the Jsx factory is updated.
+* The output is as follows. As we can see, the Jsx factory is updated.
 
 ```js
 /*********************************************

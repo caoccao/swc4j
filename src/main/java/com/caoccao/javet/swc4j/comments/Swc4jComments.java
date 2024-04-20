@@ -53,8 +53,24 @@ public class Swc4jComments {
         return leading;
     }
 
+    public List<Swc4jComment> getLeading(Swc4jSpan span) {
+        return getLeading(span.getStart());
+    }
+
+    public List<Swc4jComment> getLeading(int start) {
+        return leading.get(start);
+    }
+
     public Map<Integer, List<Swc4jComment>> getTrailing() {
         return trailing;
+    }
+
+    public List<Swc4jComment> getTrailing(Swc4jSpan span) {
+        return getTrailing(span.getEnd());
+    }
+
+    public List<Swc4jComment> getTrailing(int end) {
+        return trailing.get(end);
     }
 
     public boolean hasLeading(Swc4jSpan span) {
