@@ -17,11 +17,15 @@
 package com.caoccao.javet.swc4j.options;
 
 import com.caoccao.javet.swc4j.BaseTestSuite;
+import com.caoccao.javet.swc4j.comments.Swc4jComment;
+import com.caoccao.javet.swc4j.comments.Swc4jCommentKind;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,6 +48,40 @@ public class TestSwc4jParseOptions extends BaseTestSuite {
         assertEquals(Swc4jMediaType.Jsx, output.getMediaType());
         assertNull(output.getProgram());
         assertNull(output.getTokens());
+    }
+
+    @Test
+    public void testTypeScriptWithComments() throws Swc4jCoreException {
+        String code = "let a: /* Comment 1 */ number = 1; // Comment 2";
+        Swc4jParseOutput output = swc4j.parse(code, tsModuleParseOptions
+                .setCaptureAst(true)
+                .setCaptureComments(true));
+        assertNotNull(output);
+        assertEquals(Swc4jParseMode.Module, output.getParseMode());
+        assertEquals(1, output.getComments().getLeading().size());
+        assertEquals(1, output.getComments().getTrailing().size());
+        List<Swc4jComment> comments = output.getComments().getLeading().get(23);
+        assertEquals(1, comments.size());
+        Swc4jComment comment = comments.get(0);
+        assertEquals(Swc4jCommentKind.Block, comment.getKind());
+        assertEquals(7, comment.getSpan().getStart());
+        assertEquals(22, comment.getSpan().getEnd());
+        assertEquals(1, comment.getSpan().getLine());
+        assertEquals(8, comment.getSpan().getColumn());
+        assertEquals(" Comment 1 ", comment.getText());
+        comments = output.getComments().getTrailing().get(34);
+        assertEquals(1, comments.size());
+        comment = comments.get(0);
+        assertEquals(Swc4jCommentKind.Line, comment.getKind());
+        assertEquals(35, comment.getSpan().getStart());
+        assertEquals(47, comment.getSpan().getEnd());
+        assertEquals(1, comment.getSpan().getLine());
+        assertEquals(36, comment.getSpan().getColumn());
+        assertEquals(" Comment 2", comment.getText());
+        assertTrue(output.getComments().hasLeading(23));
+        assertTrue(output.getComments().hasTrailing(34));
+        comments = output.getComments().getComments();
+        assertEquals(2, comments.size());
     }
 
     @Test

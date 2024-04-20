@@ -20,11 +20,15 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleMap;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.CommentUtils)
 public class Swc4jComments {
@@ -37,11 +41,42 @@ public class Swc4jComments {
         this.trailing = SimpleMap.immutable(AssertionUtils.notNull(trailing, "Trailing"));
     }
 
+    public List<Swc4jComment> getComments() {
+        List<Swc4jComment> comments = new ArrayList<>();
+        leading.values().forEach(comments::addAll);
+        trailing.values().forEach(comments::addAll);
+        comments.sort(Comparator.comparingInt(comment -> comment.getSpan().getStart()));
+        return comments;
+    }
+
     public Map<Integer, List<Swc4jComment>> getLeading() {
         return leading;
     }
 
     public Map<Integer, List<Swc4jComment>> getTrailing() {
         return trailing;
+    }
+
+    public boolean hasLeading(Swc4jSpan span) {
+        return hasLeading(span.getStart());
+    }
+
+    public boolean hasLeading(int start) {
+        return leading.containsKey(start);
+    }
+
+    public boolean hasTrailing(Swc4jSpan span) {
+        return hasTrailing(span.getEnd());
+    }
+
+    public boolean hasTrailing(int end) {
+        return trailing.containsKey(end);
+    }
+
+    @Override
+    public String toString() {
+        return getComments().stream()
+                .map(Swc4jComment::toString)
+                .collect(Collectors.joining("\n"));
     }
 }

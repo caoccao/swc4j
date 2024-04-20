@@ -150,6 +150,10 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
         assertEquals(1, comment.getSpan().getLine());
         assertEquals(36, comment.getSpan().getColumn());
         assertEquals(" Comment 2", comment.getText());
+        assertTrue(output.getComments().hasLeading(23));
+        assertTrue(output.getComments().hasTrailing(34));
+        comments = output.getComments().getComments();
+        assertEquals(2, comments.size());
     }
 
     @Test

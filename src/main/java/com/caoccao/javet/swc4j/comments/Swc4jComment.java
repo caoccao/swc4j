@@ -47,4 +47,15 @@ public class Swc4jComment {
     public String getText() {
         return text;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{ ");
+        sb.append("kind: ").append(kind.name()).append(", ");
+        sb.append("span: ").append(span).append(", ");
+        sb.append("text: ").append(text);
+        sb.append(" }");
+        return sb.toString();
+    }
 }
