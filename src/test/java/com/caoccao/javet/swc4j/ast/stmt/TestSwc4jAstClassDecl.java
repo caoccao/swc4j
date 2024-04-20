@@ -32,7 +32,7 @@ public class TestSwc4jAstClassDecl extends BaseTestSuiteSwc4jAst {
     @Test
     public void testEmptyClass() throws Swc4jCoreException {
         String code = "class A {}";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstClassDecl classDecl = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstClassDecl.class), Swc4jAstType.ClassDecl, 0, 10);

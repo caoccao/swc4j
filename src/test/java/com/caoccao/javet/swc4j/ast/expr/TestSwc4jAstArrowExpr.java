@@ -34,7 +34,7 @@ public class TestSwc4jAstArrowExpr extends BaseTestSuiteSwc4jAst {
     @Test
     public void testEmptyFunction() throws Swc4jCoreException {
         String code = "()=>{}";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstExprStmt exprStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 6);
@@ -53,7 +53,7 @@ public class TestSwc4jAstArrowExpr extends BaseTestSuiteSwc4jAst {
     @Test
     public void testNonEmptyFunction() throws Swc4jCoreException {
         String code = "(a,b)=>{ return a+b; }";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstExprStmt exprStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 22);

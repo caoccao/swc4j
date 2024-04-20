@@ -32,7 +32,7 @@ public class TestSwc4jAstJsxClosing extends BaseTestSuiteSwc4jAst {
     @Test
     public void test() throws Swc4jCoreException {
         String code = "<h1>test</h1>";
-        Swc4jParseOutput output = swc4j.parse(code, jsxScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, jsxScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstExprStmt exprStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 13);

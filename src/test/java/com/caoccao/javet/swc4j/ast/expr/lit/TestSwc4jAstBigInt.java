@@ -38,7 +38,7 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
     @Test
     public void testExtraLongNumber() throws Swc4jCoreException {
         String code = "1234567890123456789012345678901234567890n";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstExprStmt exprStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 41);
@@ -53,7 +53,7 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
     @Test
     public void testSignMinus() throws Swc4jCoreException {
         String code = "-1n";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstExprStmt exprStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 3);
@@ -71,7 +71,7 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
     @Test
     public void testSignPlus() throws Swc4jCoreException {
         String code = "+1n";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstExprStmt exprStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 3);
@@ -88,7 +88,7 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
 
     @Test
     public void testVisitor() {
-        assertVisitor(tsScriptOptions, SimpleList.of(
+        assertVisitor(tsScriptParseOptions, SimpleList.of(
                 new VisitorCase("0n", SimpleMap.of(
                         Swc4jAstType.Script, 1,
                         Swc4jAstType.ExprStmt, 1,
@@ -108,7 +108,7 @@ public class TestSwc4jAstBigInt extends BaseTestSuiteSwc4jAst {
     @Test
     public void testZero() throws Swc4jCoreException {
         String code = "0n";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstExprStmt exprStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 2);

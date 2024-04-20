@@ -22,11 +22,10 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstCounterVisitor;
-import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
-import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.List;
 import java.util.Map;
@@ -35,30 +34,6 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
-    protected Swc4jParseOptions jsxModuleOptions;
-    protected Swc4jParseOptions jsxScriptOptions;
-    protected Swc4jParseOptions tsModuleOptions;
-    protected Swc4jParseOptions tsScriptOptions;
-
-    public BaseTestSuiteSwc4jAst() {
-        super();
-        this.jsxModuleOptions = new Swc4jParseOptions()
-                .setMediaType(Swc4jMediaType.Jsx)
-                .setParseMode(Swc4jParseMode.Module)
-                .setCaptureAst(true);
-        this.jsxScriptOptions = new Swc4jParseOptions()
-                .setMediaType(Swc4jMediaType.Jsx)
-                .setParseMode(Swc4jParseMode.Script)
-                .setCaptureAst(true);
-        this.tsModuleOptions = new Swc4jParseOptions()
-                .setMediaType(Swc4jMediaType.TypeScript)
-                .setParseMode(Swc4jParseMode.Module)
-                .setCaptureAst(true);
-        this.tsScriptOptions = new Swc4jParseOptions()
-                .setMediaType(Swc4jMediaType.TypeScript)
-                .setParseMode(Swc4jParseMode.Script)
-                .setCaptureAst(true);
-    }
 
     protected <AST extends ISwc4jAst> AST assertAst(
             ISwc4jAst parentNode,
@@ -146,6 +121,17 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
         } catch (Throwable t) {
             fail(t);
         }
+    }
+
+    @BeforeEach
+    protected void beforeEach() {
+        super.beforeEach();
+        jsModuleParseOptions.setCaptureAst(true);
+        jsScriptParseOptions.setCaptureAst(true);
+        jsxModuleParseOptions.setCaptureAst(true);
+        jsxScriptParseOptions.setCaptureAst(true);
+        tsModuleParseOptions.setCaptureAst(true);
+        tsScriptParseOptions.setCaptureAst(true);
     }
 
     public static final class VisitorCase {

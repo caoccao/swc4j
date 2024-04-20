@@ -33,7 +33,7 @@ public class TestSwc4jAstFunction extends BaseTestSuiteSwc4jAst {
     @Test
     public void testAnonymousFunction() throws Swc4jCoreException {
         String code = "const a = function() {}";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstVarDecl varDecl = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstVarDecl.class), Swc4jAstType.VarDecl, 0, 23);

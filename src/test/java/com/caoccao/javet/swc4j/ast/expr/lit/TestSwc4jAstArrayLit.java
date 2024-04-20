@@ -34,7 +34,7 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
     @Test
     public void testEmptyArray() throws Swc4jCoreException {
         String code = "[]";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstExprStmt exprStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 2);
@@ -47,7 +47,7 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
     @Test
     public void testNonEmptyArray() throws Swc4jCoreException {
         String code = "[1,'a',true]";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstExprStmt exprStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 12);
@@ -81,7 +81,7 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
 
     @Test
     public void testVisitor() {
-        assertVisitor(tsScriptOptions, SimpleList.of(
+        assertVisitor(tsScriptParseOptions, SimpleList.of(
                 new VisitorCase("[]", SimpleMap.of(
                         Swc4jAstType.Script, 1,
                         Swc4jAstType.ExprStmt, 1,

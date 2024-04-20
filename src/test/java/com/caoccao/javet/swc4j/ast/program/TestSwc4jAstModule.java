@@ -38,7 +38,7 @@ public class TestSwc4jAstModule extends BaseTestSuiteSwc4jAst {
     public void testChangeSwc4jVersion() throws Swc4jCoreException, IOException {
         File scriptFile = new File(OSUtils.WORKING_DIRECTORY, "scripts/ts/change_swc4j_version.ts");
         String code = new String(Files.readAllBytes(scriptFile.toPath()));
-        Swc4jParseOutput output = swc4j.parse(code, tsModuleOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsModuleParseOptions);
         Swc4jAstModule module = output.getProgram().as(Swc4jAstModule.class);
         Swc4jAstCounterVisitor visitor = new Swc4jAstCounterVisitor();
         module.visit(visitor);
@@ -71,7 +71,7 @@ public class TestSwc4jAstModule extends BaseTestSuiteSwc4jAst {
     public void testCopySwc4jLib() throws Swc4jCoreException, IOException {
         File scriptFile = new File(OSUtils.WORKING_DIRECTORY, "scripts/ts/copy_swc4j_lib.ts");
         String code = new String(Files.readAllBytes(scriptFile.toPath()));
-        Swc4jParseOutput output = swc4j.parse(code, tsModuleOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsModuleParseOptions);
         Swc4jAstModule module = output.getProgram().as(Swc4jAstModule.class);
         Swc4jAstCounterVisitor visitor = new Swc4jAstCounterVisitor();
         module.visit(visitor);

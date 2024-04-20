@@ -32,7 +32,7 @@ public class TestSwc4jAstFnDecl extends BaseTestSuiteSwc4jAst {
     @Test
     public void testEmptyFunction() throws Swc4jCoreException {
         String code = "function a() {}";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstFnDecl fnDecl = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstFnDecl.class), Swc4jAstType.FnDecl, 0, 15);

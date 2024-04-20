@@ -16,15 +16,72 @@
 
 package com.caoccao.javet.swc4j;
 
+import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.interfaces.ISwc4jLogger;
+import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
+import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.utils.Swc4jDefaultLogger;
+import org.junit.jupiter.api.BeforeEach;
 
 public abstract class BaseTestSuite {
+    protected Swc4jParseOptions jsModuleParseOptions;
+    protected Swc4jTranspileOptions jsModuleTranspileOptions;
+    protected Swc4jParseOptions jsScriptParseOptions;
+    protected Swc4jTranspileOptions jsScriptTranspileOptions;
+    protected Swc4jParseOptions jsxModuleParseOptions;
+    protected Swc4jTranspileOptions jsxModuleTranspileOptions;
+    protected Swc4jParseOptions jsxScriptParseOptions;
+    protected Swc4jTranspileOptions jsxScriptTranspileOptions;
     protected ISwc4jLogger logger;
     protected Swc4j swc4j;
+    protected Swc4jParseOptions tsModuleParseOptions;
+    protected Swc4jTranspileOptions tsModuleTranspileOptions;
+    protected Swc4jParseOptions tsScriptParseOptions;
+    protected Swc4jTranspileOptions tsScriptTranspileOptions;
 
     public BaseTestSuite() {
         logger = new Swc4jDefaultLogger(getClass().getName());
         swc4j = new Swc4j();
+    }
+
+    @BeforeEach
+    protected void beforeEach() {
+        jsModuleParseOptions = new Swc4jParseOptions()
+                .setMediaType(Swc4jMediaType.JavaScript)
+                .setParseMode(Swc4jParseMode.Module);
+        jsModuleTranspileOptions = new Swc4jTranspileOptions()
+                .setMediaType(Swc4jMediaType.JavaScript)
+                .setParseMode(Swc4jParseMode.Module);
+        jsScriptParseOptions = new Swc4jParseOptions()
+                .setMediaType(Swc4jMediaType.JavaScript)
+                .setParseMode(Swc4jParseMode.Script);
+        jsScriptTranspileOptions = new Swc4jTranspileOptions()
+                .setMediaType(Swc4jMediaType.JavaScript)
+                .setParseMode(Swc4jParseMode.Script);
+        jsxModuleParseOptions = new Swc4jParseOptions()
+                .setMediaType(Swc4jMediaType.Jsx)
+                .setParseMode(Swc4jParseMode.Module);
+        jsxModuleTranspileOptions = new Swc4jTranspileOptions()
+                .setMediaType(Swc4jMediaType.Jsx)
+                .setParseMode(Swc4jParseMode.Module);
+        jsxScriptParseOptions = new Swc4jParseOptions()
+                .setMediaType(Swc4jMediaType.Jsx)
+                .setParseMode(Swc4jParseMode.Script);
+        jsxScriptTranspileOptions = new Swc4jTranspileOptions()
+                .setMediaType(Swc4jMediaType.Jsx)
+                .setParseMode(Swc4jParseMode.Script);
+        tsModuleParseOptions = new Swc4jParseOptions()
+                .setMediaType(Swc4jMediaType.TypeScript)
+                .setParseMode(Swc4jParseMode.Module);
+        tsModuleTranspileOptions = new Swc4jTranspileOptions()
+                .setMediaType(Swc4jMediaType.TypeScript)
+                .setParseMode(Swc4jParseMode.Module);
+        tsScriptParseOptions = new Swc4jParseOptions()
+                .setMediaType(Swc4jMediaType.TypeScript)
+                .setParseMode(Swc4jParseMode.Script);
+        tsScriptTranspileOptions = new Swc4jTranspileOptions()
+                .setMediaType(Swc4jMediaType.TypeScript)
+                .setParseMode(Swc4jParseMode.Script);
     }
 }

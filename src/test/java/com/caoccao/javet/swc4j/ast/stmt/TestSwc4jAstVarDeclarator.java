@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
     @Test
     public void testVisitor() {
-        assertVisitor(tsScriptOptions, SimpleList.of(
+        assertVisitor(tsScriptParseOptions, SimpleList.of(
                 new VisitorCase("const a = 1", SimpleMap.of(
                         Swc4jAstType.Script, 1,
                         Swc4jAstType.VarDecl, 1,
@@ -52,7 +52,7 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
     @Test
     public void testWithInit() throws Swc4jCoreException {
         String code = "let a變量=1";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         assertNotNull(output);
         assertEquals(Swc4jParseMode.Script, output.getParseMode());
         assertNotNull(output.getProgram());
@@ -78,7 +78,7 @@ public class TestSwc4jAstVarDeclarator extends BaseTestSuiteSwc4jAst {
     @Test
     public void testWithoutInit() throws Swc4jCoreException {
         String code = "let a變量";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         assertNotNull(output);
         assertEquals(Swc4jParseMode.Script, output.getParseMode());
         assertNotNull(output.getProgram());

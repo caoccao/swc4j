@@ -33,7 +33,7 @@ public class TestSwc4jAstReturnExpr extends BaseTestSuiteSwc4jAst {
     @Test
     public void testReturnBinExpr() throws Swc4jCoreException {
         String code = "return a+b";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstReturnStmt returnStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstReturnStmt.class), Swc4jAstType.ReturnStmt, 0, 10);

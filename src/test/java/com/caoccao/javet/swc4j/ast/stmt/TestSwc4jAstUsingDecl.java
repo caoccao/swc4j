@@ -32,7 +32,7 @@ public class TestSwc4jAstUsingDecl extends BaseTestSuiteSwc4jAst {
     @Test
     public void testUsingInTypeScript() throws Swc4jCoreException {
         String code = "using a";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstUsingDecl usingDecl = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstUsingDecl.class), Swc4jAstType.UsingDecl, 0, 7);

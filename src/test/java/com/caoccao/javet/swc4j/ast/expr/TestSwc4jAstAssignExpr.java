@@ -34,7 +34,7 @@ public class TestSwc4jAstAssignExpr extends BaseTestSuiteSwc4jAst {
     @Test
     public void testNonEmptyObject() throws Swc4jCoreException {
         String code = "a=1";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstExprStmt exprStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 3);

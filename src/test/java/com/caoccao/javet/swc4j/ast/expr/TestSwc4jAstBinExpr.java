@@ -34,7 +34,7 @@ public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
         SimpleList.of(Swc4jAstBinaryOp.In, Swc4jAstBinaryOp.InstanceOf).forEach(op -> {
             try {
                 String code = "a " + op.getName() + " b";
-                Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+                Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
                 Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
                 Swc4jAstExprStmt exprStmt = assertAst(
                         script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 4 + op.getName().length());
@@ -83,7 +83,7 @@ public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
         ).forEach(op -> {
             try {
                 String code = "a" + op.getName() + "b";
-                Swc4jParseOutput output = swc4j.parse(code, tsScriptOptions);
+                Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
                 Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
                 Swc4jAstExprStmt exprStmt = assertAst(
                         script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 2 + op.getName().length());
