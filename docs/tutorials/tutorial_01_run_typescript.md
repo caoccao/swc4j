@@ -91,7 +91,7 @@ System.out.println(output.getCode());
 System.out.println("/*********************************************");
 System.out.println("   The transpiled source map is as follows.");
 System.out.println("*********************************************/");
-System.out.println(output.getSourceMap().get());
+System.out.println(output.getSourceMap());
 ```
 
 * The output is as follows. As you can see, the source map is not inlined. Note: The actual source map is a minified Json string. The output below shows a beautified Json string for better readability.

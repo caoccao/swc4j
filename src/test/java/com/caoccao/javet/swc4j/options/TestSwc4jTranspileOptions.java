@@ -65,7 +65,7 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
                 output.getCode().substring(
                         expectedCode.length(),
                         expectedCode.length() + expectedSourceMapPrefix.length()));
-        assertFalse(output.getSourceMap().isPresent());
+        assertNull(output.getSourceMap());
     }
 
     @Test
@@ -96,7 +96,8 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
                 output.getCode().substring(
                         expectedCode.length(),
                         expectedCode.length() + expectedSourceMapPrefix.length()));
-        assertFalse(output.getSourceMap().isPresent());
+        assertNull(output.getProgram());
+        assertNull(output.getSourceMap());
     }
 
     @Test
@@ -166,7 +167,7 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
                 output.getCode().substring(
                         expectedCode.length(),
                         expectedCode.length() + expectedSourceMapPrefix.length()));
-        assertFalse(output.getSourceMap().isPresent());
+        assertNull(output.getSourceMap());
     }
 
     @Test
@@ -204,7 +205,7 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
         assertEquals(parseMode, output.getParseMode());
         assertNotNull(output.getSourceMap());
         Stream.of(expectedProperties).forEach(p -> assertTrue(
-                output.getSourceMap().get().contains("\"" + p + "\""),
+                output.getSourceMap().contains("\"" + p + "\""),
                 p + " should exist in the source map"));
         assertTrue(output.getComments().getLeading().isEmpty());
         assertTrue(output.getComments().getTrailing().isEmpty());

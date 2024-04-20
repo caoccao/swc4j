@@ -42,6 +42,7 @@ public class TestSwc4jParseOptions extends BaseTestSuite {
         assertEquals(Swc4jParseMode.Module, output.getParseMode());
         assertEquals(code, output.getSourceText());
         assertEquals(Swc4jMediaType.Jsx, output.getMediaType());
+        assertNull(output.getProgram());
         assertNull(output.getTokens());
     }
 

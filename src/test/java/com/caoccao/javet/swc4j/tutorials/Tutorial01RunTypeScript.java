@@ -69,6 +69,6 @@ public class Tutorial01RunTypeScript {
         System.out.println("/*********************************************");
         System.out.println("   The transpiled source map is as follows.");
         System.out.println("*********************************************/");
-        System.out.println(output.getSourceMap().get());
+        System.out.println(output.getSourceMap());
     }
 }
