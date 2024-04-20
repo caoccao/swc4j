@@ -55,6 +55,12 @@ public class Swc4jParseOptions {
      */
     protected boolean captureAst;
     /**
+     * The Capture comments.
+     *
+     * @since 0.4.0
+     */
+    protected boolean captureComments;
+    /**
      * The Capture tokens.
      *
      * @since 0.2.0
@@ -92,6 +98,7 @@ public class Swc4jParseOptions {
      */
     public Swc4jParseOptions() {
         setCaptureAst(false);
+        setCaptureComments(false);
         setCaptureTokens(false);
         setMediaType(Swc4jMediaType.JavaScript);
         setParseMode(Swc4jParseMode.Module);
@@ -133,14 +140,25 @@ public class Swc4jParseOptions {
     }
 
     /**
-     * Is capture ast boolean.
+     * Is capture ast.
      *
-     * @return the boolean
+     * @return true : capture ast, false : not capture ast
      * @since 0.2.0
      */
     @Jni2RustMethod
     public boolean isCaptureAst() {
         return captureAst;
+    }
+
+    /**
+     * Is capture comments.
+     *
+     * @return true : capture comments, false : not capture comments
+     * @since 0.4.0
+     */
+    @Jni2RustMethod
+    public boolean isCaptureComments() {
+        return captureComments;
     }
 
     /**
@@ -174,6 +192,18 @@ public class Swc4jParseOptions {
      */
     public Swc4jParseOptions setCaptureAst(boolean captureAst) {
         this.captureAst = captureAst;
+        return this;
+    }
+
+    /**
+     * Sets capture comments.
+     *
+     * @param captureComments the capture comments
+     * @return the self
+     * @since 0.4.0
+     */
+    public Swc4jParseOptions setCaptureComments(boolean captureComments) {
+        this.captureComments = captureComments;
         return this;
     }
 

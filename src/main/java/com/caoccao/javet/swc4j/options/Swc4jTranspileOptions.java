@@ -362,6 +362,12 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     @Override
+    public Swc4jTranspileOptions setCaptureComments(boolean captureComments) {
+        super.setCaptureComments(captureComments);
+        return this;
+    }
+
+    @Override
     public Swc4jTranspileOptions setCaptureTokens(boolean captureTokens) {
         super.setCaptureTokens(captureTokens);
         return this;

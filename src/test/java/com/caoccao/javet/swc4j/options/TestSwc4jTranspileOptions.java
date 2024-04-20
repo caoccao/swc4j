@@ -124,6 +124,7 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
     public void testTypeScriptWithComments() throws Swc4jCoreException {
         String code = "let a: /* Comment 1 */ number = 1; // Comment 2";
         Swc4jTranspileOutput output = swc4j.transpile(code, tsModuleTranspileOptions
+                .setCaptureComments(true)
                 .setKeepComments(true)
                 .setSourceMap(Swc4jSourceMapOption.None));
         assertNotNull(output);
@@ -179,8 +180,7 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
         assertNotNull(output);
         assertEquals(Swc4jParseMode.Module, output.getParseMode());
         assertEquals("let a = 1;\n", output.getCode());
-        assertEquals(1, output.getComments().getLeading().size());
-        assertEquals(1, output.getComments().getTrailing().size());
+        assertNull(output.getComments());
     }
 
     @ParameterizedTest
@@ -207,8 +207,7 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
         Stream.of(expectedProperties).forEach(p -> assertTrue(
                 output.getSourceMap().contains("\"" + p + "\""),
                 p + " should exist in the source map"));
-        assertTrue(output.getComments().getLeading().isEmpty());
-        assertTrue(output.getComments().getTrailing().isEmpty());
+        assertNull(output.getComments());
     }
 
     @Test

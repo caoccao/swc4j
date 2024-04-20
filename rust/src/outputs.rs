@@ -110,7 +110,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 
 #[derive(Debug)]
 pub struct ParseOutput {
-  pub comments: MultiThreadedComments,
+  pub comments: Option<MultiThreadedComments>,
   pub media_type: MediaType,
   pub parse_mode: ParseMode,
   pub program: Option<Arc<Program>>,
@@ -120,7 +120,11 @@ pub struct ParseOutput {
 
 impl ParseOutput {
   pub fn new(parse_options: &ParseOptions, parsed_source: &ParsedSource) -> Self {
-    let comments = parsed_source.comments().clone();
+    let comments = if parse_options.capture_comments {
+      Some(parsed_source.comments().clone())
+    } else {
+      None
+    };
     let media_type = parsed_source.media_type();
     let parse_mode = if parsed_source.is_module() {
       ParseMode::Module
@@ -151,13 +155,15 @@ impl ParseOutput {
   pub fn get_byte_to_index_map(&self) -> ByteToIndexMap {
     // Register the keys
     let mut map = ByteToIndexMap::new();
-    self.comments.leading_map().iter().for_each(|(key, value)| {
-      map.register_by_byte_pos(&key);
-      value.iter().for_each(|comment| map.register_by_span(&comment.span));
-    });
-    self.comments.trailing_map().iter().for_each(|(key, value)| {
-      map.register_by_byte_pos(&key);
-      value.iter().for_each(|comment| map.register_by_span(&comment.span));
+    self.comments.as_ref().map(|comments| {
+      comments.leading_map().iter().for_each(|(key, value)| {
+        map.register_by_byte_pos(&key);
+        value.iter().for_each(|comment| map.register_by_span(&comment.span));
+      });
+      comments.trailing_map().iter().for_each(|(key, value)| {
+        map.register_by_byte_pos(&key);
+        value.iter().for_each(|comment| map.register_by_span(&comment.span));
+      });
     });
     self
       .program
@@ -217,8 +223,11 @@ impl ToJniType for ParseOutput {
       self.source_text.as_str(),
       self.tokens.clone(),
     );
-    let java_comments = comments_new(env, &self.comments, &byte_to_index_map);
-    let comments = object_to_jvalue!(&java_comments);
+    let java_optional_comments = self
+      .comments
+      .as_ref()
+      .map(|comments| comments_new(env, comments, &byte_to_index_map));
+    let comments = optional_object_to_jvalue!(&java_optional_comments);
     let return_value = call_as_construct!(
       env,
       &java_class_parse_output.class,
@@ -230,7 +239,7 @@ impl ToJniType for ParseOutput {
     delete_local_ref!(env, java_media_type);
     delete_local_ref!(env, java_parse_mode);
     delete_local_ref!(env, java_source_text);
-    delete_local_ref!(env, java_comments);
+    delete_local_optional_ref!(env, java_optional_comments);
     return_value
   }
 }
@@ -248,7 +257,11 @@ impl TranspileOutput {
     parsed_source: &ParsedSource,
     transpile_result: &TranspileResult,
   ) -> Self {
-    let comments = parsed_source.comments().clone();
+    let comments = if transpile_options.capture_comments {
+      Some(parsed_source.comments().clone())
+    } else {
+      None
+    };
     let emitted_source = transpile_result.clone().into_source();
     let code = emitted_source.text.to_owned();
     let media_type = parsed_source.media_type();
@@ -316,8 +329,12 @@ impl ToJniType for TranspileOutput {
       self.parse_output.source_text.as_str(),
       self.parse_output.tokens.clone(),
     );
-    let java_comments = comments_new(env, &self.parse_output.comments, &byte_to_index_map);
-    let comments = object_to_jvalue!(&java_comments);
+    let java_optional_comments = self
+      .parse_output
+      .comments
+      .as_ref()
+      .map(|comments| comments_new(env, comments, &byte_to_index_map));
+    let comments = optional_object_to_jvalue!(&java_optional_comments);
     let return_value = call_as_construct!(
       env,
       &java_class_transpile_output.class,
@@ -340,7 +357,7 @@ impl ToJniType for TranspileOutput {
     delete_local_ref!(env, java_parse_mode);
     delete_local_ref!(env, java_source_map);
     delete_local_ref!(env, java_source_text);
-    delete_local_ref!(env, java_comments);
+    delete_local_optional_ref!(env, java_optional_comments);
     return_value
   }
 }

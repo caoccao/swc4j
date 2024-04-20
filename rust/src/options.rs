@@ -33,6 +33,7 @@ struct JavaSwc4jParseOptions {
   method_get_parse_mode: JMethodID,
   method_get_specifier: JMethodID,
   method_is_capture_ast: JMethodID,
+  method_is_capture_comments: JMethodID,
   method_is_capture_tokens: JMethodID,
   method_is_scope_analysis: JMethodID,
 }
@@ -75,6 +76,13 @@ impl JavaSwc4jParseOptions {
         "()Z",
       )
       .expect("Couldn't find method Swc4jParseOptions.isCaptureAst");
+    let method_is_capture_comments = env
+      .get_method_id(
+        &class,
+        "isCaptureComments",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jParseOptions.isCaptureComments");
     let method_is_capture_tokens = env
       .get_method_id(
         &class,
@@ -95,6 +103,7 @@ impl JavaSwc4jParseOptions {
       method_get_parse_mode,
       method_get_specifier,
       method_is_capture_ast,
+      method_is_capture_comments,
       method_is_capture_tokens,
       method_is_scope_analysis,
     }
@@ -170,6 +179,22 @@ impl JavaSwc4jParseOptions {
     return_value
   }
 
+  pub fn is_capture_comments<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_capture_comments,
+        &[],
+        "boolean is_capture_comments()"
+      );
+    return_value
+  }
+
   pub fn is_capture_tokens<'local>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -217,6 +242,7 @@ struct JavaSwc4jTranspileOptions {
   method_get_source_map: JMethodID,
   method_get_specifier: JMethodID,
   method_is_capture_ast: JMethodID,
+  method_is_capture_comments: JMethodID,
   method_is_capture_tokens: JMethodID,
   method_is_emit_metadata: JMethodID,
   method_is_inline_source_map: JMethodID,
@@ -305,6 +331,13 @@ impl JavaSwc4jTranspileOptions {
         "()Z",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isCaptureAst");
+    let method_is_capture_comments = env
+      .get_method_id(
+        &class,
+        "isCaptureComments",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.isCaptureComments");
     let method_is_capture_tokens = env
       .get_method_id(
         &class,
@@ -407,6 +440,7 @@ impl JavaSwc4jTranspileOptions {
       method_get_source_map,
       method_get_specifier,
       method_is_capture_ast,
+      method_is_capture_comments,
       method_is_capture_tokens,
       method_is_emit_metadata,
       method_is_inline_source_map,
@@ -576,6 +610,22 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_capture_ast,
         &[],
         "boolean is_capture_ast()"
+      );
+    return_value
+  }
+
+  pub fn is_capture_comments<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_capture_comments,
+        &[],
+        "boolean is_capture_comments()"
       );
     return_value
   }
@@ -808,6 +858,8 @@ pub trait FromJniType {
 pub struct ParseOptions {
   /// Whether to capture ast or not.
   pub capture_ast: bool,
+  /// Whether to capture comments or not.
+  pub capture_comments: bool,
   /// Whether to capture tokens or not.
   pub capture_tokens: bool,
   /// Media type of the source text.
@@ -831,6 +883,7 @@ impl Default for ParseOptions {
   fn default() -> Self {
     ParseOptions {
       capture_ast: false,
+      capture_comments: false,
       capture_tokens: false,
       media_type: MediaType::TypeScript,
       parse_mode: ParseMode::Module,
@@ -848,6 +901,7 @@ impl FromJniType for ParseOptions {
     let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
     let java_parse_options = unsafe { JAVA_PARSE_OPTIONS.as_ref().unwrap() };
     let capture_ast = java_parse_options.is_capture_ast(env, obj);
+    let capture_comments = java_parse_options.is_capture_comments(env, obj);
     let capture_tokens = java_parse_options.is_capture_tokens(env, obj);
     let media_type = java_parse_options.get_media_type(env, obj);
     let media_type = media_type.as_ref();
@@ -860,6 +914,7 @@ impl FromJniType for ParseOptions {
     let parse_mode = java_parse_mode.get_parse_mode(env, parse_mode);
     ParseOptions {
       capture_ast,
+      capture_comments,
       capture_tokens,
       media_type,
       parse_mode,
@@ -873,6 +928,8 @@ impl FromJniType for ParseOptions {
 pub struct TranspileOptions {
   /// Whether to capture ast or not.
   pub capture_ast: bool,
+  /// Whether to capture comments or not.
+  pub capture_comments: bool,
   /// Whether to capture tokens or not.
   pub capture_tokens: bool,
   /// When emitting a legacy decorator, also emit experimental decorator meta
@@ -943,6 +1000,7 @@ impl Default for TranspileOptions {
   fn default() -> Self {
     TranspileOptions {
       capture_ast: false,
+      capture_comments: false,
       capture_tokens: false,
       emit_metadata: false,
       imports_not_used_as_values: ImportsNotUsedAsValues::Remove,
@@ -978,6 +1036,7 @@ impl FromJniType for TranspileOptions {
     let java_source_map_option = unsafe { JAVA_SOURCE_MAP_OPTION.as_ref().unwrap() };
     let java_transpile_options = unsafe { JAVA_TRANSPILE_OPTIONS.as_ref().unwrap() };
     let capture_ast = java_transpile_options.is_capture_ast(env, obj);
+    let capture_comments = java_transpile_options.is_capture_comments(env, obj);
     let capture_tokens = java_transpile_options.is_capture_tokens(env, obj);
     let emit_metadata = java_transpile_options.is_emit_metadata(env, obj);
     let imports_not_used_as_values = java_transpile_options.get_imports_not_used_as_values(env, obj);
@@ -1011,6 +1070,7 @@ impl FromJniType for TranspileOptions {
     let use_ts_decorators = java_transpile_options.is_use_ts_decorators(env, obj);
     TranspileOptions {
       capture_ast,
+      capture_comments,
       capture_tokens,
       emit_metadata,
       imports_not_used_as_values,

@@ -123,36 +123,38 @@ fn test_parse_typescript_with_comments() {
   let code = "let a: /* Comment 1 */ number = 1; // Comment 2";
   let options = options::ParseOptions {
     media_type: MediaType::TypeScript,
+    capture_comments: true,
     ..Default::default()
   };
   let output = core::parse(code.to_owned(), options);
   assert!(output.is_ok());
   let output = output.unwrap();
-  let comments = output.comments.get_vec();
-  assert_eq!(2, comments.len());
-  assert_eq!(CommentKind::Block, comments[0].kind);
+  let comments = output.comments.unwrap();
+  let all_comments = comments.get_vec();
+  assert_eq!(2, all_comments.len());
+  assert_eq!(CommentKind::Block, all_comments[0].kind);
   assert_eq!(
     Span {
       lo: BytePos(8),
       hi: BytePos(23),
       ..Default::default()
     },
-    comments[0].span
+    all_comments[0].span
   );
-  assert_eq!(" Comment 1 ", comments[0].text.as_str());
-  assert_eq!(CommentKind::Line, comments[1].kind);
+  assert_eq!(" Comment 1 ", all_comments[0].text.as_str());
+  assert_eq!(CommentKind::Line, all_comments[1].kind);
   assert_eq!(
     Span {
       lo: BytePos(36),
       hi: BytePos(48),
       ..Default::default()
     },
-    comments[1].span
+    all_comments[1].span
   );
-  assert_eq!(" Comment 2", comments[1].text.as_str());
-  let leading_comment_map = output.comments.leading_map();
+  assert_eq!(" Comment 2", all_comments[1].text.as_str());
+  let leading_comment_map = comments.leading_map();
   assert_eq!(1, leading_comment_map.len());
-  let tailing_comment_map = output.comments.trailing_map();
+  let tailing_comment_map = comments.trailing_map();
   assert_eq!(1, tailing_comment_map.len());
 }
 
