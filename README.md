@@ -14,8 +14,10 @@
 * JavaScript, TypeScript, JSX, TSX, etc.
 * Parse
   * AST
+  * Comments
   * Tokens
 * Transpile
+  * Source Map
 
 ## Quick Start
 
