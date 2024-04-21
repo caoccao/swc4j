@@ -76,6 +76,7 @@ function add(a, b) {
 ## Blog
 
 * [Run TypeScript Directly in Java](https://blog.caoccao.com/run-typescript-directly-in-java-82b7003b44b8)
+* [Hello Swc4j, Goodbye Antlr](https://blog.caoccao.com/hello-swc4j-goodbye-antlr-f9a63e45a3d4)
 
 ## License
 
