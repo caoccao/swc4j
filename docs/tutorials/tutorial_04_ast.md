@@ -212,7 +212,7 @@ options.setCaptureComments(true);
 output = swc4j.parse(code, options);
 ```
 
-* Upgrade the visit by introducing a private property `comments` and its corresponding constructor.
+* Upgrade the visitor by introducing a private property `comments` and its corresponding constructor.
 
 ```java
 private final Swc4jComments comments;
