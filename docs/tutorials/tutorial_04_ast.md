@@ -1,6 +1,6 @@
 # Tutorial 04: AST
 
-In this tutorial, we are going to learn the follows.
+In this tutorial, we are going to learn the following.
 
 * Parse a TypeScript code snippet.
 * Create an AST visitor.
@@ -148,7 +148,7 @@ Module (0,296,1,1)
 
 ## Create a Visitor
 
-In order to visit the AST, we need to create a Visitor as follows. There are 170+ types of AST nodes. This sample visitor only selectively visit 3 types of AST nodes.
+In order to visit the AST, we need to create a Visitor as follows. There are 170+ types of AST nodes. This sample visitor only selectively visits 3 types of AST nodes.
 
 * Subclass the built-in `Swc4jAstVisitor` or implement interface `ISwc4jAstVisitor` from scratch.
 
@@ -201,7 +201,7 @@ Regex is /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 ## Fetch the Comments
 
-As the AST shows there is no comments. What if we want to fetch the comments? Yes, that's supported.
+As the AST shows there are no comments. What if we want to fetch the comments? Yes, that's supported.
 
 * Turn on the comments and parse the code again as follows.
 
@@ -259,7 +259,7 @@ Leading comment is a Line comment.
 Regex is /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 ```
 
-* All comments are stored in the output as leading and trailing comments both of which are `Map<String, List<Swc4jComment>>`. The following code explains what is a leading and trailing comment.
+* All comments are stored in the output as leading and trailing comments both of which are `Map<String, List<Swc4jComment>>`. The following code explains what a leading and trailing comment is.
 
 ```js
 // This is a leading comment. 

@@ -1,6 +1,6 @@
 # Tutorial 03: Tokens
 
-In this tutorial, we are going to learn the follows.
+In this tutorial, we are going to learn the following.
 
 * Parse a TypeScript code snippet.
 * Process the tokens.
