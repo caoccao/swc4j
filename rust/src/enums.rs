@@ -32,8 +32,9 @@ pub trait IdentifiableEnum<T> {
   fn parse_by_id(id: i32) -> T;
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Default, Debug, Copy, Clone)]
 pub enum TokenType {
+  #[default]
   Unknown, // 0
   // Keyword
   Await,      // 1
@@ -740,8 +741,9 @@ impl JavaMediaType {
   }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Default, Debug, Copy, Clone)]
 pub enum ParseMode {
+  #[default]
   Module,
   Script,
 }
@@ -755,8 +757,8 @@ impl IdentifiableEnum<ParseMode> for ParseMode {
   }
   fn parse_by_id(id: i32) -> ParseMode {
     match id {
-      0 => ParseMode::Module,
-      _ => ParseMode::Script,
+      1 => ParseMode::Script,
+      _ => ParseMode::Module,
     }
   }
 }
@@ -815,9 +817,9 @@ impl IdentifiableEnum<SourceMapOption> for SourceMapOption {
   }
   fn parse_by_id(id: i32) -> SourceMapOption {
     match id {
-      0 => SourceMapOption::Inline,
       1 => SourceMapOption::Separate,
-      _ => SourceMapOption::None,
+      2 => SourceMapOption::None,
+      _ => SourceMapOption::Inline,
     }
   }
 }
