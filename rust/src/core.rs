@@ -15,11 +15,101 @@
 * limitations under the License.
 */
 
+use base64::Engine;
+
+use deno_ast::swc::ast::Program;
+use deno_ast::swc::codegen::{text_writer::JsWriter, Config, Emitter};
+use deno_ast::swc::common::{sync::Lrc, FileName, FilePathMapping, SourceMap};
 use deno_ast::*;
 
 use crate::{enums, options, outputs};
 
 const VERSION: &'static str = "0.5.0";
+
+pub fn minify<'local>(code: String, options: options::MinifyOptions) -> Result<outputs::MinifyOutput, String> {
+  let parse_params = ParseParams {
+    specifier: options.get_specifier(),
+    text_info: SourceTextInfo::from_string(code.to_owned()),
+    media_type: options.media_type,
+    capture_tokens: false,
+    maybe_syntax: None,
+    scope_analysis: false,
+  };
+  let result = match options.parse_mode {
+    enums::ParseMode::Script => parse_script(parse_params),
+    _ => parse_module(parse_params),
+  };
+  match result {
+    Ok(parsed_source) => {
+      let source_map = Lrc::new(SourceMap::new(FilePathMapping::empty()));
+      source_map.new_source_file(FileName::Url(options.get_specifier()), code.to_owned());
+      let mut minified_buffer = vec![];
+      let mut minified_source_map_buffer = vec![];
+      let mut writer = Box::new(JsWriter::new(
+        source_map.clone(),
+        "\n",
+        &mut minified_buffer,
+        Some(&mut minified_source_map_buffer),
+      ));
+      writer.set_indent_str("  "); // two spaces
+      let config = Config::default()
+        .with_minify(true)
+        .with_ascii_only(options.ascii_only)
+        .with_omit_last_semi(options.omit_last_semi)
+        .with_target(options.target)
+        .with_emit_assert_for_import_attributes(options.emit_assert_for_import_attributes);
+      let mut emitter = Emitter {
+        cfg: config,
+        comments: None,
+        cm: source_map.clone(),
+        wr: writer,
+      };
+      let result = match parsed_source.program_ref() {
+        Program::Module(module) => emitter.emit_module(module),
+        Program::Script(script) => emitter.emit_script(script),
+      };
+      match result {
+        Ok(_) => match String::from_utf8(minified_buffer.to_vec()) {
+          Ok(mut code) => {
+            let source_map: Option<String> = if options.source_map != SourceMapOption::None {
+              let mut buffer = Vec::new();
+              let source_map_config = SourceMapConfig {
+                inline_sources: options.inline_sources,
+              };
+              match source_map
+                .build_source_map_with_config(&minified_source_map_buffer, None, source_map_config)
+                .to_writer(&mut buffer)
+              {
+                Ok(_) => {
+                  if options.source_map == SourceMapOption::Inline {
+                    if !code.ends_with("\n") {
+                      code.push_str("\n");
+                    }
+                    code.push_str("//# sourceMappingURL=data:application/json;base64,");
+                    base64::prelude::BASE64_STANDARD.encode_string(buffer, &mut code);
+                    None
+                  } else {
+                    match String::from_utf8(buffer) {
+                      Ok(source_map) => Some(source_map),
+                      Err(_) => None,
+                    }
+                  }
+                }
+                Err(_) => None,
+              }
+            } else {
+              None
+            };
+            Ok(outputs::MinifyOutput::new(&parsed_source, code, source_map))
+          }
+          Err(e) => Err(e.to_string()),
+        },
+        Err(e) => Err(e.to_string()),
+      }
+    }
+    Err(e) => Err(e.to_string()),
+  }
+}
 
 pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<outputs::ParseOutput, String> {
   let parse_params = ParseParams {

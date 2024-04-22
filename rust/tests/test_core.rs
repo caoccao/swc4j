@@ -17,8 +17,7 @@
 
 use deno_ast::swc::{
   atoms::JsWord,
-  common::comments::CommentKind,
-  common::{BytePos, Span, Spanned},
+  common::{comments::CommentKind, BytePos, Span, Spanned},
   parser::token::{IdentLike, Keyword, Token, Word},
 };
 
@@ -28,6 +27,25 @@ use swc4j::*;
 #[test]
 fn test_get_version() {
   assert_eq!(core::get_version(), "0.5.0");
+}
+
+#[test]
+fn test_minify_with_default_options() {
+  let code = "function add(a:number, b:number) { return a+b; }";
+  let expected_code ="function add(a:number,b:number){return a+b;}\n";
+  let expected_source_map_prefix = "//# sourceMappingURL=data:application/json;base64,";
+  let options = options::MinifyOptions {
+    media_type: MediaType::TypeScript,
+    ..Default::default()
+  };
+  let output = core::minify(code.to_owned(), options);
+  assert!(output.is_ok());
+  let output = output.unwrap();
+  assert_eq!(MediaType::TypeScript, output.media_type);
+  assert!(matches!(output.parse_mode, ParseMode::Module));
+  let output_code = output.code;
+  assert_eq!(expected_code, &output_code[0..expected_code.len()]);
+  assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
 }
 
 #[test]

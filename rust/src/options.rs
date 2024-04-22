@@ -20,6 +20,7 @@ use jni::signature::{Primitive, ReturnType};
 use jni::sys::jobject;
 use jni::JNIEnv;
 
+use deno_ast::swc::ast::EsVersion;
 use deno_ast::ModuleSpecifier;
 
 use crate::enums::*;
@@ -852,6 +853,69 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 
 pub trait FromJniType {
   fn from_jni_type<'local>(env: &mut JNIEnv<'local>, o: jobject) -> Self;
+}
+
+#[derive(Debug)]
+pub struct MinifyOptions {
+  /// Forces the code generator to use only ascii characters.
+  ///
+  /// This is useful for environments that do not support unicode.
+  pub ascii_only: bool,
+  pub emit_assert_for_import_attributes: bool,
+  /// Should the source map be inlined in the emitted code file, or provided
+  /// as a separate file.  Defaults to `true`.
+  pub inline_source_map: bool,
+  /// Should the sources be inlined in the source map.  Defaults to `true`.
+  pub inline_sources: bool,
+  /// Whether to keep comments in the output. Defaults to `false`.
+  pub keep_comments: bool,
+  /// Media type of the source text.
+  pub media_type: MediaType,
+  /// If true, the code generator will emit the lastest semicolon.
+  ///
+  /// Defaults to `false`.
+  pub omit_last_semi: bool,
+  /// Should the code to be parsed as Module or Script,
+  pub parse_mode: ParseMode,
+  /// How and if source maps should be generated.
+  pub source_map: SourceMapOption,
+  /// Specifier of the source text.
+  pub specifier: String,
+  /// The target runtime environment.
+  ///
+  /// This defaults to [EsVersion::latest] because it preserves input as much
+  /// as possible.
+  ///
+  /// Note: This does not verifies if output is valid for the target runtime.
+  /// e.g. `const foo = 1;` with [EsVersion::Es3] will emitted as `const foo =
+  /// 1` without verification.
+  /// This is because it's not a concern of the code generator.
+  pub target: EsVersion,
+}
+
+impl MinifyOptions {
+  pub fn get_specifier(&self) -> ModuleSpecifier {
+    ModuleSpecifier::parse(self.specifier.as_str())
+      .unwrap_or_else(|_| ModuleSpecifier::parse(&"file://main.ts").unwrap())
+  }
+}
+
+impl Default for MinifyOptions {
+  fn default() -> Self {
+    MinifyOptions {
+      ascii_only: false,
+      emit_assert_for_import_attributes: false,
+      inline_source_map: true,
+      inline_sources: true,
+      keep_comments: false,
+      media_type: MediaType::TypeScript,
+      omit_last_semi: false,
+      parse_mode: ParseMode::Module,
+      source_map: SourceMapOption::Inline,
+      specifier: "file:///main.js".to_owned(),
+      target: EsVersion::latest(),
+    }
+  }
 }
 
 #[derive(Debug)]

@@ -9,6 +9,7 @@ edition = "2021"
 crate_type = ["cdylib", "rlib"]
 
 [dependencies]
+base64 = "0.22.0"
 debug_print = "1.0.0"
 deno_ast = { version = "0.37.0", features = [
   "bundler",

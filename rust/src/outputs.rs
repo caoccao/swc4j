@@ -109,6 +109,31 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 }
 
 #[derive(Debug)]
+pub struct MinifyOutput {
+  pub code: String,
+  pub media_type: MediaType,
+  pub parse_mode: ParseMode,
+  pub source_map: Option<String>,
+}
+
+impl MinifyOutput {
+  pub fn new(parsed_source: &ParsedSource, code: String, source_map: Option<String>) -> Self {
+    let media_type = parsed_source.media_type();
+    let parse_mode = if parsed_source.is_module() {
+      ParseMode::Module
+    } else {
+      ParseMode::Script
+    };
+    MinifyOutput {
+      code,
+      media_type,
+      parse_mode,
+      source_map,
+    }
+  }
+}
+
+#[derive(Debug)]
 pub struct ParseOutput {
   pub comments: Option<MultiThreadedComments>,
   pub media_type: MediaType,
