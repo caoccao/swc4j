@@ -23,6 +23,8 @@ final class Swc4jNative {
 
     static native String coreGetVersion();
 
+    static native Object coreMinify(String code, Object options);
+
     static native Object coreParse(String code, Object options);
 
     static native Object coreTranspile(String code, Object options);

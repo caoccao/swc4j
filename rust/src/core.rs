@@ -58,9 +58,14 @@ pub fn minify<'local>(code: String, options: options::MinifyOptions) -> Result<o
         .with_omit_last_semi(options.omit_last_semi)
         .with_target(options.target)
         .with_emit_assert_for_import_attributes(options.emit_assert_for_import_attributes);
+      let swc_comments = parsed_source.comments().as_swc_comments();
       let mut emitter = Emitter {
         cfg: config,
-        comments: None,
+        comments: if options.keep_comments {
+          Some(&swc_comments)
+        } else {
+          None
+        },
         cm: source_map.clone(),
         wr: writer,
       };

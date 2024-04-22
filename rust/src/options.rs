@@ -26,6 +26,314 @@ use deno_ast::ModuleSpecifier;
 use crate::enums::*;
 use crate::jni_utils::*;
 
+/* JavaSwc4jMinifyOptions Begin */
+struct JavaSwc4jMinifyOptions {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_media_type: JMethodID,
+  method_get_parse_mode: JMethodID,
+  method_get_source_map: JMethodID,
+  method_get_specifier: JMethodID,
+  method_get_target: JMethodID,
+  method_is_ascii_only: JMethodID,
+  method_is_emit_assert_for_import_attributes: JMethodID,
+  method_is_inline_source_map: JMethodID,
+  method_is_inline_sources: JMethodID,
+  method_is_keep_comments: JMethodID,
+  method_is_omit_last_semi: JMethodID,
+}
+unsafe impl Send for JavaSwc4jMinifyOptions {}
+unsafe impl Sync for JavaSwc4jMinifyOptions {}
+
+impl JavaSwc4jMinifyOptions {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/options/Swc4jMinifyOptions")
+      .expect("Couldn't find class Swc4jMinifyOptions");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jMinifyOptions");
+    let method_get_media_type = env
+      .get_method_id(
+        &class,
+        "getMediaType",
+        "()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;",
+      )
+      .expect("Couldn't find method Swc4jMinifyOptions.getMediaType");
+    let method_get_parse_mode = env
+      .get_method_id(
+        &class,
+        "getParseMode",
+        "()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;",
+      )
+      .expect("Couldn't find method Swc4jMinifyOptions.getParseMode");
+    let method_get_source_map = env
+      .get_method_id(
+        &class,
+        "getSourceMap",
+        "()Lcom/caoccao/javet/swc4j/enums/Swc4jSourceMapOption;",
+      )
+      .expect("Couldn't find method Swc4jMinifyOptions.getSourceMap");
+    let method_get_specifier = env
+      .get_method_id(
+        &class,
+        "getSpecifier",
+        "()Ljava/net/URL;",
+      )
+      .expect("Couldn't find method Swc4jMinifyOptions.getSpecifier");
+    let method_get_target = env
+      .get_method_id(
+        &class,
+        "getTarget",
+        "()Lcom/caoccao/javet/swc4j/enums/Swc4jEsVersion;",
+      )
+      .expect("Couldn't find method Swc4jMinifyOptions.getTarget");
+    let method_is_ascii_only = env
+      .get_method_id(
+        &class,
+        "isAsciiOnly",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jMinifyOptions.isAsciiOnly");
+    let method_is_emit_assert_for_import_attributes = env
+      .get_method_id(
+        &class,
+        "isEmitAssertForImportAttributes",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jMinifyOptions.isEmitAssertForImportAttributes");
+    let method_is_inline_source_map = env
+      .get_method_id(
+        &class,
+        "isInlineSourceMap",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jMinifyOptions.isInlineSourceMap");
+    let method_is_inline_sources = env
+      .get_method_id(
+        &class,
+        "isInlineSources",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jMinifyOptions.isInlineSources");
+    let method_is_keep_comments = env
+      .get_method_id(
+        &class,
+        "isKeepComments",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jMinifyOptions.isKeepComments");
+    let method_is_omit_last_semi = env
+      .get_method_id(
+        &class,
+        "isOmitLastSemi",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jMinifyOptions.isOmitLastSemi");
+    JavaSwc4jMinifyOptions {
+      class,
+      method_get_media_type,
+      method_get_parse_mode,
+      method_get_source_map,
+      method_get_specifier,
+      method_get_target,
+      method_is_ascii_only,
+      method_is_emit_assert_for_import_attributes,
+      method_is_inline_source_map,
+      method_is_inline_sources,
+      method_is_keep_comments,
+      method_is_omit_last_semi,
+    }
+  }
+
+  pub fn get_media_type<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_media_type,
+        &[],
+        "Swc4jMediaType get_media_type()"
+      );
+    return_value
+  }
+
+  pub fn get_parse_mode<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_parse_mode,
+        &[],
+        "Swc4jParseMode get_parse_mode()"
+      );
+    return_value
+  }
+
+  pub fn get_source_map<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_source_map,
+        &[],
+        "Swc4jSourceMapOption get_source_map()"
+      );
+    return_value
+  }
+
+  pub fn get_specifier<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_specifier,
+        &[],
+        "URL get_specifier()"
+      );
+    return_value
+  }
+
+  pub fn get_target<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_target,
+        &[],
+        "Swc4jEsVersion get_target()"
+      );
+    return_value
+  }
+
+  pub fn is_ascii_only<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_ascii_only,
+        &[],
+        "boolean is_ascii_only()"
+      );
+    return_value
+  }
+
+  pub fn is_emit_assert_for_import_attributes<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_emit_assert_for_import_attributes,
+        &[],
+        "boolean is_emit_assert_for_import_attributes()"
+      );
+    return_value
+  }
+
+  pub fn is_inline_source_map<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_inline_source_map,
+        &[],
+        "boolean is_inline_source_map()"
+      );
+    return_value
+  }
+
+  pub fn is_inline_sources<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_inline_sources,
+        &[],
+        "boolean is_inline_sources()"
+      );
+    return_value
+  }
+
+  pub fn is_keep_comments<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_keep_comments,
+        &[],
+        "boolean is_keep_comments()"
+      );
+    return_value
+  }
+
+  pub fn is_omit_last_semi<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_omit_last_semi,
+        &[],
+        "boolean is_omit_last_semi()"
+      );
+    return_value
+  }
+}
+/* JavaSwc4jMinifyOptions End */
+
 /* JavaSwc4jParseOptions Begin */
 struct JavaSwc4jParseOptions {
   #[allow(dead_code)]
@@ -841,11 +1149,13 @@ impl JavaSwc4jTranspileOptions {
 }
 /* JavaSwc4jTranspileOptions End */
 
+static mut JAVA_MINIFY_OPTIONS: Option<JavaSwc4jMinifyOptions> = None;
 static mut JAVA_PARSE_OPTIONS: Option<JavaSwc4jParseOptions> = None;
 static mut JAVA_TRANSPILE_OPTIONS: Option<JavaSwc4jTranspileOptions> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
+    JAVA_MINIFY_OPTIONS = Some(JavaSwc4jMinifyOptions::new(env));
     JAVA_PARSE_OPTIONS = Some(JavaSwc4jParseOptions::new(env));
     JAVA_TRANSPILE_OPTIONS = Some(JavaSwc4jTranspileOptions::new(env));
   }
@@ -871,11 +1181,11 @@ pub struct MinifyOptions {
   pub keep_comments: bool,
   /// Media type of the source text.
   pub media_type: MediaType,
-  /// If true, the code generator will emit the lastest semicolon.
+  /// If true, the code generator will emit the latest semicolon.
   ///
   /// Defaults to `false`.
   pub omit_last_semi: bool,
-  /// Should the code to be parsed as Module or Script,
+  /// Should the code to be parsed as Module or Script.
   pub parse_mode: ParseMode,
   /// How and if source maps should be generated.
   pub source_map: SourceMapOption,
@@ -918,6 +1228,51 @@ impl Default for MinifyOptions {
   }
 }
 
+impl FromJniType for MinifyOptions {
+  fn from_jni_type<'local>(env: &mut JNIEnv<'local>, obj: jobject) -> MinifyOptions {
+    let obj = unsafe { JObject::from_raw(obj) };
+    let obj = obj.as_ref();
+    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
+    let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
+    let java_source_map_option = unsafe { JAVA_SOURCE_MAP_OPTION.as_ref().unwrap() };
+    let java_es_version = unsafe { JAVA_ES_VERSION.as_ref().unwrap() };
+    let java_minify_options = unsafe { JAVA_MINIFY_OPTIONS.as_ref().unwrap() };
+    let ascii_only = java_minify_options.is_ascii_only(env, obj);
+    let emit_assert_for_import_attributes = java_minify_options.is_emit_assert_for_import_attributes(env, obj);
+    let inline_source_map = java_minify_options.is_inline_source_map(env, obj);
+    let inline_sources = java_minify_options.is_inline_sources(env, obj);
+    let keep_comments = java_minify_options.is_keep_comments(env, obj);
+    let media_type = java_minify_options.get_media_type(env, obj);
+    let media_type = media_type.as_ref();
+    let media_type = java_media_type.get_media_type(env, media_type);
+    let omit_last_semi = java_minify_options.is_omit_last_semi(env, obj);
+    let source_map = java_minify_options.get_source_map(env, obj);
+    let source_map = source_map.as_ref();
+    let source_map = java_source_map_option.get_source_map(env, source_map);
+    let parse_mode = java_minify_options.get_parse_mode(env, obj);
+    let parse_mode = parse_mode.as_ref();
+    let parse_mode = java_parse_mode.get_parse_mode(env, parse_mode);
+    let specifier = java_minify_options.get_specifier(env, obj);
+    let specifier = url_to_string(env, &specifier);
+    let target = java_minify_options.get_target(env, obj);
+    let target = target.as_ref();
+    let target = java_es_version.get_es_version(env, target);
+    MinifyOptions {
+      ascii_only,
+      emit_assert_for_import_attributes,
+      inline_source_map,
+      inline_sources,
+      keep_comments,
+      media_type,
+      omit_last_semi,
+      parse_mode,
+      source_map,
+      specifier,
+      target,
+    }
+  }
+}
+
 #[derive(Debug)]
 pub struct ParseOptions {
   /// Whether to capture ast or not.
@@ -928,7 +1283,7 @@ pub struct ParseOptions {
   pub capture_tokens: bool,
   /// Media type of the source text.
   pub media_type: MediaType,
-  /// Should the code to be parsed as Module or Script,
+  /// Should the code to be parsed as Module or Script.
   pub parse_mode: ParseMode,
   /// Whether to apply swc's scope analysis.
   pub scope_analysis: bool,

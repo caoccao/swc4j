@@ -22,8 +22,10 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstStore;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.comments.Swc4jComment;
 import com.caoccao.javet.swc4j.comments.Swc4jComments;
+import com.caoccao.javet.swc4j.options.Swc4jMinifyOptions;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
+import com.caoccao.javet.swc4j.outputs.Swc4jMinifyOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
@@ -647,6 +649,18 @@ public class TestCodeGen {
     @Test
     public void testSwc4jComments() throws IOException {
         Jni2Rust<Swc4jComments> jni2Rust = new Jni2Rust<>(Swc4jComments.class);
+        jni2Rust.updateFile();
+    }
+
+    @Test
+    public void testSwc4jMinifyOptions() throws IOException {
+        Jni2Rust<Swc4jMinifyOptions> jni2Rust = new Jni2Rust<>(Swc4jMinifyOptions.class);
+        jni2Rust.updateFile();
+    }
+
+    @Test
+    public void testSwc4jMinifyOutput() throws IOException {
+        Jni2Rust<Swc4jMinifyOutput> jni2Rust = new Jni2Rust<>(Swc4jMinifyOutput.class);
         jni2Rust.updateFile();
     }
 

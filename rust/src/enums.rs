@@ -21,6 +21,7 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use deno_ast::swc::ast::AssignOp;
+pub use deno_ast::swc::ast::EsVersion;
 pub use deno_ast::swc::common::comments::CommentKind;
 use deno_ast::swc::parser::token::{BinOpToken, Keyword, Token};
 pub use deno_ast::{ImportsNotUsedAsValues, MediaType, SourceMapOption};
@@ -573,12 +574,13 @@ impl JavaCommentKind {
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jCommentKind");
     let method_parse = env
-      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/comments/Swc4jCommentKind;")
+      .get_static_method_id(
+        &class,
+        "parse",
+        "(I)Lcom/caoccao/javet/swc4j/comments/Swc4jCommentKind;",
+      )
       .expect("Couldn't find static method Swc4jCommentKind.parse");
-    JavaCommentKind {
-      class,
-      method_parse,
-    }
+    JavaCommentKind { class, method_parse }
   }
 
   pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
@@ -602,6 +604,71 @@ impl IdentifiableEnum<CommentKind> for CommentKind {
       1 => CommentKind::Block,
       _ => CommentKind::Line,
     }
+  }
+}
+
+pub struct JavaEsVersion {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+}
+unsafe impl Send for JavaEsVersion {}
+unsafe impl Sync for JavaEsVersion {}
+
+impl IdentifiableEnum<EsVersion> for EsVersion {
+  fn get_id(&self) -> i32 {
+    match self {
+      EsVersion::Es3 => 1,
+      EsVersion::Es5 => 2,
+      EsVersion::Es2015 => 3,
+      EsVersion::Es2016 => 4,
+      EsVersion::Es2017 => 5,
+      EsVersion::Es2018 => 6,
+      EsVersion::Es2019 => 7,
+      EsVersion::Es2020 => 8,
+      EsVersion::Es2021 => 9,
+      EsVersion::Es2022 => 10,
+      EsVersion::EsNext => 0,
+    }
+  }
+  fn parse_by_id(id: i32) -> EsVersion {
+    match id {
+      1 => EsVersion::Es3,
+      2 => EsVersion::Es5,
+      3 => EsVersion::Es2015,
+      4 => EsVersion::Es2016,
+      5 => EsVersion::Es2017,
+      6 => EsVersion::Es2018,
+      7 => EsVersion::Es2019,
+      8 => EsVersion::Es2020,
+      9 => EsVersion::Es2021,
+      10 => EsVersion::Es2022,
+      _ => EsVersion::EsNext,
+    }
+  }
+}
+
+impl JavaEsVersion {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jEsVersion")
+      .expect("Couldn't find class Swc4jEsVersion");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jEsVersion");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jEsVersion.getId");
+    JavaEsVersion { class, method_get_id }
+  }
+
+  pub fn get_es_version<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'a>,
+  ) -> EsVersion {
+    let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
+    EsVersion::parse_by_id(id)
   }
 }
 
@@ -853,6 +920,7 @@ impl JavaSourceMapOption {
 }
 
 pub static mut JAVA_COMMENT_KIND: Option<JavaCommentKind> = None;
+pub static mut JAVA_ES_VERSION: Option<JavaEsVersion> = None;
 pub static mut JAVA_IMPORTS_NOT_USED_AS_VALUES: Option<JavaImportsNotUsedAsValues> = None;
 pub static mut JAVA_MEDIA_TYPE: Option<JavaMediaType> = None;
 pub static mut JAVA_PARSE_MODE: Option<JavaParseMode> = None;
@@ -862,6 +930,7 @@ pub static mut JAVA_TOKEN_TYPE: Option<JavaTokenType> = None;
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
     JAVA_COMMENT_KIND = Some(JavaCommentKind::new(env));
+    JAVA_ES_VERSION = Some(JavaEsVersion::new(env));
     JAVA_IMPORTS_NOT_USED_AS_VALUES = Some(JavaImportsNotUsedAsValues::new(env));
     JAVA_MEDIA_TYPE = Some(JavaMediaType::new(env));
     JAVA_PARSE_MODE = Some(JavaParseMode::new(env));

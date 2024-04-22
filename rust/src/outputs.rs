@@ -34,6 +34,38 @@ use crate::options::*;
 use crate::span_utils::ByteToIndexMap;
 use crate::token_utils;
 
+/* JavaSwc4jMinifyOutput Begin */
+struct JavaSwc4jMinifyOutput {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_construct: JMethodID,
+}
+unsafe impl Send for JavaSwc4jMinifyOutput {}
+unsafe impl Sync for JavaSwc4jMinifyOutput {}
+
+impl JavaSwc4jMinifyOutput {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/outputs/Swc4jMinifyOutput")
+      .expect("Couldn't find class Swc4jMinifyOutput");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jMinifyOutput");
+    let method_construct = env
+      .get_method_id(
+        &class,
+        "<init>",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;Ljava/lang/String;)V",
+      )
+      .expect("Couldn't find method Swc4jMinifyOutput::new");
+    JavaSwc4jMinifyOutput {
+      class,
+      method_construct,
+    }
+  }
+}
+/* JavaSwc4jMinifyOutput End */
+
 /* JavaSwc4jParseOutput Begin */
 struct JavaSwc4jParseOutput {
   #[allow(dead_code)]
@@ -98,11 +130,13 @@ impl JavaSwc4jTranspileOutput {
 }
 /* JavaSwc4jTranspileOutput End */
 
+static mut JAVA_MINIFY_OUTPUT: Option<JavaSwc4jMinifyOutput> = None;
 static mut JAVA_PARSE_OUTPUT: Option<JavaSwc4jParseOutput> = None;
 static mut JAVA_TRANSPILE_OUTPUT: Option<JavaSwc4jTranspileOutput> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
+    JAVA_MINIFY_OUTPUT = Some(JavaSwc4jMinifyOutput::new(env));
     JAVA_PARSE_OUTPUT = Some(JavaSwc4jParseOutput::new(env));
     JAVA_TRANSPILE_OUTPUT = Some(JavaSwc4jTranspileOutput::new(env));
   }
@@ -130,6 +164,40 @@ impl MinifyOutput {
       parse_mode,
       source_map,
     }
+  }
+}
+
+impl ToJniType for MinifyOutput {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_class_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
+    let java_class_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
+    let java_class_minify_output = unsafe { JAVA_MINIFY_OUTPUT.as_ref().unwrap() };
+    let java_code = string_to_jstring!(env, &self.code);
+    let code = object_to_jvalue!(&java_code);
+    let java_media_type = java_class_media_type.parse(env, self.media_type.get_id());
+    let media_type = object_to_jvalue!(&java_media_type);
+    let java_parse_mode = java_class_parse_mode.parse(env, self.parse_mode.get_id());
+    let parse_mode = object_to_jvalue!(&java_parse_mode);
+    let java_optional_source_map = self
+      .source_map
+      .as_ref()
+      .map(|source_map| string_to_jstring!(env, source_map));
+    let source_map = optional_object_to_jvalue!(&java_optional_source_map);
+    let return_value = call_as_construct!(
+      env,
+      &java_class_minify_output.class,
+      java_class_minify_output.method_construct,
+      &[code, media_type, parse_mode, source_map],
+      "Swc4jMinifyOutput"
+    );
+    delete_local_ref!(env, java_code);
+    delete_local_ref!(env, java_media_type);
+    delete_local_ref!(env, java_parse_mode);
+    delete_local_optional_ref!(env, java_optional_source_map);
+    return_value
   }
 }
 

@@ -47,97 +47,111 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     public static final String DEFAULT_JSX_FRAGMENT_FACTORY = "React.Fragment";
     /**
-     * The Emit metadata.
+     * When emitting a legacy decorator, also emit experimental decorator meta data.
+     * Defaults to `false`.
      *
      * @since 0.1.0
      */
     protected boolean emitMetadata;
     /**
-     * The Imports not used as values.
+     * What to do with import statements that only import types i.e. whether to
+     * remove them (`Remove`), keep them as side-effect imports (`Preserve`)
+     * or error (`Error`). Defaults to `Remove`.
      *
      * @since 0.1.0
      */
     protected Swc4jImportsNotUsedAsValues importsNotUsedAsValues;
     /**
-     * The Inline source map.
+     * Should the source map be inlined in the emitted code file, or provided
+     * as a separate file.  Defaults to `true`.
      *
      * @since 0.1.0
      */
     protected boolean inlineSourceMap;
     /**
-     * The Inline sources.
+     * Should the sources be inlined in the source map.
+     * Defaults to `true`.
      *
      * @since 0.1.0
      */
     protected boolean inlineSources;
     /**
-     * The Jsx automatic.
+     * `true` if the program should use an implicit JSX import source/the "new" JSX transforms.
      *
      * @since 0.1.0
      */
     protected boolean jsxAutomatic;
     /**
-     * The Jsx development.
+     * If JSX is automatic, if it is in development mode, meaning that it should
+     * import `jsx-dev-runtime` and transform JSX using `jsxDEV` import from the
+     * JSX import source as well as provide additional debug information to the
+     * JSX factory.
      *
      * @since 0.1.0
      */
     protected boolean jsxDevelopment;
     /**
-     * The Jsx factory.
+     * When transforming JSX, what value should be used for the JSX factory.
+     * Defaults to `React.createElement`.
      *
      * @since 0.1.0
      */
     protected String jsxFactory;
     /**
-     * The Jsx fragment factory.
+     * When transforming JSX, what value should be used for the JSX fragment factory.
+     * Defaults to `React.Fragment`.
      *
      * @since 0.1.0
      */
     protected String jsxFragmentFactory;
     /**
-     * The Jsx import source.
+     * The string module specifier to implicitly import JSX factories from when transpiling JSX.
      *
      * @since 0.1.0
      */
     protected String jsxImportSource;
     /**
-     * The Keep comments.
+     * Whether to keep comments in the output. Defaults to `false`.
      *
      * @since 0.3.0
      */
     protected boolean keepComments;
     /**
-     * The Precompile jsx.
+     * Should JSX be precompiled into static strings that need to be concatenated
+     * with dynamic content. Defaults to `false`, mutually exclusive with
+     * `transform_jsx`.
      *
      * @since 0.1.0
      */
     protected boolean precompileJsx;
     /**
-     * The Source map.
+     * How and if source maps should be generated.
      *
      * @since 0.1.0
      */
     protected Swc4jSourceMapOption sourceMap;
     /**
-     * The Transform jsx.
+     * Should JSX be transformed. Defaults to `true`.
      *
      * @since 0.1.0
      */
     protected boolean transformJsx;
     /**
-     * The Use decorator proposal.
+     * TC39 Decorators Proposal - https://github.com/tc39/proposal-decorators
      *
      * @since 0.3.0
      */
     protected boolean useDecoratorsProposal;
     /**
-     * The Use ts decorators.
+     * TypeScript experimental decorators.
      *
      * @since 0.3.0
      */
     protected boolean useTsDecorators;
     /**
-     * The Var decl imports.
+     * Should import declarations be transformed to variable declarations using
+     * a dynamic import. This is useful for import & export declaration support
+     * in script contexts such as the Deno REPL.  Defaults to `false`.
      *
      * @since 0.1.0
      */
@@ -168,9 +182,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * What to do with import statements that only import types i.e. whether to
-     * remove them (`Remove`), keep them as side-effect imports (`Preserve`)
-     * or error (`Error`). Defaults to `Remove`.
+     * Gets imports not used as values.
      *
      * @return the imports not used as values
      * @since 0.1.0
@@ -181,8 +193,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * When transforming JSX, what value should be used for the JSX factory.
-     * Defaults to `React.createElement`.
+     * Gets jsx factory.
      *
      * @return the jsx factory
      * @since 0.1.0
@@ -193,8 +204,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * When transforming JSX, what value should be used for the JSX fragment.
-     * Defaults to `React.Fragment`.
+     * Gets jsx fragment factory.
      *
      * @return the jsx fragment factory
      * @since 0.1.0
@@ -205,7 +215,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * The string module specifier to implicitly import JSX factories from when transpiling JSX.
+     * Gets jsx import source.
      *
      * @return the jsx import source
      * @since 0.1.0
@@ -216,7 +226,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * How and if source maps should be generated.
+     * Gets source map.
      *
      * @return the source map
      * @since 0.3.0
@@ -227,10 +237,9 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * When emitting a legacy decorator, also emit experimental decorator meta data.
-     * Defaults to `false`.
+     * Is emit metadata.
      *
-     * @return the boolean
+     * @return true : yes, false : no
      * @since 0.1.0
      */
     @Jni2RustMethod
@@ -239,9 +248,9 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * Should the source map be inlined, or provided as a separate string. Defaults to `true`.
+     * Is inline source map.
      *
-     * @return true : source map is inlined, false : source map is separated
+     * @return true : yes, false : no
      * @since 0.1.0
      */
     @Jni2RustMethod
@@ -250,9 +259,9 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * Should the sources be inlined in the source map. Defaults to `true`.
+     * Is inline sources.
      *
-     * @return true : source is inlined, false : source is not inlined
+     * @return true : yes, false : no
      * @since 0.1.0
      */
     @Jni2RustMethod
@@ -261,9 +270,9 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * `true` if the program should use an implicit JSX import source/the "new" JSX transforms.
+     * Is jsx automatic.
      *
-     * @return true : automatic, false : not automatic
+     * @return true : yes, false : no
      * @since 0.1.0
      */
     @Jni2RustMethod
@@ -272,12 +281,9 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * If JSX is automatic, if it is in development mode, meaning that it should
-     * import `jsx-dev-runtime` and transform JSX using `jsxDEV` import from the
-     * JSX import source as well as provide additional debug information to the
-     * JSX factory.
+     * Is jsx development.
      *
-     * @return true : development mode, false : not development mode
+     * @return true : yes, false : no
      * @since 0.1.0
      */
     @Jni2RustMethod
@@ -286,9 +292,9 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * Whether to keep comments in the output. Defaults to `false`.
+     * Is keep comments.
      *
-     * @return true : keep comments, false : remove comments
+     * @return true : yes, false : no
      * @since 0.3.0
      */
     @Jni2RustMethod
@@ -297,10 +303,9 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * Should JSX be precompiled into static strings that need to be concatenated
-     * with dynamic content. Defaults to `false`, mutually exclusive with `transform_jsx`.
+     * Is precompile jsx.
      *
-     * @return true : be precompiled, false : not be precompiled
+     * @return true : yes, false : no
      * @since 0.1.0
      */
     @Jni2RustMethod
@@ -309,9 +314,9 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * Should JSX be transformed. Defaults to `true`.
+     * Is transform jsx.
      *
-     * @return true : be transformed, false : not be transformed
+     * @return true : yes, false : no
      * @since 0.1.0
      */
     @Jni2RustMethod
@@ -320,9 +325,9 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * TC39 Decorators Proposal - https://github.com/tc39/proposal-decorators
+     * Is use decorators proposal.
      *
-     * @return true : use decorators proposal, false : not use decorators proposal
+     * @return true : yes, false : no
      * @since 0.3.0
      */
     @Jni2RustMethod
@@ -331,9 +336,9 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * TypeScript experimental decorators.
+     * Is use ts decorators.
      *
-     * @return true : use TypeScript experimental decorators, false : not use TypeScript experimental decorators
+     * @return true : yes, false : no
      * @since 0.3.0
      */
     @Jni2RustMethod
@@ -342,12 +347,9 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * Should import declarations be transformed to variable declarations using
-     * a dynamic import. This is useful for import and export declaration support
-     * in script contexts such as the Deno REPL.
-     * Defaults to `false`.
+     * Is var decl imports.
      *
-     * @return true : transformed, false : not transformed
+     * @return true : yes, false : no
      * @since 0.1.0
      */
     @Jni2RustMethod

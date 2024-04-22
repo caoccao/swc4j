@@ -17,8 +17,10 @@
 package com.caoccao.javet.swc4j;
 
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
+import com.caoccao.javet.swc4j.options.Swc4jMinifyOptions;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
+import com.caoccao.javet.swc4j.outputs.Swc4jMinifyOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -53,7 +55,35 @@ public final class Swc4j {
     }
 
     /**
-     * Parse.
+     * Minify with default options.
+     *
+     * @param code the code
+     * @return the swc4j minify output
+     * @throws Swc4jCoreException the swc4j core exception
+     * @since 0.5.0
+     */
+    public Swc4jMinifyOutput minify(String code) throws Swc4jCoreException {
+        return minify(code, new Swc4jMinifyOptions());
+    }
+
+    /**
+     * Minify.
+     *
+     * @param code    the code
+     * @param options the options
+     * @return the swc4j minify output
+     * @throws Swc4jCoreException the swc4j core exception
+     * @since 0.5.0
+     */
+    @SuppressWarnings("RedundantThrows")
+    public Swc4jMinifyOutput minify(String code, Swc4jMinifyOptions options) throws Swc4jCoreException {
+        return (Swc4jMinifyOutput) Swc4jNative.coreMinify(
+                code,
+                AssertionUtils.notNull(options, "Options"));
+    }
+
+    /**
+     * Parse with default options.
      *
      * @param code the code
      * @return the swc4j parse output
@@ -81,7 +111,7 @@ public final class Swc4j {
     }
 
     /**
-     * Transpile.
+     * Transpile with default options.
      *
      * @param code the code
      * @return the swc4j transpile output
