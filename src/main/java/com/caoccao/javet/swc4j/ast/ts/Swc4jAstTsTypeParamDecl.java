@@ -20,9 +20,9 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ public class Swc4jAstTsTypeParamDecl
             List<Swc4jAstTsTypeParam> params,
             Swc4jSpan span) {
         super(span);
-        this.params = SimpleList.immutableCopyOf(AssertionUtils.notNull(params, "Params"));
+        this.params = SimpleList.immutable(AssertionUtils.notNull(params, "Params"));
         childNodes = SimpleList.immutableCopyOf(params);
         updateParent();
     }

@@ -26,9 +26,9 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 import java.util.Optional;
@@ -73,7 +73,7 @@ public class Swc4jAstClassProp
         this._static = _static;
         this.accessibility = Optional.ofNullable(accessibility);
         this.declare = declare;
-        this.decorators = SimpleList.immutableCopyOf(AssertionUtils.notNull(decorators, "Decorators"));
+        this.decorators = SimpleList.immutable(AssertionUtils.notNull(decorators, "Decorators"));
         this.definite = definite;
         this.key = AssertionUtils.notNull(key, "Key");
         this.optional = optional;

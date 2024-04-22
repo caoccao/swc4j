@@ -22,9 +22,9 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 import java.util.Optional;
@@ -63,7 +63,7 @@ public class Swc4jAstModule
             String shebang,
             Swc4jSpan span) {
         super(span);
-        this.body = SimpleList.immutableCopyOf(AssertionUtils.notNull(body, "Body"));
+        this.body = SimpleList.immutable(AssertionUtils.notNull(body, "Body"));
         this.shebang = Optional.ofNullable(shebang);
         childNodes = SimpleList.immutableCopyOf(body);
         updateParent();

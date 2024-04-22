@@ -16,9 +16,9 @@
 
 package com.caoccao.javet.swc4j.tokens;
 
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.JsonUtils;
-import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 /**
  * The type swc4j token.

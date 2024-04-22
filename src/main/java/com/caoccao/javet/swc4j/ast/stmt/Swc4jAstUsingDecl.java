@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
@@ -25,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstForHead;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
@@ -43,7 +43,7 @@ public class Swc4jAstUsingDecl
             Swc4jSpan span) {
         super(span);
         this.await = await;
-        this.decls = SimpleList.immutableCopyOf(AssertionUtils.notNull(decls, "Decls"));
+        this.decls = SimpleList.immutable(AssertionUtils.notNull(decls, "Decls"));
         childNodes = SimpleList.immutableCopyOf(decls);
         updateParent();
     }

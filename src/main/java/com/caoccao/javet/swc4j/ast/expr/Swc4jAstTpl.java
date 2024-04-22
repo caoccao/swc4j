@@ -22,9 +22,9 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstTplElement;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 
@@ -39,8 +39,8 @@ public class Swc4jAstTpl
             List<Swc4jAstTplElement> quasis,
             Swc4jSpan span) {
         super(span);
-        this.exprs = SimpleList.immutableCopyOf(AssertionUtils.notNull(exprs, "Exprs"));
-        this.quasis = SimpleList.immutableCopyOf(AssertionUtils.notNull(quasis, "Quasis"));
+        this.exprs = SimpleList.immutable(AssertionUtils.notNull(exprs, "Exprs"));
+        this.quasis = SimpleList.immutable(AssertionUtils.notNull(quasis, "Quasis"));
         childNodes = SimpleList.copyOf(exprs);
         childNodes.addAll(quasis);
         childNodes = SimpleList.immutable(childNodes);

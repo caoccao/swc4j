@@ -25,9 +25,9 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsParamPropParam;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +52,7 @@ public class Swc4jAstTsParamProp
         super(span);
         this._override = _override;
         this.accessibility = Optional.ofNullable(accessibility);
-        this.decorators = SimpleList.immutableCopyOf(AssertionUtils.notNull(decorators, "Decorators"));
+        this.decorators = SimpleList.immutable(AssertionUtils.notNull(decorators, "Decorators"));
         this.param = AssertionUtils.notNull(param, "Param");
         this.readonly = readonly;
         childNodes = SimpleList.copyOf(decorators);

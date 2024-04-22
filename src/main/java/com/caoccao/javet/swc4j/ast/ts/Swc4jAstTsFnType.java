@@ -23,9 +23,9 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnOrConstructorType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +44,7 @@ public class Swc4jAstTsFnType
             Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.params = SimpleList.immutableCopyOf(AssertionUtils.notNull(params, "Params"));
+        this.params = SimpleList.immutable(AssertionUtils.notNull(params, "Params"));
         this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
         this.typeParams = Optional.ofNullable(typeParams);
         childNodes = SimpleList.copyOf(params);

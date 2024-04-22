@@ -22,9 +22,9 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsUnionOrIntersectionType;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 
@@ -37,7 +37,7 @@ public class Swc4jAstTsUnionType
             List<ISwc4jAstTsType> types,
             Swc4jSpan span) {
         super(span);
-        this.types = SimpleList.immutableCopyOf(AssertionUtils.notNull(types, "Types"));
+        this.types = SimpleList.immutable(AssertionUtils.notNull(types, "Types"));
         childNodes = SimpleList.immutableCopyOf(types);
         updateParent();
     }

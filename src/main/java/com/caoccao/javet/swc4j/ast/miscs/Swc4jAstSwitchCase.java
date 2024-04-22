@@ -22,9 +22,9 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +40,7 @@ public class Swc4jAstSwitchCase
             Swc4jSpan span) {
         super(span);
         this.test = Optional.ofNullable(test);
-        this.cons = SimpleList.immutableCopyOf(AssertionUtils.notNull(cons, "Cons"));
+        this.cons = SimpleList.immutable(AssertionUtils.notNull(cons, "Cons"));
         childNodes = SimpleList.copyOf(cons);
         childNodes.add(test);
         childNodes = SimpleList.immutable(childNodes);

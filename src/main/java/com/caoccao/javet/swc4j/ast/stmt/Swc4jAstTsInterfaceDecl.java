@@ -26,9 +26,9 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsInterfaceBody;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +50,7 @@ public class Swc4jAstTsInterfaceDecl
             Swc4jAstTsInterfaceBody body,
             Swc4jSpan span) {
         super(span);
-        this._extends = SimpleList.immutableCopyOf(AssertionUtils.notNull(_extends, "Extends"));
+        this._extends = SimpleList.immutable(AssertionUtils.notNull(_extends, "Extends"));
         this.body = AssertionUtils.notNull(body, "Body");
         this.declare = declare;
         this.id = AssertionUtils.notNull(id, "Id");
