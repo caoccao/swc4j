@@ -29,7 +29,7 @@ jobs:
             os: linux
             arch: x86_64
             ext: .so
-          - image: macos-latest
+          - image: macos-13
             os: macos
             arch: x86_64
             ext: .dylib
