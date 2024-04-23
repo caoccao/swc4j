@@ -77,7 +77,6 @@ public class TestSwc4jTransformOptions extends BaseTestSuite {
                 "}\n";
         Swc4jTransformOutput output = swc4j.transform(code, tsModuleTransformOptions
                 .setMinify(false)
-                .setInlineSourceMap(false)
                 .setSourceMap(Swc4jSourceMapOption.None));
         assertNotNull(output);
         assertEquals(Swc4jParseMode.Module, output.getParseMode());
@@ -94,7 +93,6 @@ public class TestSwc4jTransformOptions extends BaseTestSuite {
                 "}\n";
         Swc4jTransformOutput output = swc4j.transform(code, tsModuleTransformOptions
                 .setMinify(false)
-                .setInlineSourceMap(false)
                 .setSourceMap(Swc4jSourceMapOption.Separate));
         assertNotNull(output);
         assertEquals(Swc4jParseMode.Module, output.getParseMode());

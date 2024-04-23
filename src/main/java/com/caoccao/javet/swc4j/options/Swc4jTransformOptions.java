@@ -48,13 +48,6 @@ public class Swc4jTransformOptions extends Swc4jOptions {
      */
     protected boolean emitAssertForImportAttributes;
     /**
-     * Should the source map be inlined in the emitted code file, or provided as a separate file.
-     * Defaults to `true`.
-     *
-     * @since 0.5.0
-     */
-    protected boolean inlineSourceMap;
-    /**
      * Should the sources be inlined in the source map.  Defaults to `true`.
      *
      * @since 0.5.0
@@ -107,7 +100,6 @@ public class Swc4jTransformOptions extends Swc4jOptions {
         super();
         setAsciiOnly(false);
         setEmitAssertForImportAttributes(false);
-        setInlineSourceMap(true);
         setInlineSources(true);
         setKeepComments(false);
         setMinify(true);
@@ -155,16 +147,6 @@ public class Swc4jTransformOptions extends Swc4jOptions {
     @Jni2RustMethod
     public boolean isEmitAssertForImportAttributes() {
         return emitAssertForImportAttributes;
-    }
-
-    /**
-     * Is inline source map.
-     *
-     * @return true : yes, false : no
-     */
-    @Jni2RustMethod
-    public boolean isInlineSourceMap() {
-        return inlineSourceMap;
     }
 
     /**
@@ -229,18 +211,6 @@ public class Swc4jTransformOptions extends Swc4jOptions {
      */
     public Swc4jTransformOptions setEmitAssertForImportAttributes(boolean emitAssertForImportAttributes) {
         this.emitAssertForImportAttributes = emitAssertForImportAttributes;
-        return this;
-    }
-
-    /**
-     * Sets inline source map.
-     *
-     * @param inlineSourceMap the inline source map
-     * @return the self
-     * @since 0.5.0
-     */
-    public Swc4jTransformOptions setInlineSourceMap(boolean inlineSourceMap) {
-        this.inlineSourceMap = inlineSourceMap;
         return this;
     }
 
@@ -330,7 +300,7 @@ public class Swc4jTransformOptions extends Swc4jOptions {
      * @since 0.5.0
      */
     public Swc4jTransformOptions setTarget(Swc4jEsVersion target) {
-        this.target = target;
+        this.target = AssertionUtils.notNull(target, "Target");
         return this;
     }
 }

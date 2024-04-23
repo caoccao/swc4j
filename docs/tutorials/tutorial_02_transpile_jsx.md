@@ -61,7 +61,7 @@ We may want to replace the default Jsx factory with a customized one. Yes, that'
 
 ```java
 // Remove the inline source map.
-options.setInlineSourceMap(false).setSourceMap(Swc4jSourceMapOption.None);
+options.setSourceMap(Swc4jSourceMapOption.None);
 // Customize the Jsx factory.
 options.setJsxFactory("CustomJsxFactory.createElement");
 output = swc4j.transpile(code, options);

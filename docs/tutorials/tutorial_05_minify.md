@@ -33,7 +33,6 @@ Swc4jTransformOptions options = new Swc4jTransformOptions()
         .setSpecifier(specifier)
         .setMediaType(Swc4jMediaType.TypeScript)
         .setParseMode(Swc4jParseMode.Module)
-        .setInlineSourceMap(false)
         .setSourceMap(Swc4jSourceMapOption.Separate);
 // Parse the code.
 Swc4jTransformOutput output = swc4j.transform(code, options);

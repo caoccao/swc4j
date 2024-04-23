@@ -56,7 +56,7 @@ public class Tutorial02TranspileJsx {
         System.out.println("*********************************************/");
         System.out.println(output.getCode());
         // Remove the inline source map.
-        options.setInlineSourceMap(false).setSourceMap(Swc4jSourceMapOption.None);
+        options.setSourceMap(Swc4jSourceMapOption.None);
         // Customize the Jsx factory.
         options.setJsxFactory("CustomJsxFactory.createElement");
         output = swc4j.transpile(code, options);

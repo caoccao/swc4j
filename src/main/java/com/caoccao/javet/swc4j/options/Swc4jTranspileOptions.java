@@ -62,13 +62,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     protected Swc4jImportsNotUsedAsValues importsNotUsedAsValues;
     /**
-     * Should the source map be inlined in the emitted code file, or provided
-     * as a separate file.  Defaults to `true`.
-     *
-     * @since 0.1.0
-     */
-    protected boolean inlineSourceMap;
-    /**
      * Should the sources be inlined in the source map.
      * Defaults to `true`.
      *
@@ -171,7 +164,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
         setJsxFactory(DEFAULT_JSX_FACTORY);
         setJsxFragmentFactory(DEFAULT_JSX_FRAGMENT_FACTORY);
         setJsxImportSource(null);
-        setInlineSourceMap(true);
         setInlineSources(true);
         setKeepComments(false);
         setPrecompileJsx(false);
@@ -245,17 +237,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     @Jni2RustMethod
     public boolean isEmitMetadata() {
         return emitMetadata;
-    }
-
-    /**
-     * Is inline source map.
-     *
-     * @return true : yes, false : no
-     * @since 0.1.0
-     */
-    @Jni2RustMethod
-    public boolean isInlineSourceMap() {
-        return inlineSourceMap;
     }
 
     /**
@@ -396,18 +377,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     public Swc4jTranspileOptions setImportsNotUsedAsValues(Swc4jImportsNotUsedAsValues importsNotUsedAsValues) {
         this.importsNotUsedAsValues = AssertionUtils.notNull(importsNotUsedAsValues, "Imports not used as values");
-        return this;
-    }
-
-    /**
-     * Sets inline source map.
-     *
-     * @param inlineSourceMap the inline source map
-     * @return the self
-     * @since 0.1.0
-     */
-    public Swc4jTranspileOptions setInlineSourceMap(boolean inlineSourceMap) {
-        this.inlineSourceMap = inlineSourceMap;
         return this;
     }
 

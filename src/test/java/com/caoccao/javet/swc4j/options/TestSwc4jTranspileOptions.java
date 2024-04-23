@@ -200,7 +200,6 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
                 "version", "sources", "sourcesContent", specifier + "/", "names", "mappings"};
         Swc4jTranspileOutput output = swc4j.transpile(code, tsModuleTranspileOptions
                 .setParseMode(parseMode)
-                .setInlineSourceMap(false)
                 .setSpecifier(specifier)
                 .setMediaType(Swc4jMediaType.TypeScript)
                 .setSourceMap(Swc4jSourceMapOption.Separate));

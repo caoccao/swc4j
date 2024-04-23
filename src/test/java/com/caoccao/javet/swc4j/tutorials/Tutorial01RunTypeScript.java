@@ -59,7 +59,7 @@ public class Tutorial01RunTypeScript {
                             "add", 1, 2));
         }
         // Remove the inline source map.
-        options.setInlineSourceMap(false).setSourceMap(Swc4jSourceMapOption.Separate);
+        options.setSourceMap(Swc4jSourceMapOption.Separate);
         output = swc4j.transpile(code, options);
         // Print the transpiled code.
         System.out.println("/*********************************************");

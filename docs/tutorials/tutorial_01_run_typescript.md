@@ -81,7 +81,7 @@ We may want to generate a separate source map as the inline source map sometimes
 
 ```java
 // Remove the inline source map.
-options.setInlineSourceMap(false).setSourceMap(Swc4jSourceMapOption.Separate);
+options.setSourceMap(Swc4jSourceMapOption.Separate);
 output = swc4j.transpile(code, options);
 // Print the transpiled code.
 System.out.println("/*********************************************");

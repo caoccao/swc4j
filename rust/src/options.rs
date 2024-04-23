@@ -241,7 +241,6 @@ struct JavaSwc4jTransformOptions {
   method_get_target: JMethodID,
   method_is_ascii_only: JMethodID,
   method_is_emit_assert_for_import_attributes: JMethodID,
-  method_is_inline_source_map: JMethodID,
   method_is_inline_sources: JMethodID,
   method_is_keep_comments: JMethodID,
   method_is_minify: JMethodID,
@@ -307,13 +306,6 @@ impl JavaSwc4jTransformOptions {
         "()Z",
       )
       .expect("Couldn't find method Swc4jTransformOptions.isEmitAssertForImportAttributes");
-    let method_is_inline_source_map = env
-      .get_method_id(
-        &class,
-        "isInlineSourceMap",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jTransformOptions.isInlineSourceMap");
     let method_is_inline_sources = env
       .get_method_id(
         &class,
@@ -351,7 +343,6 @@ impl JavaSwc4jTransformOptions {
       method_get_target,
       method_is_ascii_only,
       method_is_emit_assert_for_import_attributes,
-      method_is_inline_source_map,
       method_is_inline_sources,
       method_is_keep_comments,
       method_is_minify,
@@ -481,22 +472,6 @@ impl JavaSwc4jTransformOptions {
     return_value
   }
 
-  pub fn is_inline_source_map<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> bool
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_inline_source_map,
-        &[],
-        "boolean is_inline_source_map()"
-      );
-    return_value
-  }
-
   pub fn is_inline_sources<'local>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -579,7 +554,6 @@ struct JavaSwc4jTranspileOptions {
   method_is_capture_comments: JMethodID,
   method_is_capture_tokens: JMethodID,
   method_is_emit_metadata: JMethodID,
-  method_is_inline_source_map: JMethodID,
   method_is_inline_sources: JMethodID,
   method_is_jsx_automatic: JMethodID,
   method_is_jsx_development: JMethodID,
@@ -686,13 +660,6 @@ impl JavaSwc4jTranspileOptions {
         "()Z",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isEmitMetadata");
-    let method_is_inline_source_map = env
-      .get_method_id(
-        &class,
-        "isInlineSourceMap",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jTranspileOptions.isInlineSourceMap");
     let method_is_inline_sources = env
       .get_method_id(
         &class,
@@ -777,7 +744,6 @@ impl JavaSwc4jTranspileOptions {
       method_is_capture_comments,
       method_is_capture_tokens,
       method_is_emit_metadata,
-      method_is_inline_source_map,
       method_is_inline_sources,
       method_is_jsx_automatic,
       method_is_jsx_development,
@@ -992,22 +958,6 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_emit_metadata,
         &[],
         "boolean is_emit_metadata()"
-      );
-    return_value
-  }
-
-  pub fn is_inline_source_map<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> bool
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_inline_source_map,
-        &[],
-        "boolean is_inline_source_map()"
       );
     return_value
   }
@@ -1267,9 +1217,6 @@ pub struct TransformOptions {
   /// This is useful for environments that do not support unicode.
   pub ascii_only: bool,
   pub emit_assert_for_import_attributes: bool,
-  /// Should the source map be inlined in the emitted code file, or provided
-  /// as a separate file.  Defaults to `true`.
-  pub inline_source_map: bool,
   /// Should the sources be inlined in the source map.  Defaults to `true`.
   pub inline_sources: bool,
   /// Whether to keep comments in the output. Defaults to `false`.
@@ -1312,7 +1259,6 @@ impl Default for TransformOptions {
     TransformOptions {
       ascii_only: false,
       emit_assert_for_import_attributes: false,
-      inline_source_map: true,
       inline_sources: true,
       keep_comments: false,
       media_type: MediaType::TypeScript,
@@ -1337,7 +1283,6 @@ impl FromJniType for TransformOptions {
     let java_transform_options = unsafe { JAVA_TRANSFORM_OPTIONS.as_ref().unwrap() };
     let ascii_only = java_transform_options.is_ascii_only(env, obj);
     let emit_assert_for_import_attributes = java_transform_options.is_emit_assert_for_import_attributes(env, obj);
-    let inline_source_map = java_transform_options.is_inline_source_map(env, obj);
     let inline_sources = java_transform_options.is_inline_sources(env, obj);
     let keep_comments = java_transform_options.is_keep_comments(env, obj);
     let media_type = java_transform_options.get_media_type(env, obj);
@@ -1359,7 +1304,6 @@ impl FromJniType for TransformOptions {
     TransformOptions {
       ascii_only,
       emit_assert_for_import_attributes,
-      inline_source_map,
       inline_sources,
       keep_comments,
       media_type,
@@ -1388,9 +1332,6 @@ pub struct TranspileOptions {
   /// remove them (`Remove`), keep them as side-effect imports (`Preserve`)
   /// or error (`Error`). Defaults to `Remove`.
   pub imports_not_used_as_values: ImportsNotUsedAsValues,
-  /// Should the source map be inlined in the emitted code file, or provided
-  /// as a separate file.  Defaults to `true`.
-  pub inline_source_map: bool,
   /// Should the sources be inlined in the source map.  Defaults to `true`.
   pub inline_sources: bool,
   /// `true` if the program should use an implicit JSX import source/the "new"
@@ -1453,7 +1394,6 @@ impl Default for TranspileOptions {
       capture_tokens: false,
       emit_metadata: false,
       imports_not_used_as_values: ImportsNotUsedAsValues::Remove,
-      inline_source_map: true,
       inline_sources: true,
       jsx_automatic: false,
       jsx_development: false,
@@ -1492,7 +1432,6 @@ impl FromJniType for TranspileOptions {
     let imports_not_used_as_values = imports_not_used_as_values.as_ref();
     let imports_not_used_as_values =
       java_imports_not_used_as_values.get_imports_not_used_as_values(env, imports_not_used_as_values);
-    let inline_source_map = java_transpile_options.is_inline_source_map(env, obj);
     let inline_sources = java_transpile_options.is_inline_sources(env, obj);
     let jsx_automatic = java_transpile_options.is_jsx_automatic(env, obj);
     let jsx_development = java_transpile_options.is_jsx_development(env, obj);
@@ -1523,7 +1462,6 @@ impl FromJniType for TranspileOptions {
       capture_tokens,
       emit_metadata,
       imports_not_used_as_values,
-      inline_source_map,
       inline_sources,
       jsx_automatic,
       jsx_development,

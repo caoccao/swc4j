@@ -278,7 +278,6 @@ fn test_transpile_type_script_without_inline_source_map() {
     .iter()
     .for_each(|parse_mode| {
       let options = options::TranspileOptions {
-        inline_source_map: false,
         parse_mode: parse_mode.clone(),
         source_map: enums::SourceMapOption::None,
         specifier: "file:///main.ts".to_owned(),
