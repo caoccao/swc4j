@@ -28,12 +28,12 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import java.net.URL;
 
 /**
- * The type Swc4j minify options.
+ * The type Swc4j transform options.
  *
  * @since 0.5.0
  */
 @Jni2RustClass(filePath = Jni2RustFilePath.Options)
-public class Swc4jMinifyOptions extends Swc4jOptions {
+public class Swc4jTransformOptions extends Swc4jOptions {
     /**
      * Forces the code generator to use only ascii characters.
      * This is useful for environments that do not support unicode.
@@ -93,11 +93,11 @@ public class Swc4jMinifyOptions extends Swc4jOptions {
     protected Swc4jEsVersion target;
 
     /**
-     * Instantiates a new Swc4j minify options.
+     * Instantiates a new Swc4j transform options.
      *
      * @since 0.5.0
      */
-    public Swc4jMinifyOptions() {
+    public Swc4jTransformOptions() {
         super();
         setAsciiOnly(false);
         setEmitAssertForImportAttributes(false);
@@ -197,7 +197,7 @@ public class Swc4jMinifyOptions extends Swc4jOptions {
      * @return the self
      * @since 0.5.0
      */
-    public Swc4jMinifyOptions setAsciiOnly(boolean asciiOnly) {
+    public Swc4jTransformOptions setAsciiOnly(boolean asciiOnly) {
         this.asciiOnly = asciiOnly;
         return this;
     }
@@ -209,7 +209,7 @@ public class Swc4jMinifyOptions extends Swc4jOptions {
      * @return the self
      * @since 0.5.0
      */
-    public Swc4jMinifyOptions setEmitAssertForImportAttributes(boolean emitAssertForImportAttributes) {
+    public Swc4jTransformOptions setEmitAssertForImportAttributes(boolean emitAssertForImportAttributes) {
         this.emitAssertForImportAttributes = emitAssertForImportAttributes;
         return this;
     }
@@ -221,7 +221,7 @@ public class Swc4jMinifyOptions extends Swc4jOptions {
      * @return the self
      * @since 0.5.0
      */
-    public Swc4jMinifyOptions setInlineSourceMap(boolean inlineSourceMap) {
+    public Swc4jTransformOptions setInlineSourceMap(boolean inlineSourceMap) {
         this.inlineSourceMap = inlineSourceMap;
         return this;
     }
@@ -233,7 +233,7 @@ public class Swc4jMinifyOptions extends Swc4jOptions {
      * @return the self
      * @since 0.5.0
      */
-    public Swc4jMinifyOptions setInlineSources(boolean inlineSources) {
+    public Swc4jTransformOptions setInlineSources(boolean inlineSources) {
         this.inlineSources = inlineSources;
         return this;
     }
@@ -245,13 +245,13 @@ public class Swc4jMinifyOptions extends Swc4jOptions {
      * @return the self
      * @since 0.5.0
      */
-    public Swc4jMinifyOptions setKeepComments(boolean keepComments) {
+    public Swc4jTransformOptions setKeepComments(boolean keepComments) {
         this.keepComments = keepComments;
         return this;
     }
 
     @Override
-    public Swc4jMinifyOptions setMediaType(Swc4jMediaType mediaType) {
+    public Swc4jTransformOptions setMediaType(Swc4jMediaType mediaType) {
         super.setMediaType(mediaType);
         return this;
     }
@@ -263,13 +263,13 @@ public class Swc4jMinifyOptions extends Swc4jOptions {
      * @return the self
      * @since 0.5.0
      */
-    public Swc4jMinifyOptions setOmitLastSemi(boolean omitLastSemi) {
+    public Swc4jTransformOptions setOmitLastSemi(boolean omitLastSemi) {
         this.omitLastSemi = omitLastSemi;
         return this;
     }
 
     @Override
-    public Swc4jMinifyOptions setParseMode(Swc4jParseMode parseMode) {
+    public Swc4jTransformOptions setParseMode(Swc4jParseMode parseMode) {
         super.setParseMode(parseMode);
         return this;
     }
@@ -281,13 +281,13 @@ public class Swc4jMinifyOptions extends Swc4jOptions {
      * @return self
      * @since 0.5.0
      */
-    public Swc4jMinifyOptions setSourceMap(Swc4jSourceMapOption sourceMap) {
+    public Swc4jTransformOptions setSourceMap(Swc4jSourceMapOption sourceMap) {
         this.sourceMap = AssertionUtils.notNull(sourceMap, "Source map");
         return this;
     }
 
     @Override
-    public Swc4jMinifyOptions setSpecifier(URL specifier) {
+    public Swc4jTransformOptions setSpecifier(URL specifier) {
         super.setSpecifier(specifier);
         return this;
     }
@@ -299,7 +299,7 @@ public class Swc4jMinifyOptions extends Swc4jOptions {
      * @return the self
      * @since 0.5.0
      */
-    public Swc4jMinifyOptions setTarget(Swc4jEsVersion target) {
+    public Swc4jTransformOptions setTarget(Swc4jEsVersion target) {
         this.target = target;
         return this;
     }

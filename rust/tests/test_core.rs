@@ -30,25 +30,6 @@ fn test_get_version() {
 }
 
 #[test]
-fn test_minify_with_default_options() {
-  let code = "function add(a:number, b:number) { return a+b; }";
-  let expected_code ="function add(a:number,b:number){return a+b;}\n";
-  let expected_source_map_prefix = "//# sourceMappingURL=data:application/json;base64,";
-  let options = options::MinifyOptions {
-    media_type: MediaType::TypeScript,
-    ..Default::default()
-  };
-  let output = core::minify(code.to_owned(), options);
-  assert!(output.is_ok());
-  let output = output.unwrap();
-  assert_eq!(MediaType::TypeScript, output.media_type);
-  assert!(matches!(output.parse_mode, ParseMode::Module));
-  let output_code = output.code;
-  assert_eq!(expected_code, &output_code[0..expected_code.len()]);
-  assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
-}
-
-#[test]
 fn test_parse_jsx_with_default_options() {
   let code = String::from("import React from 'react';\n")
     + "import './App.css';\n"
@@ -191,6 +172,25 @@ fn test_parse_wrong_media_type() {
   assert!(output.is_err());
   let output_error = output.err().unwrap();
   assert_eq!(expected_error, output_error);
+}
+
+#[test]
+fn test_transform_with_default_options() {
+  let code = "function add(a:number, b:number) { return a+b; }";
+  let expected_code ="function add(a:number,b:number){return a+b;}\n";
+  let expected_source_map_prefix = "//# sourceMappingURL=data:application/json;base64,";
+  let options = options::TransformOptions {
+    media_type: MediaType::TypeScript,
+    ..Default::default()
+  };
+  let output = core::transform(code.to_owned(), options);
+  assert!(output.is_ok());
+  let output = output.unwrap();
+  assert_eq!(MediaType::TypeScript, output.media_type);
+  assert!(matches!(output.parse_mode, ParseMode::Module));
+  let output_code = output.code;
+  assert_eq!(expected_code, &output_code[0..expected_code.len()]);
+  assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
 }
 
 #[test]

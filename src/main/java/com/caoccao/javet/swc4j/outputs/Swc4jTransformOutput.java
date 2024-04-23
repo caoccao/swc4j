@@ -25,12 +25,12 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 /**
- * The type Swc4j minify output.
+ * The type Swc4j transform output.
  *
  * @since 0.5.0
  */
 @Jni2RustClass(filePath = Jni2RustFilePath.Outputs)
-public class Swc4jMinifyOutput {
+public class Swc4jTransformOutput {
     /**
      * The Code.
      *
@@ -57,7 +57,7 @@ public class Swc4jMinifyOutput {
     protected final String sourceMap;
 
     /**
-     * Instantiates a new Swc4j minify output.
+     * Instantiates a new Swc4j transform output.
      *
      * @param code      the code
      * @param mediaType the media type
@@ -66,7 +66,7 @@ public class Swc4jMinifyOutput {
      * @since 0.5.0
      */
     @Jni2RustMethod(mode = Jni2RustMethodMode.DefinitionOnly)
-    public Swc4jMinifyOutput(
+    public Swc4jTransformOutput(
             String code,
             Swc4jMediaType mediaType,
             Swc4jParseMode parseMode,

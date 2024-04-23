@@ -20,20 +20,20 @@ import com.caoccao.javet.swc4j.BaseTestSuite;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
-import com.caoccao.javet.swc4j.outputs.Swc4jMinifyOutput;
+import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class TestSwc4jMinifyOptions extends BaseTestSuite {
+public class TestSwc4JTransformOptions extends BaseTestSuite {
 
     @Test
     public void testTypeScriptWithDefaultOptions() throws Swc4jCoreException {
         String code = "function add(a:number, b:number) { return a+b; }";
         String expectedCode = "function add(a:number,b:number){return a+b;}\n";
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
-        Swc4jMinifyOutput output = swc4j.minify(code, tsModuleMinifyOptions);
+        Swc4jTransformOutput output = swc4j.transform(code, tsModuleTransformOptions);
         assertNotNull(output);
         assertEquals(Swc4jParseMode.Module, output.getParseMode());
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));

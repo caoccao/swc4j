@@ -150,7 +150,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     protected boolean useTsDecorators;
     /**
      * Should import declarations be transformed to variable declarations using
-     * a dynamic import. This is useful for import & export declaration support
+     * a dynamic import. This is useful for import and export declaration support
      * in script contexts such as the Deno REPL.  Defaults to `false`.
      *
      * @since 0.1.0

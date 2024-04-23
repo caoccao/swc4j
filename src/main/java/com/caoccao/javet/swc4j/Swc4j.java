@@ -17,11 +17,11 @@
 package com.caoccao.javet.swc4j;
 
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
-import com.caoccao.javet.swc4j.options.Swc4jMinifyOptions;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
+import com.caoccao.javet.swc4j.options.Swc4jTransformOptions;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
-import com.caoccao.javet.swc4j.outputs.Swc4jMinifyOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
+import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
@@ -55,34 +55,6 @@ public final class Swc4j {
     }
 
     /**
-     * Minify with default options.
-     *
-     * @param code the code
-     * @return the swc4j minify output
-     * @throws Swc4jCoreException the swc4j core exception
-     * @since 0.5.0
-     */
-    public Swc4jMinifyOutput minify(String code) throws Swc4jCoreException {
-        return minify(code, new Swc4jMinifyOptions());
-    }
-
-    /**
-     * Minify.
-     *
-     * @param code    the code
-     * @param options the options
-     * @return the swc4j minify output
-     * @throws Swc4jCoreException the swc4j core exception
-     * @since 0.5.0
-     */
-    @SuppressWarnings("RedundantThrows")
-    public Swc4jMinifyOutput minify(String code, Swc4jMinifyOptions options) throws Swc4jCoreException {
-        return (Swc4jMinifyOutput) Swc4jNative.coreMinify(
-                code,
-                AssertionUtils.notNull(options, "Options"));
-    }
-
-    /**
      * Parse with default options.
      *
      * @param code the code
@@ -106,6 +78,34 @@ public final class Swc4j {
     @SuppressWarnings("RedundantThrows")
     public Swc4jParseOutput parse(String code, Swc4jParseOptions options) throws Swc4jCoreException {
         return (Swc4jParseOutput) Swc4jNative.coreParse(
+                code,
+                AssertionUtils.notNull(options, "Options"));
+    }
+
+    /**
+     * Transform with default options.
+     *
+     * @param code the code
+     * @return the swc4j transform output
+     * @throws Swc4jCoreException the swc4j core exception
+     * @since 0.5.0
+     */
+    public Swc4jTransformOutput transform(String code) throws Swc4jCoreException {
+        return transform(code, new Swc4jTransformOptions());
+    }
+
+    /**
+     * Transform.
+     *
+     * @param code    the code
+     * @param options the options
+     * @return the swc4j transform output
+     * @throws Swc4jCoreException the swc4j core exception
+     * @since 0.5.0
+     */
+    @SuppressWarnings("RedundantThrows")
+    public Swc4jTransformOutput transform(String code, Swc4jTransformOptions options) throws Swc4jCoreException {
+        return (Swc4jTransformOutput) Swc4jNative.coreTransform(
                 code,
                 AssertionUtils.notNull(options, "Options"));
     }

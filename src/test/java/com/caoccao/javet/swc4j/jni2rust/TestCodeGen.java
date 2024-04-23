@@ -22,11 +22,11 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstStore;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.comments.Swc4jComment;
 import com.caoccao.javet.swc4j.comments.Swc4jComments;
-import com.caoccao.javet.swc4j.options.Swc4jMinifyOptions;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
+import com.caoccao.javet.swc4j.options.Swc4jTransformOptions;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
-import com.caoccao.javet.swc4j.outputs.Swc4jMinifyOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
+import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.tokens.Swc4jTokenFactory;
@@ -653,18 +653,6 @@ public class TestCodeGen {
     }
 
     @Test
-    public void testSwc4jMinifyOptions() throws IOException {
-        Jni2Rust<Swc4jMinifyOptions> jni2Rust = new Jni2Rust<>(Swc4jMinifyOptions.class);
-        jni2Rust.updateFile();
-    }
-
-    @Test
-    public void testSwc4jMinifyOutput() throws IOException {
-        Jni2Rust<Swc4jMinifyOutput> jni2Rust = new Jni2Rust<>(Swc4jMinifyOutput.class);
-        jni2Rust.updateFile();
-    }
-
-    @Test
     public void testSwc4jParseOptions() throws IOException {
         Jni2Rust<Swc4jParseOptions> jni2Rust = new Jni2Rust<>(Swc4jParseOptions.class);
         jni2Rust.updateFile();
@@ -685,6 +673,18 @@ public class TestCodeGen {
     @Test
     public void testSwc4jTokenFactory() throws IOException {
         Jni2Rust<Swc4jTokenFactory> jni2Rust = new Jni2Rust<>(Swc4jTokenFactory.class);
+        jni2Rust.updateFile();
+    }
+
+    @Test
+    public void testSwc4jTransformOptions() throws IOException {
+        Jni2Rust<Swc4jTransformOptions> jni2Rust = new Jni2Rust<>(Swc4jTransformOptions.class);
+        jni2Rust.updateFile();
+    }
+
+    @Test
+    public void testSwc4jTransformOutput() throws IOException {
+        Jni2Rust<Swc4jTransformOutput> jni2Rust = new Jni2Rust<>(Swc4jTransformOutput.class);
         jni2Rust.updateFile();
     }
 

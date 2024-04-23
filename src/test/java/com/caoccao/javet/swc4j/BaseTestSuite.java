@@ -19,33 +19,33 @@ package com.caoccao.javet.swc4j;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.interfaces.ISwc4jLogger;
-import com.caoccao.javet.swc4j.options.Swc4jMinifyOptions;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
+import com.caoccao.javet.swc4j.options.Swc4jTransformOptions;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 import com.caoccao.javet.swc4j.utils.Swc4jDefaultLogger;
 import org.junit.jupiter.api.BeforeEach;
 
 public abstract class BaseTestSuite {
-    protected Swc4jMinifyOptions jsModuleMinifyOptions;
     protected Swc4jParseOptions jsModuleParseOptions;
+    protected Swc4jTransformOptions jsModuleTransformOptions;
     protected Swc4jTranspileOptions jsModuleTranspileOptions;
-    protected Swc4jMinifyOptions jsScriptMinifyOptions;
     protected Swc4jParseOptions jsScriptParseOptions;
+    protected Swc4jTransformOptions jsScriptTransformOptions;
     protected Swc4jTranspileOptions jsScriptTranspileOptions;
-    protected Swc4jMinifyOptions jsxModuleMinifyOptions;
     protected Swc4jParseOptions jsxModuleParseOptions;
+    protected Swc4jTransformOptions jsxModuleTransformOptions;
     protected Swc4jTranspileOptions jsxModuleTranspileOptions;
-    protected Swc4jMinifyOptions jsxScriptMinifyOptions;
     protected Swc4jParseOptions jsxScriptParseOptions;
+    protected Swc4jTransformOptions jsxScriptTransformOptions;
     protected Swc4jTranspileOptions jsxScriptTranspileOptions;
     protected ISwc4jLogger logger;
     protected Swc4j swc4j;
-    protected Swc4jMinifyOptions tsModuleMinifyOptions;
     protected Swc4jParseOptions tsModuleParseOptions;
+    protected Swc4jTransformOptions tsModuleTransformOptions;
     protected Swc4jTranspileOptions tsModuleTranspileOptions;
-    protected Swc4jMinifyOptions tsScriptMinifyOptions;
     protected Swc4jParseOptions tsScriptParseOptions;
+    protected Swc4jTransformOptions tsScriptTransformOptions;
     protected Swc4jTranspileOptions tsScriptTranspileOptions;
 
     public BaseTestSuite() {
@@ -55,68 +55,68 @@ public abstract class BaseTestSuite {
 
     @BeforeEach
     protected void beforeEach() {
-        jsModuleMinifyOptions = new Swc4jMinifyOptions();
         jsModuleParseOptions = new Swc4jParseOptions();
+        jsModuleTransformOptions = new Swc4jTransformOptions();
         jsModuleTranspileOptions = new Swc4jTranspileOptions();
-        jsScriptMinifyOptions = new Swc4jMinifyOptions();
         jsScriptParseOptions = new Swc4jParseOptions();
+        jsScriptTransformOptions = new Swc4jTransformOptions();
         jsScriptTranspileOptions = new Swc4jTranspileOptions();
-        jsxModuleMinifyOptions = new Swc4jMinifyOptions();
         jsxModuleParseOptions = new Swc4jParseOptions();
+        jsxModuleTransformOptions = new Swc4jTransformOptions();
         jsxModuleTranspileOptions = new Swc4jTranspileOptions();
-        jsxScriptMinifyOptions = new Swc4jMinifyOptions();
         jsxScriptParseOptions = new Swc4jParseOptions();
+        jsxScriptTransformOptions = new Swc4jTransformOptions();
         jsxScriptTranspileOptions = new Swc4jTranspileOptions();
-        tsModuleMinifyOptions = new Swc4jMinifyOptions();
         tsModuleParseOptions = new Swc4jParseOptions();
+        tsModuleTransformOptions = new Swc4jTransformOptions();
         tsModuleTranspileOptions = new Swc4jTranspileOptions();
-        tsScriptMinifyOptions = new Swc4jMinifyOptions();
         tsScriptParseOptions = new Swc4jParseOptions();
+        tsScriptTransformOptions = new Swc4jTransformOptions();
         tsScriptTranspileOptions = new Swc4jTranspileOptions();
         SimpleList.of(
-                jsModuleMinifyOptions,
                 jsModuleParseOptions,
+                jsModuleTransformOptions,
                 jsModuleTranspileOptions,
-                jsScriptMinifyOptions,
                 jsScriptParseOptions,
+                jsScriptTransformOptions,
                 jsScriptTranspileOptions
         ).forEach(options -> options.setMediaType(Swc4jMediaType.JavaScript));
         SimpleList.of(
-                jsxModuleMinifyOptions,
                 jsxModuleParseOptions,
+                jsxModuleTransformOptions,
                 jsxModuleTranspileOptions,
-                jsxScriptMinifyOptions,
                 jsxScriptParseOptions,
+                jsxScriptTransformOptions,
                 jsxScriptTranspileOptions
         ).forEach(options -> options.setMediaType(Swc4jMediaType.Jsx));
         SimpleList.of(
-                tsModuleMinifyOptions,
                 tsModuleParseOptions,
+                tsModuleTransformOptions,
                 tsModuleTranspileOptions,
-                tsScriptMinifyOptions,
                 tsScriptParseOptions,
+                tsScriptTransformOptions,
                 tsScriptTranspileOptions
         ).forEach(options -> options.setMediaType(Swc4jMediaType.TypeScript));
         SimpleList.of(
-                jsModuleMinifyOptions,
                 jsModuleParseOptions,
+                jsModuleTransformOptions,
                 jsModuleTranspileOptions,
-                jsxModuleMinifyOptions,
                 jsxModuleParseOptions,
+                jsxModuleTransformOptions,
                 jsxModuleTranspileOptions,
-                tsModuleMinifyOptions,
                 tsModuleParseOptions,
+                tsModuleTransformOptions,
                 tsModuleTranspileOptions
         ).forEach(options -> options.setParseMode(Swc4jParseMode.Module));
         SimpleList.of(
-                jsScriptMinifyOptions,
                 jsScriptParseOptions,
+                jsScriptTransformOptions,
                 jsScriptTranspileOptions,
-                jsxScriptMinifyOptions,
                 jsxScriptParseOptions,
+                jsxScriptTransformOptions,
                 jsxScriptTranspileOptions,
-                tsScriptMinifyOptions,
                 tsScriptParseOptions,
+                tsScriptTransformOptions,
                 tsScriptTranspileOptions
         ).forEach(options -> options.setParseMode(Swc4jParseMode.Script));
     }

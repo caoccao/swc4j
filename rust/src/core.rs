@@ -26,7 +26,26 @@ use crate::{enums, options, outputs};
 
 const VERSION: &'static str = "0.5.0";
 
-pub fn minify<'local>(code: String, options: options::MinifyOptions) -> Result<outputs::MinifyOutput, String> {
+pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<outputs::ParseOutput, String> {
+  let parse_params = ParseParams {
+    specifier: options.get_specifier(),
+    text_info: SourceTextInfo::from_string(code),
+    media_type: options.media_type,
+    capture_tokens: options.capture_tokens,
+    maybe_syntax: None,
+    scope_analysis: options.scope_analysis,
+  };
+  let result = match options.parse_mode {
+    enums::ParseMode::Script => parse_script(parse_params),
+    _ => parse_module(parse_params),
+  };
+  match result {
+    Ok(parsed_source) => Ok(outputs::ParseOutput::new(&options, &parsed_source)),
+    Err(e) => Err(e.to_string()),
+  }
+}
+
+pub fn transform<'local>(code: String, options: options::TransformOptions) -> Result<outputs::TransformOutput, String> {
   let parse_params = ParseParams {
     specifier: options.get_specifier(),
     text_info: SourceTextInfo::from_string(code.to_owned()),
@@ -105,32 +124,13 @@ pub fn minify<'local>(code: String, options: options::MinifyOptions) -> Result<o
             } else {
               None
             };
-            Ok(outputs::MinifyOutput::new(&parsed_source, code, source_map))
+            Ok(outputs::TransformOutput::new(&parsed_source, code, source_map))
           }
           Err(e) => Err(e.to_string()),
         },
         Err(e) => Err(e.to_string()),
       }
     }
-    Err(e) => Err(e.to_string()),
-  }
-}
-
-pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<outputs::ParseOutput, String> {
-  let parse_params = ParseParams {
-    specifier: options.get_specifier(),
-    text_info: SourceTextInfo::from_string(code),
-    media_type: options.media_type,
-    capture_tokens: options.capture_tokens,
-    maybe_syntax: None,
-    scope_analysis: options.scope_analysis,
-  };
-  let result = match options.parse_mode {
-    enums::ParseMode::Script => parse_script(parse_params),
-    _ => parse_module(parse_params),
-  };
-  match result {
-    Ok(parsed_source) => Ok(outputs::ParseOutput::new(&options, &parsed_source)),
     Err(e) => Err(e.to_string()),
   }
 }

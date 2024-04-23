@@ -62,24 +62,6 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion<'
 }
 
 #[no_mangle]
-pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreMinify<'local>(
-  mut env: JNIEnv<'local>,
-  _: JClass<'local>,
-  code: jstring,
-  options: jobject,
-) -> jobject {
-  let code = jstring_to_string!(env, code);
-  let options = options::MinifyOptions::from_jni_type(&mut env, options);
-  match core::minify(code, options) {
-    Ok(output) => output.to_jni_type(&mut env).as_raw(),
-    Err(message) => {
-      error::throw_parse_error(&mut env, message.as_str());
-      null_mut()
-    }
-  }
-}
-
-#[no_mangle]
 pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse<'local>(
   mut env: JNIEnv<'local>,
   _: JClass<'local>,
@@ -89,6 +71,24 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse<'local
   let code = jstring_to_string!(env, code);
   let options = options::ParseOptions::from_jni_type(&mut env, options);
   match core::parse(code, options) {
+    Ok(output) => output.to_jni_type(&mut env).as_raw(),
+    Err(message) => {
+      error::throw_parse_error(&mut env, message.as_str());
+      null_mut()
+    }
+  }
+}
+
+#[no_mangle]
+pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTransform<'local>(
+  mut env: JNIEnv<'local>,
+  _: JClass<'local>,
+  code: jstring,
+  options: jobject,
+) -> jobject {
+  let code = jstring_to_string!(env, code);
+  let options = options::TransformOptions::from_jni_type(&mut env, options);
+  match core::transform(code, options) {
     Ok(output) => output.to_jni_type(&mut env).as_raw(),
     Err(message) => {
       error::throw_parse_error(&mut env, message.as_str());
