@@ -28,7 +28,7 @@ import com.caoccao.javet.swc4j.comments.Swc4jComments;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
-import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
+import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 
 import java.net.MalformedURLException;
@@ -53,7 +53,7 @@ public class Tutorial04Ast {
         // Prepare a script name.
         URL specifier = new URL("file://abc.ts");
         // Prepare an option with script name and media type.
-        Swc4jTranspileOptions options = new Swc4jTranspileOptions()
+        Swc4jParseOptions options = new Swc4jParseOptions()
                 .setSpecifier(specifier)
                 .setMediaType(Swc4jMediaType.TypeScript)
                 // Set capture ast.

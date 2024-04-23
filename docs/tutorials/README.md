@@ -4,3 +4,4 @@
 * [Tutorial 02: Transpile Jsx](tutorial_02_transpile_jsx.md)
 * [Tutorial 03: Tokens](tutorial_03_tokens.md)
 * [Tutorial 04: AST](tutorial_04_ast.md)
+* [Tutorial 05: Minify](tutorial_05_minify.md)

@@ -77,7 +77,7 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
         .with_omit_last_semi(options.omit_last_semi)
         .with_target(options.target)
         .with_emit_assert_for_import_attributes(options.emit_assert_for_import_attributes);
-      let swc_comments = parsed_source.comments().as_swc_comments();
+      let swc_comments = parsed_source.comments().as_single_threaded();
       let mut emitter = Emitter {
         cfg: config,
         comments: if options.keep_comments {

@@ -87,6 +87,23 @@ public class TestSwc4jTransformOptions extends BaseTestSuite {
     }
 
     @Test
+    public void testTypeScriptWithoutMinifyWithSeparateSourceMap() throws Swc4jCoreException {
+        String code = "function add(a:number, b:number) { return a+b; }";
+        String expectedCode = "function add(a: number, b: number) {\n" +
+                "  return a + b;\n" +
+                "}\n";
+        Swc4jTransformOutput output = swc4j.transform(code, tsModuleTransformOptions
+                .setMinify(false)
+                .setInlineSourceMap(false)
+                .setSourceMap(Swc4jSourceMapOption.Separate));
+        assertNotNull(output);
+        assertEquals(Swc4jParseMode.Module, output.getParseMode());
+        assertEquals(Swc4jMediaType.TypeScript, output.getMediaType());
+        assertEquals(expectedCode, output.getCode());
+        assertNotNull(output.getSourceMap());
+    }
+
+    @Test
     public void testWrongMediaType() {
         String code = "function add(a:number, b:number) { return a+b; }";
         assertEquals(

@@ -29,7 +29,7 @@ String code = "import { Validator } from './Validator';\n" +
 // Prepare a script name.
 URL specifier = new URL("file://abc.ts");
 // Prepare an option with script name and media type.
-Swc4jTranspileOptions options = new Swc4jTranspileOptions()
+Swc4jParseOptions options = new Swc4jParseOptions()
         .setSpecifier(specifier)
         .setMediaType(Swc4jMediaType.TypeScript)
         // Set capture ast.
