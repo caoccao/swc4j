@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.5.0
+
+* Supported `transform()`
+
 ## 0.4.0
 
 * Upgraded deno_ast to v0.37.0
