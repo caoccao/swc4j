@@ -72,7 +72,7 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
       ));
       writer.set_indent_str("  "); // two spaces
       let config = Config::default()
-        .with_minify(true)
+        .with_minify(options.minify)
         .with_ascii_only(options.ascii_only)
         .with_omit_last_semi(options.omit_last_semi)
         .with_target(options.target)

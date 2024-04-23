@@ -67,6 +67,12 @@ public class Swc4jTransformOptions extends Swc4jOptions {
      */
     protected boolean keepComments;
     /**
+     * Whether to minify the code. Defaults to `true`.
+     *
+     * @since 0.5.0
+     */
+    protected boolean minify;
+    /**
      * If true, the code generator will emit the latest semicolon.
      * Defaults to `false`.
      *
@@ -104,6 +110,7 @@ public class Swc4jTransformOptions extends Swc4jOptions {
         setInlineSourceMap(true);
         setInlineSources(true);
         setKeepComments(false);
+        setMinify(true);
         setOmitLastSemi(false);
         setSourceMap(Swc4jSourceMapOption.Inline);
         setTarget(Swc4jEsVersion.ESNext);
@@ -178,6 +185,17 @@ public class Swc4jTransformOptions extends Swc4jOptions {
     @Jni2RustMethod
     public boolean isKeepComments() {
         return keepComments;
+    }
+
+    /**
+     * Is minify.
+     *
+     * @return true : yes, false : no
+     * @since 0.5.0
+     */
+    @Jni2RustMethod
+    public boolean isMinify() {
+        return minify;
     }
 
     /**
@@ -257,6 +275,18 @@ public class Swc4jTransformOptions extends Swc4jOptions {
     }
 
     /**
+     * Sets minify.
+     *
+     * @param minify the minify
+     * @return the minify
+     * @since 0.5.0
+     */
+    public Swc4jTransformOptions setMinify(boolean minify) {
+        this.minify = minify;
+        return this;
+    }
+
+    /**
      * Sets omit last semi.
      *
      * @param omitLastSemi the omit last semi
@@ -278,7 +308,7 @@ public class Swc4jTransformOptions extends Swc4jOptions {
      * Sets source map.
      *
      * @param sourceMap the source map
-     * @return self
+     * @return self source map
      * @since 0.5.0
      */
     public Swc4jTransformOptions setSourceMap(Swc4jSourceMapOption sourceMap) {

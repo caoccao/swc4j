@@ -16,7 +16,14 @@
   * AST
   * Comments
   * Tokens
+* Transform (Snapshot Build)
+  * Minify
+  * Multiple Target ES Version
+  * Source Map
 * Transpile
+  * TS → JS
+  * JSX → JS
+  * TSX → JS
   * Source Map
 
 ## Quick Start

@@ -244,6 +244,7 @@ struct JavaSwc4jTransformOptions {
   method_is_inline_source_map: JMethodID,
   method_is_inline_sources: JMethodID,
   method_is_keep_comments: JMethodID,
+  method_is_minify: JMethodID,
   method_is_omit_last_semi: JMethodID,
 }
 unsafe impl Send for JavaSwc4jTransformOptions {}
@@ -327,6 +328,13 @@ impl JavaSwc4jTransformOptions {
         "()Z",
       )
       .expect("Couldn't find method Swc4jTransformOptions.isKeepComments");
+    let method_is_minify = env
+      .get_method_id(
+        &class,
+        "isMinify",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jTransformOptions.isMinify");
     let method_is_omit_last_semi = env
       .get_method_id(
         &class,
@@ -346,6 +354,7 @@ impl JavaSwc4jTransformOptions {
       method_is_inline_source_map,
       method_is_inline_sources,
       method_is_keep_comments,
+      method_is_minify,
       method_is_omit_last_semi,
     }
   }
@@ -516,6 +525,22 @@ impl JavaSwc4jTransformOptions {
         self.method_is_keep_comments,
         &[],
         "boolean is_keep_comments()"
+      );
+    return_value
+  }
+
+  pub fn is_minify<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_minify,
+        &[],
+        "boolean is_minify()"
       );
     return_value
   }
@@ -1251,6 +1276,8 @@ pub struct TransformOptions {
   pub keep_comments: bool,
   /// Media type of the source text.
   pub media_type: MediaType,
+  /// Whether to minify the code. Defaults to `true`.
+  pub minify: bool,
   /// If true, the code generator will emit the latest semicolon.
   ///
   /// Defaults to `false`.
@@ -1289,6 +1316,7 @@ impl Default for TransformOptions {
       inline_sources: true,
       keep_comments: false,
       media_type: MediaType::TypeScript,
+      minify: true,
       omit_last_semi: false,
       parse_mode: ParseMode::Module,
       source_map: SourceMapOption::Inline,
@@ -1315,6 +1343,7 @@ impl FromJniType for TransformOptions {
     let media_type = java_transform_options.get_media_type(env, obj);
     let media_type = media_type.as_ref();
     let media_type = java_media_type.get_media_type(env, media_type);
+    let minify = java_transform_options.is_minify(env, obj);
     let omit_last_semi = java_transform_options.is_omit_last_semi(env, obj);
     let source_map = java_transform_options.get_source_map(env, obj);
     let source_map = source_map.as_ref();
@@ -1334,6 +1363,7 @@ impl FromJniType for TransformOptions {
       inline_sources,
       keep_comments,
       media_type,
+      minify,
       omit_last_semi,
       parse_mode,
       source_map,
