@@ -13,8 +13,10 @@ Follow the [Cross-compilation](https://rust-lang.github.io/rustup/cross-compilat
 Note: The Android build hasn't been implemented yet.
 
 ```sh
-# 64-bit MSVC (Windows 7+)
+# 64-bit MSVC (Windows 10+)
 rustup target add x86_64-pc-windows-msvc
+# ARM64 Windows MSVC
+rustup target add aarch64-pc-windows-msvc
 
 # 64-bit Linux (kernel 3.2+, glibc 2.17+)
 rustup target add x86_64-unknown-linux-gnu
@@ -45,8 +47,10 @@ Install a proper Android NDK.
 ```sh
 # Windows Native
 cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o windows -a x86_64
+cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o windows -a arm64
 # Windows Cross-compile
 cargo build --release --target x86_64-pc-windows-msvc && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o windows -a x86_64
+cargo build --release --target aarch64-pc-windows-msvc && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o windows -a arm64
 
 # Linux Native
 cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o linux -a x86_64

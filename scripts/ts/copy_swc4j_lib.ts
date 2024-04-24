@@ -36,6 +36,7 @@ const OS_CONFIG_MAP = {
     ext: '.dll',
     targets: {
       'x86_64': 'x86_64-pc-windows-msvc',
+      'arm64': 'aarch64-pc-windows-msvc',
     }
   },
   'linux': {
