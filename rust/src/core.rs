@@ -24,7 +24,7 @@ use deno_ast::*;
 
 use crate::{enums, options, outputs};
 
-const VERSION: &'static str = "0.5.0";
+const VERSION: &'static str = "0.6.0";
 
 pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<outputs::ParseOutput, String> {
   let parse_params = ParseParams {

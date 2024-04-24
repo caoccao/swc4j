@@ -14,7 +14,7 @@ on:
       - "docs/**"
 
 env:
-  SWC4J_VERSION: 0.5.0
+  SWC4J_VERSION: 0.6.0
 
 jobs:
   build_native:
