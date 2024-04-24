@@ -3,6 +3,7 @@
 ## 0.5.0
 
 * Supported `transform()`
+* Supported Windows arm64 and Linux arm64
 
 ## 0.4.0
 

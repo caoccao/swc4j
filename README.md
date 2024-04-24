@@ -10,13 +10,13 @@
 
 ## Features
 
-* Linux (x86_64) + MacOS (x86_64, arm64) + Windows (x86_64)
+* Linux + MacOS + Windows
 * JavaScript, TypeScript, JSX, TSX, etc.
 * Parse
   * AST
   * Comments
   * Tokens
-* Transform (Snapshot Build)
+* Transform
   * Minify
   * Multiple Target ES Version
   * Source Map
@@ -35,18 +35,18 @@
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
 </dependency>
 ```
 
 ```kotlin
 // Gradle Kotlin DSL
-implementation("com.caoccao.javet:swc4j:0.4.0")
+implementation("com.caoccao.javet:swc4j:0.5.0")
 ```
 
 ```groovy
 // Gradle Groovy DSL
-implementation 'com.caoccao.javet:swc4j:0.4.0'
+implementation 'com.caoccao.javet:swc4j:0.5.0'
 ```
 
 * Run the following Java code.
