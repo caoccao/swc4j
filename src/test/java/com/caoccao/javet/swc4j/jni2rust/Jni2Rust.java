@@ -54,13 +54,6 @@ public class Jni2Rust<T> {
         return clazz;
     }
 
-    public String getCode() {
-        List<String> lines = new ArrayList<>();
-        getCodeStruct(lines);
-        getCodeImpl(lines);
-        return StringUtils.join("\n", lines);
-    }
-
     protected void getCodeImpl(List<String> lines) {
         lines.add(StringUtils.EMPTY);
         lines.add(String.format("impl %s {", structName));
@@ -340,6 +333,13 @@ public class Jni2Rust<T> {
         return filePath;
     }
 
+    public List<String> getLines() {
+        List<String> lines = new ArrayList<>();
+        getCodeStruct(lines);
+        getCodeImpl(lines);
+        return lines;
+    }
+
     public List<Method> getMethods() {
         return methods;
     }
@@ -382,7 +382,9 @@ public class Jni2Rust<T> {
     protected void init() {
         Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
         // filePath and structName
-        setFilePath(jni2RustClassUtils.getFilePath().getFilePath());
+        setFilePath(Optional.ofNullable(jni2RustClassUtils.getFilePath())
+                .map(Jni2RustFilePath::getFilePath)
+                .orElse(null));
         setStructName(jni2RustClassUtils.getName(PREFIX_NAME + clazz.getSimpleName()));
         // constructor
         constructor = (Constructor<T>) Stream.of(clazz.getConstructors())
@@ -446,7 +448,7 @@ public class Jni2Rust<T> {
         AssertionUtils.notTrue(endPosition >= startPosition, "End position is invalid");
         StringBuilder sb = new StringBuilder(fileContent.length());
         sb.append(fileContent, 0, startPosition);
-        sb.append(getCode());
+        sb.append(StringUtils.join("\n", getLines()));
         sb.append("\n");
         sb.append(fileContent, endPosition, fileContent.length());
         byte[] newBuffer = sb.toString().getBytes(StandardCharsets.UTF_8);

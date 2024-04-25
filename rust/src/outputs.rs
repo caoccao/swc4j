@@ -26,7 +26,7 @@ use jni::JNIEnv;
 use std::ptr::null_mut;
 use std::sync::Arc;
 
-use crate::ast_utils;
+use crate::ast_utils::*;
 use crate::comment_utils::*;
 use crate::enums::*;
 use crate::jni_utils::*;
@@ -202,7 +202,7 @@ impl ParseOutput {
     self
       .program
       .as_ref()
-      .map(|program| ast_utils::span::enum_register_program(&mut map, program));
+      .map(|program| enum_register_program(&mut map, program));
     self.tokens.as_ref().map(|token_and_spans| {
       token_and_spans.iter().for_each(|token_and_span| {
         map.register_by_span(&token_and_span.span);
@@ -243,7 +243,7 @@ impl ToJniType for ParseOutput {
     let java_optional_program = self
       .program
       .as_ref()
-      .map(|program| ast_utils::program::enum_create_program(env, &byte_to_index_map, &program));
+      .map(|program| enum_create_program(env, &byte_to_index_map, &program));
     let program = optional_object_to_jvalue!(&java_optional_program);
     let java_media_type = java_class_media_type.parse(env, self.media_type.get_id());
     let media_type = object_to_jvalue!(&java_media_type);
@@ -404,7 +404,7 @@ impl ToJniType for TranspileOutput {
       .parse_output
       .program
       .as_ref()
-      .map(|program| ast_utils::program::enum_create_program(env, &byte_to_index_map, &program));
+      .map(|program| enum_create_program(env, &byte_to_index_map, &program));
     let program = optional_object_to_jvalue!(&java_optional_program);
     let java_code = string_to_jstring!(env, &self.code);
     let code = object_to_jvalue!(&java_code);
