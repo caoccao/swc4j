@@ -22,13 +22,14 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExportSpecifier;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleExportName;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstExportNamedSpecifier
         extends Swc4jAst
         implements ISwc4jAstExportSpecifier {
@@ -37,9 +38,10 @@ public class Swc4jAstExportNamedSpecifier
     @Jni2RustField(name = "is_type_only")
     protected final boolean typeOnly;
 
+    @Jni2RustMethod
     public Swc4jAstExportNamedSpecifier(
             ISwc4jAstModuleExportName orig,
-            ISwc4jAstModuleExportName exported,
+            @Jni2RustParam(optional = true) ISwc4jAstModuleExportName exported,
             boolean typeOnly,
             Swc4jSpan span) {
         super(span);

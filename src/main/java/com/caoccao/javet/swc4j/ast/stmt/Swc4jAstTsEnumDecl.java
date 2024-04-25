@@ -23,13 +23,14 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsEnumMember;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsEnumDecl
         extends Swc4jAst
         implements ISwc4jAstDecl {
@@ -39,9 +40,10 @@ public class Swc4jAstTsEnumDecl
     protected final Swc4jAstIdent id;
     protected final List<Swc4jAstTsEnumMember> members;
 
+    @Jni2RustMethod
     public Swc4jAstTsEnumDecl(
             boolean declare,
-            boolean _const,
+            @Jni2RustParam(name = "is_const") boolean _const,
             Swc4jAstIdent id,
             List<Swc4jAstTsEnumMember> members,
             Swc4jSpan span) {

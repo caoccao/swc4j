@@ -23,6 +23,10 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -30,6 +34,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstCallExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
@@ -37,10 +42,11 @@ public class Swc4jAstCallExpr
     protected final ISwc4jAstCallee callee;
     protected final Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
+    @Jni2RustMethod
     public Swc4jAstCallExpr(
             ISwc4jAstCallee callee,
             List<Swc4jAstExprOrSpread> args,
-            Swc4jAstTsTypeParamInstantiation typeArgs,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
             Swc4jSpan span) {
         super(span);
         this.args = SimpleList.immutable(AssertionUtils.notNull(args, "Args"));

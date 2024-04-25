@@ -22,13 +22,14 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTypeParam
         extends Swc4jAst {
     @Jni2RustField(name = "is_const")
@@ -41,13 +42,14 @@ public class Swc4jAstTsTypeParam
     @Jni2RustField(name = "is_out")
     protected final boolean out;
 
+    @Jni2RustMethod
     public Swc4jAstTsTypeParam(
             Swc4jAstIdent name,
-            boolean in,
-            boolean out,
-            boolean _const,
-            ISwc4jAstTsType constraint,
-            ISwc4jAstTsType _default,
+            @Jni2RustParam(name = "is_in") boolean in,
+            @Jni2RustParam(name = "is_out") boolean out,
+            @Jni2RustParam(name = "is_count") boolean _const,
+            @Jni2RustParam(optional = true) ISwc4jAstTsType constraint,
+            @Jni2RustParam(optional = true) ISwc4jAstTsType _default,
             Swc4jSpan span) {
         super(span);
         this._const = _const;

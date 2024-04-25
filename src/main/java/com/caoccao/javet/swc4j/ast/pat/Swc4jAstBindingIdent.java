@@ -27,22 +27,26 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsParamPropParam;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
-@Jni2RustClass(span = false)
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
 public class Swc4jAstBindingIdent
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstTsFnParam, ISwc4jAstTsParamPropParam, ISwc4jAstSimpleAssignTarget {
     protected final Swc4jAstIdent id;
     protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
 
+    @Jni2RustMethod
     public Swc4jAstBindingIdent(
             Swc4jAstIdent id,
-            Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
         this.id = AssertionUtils.notNull(id, "Id");

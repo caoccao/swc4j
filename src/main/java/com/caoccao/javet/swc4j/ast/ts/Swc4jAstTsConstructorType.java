@@ -22,7 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnOrConstructorType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -30,6 +30,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsConstructorType
         extends Swc4jAst
         implements ISwc4jAstTsFnOrConstructorType {
@@ -40,11 +41,12 @@ public class Swc4jAstTsConstructorType
     protected final Swc4jAstTsTypeAnn typeAnn;
     protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
+    @Jni2RustMethod
     public Swc4jAstTsConstructorType(
             List<ISwc4jAstTsFnParam> params,
-            Swc4jAstTsTypeParamDecl typeParams,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
             Swc4jAstTsTypeAnn typeAnn,
-            boolean _abstract,
+            @Jni2RustParam(name = "is_abstract") boolean _abstract,
             Swc4jSpan span) {
         super(span);
         this._abstract = _abstract;

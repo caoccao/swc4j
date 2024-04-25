@@ -23,7 +23,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -31,6 +31,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstFunction
         extends Swc4jAst {
     @Jni2RustField(name = "is_async")
@@ -43,14 +44,15 @@ public class Swc4jAstFunction
     protected final Optional<Swc4jAstTsTypeAnn> returnType;
     protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
+    @Jni2RustMethod
     public Swc4jAstFunction(
             List<Swc4jAstParam> params,
             List<Swc4jAstDecorator> decorators,
-            Swc4jAstBlockStmt body,
-            boolean generator,
-            boolean _async,
-            Swc4jAstTsTypeParamDecl typeParams,
-            Swc4jAstTsTypeAnn returnType,
+            @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
+            @Jni2RustParam(name = "is_generator") boolean generator,
+            @Jni2RustParam(name = "is_async") boolean _async,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn returnType,
             Swc4jSpan span) {
         super(span);
         this._async = _async;

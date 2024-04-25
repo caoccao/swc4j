@@ -25,7 +25,7 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -33,10 +33,12 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstClass
         extends Swc4jAst {
     @Jni2RustField(name = "is_abstract")
     protected final boolean _abstract;
+    @Jni2RustField(name = "implements")
     protected final List<Swc4jAstTsExprWithTypeArgs> _implements;
     protected final List<ISwc4jAstClassMember> body;
     protected final List<Swc4jAstDecorator> decorators;
@@ -44,14 +46,15 @@ public class Swc4jAstClass
     protected final Optional<Swc4jAstTsTypeParamInstantiation> superTypeParams;
     protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
+    @Jni2RustMethod
     public Swc4jAstClass(
             List<Swc4jAstDecorator> decorators,
             List<ISwc4jAstClassMember> body,
-            ISwc4jAstExpr superClass,
-            boolean _abstract,
-            Swc4jAstTsTypeParamDecl typeParams,
-            Swc4jAstTsTypeParamInstantiation superTypeParams,
-            List<Swc4jAstTsExprWithTypeArgs> _implements,
+            @Jni2RustParam(optional = true) ISwc4jAstExpr superClass,
+            @Jni2RustParam(name = "is_abstract") boolean _abstract,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation superTypeParams,
+            @Jni2RustParam(name = "implements") List<Swc4jAstTsExprWithTypeArgs> _implements,
             Swc4jSpan span) {
         super(span);
         this._abstract = _abstract;

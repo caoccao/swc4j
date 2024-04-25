@@ -23,13 +23,14 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstForHead;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstUsingDecl
         extends Swc4jAst
         implements ISwc4jAstDecl, ISwc4jAstVarDeclOrExpr, ISwc4jAstForHead {
@@ -37,8 +38,9 @@ public class Swc4jAstUsingDecl
     protected final boolean await;
     protected final List<Swc4jAstVarDeclarator> decls;
 
+    @Jni2RustMethod
     public Swc4jAstUsingDecl(
-            boolean await,
+            @Jni2RustParam(name = "is_await") boolean await,
             List<Swc4jAstVarDeclarator> decls,
             Swc4jSpan span) {
         super(span);

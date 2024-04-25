@@ -23,7 +23,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsTypeElement;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -31,6 +31,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsIndexSignature
         extends Swc4jAst
         implements ISwc4jAstClassMember, ISwc4jAstTsTypeElement {
@@ -40,11 +41,12 @@ public class Swc4jAstTsIndexSignature
     protected final boolean readonly;
     protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
 
+    @Jni2RustMethod
     public Swc4jAstTsIndexSignature(
             List<ISwc4jAstTsFnParam> params,
-            Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             boolean readonly,
-            boolean _static,
+            @Jni2RustParam(name = "is_static") boolean _static,
             Swc4jSpan span) {
         super(span);
         this._static = _static;

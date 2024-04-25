@@ -24,7 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -32,6 +32,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstPrivateProp
         extends Swc4jAst
         implements ISwc4jAstClassMember {
@@ -49,15 +50,16 @@ public class Swc4jAstPrivateProp
     protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
     protected final Optional<ISwc4jAstExpr> value;
 
+    @Jni2RustMethod
     public Swc4jAstPrivateProp(
             Swc4jAstPrivateName key,
-            ISwc4jAstExpr value,
-            Swc4jAstTsTypeAnn typeAnn,
-            boolean _static,
+            @Jni2RustParam(optional = true) ISwc4jAstExpr value,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParam(name = "is_static") boolean _static,
             List<Swc4jAstDecorator> decorators,
             Swc4jAstAccessibility accessibility,
             boolean optional,
-            boolean _override,
+            @Jni2RustParam(name = "is_override") boolean _override,
             boolean readonly,
             boolean definite,
             Swc4jSpan span) {

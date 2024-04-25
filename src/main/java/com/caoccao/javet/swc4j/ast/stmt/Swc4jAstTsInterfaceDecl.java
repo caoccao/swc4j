@@ -26,6 +26,10 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsInterfaceBody;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -33,6 +37,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsInterfaceDecl
         extends Swc4jAst
         implements ISwc4jAstDecl, ISwc4jAstDefaultDecl {
@@ -42,10 +47,11 @@ public class Swc4jAstTsInterfaceDecl
     protected final Swc4jAstIdent id;
     protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
+    @Jni2RustMethod
     public Swc4jAstTsInterfaceDecl(
             Swc4jAstIdent id,
             boolean declare,
-            Swc4jAstTsTypeParamDecl typeParams,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
             List<Swc4jAstTsExprWithTypeArgs> _extends,
             Swc4jAstTsInterfaceBody body,
             Swc4jSpan span) {

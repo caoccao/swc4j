@@ -26,6 +26,9 @@ import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxClosingElement;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxOpeningElement;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -33,7 +36,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
-@Jni2RustClass(name = "JSXElement")
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXElement")
 public class Swc4jAstJsxElement
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxElementChild, ISwc4jAstJsxAttrValue {
@@ -41,10 +44,11 @@ public class Swc4jAstJsxElement
     protected final Optional<Swc4jAstJsxClosingElement> closing;
     protected final Swc4jAstJsxOpeningElement opening;
 
+    @Jni2RustMethod
     public Swc4jAstJsxElement(
             Swc4jAstJsxOpeningElement opening,
             List<ISwc4jAstJsxElementChild> children,
-            Swc4jAstJsxClosingElement closing,
+            @Jni2RustParam(optional = true) Swc4jAstJsxClosingElement closing,
             Swc4jSpan span) {
         super(span);
         this.children = SimpleList.immutable(AssertionUtils.notNull(children, "Children"));

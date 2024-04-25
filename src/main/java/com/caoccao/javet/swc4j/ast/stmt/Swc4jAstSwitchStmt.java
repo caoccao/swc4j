@@ -23,13 +23,17 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstSwitchCase;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstSwitchStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
@@ -37,6 +41,7 @@ public class Swc4jAstSwitchStmt
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr discriminant;
 
+    @Jni2RustMethod
     public Swc4jAstSwitchStmt(
             ISwc4jAstExpr discriminant,
             List<Swc4jAstSwitchCase> cases,

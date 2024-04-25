@@ -382,9 +382,7 @@ public class Jni2Rust<T> {
     protected void init() {
         Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
         // filePath and structName
-        setFilePath(Optional.ofNullable(jni2RustClassUtils.getFilePath())
-                .map(Jni2RustFilePath::getFilePath)
-                .orElse(null));
+        setFilePath(jni2RustClassUtils.getFilePath().getFilePath());
         setStructName(jni2RustClassUtils.getName(PREFIX_NAME + clazz.getSimpleName()));
         // constructor
         constructor = (Constructor<T>) Stream.of(clazz.getConstructors())

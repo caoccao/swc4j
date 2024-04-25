@@ -24,17 +24,20 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxElementName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxObject;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-@Jni2RustClass(name = "JSXMemberExpr", span = false)
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXMemberExpr", span = false)
 public class Swc4jAstJsxMemberExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxObject, ISwc4jAstJsxElementName {
     protected final ISwc4jAstJsxObject obj;
     protected final Swc4jAstIdent prop;
 
+    @Jni2RustMethod
     public Swc4jAstJsxMemberExpr(
             ISwc4jAstJsxObject obj,
             Swc4jAstIdent prop,

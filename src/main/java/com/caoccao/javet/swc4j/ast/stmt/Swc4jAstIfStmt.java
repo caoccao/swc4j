@@ -22,13 +22,14 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstIfStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
@@ -38,10 +39,11 @@ public class Swc4jAstIfStmt
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr test;
 
+    @Jni2RustMethod
     public Swc4jAstIfStmt(
             ISwc4jAstExpr test,
             ISwc4jAstStmt cons,
-            ISwc4jAstStmt alt,
+            @Jni2RustParam(optional = true) ISwc4jAstStmt alt,
             Swc4jSpan span) {
         super(span);
         this.cons = AssertionUtils.notNull(cons, "Body");

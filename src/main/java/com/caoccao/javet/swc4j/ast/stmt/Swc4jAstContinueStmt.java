@@ -22,18 +22,24 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstContinueStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
     protected final Optional<Swc4jAstIdent> label;
 
+    @Jni2RustMethod
     public Swc4jAstContinueStmt(
-            Swc4jAstIdent label,
+            @Jni2RustParam(optional = true) Swc4jAstIdent label,
             Swc4jSpan span) {
         super(span);
         this.label = Optional.ofNullable(label);

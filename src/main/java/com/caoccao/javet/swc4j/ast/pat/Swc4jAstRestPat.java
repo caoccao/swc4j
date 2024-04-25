@@ -24,13 +24,14 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstRestPat
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstObjectPatProp, ISwc4jAstTsFnParam {
@@ -39,10 +40,11 @@ public class Swc4jAstRestPat
     protected final Swc4jSpan dot3Token;
     protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
 
+    @Jni2RustMethod
     public Swc4jAstRestPat(
             Swc4jSpan dot3Token,
             ISwc4jAstPat arg,
-            Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
         this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");

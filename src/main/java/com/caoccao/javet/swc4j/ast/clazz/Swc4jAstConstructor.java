@@ -25,7 +25,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -33,6 +33,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstConstructor
         extends Swc4jAst
         implements ISwc4jAstClassMember {
@@ -43,10 +44,11 @@ public class Swc4jAstConstructor
     protected final boolean optional;
     protected final List<ISwc4jAstParamOrTsParamProp> params;
 
+    @Jni2RustMethod
     public Swc4jAstConstructor(
             ISwc4jAstPropName key,
             List<ISwc4jAstParamOrTsParamProp> params,
-            Swc4jAstBlockStmt body,
+            @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
             Swc4jAstAccessibility accessibility,
             boolean optional,
             Swc4jSpan span) {

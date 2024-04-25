@@ -24,12 +24,17 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstGetterProp
         extends Swc4jAst
         implements ISwc4jAstProp {
@@ -37,10 +42,11 @@ public class Swc4jAstGetterProp
     protected final ISwc4jAstPropName key;
     protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
 
+    @Jni2RustMethod
     public Swc4jAstGetterProp(
             ISwc4jAstPropName key,
-            Swc4jAstTsTypeAnn typeAnn,
-            Swc4jAstBlockStmt body,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
+            @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
             Swc4jSpan span) {
         super(span);
         this.body = Optional.ofNullable(body);

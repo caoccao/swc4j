@@ -21,12 +21,14 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
-@Jni2RustClass(name = "JSXOpeningFragment")
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXOpeningFragment")
 public class Swc4jAstJsxOpeningFragment
         extends Swc4jAst {
-
+    @Jni2RustMethod
     public Swc4jAstJsxOpeningFragment(
             Swc4jSpan span) {
         super(span);

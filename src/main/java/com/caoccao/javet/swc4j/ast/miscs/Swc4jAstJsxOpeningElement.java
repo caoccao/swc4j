@@ -24,6 +24,9 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxElementName;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -31,7 +34,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
-@Jni2RustClass(name = "JSXOpeningElement")
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXOpeningElement")
 public class Swc4jAstJsxOpeningElement
         extends Swc4jAst {
     protected final List<ISwc4jAstJsxAttrOrSpread> attrs;
@@ -39,11 +42,12 @@ public class Swc4jAstJsxOpeningElement
     protected final boolean selfClosing;
     protected final Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
+    @Jni2RustMethod
     public Swc4jAstJsxOpeningElement(
             ISwc4jAstJsxElementName name,
             List<ISwc4jAstJsxAttrOrSpread> attrs,
             boolean selfClosing,
-            Swc4jAstTsTypeParamInstantiation typeArgs,
+            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
             Swc4jSpan span) {
         super(span);
         this.attrs = SimpleList.immutable(AssertionUtils.notNull(attrs, "Attrs"));

@@ -24,7 +24,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsParamPropParam;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -32,6 +32,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsParamProp
         extends Swc4jAst
         implements ISwc4jAstParamOrTsParamProp {
@@ -42,10 +43,11 @@ public class Swc4jAstTsParamProp
     protected final ISwc4jAstTsParamPropParam param;
     protected final boolean readonly;
 
+    @Jni2RustMethod
     public Swc4jAstTsParamProp(
             List<Swc4jAstDecorator> decorators,
             Swc4jAstAccessibility accessibility,
-            boolean _override,
+            @Jni2RustParam(name = "is_override") boolean _override,
             boolean readonly,
             ISwc4jAstTsParamPropParam param,
             Swc4jSpan span) {

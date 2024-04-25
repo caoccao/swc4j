@@ -26,13 +26,15 @@ import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxClosingFragment;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstJsxOpeningFragment;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
-@Jni2RustClass(name = "JSXFragment")
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXFragment")
 public class Swc4jAstJsxFragment
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxElementChild, ISwc4jAstJsxAttrValue {
@@ -40,6 +42,7 @@ public class Swc4jAstJsxFragment
     protected final Swc4jAstJsxClosingFragment closing;
     protected final Swc4jAstJsxOpeningFragment opening;
 
+    @Jni2RustMethod
     public Swc4jAstJsxFragment(
             Swc4jAstJsxOpeningFragment opening,
             List<ISwc4jAstJsxElementChild> children,

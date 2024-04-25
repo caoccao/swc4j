@@ -23,13 +23,14 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstImportSpecifier;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleExportName;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstImportNamedSpecifier
         extends Swc4jAst
         implements ISwc4jAstImportSpecifier {
@@ -38,9 +39,10 @@ public class Swc4jAstImportNamedSpecifier
     @Jni2RustField(name = "is_type_only")
     protected final boolean typeOnly;
 
+    @Jni2RustMethod
     public Swc4jAstImportNamedSpecifier(
             Swc4jAstIdent local,
-            ISwc4jAstModuleExportName imported,
+            @Jni2RustParam(optional = true) ISwc4jAstModuleExportName imported,
             boolean typeOnly,
             Swc4jSpan span) {
         super(span);

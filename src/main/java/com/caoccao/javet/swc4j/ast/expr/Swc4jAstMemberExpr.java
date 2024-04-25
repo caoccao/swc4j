@@ -24,11 +24,15 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstOptChainBase;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstSimpleAssignTarget;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstMemberExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstOptChainBase, ISwc4jAstSimpleAssignTarget {
@@ -36,6 +40,7 @@ public class Swc4jAstMemberExpr
     protected final ISwc4jAstExpr obj;
     protected final ISwc4jAstMemberProp prop;
 
+    @Jni2RustMethod
     public Swc4jAstMemberExpr(
             ISwc4jAstExpr obj,
             ISwc4jAstMemberProp prop,

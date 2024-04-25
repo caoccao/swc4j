@@ -23,15 +23,14 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDefaultDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
-@Jni2RustClass(span = false)
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
 public class Swc4jAstFnExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstDefaultDecl {
@@ -39,8 +38,9 @@ public class Swc4jAstFnExpr
     protected final Swc4jAstFunction function;
     protected final Optional<Swc4jAstIdent> ident;
 
+    @Jni2RustMethod
     public Swc4jAstFnExpr(
-            Swc4jAstIdent ident,
+            @Jni2RustParam(optional = true) Swc4jAstIdent ident,
             Swc4jAstFunction function,
             Swc4jSpan span) {
         super(span);

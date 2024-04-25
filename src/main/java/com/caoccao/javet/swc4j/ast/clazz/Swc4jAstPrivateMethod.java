@@ -23,13 +23,14 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstPrivateMethod
         extends Swc4jAst
         implements ISwc4jAstClassMember {
@@ -47,15 +48,16 @@ public class Swc4jAstPrivateMethod
     @Jni2RustField(name = "is_optional")
     protected final boolean optional;
 
+    @Jni2RustMethod
     public Swc4jAstPrivateMethod(
             Swc4jAstPrivateName key,
             Swc4jAstFunction function,
             Swc4jAstMethodKind kind,
-            boolean _static,
+            @Jni2RustParam(name = "is_static") boolean _static,
             Swc4jAstAccessibility accessibility,
-            boolean _abstract,
+            @Jni2RustParam(name = "is_abstract") boolean _abstract,
             boolean optional,
-            boolean _override,
+            @Jni2RustParam(name = "is_override") boolean _override,
             Swc4jSpan span) {
         super(span);
         this._abstract = _abstract;

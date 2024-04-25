@@ -25,11 +25,13 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProp;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
-@Jni2RustClass(span = false)
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
 public class Swc4jAstAssignProp
         extends Swc4jAst
         implements ISwc4jAstProp {
@@ -37,6 +39,7 @@ public class Swc4jAstAssignProp
     @Jni2RustField(box = true)
     protected final ISwc4jAstExpr value;
 
+    @Jni2RustMethod
     public Swc4jAstAssignProp(
             Swc4jAstIdent key,
             ISwc4jAstExpr value,

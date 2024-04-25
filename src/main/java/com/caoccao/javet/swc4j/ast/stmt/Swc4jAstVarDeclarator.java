@@ -23,12 +23,17 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.Optional;
 
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstVarDeclarator
         extends Swc4jAst
         implements ISwc4jAstDecl {
@@ -36,9 +41,10 @@ public class Swc4jAstVarDeclarator
     protected final Optional<ISwc4jAstExpr> init;
     protected final ISwc4jAstPat name;
 
+    @Jni2RustMethod
     public Swc4jAstVarDeclarator(
             ISwc4jAstPat name,
-            ISwc4jAstExpr init,
+            @Jni2RustParam(optional = true) ISwc4jAstExpr init,
             boolean definite,
             Swc4jSpan span) {
         super(span);

@@ -17,7 +17,10 @@
 package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClassUtils;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.utils.AnnotationUtils;
 import com.caoccao.javet.swc4j.utils.OSUtils;
 
 import java.io.File;
@@ -29,9 +32,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public final class Swc4jAstStore {
     public static final String JAVA_FILE_EXT = ".java";
@@ -100,6 +103,11 @@ public final class Swc4jAstStore {
                             if (matcherFileName.matches()) {
                                 String className = matcherFileName.group(1);
                                 structMap.put(className, clazz);
+                                assertTrue(AnnotationUtils.isAnnotationPresent(clazz, Jni2RustClass.class));
+                                assertTrue(Stream.of(clazz.getConstructors())
+                                        .findFirst()
+                                        .map(c -> c.isAnnotationPresent(Jni2RustMethod.class))
+                                        .orElse(false));
                             }
                         }
                     });
