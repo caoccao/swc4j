@@ -15,10 +15,10 @@
 * limitations under the License.
 */
 
-use jni::objects::{JClass, JString};
+use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jint, jobject, jstring, JNI_VERSION_1_8};
 use jni::{JNIEnv, JavaVM};
-use options::FromJniType;
+use jni_utils::FromJniType;
 
 use debug_print::debug_println;
 use std::ffi::c_void;
@@ -69,7 +69,8 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse<'local
   options: jobject,
 ) -> jobject {
   let code = jstring_to_string!(env, code);
-  let options = options::ParseOptions::from_jni_type(&mut env, options);
+  let options = unsafe { JObject::from_raw(options) };
+  let options = options::ParseOptions::from_jni_type(&mut env, &options);
   match core::parse(code, options) {
     Ok(output) => output.to_jni_type(&mut env).as_raw(),
     Err(message) => {
@@ -87,7 +88,8 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTransform<'l
   options: jobject,
 ) -> jobject {
   let code = jstring_to_string!(env, code);
-  let options = options::TransformOptions::from_jni_type(&mut env, options);
+  let options = unsafe { JObject::from_raw(options) };
+  let options = options::TransformOptions::from_jni_type(&mut env, &options);
   match core::transform(code, options) {
     Ok(output) => output.to_jni_type(&mut env).as_raw(),
     Err(message) => {
@@ -105,7 +107,8 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'l
   options: jobject,
 ) -> jobject {
   let code = jstring_to_string!(env, code);
-  let options = options::TranspileOptions::from_jni_type(&mut env, options);
+  let options = unsafe { JObject::from_raw(options) };
+  let options = options::TranspileOptions::from_jni_type(&mut env, &options);
   match core::transpile(code, options) {
     Ok(output) => output.to_jni_type(&mut env).as_raw(),
     Err(message) => {

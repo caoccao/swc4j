@@ -54,7 +54,7 @@ public class Swc4jAstPrivateMethod
             Swc4jAstFunction function,
             Swc4jAstMethodKind kind,
             @Jni2RustParam(name = "is_static") boolean _static,
-            Swc4jAstAccessibility accessibility,
+            @Jni2RustParam(optional = true) Swc4jAstAccessibility accessibility,
             @Jni2RustParam(name = "is_abstract") boolean _abstract,
             boolean optional,
             @Jni2RustParam(name = "is_override") boolean _override,

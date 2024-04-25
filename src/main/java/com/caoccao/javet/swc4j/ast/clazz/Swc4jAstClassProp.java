@@ -61,7 +61,7 @@ public class Swc4jAstClassProp
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             @Jni2RustParam(name = "is_static") boolean _static,
             List<Swc4jAstDecorator> decorators,
-            Swc4jAstAccessibility accessibility,
+            @Jni2RustParam(optional = true) Swc4jAstAccessibility accessibility,
             @Jni2RustParam(name = "is_abstract") boolean _abstract,
             boolean optional,
             @Jni2RustParam(name = "is_override") boolean _override,

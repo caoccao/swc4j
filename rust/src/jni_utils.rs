@@ -265,6 +265,10 @@ macro_rules! short_to_jvalue {
 #[allow(unused_imports)]
 pub(crate) use short_to_jvalue;
 
+pub trait FromJniType {
+  fn from_jni_type<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self;
+}
+
 pub trait ToJniType {
   fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
   where

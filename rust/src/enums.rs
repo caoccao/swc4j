@@ -20,17 +20,1467 @@ use jni::signature::{Primitive, ReturnType};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
-use deno_ast::swc::ast::AssignOp;
 pub use deno_ast::swc::ast::EsVersion;
+use deno_ast::swc::ast::*;
 pub use deno_ast::swc::common::comments::CommentKind;
 use deno_ast::swc::parser::token::{BinOpToken, Keyword, Token};
 pub use deno_ast::{ImportsNotUsedAsValues, MediaType, SourceMapOption};
+use num_bigint::Sign;
 
 use crate::jni_utils::*;
 
 pub trait IdentifiableEnum<T> {
   fn get_id(&self) -> i32;
   fn parse_by_id(id: i32) -> T;
+}
+
+pub struct JavaAccessibility {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaAccessibility {}
+unsafe impl Sync for JavaAccessibility {}
+
+impl JavaAccessibility {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/enums/Swc4jAstAccessibility")
+      .expect("Couldn't find class Swc4jAstAccessibility");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstAccessibility");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstAccessibility.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstAccessibility;")
+      .expect("Couldn't find static method Swc4jAstAccessibility.parse");
+    JavaAccessibility {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaAssignOp {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaAssignOp {}
+unsafe impl Sync for JavaAssignOp {}
+
+impl JavaAssignOp {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/enums/Swc4jAstAssignOp")
+      .expect("Couldn't find class Swc4jAstAssignOp");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstAssignOp");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstAssignOp.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstAssignOp;")
+      .expect("Couldn't find static method Swc4jAstAssignOp.parse");
+    JavaAssignOp {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaBigIntSign {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaBigIntSign {}
+unsafe impl Sync for JavaBigIntSign {}
+
+impl JavaBigIntSign {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/enums/Swc4jAstBigIntSign")
+      .expect("Couldn't find class Swc4jAstBigIntSign");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstBigIntSign");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstBigIntSign.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstBigIntSign;")
+      .expect("Couldn't find static method Swc4jAstBigIntSign.parse");
+    JavaBigIntSign {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaBinaryOp {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaBinaryOp {}
+unsafe impl Sync for JavaBinaryOp {}
+
+impl JavaBinaryOp {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/enums/Swc4jAstBinaryOp")
+      .expect("Couldn't find class Swc4jAstBinaryOp");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstBinaryOp");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstBinaryOp.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstBinaryOp;")
+      .expect("Couldn't find static method Swc4jAstBinaryOp.parse");
+    JavaBinaryOp {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaCommentKind {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaCommentKind {}
+unsafe impl Sync for JavaCommentKind {}
+
+impl JavaCommentKind {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/comments/Swc4jCommentKind")
+      .expect("Couldn't find class Swc4jAstCommentKind");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstCommentKind");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstCommentKind.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/comments/Swc4jCommentKind;")
+      .expect("Couldn't find static method Swc4jAstCommentKind.parse");
+    JavaCommentKind {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaEsVersion {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaEsVersion {}
+unsafe impl Sync for JavaEsVersion {}
+
+impl JavaEsVersion {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jEsVersion")
+      .expect("Couldn't find class Swc4jEsVersion");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jEsVersion");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jEsVersion.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/enums/Swc4jEsVersion;")
+      .expect("Couldn't find static method Swc4jEsVersion.parse");
+    JavaEsVersion {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaImportPhase {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaImportPhase {}
+unsafe impl Sync for JavaImportPhase {}
+
+impl JavaImportPhase {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/enums/Swc4jAstImportPhase")
+      .expect("Couldn't find class Swc4jAstImportPhase");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstImportPhase");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstImportPhase.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstImportPhase;")
+      .expect("Couldn't find static method Swc4jAstImportPhase.parse");
+    JavaImportPhase {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaImportsNotUsedAsValues {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaImportsNotUsedAsValues {}
+unsafe impl Sync for JavaImportsNotUsedAsValues {}
+
+impl JavaImportsNotUsedAsValues {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jImportsNotUsedAsValues")
+      .expect("Couldn't find class Swc4jImportsNotUsedAsValues");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jImportsNotUsedAsValues");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jImportsNotUsedAsValues.getId");
+    let method_parse = env
+      .get_static_method_id(
+        &class,
+        "parse",
+        "(I)Lcom/caoccao/javet/swc4j/enums/Swc4jImportsNotUsedAsValues;",
+      )
+      .expect("Couldn't find static method Swc4jImportsNotUsedAsValues.parse");
+    JavaImportsNotUsedAsValues {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaMediaType {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaMediaType {}
+unsafe impl Sync for JavaMediaType {}
+
+impl JavaMediaType {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jMediaType")
+      .expect("Couldn't find class Swc4jMediaType");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jMediaType");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jMediaType.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;")
+      .expect("Couldn't find static method Swc4jMediaType.parse");
+    JavaMediaType {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaMetaPropKind {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaMetaPropKind {}
+unsafe impl Sync for JavaMetaPropKind {}
+
+impl JavaMetaPropKind {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/enums/Swc4jAstMetaPropKind")
+      .expect("Couldn't find class Swc4jAstMetaPropKind");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstMetaPropKind");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstMetaPropKind.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstMetaPropKind;")
+      .expect("Couldn't find static method Swc4jAstMetaPropKind.parse");
+    JavaMetaPropKind {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaMethodKind {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaMethodKind {}
+unsafe impl Sync for JavaMethodKind {}
+
+impl JavaMethodKind {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/enums/Swc4jAstMethodKind")
+      .expect("Couldn't find class Swc4jAstMethodKind");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstMethodKind");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstMethodKind.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstMethodKind;")
+      .expect("Couldn't find static method Swc4jAstMethodKind.parse");
+    JavaMethodKind {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaSourceMapOption {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaSourceMapOption {}
+unsafe impl Sync for JavaSourceMapOption {}
+
+impl JavaSourceMapOption {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jSourceMapOption")
+      .expect("Couldn't find class Swc4jSourceMapOption");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jSourceMapOption");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jSourceMapOption.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/enums/Swc4jSourceMapOption;")
+      .expect("Couldn't find static method Swc4jSourceMapOption.parse");
+    JavaSourceMapOption {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaTokenType {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaTokenType {}
+unsafe impl Sync for JavaTokenType {}
+
+impl JavaTokenType {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/tokens/Swc4jTokenType")
+      .expect("Couldn't find class Swc4jTokenType");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jTokenType");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jTokenType.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenType;")
+      .expect("Couldn't find static method Swc4jTokenType.parse");
+    JavaTokenType {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaParseMode {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaParseMode {}
+unsafe impl Sync for JavaParseMode {}
+
+impl JavaParseMode {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/enums/Swc4jParseMode")
+      .expect("Couldn't find class Swc4jParseMode");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jParseMode");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jParseMode.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;")
+      .expect("Couldn't find static method Swc4jParseMode.parse");
+    JavaParseMode {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaTruePlusMinus {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaTruePlusMinus {}
+unsafe impl Sync for JavaTruePlusMinus {}
+
+impl JavaTruePlusMinus {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/enums/Swc4jAstTruePlusMinus")
+      .expect("Couldn't find class Swc4jAstTruePlusMinus");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstTruePlusMinus");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstTruePlusMinus.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstTruePlusMinus;")
+      .expect("Couldn't find static method Swc4jAstTruePlusMinus.parse");
+    JavaTruePlusMinus {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaTsKeywordTypeKind {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaTsKeywordTypeKind {}
+unsafe impl Sync for JavaTsKeywordTypeKind {}
+
+impl JavaTsKeywordTypeKind {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/enums/Swc4jAstTsKeywordTypeKind")
+      .expect("Couldn't find class Swc4jAstTsKeywordTypeKind");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstTsKeywordTypeKind");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstTsKeywordTypeKind.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstTsKeywordTypeKind;")
+      .expect("Couldn't find static method Swc4jAstTsKeywordTypeKind.parse");
+    JavaTsKeywordTypeKind {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaTsTypeOperatorOp {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaTsTypeOperatorOp {}
+unsafe impl Sync for JavaTsTypeOperatorOp {}
+
+impl JavaTsTypeOperatorOp {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/enums/Swc4jAstTsTypeOperatorOp")
+      .expect("Couldn't find class Swc4jAstTsTypeOperatorOp");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstTsTypeOperatorOp");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstTsTypeOperatorOp.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstTsTypeOperatorOp;")
+      .expect("Couldn't find static method Swc4jAstTsTypeOperatorOp.parse");
+    JavaTsTypeOperatorOp {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaUnaryOp {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaUnaryOp {}
+unsafe impl Sync for JavaUnaryOp {}
+
+impl JavaUnaryOp {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/enums/Swc4jAstUnaryOp")
+      .expect("Couldn't find class Swc4jAstUnaryOp");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstUnaryOp");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstUnaryOp.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstUnaryOp;")
+      .expect("Couldn't find static method Swc4jAstUnaryOp.parse");
+    JavaUnaryOp {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaUpdateOp {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaUpdateOp {}
+unsafe impl Sync for JavaUpdateOp {}
+
+impl JavaUpdateOp {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/enums/Swc4jAstUpdateOp")
+      .expect("Couldn't find class Swc4jAstUpdateOp");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstUpdateOp");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstUpdateOp.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstUpdateOp;")
+      .expect("Couldn't find static method Swc4jAstUpdateOp.parse");
+    JavaUpdateOp {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+pub struct JavaVarDeclKind {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get_id: JMethodID,
+  method_parse: JStaticMethodID,
+}
+unsafe impl Send for JavaVarDeclKind {}
+unsafe impl Sync for JavaVarDeclKind {}
+
+impl JavaVarDeclKind {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/enums/Swc4jAstVarDeclKind")
+      .expect("Couldn't find class Swc4jAstVarDeclKind");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstVarDeclKind");
+    let method_get_id = env
+      .get_method_id(&class, "getId", "()I")
+      .expect("Couldn't find method Swc4jAstVarDeclKind.getId");
+    let method_parse = env
+      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstVarDeclKind;")
+      .expect("Couldn't find static method Swc4jAstVarDeclKind.parse");
+    JavaVarDeclKind {
+      class,
+      method_get_id,
+      method_parse,
+    }
+  }
+
+  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let id = int_to_jvalue!(id);
+    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+  }
+}
+
+static mut JAVA_CLASS_ACCESSIBILITY: Option<JavaAccessibility> = None;
+static mut JAVA_CLASS_ASSIGN_OP: Option<JavaAssignOp> = None;
+static mut JAVA_CLASS_BIG_INT_SIGN: Option<JavaBigIntSign> = None;
+static mut JAVA_CLASS_BINARY_OP: Option<JavaBinaryOp> = None;
+static mut JAVA_CLASS_COMMENT_KIND: Option<JavaCommentKind> = None;
+static mut JAVA_CLASS_ES_VERSION: Option<JavaEsVersion> = None;
+static mut JAVA_CLASS_IMPORT_PHASE: Option<JavaImportPhase> = None;
+static mut JAVA_CLASS_IMPORTS_NOT_USED_AS_VALUES: Option<JavaImportsNotUsedAsValues> = None;
+static mut JAVA_CLASS_MEDIA_TYPE: Option<JavaMediaType> = None;
+static mut JAVA_CLASS_META_PROP_KIND: Option<JavaMetaPropKind> = None;
+static mut JAVA_CLASS_METHOD_KIND: Option<JavaMethodKind> = None;
+static mut JAVA_CLASS_PARSE_MODE: Option<JavaParseMode> = None;
+static mut JAVA_CLASS_SOURCE_MAP_OPTION: Option<JavaSourceMapOption> = None;
+static mut JAVA_CLASS_TOKEN_TYPE: Option<JavaTokenType> = None;
+static mut JAVA_CLASS_TRUE_PLUS_MINUS: Option<JavaTruePlusMinus> = None;
+static mut JAVA_CLASS_TS_KEYWORD_TYPE_KIND: Option<JavaTsKeywordTypeKind> = None;
+static mut JAVA_CLASS_TS_TYPE_OPERATOR_OP: Option<JavaTsTypeOperatorOp> = None;
+static mut JAVA_CLASS_UNARY_OP: Option<JavaUnaryOp> = None;
+static mut JAVA_CLASS_UPDATE_OP: Option<JavaUpdateOp> = None;
+static mut JAVA_CLASS_VAR_DECL_KIND: Option<JavaVarDeclKind> = None;
+
+pub fn init<'local>(env: &mut JNIEnv<'local>) {
+  unsafe {
+    JAVA_CLASS_ACCESSIBILITY = Some(JavaAccessibility::new(env));
+    JAVA_CLASS_ASSIGN_OP = Some(JavaAssignOp::new(env));
+    JAVA_CLASS_BIG_INT_SIGN = Some(JavaBigIntSign::new(env));
+    JAVA_CLASS_BINARY_OP = Some(JavaBinaryOp::new(env));
+    JAVA_CLASS_COMMENT_KIND = Some(JavaCommentKind::new(env));
+    JAVA_CLASS_ES_VERSION = Some(JavaEsVersion::new(env));
+    JAVA_CLASS_IMPORT_PHASE = Some(JavaImportPhase::new(env));
+    JAVA_CLASS_IMPORTS_NOT_USED_AS_VALUES = Some(JavaImportsNotUsedAsValues::new(env));
+    JAVA_CLASS_MEDIA_TYPE = Some(JavaMediaType::new(env));
+    JAVA_CLASS_META_PROP_KIND = Some(JavaMetaPropKind::new(env));
+    JAVA_CLASS_METHOD_KIND = Some(JavaMethodKind::new(env));
+    JAVA_CLASS_PARSE_MODE = Some(JavaParseMode::new(env));
+    JAVA_CLASS_SOURCE_MAP_OPTION = Some(JavaSourceMapOption::new(env));
+    JAVA_CLASS_TOKEN_TYPE = Some(JavaTokenType::new(env));
+    JAVA_CLASS_TS_KEYWORD_TYPE_KIND = Some(JavaTsKeywordTypeKind::new(env));
+    JAVA_CLASS_TS_TYPE_OPERATOR_OP = Some(JavaTsTypeOperatorOp::new(env));
+    JAVA_CLASS_UNARY_OP = Some(JavaUnaryOp::new(env));
+    JAVA_CLASS_UPDATE_OP = Some(JavaUpdateOp::new(env));
+    JAVA_CLASS_VAR_DECL_KIND = Some(JavaVarDeclKind::new(env));
+  }
+}
+
+impl IdentifiableEnum<Accessibility> for Accessibility {
+  fn get_id(&self) -> i32 {
+    match self {
+      Accessibility::Public => 0,
+      Accessibility::Protected => 1,
+      Accessibility::Private => 2,
+    }
+  }
+  fn parse_by_id(id: i32) -> Accessibility {
+    match id {
+      1 => Accessibility::Protected,
+      2 => Accessibility::Private,
+      _ => Accessibility::Public,
+    }
+  }
+}
+
+impl FromJniType for Accessibility {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> Accessibility {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_ACCESSIBILITY.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    Accessibility::parse_by_id(id)
+  }
+}
+
+impl ToJniType for Accessibility {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_ACCESSIBILITY.as_ref().unwrap() }.parse(env, self.get_id())
+  }
+}
+
+impl IdentifiableEnum<AssignOp> for AssignOp {
+  fn get_id(&self) -> i32 {
+    match self {
+      AssignOp::AddAssign => 0,
+      AssignOp::AndAssign => 1,
+      AssignOp::Assign => 2,
+      AssignOp::BitAndAssign => 3,
+      AssignOp::BitOrAssign => 4,
+      AssignOp::BitXorAssign => 5,
+      AssignOp::DivAssign => 6,
+      AssignOp::ExpAssign => 7,
+      AssignOp::LShiftAssign => 8,
+      AssignOp::ModAssign => 9,
+      AssignOp::MulAssign => 10,
+      AssignOp::NullishAssign => 11,
+      AssignOp::OrAssign => 12,
+      AssignOp::RShiftAssign => 13,
+      AssignOp::SubAssign => 14,
+      AssignOp::ZeroFillRShiftAssign => 15,
+    }
+  }
+  fn parse_by_id(id: i32) -> AssignOp {
+    match id {
+      1 => AssignOp::AndAssign,
+      2 => AssignOp::Assign,
+      3 => AssignOp::BitAndAssign,
+      4 => AssignOp::BitOrAssign,
+      5 => AssignOp::BitXorAssign,
+      6 => AssignOp::DivAssign,
+      7 => AssignOp::ExpAssign,
+      8 => AssignOp::LShiftAssign,
+      9 => AssignOp::ModAssign,
+      10 => AssignOp::MulAssign,
+      11 => AssignOp::NullishAssign,
+      12 => AssignOp::OrAssign,
+      13 => AssignOp::RShiftAssign,
+      14 => AssignOp::SubAssign,
+      15 => AssignOp::ZeroFillRShiftAssign,
+      _ => AssignOp::AddAssign,
+    }
+  }
+}
+
+impl FromJniType for AssignOp {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> AssignOp {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_ASSIGN_OP.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    AssignOp::parse_by_id(id)
+  }
+}
+
+impl ToJniType for AssignOp {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_ASSIGN_OP.as_ref().unwrap() }.parse(env, self.get_id())
+  }
+}
+
+impl IdentifiableEnum<BinaryOp> for BinaryOp {
+  fn get_id(&self) -> i32 {
+    match self {
+      BinaryOp::Add => 0,
+      BinaryOp::BitAnd => 1,
+      BinaryOp::BitOr => 2,
+      BinaryOp::BitXor => 3,
+      BinaryOp::Div => 4,
+      BinaryOp::EqEq => 5,
+      BinaryOp::EqEqEq => 6,
+      BinaryOp::Exp => 7,
+      BinaryOp::Gt => 8,
+      BinaryOp::GtEq => 9,
+      BinaryOp::In => 10,
+      BinaryOp::InstanceOf => 11,
+      BinaryOp::LogicalAnd => 12,
+      BinaryOp::LogicalOr => 13,
+      BinaryOp::LShift => 14,
+      BinaryOp::Lt => 15,
+      BinaryOp::LtEq => 16,
+      BinaryOp::Mod => 17,
+      BinaryOp::Mul => 18,
+      BinaryOp::NotEq => 19,
+      BinaryOp::NotEqEq => 20,
+      BinaryOp::NullishCoalescing => 21,
+      BinaryOp::RShift => 22,
+      BinaryOp::Sub => 23,
+      BinaryOp::ZeroFillRShift => 24,
+    }
+  }
+  fn parse_by_id(id: i32) -> BinaryOp {
+    match id {
+      1 => BinaryOp::BitAnd,
+      2 => BinaryOp::BitOr,
+      3 => BinaryOp::BitXor,
+      4 => BinaryOp::Div,
+      5 => BinaryOp::EqEq,
+      6 => BinaryOp::EqEqEq,
+      7 => BinaryOp::Exp,
+      8 => BinaryOp::Gt,
+      9 => BinaryOp::GtEq,
+      10 => BinaryOp::In,
+      11 => BinaryOp::InstanceOf,
+      12 => BinaryOp::LogicalAnd,
+      13 => BinaryOp::LogicalOr,
+      14 => BinaryOp::LShift,
+      15 => BinaryOp::Lt,
+      16 => BinaryOp::LtEq,
+      17 => BinaryOp::Mod,
+      18 => BinaryOp::Mul,
+      19 => BinaryOp::NotEq,
+      20 => BinaryOp::NotEqEq,
+      21 => BinaryOp::NullishCoalescing,
+      22 => BinaryOp::RShift,
+      23 => BinaryOp::Sub,
+      24 => BinaryOp::ZeroFillRShift,
+      _ => BinaryOp::Add,
+    }
+  }
+}
+
+impl FromJniType for BinaryOp {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> BinaryOp {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_BINARY_OP.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    BinaryOp::parse_by_id(id)
+  }
+}
+
+impl ToJniType for BinaryOp {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_BINARY_OP.as_ref().unwrap() }.parse(env, self.get_id())
+  }
+}
+
+impl IdentifiableEnum<CommentKind> for CommentKind {
+  fn get_id(&self) -> i32 {
+    match self {
+      CommentKind::Line => 0,
+      CommentKind::Block => 1,
+    }
+  }
+  fn parse_by_id(id: i32) -> CommentKind {
+    match id {
+      1 => CommentKind::Block,
+      _ => CommentKind::Line,
+    }
+  }
+}
+
+impl FromJniType for CommentKind {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> CommentKind {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_COMMENT_KIND.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    CommentKind::parse_by_id(id)
+  }
+}
+
+impl ToJniType for CommentKind {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_COMMENT_KIND.as_ref().unwrap() }.parse(env, self.get_id())
+  }
+}
+
+impl IdentifiableEnum<EsVersion> for EsVersion {
+  fn get_id(&self) -> i32 {
+    match self {
+      EsVersion::Es3 => 1,
+      EsVersion::Es5 => 2,
+      EsVersion::Es2015 => 3,
+      EsVersion::Es2016 => 4,
+      EsVersion::Es2017 => 5,
+      EsVersion::Es2018 => 6,
+      EsVersion::Es2019 => 7,
+      EsVersion::Es2020 => 8,
+      EsVersion::Es2021 => 9,
+      EsVersion::Es2022 => 10,
+      EsVersion::EsNext => 0,
+    }
+  }
+  fn parse_by_id(id: i32) -> EsVersion {
+    match id {
+      1 => EsVersion::Es3,
+      2 => EsVersion::Es5,
+      3 => EsVersion::Es2015,
+      4 => EsVersion::Es2016,
+      5 => EsVersion::Es2017,
+      6 => EsVersion::Es2018,
+      7 => EsVersion::Es2019,
+      8 => EsVersion::Es2020,
+      9 => EsVersion::Es2021,
+      10 => EsVersion::Es2022,
+      _ => EsVersion::EsNext,
+    }
+  }
+}
+
+impl FromJniType for EsVersion {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> EsVersion {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_ES_VERSION.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    EsVersion::parse_by_id(id)
+  }
+}
+
+impl ToJniType for EsVersion {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_ES_VERSION.as_ref().unwrap() }.parse(env, self.get_id())
+  }
+}
+
+impl IdentifiableEnum<ImportPhase> for ImportPhase {
+  fn get_id(&self) -> i32 {
+    match self {
+      ImportPhase::Defer => 0,
+      ImportPhase::Evaluation => 1,
+      ImportPhase::Source => 2,
+    }
+  }
+  fn parse_by_id(id: i32) -> ImportPhase {
+    match id {
+      1 => ImportPhase::Evaluation,
+      2 => ImportPhase::Source,
+      _ => ImportPhase::Defer,
+    }
+  }
+}
+
+impl FromJniType for ImportPhase {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> ImportPhase {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_IMPORT_PHASE.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    ImportPhase::parse_by_id(id)
+  }
+}
+
+impl ToJniType for ImportPhase {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_IMPORT_PHASE.as_ref().unwrap() }.parse(env, self.get_id())
+  }
+}
+
+impl IdentifiableEnum<ImportsNotUsedAsValues> for ImportsNotUsedAsValues {
+  fn get_id(&self) -> i32 {
+    match self {
+      ImportsNotUsedAsValues::Remove => 0,
+      ImportsNotUsedAsValues::Preserve => 1,
+      ImportsNotUsedAsValues::Error => 2,
+    }
+  }
+  fn parse_by_id(id: i32) -> ImportsNotUsedAsValues {
+    match id {
+      0 => ImportsNotUsedAsValues::Remove,
+      1 => ImportsNotUsedAsValues::Preserve,
+      _ => ImportsNotUsedAsValues::Error,
+    }
+  }
+}
+
+impl FromJniType for ImportsNotUsedAsValues {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> ImportsNotUsedAsValues {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_IMPORTS_NOT_USED_AS_VALUES.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    ImportsNotUsedAsValues::parse_by_id(id)
+  }
+}
+
+impl ToJniType for ImportsNotUsedAsValues {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_IMPORTS_NOT_USED_AS_VALUES.as_ref().unwrap() }.parse(env, self.get_id())
+  }
+}
+
+impl IdentifiableEnum<MetaPropKind> for MetaPropKind {
+  fn get_id(&self) -> i32 {
+    match self {
+      MetaPropKind::NewTarget => 0,
+      MetaPropKind::ImportMeta => 1,
+    }
+  }
+  fn parse_by_id(id: i32) -> MetaPropKind {
+    match id {
+      1 => MetaPropKind::ImportMeta,
+      _ => MetaPropKind::NewTarget,
+    }
+  }
+}
+
+impl IdentifiableEnum<MediaType> for MediaType {
+  fn get_id(&self) -> i32 {
+    match self {
+      MediaType::JavaScript => 0,
+      MediaType::Jsx => 1,
+      MediaType::Mjs => 2,
+      MediaType::Cjs => 3,
+      MediaType::TypeScript => 4,
+      MediaType::Mts => 5,
+      MediaType::Cts => 6,
+      MediaType::Dts => 7,
+      MediaType::Dmts => 8,
+      MediaType::Dcts => 9,
+      MediaType::Tsx => 10,
+      MediaType::Json => 11,
+      MediaType::Wasm => 12,
+      MediaType::TsBuildInfo => 13,
+      MediaType::SourceMap => 14,
+      MediaType::Unknown => 15,
+    }
+  }
+  fn parse_by_id(id: i32) -> MediaType {
+    match id {
+      0 => MediaType::JavaScript,
+      1 => MediaType::Jsx,
+      2 => MediaType::Mjs,
+      3 => MediaType::Cjs,
+      4 => MediaType::TypeScript,
+      5 => MediaType::Mts,
+      6 => MediaType::Cts,
+      7 => MediaType::Dts,
+      8 => MediaType::Dmts,
+      9 => MediaType::Dcts,
+      10 => MediaType::Tsx,
+      11 => MediaType::Json,
+      12 => MediaType::Wasm,
+      13 => MediaType::TsBuildInfo,
+      14 => MediaType::SourceMap,
+      _ => MediaType::Unknown,
+    }
+  }
+}
+
+impl FromJniType for MediaType {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> MediaType {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_MEDIA_TYPE.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    MediaType::parse_by_id(id)
+  }
+}
+
+impl ToJniType for MediaType {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_MEDIA_TYPE.as_ref().unwrap() }.parse(env, self.get_id())
+  }
+}
+
+impl FromJniType for MetaPropKind {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> MetaPropKind {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_META_PROP_KIND.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    MetaPropKind::parse_by_id(id)
+  }
+}
+
+impl ToJniType for MetaPropKind {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_META_PROP_KIND.as_ref().unwrap() }.parse(env, self.get_id())
+  }
+}
+
+impl IdentifiableEnum<MethodKind> for MethodKind {
+  fn get_id(&self) -> i32 {
+    match self {
+      MethodKind::Method => 0,
+      MethodKind::Getter => 1,
+      MethodKind::Setter => 2,
+    }
+  }
+  fn parse_by_id(id: i32) -> MethodKind {
+    match id {
+      1 => MethodKind::Getter,
+      2 => MethodKind::Setter,
+      _ => MethodKind::Method,
+    }
+  }
+}
+
+impl FromJniType for MethodKind {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> MethodKind {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_METHOD_KIND.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    MethodKind::parse_by_id(id)
+  }
+}
+
+impl ToJniType for MethodKind {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_METHOD_KIND.as_ref().unwrap() }.parse(env, self.get_id())
+  }
+}
+
+#[derive(Default, Debug, Copy, Clone)]
+pub enum ParseMode {
+  #[default]
+  Module,
+  Script,
+}
+
+impl IdentifiableEnum<ParseMode> for ParseMode {
+  fn get_id(&self) -> i32 {
+    match self {
+      ParseMode::Module => 0,
+      ParseMode::Script => 1,
+    }
+  }
+  fn parse_by_id(id: i32) -> ParseMode {
+    match id {
+      1 => ParseMode::Script,
+      _ => ParseMode::Module,
+    }
+  }
+}
+
+impl FromJniType for ParseMode {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> ParseMode {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_PARSE_MODE.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    ParseMode::parse_by_id(id)
+  }
+}
+
+impl ToJniType for ParseMode {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_PARSE_MODE.as_ref().unwrap() }.parse(env, self.get_id())
+  }
+}
+
+impl IdentifiableEnum<Sign> for Sign {
+  fn get_id(&self) -> i32 {
+    match self {
+      Sign::NoSign => 0,
+      Sign::Minus => 1,
+      Sign::Plus => 2,
+    }
+  }
+  fn parse_by_id(id: i32) -> Sign {
+    match id {
+      1 => Sign::Minus,
+      2 => Sign::Plus,
+      _ => Sign::NoSign,
+    }
+  }
+}
+
+impl FromJniType for Sign {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> Sign {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_BIG_INT_SIGN.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    Sign::parse_by_id(id)
+  }
+}
+
+impl ToJniType for Sign {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_BIG_INT_SIGN.as_ref().unwrap() }.parse(env, self.get_id())
+  }
+}
+
+impl IdentifiableEnum<SourceMapOption> for SourceMapOption {
+  fn get_id(&self) -> i32 {
+    match self {
+      SourceMapOption::Inline => 0,
+      SourceMapOption::Separate => 1,
+      SourceMapOption::None => 2,
+    }
+  }
+  fn parse_by_id(id: i32) -> SourceMapOption {
+    match id {
+      1 => SourceMapOption::Separate,
+      2 => SourceMapOption::None,
+      _ => SourceMapOption::Inline,
+    }
+  }
+}
+
+impl FromJniType for SourceMapOption {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> SourceMapOption {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_SOURCE_MAP_OPTION.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    SourceMapOption::parse_by_id(id)
+  }
+}
+
+impl ToJniType for SourceMapOption {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_SOURCE_MAP_OPTION.as_ref().unwrap() }.parse(env, self.get_id())
+  }
 }
 
 #[derive(Default, Debug, Copy, Clone)]
@@ -513,749 +1963,284 @@ impl TokenType {
   }
 }
 
-pub struct JavaTokenType {
-  #[allow(dead_code)]
-  class: GlobalRef,
-  method_get_id: JMethodID,
-  method_parse: JStaticMethodID,
-}
-unsafe impl Send for JavaTokenType {}
-unsafe impl Sync for JavaTokenType {}
-
-impl JavaTokenType {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
-    let class = env
-      .find_class("com/caoccao/javet/swc4j/tokens/Swc4jTokenType")
-      .expect("Couldn't find class Swc4jTokenType");
-    let class = env
-      .new_global_ref(class)
-      .expect("Couldn't globalize class Swc4jTokenType");
-    let method_get_id = env
-      .get_method_id(&class, "getId", "()I")
-      .expect("Couldn't find method Swc4jTokenType.getId");
-    let method_parse = env
-      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenType;")
-      .expect("Couldn't find static method Swc4jTokenType.parse");
-    JavaTokenType {
-      class,
-      method_get_id,
-      method_parse,
-    }
-  }
-
-  pub fn get_token_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> TokenType {
-    let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
+impl FromJniType for TokenType {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> TokenType {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_TOKEN_TYPE.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
     TokenType::parse_by_id(id)
   }
+}
 
-  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+impl ToJniType for TokenType {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
   where
     'local: 'a,
   {
-    let id = int_to_jvalue!(id);
-    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+    unsafe { JAVA_CLASS_TOKEN_TYPE.as_ref().unwrap() }.parse(env, self.get_id())
   }
 }
 
-pub struct JavaCommentKind {
-  #[allow(dead_code)]
-  class: GlobalRef,
-  method_parse: JStaticMethodID,
-}
-unsafe impl Send for JavaCommentKind {}
-unsafe impl Sync for JavaCommentKind {}
-
-impl JavaCommentKind {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
-    let class = env
-      .find_class("com/caoccao/javet/swc4j/comments/Swc4jCommentKind")
-      .expect("Couldn't find class Swc4jCommentKind");
-    let class = env
-      .new_global_ref(class)
-      .expect("Couldn't globalize class Swc4jCommentKind");
-    let method_parse = env
-      .get_static_method_id(
-        &class,
-        "parse",
-        "(I)Lcom/caoccao/javet/swc4j/comments/Swc4jCommentKind;",
-      )
-      .expect("Couldn't find static method Swc4jCommentKind.parse");
-    JavaCommentKind { class, method_parse }
+impl IdentifiableEnum<TruePlusMinus> for TruePlusMinus {
+  fn get_id(&self) -> i32 {
+    match self {
+      TruePlusMinus::True => 0,
+      TruePlusMinus::Plus => 1,
+      TruePlusMinus::Minus => 2,
+    }
   }
+  fn parse_by_id(id: i32) -> TruePlusMinus {
+    match id {
+      1 => TruePlusMinus::Plus,
+      2 => TruePlusMinus::Minus,
+      _ => TruePlusMinus::True,
+    }
+  }
+}
 
-  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+impl FromJniType for TruePlusMinus {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> TruePlusMinus {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_TRUE_PLUS_MINUS.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    TruePlusMinus::parse_by_id(id)
+  }
+}
+
+impl ToJniType for TruePlusMinus {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
   where
     'local: 'a,
   {
-    let id = int_to_jvalue!(id);
-    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+    unsafe { JAVA_CLASS_TRUE_PLUS_MINUS.as_ref().unwrap() }.parse(env, self.get_id())
   }
 }
 
-impl IdentifiableEnum<CommentKind> for CommentKind {
+impl IdentifiableEnum<TsKeywordTypeKind> for TsKeywordTypeKind {
   fn get_id(&self) -> i32 {
     match self {
-      CommentKind::Line => 0,
-      CommentKind::Block => 1,
+      TsKeywordTypeKind::TsAnyKeyword => 0,
+      TsKeywordTypeKind::TsBigIntKeyword => 1,
+      TsKeywordTypeKind::TsBooleanKeyword => 2,
+      TsKeywordTypeKind::TsIntrinsicKeyword => 3,
+      TsKeywordTypeKind::TsNeverKeyword => 4,
+      TsKeywordTypeKind::TsNullKeyword => 5,
+      TsKeywordTypeKind::TsNumberKeyword => 6,
+      TsKeywordTypeKind::TsObjectKeyword => 7,
+      TsKeywordTypeKind::TsStringKeyword => 8,
+      TsKeywordTypeKind::TsSymbolKeyword => 9,
+      TsKeywordTypeKind::TsUndefinedKeyword => 10,
+      TsKeywordTypeKind::TsUnknownKeyword => 11,
+      TsKeywordTypeKind::TsVoidKeyword => 12,
     }
   }
-  fn parse_by_id(id: i32) -> CommentKind {
+  fn parse_by_id(id: i32) -> TsKeywordTypeKind {
     match id {
-      1 => CommentKind::Block,
-      _ => CommentKind::Line,
+      1 => TsKeywordTypeKind::TsBigIntKeyword,
+      2 => TsKeywordTypeKind::TsBooleanKeyword,
+      3 => TsKeywordTypeKind::TsIntrinsicKeyword,
+      4 => TsKeywordTypeKind::TsNeverKeyword,
+      5 => TsKeywordTypeKind::TsNullKeyword,
+      6 => TsKeywordTypeKind::TsNumberKeyword,
+      7 => TsKeywordTypeKind::TsObjectKeyword,
+      8 => TsKeywordTypeKind::TsStringKeyword,
+      9 => TsKeywordTypeKind::TsSymbolKeyword,
+      10 => TsKeywordTypeKind::TsUndefinedKeyword,
+      11 => TsKeywordTypeKind::TsUnknownKeyword,
+      12 => TsKeywordTypeKind::TsVoidKeyword,
+      _ => TsKeywordTypeKind::TsAnyKeyword,
     }
   }
 }
 
-pub struct JavaEsVersion {
-  #[allow(dead_code)]
-  class: GlobalRef,
-  method_get_id: JMethodID,
-}
-unsafe impl Send for JavaEsVersion {}
-unsafe impl Sync for JavaEsVersion {}
-
-impl IdentifiableEnum<EsVersion> for EsVersion {
-  fn get_id(&self) -> i32 {
-    match self {
-      EsVersion::Es3 => 1,
-      EsVersion::Es5 => 2,
-      EsVersion::Es2015 => 3,
-      EsVersion::Es2016 => 4,
-      EsVersion::Es2017 => 5,
-      EsVersion::Es2018 => 6,
-      EsVersion::Es2019 => 7,
-      EsVersion::Es2020 => 8,
-      EsVersion::Es2021 => 9,
-      EsVersion::Es2022 => 10,
-      EsVersion::EsNext => 0,
-    }
-  }
-  fn parse_by_id(id: i32) -> EsVersion {
-    match id {
-      1 => EsVersion::Es3,
-      2 => EsVersion::Es5,
-      3 => EsVersion::Es2015,
-      4 => EsVersion::Es2016,
-      5 => EsVersion::Es2017,
-      6 => EsVersion::Es2018,
-      7 => EsVersion::Es2019,
-      8 => EsVersion::Es2020,
-      9 => EsVersion::Es2021,
-      10 => EsVersion::Es2022,
-      _ => EsVersion::EsNext,
-    }
+impl FromJniType for TsKeywordTypeKind {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> TsKeywordTypeKind {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_TS_KEYWORD_TYPE_KIND.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    TsKeywordTypeKind::parse_by_id(id)
   }
 }
 
-impl JavaEsVersion {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
-    let class = env
-      .find_class("com/caoccao/javet/swc4j/enums/Swc4jEsVersion")
-      .expect("Couldn't find class Swc4jEsVersion");
-    let class = env
-      .new_global_ref(class)
-      .expect("Couldn't globalize class Swc4jEsVersion");
-    let method_get_id = env
-      .get_method_id(&class, "getId", "()I")
-      .expect("Couldn't find method Swc4jEsVersion.getId");
-    JavaEsVersion { class, method_get_id }
-  }
-
-  pub fn get_es_version<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'a>,
-  ) -> EsVersion {
-    let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
-    EsVersion::parse_by_id(id)
-  }
-}
-
-impl IdentifiableEnum<ImportsNotUsedAsValues> for ImportsNotUsedAsValues {
-  fn get_id(&self) -> i32 {
-    match self {
-      ImportsNotUsedAsValues::Remove => 0,
-      ImportsNotUsedAsValues::Preserve => 1,
-      ImportsNotUsedAsValues::Error => 2,
-    }
-  }
-  fn parse_by_id(id: i32) -> ImportsNotUsedAsValues {
-    match id {
-      0 => ImportsNotUsedAsValues::Remove,
-      1 => ImportsNotUsedAsValues::Preserve,
-      _ => ImportsNotUsedAsValues::Error,
-    }
-  }
-}
-
-pub struct JavaImportsNotUsedAsValues {
-  #[allow(dead_code)]
-  class: GlobalRef,
-  method_get_id: JMethodID,
-}
-unsafe impl Send for JavaImportsNotUsedAsValues {}
-unsafe impl Sync for JavaImportsNotUsedAsValues {}
-
-impl JavaImportsNotUsedAsValues {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
-    let class = env
-      .find_class("com/caoccao/javet/swc4j/enums/Swc4jImportsNotUsedAsValues")
-      .expect("Couldn't find class Swc4jImportsNotUsedAsValues");
-    let class = env
-      .new_global_ref(class)
-      .expect("Couldn't globalize class Swc4jImportsNotUsedAsValues");
-    let method_get_id = env
-      .get_method_id(&class, "getId", "()I")
-      .expect("Couldn't find method Swc4jImportsNotUsedAsValues.getId");
-    JavaImportsNotUsedAsValues { class, method_get_id }
-  }
-
-  pub fn get_imports_not_used_as_values<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'a>,
-  ) -> ImportsNotUsedAsValues {
-    let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
-    ImportsNotUsedAsValues::parse_by_id(id)
-  }
-}
-
-impl IdentifiableEnum<MediaType> for MediaType {
-  fn get_id(&self) -> i32 {
-    match self {
-      MediaType::JavaScript => 0,
-      MediaType::Jsx => 1,
-      MediaType::Mjs => 2,
-      MediaType::Cjs => 3,
-      MediaType::TypeScript => 4,
-      MediaType::Mts => 5,
-      MediaType::Cts => 6,
-      MediaType::Dts => 7,
-      MediaType::Dmts => 8,
-      MediaType::Dcts => 9,
-      MediaType::Tsx => 10,
-      MediaType::Json => 11,
-      MediaType::Wasm => 12,
-      MediaType::TsBuildInfo => 13,
-      MediaType::SourceMap => 14,
-      MediaType::Unknown => 15,
-    }
-  }
-  fn parse_by_id(id: i32) -> MediaType {
-    match id {
-      0 => MediaType::JavaScript,
-      1 => MediaType::Jsx,
-      2 => MediaType::Mjs,
-      3 => MediaType::Cjs,
-      4 => MediaType::TypeScript,
-      5 => MediaType::Mts,
-      6 => MediaType::Cts,
-      7 => MediaType::Dts,
-      8 => MediaType::Dmts,
-      9 => MediaType::Dcts,
-      10 => MediaType::Tsx,
-      11 => MediaType::Json,
-      12 => MediaType::Wasm,
-      13 => MediaType::TsBuildInfo,
-      14 => MediaType::SourceMap,
-      _ => MediaType::Unknown,
-    }
-  }
-}
-
-pub struct JavaMediaType {
-  #[allow(dead_code)]
-  class: GlobalRef,
-  method_get_id: JMethodID,
-  method_parse: JStaticMethodID,
-}
-unsafe impl Send for JavaMediaType {}
-unsafe impl Sync for JavaMediaType {}
-
-impl JavaMediaType {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
-    let class = env
-      .find_class("com/caoccao/javet/swc4j/enums/Swc4jMediaType")
-      .expect("Couldn't find class Swc4jMediaType");
-    let class = env
-      .new_global_ref(class)
-      .expect("Couldn't globalize class Swc4jMediaType");
-    let method_get_id = env
-      .get_method_id(&class, "getId", "()I")
-      .expect("Couldn't find method Swc4jMediaType.getId");
-    let method_parse = env
-      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;")
-      .expect("Couldn't find static method Swc4jMediaType.parse");
-    JavaMediaType {
-      class,
-      method_get_id,
-      method_parse,
-    }
-  }
-
-  pub fn get_media_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> MediaType {
-    let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
-    MediaType::parse_by_id(id)
-  }
-
-  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+impl ToJniType for TsKeywordTypeKind {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
   where
     'local: 'a,
   {
-    let id = int_to_jvalue!(id);
-    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+    unsafe { JAVA_CLASS_TS_KEYWORD_TYPE_KIND.as_ref().unwrap() }.parse(env, self.get_id())
   }
 }
 
-#[derive(Default, Debug, Copy, Clone)]
-pub enum ParseMode {
-  #[default]
-  Module,
-  Script,
-}
-
-impl IdentifiableEnum<ParseMode> for ParseMode {
+impl IdentifiableEnum<TsTypeOperatorOp> for TsTypeOperatorOp {
   fn get_id(&self) -> i32 {
     match self {
-      ParseMode::Module => 0,
-      ParseMode::Script => 1,
+      TsTypeOperatorOp::KeyOf => 0,
+      TsTypeOperatorOp::ReadOnly => 1,
+      TsTypeOperatorOp::Unique => 2,
     }
   }
-  fn parse_by_id(id: i32) -> ParseMode {
+  fn parse_by_id(id: i32) -> TsTypeOperatorOp {
     match id {
-      1 => ParseMode::Script,
-      _ => ParseMode::Module,
+      1 => TsTypeOperatorOp::ReadOnly,
+      2 => TsTypeOperatorOp::Unique,
+      _ => TsTypeOperatorOp::KeyOf,
     }
   }
 }
 
-pub struct JavaParseMode {
-  #[allow(dead_code)]
-  class: GlobalRef,
-  method_get_id: JMethodID,
-  method_parse: JStaticMethodID,
+impl FromJniType for TsTypeOperatorOp {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> TsTypeOperatorOp {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_TS_TYPE_OPERATOR_OP.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    TsTypeOperatorOp::parse_by_id(id)
+  }
 }
-unsafe impl Send for JavaParseMode {}
-unsafe impl Sync for JavaParseMode {}
 
-impl JavaParseMode {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
-    let class = env
-      .find_class("com/caoccao/javet/swc4j/enums/Swc4jParseMode")
-      .expect("Couldn't find class Swc4jParseMode");
-    let class = env
-      .new_global_ref(class)
-      .expect("Couldn't globalize class Swc4jParseMode");
-    let method_get_id = env
-      .get_method_id(&class, "getId", "()I")
-      .expect("Couldn't find method Swc4jParseMode.getId");
-    let method_parse = env
-      .get_static_method_id(&class, "parse", "(I)Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;")
-      .expect("Couldn't find static method Swc4jParseMode.parse");
-    JavaParseMode {
-      class,
-      method_get_id,
-      method_parse,
-    }
-  }
-
-  pub fn get_parse_mode<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> ParseMode {
-    let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
-    ParseMode::parse_by_id(id)
-  }
-
-  pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+impl ToJniType for TsTypeOperatorOp {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
   where
     'local: 'a,
   {
-    let id = int_to_jvalue!(id);
-    call_static_as_object!(env, &self.class, &self.method_parse, &[id], "parse()")
+    unsafe { JAVA_CLASS_TS_TYPE_OPERATOR_OP.as_ref().unwrap() }.parse(env, self.get_id())
   }
 }
 
-impl IdentifiableEnum<SourceMapOption> for SourceMapOption {
+impl IdentifiableEnum<UnaryOp> for UnaryOp {
   fn get_id(&self) -> i32 {
     match self {
-      SourceMapOption::Inline => 0,
-      SourceMapOption::Separate => 1,
-      SourceMapOption::None => 2,
+      UnaryOp::Void => 0,
+      UnaryOp::Bang => 1,
+      UnaryOp::Delete => 2,
+      UnaryOp::Minus => 3,
+      UnaryOp::Plus => 4,
+      UnaryOp::Tilde => 5,
+      UnaryOp::TypeOf => 6,
     }
   }
-  fn parse_by_id(id: i32) -> SourceMapOption {
+  fn parse_by_id(id: i32) -> UnaryOp {
     match id {
-      1 => SourceMapOption::Separate,
-      2 => SourceMapOption::None,
-      _ => SourceMapOption::Inline,
+      1 => UnaryOp::Bang,
+      2 => UnaryOp::Delete,
+      3 => UnaryOp::Minus,
+      4 => UnaryOp::Plus,
+      5 => UnaryOp::Tilde,
+      6 => UnaryOp::TypeOf,
+      _ => UnaryOp::Void,
     }
   }
 }
 
-pub struct JavaSourceMapOption {
-  #[allow(dead_code)]
-  class: GlobalRef,
-  method_get_id: JMethodID,
-}
-unsafe impl Send for JavaSourceMapOption {}
-unsafe impl Sync for JavaSourceMapOption {}
-
-impl JavaSourceMapOption {
-  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
-    let class = env
-      .find_class("com/caoccao/javet/swc4j/enums/Swc4jSourceMapOption")
-      .expect("Couldn't find class Swc4jSourceMapOption");
-    let class = env
-      .new_global_ref(class)
-      .expect("Couldn't globalize class Swc4jSourceMapOption");
-    let method_get_id = env
-      .get_method_id(&class, "getId", "()I")
-      .expect("Couldn't find method Swc4jSourceMapOption.getId");
-    JavaSourceMapOption { class, method_get_id }
-  }
-
-  pub fn get_source_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> SourceMapOption {
-    let id = call_as_int!(env, obj.as_ref(), self.method_get_id, &[], "getId()");
-    SourceMapOption::parse_by_id(id)
+impl FromJniType for UnaryOp {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> UnaryOp {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_UNARY_OP.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    UnaryOp::parse_by_id(id)
   }
 }
 
-pub static mut JAVA_COMMENT_KIND: Option<JavaCommentKind> = None;
-pub static mut JAVA_ES_VERSION: Option<JavaEsVersion> = None;
-pub static mut JAVA_IMPORTS_NOT_USED_AS_VALUES: Option<JavaImportsNotUsedAsValues> = None;
-pub static mut JAVA_MEDIA_TYPE: Option<JavaMediaType> = None;
-pub static mut JAVA_PARSE_MODE: Option<JavaParseMode> = None;
-pub static mut JAVA_SOURCE_MAP_OPTION: Option<JavaSourceMapOption> = None;
-pub static mut JAVA_TOKEN_TYPE: Option<JavaTokenType> = None;
-
-pub fn init<'local>(env: &mut JNIEnv<'local>) {
-  unsafe {
-    JAVA_COMMENT_KIND = Some(JavaCommentKind::new(env));
-    JAVA_ES_VERSION = Some(JavaEsVersion::new(env));
-    JAVA_IMPORTS_NOT_USED_AS_VALUES = Some(JavaImportsNotUsedAsValues::new(env));
-    JAVA_MEDIA_TYPE = Some(JavaMediaType::new(env));
-    JAVA_PARSE_MODE = Some(JavaParseMode::new(env));
-    JAVA_SOURCE_MAP_OPTION = Some(JavaSourceMapOption::new(env));
-    JAVA_TOKEN_TYPE = Some(JavaTokenType::new(env));
+impl ToJniType for UnaryOp {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_UNARY_OP.as_ref().unwrap() }.parse(env, self.get_id())
   }
 }
 
-pub mod swc_enums {
-  use crate::enums::IdentifiableEnum;
-  use deno_ast::swc::ast::*;
-  use num_bigint::Sign;
-
-  impl IdentifiableEnum<AssignOp> for AssignOp {
-    fn get_id(&self) -> i32 {
-      match self {
-        AssignOp::AddAssign => 0,
-        AssignOp::AndAssign => 1,
-        AssignOp::Assign => 2,
-        AssignOp::BitAndAssign => 3,
-        AssignOp::BitOrAssign => 4,
-        AssignOp::BitXorAssign => 5,
-        AssignOp::DivAssign => 6,
-        AssignOp::ExpAssign => 7,
-        AssignOp::LShiftAssign => 8,
-        AssignOp::ModAssign => 9,
-        AssignOp::MulAssign => 10,
-        AssignOp::NullishAssign => 11,
-        AssignOp::OrAssign => 12,
-        AssignOp::RShiftAssign => 13,
-        AssignOp::SubAssign => 14,
-        AssignOp::ZeroFillRShiftAssign => 15,
-      }
-    }
-    fn parse_by_id(id: i32) -> AssignOp {
-      match id {
-        1 => AssignOp::AndAssign,
-        2 => AssignOp::Assign,
-        3 => AssignOp::BitAndAssign,
-        4 => AssignOp::BitOrAssign,
-        5 => AssignOp::BitXorAssign,
-        6 => AssignOp::DivAssign,
-        7 => AssignOp::ExpAssign,
-        8 => AssignOp::LShiftAssign,
-        9 => AssignOp::ModAssign,
-        10 => AssignOp::MulAssign,
-        11 => AssignOp::NullishAssign,
-        12 => AssignOp::OrAssign,
-        13 => AssignOp::RShiftAssign,
-        14 => AssignOp::SubAssign,
-        15 => AssignOp::ZeroFillRShiftAssign,
-        _ => AssignOp::AddAssign,
-      }
+impl IdentifiableEnum<UpdateOp> for UpdateOp {
+  fn get_id(&self) -> i32 {
+    match self {
+      UpdateOp::PlusPlus => 0,
+      UpdateOp::MinusMinus => 1,
     }
   }
-
-  impl IdentifiableEnum<BinaryOp> for BinaryOp {
-    fn get_id(&self) -> i32 {
-      match self {
-        BinaryOp::Add => 0,
-        BinaryOp::BitAnd => 1,
-        BinaryOp::BitOr => 2,
-        BinaryOp::BitXor => 3,
-        BinaryOp::Div => 4,
-        BinaryOp::EqEq => 5,
-        BinaryOp::EqEqEq => 6,
-        BinaryOp::Exp => 7,
-        BinaryOp::Gt => 8,
-        BinaryOp::GtEq => 9,
-        BinaryOp::In => 10,
-        BinaryOp::InstanceOf => 11,
-        BinaryOp::LogicalAnd => 12,
-        BinaryOp::LogicalOr => 13,
-        BinaryOp::LShift => 14,
-        BinaryOp::Lt => 15,
-        BinaryOp::LtEq => 16,
-        BinaryOp::Mod => 17,
-        BinaryOp::Mul => 18,
-        BinaryOp::NotEq => 19,
-        BinaryOp::NotEqEq => 20,
-        BinaryOp::NullishCoalescing => 21,
-        BinaryOp::RShift => 22,
-        BinaryOp::Sub => 23,
-        BinaryOp::ZeroFillRShift => 24,
-      }
-    }
-    fn parse_by_id(id: i32) -> BinaryOp {
-      match id {
-        1 => BinaryOp::BitAnd,
-        2 => BinaryOp::BitOr,
-        3 => BinaryOp::BitXor,
-        4 => BinaryOp::Div,
-        5 => BinaryOp::EqEq,
-        6 => BinaryOp::EqEqEq,
-        7 => BinaryOp::Exp,
-        8 => BinaryOp::Gt,
-        9 => BinaryOp::GtEq,
-        10 => BinaryOp::In,
-        11 => BinaryOp::InstanceOf,
-        12 => BinaryOp::LogicalAnd,
-        13 => BinaryOp::LogicalOr,
-        14 => BinaryOp::LShift,
-        15 => BinaryOp::Lt,
-        16 => BinaryOp::LtEq,
-        17 => BinaryOp::Mod,
-        18 => BinaryOp::Mul,
-        19 => BinaryOp::NotEq,
-        20 => BinaryOp::NotEqEq,
-        21 => BinaryOp::NullishCoalescing,
-        22 => BinaryOp::RShift,
-        23 => BinaryOp::Sub,
-        24 => BinaryOp::ZeroFillRShift,
-        _ => BinaryOp::Add,
-      }
+  fn parse_by_id(id: i32) -> UpdateOp {
+    match id {
+      1 => UpdateOp::MinusMinus,
+      _ => UpdateOp::PlusPlus,
     }
   }
+}
 
-  impl IdentifiableEnum<Accessibility> for Accessibility {
-    fn get_id(&self) -> i32 {
-      match self {
-        Accessibility::Public => 0,
-        Accessibility::Protected => 1,
-        Accessibility::Private => 2,
-      }
-    }
-    fn parse_by_id(id: i32) -> Accessibility {
-      match id {
-        1 => Accessibility::Protected,
-        2 => Accessibility::Private,
-        _ => Accessibility::Public,
-      }
+impl FromJniType for UpdateOp {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> UpdateOp {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_UPDATE_OP.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    UpdateOp::parse_by_id(id)
+  }
+}
+
+impl ToJniType for UpdateOp {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_UPDATE_OP.as_ref().unwrap() }.parse(env, self.get_id())
+  }
+}
+
+impl IdentifiableEnum<VarDeclKind> for VarDeclKind {
+  fn get_id(&self) -> i32 {
+    match self {
+      VarDeclKind::Const => 0,
+      VarDeclKind::Let => 1,
+      VarDeclKind::Var => 2,
     }
   }
-
-  impl IdentifiableEnum<ImportPhase> for ImportPhase {
-    fn get_id(&self) -> i32 {
-      match self {
-        ImportPhase::Defer => 0,
-        ImportPhase::Evaluation => 1,
-        ImportPhase::Source => 2,
-      }
-    }
-    fn parse_by_id(id: i32) -> ImportPhase {
-      match id {
-        1 => ImportPhase::Evaluation,
-        2 => ImportPhase::Source,
-        _ => ImportPhase::Defer,
-      }
+  fn parse_by_id(id: i32) -> VarDeclKind {
+    match id {
+      1 => VarDeclKind::Let,
+      2 => VarDeclKind::Var,
+      _ => VarDeclKind::Const,
     }
   }
+}
 
-  impl IdentifiableEnum<MetaPropKind> for MetaPropKind {
-    fn get_id(&self) -> i32 {
-      match self {
-        MetaPropKind::NewTarget => 0,
-        MetaPropKind::ImportMeta => 1,
-      }
-    }
-    fn parse_by_id(id: i32) -> MetaPropKind {
-      match id {
-        1 => MetaPropKind::ImportMeta,
-        _ => MetaPropKind::NewTarget,
-      }
-    }
+impl FromJniType for VarDeclKind {
+  fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> VarDeclKind {
+    let id = call_as_int!(
+      env,
+      obj.as_ref(),
+      JAVA_CLASS_VAR_DECL_KIND.as_ref().unwrap().method_get_id,
+      &[],
+      "getId()"
+    );
+    VarDeclKind::parse_by_id(id)
   }
+}
 
-  impl IdentifiableEnum<MethodKind> for MethodKind {
-    fn get_id(&self) -> i32 {
-      match self {
-        MethodKind::Method => 0,
-        MethodKind::Getter => 1,
-        MethodKind::Setter => 2,
-      }
-    }
-    fn parse_by_id(id: i32) -> MethodKind {
-      match id {
-        1 => MethodKind::Getter,
-        2 => MethodKind::Setter,
-        _ => MethodKind::Method,
-      }
-    }
-  }
-
-  impl IdentifiableEnum<Sign> for Sign {
-    fn get_id(&self) -> i32 {
-      match self {
-        Sign::NoSign => 0,
-        Sign::Minus => 1,
-        Sign::Plus => 2,
-      }
-    }
-    fn parse_by_id(id: i32) -> Sign {
-      match id {
-        1 => Sign::Minus,
-        2 => Sign::Plus,
-        _ => Sign::NoSign,
-      }
-    }
-  }
-
-  impl IdentifiableEnum<TsKeywordTypeKind> for TsKeywordTypeKind {
-    fn get_id(&self) -> i32 {
-      match self {
-        TsKeywordTypeKind::TsAnyKeyword => 0,
-        TsKeywordTypeKind::TsBigIntKeyword => 1,
-        TsKeywordTypeKind::TsBooleanKeyword => 2,
-        TsKeywordTypeKind::TsIntrinsicKeyword => 3,
-        TsKeywordTypeKind::TsNeverKeyword => 4,
-        TsKeywordTypeKind::TsNullKeyword => 5,
-        TsKeywordTypeKind::TsNumberKeyword => 6,
-        TsKeywordTypeKind::TsObjectKeyword => 7,
-        TsKeywordTypeKind::TsStringKeyword => 8,
-        TsKeywordTypeKind::TsSymbolKeyword => 9,
-        TsKeywordTypeKind::TsUndefinedKeyword => 10,
-        TsKeywordTypeKind::TsUnknownKeyword => 11,
-        TsKeywordTypeKind::TsVoidKeyword => 12,
-      }
-    }
-    fn parse_by_id(id: i32) -> TsKeywordTypeKind {
-      match id {
-        1 => TsKeywordTypeKind::TsBigIntKeyword,
-        2 => TsKeywordTypeKind::TsBooleanKeyword,
-        3 => TsKeywordTypeKind::TsIntrinsicKeyword,
-        4 => TsKeywordTypeKind::TsNeverKeyword,
-        5 => TsKeywordTypeKind::TsNullKeyword,
-        6 => TsKeywordTypeKind::TsNumberKeyword,
-        7 => TsKeywordTypeKind::TsObjectKeyword,
-        8 => TsKeywordTypeKind::TsStringKeyword,
-        9 => TsKeywordTypeKind::TsSymbolKeyword,
-        10 => TsKeywordTypeKind::TsUndefinedKeyword,
-        11 => TsKeywordTypeKind::TsUnknownKeyword,
-        12 => TsKeywordTypeKind::TsVoidKeyword,
-        _ => TsKeywordTypeKind::TsAnyKeyword,
-      }
-    }
-  }
-
-  impl IdentifiableEnum<TruePlusMinus> for TruePlusMinus {
-    fn get_id(&self) -> i32 {
-      match self {
-        TruePlusMinus::True => 0,
-        TruePlusMinus::Plus => 1,
-        TruePlusMinus::Minus => 2,
-      }
-    }
-    fn parse_by_id(id: i32) -> TruePlusMinus {
-      match id {
-        1 => TruePlusMinus::Plus,
-        2 => TruePlusMinus::Minus,
-        _ => TruePlusMinus::True,
-      }
-    }
-  }
-
-  impl IdentifiableEnum<TsTypeOperatorOp> for TsTypeOperatorOp {
-    fn get_id(&self) -> i32 {
-      match self {
-        TsTypeOperatorOp::KeyOf => 0,
-        TsTypeOperatorOp::ReadOnly => 1,
-        TsTypeOperatorOp::Unique => 2,
-      }
-    }
-    fn parse_by_id(id: i32) -> TsTypeOperatorOp {
-      match id {
-        1 => TsTypeOperatorOp::ReadOnly,
-        2 => TsTypeOperatorOp::Unique,
-        _ => TsTypeOperatorOp::KeyOf,
-      }
-    }
-  }
-
-  impl IdentifiableEnum<UnaryOp> for UnaryOp {
-    fn get_id(&self) -> i32 {
-      match self {
-        UnaryOp::Void => 0,
-        UnaryOp::Bang => 1,
-        UnaryOp::Delete => 2,
-        UnaryOp::Minus => 3,
-        UnaryOp::Plus => 4,
-        UnaryOp::Tilde => 5,
-        UnaryOp::TypeOf => 6,
-      }
-    }
-    fn parse_by_id(id: i32) -> UnaryOp {
-      match id {
-        1 => UnaryOp::Bang,
-        2 => UnaryOp::Delete,
-        3 => UnaryOp::Minus,
-        4 => UnaryOp::Plus,
-        5 => UnaryOp::Tilde,
-        6 => UnaryOp::TypeOf,
-        _ => UnaryOp::Void,
-      }
-    }
-  }
-
-  impl IdentifiableEnum<UpdateOp> for UpdateOp {
-    fn get_id(&self) -> i32 {
-      match self {
-        UpdateOp::PlusPlus => 0,
-        UpdateOp::MinusMinus => 1,
-      }
-    }
-    fn parse_by_id(id: i32) -> UpdateOp {
-      match id {
-        1 => UpdateOp::MinusMinus,
-        _ => UpdateOp::PlusPlus,
-      }
-    }
-  }
-
-  impl IdentifiableEnum<VarDeclKind> for VarDeclKind {
-    fn get_id(&self) -> i32 {
-      match self {
-        VarDeclKind::Const => 0,
-        VarDeclKind::Let => 1,
-        VarDeclKind::Var => 2,
-      }
-    }
-    fn parse_by_id(id: i32) -> VarDeclKind {
-      match id {
-        1 => VarDeclKind::Let,
-        2 => VarDeclKind::Var,
-        _ => VarDeclKind::Const,
-      }
-    }
+impl ToJniType for VarDeclKind {
+  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    unsafe { JAVA_CLASS_VAR_DECL_KIND.as_ref().unwrap() }.parse(env, self.get_id())
   }
 }

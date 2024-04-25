@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.jni2rust;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.Swc4jAstFactory;
 import com.caoccao.javet.swc4j.ast.Swc4jAstStore;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.comments.Swc4jComment;
@@ -156,7 +155,74 @@ public class TestCodeGen {
     }
 
     @Test
-    public void testStruct() throws IOException {
+    public void testStructJNI() throws IOException {
+        Path rustFilePath = new File(OSUtils.WORKING_DIRECTORY).toPath()
+                .resolve(Jni2RustFilePath.AstUtils.getFilePath());
+        File rustFile = rustFilePath.toFile();
+        assertTrue(rustFile.exists());
+        assertTrue(rustFile.isFile());
+        assertTrue(rustFile.canRead());
+        assertTrue(rustFile.canWrite());
+        String startSign = "\n/* JNI Begin */\n";
+        String endSign = "/* JNI End */\n";
+        byte[] originalBuffer = Files.readAllBytes(rustFilePath);
+        String fileContent = new String(originalBuffer, StandardCharsets.UTF_8);
+        final int startPosition = fileContent.indexOf(startSign) + startSign.length();
+        final int endPosition = fileContent.indexOf(endSign);
+        assertTrue(startPosition > 0, "Start position is invalid");
+        assertTrue(endPosition > startPosition, "End position is invalid");
+        final AtomicInteger structCounter = new AtomicInteger();
+        List<String> lines = new ArrayList<>();
+        List<String> declarationLines = new ArrayList<>();
+        List<String> initLines = new ArrayList<>();
+        Swc4jAstStore.getInstance().getStructMap().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(entry -> {
+                    Class<?> clazz = entry.getValue();
+                    Constructor<?>[] constructors = clazz.getConstructors();
+                    assertEquals(1, constructors.length);
+                    Constructor<?> constructor = constructors[0];
+                    final Map<String, Integer> fieldOrderMap = new HashMap<>(constructor.getParameterCount());
+                    int fieldOrder = 0;
+                    for (Parameter parameter : constructor.getParameters()) {
+                        fieldOrderMap.put(parameter.getName(), fieldOrder);
+                        ++fieldOrder;
+                    }
+                    Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
+                    String className = clazz.getSimpleName();
+                    String structName = jni2RustClassUtils.getName();
+                    Jni2Rust<?> jni2Rust = new Jni2Rust<>(clazz);
+                    lines.addAll(jni2Rust.getLines());
+                    lines.add("");
+                    declarationLines.add(String.format("static mut JAVA_CLASS_%s: Option<Java%s> = None;",
+                            StringUtils.toSnakeCase(structName).toUpperCase(),
+                            className));
+                    initLines.add(String.format("    JAVA_CLASS_%s = Some(Java%s::new(env));",
+                            StringUtils.toSnakeCase(structName).toUpperCase(),
+                            className));
+                    structCounter.incrementAndGet();
+                });
+        lines.addAll(declarationLines);
+        lines.add("\npub fn init<'local>(env: &mut JNIEnv<'local>) {");
+        lines.add("  unsafe {");
+        lines.addAll(initLines);
+        lines.add("  }");
+        lines.add("}\n");
+        assertTrue(structCounter.get() > 0);
+        StringBuilder sb = new StringBuilder(fileContent.length());
+        sb.append(fileContent, 0, startPosition);
+        String code = StringUtils.join("\n", lines);
+        sb.append(code);
+        sb.append(fileContent, endPosition, fileContent.length());
+        byte[] newBuffer = sb.toString().getBytes(StandardCharsets.UTF_8);
+        if (!Arrays.equals(originalBuffer, newBuffer)) {
+            // Only generate document when content is changed.
+            Files.write(rustFilePath, newBuffer, StandardOpenOption.TRUNCATE_EXISTING);
+        }
+    }
+
+    @Test
+    public void testStructRegistrationAndCreation() throws IOException {
         Path rustFilePath = new File(OSUtils.WORKING_DIRECTORY).toPath()
                 .resolve(Jni2RustFilePath.AstUtils.getFilePath());
         File rustFile = rustFilePath.toFile();
@@ -326,7 +392,6 @@ public class TestCodeGen {
                         lines.add("where");
                         lines.add("  'local: 'a,");
                         lines.add("{");
-                        lines.add("  let java_ast_factory = unsafe { JAVA_AST_FACTORY.as_ref().unwrap() };");
                         lines.add(String.format("  let java_span_ex = map.get_span_ex_by_span(&node.span%s).to_jni_type(env);", spanCall));
                         ReflectionUtils.getDeclaredFields(clazz).values().stream()
                                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
@@ -374,10 +439,11 @@ public class TestCodeGen {
                                                             optionalVar,
                                                             StringUtils.toSnakeCase(fieldName)));
                                                 } else if (innerClass.isEnum()) {
-                                                    String optionalVar = String.format("optional_%s", StringUtils.toSnakeCase(fieldName));
-                                                    args.add(optionalVar);
-                                                    lines.add(String.format("  let %s = node.%s.as_ref().map_or(-1, |node| node.get_id());",
-                                                            optionalVar,
+                                                    String javaOptionalVar = String.format("java_optional_%s", StringUtils.toSnakeCase(fieldName));
+                                                    args.add("&" + javaOptionalVar);
+                                                    javaOptionalVars.add(javaOptionalVar);
+                                                    lines.add(String.format("  let %s = node.%s.as_ref().map(|node| node.to_jni_type(env));",
+                                                            javaOptionalVar,
                                                             StringUtils.toSnakeCase(fieldName)));
                                                 } else {
                                                     fail(field.getGenericType().getTypeName() + " is not expected");
@@ -514,17 +580,21 @@ public class TestCodeGen {
                                         args.add(arg);
                                         lines.add(String.format("  let %s = node.%s.as_str();", arg, arg));
                                     } else if (fieldType.isEnum()) {
-                                        String arg = StringUtils.toSnakeCase(fieldName);
-                                        args.add(arg);
-                                        lines.add(String.format("  let %s = node.%s.get_id();", arg, arg));
+                                        String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
+                                        args.add("&" + javaVar);
+                                        javaVars.add(javaVar);
+                                        lines.add(String.format("  let %s = node.%s.to_jni_type(env);",
+                                                javaVar,
+                                                StringUtils.toSnakeCase(fieldName)));
                                     } else {
                                         fail(field.getGenericType().getTypeName() + " is not expected");
                                     }
                                 });
                         args.add("&java_span_ex");
                         javaVars.add("java_span_ex");
-                        lines.add(String.format("  let return_value = java_ast_factory.create_%s(env, %s);",
-                                StringUtils.toSnakeCase(jni2RustClassUtils.getName()),
+                        lines.add(String.format("  let return_value = unsafe { JAVA_CLASS_%s.as_ref().unwrap() }",
+                                StringUtils.toSnakeCase(jni2RustClassUtils.getName()).toUpperCase()));
+                        lines.add(String.format("    .construct(env, %s);",
                                 StringUtils.join(", ", args)));
                         javaOptionalVars.forEach(javaOptionalVar -> lines.add(String.format("  delete_local_optional_ref!(env, %s);", javaOptionalVar)));
                         javaVars.forEach(javaVar -> lines.add(String.format("  delete_local_ref!(env, %s);", javaVar)));
@@ -544,12 +614,6 @@ public class TestCodeGen {
             // Only generate document when content is changed.
             Files.write(rustFilePath, newBuffer, StandardOpenOption.TRUNCATE_EXISTING);
         }
-    }
-
-    @Test
-    public void testSwc4jAstFactory() throws IOException {
-        Jni2Rust<Swc4jAstFactory> jni2Rust = new Jni2Rust<>(Swc4jAstFactory.class);
-        jni2Rust.updateFile();
     }
 
     @Test

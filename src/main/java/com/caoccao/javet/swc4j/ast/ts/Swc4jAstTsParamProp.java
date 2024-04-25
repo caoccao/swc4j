@@ -46,7 +46,7 @@ public class Swc4jAstTsParamProp
     @Jni2RustMethod
     public Swc4jAstTsParamProp(
             List<Swc4jAstDecorator> decorators,
-            Swc4jAstAccessibility accessibility,
+            @Jni2RustParam(optional = true) Swc4jAstAccessibility accessibility,
             @Jni2RustParam(name = "is_override") boolean _override,
             boolean readonly,
             ISwc4jAstTsParamPropParam param,

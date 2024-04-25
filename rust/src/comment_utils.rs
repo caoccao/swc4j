@@ -22,7 +22,6 @@ use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
-use crate::enums::*;
 use crate::jni_utils::*;
 use crate::span_utils::ByteToIndexMap;
 
@@ -61,10 +60,9 @@ impl JavaSwc4jComment {
   where
     'local: 'a,
   {
-    let java_class_comment_kind = unsafe { JAVA_COMMENT_KIND.as_ref().unwrap() };
     let java_text = string_to_jstring!(env, &comment.text);
     let text = object_to_jvalue!(java_text);
-    let java_comment_kind = java_class_comment_kind.parse(env, comment.kind.get_id());
+    let java_comment_kind = comment.kind.to_jni_type(env);
     let comment_kind = object_to_jvalue!(java_comment_kind);
     let java_span_ex = map.get_span_ex_by_span(&comment.span).to_jni_type(env);
     let span_ex = object_to_jvalue!(java_span_ex);

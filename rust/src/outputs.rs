@@ -236,8 +236,6 @@ impl ToJniType for ParseOutput {
   where
     'local: 'a,
   {
-    let java_class_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
-    let java_class_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
     let java_class_parse_output = unsafe { JAVA_PARSE_OUTPUT.as_ref().unwrap() };
     let byte_to_index_map = self.get_byte_to_index_map();
     let java_optional_program = self
@@ -245,9 +243,9 @@ impl ToJniType for ParseOutput {
       .as_ref()
       .map(|program| enum_create_program(env, &byte_to_index_map, &program));
     let program = optional_object_to_jvalue!(&java_optional_program);
-    let java_media_type = java_class_media_type.parse(env, self.media_type.get_id());
+    let java_media_type = self.media_type.to_jni_type(env);
     let media_type = object_to_jvalue!(&java_media_type);
-    let java_parse_mode = java_class_parse_mode.parse(env, self.parse_mode.get_id());
+    let java_parse_mode = self.parse_mode.to_jni_type(env);
     let parse_mode = object_to_jvalue!(&java_parse_mode);
     let java_source_text = string_to_jstring!(env, &self.source_text);
     let source_text = object_to_jvalue!(&java_source_text);
@@ -308,14 +306,12 @@ impl ToJniType for TransformOutput {
   where
     'local: 'a,
   {
-    let java_class_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
-    let java_class_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
     let java_class_transform_output = unsafe { JAVA_TRANSFORM_OUTPUT.as_ref().unwrap() };
     let java_code = string_to_jstring!(env, &self.code);
     let code = object_to_jvalue!(&java_code);
-    let java_media_type = java_class_media_type.parse(env, self.media_type.get_id());
+    let java_media_type = self.media_type.to_jni_type(env);
     let media_type = object_to_jvalue!(&java_media_type);
-    let java_parse_mode = java_class_parse_mode.parse(env, self.parse_mode.get_id());
+    let java_parse_mode = self.parse_mode.to_jni_type(env);
     let parse_mode = object_to_jvalue!(&java_parse_mode);
     let java_optional_source_map = self
       .source_map
@@ -396,8 +392,6 @@ impl ToJniType for TranspileOutput {
   where
     'local: 'a,
   {
-    let java_class_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
-    let java_class_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
     let java_class_transpile_output = unsafe { JAVA_TRANSPILE_OUTPUT.as_ref().unwrap() };
     let byte_to_index_map = self.parse_output.get_byte_to_index_map();
     let java_optional_program = self
@@ -408,9 +402,9 @@ impl ToJniType for TranspileOutput {
     let program = optional_object_to_jvalue!(&java_optional_program);
     let java_code = string_to_jstring!(env, &self.code);
     let code = object_to_jvalue!(&java_code);
-    let java_media_type = java_class_media_type.parse(env, self.parse_output.media_type.get_id());
+    let java_media_type = self.parse_output.media_type.to_jni_type(env);
     let media_type = object_to_jvalue!(&java_media_type);
-    let java_parse_mode = java_class_parse_mode.parse(env, self.parse_output.parse_mode.get_id());
+    let java_parse_mode = self.parse_output.parse_mode.to_jni_type(env);
     let parse_mode = object_to_jvalue!(&java_parse_mode);
     let java_source_map = optional_string_to_jstring!(env, &self.source_map);
     let source_map = object_to_jvalue!(&java_source_map);

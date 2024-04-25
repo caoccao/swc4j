@@ -17,10 +17,8 @@
 
 use jni::objects::{GlobalRef, JMethodID, JObject, JString};
 use jni::signature::{Primitive, ReturnType};
-use jni::sys::jobject;
 use jni::JNIEnv;
 
-use deno_ast::swc::ast::EsVersion;
 use deno_ast::ModuleSpecifier;
 
 use crate::enums::*;
@@ -1136,10 +1134,6 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
   }
 }
 
-pub trait FromJniType {
-  fn from_jni_type<'local>(env: &mut JNIEnv<'local>, o: jobject) -> Self;
-}
-
 #[derive(Debug)]
 pub struct ParseOptions {
   /// Whether to capture ast or not.
@@ -1180,24 +1174,20 @@ impl Default for ParseOptions {
 }
 
 impl FromJniType for ParseOptions {
-  fn from_jni_type<'local>(env: &mut JNIEnv<'local>, obj: jobject) -> ParseOptions {
-    let obj = unsafe { JObject::from_raw(obj) };
-    let obj = obj.as_ref();
-    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
-    let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
+  fn from_jni_type<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> ParseOptions {
     let java_parse_options = unsafe { JAVA_PARSE_OPTIONS.as_ref().unwrap() };
     let capture_ast = java_parse_options.is_capture_ast(env, obj);
     let capture_comments = java_parse_options.is_capture_comments(env, obj);
     let capture_tokens = java_parse_options.is_capture_tokens(env, obj);
-    let media_type = java_parse_options.get_media_type(env, obj);
-    let media_type = media_type.as_ref();
-    let media_type = java_media_type.get_media_type(env, media_type);
+    let java_media_type = java_parse_options.get_media_type(env, obj);
+    let media_type = MediaType::from_jni_type(env, &java_media_type);
     let scope_analysis = java_parse_options.is_scope_analysis(env, obj);
     let specifier = java_parse_options.get_specifier(env, obj);
     let specifier = url_to_string(env, &specifier);
-    let parse_mode = java_parse_options.get_parse_mode(env, obj);
-    let parse_mode = parse_mode.as_ref();
-    let parse_mode = java_parse_mode.get_parse_mode(env, parse_mode);
+    let java_parse_mode = java_parse_options.get_parse_mode(env, obj);
+    let parse_mode = ParseMode::from_jni_type(env, &java_parse_mode);
+    delete_local_ref!(env, java_media_type);
+    delete_local_ref!(env, java_parse_mode);
     ParseOptions {
       capture_ast,
       capture_comments,
@@ -1273,34 +1263,28 @@ impl Default for TransformOptions {
 }
 
 impl FromJniType for TransformOptions {
-  fn from_jni_type<'local>(env: &mut JNIEnv<'local>, obj: jobject) -> TransformOptions {
-    let obj = unsafe { JObject::from_raw(obj) };
-    let obj = obj.as_ref();
-    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
-    let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
-    let java_source_map_option = unsafe { JAVA_SOURCE_MAP_OPTION.as_ref().unwrap() };
-    let java_es_version = unsafe { JAVA_ES_VERSION.as_ref().unwrap() };
+  fn from_jni_type<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> TransformOptions {
     let java_transform_options = unsafe { JAVA_TRANSFORM_OPTIONS.as_ref().unwrap() };
     let ascii_only = java_transform_options.is_ascii_only(env, obj);
     let emit_assert_for_import_attributes = java_transform_options.is_emit_assert_for_import_attributes(env, obj);
     let inline_sources = java_transform_options.is_inline_sources(env, obj);
     let keep_comments = java_transform_options.is_keep_comments(env, obj);
-    let media_type = java_transform_options.get_media_type(env, obj);
-    let media_type = media_type.as_ref();
-    let media_type = java_media_type.get_media_type(env, media_type);
+    let java_media_type = java_transform_options.get_media_type(env, obj);
+    let media_type = MediaType::from_jni_type(env, &java_media_type);
     let minify = java_transform_options.is_minify(env, obj);
     let omit_last_semi = java_transform_options.is_omit_last_semi(env, obj);
-    let source_map = java_transform_options.get_source_map(env, obj);
-    let source_map = source_map.as_ref();
-    let source_map = java_source_map_option.get_source_map(env, source_map);
-    let parse_mode = java_transform_options.get_parse_mode(env, obj);
-    let parse_mode = parse_mode.as_ref();
-    let parse_mode = java_parse_mode.get_parse_mode(env, parse_mode);
+    let java_source_map = java_transform_options.get_source_map(env, obj);
+    let source_map = SourceMapOption::from_jni_type(env, &java_source_map);
+    let java_parse_mode = java_transform_options.get_parse_mode(env, obj);
+    let parse_mode = ParseMode::from_jni_type(env, &java_parse_mode);
     let specifier = java_transform_options.get_specifier(env, obj);
     let specifier = url_to_string(env, &specifier);
-    let target = java_transform_options.get_target(env, obj);
-    let target = target.as_ref();
-    let target = java_es_version.get_es_version(env, target);
+    let java_target = java_transform_options.get_target(env, obj);
+    let target = EsVersion::from_jni_type(env, &java_target);
+    delete_local_ref!(env, java_media_type);
+    delete_local_ref!(env, java_source_map);
+    delete_local_ref!(env, java_parse_mode);
+    delete_local_ref!(env, java_target);
     TransformOptions {
       ascii_only,
       emit_assert_for_import_attributes,
@@ -1416,22 +1400,14 @@ impl Default for TranspileOptions {
 }
 
 impl FromJniType for TranspileOptions {
-  fn from_jni_type<'local>(env: &mut JNIEnv<'local>, obj: jobject) -> TranspileOptions {
-    let obj = unsafe { JObject::from_raw(obj) };
-    let obj = obj.as_ref();
-    let java_imports_not_used_as_values = unsafe { JAVA_IMPORTS_NOT_USED_AS_VALUES.as_ref().unwrap() };
-    let java_media_type = unsafe { JAVA_MEDIA_TYPE.as_ref().unwrap() };
-    let java_parse_mode = unsafe { JAVA_PARSE_MODE.as_ref().unwrap() };
-    let java_source_map_option = unsafe { JAVA_SOURCE_MAP_OPTION.as_ref().unwrap() };
+  fn from_jni_type<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> TranspileOptions {
     let java_transpile_options = unsafe { JAVA_TRANSPILE_OPTIONS.as_ref().unwrap() };
     let capture_ast = java_transpile_options.is_capture_ast(env, obj);
     let capture_comments = java_transpile_options.is_capture_comments(env, obj);
     let capture_tokens = java_transpile_options.is_capture_tokens(env, obj);
     let emit_metadata = java_transpile_options.is_emit_metadata(env, obj);
-    let imports_not_used_as_values = java_transpile_options.get_imports_not_used_as_values(env, obj);
-    let imports_not_used_as_values = imports_not_used_as_values.as_ref();
-    let imports_not_used_as_values =
-      java_imports_not_used_as_values.get_imports_not_used_as_values(env, imports_not_used_as_values);
+    let java_imports_not_used_as_values = java_transpile_options.get_imports_not_used_as_values(env, obj);
+    let imports_not_used_as_values = ImportsNotUsedAsValues::from_jni_type(env, &java_imports_not_used_as_values);
     let inline_sources = java_transpile_options.is_inline_sources(env, obj);
     let jsx_automatic = java_transpile_options.is_jsx_automatic(env, obj);
     let jsx_development = java_transpile_options.is_jsx_development(env, obj);
@@ -1439,23 +1415,24 @@ impl FromJniType for TranspileOptions {
     let jsx_fragment_factory = java_transpile_options.get_jsx_fragment_factory(env, obj);
     let jsx_import_source = java_transpile_options.get_jsx_import_source(env, obj);
     let keep_comments = java_transpile_options.is_keep_comments(env, obj);
-    let media_type = java_transpile_options.get_media_type(env, obj);
-    let media_type = media_type.as_ref();
-    let media_type = java_media_type.get_media_type(env, media_type);
-    let parse_mode = java_transpile_options.get_parse_mode(env, obj);
-    let parse_mode = parse_mode.as_ref();
-    let parse_mode = java_parse_mode.get_parse_mode(env, parse_mode);
+    let java_media_type = java_transpile_options.get_media_type(env, obj);
+    let media_type = MediaType::from_jni_type(env, &java_media_type);
+    let java_parse_mode = java_transpile_options.get_parse_mode(env, obj);
+    let parse_mode = ParseMode::from_jni_type(env, &java_parse_mode);
     let precompile_jsx = java_transpile_options.is_precompile_jsx(env, obj);
     let scope_analysis = java_transpile_options.is_scope_analysis(env, obj);
-    let source_map = java_transpile_options.get_source_map(env, obj);
-    let source_map = source_map.as_ref();
-    let source_map = java_source_map_option.get_source_map(env, source_map);
+    let java_source_map = java_transpile_options.get_source_map(env, obj);
+    let source_map = SourceMapOption::from_jni_type(env, &java_source_map);
     let specifier = java_transpile_options.get_specifier(env, obj);
     let specifier = url_to_string(env, &specifier);
     let transform_jsx = java_transpile_options.is_transform_jsx(env, obj);
     let var_decl_imports = java_transpile_options.is_var_decl_imports(env, obj);
     let use_decorators_proposal = java_transpile_options.is_use_decorators_proposal(env, obj);
     let use_ts_decorators = java_transpile_options.is_use_ts_decorators(env, obj);
+    delete_local_ref!(env, java_imports_not_used_as_values);
+    delete_local_ref!(env, java_media_type);
+    delete_local_ref!(env, java_parse_mode);
+    delete_local_ref!(env, java_source_map);
     TranspileOptions {
       capture_ast,
       capture_comments,

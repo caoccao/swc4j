@@ -43,10 +43,10 @@ public class Swc4jAstTsMappedType
 
     @Jni2RustMethod
     public Swc4jAstTsMappedType(
-            Swc4jAstTruePlusMinus readonly,
+            @Jni2RustParam(optional = true) Swc4jAstTruePlusMinus readonly,
             Swc4jAstTsTypeParam typeParam,
             @Jni2RustParam(optional = true) ISwc4jAstTsType nameType,
-            Swc4jAstTruePlusMinus optional,
+            @Jni2RustParam(optional = true) Swc4jAstTruePlusMinus optional,
             @Jni2RustParam(optional = true) ISwc4jAstTsType typeAnn,
             Swc4jSpan span) {
         super(span);

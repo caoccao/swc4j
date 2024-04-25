@@ -18,16 +18,16 @@ package com.caoccao.javet.swc4j.jni2rust;
 
 import com.caoccao.javet.swc4j.utils.AnnotationUtils;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Executable;
 import java.util.Optional;
 
 public class Jni2RustMethodUtils {
-    protected final Method method;
+    protected final Executable executable;
     protected final Optional<Jni2RustMethod> optionalJni2RustMethod;
 
-    public Jni2RustMethodUtils(Method method) {
-        this.method = method;
-        optionalJni2RustMethod = Optional.ofNullable(AnnotationUtils.getAnnotation(method, Jni2RustMethod.class));
+    public Jni2RustMethodUtils(Executable executable) {
+        this.executable = executable;
+        optionalJni2RustMethod = Optional.ofNullable(AnnotationUtils.getAnnotation(executable, Jni2RustMethod.class));
     }
 
     public boolean isOptional() {

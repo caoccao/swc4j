@@ -65,19 +65,27 @@ public class Jni2Rust<T> {
     }
 
     protected void getCodeMethods(List<String> lines) {
-        methods.stream()
-                .filter(method -> !AnnotationUtils.isAnnotationPresent(method, Jni2RustMethod.class)
-                        || (Objects.requireNonNull(AnnotationUtils.getAnnotation(method, Jni2RustMethod.class)).mode()
+        List<Executable> executables = new ArrayList<>();
+        if (constructor != null) {
+            executables.add(constructor);
+        }
+        executables.addAll(methods);
+        executables.stream()
+                .filter(executable -> !AnnotationUtils.isAnnotationPresent(executable, Jni2RustMethod.class)
+                        || (Objects.requireNonNull(AnnotationUtils.getAnnotation(executable, Jni2RustMethod.class)).mode()
                         == Jni2RustMethodMode.Auto))
-                .forEach(method -> {
-                    Jni2RustMethodUtils jni2RustMethodUtils = new Jni2RustMethodUtils(method);
-                    boolean isStatic = Modifier.isStatic(method.getModifiers());
-                    boolean isPrimitive = method.getReturnType().isPrimitive();
-                    boolean isString = method.getReturnType() == String.class;
-                    boolean isVoid = method.getReturnType() == Void.class;
-                    String methodName = getExecutableName(method);
-                    String returnTypeName = method.getReturnType().getSimpleName();
-                    List<String> parameterNames = Stream.of(method.getParameters())
+                .forEach(executable -> {
+                    Jni2RustMethodUtils jni2RustMethodUtils = new Jni2RustMethodUtils(executable);
+                    boolean isStatic = Modifier.isStatic(executable.getModifiers());
+                    boolean isConstructor = executable instanceof Constructor;
+                    boolean isPrimitive = !isConstructor && ((Method) executable).getReturnType().isPrimitive();
+                    boolean isString = !isConstructor && ((Method) executable).getReturnType() == String.class;
+                    boolean isVoid = !isConstructor && ((Method) executable).getReturnType() == Void.class;
+                    String methodName = getExecutableName(executable);
+                    String returnTypeName = isConstructor
+                            ? clazz.getSimpleName()
+                            : ((Method) executable).getReturnType().getSimpleName();
+                    List<String> parameterNames = Stream.of(executable.getParameters())
                             .map(this::getParameterName)
                             .collect(Collectors.toList());
                     lines.add(StringUtils.EMPTY);
@@ -89,10 +97,12 @@ public class Jni2Rust<T> {
                     lines.add("    &self,");
                     lines.add("    env: &mut JNIEnv<'local>,");
                     if (!isStatic) {
-                        lines.add("    obj: &JObject<'_>,");
+                        if (!isConstructor) {
+                            lines.add("    obj: &JObject<'_>,");
+                        }
                     }
                     Set<String> rustTypeSet = new HashSet<>();
-                    for (Parameter parameter : method.getParameters()) {
+                    for (Parameter parameter : executable.getParameters()) {
                         Class<?> parameterType = parameter.getType();
                         boolean isOptional = false;
                         boolean isCustomRustType = false;
@@ -139,7 +149,7 @@ public class Jni2Rust<T> {
                         lines.add("  )");
                     } else if (isPrimitive) {
                         lines.add(String.format("  ) -> %s",
-                                options.getJavaTypeToRustTypeMap().get(method.getReturnType().getName())));
+                                options.getJavaTypeToRustTypeMap().get(((Method) executable).getReturnType().getName())));
                     } else if (isString) {
                         if (jni2RustMethodUtils.isOptional()) {
                             lines.add("  ) -> Option<String>");
@@ -153,7 +163,7 @@ public class Jni2Rust<T> {
                     }
                     lines.add("  {");
                     // pre-call
-                    for (Parameter parameter : method.getParameters()) {
+                    for (Parameter parameter : executable.getParameters()) {
                         String name = getParameterName(parameter);
                         Class<?> parameterType = parameter.getType();
                         boolean isOptional = false;
@@ -191,12 +201,16 @@ public class Jni2Rust<T> {
                     if (isVoid) {
                         returnType = "void";
                     } else if (isPrimitive) {
-                        returnType = method.getReturnType().getName();
+                        returnType = ((Method) executable).getReturnType().getName();
                     } else {
                         returnType = "object";
                     }
                     if (isStatic) {
                         lines.add(String.format("    let return_value = call_static_as_%s!(", returnType));
+                        lines.add("        env,");
+                        lines.add("        &self.class,");
+                    } else if (isConstructor) {
+                        lines.add("    let return_value = call_as_construct!(");
                         lines.add("        env,");
                         lines.add("        &self.class,");
                     } else {
@@ -216,7 +230,7 @@ public class Jni2Rust<T> {
                         }
                     }
                     // post-call
-                    for (Parameter parameter : method.getParameters()) {
+                    for (Parameter parameter : executable.getParameters()) {
                         String name = getParameterName(parameter);
                         Class<?> parameterType = parameter.getType();
                         String[] postCalls = null;
@@ -255,9 +269,10 @@ public class Jni2Rust<T> {
         executables.addAll(methods);
         executables.forEach(executable -> {
             String executableName = getExecutableName(executable);
+            boolean isConstructor = executable instanceof Constructor;
             if (executable instanceof Method) {
                 lines.add(String.format("    let method_%s = env", executableName));
-            } else if (executable instanceof Constructor) {
+            } else if (isConstructor) {
                 lines.add("    let method_construct = env");
             }
             if (Modifier.isStatic(executable.getModifiers())) {
@@ -268,7 +283,7 @@ public class Jni2Rust<T> {
             lines.add("        &class,");
             if (executable instanceof Method) {
                 lines.add(String.format("        \"%s\",", executable.getName()));
-            } else if (executable instanceof Constructor) {
+            } else if (isConstructor) {
                 lines.add("        \"<init>\",");
             }
             StringBuilder sb = new StringBuilder("(");
@@ -278,14 +293,14 @@ public class Jni2Rust<T> {
             sb.append(")");
             if (executable instanceof Method) {
                 sb.append(getSignature(((Method) executable).getReturnType().getName()));
-            } else if (executable instanceof Constructor) {
+            } else if (isConstructor) {
                 sb.append("V");
             }
             lines.add(String.format("        \"%s\",", sb));
             lines.add("      )");
             if (executable instanceof Method) {
                 lines.add(String.format("      .expect(\"Couldn't find method %s.%s\");", clazz.getSimpleName(), executable.getName()));
-            } else if (executable instanceof Constructor) {
+            } else if (isConstructor) {
                 lines.add(String.format("      .expect(\"Couldn't find method %s::new\");", clazz.getSimpleName()));
             }
         });
@@ -326,7 +341,7 @@ public class Jni2Rust<T> {
     }
 
     protected String getExecutableName(Executable executable) {
-        return StringUtils.toSnakeCase(executable.getName());
+        return executable instanceof Constructor ? "construct" : StringUtils.toSnakeCase(executable.getName());
     }
 
     public String getFilePath() {
@@ -383,7 +398,7 @@ public class Jni2Rust<T> {
         Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
         // filePath and structName
         setFilePath(jni2RustClassUtils.getFilePath().getFilePath());
-        setStructName(jni2RustClassUtils.getName(PREFIX_NAME + clazz.getSimpleName()));
+        setStructName(PREFIX_NAME + clazz.getSimpleName());
         // constructor
         constructor = (Constructor<T>) Stream.of(clazz.getConstructors())
                 .filter(method -> AnnotationUtils.isAnnotationPresent(method, Jni2RustMethod.class))

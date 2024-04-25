@@ -55,7 +55,7 @@ public class Swc4jAstAutoAccessor
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             @Jni2RustParam(name = "is_static") boolean _static,
             List<Swc4jAstDecorator> decorators,
-            Swc4jAstAccessibility accessibility,
+            @Jni2RustParam(optional = true) Swc4jAstAccessibility accessibility,
             @Jni2RustParam(name = "is_override") boolean _override,
             boolean definite,
             Swc4jSpan span) {

@@ -49,7 +49,7 @@ public class Swc4jAstConstructor
             ISwc4jAstPropName key,
             List<ISwc4jAstParamOrTsParamProp> params,
             @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
-            Swc4jAstAccessibility accessibility,
+            @Jni2RustParam(optional = true) Swc4jAstAccessibility accessibility,
             boolean optional,
             Swc4jSpan span) {
         super(span);
