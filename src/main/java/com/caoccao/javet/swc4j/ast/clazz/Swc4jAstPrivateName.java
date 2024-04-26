@@ -38,14 +38,14 @@ import java.util.List;
 public class Swc4jAstPrivateName
         extends Swc4jAst
         implements ISwc4jAstKey, ISwc4jAstExpr, ISwc4jAstMemberProp {
-    protected final Swc4jAstIdent id;
+    protected Swc4jAstIdent id;
 
     @Jni2RustMethod
     public Swc4jAstPrivateName(
             Swc4jAstIdent id,
             Swc4jSpan span) {
         super(span);
-        this.id = AssertionUtils.notNull(id, "Id");
+        setId(id);
         updateParent();
     }
 
@@ -54,6 +54,7 @@ public class Swc4jAstPrivateName
         return SimpleList.of(id);
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
     }
@@ -61,6 +62,11 @@ public class Swc4jAstPrivateName
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.PrivateName;
+    }
+
+    public Swc4jAstPrivateName setId(Swc4jAstIdent id) {
+        this.id = AssertionUtils.notNull(id, "Id");
+        return this;
     }
 
     @Override

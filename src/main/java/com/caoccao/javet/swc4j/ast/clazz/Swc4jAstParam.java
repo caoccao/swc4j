@@ -37,7 +37,7 @@ public class Swc4jAstParam
         extends Swc4jAst
         implements ISwc4jAstParamOrTsParamProp {
     protected final List<Swc4jAstDecorator> decorators;
-    protected final ISwc4jAstPat pat;
+    protected ISwc4jAstPat pat;
 
     @Jni2RustMethod
     public Swc4jAstParam(
@@ -46,7 +46,7 @@ public class Swc4jAstParam
             Swc4jSpan span) {
         super(span);
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
-        this.pat = AssertionUtils.notNull(pat, "Pat");
+        setPat(pat);
         updateParent();
     }
 
@@ -57,10 +57,12 @@ public class Swc4jAstParam
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstDecorator> getDecorators() {
         return decorators;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstPat getPat() {
         return pat;
     }
@@ -68,6 +70,11 @@ public class Swc4jAstParam
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.Param;
+    }
+
+    public Swc4jAstParam setPat(ISwc4jAstPat pat) {
+        this.pat = AssertionUtils.notNull(pat, "Pat");
+        return this;
     }
 
     @Override

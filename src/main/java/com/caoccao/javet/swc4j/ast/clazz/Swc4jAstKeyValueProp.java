@@ -38,9 +38,9 @@ import java.util.List;
 public class Swc4jAstKeyValueProp
         extends Swc4jAst
         implements ISwc4jAstProp {
-    protected final ISwc4jAstPropName key;
+    protected ISwc4jAstPropName key;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr value;
+    protected ISwc4jAstExpr value;
 
     @Jni2RustMethod
     public Swc4jAstKeyValueProp(
@@ -48,8 +48,8 @@ public class Swc4jAstKeyValueProp
             ISwc4jAstExpr value,
             Swc4jSpan span) {
         super(span);
-        this.key = AssertionUtils.notNull(key, "Key");
-        this.value = AssertionUtils.notNull(value, "Value");
+        setKey(key);
+        setValue(value);
         updateParent();
     }
 
@@ -58,6 +58,7 @@ public class Swc4jAstKeyValueProp
         return SimpleList.of(key, value);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
     }
@@ -67,8 +68,19 @@ public class Swc4jAstKeyValueProp
         return Swc4jAstType.KeyValueProp;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getValue() {
         return value;
+    }
+
+    public Swc4jAstKeyValueProp setKey(ISwc4jAstPropName key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
+    }
+
+    public Swc4jAstKeyValueProp setValue(ISwc4jAstExpr value) {
+        this.value = AssertionUtils.notNull(value, "Value");
+        return this;
     }
 
     @Override

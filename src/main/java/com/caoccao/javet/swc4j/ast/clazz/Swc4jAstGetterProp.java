@@ -40,9 +40,9 @@ import java.util.Optional;
 public class Swc4jAstGetterProp
         extends Swc4jAst
         implements ISwc4jAstProp {
-    protected final Optional<Swc4jAstBlockStmt> body;
-    protected final ISwc4jAstPropName key;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
+    protected Optional<Swc4jAstBlockStmt> body;
+    protected ISwc4jAstPropName key;
+    protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     @Jni2RustMethod
     public Swc4jAstGetterProp(
@@ -51,12 +51,13 @@ public class Swc4jAstGetterProp
             @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
             Swc4jSpan span) {
         super(span);
-        this.body = Optional.ofNullable(body);
-        this.key = AssertionUtils.notNull(key, "Key");
-        this.typeAnn = Optional.ofNullable(typeAnn);
+        setBody(body);
+        setKey(key);
+        setTypeAnn(typeAnn);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
     }
@@ -69,6 +70,7 @@ public class Swc4jAstGetterProp
         return childNodes;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
     }
@@ -78,8 +80,24 @@ public class Swc4jAstGetterProp
         return Swc4jAstType.GetterProp;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
+    }
+
+    public Swc4jAstGetterProp setBody(Swc4jAstBlockStmt body) {
+        this.body = Optional.ofNullable(body);
+        return this;
+    }
+
+    public Swc4jAstGetterProp setKey(ISwc4jAstPropName key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
+    }
+
+    public Swc4jAstGetterProp setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        return this;
     }
 
     @Override

@@ -37,19 +37,20 @@ import java.util.Optional;
 public class Swc4jAstPrivateProp
         extends Swc4jAst
         implements ISwc4jAstClassMember {
-    @Jni2RustField(name = "is_override")
-    protected final boolean _override;
-    @Jni2RustField(name = "is_static")
-    protected final boolean _static;
-    protected final Optional<Swc4jAstAccessibility> accessibility;
     protected final List<Swc4jAstDecorator> decorators;
-    protected final boolean definite;
-    protected final Swc4jAstPrivateName key;
+    @Jni2RustField(name = "is_override")
+    protected boolean _override;
+    @Jni2RustField(name = "is_static")
+    protected boolean _static;
+    protected Optional<Swc4jAstAccessibility> accessibility;
+    protected boolean definite;
+    protected Swc4jAstPrivateName key;
     @Jni2RustField(name = "is_optional")
-    protected final boolean optional;
-    protected final boolean readonly;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
-    protected final Optional<ISwc4jAstExpr> value;
+    protected boolean optional;
+    protected boolean readonly;
+    protected Optional<Swc4jAstTsTypeAnn> typeAnn;
+    protected Optional<ISwc4jAstExpr> value;
+
 
     @Jni2RustMethod
     public Swc4jAstPrivateProp(
@@ -65,19 +66,20 @@ public class Swc4jAstPrivateProp
             boolean definite,
             Swc4jSpan span) {
         super(span);
-        this._override = _override;
-        this._static = _static;
-        this.accessibility = Optional.ofNullable(accessibility);
+        setAccessibility(accessibility);
+        setDefinite(definite);
+        setKey(key);
+        setOptional(optional);
+        setOverride(_override);
+        setReadonly(readonly);
+        setStatic(_static);
+        setTypeAnn(typeAnn);
+        setValue(value);
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
-        this.definite = definite;
-        this.key = AssertionUtils.notNull(key, "Key");
-        this.optional = optional;
-        this.readonly = readonly;
-        this.typeAnn = Optional.ofNullable(typeAnn);
-        this.value = Optional.ofNullable(value);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
     }
@@ -91,10 +93,12 @@ public class Swc4jAstPrivateProp
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstDecorator> getDecorators() {
         return decorators;
     }
 
+    @Jni2RustMethod
     public Swc4jAstPrivateName getKey() {
         return key;
     }
@@ -104,28 +108,84 @@ public class Swc4jAstPrivateProp
         return Swc4jAstType.PrivateProp;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getValue() {
         return value;
     }
 
+    @Jni2RustMethod
     public boolean isDefinite() {
         return definite;
     }
 
+    @Jni2RustMethod
+    public boolean isOptional() {
+        return optional;
+    }
+
+    @Jni2RustMethod
     public boolean isOverride() {
         return _override;
     }
 
+    @Jni2RustMethod
     public boolean isReadonly() {
         return readonly;
     }
 
+    @Jni2RustMethod
     public boolean isStatic() {
         return _static;
+    }
+
+    public Swc4jAstPrivateProp setAccessibility(Swc4jAstAccessibility accessibility) {
+        this.accessibility = Optional.ofNullable(accessibility);
+        return this;
+    }
+
+    public Swc4jAstPrivateProp setDefinite(boolean definite) {
+        this.definite = definite;
+        return this;
+    }
+
+    public Swc4jAstPrivateProp setKey(Swc4jAstPrivateName key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
+    }
+
+    public Swc4jAstPrivateProp setOptional(boolean optional) {
+        this.optional = optional;
+        return this;
+    }
+
+    public Swc4jAstPrivateProp setOverride(boolean _override) {
+        this._override = _override;
+        return this;
+    }
+
+    public Swc4jAstPrivateProp setReadonly(boolean readonly) {
+        this.readonly = readonly;
+        return this;
+    }
+
+    public Swc4jAstPrivateProp setStatic(boolean _static) {
+        this._static = _static;
+        return this;
+    }
+
+    public Swc4jAstPrivateProp setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        return this;
+    }
+
+    public Swc4jAstPrivateProp setValue(ISwc4jAstExpr value) {
+        this.value = Optional.ofNullable(value);
+        return this;
     }
 
     @Override

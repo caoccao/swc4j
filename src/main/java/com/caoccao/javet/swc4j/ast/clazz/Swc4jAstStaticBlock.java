@@ -36,17 +36,18 @@ import java.util.List;
 public class Swc4jAstStaticBlock
         extends Swc4jAst
         implements ISwc4jAstClassMember {
-    protected final Swc4jAstBlockStmt body;
+    protected Swc4jAstBlockStmt body;
 
     @Jni2RustMethod
     public Swc4jAstStaticBlock(
             Swc4jAstBlockStmt body,
             Swc4jSpan span) {
         super(span);
-        this.body = AssertionUtils.notNull(body, "Body");
+        setBody(body);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Swc4jAstBlockStmt getBody() {
         return body;
     }
@@ -59,6 +60,11 @@ public class Swc4jAstStaticBlock
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.StaticBlock;
+    }
+
+    public Swc4jAstStaticBlock setBody(Swc4jAstBlockStmt body) {
+        this.body = AssertionUtils.notNull(body, "Body");
+        return this;
     }
 
     @Override

@@ -38,8 +38,8 @@ public class Swc4jAstMethodProp
         extends Swc4jAst
         implements ISwc4jAstProp {
     @Jni2RustField(box = true)
-    protected final Swc4jAstFunction function;
-    protected final ISwc4jAstPropName key;
+    protected Swc4jAstFunction function;
+    protected ISwc4jAstPropName key;
 
     @Jni2RustMethod
     public Swc4jAstMethodProp(
@@ -47,8 +47,8 @@ public class Swc4jAstMethodProp
             Swc4jAstFunction function,
             Swc4jSpan span) {
         super(span);
-        this.function = AssertionUtils.notNull(function, "Function");
-        this.key = AssertionUtils.notNull(key, "Key");
+        setFunction(function);
+        setKey(key);
         updateParent();
     }
 
@@ -57,10 +57,12 @@ public class Swc4jAstMethodProp
         return SimpleList.of(key, function);
     }
 
+    @Jni2RustMethod
     public Swc4jAstFunction getFunction() {
         return function;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
     }
@@ -68,6 +70,16 @@ public class Swc4jAstMethodProp
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.MethodProp;
+    }
+
+    public Swc4jAstMethodProp setFunction(Swc4jAstFunction function) {
+        this.function = AssertionUtils.notNull(function, "Function");
+        return this;
+    }
+
+    public Swc4jAstMethodProp setKey(ISwc4jAstPropName key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
     }
 
     @Override

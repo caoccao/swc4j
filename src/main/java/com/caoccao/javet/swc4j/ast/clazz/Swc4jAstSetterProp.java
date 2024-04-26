@@ -37,11 +37,11 @@ import java.util.Optional;
 public class Swc4jAstSetterProp
         extends Swc4jAst
         implements ISwc4jAstProp {
-    protected final Optional<Swc4jAstBlockStmt> body;
-    protected final ISwc4jAstPropName key;
+    protected Optional<Swc4jAstBlockStmt> body;
+    protected ISwc4jAstPropName key;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstPat param;
-    protected final Optional<ISwc4jAstPat> thisParam;
+    protected ISwc4jAstPat param;
+    protected Optional<ISwc4jAstPat> thisParam;
 
     @Jni2RustMethod
     public Swc4jAstSetterProp(
@@ -51,13 +51,14 @@ public class Swc4jAstSetterProp
             @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
             Swc4jSpan span) {
         super(span);
-        this.body = Optional.ofNullable(body);
-        this.key = AssertionUtils.notNull(key, "Key");
-        this.param = AssertionUtils.notNull(param, "Param");
-        this.thisParam = Optional.ofNullable(thisParam);
+        setBody(body);
+        setKey(key);
+        setParam(param);
+        setThisParam(thisParam);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
     }
@@ -70,14 +71,17 @@ public class Swc4jAstSetterProp
         return childNodes;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstPat getParam() {
         return param;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstPat> getThisParam() {
         return thisParam;
     }
@@ -85,6 +89,26 @@ public class Swc4jAstSetterProp
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.SetterProp;
+    }
+
+    public Swc4jAstSetterProp setBody(Swc4jAstBlockStmt body) {
+        this.body = Optional.ofNullable(body);
+        return this;
+    }
+
+    public Swc4jAstSetterProp setKey(ISwc4jAstPropName key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
+    }
+
+    public Swc4jAstSetterProp setParam(ISwc4jAstPat param) {
+        this.param = AssertionUtils.notNull(param, "Param");
+        return this;
+    }
+
+    public Swc4jAstSetterProp setThisParam(ISwc4jAstPat thisParam) {
+        this.thisParam = Optional.ofNullable(thisParam);
+        return this;
     }
 
     @Override

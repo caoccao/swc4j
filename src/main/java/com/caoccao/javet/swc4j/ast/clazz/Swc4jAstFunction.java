@@ -35,15 +35,15 @@ import java.util.Optional;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstFunction
         extends Swc4jAst {
-    @Jni2RustField(name = "is_async")
-    protected final boolean _async;
-    protected final Optional<Swc4jAstBlockStmt> body;
     protected final List<Swc4jAstDecorator> decorators;
-    @Jni2RustField(name = "is_generator")
-    protected final boolean generator;
     protected final List<Swc4jAstParam> params;
-    protected final Optional<Swc4jAstTsTypeAnn> returnType;
-    protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
+    @Jni2RustField(name = "is_async")
+    protected boolean _async;
+    protected Optional<Swc4jAstBlockStmt> body;
+    @Jni2RustField(name = "is_generator")
+    protected boolean generator;
+    protected Optional<Swc4jAstTsTypeAnn> returnType;
+    protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod
     public Swc4jAstFunction(
@@ -56,16 +56,17 @@ public class Swc4jAstFunction
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn returnType,
             Swc4jSpan span) {
         super(span);
-        this._async = _async;
-        this.body = Optional.ofNullable(body);
+        setAsync(_async);
+        setBody(body);
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
-        this.generator = generator;
+        setGenerator(generator);
         this.params = AssertionUtils.notNull(params, "Params");
-        this.returnType = Optional.ofNullable(returnType);
-        this.typeParams = Optional.ofNullable(typeParams);
+        setReturnType(returnType);
+        setTypeParams(typeParams);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
     }
@@ -80,14 +81,17 @@ public class Swc4jAstFunction
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstDecorator> getDecorators() {
         return decorators;
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstParam> getParams() {
         return params;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getReturnType() {
         return returnType;
     }
@@ -97,16 +101,44 @@ public class Swc4jAstFunction
         return Swc4jAstType.Function;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 
+    @Jni2RustMethod
     public boolean isAsync() {
         return _async;
     }
 
+    @Jni2RustMethod
     public boolean isGenerator() {
         return generator;
+    }
+
+    public Swc4jAstFunction setAsync(boolean _async) {
+        this._async = _async;
+        return this;
+    }
+
+    public Swc4jAstFunction setBody(Swc4jAstBlockStmt body) {
+        this.body = Optional.ofNullable(body);
+        return this;
+    }
+
+    public Swc4jAstFunction setGenerator(boolean generator) {
+        this.generator = generator;
+        return this;
+    }
+
+    public Swc4jAstFunction setReturnType(Swc4jAstTsTypeAnn returnType) {
+        this.returnType = Optional.ofNullable(returnType);
+        return this;
+    }
+
+    public Swc4jAstFunction setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
+        this.typeParams = Optional.ofNullable(typeParams);
+        return this;
     }
 
     @Override
