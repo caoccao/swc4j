@@ -52,6 +52,7 @@ public class Swc4jAstObjectLit
         return SimpleList.copyOf(props);
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstPropOrSpread> getProps() {
         return props;
     }

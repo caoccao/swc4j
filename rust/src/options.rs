@@ -789,7 +789,9 @@ impl JavaSwc4jTranspileOptions {
         &[],
         "String get_jsx_factory()"
       );
-    let return_value = jstring_to_string!(env, return_value.as_raw());
+    let java_return_value = return_value;
+    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    delete_local_ref!(env, java_return_value);
     return_value
   }
 
@@ -806,7 +808,9 @@ impl JavaSwc4jTranspileOptions {
         &[],
         "String get_jsx_fragment_factory()"
       );
-    let return_value = jstring_to_string!(env, return_value.as_raw());
+    let java_return_value = return_value;
+    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    delete_local_ref!(env, java_return_value);
     return_value
   }
 
@@ -823,7 +827,9 @@ impl JavaSwc4jTranspileOptions {
         &[],
         "String get_jsx_import_source()"
       );
-    let return_value = jstring_to_optional_string!(env, return_value.as_raw());
+    let java_return_value = return_value;
+    let return_value = jstring_to_optional_string!(env, java_return_value.as_raw());
+    delete_local_ref!(env, java_return_value);
     return_value
   }
 

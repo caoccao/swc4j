@@ -34,14 +34,14 @@ import java.util.List;
 public class Swc4jAstBool
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstTsLit {
-    protected final boolean value;
+    protected boolean value;
 
     @Jni2RustMethod
     public Swc4jAstBool(
             boolean value,
             Swc4jSpan span) {
         super(span);
-        this.value = value;
+        setValue(value);
     }
 
     @Override
@@ -54,8 +54,14 @@ public class Swc4jAstBool
         return Swc4jAstType.Bool;
     }
 
+    @Jni2RustMethod
     public boolean getValue() {
         return value;
+    }
+
+    public Swc4jAstBool setValue(boolean value) {
+        this.value = value;
+        return this;
     }
 
     @Override

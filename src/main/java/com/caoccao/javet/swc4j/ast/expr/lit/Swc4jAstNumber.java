@@ -37,8 +37,8 @@ import java.util.Optional;
 public class Swc4jAstNumber
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit {
-    protected final Optional<String> raw;
-    protected final double value;
+    protected Optional<String> raw;
+    protected double value;
 
     @Jni2RustMethod
     public Swc4jAstNumber(
@@ -46,8 +46,8 @@ public class Swc4jAstNumber
             @Jni2RustParam(optional = true) String raw,
             Swc4jSpan span) {
         super(span);
-        this.value = value;
-        this.raw = Optional.ofNullable(raw);
+        setRaw(raw);
+        setValue(value);
     }
 
     @Override
@@ -55,6 +55,7 @@ public class Swc4jAstNumber
         return EMPTY_CHILD_NODES;
     }
 
+    @Jni2RustMethod
     public Optional<String> getRaw() {
         return raw;
     }
@@ -64,6 +65,7 @@ public class Swc4jAstNumber
         return Swc4jAstType.Number;
     }
 
+    @Jni2RustMethod
     public double getValue() {
         return value;
     }
@@ -78,6 +80,16 @@ public class Swc4jAstNumber
 
     public long getValueAsLong() {
         return ((Double) value).longValue();
+    }
+
+    public Swc4jAstNumber setRaw(String raw) {
+        this.raw = Optional.ofNullable(raw);
+        return this;
+    }
+
+    public Swc4jAstNumber setValue(double value) {
+        this.value = value;
+        return this;
     }
 
     @Override

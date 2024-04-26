@@ -36,8 +36,8 @@ public class Swc4jAstStr
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstModuleExportName, ISwc4jAstPropName, ISwc4jAstTsModuleName, ISwc4jAstTsLit,
         ISwc4jAstTsEnumMemberId {
-    protected final Optional<String> raw;
-    protected final String value;
+    protected Optional<String> raw;
+    protected String value;
 
     @Jni2RustMethod
     public Swc4jAstStr(
@@ -45,8 +45,8 @@ public class Swc4jAstStr
             @Jni2RustParam(optional = true) String raw,
             Swc4jSpan span) {
         super(span);
-        this.value = AssertionUtils.notNull(value, "Value");
-        this.raw = Optional.ofNullable(raw);
+        setRaw(raw);
+        setValue(value);
     }
 
     @Override
@@ -54,6 +54,7 @@ public class Swc4jAstStr
         return EMPTY_CHILD_NODES;
     }
 
+    @Jni2RustMethod
     public Optional<String> getRaw() {
         return raw;
     }
@@ -63,8 +64,19 @@ public class Swc4jAstStr
         return Swc4jAstType.Str;
     }
 
+    @Jni2RustMethod
     public String getValue() {
         return value;
+    }
+
+    public Swc4jAstStr setRaw(String raw) {
+        this.raw = Optional.ofNullable(raw);
+        return this;
+    }
+
+    public Swc4jAstStr setValue(String value) {
+        this.value = AssertionUtils.notNull(value, "Value");
+        return this;
     }
 
     @Override

@@ -35,8 +35,8 @@ import java.util.List;
 public class Swc4jAstJsxText
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstJsxElementChild {
-    protected final String raw;
-    protected final String value;
+    protected String raw;
+    protected String value;
 
     @Jni2RustMethod
     public Swc4jAstJsxText(
@@ -44,8 +44,8 @@ public class Swc4jAstJsxText
             String raw,
             Swc4jSpan span) {
         super(span);
-        this.value = AssertionUtils.notNull(value, "Value");
-        this.raw = AssertionUtils.notNull(raw, "Raw");
+        setRaw(raw);
+        setValue(value);
     }
 
     @Override
@@ -53,6 +53,7 @@ public class Swc4jAstJsxText
         return EMPTY_CHILD_NODES;
     }
 
+    @Jni2RustMethod
     public String getRaw() {
         return raw;
     }
@@ -62,8 +63,19 @@ public class Swc4jAstJsxText
         return Swc4jAstType.JsxText;
     }
 
+    @Jni2RustMethod
     public String getValue() {
         return value;
+    }
+
+    public Swc4jAstJsxText setRaw(String raw) {
+        this.raw = AssertionUtils.notNull(raw, "Raw");
+        return this;
+    }
+
+    public Swc4jAstJsxText setValue(String value) {
+        this.value = AssertionUtils.notNull(value, "Value");
+        return this;
     }
 
     @Override

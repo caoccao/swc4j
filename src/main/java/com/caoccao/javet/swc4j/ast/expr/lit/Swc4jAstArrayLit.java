@@ -61,6 +61,7 @@ public class Swc4jAstArrayLit
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<Optional<Swc4jAstExprOrSpread>> getElems() {
         return elems;
     }

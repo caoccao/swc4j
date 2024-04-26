@@ -34,8 +34,8 @@ import java.util.List;
 public class Swc4jAstRegex
         extends Swc4jAst
         implements ISwc4jAstLit {
-    protected final String exp;
-    protected final String flags;
+    protected String exp;
+    protected String flags;
 
     @Jni2RustMethod
     public Swc4jAstRegex(
@@ -43,8 +43,8 @@ public class Swc4jAstRegex
             String flags,
             Swc4jSpan span) {
         super(span);
-        this.flags = AssertionUtils.notNull(flags, "Flags");
-        this.exp = AssertionUtils.notNull(exp, "Exp");
+        setExp(exp);
+        setFlags(flags);
     }
 
     @Override
@@ -52,10 +52,12 @@ public class Swc4jAstRegex
         return EMPTY_CHILD_NODES;
     }
 
+    @Jni2RustMethod
     public String getExp() {
         return exp;
     }
 
+    @Jni2RustMethod
     public String getFlags() {
         return flags;
     }
@@ -63,6 +65,16 @@ public class Swc4jAstRegex
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.Regex;
+    }
+
+    public Swc4jAstRegex setExp(String exp) {
+        this.exp = AssertionUtils.notNull(exp, "Exp");
+        return this;
+    }
+
+    public Swc4jAstRegex setFlags(String flags) {
+        this.flags = AssertionUtils.notNull(flags, "Flags");
+        return this;
     }
 
     @Override

@@ -38,10 +38,10 @@ import java.util.Optional;
 public class Swc4jAstBigInt
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit {
-    protected final Optional<String> raw;
+    protected Optional<String> raw;
     @Jni2RustField(ignore = true)
-    protected final Swc4jAstBigIntSign sign;
-    protected final BigInteger value;
+    protected Swc4jAstBigIntSign sign;
+    protected BigInteger value;
 
     @Jni2RustMethod
     public Swc4jAstBigInt(
@@ -49,8 +49,8 @@ public class Swc4jAstBigInt
             @Jni2RustParam(optional = true) String raw,
             Swc4jSpan span) {
         super(span);
-        this.sign = AssertionUtils.notNull(sign, "Sign");
-        this.raw = Optional.ofNullable(raw);
+        setRaw(raw);
+        setSign(sign);
         this.value = StringUtils.isEmpty(raw) ? BigInteger.ZERO : new BigInteger(raw.substring(0, raw.length() - 1));
     }
 
@@ -59,10 +59,12 @@ public class Swc4jAstBigInt
         return EMPTY_CHILD_NODES;
     }
 
+    @Jni2RustMethod
     public Optional<String> getRaw() {
         return raw;
     }
 
+    @Jni2RustMethod
     public Swc4jAstBigIntSign getSign() {
         return sign;
     }
@@ -72,8 +74,24 @@ public class Swc4jAstBigInt
         return Swc4jAstType.BigInt;
     }
 
+    @Jni2RustMethod
     public BigInteger getValue() {
         return value;
+    }
+
+    public Swc4jAstBigInt setRaw(String raw) {
+        this.raw = Optional.ofNullable(raw);
+        return this;
+    }
+
+    public Swc4jAstBigInt setSign(Swc4jAstBigIntSign sign) {
+        this.sign = AssertionUtils.notNull(sign, "Sign");
+        return this;
+    }
+
+    public Swc4jAstBigInt setValue(BigInteger value) {
+        this.value = AssertionUtils.notNull(value, "Value");
+        return this;
     }
 
     @Override

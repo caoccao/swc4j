@@ -43,6 +43,19 @@ macro_rules! call_as_construct {
 }
 pub(crate) use call_as_construct;
 
+macro_rules! call_as_double {
+  ($env: ident, $obj: expr, $method: expr, $args: expr, $name: literal) => {
+    match unsafe { $env.call_method_unchecked($obj, $method, ReturnType::Primitive(Primitive::Double), $args) } {
+      Ok(java_object) => match java_object.d() {
+        Ok(object) => object,
+        Err(err) => panic!("Couldn't convert {} because {}", $name, err),
+      },
+      Err(err) => panic!("Couldn't call {} because {}", $name, err),
+    }
+  };
+}
+pub(crate) use call_as_double;
+
 macro_rules! call_as_int {
   ($env: ident, $obj: expr, $method: expr, $args: expr, $name: literal) => {
     match unsafe { $env.call_method_unchecked($obj, $method, ReturnType::Primitive(Primitive::Int), $args) } {
