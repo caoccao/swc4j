@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.clazz;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
@@ -29,6 +30,7 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.List;
 import java.util.Optional;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
@@ -53,12 +55,19 @@ public class Swc4jAstSetterProp
         this.key = AssertionUtils.notNull(key, "Key");
         this.param = AssertionUtils.notNull(param, "Param");
         this.thisParam = Optional.ofNullable(thisParam);
-        childNodes = SimpleList.immutableOf(key, thisParam, param, body);
         updateParent();
     }
 
     public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.of(key, param);
+        body.ifPresent(childNodes::add);
+        thisParam.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public ISwc4jAstPropName getKey() {

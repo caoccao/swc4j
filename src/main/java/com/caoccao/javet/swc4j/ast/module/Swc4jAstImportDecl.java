@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstImportSpecifier;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -58,11 +59,15 @@ public class Swc4jAstImportDecl
         this.typeOnly = typeOnly;
         this.with = Optional.ofNullable(with);
         this.phase = AssertionUtils.notNull(phase, "Phase");
-        childNodes = SimpleList.copyOf(specifiers);
-        childNodes.add(src);
-        childNodes.add(with);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(specifiers);
+        childNodes.add(src);
+        with.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public Swc4jAstImportPhase getPhase() {

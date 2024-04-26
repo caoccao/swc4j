@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.ts;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsTypeElement;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -42,9 +43,13 @@ public class Swc4jAstTsTypeLit
             List<ISwc4jAstTsTypeElement> members,
             Swc4jSpan span) {
         super(span);
-        this.members = SimpleList.immutable(AssertionUtils.notNull(members, "Members"));
-        childNodes = SimpleList.immutableCopyOf(members);
+        this.members = AssertionUtils.notNull(members, "Members");
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return SimpleList.copyOf(members);
     }
 
     public List<ISwc4jAstTsTypeElement> getMembers() {

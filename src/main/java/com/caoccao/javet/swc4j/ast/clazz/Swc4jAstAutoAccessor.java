@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstKey;
@@ -67,18 +68,22 @@ public class Swc4jAstAutoAccessor
         setStatic(_static);
         setTypeAnn(typeAnn);
         setValue(value);
-        this.decorators = SimpleList.immutable(AssertionUtils.notNull(decorators, "Decorators"));
-        childNodes = SimpleList.copyOf(decorators);
-        childNodes.add(key);
-        childNodes.add(value);
-        childNodes.add(typeAnn);
-        childNodes = SimpleList.immutable(childNodes);
+        this.decorators = AssertionUtils.notNull(decorators, "Decorators");
         updateParent();
     }
 
     @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(decorators);
+        childNodes.add(key);
+        value.ifPresent(childNodes::add);
+        typeAnn.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     @Jni2RustMethod

@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDefaultDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
@@ -56,21 +57,25 @@ public class Swc4jAstTsInterfaceDecl
             Swc4jAstTsInterfaceBody body,
             Swc4jSpan span) {
         super(span);
-        this._extends = SimpleList.immutable(AssertionUtils.notNull(_extends, "Extends"));
+        this._extends = AssertionUtils.notNull(_extends, "Extends");
         this.body = AssertionUtils.notNull(body, "Body");
         this.declare = declare;
         this.id = AssertionUtils.notNull(id, "Id");
         this.typeParams = Optional.ofNullable(typeParams);
-        childNodes = SimpleList.copyOf(_extends);
-        childNodes.add(id);
-        childNodes.add(typeParams);
-        childNodes.add(body);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 
     public Swc4jAstTsInterfaceBody getBody() {
         return body;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(_extends);
+        childNodes.add(id);
+        typeParams.ifPresent(childNodes::add);
+        childNodes.add(body);
+        return childNodes;
     }
 
     public List<Swc4jAstTsExprWithTypeArgs> getExtends() {

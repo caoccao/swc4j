@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.expr;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -49,10 +50,6 @@ public class Swc4jAstNewExpr
         this.args = Optional.ofNullable(args).map(SimpleList::immutableCopyOf);
         this.callee = AssertionUtils.notNull(callee, "Callee");
         this.typeArgs = Optional.ofNullable(typeArgs);
-        childNodes = args == null ? SimpleList.of() : SimpleList.copyOf(args);
-        childNodes.add(callee);
-        childNodes.add(typeArgs);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 
@@ -62,6 +59,14 @@ public class Swc4jAstNewExpr
 
     public ISwc4jAstExpr getCallee() {
         return callee;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.of(callee);
+        args.ifPresent(childNodes::addAll);
+        typeArgs.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     @Override

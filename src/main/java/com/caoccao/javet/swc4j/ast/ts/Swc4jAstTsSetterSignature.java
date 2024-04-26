@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.ts;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsTypeElement;
@@ -30,6 +31,8 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+
+import java.util.List;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsSetterSignature
@@ -56,8 +59,12 @@ public class Swc4jAstTsSetterSignature
         this.optional = optional;
         this.readonly = readonly;
         this.param = AssertionUtils.notNull(param, "Param");
-        childNodes = SimpleList.immutableOf(key, param);
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return SimpleList.of(key, param);
     }
 
     public ISwc4jAstExpr getKey() {

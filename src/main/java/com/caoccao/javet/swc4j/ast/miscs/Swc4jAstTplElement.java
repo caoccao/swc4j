@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.miscs;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
@@ -27,6 +28,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
@@ -46,7 +48,11 @@ public class Swc4jAstTplElement
         this.cooked = Optional.ofNullable(cooked);
         this.raw = AssertionUtils.notNull(raw, "Raw");
         this.tail = tail;
-        childNodes = EMPTY_CHILD_NODES;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return EMPTY_CHILD_NODES;
     }
 
     public Optional<String> getCooked() {

@@ -48,13 +48,17 @@ public class Swc4jAstObjectPat
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.props = SimpleList.immutable(AssertionUtils.notNull(props, "Props"));
+        this.props = AssertionUtils.notNull(props, "Props");
         this.optional = optional;
         this.typeAnn = Optional.ofNullable(typeAnn);
-        childNodes = SimpleList.copyOf(props);
-        childNodes.add(typeAnn);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(props);
+        typeAnn.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public List<ISwc4jAstObjectPatProp> getProps() {

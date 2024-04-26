@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsEnumMember;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -51,11 +52,15 @@ public class Swc4jAstTsEnumDecl
         this._const = _const;
         this.declare = declare;
         this.id = AssertionUtils.notNull(id, "Id");
-        this.members = SimpleList.immutable(AssertionUtils.notNull(members, "TypeAnn"));
-        childNodes = SimpleList.copyOf(members);
-        childNodes.add(id);
-        childNodes = SimpleList.immutable(childNodes);
+        this.members = AssertionUtils.notNull(members, "TypeAnn");
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(members);
+        childNodes.add(id);
+        return childNodes;
     }
 
     public Swc4jAstIdent getId() {

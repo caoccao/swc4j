@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
@@ -29,6 +30,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.List;
 import java.util.Optional;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
@@ -43,8 +45,14 @@ public class Swc4jAstContinueStmt
             Swc4jSpan span) {
         super(span);
         this.label = Optional.ofNullable(label);
-        childNodes = SimpleList.immutableOf(label);
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.of();
+        label.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public Optional<Swc4jAstIdent> getLabel() {

@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.clazz;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -46,10 +47,14 @@ public class Swc4jAstParam
         super(span);
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
         this.pat = AssertionUtils.notNull(pat, "Pat");
-        childNodes = SimpleList.copyOf(decorators);
-        childNodes.add(pat);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(decorators);
+        childNodes.add(pat);
+        return childNodes;
     }
 
     public List<Swc4jAstDecorator> getDecorators() {

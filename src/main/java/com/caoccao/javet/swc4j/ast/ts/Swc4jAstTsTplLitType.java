@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.ts;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstTplElement;
@@ -47,10 +48,14 @@ public class Swc4jAstTsTplLitType
         super(span);
         this.quasis = AssertionUtils.notNull(quasis, "Quasis");
         this.types = AssertionUtils.notNull(types, "Types");
-        childNodes = SimpleList.copyOf(types);
-        childNodes.addAll(quasis);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(types);
+        childNodes.addAll(quasis);
+        return childNodes;
     }
 
     public List<Swc4jAstTplElement> getQuasis() {

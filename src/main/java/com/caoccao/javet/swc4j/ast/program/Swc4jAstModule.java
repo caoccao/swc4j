@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.program;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -69,15 +70,19 @@ public class Swc4jAstModule
             @Jni2RustParam(optional = true) String shebang,
             Swc4jSpan span) {
         super(span);
-        this.body = SimpleList.immutable(AssertionUtils.notNull(body, "Body"));
+        this.body = AssertionUtils.notNull(body, "Body");
         this.shebang = Optional.ofNullable(shebang);
-        childNodes = SimpleList.immutableCopyOf(body);
         updateParent();
     }
 
     @Override
     public List<ISwc4jAstModuleItem> getBody() {
         return body;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return SimpleList.copyOf(body);
     }
 
     @Override

@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.miscs;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxAttrOrSpread;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxElementName;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
@@ -50,19 +51,23 @@ public class Swc4jAstJsxOpeningElement
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
             Swc4jSpan span) {
         super(span);
-        this.attrs = SimpleList.immutable(AssertionUtils.notNull(attrs, "Attrs"));
+        this.attrs = AssertionUtils.notNull(attrs, "Attrs");
         this.name = AssertionUtils.notNull(name, "Name");
         this.selfClosing = selfClosing;
         this.typeArgs = Optional.ofNullable(typeArgs);
-        childNodes = SimpleList.copyOf(attrs);
-        childNodes.add(name);
-        childNodes.add(typeArgs);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 
     public List<ISwc4jAstJsxAttrOrSpread> getAttrs() {
         return attrs;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(attrs);
+        childNodes.add(name);
+        typeArgs.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public ISwc4jAstJsxElementName getName() {

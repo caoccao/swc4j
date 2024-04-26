@@ -25,7 +25,10 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * The type Swc4j ast.
@@ -53,13 +56,6 @@ public abstract class Swc4jAst implements ISwc4jAst {
     @Jni2RustField(ignore = true)
     protected final Swc4jSpan span;
     /**
-     * The Children.
-     *
-     * @since 0.2.0
-     */
-    @Jni2RustField(ignore = true)
-    protected List<ISwc4jAst> childNodes;
-    /**
      * The Parent.
      *
      * @since 0.2.0
@@ -75,14 +71,8 @@ public abstract class Swc4jAst implements ISwc4jAst {
      */
     protected Swc4jAst(
             Swc4jSpan span) {
-        childNodes = EMPTY_CHILD_NODES;
         parent = null;
         this.span = AssertionUtils.notNull(span, "Span");
-    }
-
-    @Override
-    public List<ISwc4jAst> getChildNodes() {
-        return childNodes;
     }
 
     @Override
@@ -199,8 +189,6 @@ public abstract class Swc4jAst implements ISwc4jAst {
      * @since 0.2.0
      */
     protected void updateParent() {
-        getChildNodes().stream()
-                .filter(Objects::nonNull)
-                .forEach(node -> node.setParent(this));
+        getChildNodes().forEach(node -> node.setParent(this));
     }
 }

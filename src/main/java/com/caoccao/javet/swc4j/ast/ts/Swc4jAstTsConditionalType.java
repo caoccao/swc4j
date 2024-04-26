@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.ts;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
@@ -28,6 +29,8 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+
+import java.util.List;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsConditionalType
@@ -54,12 +57,16 @@ public class Swc4jAstTsConditionalType
         this.extendsType = AssertionUtils.notNull(extendsType, "ExtendsType");
         this.trueType = AssertionUtils.notNull(trueType, "TrueType");
         this.falseType = AssertionUtils.notNull(falseType, "FalseType");
-        childNodes = SimpleList.immutableOf(checkType, extendsType, trueType, falseType);
         updateParent();
     }
 
     public ISwc4jAstTsType getCheckType() {
         return checkType;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return SimpleList.of(checkType, extendsType, trueType, falseType);
     }
 
     public ISwc4jAstTsType getExtendsType() {
@@ -74,6 +81,10 @@ public class Swc4jAstTsConditionalType
         return trueType;
     }
 
+    @Override
+    public Swc4jAstType getType() {
+        return Swc4jAstType.TsConditionalType;
+    }
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
@@ -85,10 +96,5 @@ public class Swc4jAstTsConditionalType
             default:
                 return super.visit(visitor);
         }
-    }
-
-    @Override
-    public Swc4jAstType getType() {
-        return Swc4jAstType.TsConditionalType;
     }
 }

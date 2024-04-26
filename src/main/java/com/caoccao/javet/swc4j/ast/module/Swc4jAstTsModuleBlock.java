@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.module;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleItem;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsNamespaceBody;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -42,13 +43,17 @@ public class Swc4jAstTsModuleBlock
             List<ISwc4jAstModuleItem> body,
             Swc4jSpan span) {
         super(span);
-        this.body = SimpleList.immutable(AssertionUtils.notNull(body, "Body"));
-        childNodes = SimpleList.immutableCopyOf(body);
+        this.body = AssertionUtils.notNull(body, "Body");
         updateParent();
     }
 
     public List<ISwc4jAstModuleItem> getBody() {
         return body;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return SimpleList.copyOf(body);
     }
 
     @Override

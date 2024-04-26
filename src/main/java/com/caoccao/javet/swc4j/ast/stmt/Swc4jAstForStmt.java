@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.stmt;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
@@ -28,6 +29,7 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.List;
 import java.util.Optional;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
@@ -52,12 +54,20 @@ public class Swc4jAstForStmt
         this.init = Optional.ofNullable(init);
         this.test = Optional.ofNullable(test);
         this.update = Optional.ofNullable(update);
-        childNodes = SimpleList.immutableOf(init, test, update, body);
         updateParent();
     }
 
     public ISwc4jAstStmt getBody() {
         return body;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.of(body);
+        init.ifPresent(childNodes::add);
+        test.ifPresent(childNodes::add);
+        update.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public Optional<ISwc4jAstVarDeclOrExpr> getInit() {

@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstMethodKind;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.*;
@@ -28,6 +29,7 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.List;
 import java.util.Optional;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
@@ -68,12 +70,16 @@ public class Swc4jAstPrivateMethod
         this.key = AssertionUtils.notNull(key, "Key");
         this.kind = AssertionUtils.notNull(kind, "Kind");
         this.optional = optional;
-        childNodes = SimpleList.immutableOf(key, function);
         updateParent();
     }
 
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return SimpleList.of(key, function);
     }
 
     public Swc4jAstFunction getFunction() {

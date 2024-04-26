@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.expr;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstBlockStmtOrExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
@@ -60,19 +61,23 @@ public class Swc4jAstArrowExpr
         this._async = _async;
         this.body = AssertionUtils.notNull(body, "Body");
         this.generator = generator;
-        this.params = SimpleList.immutable(AssertionUtils.notNull(params, "Params"));
+        this.params = AssertionUtils.notNull(params, "Params");
         this.returnType = Optional.ofNullable(returnType);
         this.typeParams = Optional.ofNullable(typeParams);
-        childNodes = SimpleList.copyOf(params);
-        childNodes.add(body);
-        childNodes.add(typeParams);
-        childNodes.add(returnType);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 
     public ISwc4jAstBlockStmtOrExpr getBody() {
         return body;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(params);
+        childNodes.add(body);
+        typeParams.ifPresent(childNodes::add);
+        returnType.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public List<ISwc4jAstPat> getParams() {

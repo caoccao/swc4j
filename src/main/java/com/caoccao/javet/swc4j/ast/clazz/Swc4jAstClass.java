@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.clazz;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsExprWithTypeArgs;
@@ -64,19 +65,23 @@ public class Swc4jAstClass
         this._implements = AssertionUtils.notNull(_implements, "Implements");
         this.body = AssertionUtils.notNull(body, "Body");
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
-        childNodes = SimpleList.copyOf(_implements);
-        childNodes.addAll(body);
-        childNodes.addAll(decorators);
-        childNodes.add(superClass);
-        childNodes.add(superTypeParams);
-        childNodes.add(typeParams);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 
     @Jni2RustMethod
     public List<ISwc4jAstClassMember> getBody() {
         return body;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(_implements);
+        childNodes.addAll(body);
+        childNodes.addAll(decorators);
+        superClass.ifPresent(childNodes::add);
+        superTypeParams.ifPresent(childNodes::add);
+        typeParams.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     @Jni2RustMethod

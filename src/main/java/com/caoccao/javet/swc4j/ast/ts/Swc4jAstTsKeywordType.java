@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstTsKeywordTypeKind;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
@@ -27,6 +28,8 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
+
+import java.util.List;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsKeywordType
@@ -40,7 +43,11 @@ public class Swc4jAstTsKeywordType
             Swc4jSpan span) {
         super(span);
         this.kind = AssertionUtils.notNull(kind, "Kind");
-        childNodes = EMPTY_CHILD_NODES;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return EMPTY_CHILD_NODES;
     }
 
     public Swc4jAstTsKeywordTypeKind getKind() {

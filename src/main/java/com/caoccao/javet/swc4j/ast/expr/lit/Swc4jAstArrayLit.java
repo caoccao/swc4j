@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
@@ -44,11 +45,20 @@ public class Swc4jAstArrayLit
             List<Swc4jAstExprOrSpread> elems,
             Swc4jSpan span) {
         super(span);
-        this.elems = SimpleList.immutable(AssertionUtils.notNull(elems, "Elems").stream()
+        this.elems = AssertionUtils.notNull(elems, "Elems").stream()
                 .map(Optional::ofNullable)
-                .collect(Collectors.toList()));
-        childNodes = SimpleList.immutableCopyOf(elems);
+                .collect(Collectors.toList());
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.of();
+        elems.stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(childNodes::add);
+        return childNodes;
     }
 
     public List<Optional<Swc4jAstExprOrSpread>> getElems() {

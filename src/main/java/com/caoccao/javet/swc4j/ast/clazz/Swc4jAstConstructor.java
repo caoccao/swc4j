@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
@@ -37,12 +38,12 @@ import java.util.Optional;
 public class Swc4jAstConstructor
         extends Swc4jAst
         implements ISwc4jAstClassMember {
-    protected final Optional<Swc4jAstAccessibility> accessibility;
-    protected final Optional<Swc4jAstBlockStmt> body;
-    protected final ISwc4jAstPropName key;
-    @Jni2RustField(name = "is_optional")
-    protected final boolean optional;
     protected final List<ISwc4jAstParamOrTsParamProp> params;
+    protected Optional<Swc4jAstAccessibility> accessibility;
+    protected Optional<Swc4jAstBlockStmt> body;
+    protected ISwc4jAstPropName key;
+    @Jni2RustField(name = "is_optional")
+    protected boolean optional;
 
     @Jni2RustMethod
     public Swc4jAstConstructor(
@@ -53,30 +54,38 @@ public class Swc4jAstConstructor
             boolean optional,
             Swc4jSpan span) {
         super(span);
-        this.accessibility = Optional.ofNullable(accessibility);
-        this.body = Optional.ofNullable(body);
-        this.key = AssertionUtils.notNull(key, "Key");
-        this.optional = optional;
+        setAccessibility(accessibility);
+        setBody(body);
+        setKey(key);
+        setOptional(optional);
         this.params = AssertionUtils.notNull(params, "Params");
-        childNodes = SimpleList.copyOf(params);
-        childNodes.add(body);
-        childNodes.add(key);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
     }
 
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(params);
+        body.ifPresent(childNodes::add);
+        childNodes.add(key);
+        return childNodes;
+    }
+
+    @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstParamOrTsParamProp> getParams() {
         return params;
     }
@@ -86,8 +95,28 @@ public class Swc4jAstConstructor
         return Swc4jAstType.Constructor;
     }
 
+    @Jni2RustMethod
     public boolean isOptional() {
         return optional;
+    }
+
+    public Swc4jAstConstructor setAccessibility(Swc4jAstAccessibility accessibility) {
+        this.accessibility = Optional.ofNullable(accessibility);
+        return this;
+    }
+
+    public Swc4jAstConstructor setBody(Swc4jAstBlockStmt body) {
+        this.body = Optional.ofNullable(body);
+        return this;
+    }
+
+    public Swc4jAstConstructor setKey(ISwc4jAstPropName key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
+    }
+
+    public void setOptional(boolean optional) {
+        this.optional = optional;
     }
 
     @Override

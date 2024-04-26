@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.stmt;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstSwitchCase;
@@ -47,16 +48,20 @@ public class Swc4jAstSwitchStmt
             List<Swc4jAstSwitchCase> cases,
             Swc4jSpan span) {
         super(span);
-        this.cases = SimpleList.immutable(AssertionUtils.notNull(cases, "Cases"));
+        this.cases = AssertionUtils.notNull(cases, "Cases");
         this.discriminant = AssertionUtils.notNull(discriminant, "Discriminant");
-        childNodes = SimpleList.copyOf(cases);
-        childNodes.add(discriminant);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 
     public List<Swc4jAstSwitchCase> getCases() {
         return cases;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(cases);
+        childNodes.add(discriminant);
+        return childNodes;
     }
 
     public ISwc4jAstExpr getDiscriminant() {

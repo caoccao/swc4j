@@ -19,10 +19,7 @@ package com.caoccao.javet.swc4j.ast.pat;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstAssignTargetPat;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstSimpleAssignTarget;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
@@ -52,15 +49,23 @@ public class Swc4jAstArrayPat
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.elems = SimpleList.immutable(AssertionUtils.notNull(elems, "Elems").stream()
+        this.elems = AssertionUtils.notNull(elems, "Elems").stream()
                 .map(Optional::ofNullable)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
         this.optional = optional;
         this.typeAnn = Optional.ofNullable(typeAnn);
-        childNodes = SimpleList.copyOf(elems);
-        childNodes.add(typeAnn);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.of();
+        elems.stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(childNodes::add);
+        typeAnn.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public List<Optional<ISwc4jAstPat>> getElems() {

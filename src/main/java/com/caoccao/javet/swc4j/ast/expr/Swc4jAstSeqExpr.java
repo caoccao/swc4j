@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.expr;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDefaultDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -42,13 +43,17 @@ public class Swc4jAstSeqExpr
             List<ISwc4jAstExpr> exprs,
             Swc4jSpan span) {
         super(span);
-        this.exprs = SimpleList.immutable(AssertionUtils.notNull(exprs, "Exprs"));
-        childNodes = SimpleList.immutableCopyOf(exprs);
+        this.exprs = AssertionUtils.notNull(exprs, "Exprs");
         updateParent();
     }
 
     public List<ISwc4jAstExpr> getExprs() {
         return exprs;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return SimpleList.copyOf(exprs);
     }
 
     @Override

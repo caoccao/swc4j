@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.ts;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
@@ -39,9 +40,13 @@ public class Swc4jAstTsTypeParamDecl
             List<Swc4jAstTsTypeParam> params,
             Swc4jSpan span) {
         super(span);
-        this.params = SimpleList.immutable(AssertionUtils.notNull(params, "Params"));
-        childNodes = SimpleList.immutableCopyOf(params);
+        this.params = AssertionUtils.notNull(params, "Params");
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return SimpleList.copyOf(params);
     }
 
     public List<Swc4jAstTsTypeParam> getParams() {

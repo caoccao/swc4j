@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.pat;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
@@ -29,6 +30,7 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.List;
 import java.util.Optional;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
@@ -50,12 +52,18 @@ public class Swc4jAstRestPat
         this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
         this.arg = AssertionUtils.notNull(arg, "Expr");
         this.typeAnn = Optional.ofNullable(typeAnn);
-        childNodes = SimpleList.immutableOf(arg, typeAnn);
         updateParent();
     }
 
     public ISwc4jAstPat getArg() {
         return arg;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.of(arg);
+        typeAnn.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public Swc4jSpan getDot3Token() {

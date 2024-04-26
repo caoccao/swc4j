@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
@@ -29,6 +30,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
+import java.util.List;
 import java.util.Optional;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
@@ -46,6 +48,11 @@ public class Swc4jAstNumber
         super(span);
         this.value = value;
         this.raw = Optional.ofNullable(raw);
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return EMPTY_CHILD_NODES;
     }
 
     public Optional<String> getRaw() {

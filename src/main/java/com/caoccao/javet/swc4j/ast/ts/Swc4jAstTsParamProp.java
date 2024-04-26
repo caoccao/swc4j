@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstDecorator;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsParamPropParam;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -54,17 +55,21 @@ public class Swc4jAstTsParamProp
         super(span);
         this._override = _override;
         this.accessibility = Optional.ofNullable(accessibility);
-        this.decorators = SimpleList.immutable(AssertionUtils.notNull(decorators, "Decorators"));
+        this.decorators = AssertionUtils.notNull(decorators, "Decorators");
         this.param = AssertionUtils.notNull(param, "Param");
         this.readonly = readonly;
-        childNodes = SimpleList.copyOf(decorators);
-        childNodes.add(param);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(decorators);
+        childNodes.add(param);
+        return childNodes;
     }
 
     public List<Swc4jAstDecorator> getDecorators() {

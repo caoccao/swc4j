@@ -20,10 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstSimpleAssignTarget;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsParamPropParam;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
@@ -34,6 +31,7 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.List;
 import java.util.Optional;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
@@ -51,8 +49,14 @@ public class Swc4jAstBindingIdent
         super(span);
         this.id = AssertionUtils.notNull(id, "Id");
         this.typeAnn = Optional.ofNullable(typeAnn);
-        childNodes = SimpleList.immutableOf(id, typeAnn);
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.of(id);
+        typeAnn.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public Swc4jAstIdent getId() {

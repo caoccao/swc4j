@@ -1850,6 +1850,17 @@ impl JavaSwc4jAstClassMethod {
 struct JavaSwc4jAstClassProp {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_accessibility: JMethodID,
+  method_get_decorators: JMethodID,
+  method_get_key: JMethodID,
+  method_get_type_ann: JMethodID,
+  method_get_value: JMethodID,
+  method_is_abstract: JMethodID,
+  method_is_declare: JMethodID,
+  method_is_definite: JMethodID,
+  method_is_override: JMethodID,
+  method_is_readonly: JMethodID,
+  method_is_static: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstClassProp {}
 unsafe impl Sync for JavaSwc4jAstClassProp {}
@@ -1870,9 +1881,97 @@ impl JavaSwc4jAstClassProp {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstAccessibility;ZZZZZZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstClassProp::new");
+    let method_get_accessibility = env
+      .get_method_id(
+        &class,
+        "getAccessibility",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstClassProp.getAccessibility");
+    let method_get_decorators = env
+      .get_method_id(
+        &class,
+        "getDecorators",
+        "()Ljava/util/List;",
+      )
+      .expect("Couldn't find method Swc4jAstClassProp.getDecorators");
+    let method_get_key = env
+      .get_method_id(
+        &class,
+        "getKey",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;",
+      )
+      .expect("Couldn't find method Swc4jAstClassProp.getKey");
+    let method_get_type_ann = env
+      .get_method_id(
+        &class,
+        "getTypeAnn",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstClassProp.getTypeAnn");
+    let method_get_value = env
+      .get_method_id(
+        &class,
+        "getValue",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstClassProp.getValue");
+    let method_is_abstract = env
+      .get_method_id(
+        &class,
+        "isAbstract",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstClassProp.isAbstract");
+    let method_is_declare = env
+      .get_method_id(
+        &class,
+        "isDeclare",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstClassProp.isDeclare");
+    let method_is_definite = env
+      .get_method_id(
+        &class,
+        "isDefinite",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstClassProp.isDefinite");
+    let method_is_override = env
+      .get_method_id(
+        &class,
+        "isOverride",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstClassProp.isOverride");
+    let method_is_readonly = env
+      .get_method_id(
+        &class,
+        "isReadonly",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstClassProp.isReadonly");
+    let method_is_static = env
+      .get_method_id(
+        &class,
+        "isStatic",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstClassProp.isStatic");
     JavaSwc4jAstClassProp {
       class,
       method_construct,
+      method_get_accessibility,
+      method_get_decorators,
+      method_get_key,
+      method_get_type_ann,
+      method_get_value,
+      method_is_abstract,
+      method_is_declare,
+      method_is_definite,
+      method_is_override,
+      method_is_readonly,
+      method_is_static,
     }
   }
 
@@ -1918,12 +2017,199 @@ impl JavaSwc4jAstClassProp {
       );
     return_value
   }
+
+  pub fn get_accessibility<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_accessibility,
+        &[],
+        "Optional get_accessibility()"
+      );
+    return_value
+  }
+
+  pub fn get_decorators<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_decorators,
+        &[],
+        "List get_decorators()"
+      );
+    return_value
+  }
+
+  pub fn get_key<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_key,
+        &[],
+        "ISwc4jAstPropName get_key()"
+      );
+    return_value
+  }
+
+  pub fn get_type_ann<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_type_ann,
+        &[],
+        "Optional get_type_ann()"
+      );
+    return_value
+  }
+
+  pub fn get_value<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_value,
+        &[],
+        "Optional get_value()"
+      );
+    return_value
+  }
+
+  pub fn is_abstract<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_abstract,
+        &[],
+        "boolean is_abstract()"
+      );
+    return_value
+  }
+
+  pub fn is_declare<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_declare,
+        &[],
+        "boolean is_declare()"
+      );
+    return_value
+  }
+
+  pub fn is_definite<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_definite,
+        &[],
+        "boolean is_definite()"
+      );
+    return_value
+  }
+
+  pub fn is_override<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_override,
+        &[],
+        "boolean is_override()"
+      );
+    return_value
+  }
+
+  pub fn is_readonly<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_readonly,
+        &[],
+        "boolean is_readonly()"
+      );
+    return_value
+  }
+
+  pub fn is_static<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_static,
+        &[],
+        "boolean is_static()"
+      );
+    return_value
+  }
 }
 
 #[allow(dead_code)]
 struct JavaSwc4jAstComputedPropName {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_expr: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstComputedPropName {}
 unsafe impl Sync for JavaSwc4jAstComputedPropName {}
@@ -1944,9 +2230,17 @@ impl JavaSwc4jAstComputedPropName {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstComputedPropName::new");
+    let method_get_expr = env
+      .get_method_id(
+        &class,
+        "getExpr",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstComputedPropName.getExpr");
     JavaSwc4jAstComputedPropName {
       class,
       method_construct,
+      method_get_expr,
     }
   }
 
@@ -1967,6 +2261,24 @@ impl JavaSwc4jAstComputedPropName {
         self.method_construct,
         &[expr, span],
         "Swc4jAstComputedPropName construct()"
+      );
+    return_value
+  }
+
+  pub fn get_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_expr,
+        &[],
+        "ISwc4jAstExpr get_expr()"
       );
     return_value
   }
@@ -2032,6 +2344,11 @@ impl JavaSwc4jAstCondExpr {
 struct JavaSwc4jAstConstructor {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_accessibility: JMethodID,
+  method_get_body: JMethodID,
+  method_get_key: JMethodID,
+  method_get_params: JMethodID,
+  method_is_optional: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstConstructor {}
 unsafe impl Sync for JavaSwc4jAstConstructor {}
@@ -2052,9 +2369,49 @@ impl JavaSwc4jAstConstructor {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstAccessibility;ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstConstructor::new");
+    let method_get_accessibility = env
+      .get_method_id(
+        &class,
+        "getAccessibility",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstConstructor.getAccessibility");
+    let method_get_body = env
+      .get_method_id(
+        &class,
+        "getBody",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstConstructor.getBody");
+    let method_get_key = env
+      .get_method_id(
+        &class,
+        "getKey",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;",
+      )
+      .expect("Couldn't find method Swc4jAstConstructor.getKey");
+    let method_get_params = env
+      .get_method_id(
+        &class,
+        "getParams",
+        "()Ljava/util/List;",
+      )
+      .expect("Couldn't find method Swc4jAstConstructor.getParams");
+    let method_is_optional = env
+      .get_method_id(
+        &class,
+        "isOptional",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstConstructor.isOptional");
     JavaSwc4jAstConstructor {
       class,
       method_construct,
+      method_get_accessibility,
+      method_get_body,
+      method_get_key,
+      method_get_params,
+      method_is_optional,
     }
   }
 
@@ -2083,6 +2440,94 @@ impl JavaSwc4jAstConstructor {
         self.method_construct,
         &[key, params, body, accessibility, optional, span],
         "Swc4jAstConstructor construct()"
+      );
+    return_value
+  }
+
+  pub fn get_accessibility<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_accessibility,
+        &[],
+        "Optional get_accessibility()"
+      );
+    return_value
+  }
+
+  pub fn get_body<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_body,
+        &[],
+        "Optional get_body()"
+      );
+    return_value
+  }
+
+  pub fn get_key<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_key,
+        &[],
+        "ISwc4jAstPropName get_key()"
+      );
+    return_value
+  }
+
+  pub fn get_params<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_params,
+        &[],
+        "List get_params()"
+      );
+    return_value
+  }
+
+  pub fn is_optional<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_optional,
+        &[],
+        "boolean is_optional()"
       );
     return_value
   }
@@ -2194,6 +2639,7 @@ impl JavaSwc4jAstDebuggerStmt {
 struct JavaSwc4jAstDecorator {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_expr: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstDecorator {}
 unsafe impl Sync for JavaSwc4jAstDecorator {}
@@ -2214,9 +2660,17 @@ impl JavaSwc4jAstDecorator {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstDecorator::new");
+    let method_get_expr = env
+      .get_method_id(
+        &class,
+        "getExpr",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstDecorator.getExpr");
     JavaSwc4jAstDecorator {
       class,
       method_construct,
+      method_get_expr,
     }
   }
 
@@ -2237,6 +2691,24 @@ impl JavaSwc4jAstDecorator {
         self.method_construct,
         &[expr, span],
         "Swc4jAstDecorator construct()"
+      );
+    return_value
+  }
+
+  pub fn get_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_expr,
+        &[],
+        "ISwc4jAstExpr get_expr()"
       );
     return_value
   }

@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.clazz;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
@@ -62,17 +63,21 @@ public class Swc4jAstFunction
         this.params = AssertionUtils.notNull(params, "Params");
         this.returnType = Optional.ofNullable(returnType);
         this.typeParams = Optional.ofNullable(typeParams);
-        childNodes = SimpleList.copyOf(decorators);
-        childNodes.addAll(params);
-        childNodes.add(body);
-        childNodes.add(typeParams);
-        childNodes.add(returnType);
-        childNodes = SimpleList.immutable(childNodes);
         updateParent();
     }
 
     public Optional<Swc4jAstBlockStmt> getBody() {
         return body;
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(decorators);
+        childNodes.addAll(params);
+        body.ifPresent(childNodes::add);
+        typeParams.ifPresent(childNodes::add);
+        returnType.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public List<Swc4jAstDecorator> getDecorators() {

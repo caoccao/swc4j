@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.ts;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnOrConstructorType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -46,11 +47,18 @@ public class Swc4jAstTsFnType
             Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.params = SimpleList.immutable(AssertionUtils.notNull(params, "Params"));
+        this.params = AssertionUtils.notNull(params, "Params");
         this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
         this.typeParams = Optional.ofNullable(typeParams);
-        childNodes = SimpleList.copyOf(params);
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(params);
+        childNodes.add(typeAnn);
+        typeParams.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public List<ISwc4jAstTsFnParam> getParams() {

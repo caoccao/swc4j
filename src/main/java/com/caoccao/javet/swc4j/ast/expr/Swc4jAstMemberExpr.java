@@ -19,10 +19,7 @@ package com.caoccao.javet.swc4j.ast.expr;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstOptChainBase;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstSimpleAssignTarget;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
@@ -31,6 +28,8 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+
+import java.util.List;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstMemberExpr
@@ -48,8 +47,12 @@ public class Swc4jAstMemberExpr
         super(span);
         this.prop = AssertionUtils.notNull(prop, "Prop");
         this.obj = AssertionUtils.notNull(obj, "Obj");
-        childNodes = SimpleList.immutableOf(obj, prop);
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return SimpleList.of(obj, prop);
     }
 
     public ISwc4jAstExpr getObj() {

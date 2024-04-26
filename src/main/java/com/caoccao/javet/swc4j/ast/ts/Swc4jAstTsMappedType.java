@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstTruePlusMinus;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
@@ -28,7 +29,9 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.List;
 import java.util.Optional;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
@@ -55,7 +58,15 @@ public class Swc4jAstTsMappedType
         this.readonly = Optional.ofNullable(readonly);
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeParam = AssertionUtils.notNull(typeParam, "TypeParam");
-        childNodes = EMPTY_CHILD_NODES;
+        updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.of(typeParam);
+        nameType.ifPresent(childNodes::add);
+        typeAnn.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public Optional<ISwc4jAstTsType> getNameType() {

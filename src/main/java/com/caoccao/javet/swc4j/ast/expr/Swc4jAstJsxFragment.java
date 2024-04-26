@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.expr;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxAttrValue;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxElementChild;
@@ -49,13 +50,18 @@ public class Swc4jAstJsxFragment
             Swc4jAstJsxClosingFragment closing,
             Swc4jSpan span) {
         super(span);
-        this.children = SimpleList.immutable(AssertionUtils.notNull(children, "Children"));
+        this.children = AssertionUtils.notNull(children, "Children");
         this.closing = AssertionUtils.notNull(closing, "Closing");
         this.opening = AssertionUtils.notNull(opening, "Opening");
-        childNodes = SimpleList.copyOf(children);
+        updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(children);
         childNodes.add(opening);
         childNodes.add(closing);
-        childNodes = SimpleList.immutable(childNodes);
+        return childNodes;
     }
 
     public List<ISwc4jAstJsxElementChild> getChildren() {

@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
@@ -30,6 +31,7 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, customCreation = true)
@@ -50,6 +52,11 @@ public class Swc4jAstBigInt
         this.sign = AssertionUtils.notNull(sign, "Sign");
         this.raw = Optional.ofNullable(raw);
         this.value = StringUtils.isEmpty(raw) ? BigInteger.ZERO : new BigInteger(raw.substring(0, raw.length() - 1));
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return EMPTY_CHILD_NODES;
     }
 
     public Optional<String> getRaw() {

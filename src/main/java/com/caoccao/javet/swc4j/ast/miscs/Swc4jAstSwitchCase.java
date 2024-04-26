@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.miscs;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -46,11 +47,15 @@ public class Swc4jAstSwitchCase
             Swc4jSpan span) {
         super(span);
         this.test = Optional.ofNullable(test);
-        this.cons = SimpleList.immutable(AssertionUtils.notNull(cons, "Cons"));
-        childNodes = SimpleList.copyOf(cons);
-        childNodes.add(test);
-        childNodes = SimpleList.immutable(childNodes);
+        this.cons = AssertionUtils.notNull(cons, "Cons");
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(cons);
+        test.ifPresent(childNodes::add);
+        return childNodes;
     }
 
     public List<ISwc4jAstStmt> getCons() {

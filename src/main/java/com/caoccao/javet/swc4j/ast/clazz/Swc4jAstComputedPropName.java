@@ -19,10 +19,7 @@ package com.caoccao.javet.swc4j.ast.clazz;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstSuperProp;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
@@ -32,23 +29,30 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.List;
+
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstComputedPropName
         extends Swc4jAst
         implements ISwc4jAstPropName, ISwc4jAstMemberProp, ISwc4jAstSuperProp {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr expr;
+    protected ISwc4jAstExpr expr;
 
     @Jni2RustMethod
     public Swc4jAstComputedPropName(
             ISwc4jAstExpr expr,
             Swc4jSpan span) {
         super(span);
-        this.expr = AssertionUtils.notNull(expr, "Expr");
-        childNodes = SimpleList.immutableOf(expr);
+        setExpr(expr);
         updateParent();
     }
 
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return SimpleList.of(expr);
+    }
+
+    @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
     }
@@ -56,6 +60,11 @@ public class Swc4jAstComputedPropName
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ComputedPropName;
+    }
+
+    public Swc4jAstComputedPropName setExpr(ISwc4jAstExpr expr) {
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        return this;
     }
 
     @Override

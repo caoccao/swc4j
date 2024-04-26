@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.expr;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstTplElement;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -44,12 +45,16 @@ public class Swc4jAstTpl
             List<Swc4jAstTplElement> quasis,
             Swc4jSpan span) {
         super(span);
-        this.exprs = SimpleList.immutable(AssertionUtils.notNull(exprs, "Exprs"));
-        this.quasis = SimpleList.immutable(AssertionUtils.notNull(quasis, "Quasis"));
-        childNodes = SimpleList.copyOf(exprs);
-        childNodes.addAll(quasis);
-        childNodes = SimpleList.immutable(childNodes);
+        this.exprs = AssertionUtils.notNull(exprs, "Exprs");
+        this.quasis = AssertionUtils.notNull(quasis, "Quasis");
         updateParent();
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        List<ISwc4jAst> childNodes = SimpleList.copyOf(exprs);
+        childNodes.addAll(quasis);
+        return childNodes;
     }
 
     public List<ISwc4jAstExpr> getExprs() {

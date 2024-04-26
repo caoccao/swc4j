@@ -27,6 +27,8 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
+import java.util.List;
+
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstIdent
         extends Swc4jAst
@@ -45,6 +47,11 @@ public class Swc4jAstIdent
         super(span);
         this.optional = optional;
         this.sym = AssertionUtils.notNull(sym, "Sym");
+    }
+
+    @Override
+    public List<ISwc4jAst> getChildNodes() {
+        return EMPTY_CHILD_NODES;
     }
 
     public String getSym() {
