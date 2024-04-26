@@ -34,8 +34,8 @@ import java.util.Optional;
 public class Swc4jAstExprOrSpread
         extends Swc4jAst {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr expr;
-    protected final Optional<Swc4jSpan> spread;
+    protected ISwc4jAstExpr expr;
+    protected Optional<Swc4jSpan> spread;
 
     @Jni2RustMethod
     public Swc4jAstExprOrSpread(
@@ -43,8 +43,8 @@ public class Swc4jAstExprOrSpread
             ISwc4jAstExpr expr,
             Swc4jSpan span) {
         super(span);
-        this.spread = Optional.ofNullable(spread);
-        this.expr = AssertionUtils.notNull(expr, "Expr");
+        setExpr(expr);
+        setSpread(spread);
         updateParent();
     }
 
@@ -53,10 +53,12 @@ public class Swc4jAstExprOrSpread
         return SimpleList.of(expr);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jSpan> getSpread() {
         return spread;
     }
@@ -64,6 +66,16 @@ public class Swc4jAstExprOrSpread
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ExprOrSpread;
+    }
+
+    public Swc4jAstExprOrSpread setExpr(ISwc4jAstExpr expr) {
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        return this;
+    }
+
+    public Swc4jAstExprOrSpread setSpread(Swc4jSpan spread) {
+        this.spread = Optional.ofNullable(spread);
+        return this;
     }
 
     @Override

@@ -37,11 +37,11 @@ public class Swc4jAstCondExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr alt;
+    protected ISwc4jAstExpr alt;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr cons;
+    protected ISwc4jAstExpr cons;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr test;
+    protected ISwc4jAstExpr test;
 
     @Jni2RustMethod
     public Swc4jAstCondExpr(
@@ -50,12 +50,13 @@ public class Swc4jAstCondExpr
             ISwc4jAstExpr alt,
             Swc4jSpan span) {
         super(span);
-        this.alt = AssertionUtils.notNull(alt, "Alt");
-        this.cons = AssertionUtils.notNull(cons, "Cons");
-        this.test = AssertionUtils.notNull(test, "Test");
+        setAlt(alt);
+        setCons(cons);
+        setTest(test);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getAlt() {
         return alt;
     }
@@ -65,10 +66,12 @@ public class Swc4jAstCondExpr
         return SimpleList.of(alt, cons, test);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getCons() {
         return cons;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getTest() {
         return test;
     }
@@ -76,6 +79,21 @@ public class Swc4jAstCondExpr
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.CondExpr;
+    }
+
+    public Swc4jAstCondExpr setAlt(ISwc4jAstExpr alt) {
+        this.alt = AssertionUtils.notNull(alt, "Alt");
+        return this;
+    }
+
+    public Swc4jAstCondExpr setCons(ISwc4jAstExpr cons) {
+        this.cons = AssertionUtils.notNull(cons, "Cons");
+        return this;
+    }
+
+    public Swc4jAstCondExpr setTest(ISwc4jAstExpr test) {
+        this.test = AssertionUtils.notNull(test, "Test");
+        return this;
     }
 
     @Override

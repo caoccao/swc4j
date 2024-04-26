@@ -38,10 +38,10 @@ import java.util.List;
 public class Swc4jAstAssignExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
-    protected final ISwc4jAstAssignTarget left;
-    protected final Swc4jAstAssignOp op;
+    protected ISwc4jAstAssignTarget left;
+    protected Swc4jAstAssignOp op;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr right;
+    protected ISwc4jAstExpr right;
 
     @Jni2RustMethod
     public Swc4jAstAssignExpr(
@@ -50,9 +50,9 @@ public class Swc4jAstAssignExpr
             ISwc4jAstExpr right,
             Swc4jSpan span) {
         super(span);
-        this.left = AssertionUtils.notNull(left, "Left");
-        this.op = AssertionUtils.notNull(op, "Op");
-        this.right = AssertionUtils.notNull(right, "Right");
+        setLeft(left);
+        setOp(op);
+        setRight(right);
         updateParent();
     }
 
@@ -61,14 +61,17 @@ public class Swc4jAstAssignExpr
         return SimpleList.of(left, right);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstAssignTarget getLeft() {
         return left;
     }
 
+    @Jni2RustMethod
     public Swc4jAstAssignOp getOp() {
         return op;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getRight() {
         return right;
     }
@@ -76,6 +79,21 @@ public class Swc4jAstAssignExpr
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.AssignExpr;
+    }
+
+    public Swc4jAstAssignExpr setLeft(ISwc4jAstAssignTarget left) {
+        this.left = AssertionUtils.notNull(left, "Left");
+        return this;
+    }
+
+    public Swc4jAstAssignExpr setOp(Swc4jAstAssignOp op) {
+        this.op = AssertionUtils.notNull(op, "Op");
+        return this;
+    }
+
+    public Swc4jAstAssignExpr setRight(ISwc4jAstExpr right) {
+        this.right = AssertionUtils.notNull(right, "Right");
+        return this;
     }
 
     @Override

@@ -40,8 +40,8 @@ public class Swc4jAstJsxFragment
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxElementChild, ISwc4jAstJsxAttrValue {
     protected final List<ISwc4jAstJsxElementChild> children;
-    protected final Swc4jAstJsxClosingFragment closing;
-    protected final Swc4jAstJsxOpeningFragment opening;
+    protected Swc4jAstJsxClosingFragment closing;
+    protected Swc4jAstJsxOpeningFragment opening;
 
     @Jni2RustMethod
     public Swc4jAstJsxFragment(
@@ -50,9 +50,9 @@ public class Swc4jAstJsxFragment
             Swc4jAstJsxClosingFragment closing,
             Swc4jSpan span) {
         super(span);
+        setClosing(closing);
+        setOpening(opening);
         this.children = AssertionUtils.notNull(children, "Children");
-        this.closing = AssertionUtils.notNull(closing, "Closing");
-        this.opening = AssertionUtils.notNull(opening, "Opening");
         updateParent();
     }
 
@@ -64,14 +64,17 @@ public class Swc4jAstJsxFragment
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstJsxElementChild> getChildren() {
         return children;
     }
 
+    @Jni2RustMethod
     public Swc4jAstJsxClosingFragment getClosing() {
         return closing;
     }
 
+    @Jni2RustMethod
     public Swc4jAstJsxOpeningFragment getOpening() {
         return opening;
     }
@@ -79,6 +82,16 @@ public class Swc4jAstJsxFragment
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.JsxFragment;
+    }
+
+    public Swc4jAstJsxFragment setClosing(Swc4jAstJsxClosingFragment closing) {
+        this.closing = AssertionUtils.notNull(closing, "Closing");
+        return this;
+    }
+
+    public Swc4jAstJsxFragment setOpening(Swc4jAstJsxOpeningFragment opening) {
+        this.opening = AssertionUtils.notNull(opening, "Opening");
+        return this;
     }
 
     @Override

@@ -37,8 +37,8 @@ import java.util.List;
 public class Swc4jAstJsxNamespacedName
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxElementName, ISwc4jAstJsxAttrName {
-    protected final Swc4jAstIdent name;
-    protected final Swc4jAstIdent ns;
+    protected Swc4jAstIdent name;
+    protected Swc4jAstIdent ns;
 
     @Jni2RustMethod
     public Swc4jAstJsxNamespacedName(
@@ -46,8 +46,8 @@ public class Swc4jAstJsxNamespacedName
             Swc4jAstIdent name,
             Swc4jSpan span) {
         super(span);
-        this.name = AssertionUtils.notNull(name, "Name");
-        this.ns = AssertionUtils.notNull(ns, "Ns");
+        setName(name);
+        setNs(ns);
         updateParent();
     }
 
@@ -56,10 +56,12 @@ public class Swc4jAstJsxNamespacedName
         return SimpleList.of(ns, name);
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getName() {
         return name;
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getNs() {
         return ns;
     }
@@ -67,6 +69,16 @@ public class Swc4jAstJsxNamespacedName
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.JsxNamespacedName;
+    }
+
+    public Swc4jAstJsxNamespacedName setName(Swc4jAstIdent name) {
+        this.name = AssertionUtils.notNull(name, "Name");
+        return this;
+    }
+
+    public Swc4jAstJsxNamespacedName setNs(Swc4jAstIdent ns) {
+        this.ns = AssertionUtils.notNull(ns, "Ns");
+        return this;
     }
 
     @Override

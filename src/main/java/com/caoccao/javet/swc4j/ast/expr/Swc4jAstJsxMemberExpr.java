@@ -37,8 +37,8 @@ import java.util.List;
 public class Swc4jAstJsxMemberExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxObject, ISwc4jAstJsxElementName {
-    protected final ISwc4jAstJsxObject obj;
-    protected final Swc4jAstIdent prop;
+    protected ISwc4jAstJsxObject obj;
+    protected Swc4jAstIdent prop;
 
     @Jni2RustMethod
     public Swc4jAstJsxMemberExpr(
@@ -46,8 +46,8 @@ public class Swc4jAstJsxMemberExpr
             Swc4jAstIdent prop,
             Swc4jSpan span) {
         super(span);
-        this.obj = AssertionUtils.notNull(obj, "Obj");
-        this.prop = AssertionUtils.notNull(prop, "Prop");
+        setObj(obj);
+        setProp(prop);
         updateParent();
     }
 
@@ -56,10 +56,12 @@ public class Swc4jAstJsxMemberExpr
         return SimpleList.of(obj, prop);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstJsxObject getObj() {
         return obj;
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getProp() {
         return prop;
     }
@@ -67,6 +69,16 @@ public class Swc4jAstJsxMemberExpr
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.JsxMemberExpr;
+    }
+
+    public Swc4jAstJsxMemberExpr setObj(ISwc4jAstJsxObject obj) {
+        this.obj = AssertionUtils.notNull(obj, "Obj");
+        return this;
+    }
+
+    public Swc4jAstJsxMemberExpr setProp(Swc4jAstIdent prop) {
+        this.prop = AssertionUtils.notNull(prop, "Prop");
+        return this;
     }
 
     @Override

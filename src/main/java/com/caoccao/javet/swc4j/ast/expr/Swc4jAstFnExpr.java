@@ -37,8 +37,8 @@ public class Swc4jAstFnExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstDefaultDecl {
     @Jni2RustField(box = true)
-    protected final Swc4jAstFunction function;
-    protected final Optional<Swc4jAstIdent> ident;
+    protected Swc4jAstFunction function;
+    protected Optional<Swc4jAstIdent> ident;
 
     @Jni2RustMethod
     public Swc4jAstFnExpr(
@@ -46,8 +46,8 @@ public class Swc4jAstFnExpr
             Swc4jAstFunction function,
             Swc4jSpan span) {
         super(span);
-        this.function = AssertionUtils.notNull(function, "Function");
-        this.ident = Optional.ofNullable(ident);
+        setFunction(function);
+        setIdent(ident);
         updateParent();
     }
 
@@ -58,10 +58,12 @@ public class Swc4jAstFnExpr
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Swc4jAstFunction getFunction() {
         return function;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstIdent> getIdent() {
         return ident;
     }
@@ -69,6 +71,16 @@ public class Swc4jAstFnExpr
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.FnExpr;
+    }
+
+    public Swc4jAstFnExpr setFunction(Swc4jAstFunction function) {
+        this.function = AssertionUtils.notNull(function, "Function");
+        return this;
+    }
+
+    public Swc4jAstFnExpr setIdent(Swc4jAstIdent ident) {
+        this.ident = Optional.ofNullable(ident);
+        return this;
     }
 
     @Override

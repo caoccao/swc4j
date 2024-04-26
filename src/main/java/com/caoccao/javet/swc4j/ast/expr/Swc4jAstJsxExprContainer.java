@@ -34,14 +34,14 @@ import java.util.List;
 public class Swc4jAstJsxExprContainer
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxElementChild, ISwc4jAstJsxAttrValue {
-    protected final ISwc4jAstJsxExpr expr;
+    protected ISwc4jAstJsxExpr expr;
 
     @Jni2RustMethod
     public Swc4jAstJsxExprContainer(
             ISwc4jAstJsxExpr expr,
             Swc4jSpan span) {
         super(span);
-        this.expr = AssertionUtils.notNull(expr, "Expr");
+        setExpr(expr);
         updateParent();
     }
 
@@ -50,6 +50,7 @@ public class Swc4jAstJsxExprContainer
         return SimpleList.of(expr);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstJsxExpr getExpr() {
         return expr;
     }
@@ -57,6 +58,11 @@ public class Swc4jAstJsxExprContainer
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.JsxExprContainer;
+    }
+
+    public Swc4jAstJsxExprContainer setExpr(ISwc4jAstJsxExpr expr) {
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        return this;
     }
 
     @Override

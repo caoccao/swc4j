@@ -56,8 +56,19 @@ public class Swc4jSpan {
     /**
      * Instantiates a new Swc4j span.
      *
-     * @param start the start
-     * @param end   the end
+     * @since 0.6.0
+     */
+    public Swc4jSpan() {
+        this(-1, -1, -1, -1);
+    }
+
+    /**
+     * Instantiates a new Swc4j span.
+     *
+     * @param start  the start
+     * @param end    the end
+     * @param line   the line
+     * @param column the column
      * @since 0.2.0
      */
     @Jni2RustMethod(mode = Jni2RustMethodMode.DefinitionOnly)
@@ -74,6 +85,7 @@ public class Swc4jSpan {
      * @return the column
      * @since 0.3.0
      */
+    @Jni2RustMethod
     public int getColumn() {
         return column;
     }
@@ -84,6 +96,7 @@ public class Swc4jSpan {
      * @return the end
      * @since 0.2.0
      */
+    @Jni2RustMethod
     public int getEnd() {
         return end;
     }
@@ -94,6 +107,7 @@ public class Swc4jSpan {
      * @return the line
      * @since 0.3.0
      */
+    @Jni2RustMethod
     public int getLine() {
         return line;
     }
@@ -104,6 +118,7 @@ public class Swc4jSpan {
      * @return the start
      * @since 0.2.0
      */
+    @Jni2RustMethod
     public int getStart() {
         return start;
     }

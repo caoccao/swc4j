@@ -36,8 +36,8 @@ public class Swc4jAstMemberExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstOptChainBase, ISwc4jAstSimpleAssignTarget {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr obj;
-    protected final ISwc4jAstMemberProp prop;
+    protected ISwc4jAstExpr obj;
+    protected ISwc4jAstMemberProp prop;
 
     @Jni2RustMethod
     public Swc4jAstMemberExpr(
@@ -45,8 +45,8 @@ public class Swc4jAstMemberExpr
             ISwc4jAstMemberProp prop,
             Swc4jSpan span) {
         super(span);
-        this.prop = AssertionUtils.notNull(prop, "Prop");
-        this.obj = AssertionUtils.notNull(obj, "Obj");
+        setObj(obj);
+        setProp(prop);
         updateParent();
     }
 
@@ -55,10 +55,12 @@ public class Swc4jAstMemberExpr
         return SimpleList.of(obj, prop);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getObj() {
         return obj;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstMemberProp getProp() {
         return prop;
     }
@@ -66,6 +68,16 @@ public class Swc4jAstMemberExpr
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.MemberExpr;
+    }
+
+    public Swc4jAstMemberExpr setObj(ISwc4jAstExpr obj) {
+        this.obj = AssertionUtils.notNull(obj, "Obj");
+        return this;
+    }
+
+    public Swc4jAstMemberExpr setProp(ISwc4jAstMemberProp prop) {
+        this.prop = AssertionUtils.notNull(prop, "Prop");
+        return this;
     }
 
     @Override

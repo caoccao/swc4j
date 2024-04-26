@@ -42,8 +42,8 @@ public class Swc4jAstJsxElement
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxElementChild, ISwc4jAstJsxAttrValue {
     protected final List<ISwc4jAstJsxElementChild> children;
-    protected final Optional<Swc4jAstJsxClosingElement> closing;
-    protected final Swc4jAstJsxOpeningElement opening;
+    protected Optional<Swc4jAstJsxClosingElement> closing;
+    protected Swc4jAstJsxOpeningElement opening;
 
     @Jni2RustMethod
     public Swc4jAstJsxElement(
@@ -52,9 +52,9 @@ public class Swc4jAstJsxElement
             @Jni2RustParam(optional = true) Swc4jAstJsxClosingElement closing,
             Swc4jSpan span) {
         super(span);
+        setClosing(closing);
+        setOpening(opening);
         this.children = AssertionUtils.notNull(children, "Children");
-        this.closing = Optional.ofNullable(closing);
-        this.opening = AssertionUtils.notNull(opening, "Opening");
         updateParent();
     }
 
@@ -66,14 +66,17 @@ public class Swc4jAstJsxElement
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstJsxElementChild> getChildren() {
         return children;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstJsxClosingElement> getClosing() {
         return closing;
     }
 
+    @Jni2RustMethod
     public Swc4jAstJsxOpeningElement getOpening() {
         return opening;
     }
@@ -81,6 +84,16 @@ public class Swc4jAstJsxElement
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.JsxElement;
+    }
+
+    public Swc4jAstJsxElement setClosing(Swc4jAstJsxClosingElement closing) {
+        this.closing = Optional.ofNullable(closing);
+        return this;
+    }
+
+    public Swc4jAstJsxElement setOpening(Swc4jAstJsxOpeningElement opening) {
+        this.opening = AssertionUtils.notNull(opening, "Opening");
+        return this;
     }
 
     @Override

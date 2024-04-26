@@ -38,10 +38,10 @@ public class Swc4jAstBinExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr left;
-    protected final Swc4jAstBinaryOp op;
+    protected ISwc4jAstExpr left;
+    protected Swc4jAstBinaryOp op;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr right;
+    protected ISwc4jAstExpr right;
 
     @Jni2RustMethod
     public Swc4jAstBinExpr(
@@ -50,9 +50,9 @@ public class Swc4jAstBinExpr
             ISwc4jAstExpr right,
             Swc4jSpan span) {
         super(span);
-        this.left = AssertionUtils.notNull(left, "Left");
-        this.op = AssertionUtils.notNull(op, "Op");
-        this.right = AssertionUtils.notNull(right, "Right");
+        setLeft(left);
+        setOp(op);
+        setRight(right);
         updateParent();
     }
 
@@ -61,14 +61,17 @@ public class Swc4jAstBinExpr
         return SimpleList.of(left, right);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getLeft() {
         return left;
     }
 
+    @Jni2RustMethod
     public Swc4jAstBinaryOp getOp() {
         return op;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getRight() {
         return right;
     }
@@ -76,6 +79,21 @@ public class Swc4jAstBinExpr
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.BinExpr;
+    }
+
+    public Swc4jAstBinExpr setLeft(ISwc4jAstExpr left) {
+        this.left = AssertionUtils.notNull(left, "Left");
+        return this;
+    }
+
+    public Swc4jAstBinExpr setOp(Swc4jAstBinaryOp op) {
+        this.op = AssertionUtils.notNull(op, "Op");
+        return this;
+    }
+
+    public Swc4jAstBinExpr setRight(ISwc4jAstExpr right) {
+        this.right = AssertionUtils.notNull(right, "Right");
+        return this;
     }
 
     @Override

@@ -36,8 +36,8 @@ public class Swc4jAstIdent
         ISwc4jAstPropName, ISwc4jAstTsModuleName, ISwc4jAstJsxObject, ISwc4jAstJsxElementName, ISwc4jAstMemberProp,
         ISwc4jAstSuperProp, ISwc4jAstJsxAttrName, ISwc4jAstTsThisTypeOrIdent, ISwc4jAstTsEnumMemberId {
     protected static final String QUESTION_MARK = "?";
-    protected final boolean optional;
-    protected final String sym;
+    protected boolean optional;
+    protected String sym;
 
     @Jni2RustMethod
     public Swc4jAstIdent(
@@ -45,8 +45,8 @@ public class Swc4jAstIdent
             boolean optional,
             Swc4jSpan span) {
         super(span);
-        this.optional = optional;
-        this.sym = AssertionUtils.notNull(sym, "Sym");
+        setOptional(optional);
+        setSym(sym);
     }
 
     @Override
@@ -54,6 +54,7 @@ public class Swc4jAstIdent
         return EMPTY_CHILD_NODES;
     }
 
+    @Jni2RustMethod
     public String getSym() {
         return sym;
     }
@@ -63,8 +64,19 @@ public class Swc4jAstIdent
         return Swc4jAstType.Ident;
     }
 
+    @Jni2RustMethod
     public boolean isOptional() {
         return optional;
+    }
+
+    public Swc4jAstIdent setOptional(boolean optional) {
+        this.optional = optional;
+        return this;
+    }
+
+    public Swc4jAstIdent setSym(String sym) {
+        this.sym = AssertionUtils.notNull(sym, "Sym");
+        return this;
     }
 
     @Override

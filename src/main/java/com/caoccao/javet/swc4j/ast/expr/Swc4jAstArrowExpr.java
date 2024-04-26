@@ -38,15 +38,15 @@ import java.util.Optional;
 public class Swc4jAstArrowExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
-    @Jni2RustField(name = "is_async")
-    protected final boolean _async;
-    @Jni2RustField(box = true)
-    protected final ISwc4jAstBlockStmtOrExpr body;
-    @Jni2RustField(name = "is_generator")
-    protected final boolean generator;
     protected final List<ISwc4jAstPat> params;
-    protected final Optional<Swc4jAstTsTypeAnn> returnType;
-    protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
+    @Jni2RustField(name = "is_async")
+    protected boolean _async;
+    @Jni2RustField(box = true)
+    protected ISwc4jAstBlockStmtOrExpr body;
+    @Jni2RustField(name = "is_generator")
+    protected boolean generator;
+    protected Optional<Swc4jAstTsTypeAnn> returnType;
+    protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod
     public Swc4jAstArrowExpr(
@@ -58,15 +58,16 @@ public class Swc4jAstArrowExpr
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn returnType,
             Swc4jSpan span) {
         super(span);
-        this._async = _async;
-        this.body = AssertionUtils.notNull(body, "Body");
-        this.generator = generator;
+        setAsync(_async);
+        setBody(body);
+        setGenerator(generator);
+        setReturnType(returnType);
+        setTypeParams(typeParams);
         this.params = AssertionUtils.notNull(params, "Params");
-        this.returnType = Optional.ofNullable(returnType);
-        this.typeParams = Optional.ofNullable(typeParams);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstBlockStmtOrExpr getBody() {
         return body;
     }
@@ -80,10 +81,12 @@ public class Swc4jAstArrowExpr
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstPat> getParams() {
         return params;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getReturnType() {
         return returnType;
     }
@@ -93,16 +96,44 @@ public class Swc4jAstArrowExpr
         return Swc4jAstType.ArrowExpr;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 
+    @Jni2RustMethod
     public boolean isAsync() {
         return _async;
     }
 
+    @Jni2RustMethod
     public boolean isGenerator() {
         return generator;
+    }
+
+    public Swc4jAstArrowExpr setAsync(boolean _async) {
+        this._async = _async;
+        return this;
+    }
+
+    public Swc4jAstArrowExpr setBody(ISwc4jAstBlockStmtOrExpr body) {
+        this.body = AssertionUtils.notNull(body, "Body");
+        return this;
+    }
+
+    public Swc4jAstArrowExpr setGenerator(boolean generator) {
+        this.generator = generator;
+        return this;
+    }
+
+    public Swc4jAstArrowExpr setReturnType(Swc4jAstTsTypeAnn returnType) {
+        this.returnType = Optional.ofNullable(returnType);
+        return this;
+    }
+
+    public Swc4jAstArrowExpr setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
+        this.typeParams = Optional.ofNullable(typeParams);
+        return this;
     }
 
     @Override

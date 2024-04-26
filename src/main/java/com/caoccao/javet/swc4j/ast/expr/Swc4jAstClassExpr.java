@@ -37,8 +37,8 @@ public class Swc4jAstClassExpr
         extends Swc4jAst
         implements ISwc4jAstDefaultDecl, ISwc4jAstExpr {
     @Jni2RustField(name = "class", box = true)
-    protected final Swc4jAstClass clazz;
-    protected final Optional<Swc4jAstIdent> ident;
+    protected Swc4jAstClass clazz;
+    protected Optional<Swc4jAstIdent> ident;
 
     @Jni2RustMethod
     public Swc4jAstClassExpr(
@@ -46,8 +46,8 @@ public class Swc4jAstClassExpr
             Swc4jAstClass clazz,
             Swc4jSpan span) {
         super(span);
-        this.clazz = AssertionUtils.notNull(clazz, "Class");
-        this.ident = Optional.ofNullable(ident);
+        setClazz(clazz);
+        setIdent(ident);
         updateParent();
     }
 
@@ -58,10 +58,12 @@ public class Swc4jAstClassExpr
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Swc4jAstClass getClazz() {
         return clazz;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstIdent> getIdent() {
         return ident;
     }
@@ -69,6 +71,16 @@ public class Swc4jAstClassExpr
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ClassExpr;
+    }
+
+    public Swc4jAstClassExpr setClazz(Swc4jAstClass clazz) {
+        this.clazz = AssertionUtils.notNull(clazz, "Class");
+        return this;
+    }
+
+    public Swc4jAstClassExpr setIdent(Swc4jAstIdent ident) {
+        this.ident = Optional.ofNullable(ident);
+        return this;
     }
 
     @Override

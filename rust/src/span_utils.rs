@@ -16,6 +16,7 @@
 */
 
 use jni::objects::{GlobalRef, JMethodID, JObject};
+use jni::signature::{Primitive, ReturnType};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
@@ -121,6 +122,10 @@ impl ByteToIndexMap {
 struct JavaSwc4jSpan {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_column: JMethodID,
+  method_get_end: JMethodID,
+  method_get_line: JMethodID,
+  method_get_start: JMethodID,
 }
 unsafe impl Send for JavaSwc4jSpan {}
 unsafe impl Sync for JavaSwc4jSpan {}
@@ -141,10 +146,106 @@ impl JavaSwc4jSpan {
         "(IIII)V",
       )
       .expect("Couldn't find method Swc4jSpan::new");
+    let method_get_column = env
+      .get_method_id(
+        &class,
+        "getColumn",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jSpan.getColumn");
+    let method_get_end = env
+      .get_method_id(
+        &class,
+        "getEnd",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jSpan.getEnd");
+    let method_get_line = env
+      .get_method_id(
+        &class,
+        "getLine",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jSpan.getLine");
+    let method_get_start = env
+      .get_method_id(
+        &class,
+        "getStart",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jSpan.getStart");
     JavaSwc4jSpan {
       class,
       method_construct,
+      method_get_column,
+      method_get_end,
+      method_get_line,
+      method_get_start,
     }
+  }
+
+  pub fn get_column<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_column,
+        &[],
+        "int get_column()"
+      );
+    return_value
+  }
+
+  pub fn get_end<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_end,
+        &[],
+        "int get_end()"
+      );
+    return_value
+  }
+
+  pub fn get_line<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_line,
+        &[],
+        "int get_line()"
+      );
+    return_value
+  }
+
+  pub fn get_start<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_start,
+        &[],
+        "int get_start()"
+      );
+    return_value
   }
 }
 /* JavaSwc4jSpan End */

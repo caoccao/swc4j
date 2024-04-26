@@ -37,17 +37,18 @@ public class Swc4jAstAwaitExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr arg;
+    protected ISwc4jAstExpr arg;
 
     @Jni2RustMethod
     public Swc4jAstAwaitExpr(
             ISwc4jAstExpr arg,
             Swc4jSpan span) {
         super(span);
-        this.arg = AssertionUtils.notNull(arg, "Arg");
+        setArg(arg);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getArg() {
         return arg;
     }
@@ -60,6 +61,11 @@ public class Swc4jAstAwaitExpr
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.AwaitExpr;
+    }
+
+    public Swc4jAstAwaitExpr setArg(ISwc4jAstExpr arg) {
+        this.arg = AssertionUtils.notNull(arg, "Arg");
+        return this;
     }
 
     @Override

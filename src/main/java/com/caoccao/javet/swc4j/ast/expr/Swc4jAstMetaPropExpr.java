@@ -35,14 +35,14 @@ import java.util.List;
 public class Swc4jAstMetaPropExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
-    protected final Swc4jAstMetaPropKind kind;
+    protected Swc4jAstMetaPropKind kind;
 
     @Jni2RustMethod
     public Swc4jAstMetaPropExpr(
             Swc4jAstMetaPropKind kind,
             Swc4jSpan span) {
         super(span);
-        this.kind = AssertionUtils.notNull(kind, "Kind");
+        setKind(kind);
     }
 
     @Override
@@ -50,6 +50,7 @@ public class Swc4jAstMetaPropExpr
         return EMPTY_CHILD_NODES;
     }
 
+    @Jni2RustMethod
     public Swc4jAstMetaPropKind getKind() {
         return kind;
     }
@@ -57,6 +58,11 @@ public class Swc4jAstMetaPropExpr
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.MetaPropExpr;
+    }
+
+    public Swc4jAstMetaPropExpr setKind(Swc4jAstMetaPropKind kind) {
+        this.kind = AssertionUtils.notNull(kind, "Kind");
+        return this;
     }
 
     @Override
