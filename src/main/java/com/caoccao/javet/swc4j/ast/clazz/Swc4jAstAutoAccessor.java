@@ -37,16 +37,16 @@ import java.util.Optional;
 public class Swc4jAstAutoAccessor
         extends Swc4jAst
         implements ISwc4jAstClassMember {
-    @Jni2RustField(name = "is_override")
-    protected final boolean _override;
-    @Jni2RustField(name = "is_static")
-    protected final boolean _static;
-    protected final Optional<Swc4jAstAccessibility> accessibility;
     protected final List<Swc4jAstDecorator> decorators;
-    protected final boolean definite;
-    protected final ISwc4jAstKey key;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
-    protected final Optional<ISwc4jAstExpr> value;
+    @Jni2RustField(name = "is_override")
+    protected boolean _override;
+    @Jni2RustField(name = "is_static")
+    protected boolean _static;
+    protected Optional<Swc4jAstAccessibility> accessibility;
+    protected boolean definite;
+    protected ISwc4jAstKey key;
+    protected Optional<Swc4jAstTsTypeAnn> typeAnn;
+    protected Optional<ISwc4jAstExpr> value;
 
     @Jni2RustMethod
     public Swc4jAstAutoAccessor(
@@ -60,14 +60,14 @@ public class Swc4jAstAutoAccessor
             boolean definite,
             Swc4jSpan span) {
         super(span);
-        this._override = _override;
-        this._static = _static;
-        this.accessibility = Optional.ofNullable(accessibility);
+        setAccessibility(accessibility);
+        setDefinite(definite);
+        setKey(key);
+        setOverride(_override);
+        setStatic(_static);
+        setTypeAnn(typeAnn);
+        setValue(value);
         this.decorators = SimpleList.immutable(AssertionUtils.notNull(decorators, "Decorators"));
-        this.definite = definite;
-        this.key = AssertionUtils.notNull(key, "Key");
-        this.typeAnn = Optional.ofNullable(typeAnn);
-        this.value = Optional.ofNullable(value);
         childNodes = SimpleList.copyOf(decorators);
         childNodes.add(key);
         childNodes.add(value);
@@ -76,14 +76,17 @@ public class Swc4jAstAutoAccessor
         updateParent();
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstDecorator> getDecorators() {
         return decorators;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstKey getKey() {
         return key;
     }
@@ -93,24 +96,64 @@ public class Swc4jAstAutoAccessor
         return Swc4jAstType.AutoAccessor;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getValue() {
         return value;
     }
 
+    @Jni2RustMethod
     public boolean isDefinite() {
         return definite;
     }
 
+    @Jni2RustMethod
     public boolean isOverride() {
         return _override;
     }
 
+    @Jni2RustMethod
     public boolean isStatic() {
         return _static;
+    }
+
+    public Swc4jAstAutoAccessor setAccessibility(Swc4jAstAccessibility accessibility) {
+        this.accessibility = Optional.ofNullable(accessibility);
+        return this;
+    }
+
+    public Swc4jAstAutoAccessor setDefinite(boolean definite) {
+        this.definite = definite;
+        return this;
+    }
+
+    public Swc4jAstAutoAccessor setKey(ISwc4jAstKey key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
+    }
+
+    public Swc4jAstAutoAccessor setOverride(boolean _override) {
+        this._override = _override;
+        return this;
+    }
+
+    public Swc4jAstAutoAccessor setStatic(boolean _static) {
+        this._static = _static;
+        return this;
+    }
+
+    public Swc4jAstAutoAccessor setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        return this;
+    }
+
+    public Swc4jAstAutoAccessor setValue(ISwc4jAstExpr value) {
+        this.value = Optional.ofNullable(value);
+        return this;
     }
 
     @Override

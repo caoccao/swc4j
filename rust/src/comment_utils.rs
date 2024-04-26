@@ -26,14 +26,15 @@ use crate::jni_utils::*;
 use crate::span_utils::ByteToIndexMap;
 
 /* JavaSwc4jComment Begin */
+#[allow(dead_code)]
 struct JavaSwc4jComment {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jComment {}
 unsafe impl Sync for JavaSwc4jComment {}
 
+#[allow(dead_code)]
 impl JavaSwc4jComment {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -81,14 +82,15 @@ impl JavaSwc4jComment {
 }
 
 /* JavaSwc4jComments Begin */
+#[allow(dead_code)]
 struct JavaSwc4jComments {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jComments {}
 unsafe impl Sync for JavaSwc4jComments {}
 
+#[allow(dead_code)]
 impl JavaSwc4jComments {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env

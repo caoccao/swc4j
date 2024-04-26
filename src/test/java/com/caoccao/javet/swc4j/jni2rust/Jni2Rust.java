@@ -56,6 +56,7 @@ public class Jni2Rust<T> {
 
     protected void getCodeImpl(List<String> lines) {
         lines.add(StringUtils.EMPTY);
+        lines.add("#[allow(dead_code)]");
         lines.add(String.format("impl %s {", structName));
         getCodeNew(lines);
         getCodeMethods(lines);
@@ -317,8 +318,8 @@ public class Jni2Rust<T> {
     }
 
     protected void getCodeStruct(List<String> lines) {
+        lines.add("#[allow(dead_code)]");
         lines.add(String.format("struct %s {", structName));
-        lines.add("  #[allow(dead_code)]");
         lines.add("  class: GlobalRef,");
         if (constructor != null) {
             lines.add("  method_construct: JMethodID,");

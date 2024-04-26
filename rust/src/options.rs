@@ -25,8 +25,8 @@ use crate::enums::*;
 use crate::jni_utils::*;
 
 /* JavaSwc4jParseOptions Begin */
+#[allow(dead_code)]
 struct JavaSwc4jParseOptions {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_get_media_type: JMethodID,
   method_get_parse_mode: JMethodID,
@@ -39,6 +39,7 @@ struct JavaSwc4jParseOptions {
 unsafe impl Send for JavaSwc4jParseOptions {}
 unsafe impl Sync for JavaSwc4jParseOptions {}
 
+#[allow(dead_code)]
 impl JavaSwc4jParseOptions {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -229,8 +230,8 @@ impl JavaSwc4jParseOptions {
 /* JavaSwc4jParseOptions End */
 
 /* JavaSwc4jTransformOptions Begin */
+#[allow(dead_code)]
 struct JavaSwc4jTransformOptions {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_get_media_type: JMethodID,
   method_get_parse_mode: JMethodID,
@@ -247,6 +248,7 @@ struct JavaSwc4jTransformOptions {
 unsafe impl Send for JavaSwc4jTransformOptions {}
 unsafe impl Sync for JavaSwc4jTransformOptions {}
 
+#[allow(dead_code)]
 impl JavaSwc4jTransformOptions {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -537,8 +539,8 @@ impl JavaSwc4jTransformOptions {
 /* JavaSwc4jTransformOptions End */
 
 /* JavaSwc4jTranspileOptions Begin */
+#[allow(dead_code)]
 struct JavaSwc4jTranspileOptions {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_get_imports_not_used_as_values: JMethodID,
   method_get_jsx_factory: JMethodID,
@@ -566,6 +568,7 @@ struct JavaSwc4jTranspileOptions {
 unsafe impl Send for JavaSwc4jTranspileOptions {}
 unsafe impl Sync for JavaSwc4jTranspileOptions {}
 
+#[allow(dead_code)]
 impl JavaSwc4jTranspileOptions {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env

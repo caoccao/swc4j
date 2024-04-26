@@ -117,14 +117,15 @@ impl ByteToIndexMap {
 }
 
 /* JavaSwc4jSpan Begin */
+#[allow(dead_code)]
 struct JavaSwc4jSpan {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jSpan {}
 unsafe impl Sync for JavaSwc4jSpan {}
 
+#[allow(dead_code)]
 impl JavaSwc4jSpan {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env

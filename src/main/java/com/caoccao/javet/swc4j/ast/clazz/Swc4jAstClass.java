@@ -36,15 +36,15 @@ import java.util.Optional;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstClass
         extends Swc4jAst {
-    @Jni2RustField(name = "is_abstract")
-    protected final boolean _abstract;
     @Jni2RustField(name = "implements")
     protected final List<Swc4jAstTsExprWithTypeArgs> _implements;
     protected final List<ISwc4jAstClassMember> body;
     protected final List<Swc4jAstDecorator> decorators;
-    protected final Optional<ISwc4jAstExpr> superClass;
-    protected final Optional<Swc4jAstTsTypeParamInstantiation> superTypeParams;
-    protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
+    @Jni2RustField(name = "is_abstract")
+    protected boolean _abstract;
+    protected Optional<ISwc4jAstExpr> superClass;
+    protected Optional<Swc4jAstTsTypeParamInstantiation> superTypeParams;
+    protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod
     public Swc4jAstClass(
@@ -57,13 +57,13 @@ public class Swc4jAstClass
             @Jni2RustParam(name = "implements") List<Swc4jAstTsExprWithTypeArgs> _implements,
             Swc4jSpan span) {
         super(span);
-        this._abstract = _abstract;
-        this._implements = _implements;
+        setAbstract(_abstract);
+        setSuperClass(superClass);
+        setSuperTypeParams(superTypeParams);
+        setTypeParams(typeParams);
+        this._implements = AssertionUtils.notNull(_implements, "Implements");
         this.body = AssertionUtils.notNull(body, "Body");
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
-        this.superClass = Optional.ofNullable(superClass);
-        this.superTypeParams = Optional.ofNullable(superTypeParams);
-        this.typeParams = Optional.ofNullable(typeParams);
         childNodes = SimpleList.copyOf(_implements);
         childNodes.addAll(body);
         childNodes.addAll(decorators);
@@ -74,22 +74,27 @@ public class Swc4jAstClass
         updateParent();
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstClassMember> getBody() {
         return body;
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstDecorator> getDecorators() {
         return decorators;
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstTsExprWithTypeArgs> getImplements() {
         return _implements;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getSuperClass() {
         return superClass;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getSuperTypeParams() {
         return superTypeParams;
     }
@@ -99,12 +104,34 @@ public class Swc4jAstClass
         return Swc4jAstType.Class;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 
+    @Jni2RustMethod
     public boolean isAbstract() {
         return _abstract;
+    }
+
+    public Swc4jAstClass setAbstract(boolean _abstract) {
+        this._abstract = _abstract;
+        return this;
+    }
+
+    public Swc4jAstClass setSuperClass(ISwc4jAstExpr superClass) {
+        this.superClass = Optional.ofNullable(superClass);
+        return this;
+    }
+
+    public Swc4jAstClass setSuperTypeParams(Swc4jAstTsTypeParamInstantiation superTypeParams) {
+        this.superTypeParams = Optional.ofNullable(superTypeParams);
+        return this;
+    }
+
+    public Swc4jAstClass setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
+        this.typeParams = Optional.ofNullable(typeParams);
+        return this;
     }
 
     @Override

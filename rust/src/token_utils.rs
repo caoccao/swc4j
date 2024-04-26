@@ -34,8 +34,8 @@ use std::ptr::null_mut;
 use std::sync::Arc;
 
 /* JavaSwc4jTokenFactory Begin */
+#[allow(dead_code)]
 struct JavaSwc4jTokenFactory {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_create_assign_operator: JStaticMethodID,
   method_create_big_int: JStaticMethodID,
@@ -60,6 +60,7 @@ struct JavaSwc4jTokenFactory {
 unsafe impl Send for JavaSwc4jTokenFactory {}
 unsafe impl Sync for JavaSwc4jTokenFactory {}
 
+#[allow(dead_code)]
 impl JavaSwc4jTokenFactory {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env

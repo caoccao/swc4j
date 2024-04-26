@@ -35,9 +35,9 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 public class Swc4jAstAssignProp
         extends Swc4jAst
         implements ISwc4jAstProp {
-    protected final Swc4jAstIdent key;
+    protected Swc4jAstIdent key;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr value;
+    protected ISwc4jAstExpr value;
 
     @Jni2RustMethod
     public Swc4jAstAssignProp(
@@ -45,12 +45,13 @@ public class Swc4jAstAssignProp
             ISwc4jAstExpr value,
             Swc4jSpan span) {
         super(span);
-        this.key = AssertionUtils.notNull(key, "Key");
-        this.value = AssertionUtils.notNull(value, "Value");
+        setKey(key);
+        setValue(value);
         childNodes = SimpleList.immutableOf(key, value);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getKey() {
         return key;
     }
@@ -60,8 +61,19 @@ public class Swc4jAstAssignProp
         return Swc4jAstType.AssignProp;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getValue() {
         return value;
+    }
+
+    public Swc4jAstAssignProp setKey(Swc4jAstIdent key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
+    }
+
+    public Swc4jAstAssignProp setValue(ISwc4jAstExpr value) {
+        this.value = AssertionUtils.notNull(value, "Value");
+        return this;
     }
 
     @Override

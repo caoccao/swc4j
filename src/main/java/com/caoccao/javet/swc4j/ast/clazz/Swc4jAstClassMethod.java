@@ -36,18 +36,18 @@ public class Swc4jAstClassMethod
         extends Swc4jAst
         implements ISwc4jAstClassMember {
     @Jni2RustField(name = "is_abstract")
-    protected final boolean _abstract;
+    protected boolean _abstract;
     @Jni2RustField(name = "is_override")
-    protected final boolean _override;
+    protected boolean _override;
     @Jni2RustField(name = "is_static")
-    protected final boolean _static;
-    protected final Optional<Swc4jAstAccessibility> accessibility;
+    protected boolean _static;
+    protected Optional<Swc4jAstAccessibility> accessibility;
     @Jni2RustField(box = true)
-    protected final Swc4jAstFunction function;
-    protected final ISwc4jAstPropName key;
-    protected final Swc4jAstMethodKind kind;
+    protected Swc4jAstFunction function;
+    protected ISwc4jAstPropName key;
+    protected Swc4jAstMethodKind kind;
     @Jni2RustField(name = "is_optional")
-    protected final boolean optional;
+    protected boolean optional;
 
     @Jni2RustMethod
     public Swc4jAstClassMethod(
@@ -61,30 +61,34 @@ public class Swc4jAstClassMethod
             @Jni2RustParam(name = "is_override") boolean _override,
             Swc4jSpan span) {
         super(span);
-        this._abstract = _abstract;
-        this._override = _override;
-        this._static = _static;
-        this.accessibility = Optional.ofNullable(accessibility);
-        this.function = function;
-        this.key = AssertionUtils.notNull(key, "Key");
-        this.kind = AssertionUtils.notNull(kind, "Kind");
-        this.optional = optional;
+        setAbstract(_abstract);
+        setAccessibility(accessibility);
+        setFunction(function);
+        setKey(key);
+        setKind(kind);
+        setOptional(optional);
+        setOverride(_override);
+        setStatic(_static);
         childNodes = SimpleList.immutableOf(key, function);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
     }
 
+    @Jni2RustMethod
     public Swc4jAstFunction getFunction() {
         return function;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
     }
 
+    @Jni2RustMethod
     public Swc4jAstMethodKind getKind() {
         return kind;
     }
@@ -94,16 +98,59 @@ public class Swc4jAstClassMethod
         return Swc4jAstType.ClassMethod;
     }
 
+    @Jni2RustMethod
     public boolean isAbstract() {
         return _abstract;
     }
 
+    @Jni2RustMethod
     public boolean isOverride() {
         return _override;
     }
 
+    @Jni2RustMethod
     public boolean isStatic() {
         return _static;
+    }
+
+    public Swc4jAstClassMethod setAbstract(boolean _abstract) {
+        this._abstract = _abstract;
+        return this;
+    }
+
+    public Swc4jAstClassMethod setAccessibility(Swc4jAstAccessibility accessibility) {
+        this.accessibility = Optional.ofNullable(accessibility);
+        return this;
+    }
+
+    public Swc4jAstClassMethod setFunction(Swc4jAstFunction function) {
+        this.function = AssertionUtils.notNull(function, "Function");
+        return this;
+    }
+
+    public Swc4jAstClassMethod setKey(ISwc4jAstPropName key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
+    }
+
+    public Swc4jAstClassMethod setKind(Swc4jAstMethodKind kind) {
+        this.kind = AssertionUtils.notNull(kind, "Kind");
+        return this;
+    }
+
+    public Swc4jAstClassMethod setOptional(boolean optional) {
+        this.optional = optional;
+        return this;
+    }
+
+    public Swc4jAstClassMethod setOverride(boolean _override) {
+        this._override = _override;
+        return this;
+    }
+
+    public Swc4jAstClassMethod setStatic(boolean _static) {
+        this._static = _static;
+        return this;
     }
 
     @Override

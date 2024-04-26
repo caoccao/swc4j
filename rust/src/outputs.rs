@@ -35,14 +35,15 @@ use crate::span_utils::ByteToIndexMap;
 use crate::token_utils;
 
 /* JavaSwc4jParseOutput Begin */
+#[allow(dead_code)]
 struct JavaSwc4jParseOutput {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jParseOutput {}
 unsafe impl Sync for JavaSwc4jParseOutput {}
 
+#[allow(dead_code)]
 impl JavaSwc4jParseOutput {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -67,14 +68,15 @@ impl JavaSwc4jParseOutput {
 /* JavaSwc4jParseOutput End */
 
 /* JavaSwc4jTransformOutput Begin */
+#[allow(dead_code)]
 struct JavaSwc4jTransformOutput {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jTransformOutput {}
 unsafe impl Sync for JavaSwc4jTransformOutput {}
 
+#[allow(dead_code)]
 impl JavaSwc4jTransformOutput {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -99,14 +101,15 @@ impl JavaSwc4jTransformOutput {
 /* JavaSwc4jTransformOutput End */
 
 /* JavaSwc4jTranspileOutput Begin */
+#[allow(dead_code)]
 struct JavaSwc4jTranspileOutput {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jTranspileOutput {}
 unsafe impl Sync for JavaSwc4jTranspileOutput {}
 
+#[allow(dead_code)]
 impl JavaSwc4jTranspileOutput {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env

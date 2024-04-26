@@ -16,6 +16,7 @@
 */
 
 use jni::objects::{GlobalRef, JMethodID, JObject};
+use jni::signature::{Primitive, ReturnType};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
@@ -33,14 +34,15 @@ use std::ptr::null_mut;
  */
 
 /* JNI Begin */
+#[allow(dead_code)]
 struct JavaSwc4jAstArrayLit {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstArrayLit {}
 unsafe impl Sync for JavaSwc4jAstArrayLit {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstArrayLit {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -84,14 +86,15 @@ impl JavaSwc4jAstArrayLit {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstArrayPat {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstArrayPat {}
 unsafe impl Sync for JavaSwc4jAstArrayPat {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstArrayPat {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -139,14 +142,15 @@ impl JavaSwc4jAstArrayPat {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstArrowExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstArrowExpr {}
 unsafe impl Sync for JavaSwc4jAstArrowExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstArrowExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -200,14 +204,15 @@ impl JavaSwc4jAstArrowExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstAssignExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstAssignExpr {}
 unsafe impl Sync for JavaSwc4jAstAssignExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstAssignExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -255,14 +260,15 @@ impl JavaSwc4jAstAssignExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstAssignPat {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstAssignPat {}
 unsafe impl Sync for JavaSwc4jAstAssignPat {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstAssignPat {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -308,14 +314,15 @@ impl JavaSwc4jAstAssignPat {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstAssignPatProp {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstAssignPatProp {}
 unsafe impl Sync for JavaSwc4jAstAssignPatProp {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstAssignPatProp {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -361,14 +368,17 @@ impl JavaSwc4jAstAssignPatProp {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstAssignProp {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_key: JMethodID,
+  method_get_value: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstAssignProp {}
 unsafe impl Sync for JavaSwc4jAstAssignProp {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstAssignProp {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -384,9 +394,25 @@ impl JavaSwc4jAstAssignProp {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstAssignProp::new");
+    let method_get_key = env
+      .get_method_id(
+        &class,
+        "getKey",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+      )
+      .expect("Couldn't find method Swc4jAstAssignProp.getKey");
+    let method_get_value = env
+      .get_method_id(
+        &class,
+        "getValue",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstAssignProp.getValue");
     JavaSwc4jAstAssignProp {
       class,
       method_construct,
+      method_get_key,
+      method_get_value,
     }
   }
 
@@ -412,16 +438,61 @@ impl JavaSwc4jAstAssignProp {
       );
     return_value
   }
+
+  pub fn get_key<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_key,
+        &[],
+        "Swc4jAstIdent get_key()"
+      );
+    return_value
+  }
+
+  pub fn get_value<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_value,
+        &[],
+        "ISwc4jAstExpr get_value()"
+      );
+    return_value
+  }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstAutoAccessor {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_accessibility: JMethodID,
+  method_get_decorators: JMethodID,
+  method_get_key: JMethodID,
+  method_get_type_ann: JMethodID,
+  method_get_value: JMethodID,
+  method_is_definite: JMethodID,
+  method_is_override: JMethodID,
+  method_is_static: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstAutoAccessor {}
 unsafe impl Sync for JavaSwc4jAstAutoAccessor {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstAutoAccessor {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -437,9 +508,73 @@ impl JavaSwc4jAstAutoAccessor {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstAccessibility;ZZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstAutoAccessor::new");
+    let method_get_accessibility = env
+      .get_method_id(
+        &class,
+        "getAccessibility",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstAutoAccessor.getAccessibility");
+    let method_get_decorators = env
+      .get_method_id(
+        &class,
+        "getDecorators",
+        "()Ljava/util/List;",
+      )
+      .expect("Couldn't find method Swc4jAstAutoAccessor.getDecorators");
+    let method_get_key = env
+      .get_method_id(
+        &class,
+        "getKey",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;",
+      )
+      .expect("Couldn't find method Swc4jAstAutoAccessor.getKey");
+    let method_get_type_ann = env
+      .get_method_id(
+        &class,
+        "getTypeAnn",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstAutoAccessor.getTypeAnn");
+    let method_get_value = env
+      .get_method_id(
+        &class,
+        "getValue",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstAutoAccessor.getValue");
+    let method_is_definite = env
+      .get_method_id(
+        &class,
+        "isDefinite",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstAutoAccessor.isDefinite");
+    let method_is_override = env
+      .get_method_id(
+        &class,
+        "isOverride",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstAutoAccessor.isOverride");
+    let method_is_static = env
+      .get_method_id(
+        &class,
+        "isStatic",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstAutoAccessor.isStatic");
     JavaSwc4jAstAutoAccessor {
       class,
       method_construct,
+      method_get_accessibility,
+      method_get_decorators,
+      method_get_key,
+      method_get_type_ann,
+      method_get_value,
+      method_is_definite,
+      method_is_override,
+      method_is_static,
     }
   }
 
@@ -477,16 +612,155 @@ impl JavaSwc4jAstAutoAccessor {
       );
     return_value
   }
+
+  pub fn get_accessibility<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_accessibility,
+        &[],
+        "Optional get_accessibility()"
+      );
+    return_value
+  }
+
+  pub fn get_decorators<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_decorators,
+        &[],
+        "List get_decorators()"
+      );
+    return_value
+  }
+
+  pub fn get_key<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_key,
+        &[],
+        "ISwc4jAstKey get_key()"
+      );
+    return_value
+  }
+
+  pub fn get_type_ann<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_type_ann,
+        &[],
+        "Optional get_type_ann()"
+      );
+    return_value
+  }
+
+  pub fn get_value<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_value,
+        &[],
+        "Optional get_value()"
+      );
+    return_value
+  }
+
+  pub fn is_definite<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_definite,
+        &[],
+        "boolean is_definite()"
+      );
+    return_value
+  }
+
+  pub fn is_override<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_override,
+        &[],
+        "boolean is_override()"
+      );
+    return_value
+  }
+
+  pub fn is_static<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_static,
+        &[],
+        "boolean is_static()"
+      );
+    return_value
+  }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstAwaitExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstAwaitExpr {}
 unsafe impl Sync for JavaSwc4jAstAwaitExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstAwaitExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -530,14 +804,15 @@ impl JavaSwc4jAstAwaitExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstBigInt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstBigInt {}
 unsafe impl Sync for JavaSwc4jAstBigInt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstBigInt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -585,14 +860,15 @@ impl JavaSwc4jAstBigInt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstBinExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstBinExpr {}
 unsafe impl Sync for JavaSwc4jAstBinExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstBinExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -640,14 +916,15 @@ impl JavaSwc4jAstBinExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstBindingIdent {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstBindingIdent {}
 unsafe impl Sync for JavaSwc4jAstBindingIdent {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstBindingIdent {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -693,14 +970,15 @@ impl JavaSwc4jAstBindingIdent {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstBlockStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstBlockStmt {}
 unsafe impl Sync for JavaSwc4jAstBlockStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstBlockStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -744,14 +1022,15 @@ impl JavaSwc4jAstBlockStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstBool {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstBool {}
 unsafe impl Sync for JavaSwc4jAstBool {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstBool {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -795,14 +1074,15 @@ impl JavaSwc4jAstBool {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstBreakStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstBreakStmt {}
 unsafe impl Sync for JavaSwc4jAstBreakStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstBreakStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -846,14 +1126,15 @@ impl JavaSwc4jAstBreakStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstCallExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstCallExpr {}
 unsafe impl Sync for JavaSwc4jAstCallExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstCallExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -901,14 +1182,15 @@ impl JavaSwc4jAstCallExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstCatchClause {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstCatchClause {}
 unsafe impl Sync for JavaSwc4jAstCatchClause {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstCatchClause {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -954,14 +1236,22 @@ impl JavaSwc4jAstCatchClause {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstClass {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_body: JMethodID,
+  method_get_decorators: JMethodID,
+  method_get_implements: JMethodID,
+  method_get_super_class: JMethodID,
+  method_get_super_type_params: JMethodID,
+  method_get_type_params: JMethodID,
+  method_is_abstract: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstClass {}
 unsafe impl Sync for JavaSwc4jAstClass {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstClass {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -977,9 +1267,65 @@ impl JavaSwc4jAstClass {
         "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstClass::new");
+    let method_get_body = env
+      .get_method_id(
+        &class,
+        "getBody",
+        "()Ljava/util/List;",
+      )
+      .expect("Couldn't find method Swc4jAstClass.getBody");
+    let method_get_decorators = env
+      .get_method_id(
+        &class,
+        "getDecorators",
+        "()Ljava/util/List;",
+      )
+      .expect("Couldn't find method Swc4jAstClass.getDecorators");
+    let method_get_implements = env
+      .get_method_id(
+        &class,
+        "getImplements",
+        "()Ljava/util/List;",
+      )
+      .expect("Couldn't find method Swc4jAstClass.getImplements");
+    let method_get_super_class = env
+      .get_method_id(
+        &class,
+        "getSuperClass",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstClass.getSuperClass");
+    let method_get_super_type_params = env
+      .get_method_id(
+        &class,
+        "getSuperTypeParams",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstClass.getSuperTypeParams");
+    let method_get_type_params = env
+      .get_method_id(
+        &class,
+        "getTypeParams",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstClass.getTypeParams");
+    let method_is_abstract = env
+      .get_method_id(
+        &class,
+        "isAbstract",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstClass.isAbstract");
     JavaSwc4jAstClass {
       class,
       method_construct,
+      method_get_body,
+      method_get_decorators,
+      method_get_implements,
+      method_get_super_class,
+      method_get_super_type_params,
+      method_get_type_params,
+      method_is_abstract,
     }
   }
 
@@ -1015,16 +1361,141 @@ impl JavaSwc4jAstClass {
       );
     return_value
   }
+
+  pub fn get_body<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_body,
+        &[],
+        "List get_body()"
+      );
+    return_value
+  }
+
+  pub fn get_decorators<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_decorators,
+        &[],
+        "List get_decorators()"
+      );
+    return_value
+  }
+
+  pub fn get_implements<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_implements,
+        &[],
+        "List get_implements()"
+      );
+    return_value
+  }
+
+  pub fn get_super_class<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_super_class,
+        &[],
+        "Optional get_super_class()"
+      );
+    return_value
+  }
+
+  pub fn get_super_type_params<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_super_type_params,
+        &[],
+        "Optional get_super_type_params()"
+      );
+    return_value
+  }
+
+  pub fn get_type_params<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_type_params,
+        &[],
+        "Optional get_type_params()"
+      );
+    return_value
+  }
+
+  pub fn is_abstract<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_abstract,
+        &[],
+        "boolean is_abstract()"
+      );
+    return_value
+  }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstClassDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstClassDecl {}
 unsafe impl Sync for JavaSwc4jAstClassDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstClassDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1072,14 +1543,15 @@ impl JavaSwc4jAstClassDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstClassExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstClassExpr {}
 unsafe impl Sync for JavaSwc4jAstClassExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstClassExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1125,14 +1597,22 @@ impl JavaSwc4jAstClassExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstClassMethod {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_accessibility: JMethodID,
+  method_get_function: JMethodID,
+  method_get_key: JMethodID,
+  method_get_kind: JMethodID,
+  method_is_abstract: JMethodID,
+  method_is_override: JMethodID,
+  method_is_static: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstClassMethod {}
 unsafe impl Sync for JavaSwc4jAstClassMethod {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstClassMethod {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1148,9 +1628,65 @@ impl JavaSwc4jAstClassMethod {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstMethodKind;ZLcom/caoccao/javet/swc4j/ast/enums/Swc4jAstAccessibility;ZZZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstClassMethod::new");
+    let method_get_accessibility = env
+      .get_method_id(
+        &class,
+        "getAccessibility",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstClassMethod.getAccessibility");
+    let method_get_function = env
+      .get_method_id(
+        &class,
+        "getFunction",
+        "()Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstFunction;",
+      )
+      .expect("Couldn't find method Swc4jAstClassMethod.getFunction");
+    let method_get_key = env
+      .get_method_id(
+        &class,
+        "getKey",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;",
+      )
+      .expect("Couldn't find method Swc4jAstClassMethod.getKey");
+    let method_get_kind = env
+      .get_method_id(
+        &class,
+        "getKind",
+        "()Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstMethodKind;",
+      )
+      .expect("Couldn't find method Swc4jAstClassMethod.getKind");
+    let method_is_abstract = env
+      .get_method_id(
+        &class,
+        "isAbstract",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstClassMethod.isAbstract");
+    let method_is_override = env
+      .get_method_id(
+        &class,
+        "isOverride",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstClassMethod.isOverride");
+    let method_is_static = env
+      .get_method_id(
+        &class,
+        "isStatic",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstClassMethod.isStatic");
     JavaSwc4jAstClassMethod {
       class,
       method_construct,
+      method_get_accessibility,
+      method_get_function,
+      method_get_key,
+      method_get_kind,
+      method_is_abstract,
+      method_is_override,
+      method_is_static,
     }
   }
 
@@ -1188,16 +1724,137 @@ impl JavaSwc4jAstClassMethod {
       );
     return_value
   }
+
+  pub fn get_accessibility<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_accessibility,
+        &[],
+        "Optional get_accessibility()"
+      );
+    return_value
+  }
+
+  pub fn get_function<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_function,
+        &[],
+        "Swc4jAstFunction get_function()"
+      );
+    return_value
+  }
+
+  pub fn get_key<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_key,
+        &[],
+        "ISwc4jAstPropName get_key()"
+      );
+    return_value
+  }
+
+  pub fn get_kind<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_kind,
+        &[],
+        "Swc4jAstMethodKind get_kind()"
+      );
+    return_value
+  }
+
+  pub fn is_abstract<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_abstract,
+        &[],
+        "boolean is_abstract()"
+      );
+    return_value
+  }
+
+  pub fn is_override<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_override,
+        &[],
+        "boolean is_override()"
+      );
+    return_value
+  }
+
+  pub fn is_static<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_static,
+        &[],
+        "boolean is_static()"
+      );
+    return_value
+  }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstClassProp {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstClassProp {}
 unsafe impl Sync for JavaSwc4jAstClassProp {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstClassProp {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1263,14 +1920,15 @@ impl JavaSwc4jAstClassProp {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstComputedPropName {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstComputedPropName {}
 unsafe impl Sync for JavaSwc4jAstComputedPropName {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstComputedPropName {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1314,14 +1972,15 @@ impl JavaSwc4jAstComputedPropName {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstCondExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstCondExpr {}
 unsafe impl Sync for JavaSwc4jAstCondExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstCondExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1369,14 +2028,15 @@ impl JavaSwc4jAstCondExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstConstructor {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstConstructor {}
 unsafe impl Sync for JavaSwc4jAstConstructor {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstConstructor {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1428,14 +2088,15 @@ impl JavaSwc4jAstConstructor {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstContinueStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstContinueStmt {}
 unsafe impl Sync for JavaSwc4jAstContinueStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstContinueStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1479,14 +2140,15 @@ impl JavaSwc4jAstContinueStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstDebuggerStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstDebuggerStmt {}
 unsafe impl Sync for JavaSwc4jAstDebuggerStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstDebuggerStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1528,14 +2190,15 @@ impl JavaSwc4jAstDebuggerStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstDecorator {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstDecorator {}
 unsafe impl Sync for JavaSwc4jAstDecorator {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstDecorator {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1579,14 +2242,15 @@ impl JavaSwc4jAstDecorator {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstDoWhileStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstDoWhileStmt {}
 unsafe impl Sync for JavaSwc4jAstDoWhileStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstDoWhileStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1632,14 +2296,15 @@ impl JavaSwc4jAstDoWhileStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstEmptyStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstEmptyStmt {}
 unsafe impl Sync for JavaSwc4jAstEmptyStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstEmptyStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1681,14 +2346,15 @@ impl JavaSwc4jAstEmptyStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstExportAll {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportAll {}
 unsafe impl Sync for JavaSwc4jAstExportAll {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstExportAll {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1736,14 +2402,15 @@ impl JavaSwc4jAstExportAll {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstExportDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportDecl {}
 unsafe impl Sync for JavaSwc4jAstExportDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstExportDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1787,14 +2454,15 @@ impl JavaSwc4jAstExportDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstExportDefaultDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportDefaultDecl {}
 unsafe impl Sync for JavaSwc4jAstExportDefaultDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstExportDefaultDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1838,14 +2506,15 @@ impl JavaSwc4jAstExportDefaultDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstExportDefaultExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportDefaultExpr {}
 unsafe impl Sync for JavaSwc4jAstExportDefaultExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstExportDefaultExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1889,14 +2558,15 @@ impl JavaSwc4jAstExportDefaultExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstExportDefaultSpecifier {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportDefaultSpecifier {}
 unsafe impl Sync for JavaSwc4jAstExportDefaultSpecifier {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstExportDefaultSpecifier {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1940,14 +2610,15 @@ impl JavaSwc4jAstExportDefaultSpecifier {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstExportNamedSpecifier {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportNamedSpecifier {}
 unsafe impl Sync for JavaSwc4jAstExportNamedSpecifier {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstExportNamedSpecifier {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -1995,14 +2666,15 @@ impl JavaSwc4jAstExportNamedSpecifier {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstExportNamespaceSpecifier {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportNamespaceSpecifier {}
 unsafe impl Sync for JavaSwc4jAstExportNamespaceSpecifier {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstExportNamespaceSpecifier {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2046,14 +2718,15 @@ impl JavaSwc4jAstExportNamespaceSpecifier {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstExprOrSpread {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExprOrSpread {}
 unsafe impl Sync for JavaSwc4jAstExprOrSpread {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstExprOrSpread {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2099,14 +2772,15 @@ impl JavaSwc4jAstExprOrSpread {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstExprStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExprStmt {}
 unsafe impl Sync for JavaSwc4jAstExprStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstExprStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2150,14 +2824,15 @@ impl JavaSwc4jAstExprStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstFnDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstFnDecl {}
 unsafe impl Sync for JavaSwc4jAstFnDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstFnDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2205,14 +2880,15 @@ impl JavaSwc4jAstFnDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstFnExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstFnExpr {}
 unsafe impl Sync for JavaSwc4jAstFnExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstFnExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2258,14 +2934,15 @@ impl JavaSwc4jAstFnExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstForInStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstForInStmt {}
 unsafe impl Sync for JavaSwc4jAstForInStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstForInStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2313,14 +2990,15 @@ impl JavaSwc4jAstForInStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstForOfStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstForOfStmt {}
 unsafe impl Sync for JavaSwc4jAstForOfStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstForOfStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2370,14 +3048,15 @@ impl JavaSwc4jAstForOfStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstForStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstForStmt {}
 unsafe impl Sync for JavaSwc4jAstForStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstForStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2427,14 +3106,15 @@ impl JavaSwc4jAstForStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstFunction {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstFunction {}
 unsafe impl Sync for JavaSwc4jAstFunction {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstFunction {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2490,14 +3170,15 @@ impl JavaSwc4jAstFunction {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstGetterProp {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstGetterProp {}
 unsafe impl Sync for JavaSwc4jAstGetterProp {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstGetterProp {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2545,14 +3226,15 @@ impl JavaSwc4jAstGetterProp {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstIdent {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstIdent {}
 unsafe impl Sync for JavaSwc4jAstIdent {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstIdent {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2600,14 +3282,15 @@ impl JavaSwc4jAstIdent {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstIfStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstIfStmt {}
 unsafe impl Sync for JavaSwc4jAstIfStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstIfStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2655,14 +3338,15 @@ impl JavaSwc4jAstIfStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstImport {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstImport {}
 unsafe impl Sync for JavaSwc4jAstImport {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstImport {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2706,14 +3390,15 @@ impl JavaSwc4jAstImport {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstImportDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstImportDecl {}
 unsafe impl Sync for JavaSwc4jAstImportDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstImportDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2765,14 +3450,15 @@ impl JavaSwc4jAstImportDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstImportDefaultSpecifier {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstImportDefaultSpecifier {}
 unsafe impl Sync for JavaSwc4jAstImportDefaultSpecifier {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstImportDefaultSpecifier {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2816,14 +3502,15 @@ impl JavaSwc4jAstImportDefaultSpecifier {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstImportNamedSpecifier {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstImportNamedSpecifier {}
 unsafe impl Sync for JavaSwc4jAstImportNamedSpecifier {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstImportNamedSpecifier {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2871,14 +3558,15 @@ impl JavaSwc4jAstImportNamedSpecifier {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstImportStarAsSpecifier {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstImportStarAsSpecifier {}
 unsafe impl Sync for JavaSwc4jAstImportStarAsSpecifier {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstImportStarAsSpecifier {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2922,14 +3610,15 @@ impl JavaSwc4jAstImportStarAsSpecifier {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstInvalid {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstInvalid {}
 unsafe impl Sync for JavaSwc4jAstInvalid {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstInvalid {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -2971,14 +3660,15 @@ impl JavaSwc4jAstInvalid {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstJsxAttr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstJsxAttr {}
 unsafe impl Sync for JavaSwc4jAstJsxAttr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstJsxAttr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3024,14 +3714,15 @@ impl JavaSwc4jAstJsxAttr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstJsxClosingElement {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstJsxClosingElement {}
 unsafe impl Sync for JavaSwc4jAstJsxClosingElement {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstJsxClosingElement {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3075,14 +3766,15 @@ impl JavaSwc4jAstJsxClosingElement {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstJsxClosingFragment {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstJsxClosingFragment {}
 unsafe impl Sync for JavaSwc4jAstJsxClosingFragment {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstJsxClosingFragment {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3124,14 +3816,15 @@ impl JavaSwc4jAstJsxClosingFragment {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstJsxElement {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstJsxElement {}
 unsafe impl Sync for JavaSwc4jAstJsxElement {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstJsxElement {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3179,14 +3872,15 @@ impl JavaSwc4jAstJsxElement {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstJsxEmptyExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstJsxEmptyExpr {}
 unsafe impl Sync for JavaSwc4jAstJsxEmptyExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstJsxEmptyExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3228,14 +3922,15 @@ impl JavaSwc4jAstJsxEmptyExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstJsxExprContainer {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstJsxExprContainer {}
 unsafe impl Sync for JavaSwc4jAstJsxExprContainer {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstJsxExprContainer {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3279,14 +3974,15 @@ impl JavaSwc4jAstJsxExprContainer {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstJsxFragment {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstJsxFragment {}
 unsafe impl Sync for JavaSwc4jAstJsxFragment {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstJsxFragment {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3334,14 +4030,15 @@ impl JavaSwc4jAstJsxFragment {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstJsxMemberExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstJsxMemberExpr {}
 unsafe impl Sync for JavaSwc4jAstJsxMemberExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstJsxMemberExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3387,14 +4084,15 @@ impl JavaSwc4jAstJsxMemberExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstJsxNamespacedName {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstJsxNamespacedName {}
 unsafe impl Sync for JavaSwc4jAstJsxNamespacedName {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstJsxNamespacedName {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3440,14 +4138,15 @@ impl JavaSwc4jAstJsxNamespacedName {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstJsxOpeningElement {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstJsxOpeningElement {}
 unsafe impl Sync for JavaSwc4jAstJsxOpeningElement {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstJsxOpeningElement {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3497,14 +4196,15 @@ impl JavaSwc4jAstJsxOpeningElement {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstJsxOpeningFragment {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstJsxOpeningFragment {}
 unsafe impl Sync for JavaSwc4jAstJsxOpeningFragment {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstJsxOpeningFragment {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3546,14 +4246,15 @@ impl JavaSwc4jAstJsxOpeningFragment {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstJsxSpreadChild {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstJsxSpreadChild {}
 unsafe impl Sync for JavaSwc4jAstJsxSpreadChild {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstJsxSpreadChild {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3597,14 +4298,15 @@ impl JavaSwc4jAstJsxSpreadChild {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstJsxText {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstJsxText {}
 unsafe impl Sync for JavaSwc4jAstJsxText {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstJsxText {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3654,14 +4356,15 @@ impl JavaSwc4jAstJsxText {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstKeyValuePatProp {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstKeyValuePatProp {}
 unsafe impl Sync for JavaSwc4jAstKeyValuePatProp {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstKeyValuePatProp {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3707,14 +4410,15 @@ impl JavaSwc4jAstKeyValuePatProp {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstKeyValueProp {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstKeyValueProp {}
 unsafe impl Sync for JavaSwc4jAstKeyValueProp {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstKeyValueProp {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3760,14 +4464,15 @@ impl JavaSwc4jAstKeyValueProp {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstLabeledStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstLabeledStmt {}
 unsafe impl Sync for JavaSwc4jAstLabeledStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstLabeledStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3813,14 +4518,15 @@ impl JavaSwc4jAstLabeledStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstMemberExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstMemberExpr {}
 unsafe impl Sync for JavaSwc4jAstMemberExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstMemberExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3866,14 +4572,15 @@ impl JavaSwc4jAstMemberExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstMetaPropExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstMetaPropExpr {}
 unsafe impl Sync for JavaSwc4jAstMetaPropExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstMetaPropExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3917,14 +4624,15 @@ impl JavaSwc4jAstMetaPropExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstMethodProp {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstMethodProp {}
 unsafe impl Sync for JavaSwc4jAstMethodProp {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstMethodProp {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -3970,14 +4678,15 @@ impl JavaSwc4jAstMethodProp {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstModule {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstModule {}
 unsafe impl Sync for JavaSwc4jAstModule {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstModule {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4025,14 +4734,15 @@ impl JavaSwc4jAstModule {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstNamedExport {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstNamedExport {}
 unsafe impl Sync for JavaSwc4jAstNamedExport {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstNamedExport {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4082,14 +4792,15 @@ impl JavaSwc4jAstNamedExport {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstNewExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstNewExpr {}
 unsafe impl Sync for JavaSwc4jAstNewExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstNewExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4137,14 +4848,15 @@ impl JavaSwc4jAstNewExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstNull {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstNull {}
 unsafe impl Sync for JavaSwc4jAstNull {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstNull {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4186,14 +4898,15 @@ impl JavaSwc4jAstNull {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstNumber {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstNumber {}
 unsafe impl Sync for JavaSwc4jAstNumber {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstNumber {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4241,14 +4954,15 @@ impl JavaSwc4jAstNumber {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstObjectLit {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstObjectLit {}
 unsafe impl Sync for JavaSwc4jAstObjectLit {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstObjectLit {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4292,14 +5006,15 @@ impl JavaSwc4jAstObjectLit {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstObjectPat {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstObjectPat {}
 unsafe impl Sync for JavaSwc4jAstObjectPat {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstObjectPat {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4347,14 +5062,15 @@ impl JavaSwc4jAstObjectPat {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstOptCall {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstOptCall {}
 unsafe impl Sync for JavaSwc4jAstOptCall {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstOptCall {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4402,14 +5118,15 @@ impl JavaSwc4jAstOptCall {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstOptChainExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstOptChainExpr {}
 unsafe impl Sync for JavaSwc4jAstOptChainExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstOptChainExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4455,14 +5172,15 @@ impl JavaSwc4jAstOptChainExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstParam {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstParam {}
 unsafe impl Sync for JavaSwc4jAstParam {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstParam {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4508,14 +5226,15 @@ impl JavaSwc4jAstParam {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstParenExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstParenExpr {}
 unsafe impl Sync for JavaSwc4jAstParenExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstParenExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4559,14 +5278,15 @@ impl JavaSwc4jAstParenExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstPrivateMethod {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstPrivateMethod {}
 unsafe impl Sync for JavaSwc4jAstPrivateMethod {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstPrivateMethod {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4624,14 +5344,15 @@ impl JavaSwc4jAstPrivateMethod {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstPrivateName {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstPrivateName {}
 unsafe impl Sync for JavaSwc4jAstPrivateName {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstPrivateName {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4675,14 +5396,15 @@ impl JavaSwc4jAstPrivateName {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstPrivateProp {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstPrivateProp {}
 unsafe impl Sync for JavaSwc4jAstPrivateProp {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstPrivateProp {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4744,14 +5466,15 @@ impl JavaSwc4jAstPrivateProp {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstRegex {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstRegex {}
 unsafe impl Sync for JavaSwc4jAstRegex {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstRegex {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4801,14 +5524,15 @@ impl JavaSwc4jAstRegex {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstRestPat {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstRestPat {}
 unsafe impl Sync for JavaSwc4jAstRestPat {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstRestPat {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4856,14 +5580,15 @@ impl JavaSwc4jAstRestPat {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstReturnStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstReturnStmt {}
 unsafe impl Sync for JavaSwc4jAstReturnStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstReturnStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4907,14 +5632,15 @@ impl JavaSwc4jAstReturnStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstScript {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstScript {}
 unsafe impl Sync for JavaSwc4jAstScript {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstScript {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -4962,14 +5688,15 @@ impl JavaSwc4jAstScript {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstSeqExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstSeqExpr {}
 unsafe impl Sync for JavaSwc4jAstSeqExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstSeqExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5013,14 +5740,15 @@ impl JavaSwc4jAstSeqExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstSetterProp {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstSetterProp {}
 unsafe impl Sync for JavaSwc4jAstSetterProp {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstSetterProp {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5070,14 +5798,15 @@ impl JavaSwc4jAstSetterProp {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstSpreadElement {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstSpreadElement {}
 unsafe impl Sync for JavaSwc4jAstSpreadElement {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstSpreadElement {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5123,14 +5852,15 @@ impl JavaSwc4jAstSpreadElement {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstStaticBlock {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstStaticBlock {}
 unsafe impl Sync for JavaSwc4jAstStaticBlock {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstStaticBlock {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5174,14 +5904,15 @@ impl JavaSwc4jAstStaticBlock {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstStr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstStr {}
 unsafe impl Sync for JavaSwc4jAstStr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstStr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5231,14 +5962,15 @@ impl JavaSwc4jAstStr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstSuper {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstSuper {}
 unsafe impl Sync for JavaSwc4jAstSuper {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstSuper {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5280,14 +6012,15 @@ impl JavaSwc4jAstSuper {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstSuperPropExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstSuperPropExpr {}
 unsafe impl Sync for JavaSwc4jAstSuperPropExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstSuperPropExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5333,14 +6066,15 @@ impl JavaSwc4jAstSuperPropExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstSwitchCase {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstSwitchCase {}
 unsafe impl Sync for JavaSwc4jAstSwitchCase {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstSwitchCase {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5386,14 +6120,15 @@ impl JavaSwc4jAstSwitchCase {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstSwitchStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstSwitchStmt {}
 unsafe impl Sync for JavaSwc4jAstSwitchStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstSwitchStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5439,14 +6174,15 @@ impl JavaSwc4jAstSwitchStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTaggedTpl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTaggedTpl {}
 unsafe impl Sync for JavaSwc4jAstTaggedTpl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTaggedTpl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5494,14 +6230,15 @@ impl JavaSwc4jAstTaggedTpl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstThisExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstThisExpr {}
 unsafe impl Sync for JavaSwc4jAstThisExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstThisExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5543,14 +6280,15 @@ impl JavaSwc4jAstThisExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstThrowStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstThrowStmt {}
 unsafe impl Sync for JavaSwc4jAstThrowStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstThrowStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5594,14 +6332,15 @@ impl JavaSwc4jAstThrowStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTpl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTpl {}
 unsafe impl Sync for JavaSwc4jAstTpl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTpl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5647,14 +6386,15 @@ impl JavaSwc4jAstTpl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTplElement {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTplElement {}
 unsafe impl Sync for JavaSwc4jAstTplElement {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTplElement {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5706,14 +6446,15 @@ impl JavaSwc4jAstTplElement {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTryStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTryStmt {}
 unsafe impl Sync for JavaSwc4jAstTryStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTryStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5761,14 +6502,15 @@ impl JavaSwc4jAstTryStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsArrayType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsArrayType {}
 unsafe impl Sync for JavaSwc4jAstTsArrayType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsArrayType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5812,14 +6554,15 @@ impl JavaSwc4jAstTsArrayType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsAsExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsAsExpr {}
 unsafe impl Sync for JavaSwc4jAstTsAsExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsAsExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5865,14 +6608,15 @@ impl JavaSwc4jAstTsAsExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsCallSignatureDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsCallSignatureDecl {}
 unsafe impl Sync for JavaSwc4jAstTsCallSignatureDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsCallSignatureDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5920,14 +6664,15 @@ impl JavaSwc4jAstTsCallSignatureDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsConditionalType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsConditionalType {}
 unsafe impl Sync for JavaSwc4jAstTsConditionalType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsConditionalType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -5977,14 +6722,15 @@ impl JavaSwc4jAstTsConditionalType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsConstAssertion {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsConstAssertion {}
 unsafe impl Sync for JavaSwc4jAstTsConstAssertion {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsConstAssertion {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6028,14 +6774,15 @@ impl JavaSwc4jAstTsConstAssertion {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsConstructSignatureDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsConstructSignatureDecl {}
 unsafe impl Sync for JavaSwc4jAstTsConstructSignatureDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsConstructSignatureDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6083,14 +6830,15 @@ impl JavaSwc4jAstTsConstructSignatureDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsConstructorType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsConstructorType {}
 unsafe impl Sync for JavaSwc4jAstTsConstructorType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsConstructorType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6140,14 +6888,15 @@ impl JavaSwc4jAstTsConstructorType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsEnumDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsEnumDecl {}
 unsafe impl Sync for JavaSwc4jAstTsEnumDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsEnumDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6197,14 +6946,15 @@ impl JavaSwc4jAstTsEnumDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsEnumMember {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsEnumMember {}
 unsafe impl Sync for JavaSwc4jAstTsEnumMember {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsEnumMember {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6250,14 +7000,15 @@ impl JavaSwc4jAstTsEnumMember {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsExportAssignment {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsExportAssignment {}
 unsafe impl Sync for JavaSwc4jAstTsExportAssignment {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsExportAssignment {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6301,14 +7052,15 @@ impl JavaSwc4jAstTsExportAssignment {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsExprWithTypeArgs {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsExprWithTypeArgs {}
 unsafe impl Sync for JavaSwc4jAstTsExprWithTypeArgs {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsExprWithTypeArgs {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6354,14 +7106,15 @@ impl JavaSwc4jAstTsExprWithTypeArgs {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsExternalModuleRef {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsExternalModuleRef {}
 unsafe impl Sync for JavaSwc4jAstTsExternalModuleRef {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsExternalModuleRef {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6405,14 +7158,15 @@ impl JavaSwc4jAstTsExternalModuleRef {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsFnType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsFnType {}
 unsafe impl Sync for JavaSwc4jAstTsFnType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsFnType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6460,14 +7214,15 @@ impl JavaSwc4jAstTsFnType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsGetterSignature {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsGetterSignature {}
 unsafe impl Sync for JavaSwc4jAstTsGetterSignature {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsGetterSignature {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6519,14 +7274,15 @@ impl JavaSwc4jAstTsGetterSignature {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsImportEqualsDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsImportEqualsDecl {}
 unsafe impl Sync for JavaSwc4jAstTsImportEqualsDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsImportEqualsDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6576,14 +7332,15 @@ impl JavaSwc4jAstTsImportEqualsDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsImportType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsImportType {}
 unsafe impl Sync for JavaSwc4jAstTsImportType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsImportType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6631,14 +7388,15 @@ impl JavaSwc4jAstTsImportType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsIndexSignature {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsIndexSignature {}
 unsafe impl Sync for JavaSwc4jAstTsIndexSignature {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsIndexSignature {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6688,14 +7446,15 @@ impl JavaSwc4jAstTsIndexSignature {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsIndexedAccessType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsIndexedAccessType {}
 unsafe impl Sync for JavaSwc4jAstTsIndexedAccessType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsIndexedAccessType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6743,14 +7502,15 @@ impl JavaSwc4jAstTsIndexedAccessType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsInferType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsInferType {}
 unsafe impl Sync for JavaSwc4jAstTsInferType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsInferType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6794,14 +7554,15 @@ impl JavaSwc4jAstTsInferType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsInstantiation {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsInstantiation {}
 unsafe impl Sync for JavaSwc4jAstTsInstantiation {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsInstantiation {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6847,14 +7608,15 @@ impl JavaSwc4jAstTsInstantiation {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsInterfaceBody {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsInterfaceBody {}
 unsafe impl Sync for JavaSwc4jAstTsInterfaceBody {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsInterfaceBody {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6898,14 +7660,15 @@ impl JavaSwc4jAstTsInterfaceBody {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsInterfaceDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsInterfaceDecl {}
 unsafe impl Sync for JavaSwc4jAstTsInterfaceDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsInterfaceDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -6957,14 +7720,15 @@ impl JavaSwc4jAstTsInterfaceDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsIntersectionType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsIntersectionType {}
 unsafe impl Sync for JavaSwc4jAstTsIntersectionType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsIntersectionType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7008,14 +7772,15 @@ impl JavaSwc4jAstTsIntersectionType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsKeywordType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsKeywordType {}
 unsafe impl Sync for JavaSwc4jAstTsKeywordType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsKeywordType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7059,14 +7824,15 @@ impl JavaSwc4jAstTsKeywordType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsLitType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsLitType {}
 unsafe impl Sync for JavaSwc4jAstTsLitType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsLitType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7110,14 +7876,15 @@ impl JavaSwc4jAstTsLitType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsMappedType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsMappedType {}
 unsafe impl Sync for JavaSwc4jAstTsMappedType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsMappedType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7169,14 +7936,15 @@ impl JavaSwc4jAstTsMappedType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsMethodSignature {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsMethodSignature {}
 unsafe impl Sync for JavaSwc4jAstTsMethodSignature {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsMethodSignature {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7232,14 +8000,15 @@ impl JavaSwc4jAstTsMethodSignature {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsModuleBlock {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsModuleBlock {}
 unsafe impl Sync for JavaSwc4jAstTsModuleBlock {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsModuleBlock {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7283,14 +8052,15 @@ impl JavaSwc4jAstTsModuleBlock {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsModuleDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsModuleDecl {}
 unsafe impl Sync for JavaSwc4jAstTsModuleDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsModuleDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7340,14 +8110,15 @@ impl JavaSwc4jAstTsModuleDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsNamespaceDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsNamespaceDecl {}
 unsafe impl Sync for JavaSwc4jAstTsNamespaceDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsNamespaceDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7397,14 +8168,15 @@ impl JavaSwc4jAstTsNamespaceDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsNamespaceExportDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsNamespaceExportDecl {}
 unsafe impl Sync for JavaSwc4jAstTsNamespaceExportDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsNamespaceExportDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7448,14 +8220,15 @@ impl JavaSwc4jAstTsNamespaceExportDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsNonNullExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsNonNullExpr {}
 unsafe impl Sync for JavaSwc4jAstTsNonNullExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsNonNullExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7499,14 +8272,15 @@ impl JavaSwc4jAstTsNonNullExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsOptionalType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsOptionalType {}
 unsafe impl Sync for JavaSwc4jAstTsOptionalType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsOptionalType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7550,14 +8324,15 @@ impl JavaSwc4jAstTsOptionalType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsParamProp {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsParamProp {}
 unsafe impl Sync for JavaSwc4jAstTsParamProp {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsParamProp {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7609,14 +8384,15 @@ impl JavaSwc4jAstTsParamProp {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsParenthesizedType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsParenthesizedType {}
 unsafe impl Sync for JavaSwc4jAstTsParenthesizedType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsParenthesizedType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7660,14 +8436,15 @@ impl JavaSwc4jAstTsParenthesizedType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsPropertySignature {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsPropertySignature {}
 unsafe impl Sync for JavaSwc4jAstTsPropertySignature {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsPropertySignature {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7725,14 +8502,15 @@ impl JavaSwc4jAstTsPropertySignature {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsQualifiedName {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsQualifiedName {}
 unsafe impl Sync for JavaSwc4jAstTsQualifiedName {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsQualifiedName {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7778,14 +8556,15 @@ impl JavaSwc4jAstTsQualifiedName {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsRestType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsRestType {}
 unsafe impl Sync for JavaSwc4jAstTsRestType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsRestType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7829,14 +8608,15 @@ impl JavaSwc4jAstTsRestType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsSatisfiesExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsSatisfiesExpr {}
 unsafe impl Sync for JavaSwc4jAstTsSatisfiesExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsSatisfiesExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7882,14 +8662,15 @@ impl JavaSwc4jAstTsSatisfiesExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsSetterSignature {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsSetterSignature {}
 unsafe impl Sync for JavaSwc4jAstTsSetterSignature {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsSetterSignature {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7941,14 +8722,15 @@ impl JavaSwc4jAstTsSetterSignature {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsThisType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsThisType {}
 unsafe impl Sync for JavaSwc4jAstTsThisType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsThisType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -7990,14 +8772,15 @@ impl JavaSwc4jAstTsThisType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTplLitType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTplLitType {}
 unsafe impl Sync for JavaSwc4jAstTsTplLitType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTplLitType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8043,14 +8826,15 @@ impl JavaSwc4jAstTsTplLitType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTupleElement {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTupleElement {}
 unsafe impl Sync for JavaSwc4jAstTsTupleElement {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTupleElement {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8096,14 +8880,15 @@ impl JavaSwc4jAstTsTupleElement {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTupleType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTupleType {}
 unsafe impl Sync for JavaSwc4jAstTsTupleType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTupleType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8147,14 +8932,15 @@ impl JavaSwc4jAstTsTupleType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTypeAliasDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTypeAliasDecl {}
 unsafe impl Sync for JavaSwc4jAstTsTypeAliasDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTypeAliasDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8204,14 +8990,15 @@ impl JavaSwc4jAstTsTypeAliasDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTypeAnn {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTypeAnn {}
 unsafe impl Sync for JavaSwc4jAstTsTypeAnn {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTypeAnn {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8255,14 +9042,15 @@ impl JavaSwc4jAstTsTypeAnn {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTypeAssertion {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTypeAssertion {}
 unsafe impl Sync for JavaSwc4jAstTsTypeAssertion {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTypeAssertion {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8308,14 +9096,15 @@ impl JavaSwc4jAstTsTypeAssertion {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTypeLit {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTypeLit {}
 unsafe impl Sync for JavaSwc4jAstTsTypeLit {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTypeLit {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8359,14 +9148,15 @@ impl JavaSwc4jAstTsTypeLit {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTypeOperator {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTypeOperator {}
 unsafe impl Sync for JavaSwc4jAstTsTypeOperator {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTypeOperator {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8412,14 +9202,15 @@ impl JavaSwc4jAstTsTypeOperator {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTypeParam {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTypeParam {}
 unsafe impl Sync for JavaSwc4jAstTsTypeParam {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTypeParam {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8473,14 +9264,15 @@ impl JavaSwc4jAstTsTypeParam {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTypeParamDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTypeParamDecl {}
 unsafe impl Sync for JavaSwc4jAstTsTypeParamDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTypeParamDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8524,14 +9316,15 @@ impl JavaSwc4jAstTsTypeParamDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTypeParamInstantiation {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTypeParamInstantiation {}
 unsafe impl Sync for JavaSwc4jAstTsTypeParamInstantiation {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTypeParamInstantiation {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8575,14 +9368,15 @@ impl JavaSwc4jAstTsTypeParamInstantiation {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTypePredicate {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTypePredicate {}
 unsafe impl Sync for JavaSwc4jAstTsTypePredicate {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTypePredicate {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8630,14 +9424,15 @@ impl JavaSwc4jAstTsTypePredicate {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTypeQuery {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTypeQuery {}
 unsafe impl Sync for JavaSwc4jAstTsTypeQuery {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTypeQuery {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8683,14 +9478,15 @@ impl JavaSwc4jAstTsTypeQuery {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsTypeRef {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsTypeRef {}
 unsafe impl Sync for JavaSwc4jAstTsTypeRef {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsTypeRef {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8736,14 +9532,15 @@ impl JavaSwc4jAstTsTypeRef {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstTsUnionType {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsUnionType {}
 unsafe impl Sync for JavaSwc4jAstTsUnionType {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstTsUnionType {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8787,14 +9584,15 @@ impl JavaSwc4jAstTsUnionType {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstUnaryExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstUnaryExpr {}
 unsafe impl Sync for JavaSwc4jAstUnaryExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstUnaryExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8840,14 +9638,15 @@ impl JavaSwc4jAstUnaryExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstUpdateExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstUpdateExpr {}
 unsafe impl Sync for JavaSwc4jAstUpdateExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstUpdateExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8895,14 +9694,15 @@ impl JavaSwc4jAstUpdateExpr {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstUsingDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstUsingDecl {}
 unsafe impl Sync for JavaSwc4jAstUsingDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstUsingDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -8948,14 +9748,15 @@ impl JavaSwc4jAstUsingDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstVarDecl {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstVarDecl {}
 unsafe impl Sync for JavaSwc4jAstVarDecl {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstVarDecl {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -9003,14 +9804,15 @@ impl JavaSwc4jAstVarDecl {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstVarDeclarator {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstVarDeclarator {}
 unsafe impl Sync for JavaSwc4jAstVarDeclarator {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstVarDeclarator {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -9058,14 +9860,15 @@ impl JavaSwc4jAstVarDeclarator {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstWhileStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstWhileStmt {}
 unsafe impl Sync for JavaSwc4jAstWhileStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstWhileStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -9111,14 +9914,15 @@ impl JavaSwc4jAstWhileStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstWithStmt {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstWithStmt {}
 unsafe impl Sync for JavaSwc4jAstWithStmt {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstWithStmt {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
@@ -9164,14 +9968,15 @@ impl JavaSwc4jAstWithStmt {
   }
 }
 
+#[allow(dead_code)]
 struct JavaSwc4jAstYieldExpr {
-  #[allow(dead_code)]
   class: GlobalRef,
   method_construct: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstYieldExpr {}
 unsafe impl Sync for JavaSwc4jAstYieldExpr {}
 
+#[allow(dead_code)]
 impl JavaSwc4jAstYieldExpr {
   pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
     let class = env
