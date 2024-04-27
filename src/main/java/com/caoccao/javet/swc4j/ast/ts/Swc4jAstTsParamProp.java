@@ -37,12 +37,12 @@ import java.util.Optional;
 public class Swc4jAstTsParamProp
         extends Swc4jAst
         implements ISwc4jAstParamOrTsParamProp {
-    @Jni2RustField(name = "is_override")
-    protected final boolean _override;
-    protected final Optional<Swc4jAstAccessibility> accessibility;
     protected final List<Swc4jAstDecorator> decorators;
-    protected final ISwc4jAstTsParamPropParam param;
-    protected final boolean readonly;
+    @Jni2RustField(name = "is_override")
+    protected boolean _override;
+    protected Optional<Swc4jAstAccessibility> accessibility;
+    protected ISwc4jAstTsParamPropParam param;
+    protected boolean readonly;
 
     @Jni2RustMethod
     public Swc4jAstTsParamProp(
@@ -53,14 +53,15 @@ public class Swc4jAstTsParamProp
             ISwc4jAstTsParamPropParam param,
             Swc4jSpan span) {
         super(span);
-        this._override = _override;
-        this.accessibility = Optional.ofNullable(accessibility);
+        setAccessibility(accessibility);
+        setOverride(_override);
+        setParam(param);
+        setReadonly(readonly);
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
-        this.param = AssertionUtils.notNull(param, "Param");
-        this.readonly = readonly;
         updateParent();
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
     }
@@ -72,10 +73,12 @@ public class Swc4jAstTsParamProp
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstDecorator> getDecorators() {
         return decorators;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsParamPropParam getParam() {
         return param;
     }
@@ -85,12 +88,34 @@ public class Swc4jAstTsParamProp
         return Swc4jAstType.TsParamProp;
     }
 
+    @Jni2RustMethod
     public boolean isOverride() {
         return _override;
     }
 
+    @Jni2RustMethod
     public boolean isReadonly() {
         return readonly;
+    }
+
+    public Swc4jAstTsParamProp setAccessibility(Swc4jAstAccessibility accessibility) {
+        this.accessibility = Optional.ofNullable(accessibility);
+        return this;
+    }
+
+    public Swc4jAstTsParamProp setOverride(boolean _override) {
+        this._override = _override;
+        return this;
+    }
+
+    public Swc4jAstTsParamProp setParam(ISwc4jAstTsParamPropParam param) {
+        this.param = AssertionUtils.notNull(param, "Param");
+        return this;
+    }
+
+    public Swc4jAstTsParamProp setReadonly(boolean readonly) {
+        this.readonly = readonly;
+        return this;
     }
 
     @Override

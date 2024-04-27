@@ -52,7 +52,7 @@ public class Swc4jAstTsEnumDecl
         setConst(_const);
         setDeclare(declare);
         setId(id);
-        this.members = AssertionUtils.notNull(members, "TypeAnn");
+        this.members = AssertionUtils.notNull(members, "Type ann");
         updateParent();
     }
 

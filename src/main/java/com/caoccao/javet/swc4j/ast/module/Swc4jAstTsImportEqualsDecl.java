@@ -101,7 +101,7 @@ public class Swc4jAstTsImportEqualsDecl
     }
 
     public Swc4jAstTsImportEqualsDecl setModuleRef(ISwc4jAstTsModuleRef moduleRef) {
-        this.moduleRef = AssertionUtils.notNull(moduleRef, "ModuleRef");
+        this.moduleRef = AssertionUtils.notNull(moduleRef, "Module ref");
         return this;
     }
 

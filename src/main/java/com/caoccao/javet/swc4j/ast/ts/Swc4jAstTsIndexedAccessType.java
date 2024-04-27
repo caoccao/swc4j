@@ -37,10 +37,10 @@ public class Swc4jAstTsIndexedAccessType
         extends Swc4jAst
         implements ISwc4jAstTsType {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsType indexType;
+    protected ISwc4jAstTsType indexType;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsType objType;
-    protected final boolean readonly;
+    protected ISwc4jAstTsType objType;
+    protected boolean readonly;
 
     @Jni2RustMethod
     public Swc4jAstTsIndexedAccessType(
@@ -49,9 +49,9 @@ public class Swc4jAstTsIndexedAccessType
             ISwc4jAstTsType indexType,
             Swc4jSpan span) {
         super(span);
-        this.objType = AssertionUtils.notNull(objType, "ObjType");
-        this.indexType = AssertionUtils.notNull(indexType, "IndexType");
-        this.readonly = readonly;
+        setIndexType(indexType);
+        setObjType(objType);
+        setReadonly(readonly);
         updateParent();
     }
 
@@ -60,10 +60,12 @@ public class Swc4jAstTsIndexedAccessType
         return SimpleList.of(objType, indexType);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsType getIndexType() {
         return indexType;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsType getObjType() {
         return objType;
     }
@@ -73,8 +75,24 @@ public class Swc4jAstTsIndexedAccessType
         return Swc4jAstType.TsIndexedAccessType;
     }
 
+    @Jni2RustMethod
     public boolean isReadonly() {
         return readonly;
+    }
+
+    public Swc4jAstTsIndexedAccessType setIndexType(ISwc4jAstTsType indexType) {
+        this.indexType = AssertionUtils.notNull(indexType, "IndexType");
+        return this;
+    }
+
+    public Swc4jAstTsIndexedAccessType setObjType(ISwc4jAstTsType objType) {
+        this.objType = AssertionUtils.notNull(objType, "ObjType");
+        return this;
+    }
+
+    public Swc4jAstTsIndexedAccessType setReadonly(boolean readonly) {
+        this.readonly = readonly;
+        return this;
     }
 
     @Override

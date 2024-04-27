@@ -35,12 +35,12 @@ import java.util.Optional;
 public class Swc4jAstTsGetterSignature
         extends Swc4jAst
         implements ISwc4jAstTsTypeElement {
-    protected final boolean computed;
+    protected boolean computed;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr key;
-    protected final boolean optional;
-    protected final boolean readonly;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
+    protected ISwc4jAstExpr key;
+    protected boolean optional;
+    protected boolean readonly;
+    protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     @Jni2RustMethod
     public Swc4jAstTsGetterSignature(
@@ -51,21 +51,22 @@ public class Swc4jAstTsGetterSignature
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.computed = computed;
-        this.key = AssertionUtils.notNull(key, "Key");
-        this.optional = optional;
-        this.readonly = readonly;
-        this.typeAnn = Optional.ofNullable(typeAnn);
+        setComputed(computed);
+        setKey(key);
+        setOptional(optional);
+        setReadonly(readonly);
+        setTypeAnn(typeAnn);
         updateParent();
     }
 
     @Override
     public List<ISwc4jAst> getChildNodes() {
-        List<ISwc4jAst> childNodes = SimpleList.of();
+        List<ISwc4jAst> childNodes = SimpleList.of(key);
         typeAnn.ifPresent(childNodes::add);
         return childNodes;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getKey() {
         return key;
     }
@@ -75,20 +76,49 @@ public class Swc4jAstTsGetterSignature
         return Swc4jAstType.TsGetterSignature;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    @Jni2RustMethod
     public boolean isComputed() {
         return computed;
     }
 
+    @Jni2RustMethod
     public boolean isOptional() {
         return optional;
     }
 
+    @Jni2RustMethod
     public boolean isReadonly() {
         return readonly;
+    }
+
+    public Swc4jAstTsGetterSignature setComputed(boolean computed) {
+        this.computed = computed;
+        return this;
+    }
+
+    public Swc4jAstTsGetterSignature setKey(ISwc4jAstExpr key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
+    }
+
+    public Swc4jAstTsGetterSignature setOptional(boolean optional) {
+        this.optional = optional;
+        return this;
+    }
+
+    public Swc4jAstTsGetterSignature setReadonly(boolean readonly) {
+        this.readonly = readonly;
+        return this;
+    }
+
+    public Swc4jAstTsGetterSignature setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        return this;
     }
 
     @Override

@@ -39,8 +39,8 @@ public class Swc4jAstTsCallSignatureDecl
         extends Swc4jAst
         implements ISwc4jAstTsTypeElement {
     protected final List<ISwc4jAstTsFnParam> params;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
-    protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
+    protected Optional<Swc4jAstTsTypeAnn> typeAnn;
+    protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod
     public Swc4jAstTsCallSignatureDecl(
@@ -49,9 +49,9 @@ public class Swc4jAstTsCallSignatureDecl
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
             Swc4jSpan span) {
         super(span);
+        setTypeAnn(typeAnn);
+        setTypeParams(typeParams);
         this.params = AssertionUtils.notNull(params, "Params");
-        this.typeAnn = Optional.ofNullable(typeAnn);
-        this.typeParams = Optional.ofNullable(typeParams);
         updateParent();
     }
 
@@ -63,6 +63,7 @@ public class Swc4jAstTsCallSignatureDecl
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstTsFnParam> getParams() {
         return params;
     }
@@ -72,12 +73,24 @@ public class Swc4jAstTsCallSignatureDecl
         return Swc4jAstType.TsCallSignatureDecl;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
+    }
+
+    public Swc4jAstTsCallSignatureDecl setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        return this;
+    }
+
+    public Swc4jAstTsCallSignatureDecl setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
+        this.typeParams = Optional.ofNullable(typeParams);
+        return this;
     }
 
     @Override

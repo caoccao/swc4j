@@ -36,14 +36,14 @@ import java.util.List;
 public class Swc4jAstTsLitType
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    protected final ISwc4jAstTsLit lit;
+    protected ISwc4jAstTsLit lit;
 
     @Jni2RustMethod
     public Swc4jAstTsLitType(
             ISwc4jAstTsLit lit,
             Swc4jSpan span) {
         super(span);
-        this.lit = AssertionUtils.notNull(lit, "Lit");
+        setLit(lit);
         updateParent();
     }
 
@@ -52,6 +52,7 @@ public class Swc4jAstTsLitType
         return SimpleList.of(lit);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsLit getLit() {
         return lit;
     }
@@ -59,6 +60,11 @@ public class Swc4jAstTsLitType
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsLitType;
+    }
+
+    public Swc4jAstTsLitType setLit(ISwc4jAstTsLit lit) {
+        this.lit = AssertionUtils.notNull(lit, "Lit");
+        return this;
     }
 
     @Override

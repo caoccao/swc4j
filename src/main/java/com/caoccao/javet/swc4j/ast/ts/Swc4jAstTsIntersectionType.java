@@ -57,6 +57,7 @@ public class Swc4jAstTsIntersectionType
         return Swc4jAstType.TsIntersectionType;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstTsType> getTypes() {
         return types;
     }

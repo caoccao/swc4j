@@ -40,9 +40,9 @@ import java.util.Optional;
 public class Swc4jAstTsImportType
         extends Swc4jAst
         implements ISwc4jAstTsType, ISwc4jAstTsTypeQueryExpr {
-    protected final Swc4jAstStr arg;
-    protected final Optional<ISwc4jAstTsEntityName> qualifier;
-    protected final Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
+    protected Swc4jAstStr arg;
+    protected Optional<ISwc4jAstTsEntityName> qualifier;
+    protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
     @Jni2RustMethod
     public Swc4jAstTsImportType(
@@ -51,12 +51,13 @@ public class Swc4jAstTsImportType
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
             Swc4jSpan span) {
         super(span);
-        this.arg = AssertionUtils.notNull(arg, "Arg");
-        this.qualifier = Optional.ofNullable(qualifier);
-        this.typeArgs = Optional.ofNullable(typeArgs);
+        setArg(arg);
+        setQualifier(qualifier);
+        setTypeArgs(typeArgs);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Swc4jAstStr getArg() {
         return arg;
     }
@@ -69,6 +70,7 @@ public class Swc4jAstTsImportType
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstTsEntityName> getQualifier() {
         return qualifier;
     }
@@ -78,8 +80,24 @@ public class Swc4jAstTsImportType
         return Swc4jAstType.TsImportType;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeArgs() {
         return typeArgs;
+    }
+
+    public Swc4jAstTsImportType setArg(Swc4jAstStr arg) {
+        this.arg = AssertionUtils.notNull(arg, "Arg");
+        return this;
+    }
+
+    public Swc4jAstTsImportType setQualifier(ISwc4jAstTsEntityName qualifier) {
+        this.qualifier = Optional.ofNullable(qualifier);
+        return this;
+    }
+
+    public Swc4jAstTsImportType setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
+        this.typeArgs = Optional.ofNullable(typeArgs);
+        return this;
     }
 
     @Override

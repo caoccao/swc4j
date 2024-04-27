@@ -34,8 +34,8 @@ import java.util.Optional;
 public class Swc4jAstTsExprWithTypeArgs
         extends Swc4jAst {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr expr;
-    protected final Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
+    protected ISwc4jAstExpr expr;
+    protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
     @Jni2RustMethod
     public Swc4jAstTsExprWithTypeArgs(
@@ -43,8 +43,8 @@ public class Swc4jAstTsExprWithTypeArgs
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
             Swc4jSpan span) {
         super(span);
-        this.expr = AssertionUtils.notNull(expr, "Expr");
-        this.typeArgs = Optional.ofNullable(typeArgs);
+        setExpr(expr);
+        setTypeArgs(typeArgs);
         updateParent();
     }
 
@@ -55,6 +55,7 @@ public class Swc4jAstTsExprWithTypeArgs
         return childNodes;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
     }
@@ -64,8 +65,19 @@ public class Swc4jAstTsExprWithTypeArgs
         return Swc4jAstType.TsExprWithTypeArgs;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeArgs() {
         return typeArgs;
+    }
+
+    public Swc4jAstTsExprWithTypeArgs setExpr(ISwc4jAstExpr expr) {
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        return this;
+    }
+
+    public Swc4jAstTsExprWithTypeArgs setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
+        this.typeArgs = Optional.ofNullable(typeArgs);
+        return this;
     }
 
     @Override

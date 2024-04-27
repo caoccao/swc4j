@@ -38,11 +38,11 @@ import java.util.Optional;
 public class Swc4jAstTsMappedType
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    protected final Optional<ISwc4jAstTsType> nameType;
-    protected final Optional<Swc4jAstTruePlusMinus> optional;
-    protected final Optional<Swc4jAstTruePlusMinus> readonly;
-    protected final Optional<ISwc4jAstTsType> typeAnn;
-    protected final Swc4jAstTsTypeParam typeParam;
+    protected Optional<ISwc4jAstTsType> nameType;
+    protected Optional<Swc4jAstTruePlusMinus> optional;
+    protected Optional<Swc4jAstTruePlusMinus> readonly;
+    protected Optional<ISwc4jAstTsType> typeAnn;
+    protected Swc4jAstTsTypeParam typeParam;
 
     @Jni2RustMethod
     public Swc4jAstTsMappedType(
@@ -53,11 +53,11 @@ public class Swc4jAstTsMappedType
             @Jni2RustParam(optional = true) ISwc4jAstTsType typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.nameType = Optional.ofNullable(nameType);
-        this.optional = Optional.ofNullable(optional);
-        this.readonly = Optional.ofNullable(readonly);
-        this.typeAnn = Optional.ofNullable(typeAnn);
-        this.typeParam = AssertionUtils.notNull(typeParam, "TypeParam");
+        setNameType(nameType);
+        setOptional(optional);
+        setReadonly(readonly);
+        setTypeAnn(typeAnn);
+        setTypeParam(typeParam);
         updateParent();
     }
 
@@ -69,14 +69,17 @@ public class Swc4jAstTsMappedType
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstTsType> getNameType() {
         return nameType;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTruePlusMinus> getOptional() {
         return optional;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTruePlusMinus> getReadonly() {
         return readonly;
     }
@@ -86,12 +89,39 @@ public class Swc4jAstTsMappedType
         return Swc4jAstType.TsMappedType;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstTsType> getTypeAnn() {
         return typeAnn;
     }
 
+    @Jni2RustMethod
     public Swc4jAstTsTypeParam getTypeParam() {
         return typeParam;
+    }
+
+    public Swc4jAstTsMappedType setNameType(ISwc4jAstTsType nameType) {
+        this.nameType = Optional.ofNullable(nameType);
+        return this;
+    }
+
+    public Swc4jAstTsMappedType setOptional(Swc4jAstTruePlusMinus optional) {
+        this.optional = Optional.ofNullable(optional);
+        return this;
+    }
+
+    public Swc4jAstTsMappedType setReadonly(Swc4jAstTruePlusMinus readonly) {
+        this.readonly = Optional.ofNullable(readonly);
+        return this;
+    }
+
+    public Swc4jAstTsMappedType setTypeAnn(ISwc4jAstTsType typeAnn) {
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        return this;
+    }
+
+    public Swc4jAstTsMappedType setTypeParam(Swc4jAstTsTypeParam typeParam) {
+        this.typeParam = AssertionUtils.notNull(typeParam, "TypeParam");
+        return this;
     }
 
     @Override

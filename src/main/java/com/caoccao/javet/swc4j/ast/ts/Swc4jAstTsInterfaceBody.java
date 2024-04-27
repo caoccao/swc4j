@@ -45,6 +45,7 @@ public class Swc4jAstTsInterfaceBody
         updateParent();
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstTsTypeElement> getBody() {
         return body;
     }

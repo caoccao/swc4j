@@ -37,14 +37,14 @@ public class Swc4jAstTsParenthesizedType
         extends Swc4jAst
         implements ISwc4jAstTsType {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsType typeAnn;
+    protected ISwc4jAstTsType typeAnn;
 
     @Jni2RustMethod
     public Swc4jAstTsParenthesizedType(
             ISwc4jAstTsType typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
+        setTypeAnn(typeAnn);
         updateParent();
     }
 
@@ -58,8 +58,14 @@ public class Swc4jAstTsParenthesizedType
         return Swc4jAstType.TsParenthesizedType;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsType getTypeAnn() {
         return typeAnn;
+    }
+
+    public Swc4jAstTsParenthesizedType setTypeAnn(ISwc4jAstTsType typeAnn) {
+        this.typeAnn = AssertionUtils.notNull(typeAnn, "Type ann");
+        return this;
     }
 
     @Override

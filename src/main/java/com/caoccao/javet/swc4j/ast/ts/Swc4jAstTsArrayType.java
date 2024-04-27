@@ -37,14 +37,14 @@ public class Swc4jAstTsArrayType
         extends Swc4jAst
         implements ISwc4jAstTsType {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsType elemType;
+    protected ISwc4jAstTsType elemType;
 
     @Jni2RustMethod
     public Swc4jAstTsArrayType(
             ISwc4jAstTsType elemType,
             Swc4jSpan span) {
         super(span);
-        this.elemType = AssertionUtils.notNull(elemType, "ElemType");
+        setElemType(elemType);
         updateParent();
     }
 
@@ -53,6 +53,7 @@ public class Swc4jAstTsArrayType
         return SimpleList.of(elemType);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsType getElemType() {
         return elemType;
     }
@@ -60,6 +61,11 @@ public class Swc4jAstTsArrayType
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsArrayType;
+    }
+
+    public Swc4jAstTsArrayType setElemType(ISwc4jAstTsType elemType) {
+        this.elemType = AssertionUtils.notNull(elemType, "Elem type");
+        return this;
     }
 
     @Override

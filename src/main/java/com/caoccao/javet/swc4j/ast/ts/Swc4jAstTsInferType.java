@@ -35,14 +35,14 @@ import java.util.List;
 public class Swc4jAstTsInferType
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    protected final Swc4jAstTsTypeParam typeParam;
+    protected Swc4jAstTsTypeParam typeParam;
 
     @Jni2RustMethod
     public Swc4jAstTsInferType(
             Swc4jAstTsTypeParam typeParam,
             Swc4jSpan span) {
         super(span);
-        this.typeParam = AssertionUtils.notNull(typeParam, "TypeParam");
+        setTypeParam(typeParam);
         updateParent();
     }
 
@@ -56,8 +56,14 @@ public class Swc4jAstTsInferType
         return Swc4jAstType.TsInferType;
     }
 
+    @Jni2RustMethod
     public Swc4jAstTsTypeParam getTypeParam() {
         return typeParam;
+    }
+
+    public Swc4jAstTsInferType setTypeParam(Swc4jAstTsTypeParam typeParam) {
+        this.typeParam = AssertionUtils.notNull(typeParam, "TypeParam");
+        return this;
     }
 
     @Override

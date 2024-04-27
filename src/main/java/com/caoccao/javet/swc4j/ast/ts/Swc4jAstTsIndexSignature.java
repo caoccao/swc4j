@@ -36,11 +36,11 @@ import java.util.Optional;
 public class Swc4jAstTsIndexSignature
         extends Swc4jAst
         implements ISwc4jAstClassMember, ISwc4jAstTsTypeElement {
-    @Jni2RustField(name = "is_static")
-    protected final boolean _static;
     protected final List<ISwc4jAstTsFnParam> params;
-    protected final boolean readonly;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
+    @Jni2RustField(name = "is_static")
+    protected boolean _static;
+    protected boolean readonly;
+    protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     @Jni2RustMethod
     public Swc4jAstTsIndexSignature(
@@ -50,10 +50,10 @@ public class Swc4jAstTsIndexSignature
             @Jni2RustParam(name = "is_static") boolean _static,
             Swc4jSpan span) {
         super(span);
-        this._static = _static;
+        setReadonly(readonly);
+        setStatic(_static);
+        setTypeAnn(typeAnn);
         this.params = AssertionUtils.notNull(params, "Params");
-        this.readonly = readonly;
-        this.typeAnn = Optional.ofNullable(typeAnn);
         updateParent();
     }
 
@@ -64,6 +64,7 @@ public class Swc4jAstTsIndexSignature
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstTsFnParam> getParams() {
         return params;
     }
@@ -73,16 +74,34 @@ public class Swc4jAstTsIndexSignature
         return Swc4jAstType.TsIndexSignature;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    @Jni2RustMethod
     public boolean isReadonly() {
         return readonly;
     }
 
+    @Jni2RustMethod
     public boolean isStatic() {
         return _static;
+    }
+
+    public Swc4jAstTsIndexSignature setReadonly(boolean readonly) {
+        this.readonly = readonly;
+        return this;
+    }
+
+    public Swc4jAstTsIndexSignature setStatic(boolean _static) {
+        this._static = _static;
+        return this;
+    }
+
+    public Swc4jAstTsIndexSignature setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        return this;
     }
 
     @Override

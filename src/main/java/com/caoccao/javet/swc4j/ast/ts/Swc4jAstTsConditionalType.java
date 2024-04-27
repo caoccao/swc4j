@@ -37,13 +37,13 @@ public class Swc4jAstTsConditionalType
         extends Swc4jAst
         implements ISwc4jAstTsType {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsType checkType;
+    protected ISwc4jAstTsType checkType;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsType extendsType;
+    protected ISwc4jAstTsType extendsType;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsType falseType;
+    protected ISwc4jAstTsType falseType;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsType trueType;
+    protected ISwc4jAstTsType trueType;
 
     @Jni2RustMethod
     public Swc4jAstTsConditionalType(
@@ -53,13 +53,14 @@ public class Swc4jAstTsConditionalType
             ISwc4jAstTsType falseType,
             Swc4jSpan span) {
         super(span);
-        this.checkType = AssertionUtils.notNull(checkType, "CheckType");
-        this.extendsType = AssertionUtils.notNull(extendsType, "ExtendsType");
-        this.trueType = AssertionUtils.notNull(trueType, "TrueType");
-        this.falseType = AssertionUtils.notNull(falseType, "FalseType");
+        setCheckType(checkType);
+        setExtendsType(extendsType);
+        setFalseType(falseType);
+        setTrueType(trueType);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsType getCheckType() {
         return checkType;
     }
@@ -69,14 +70,17 @@ public class Swc4jAstTsConditionalType
         return SimpleList.of(checkType, extendsType, trueType, falseType);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsType getExtendsType() {
         return extendsType;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsType getFalseType() {
         return falseType;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsType getTrueType() {
         return trueType;
     }
@@ -84,6 +88,26 @@ public class Swc4jAstTsConditionalType
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsConditionalType;
+    }
+
+    public Swc4jAstTsConditionalType setCheckType(ISwc4jAstTsType checkType) {
+        this.checkType = AssertionUtils.notNull(checkType, "Check type");
+        return this;
+    }
+
+    public Swc4jAstTsConditionalType setExtendsType(ISwc4jAstTsType extendsType) {
+        this.extendsType = AssertionUtils.notNull(extendsType, "Extends type");
+        return this;
+    }
+
+    public Swc4jAstTsConditionalType setFalseType(ISwc4jAstTsType falseType) {
+        this.falseType = AssertionUtils.notNull(falseType, "False type");
+        return this;
+    }
+
+    public Swc4jAstTsConditionalType setTrueType(ISwc4jAstTsType trueType) {
+        this.trueType = AssertionUtils.notNull(trueType, "True type");
+        return this;
     }
 
     @Override

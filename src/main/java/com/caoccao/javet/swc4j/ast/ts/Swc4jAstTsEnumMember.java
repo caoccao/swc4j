@@ -37,8 +37,8 @@ import java.util.Optional;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsEnumMember
         extends Swc4jAst {
-    protected final ISwc4jAstTsEnumMemberId id;
-    protected final Optional<ISwc4jAstExpr> init;
+    protected ISwc4jAstTsEnumMemberId id;
+    protected Optional<ISwc4jAstExpr> init;
 
     @Jni2RustMethod
     public Swc4jAstTsEnumMember(
@@ -46,8 +46,8 @@ public class Swc4jAstTsEnumMember
             @Jni2RustParam(optional = true) ISwc4jAstExpr init,
             Swc4jSpan span) {
         super(span);
-        this.id = AssertionUtils.notNull(id, "Id");
-        this.init = Optional.ofNullable(init);
+        setId(id);
+        setInit(init);
         updateParent();
     }
 
@@ -58,13 +58,29 @@ public class Swc4jAstTsEnumMember
         return childNodes;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsEnumMemberId getId() {
         return id;
+    }
+
+    @Jni2RustMethod
+    public Optional<ISwc4jAstExpr> getInit() {
+        return init;
     }
 
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsEnumMember;
+    }
+
+    public Swc4jAstTsEnumMember setId(ISwc4jAstTsEnumMemberId id) {
+        this.id = AssertionUtils.notNull(id, "Id");
+        return this;
+    }
+
+    public Swc4jAstTsEnumMember setInit(ISwc4jAstExpr init) {
+        this.init = Optional.ofNullable(init);
+        return this;
     }
 
     @Override

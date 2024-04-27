@@ -43,7 +43,7 @@ public class Swc4jAstTsTypeAnn
             ISwc4jAstTsType typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
+        this.typeAnn = AssertionUtils.notNull(typeAnn, "Type ann");
         updateParent();
     }
 

@@ -37,8 +37,8 @@ public class Swc4jAstTsFnType
         implements ISwc4jAstTsFnOrConstructorType {
     protected final List<ISwc4jAstTsFnParam> params;
     @Jni2RustField(box = true)
-    protected final Swc4jAstTsTypeAnn typeAnn;
-    protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
+    protected Swc4jAstTsTypeAnn typeAnn;
+    protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod
     public Swc4jAstTsFnType(
@@ -47,9 +47,9 @@ public class Swc4jAstTsFnType
             Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
+        setTypeAnn(typeAnn);
+        setTypeParams(typeParams);
         this.params = AssertionUtils.notNull(params, "Params");
-        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
-        this.typeParams = Optional.ofNullable(typeParams);
         updateParent();
     }
 
@@ -61,6 +61,7 @@ public class Swc4jAstTsFnType
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstTsFnParam> getParams() {
         return params;
     }
@@ -70,12 +71,24 @@ public class Swc4jAstTsFnType
         return Swc4jAstType.TsFnType;
     }
 
+    @Jni2RustMethod
     public Swc4jAstTsTypeAnn getTypeAnn() {
         return typeAnn;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
+    }
+
+    public Swc4jAstTsFnType setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
+        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
+        return this;
+    }
+
+    public Swc4jAstTsFnType setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
+        this.typeParams = Optional.ofNullable(typeParams);
+        return this;
     }
 
     @Override

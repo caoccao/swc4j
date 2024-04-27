@@ -35,14 +35,14 @@ import java.util.List;
 public class Swc4jAstTsKeywordType
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    protected final Swc4jAstTsKeywordTypeKind kind;
+    protected Swc4jAstTsKeywordTypeKind kind;
 
     @Jni2RustMethod
     public Swc4jAstTsKeywordType(
             Swc4jAstTsKeywordTypeKind kind,
             Swc4jSpan span) {
         super(span);
-        this.kind = AssertionUtils.notNull(kind, "Kind");
+        setKind(kind);
     }
 
     @Override
@@ -50,6 +50,7 @@ public class Swc4jAstTsKeywordType
         return EMPTY_CHILD_NODES;
     }
 
+    @Jni2RustMethod
     public Swc4jAstTsKeywordTypeKind getKind() {
         return kind;
     }
@@ -57,6 +58,11 @@ public class Swc4jAstTsKeywordType
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsKeywordType;
+    }
+
+    public Swc4jAstTsKeywordType setKind(Swc4jAstTsKeywordTypeKind kind) {
+        this.kind = AssertionUtils.notNull(kind, "Kind");
+        return this;
     }
 
     @Override

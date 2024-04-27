@@ -36,15 +36,15 @@ import java.util.Optional;
 public class Swc4jAstTsPropertySignature
         extends Swc4jAst
         implements ISwc4jAstTsTypeElement {
-    protected final boolean computed;
-    protected final Optional<ISwc4jAstExpr> init;
-    @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr key;
-    protected final boolean optional;
     protected final List<ISwc4jAstTsFnParam> params;
-    protected final boolean readonly;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
-    protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
+    protected boolean computed;
+    protected Optional<ISwc4jAstExpr> init;
+    @Jni2RustField(box = true)
+    protected ISwc4jAstExpr key;
+    protected boolean optional;
+    protected boolean readonly;
+    protected Optional<Swc4jAstTsTypeAnn> typeAnn;
+    protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod
     public Swc4jAstTsPropertySignature(
@@ -58,14 +58,14 @@ public class Swc4jAstTsPropertySignature
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
             Swc4jSpan span) {
         super(span);
-        this.computed = computed;
-        this.init = Optional.ofNullable(init);
-        this.key = AssertionUtils.notNull(key, "Key");
-        this.optional = optional;
-        this.readonly = readonly;
+        setComputed(computed);
+        setInit(init);
+        setKey(key);
+        setOptional(optional);
+        setReadonly(readonly);
+        setTypeAnn(typeAnn);
+        setTypeParams(typeParams);
         this.params = AssertionUtils.notNull(params, "Params");
-        this.typeAnn = Optional.ofNullable(typeAnn);
-        this.typeParams = Optional.ofNullable(typeParams);
         updateParent();
     }
 
@@ -79,14 +79,17 @@ public class Swc4jAstTsPropertySignature
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getInit() {
         return init;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getKey() {
         return key;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstTsFnParam> getParams() {
         return params;
     }
@@ -96,24 +99,64 @@ public class Swc4jAstTsPropertySignature
         return Swc4jAstType.TsPropertySignature;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 
+    @Jni2RustMethod
     public boolean isComputed() {
         return computed;
     }
 
+    @Jni2RustMethod
     public boolean isOptional() {
         return optional;
     }
 
+    @Jni2RustMethod
     public boolean isReadonly() {
         return readonly;
+    }
+
+    public Swc4jAstTsPropertySignature setComputed(boolean computed) {
+        this.computed = computed;
+        return this;
+    }
+
+    public Swc4jAstTsPropertySignature setInit(ISwc4jAstExpr init) {
+        this.init = Optional.ofNullable(init);
+        return this;
+    }
+
+    public Swc4jAstTsPropertySignature setKey(ISwc4jAstExpr key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
+    }
+
+    public Swc4jAstTsPropertySignature setOptional(boolean optional) {
+        this.optional = optional;
+        return this;
+    }
+
+    public Swc4jAstTsPropertySignature setReadonly(boolean readonly) {
+        this.readonly = readonly;
+        return this;
+    }
+
+    public Swc4jAstTsPropertySignature setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        return this;
+    }
+
+    public Swc4jAstTsPropertySignature setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
+        this.typeParams = Optional.ofNullable(typeParams);
+        return this;
     }
 
     @Override
