@@ -40,7 +40,7 @@ public class Swc4jAstSwitchStmt
         implements ISwc4jAstStmt {
     protected final List<Swc4jAstSwitchCase> cases;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr discriminant;
+    protected ISwc4jAstExpr discriminant;
 
     @Jni2RustMethod
     public Swc4jAstSwitchStmt(
@@ -48,11 +48,12 @@ public class Swc4jAstSwitchStmt
             List<Swc4jAstSwitchCase> cases,
             Swc4jSpan span) {
         super(span);
+        setDiscriminant(discriminant);
         this.cases = AssertionUtils.notNull(cases, "Cases");
-        this.discriminant = AssertionUtils.notNull(discriminant, "Discriminant");
         updateParent();
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstSwitchCase> getCases() {
         return cases;
     }
@@ -64,6 +65,7 @@ public class Swc4jAstSwitchStmt
         return childNodes;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getDiscriminant() {
         return discriminant;
     }
@@ -71,6 +73,11 @@ public class Swc4jAstSwitchStmt
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.SwitchStmt;
+    }
+
+    public Swc4jAstSwitchStmt setDiscriminant(ISwc4jAstExpr discriminant) {
+        this.discriminant = AssertionUtils.notNull(discriminant, "Discriminant");
+        return this;
     }
 
     @Override

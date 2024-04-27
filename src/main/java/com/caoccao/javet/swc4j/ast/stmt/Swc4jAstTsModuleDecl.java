@@ -39,10 +39,10 @@ import java.util.Optional;
 public class Swc4jAstTsModuleDecl
         extends Swc4jAst
         implements ISwc4jAstDecl {
-    protected final Optional<ISwc4jAstTsNamespaceBody> body;
-    protected final boolean declare;
-    protected final boolean global;
-    protected final ISwc4jAstTsModuleName id;
+    protected Optional<ISwc4jAstTsNamespaceBody> body;
+    protected boolean declare;
+    protected boolean global;
+    protected ISwc4jAstTsModuleName id;
 
     @Jni2RustMethod
     public Swc4jAstTsModuleDecl(
@@ -52,13 +52,14 @@ public class Swc4jAstTsModuleDecl
             @Jni2RustParam(optional = true) ISwc4jAstTsNamespaceBody body,
             Swc4jSpan span) {
         super(span);
-        this.declare = declare;
-        this.global = global;
-        this.body = Optional.ofNullable(body);
-        this.id = AssertionUtils.notNull(id, "Id");
+        setBody(body);
+        setDeclare(declare);
+        setGlobal(global);
+        setId(id);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstTsNamespaceBody> getBody() {
         return body;
     }
@@ -70,6 +71,7 @@ public class Swc4jAstTsModuleDecl
         return childNodes;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsModuleName getId() {
         return id;
     }
@@ -79,12 +81,34 @@ public class Swc4jAstTsModuleDecl
         return Swc4jAstType.TsModuleDecl;
     }
 
+    @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
     }
 
+    @Jni2RustMethod
     public boolean isGlobal() {
         return global;
+    }
+
+    public Swc4jAstTsModuleDecl setBody(ISwc4jAstTsNamespaceBody body) {
+        this.body = Optional.ofNullable(body);
+        return this;
+    }
+
+    public Swc4jAstTsModuleDecl setDeclare(boolean declare) {
+        this.declare = declare;
+        return this;
+    }
+
+    public Swc4jAstTsModuleDecl setGlobal(boolean global) {
+        this.global = global;
+        return this;
+    }
+
+    public Swc4jAstTsModuleDecl setId(ISwc4jAstTsModuleName id) {
+        this.id = AssertionUtils.notNull(id, "Id");
+        return this;
     }
 
     @Override

@@ -52,6 +52,7 @@ public class Swc4jAstBlockStmt
         return SimpleList.copyOf(stmts);
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstStmt> getStmts() {
         return stmts;
     }

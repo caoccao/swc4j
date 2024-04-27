@@ -37,10 +37,10 @@ public class Swc4jAstForStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstStmt body;
-    protected final Optional<ISwc4jAstVarDeclOrExpr> init;
-    protected final Optional<ISwc4jAstExpr> test;
-    protected final Optional<ISwc4jAstExpr> update;
+    protected ISwc4jAstStmt body;
+    protected Optional<ISwc4jAstVarDeclOrExpr> init;
+    protected Optional<ISwc4jAstExpr> test;
+    protected Optional<ISwc4jAstExpr> update;
 
     @Jni2RustMethod
     public Swc4jAstForStmt(
@@ -50,13 +50,14 @@ public class Swc4jAstForStmt
             ISwc4jAstStmt body,
             Swc4jSpan span) {
         super(span);
-        this.body = AssertionUtils.notNull(body, "Body");
-        this.init = Optional.ofNullable(init);
-        this.test = Optional.ofNullable(test);
-        this.update = Optional.ofNullable(update);
+        setBody(body);
+        setInit(init);
+        setTest(test);
+        setUpdate(update);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;
     }
@@ -70,10 +71,12 @@ public class Swc4jAstForStmt
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstVarDeclOrExpr> getInit() {
         return init;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getTest() {
         return test;
     }
@@ -83,8 +86,29 @@ public class Swc4jAstForStmt
         return Swc4jAstType.ForStmt;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getUpdate() {
         return update;
+    }
+
+    public Swc4jAstForStmt setBody(ISwc4jAstStmt body) {
+        this.body = AssertionUtils.notNull(body, "Body");
+        return this;
+    }
+
+    public Swc4jAstForStmt setInit(ISwc4jAstVarDeclOrExpr init) {
+        this.init = Optional.ofNullable(init);
+        return this;
+    }
+
+    public Swc4jAstForStmt setTest(ISwc4jAstExpr test) {
+        this.test = Optional.ofNullable(test);
+        return this;
+    }
+
+    public Swc4jAstForStmt setUpdate(ISwc4jAstExpr update) {
+        this.update = Optional.ofNullable(update);
+        return this;
     }
 
     @Override

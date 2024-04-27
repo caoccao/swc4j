@@ -38,9 +38,9 @@ import java.util.Optional;
 public class Swc4jAstTryStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
-    protected final Swc4jAstBlockStmt block;
-    protected final Optional<Swc4jAstBlockStmt> finalizer;
-    protected final Optional<Swc4jAstCatchClause> handler;
+    protected Swc4jAstBlockStmt block;
+    protected Optional<Swc4jAstBlockStmt> finalizer;
+    protected Optional<Swc4jAstCatchClause> handler;
 
     @Jni2RustMethod
     public Swc4jAstTryStmt(
@@ -49,12 +49,13 @@ public class Swc4jAstTryStmt
             @Jni2RustParam(optional = true) Swc4jAstBlockStmt finalizer,
             Swc4jSpan span) {
         super(span);
-        this.block = AssertionUtils.notNull(block, "Block");
-        this.finalizer = Optional.ofNullable(finalizer);
-        this.handler = Optional.ofNullable(handler);
+        setBlock(block);
+        setFinalizer(finalizer);
+        setHandler(handler);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Swc4jAstBlockStmt getBlock() {
         return block;
     }
@@ -67,10 +68,12 @@ public class Swc4jAstTryStmt
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstBlockStmt> getFinalizer() {
         return finalizer;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstCatchClause> getHandler() {
         return handler;
     }
@@ -78,6 +81,21 @@ public class Swc4jAstTryStmt
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TryStmt;
+    }
+
+    public Swc4jAstTryStmt setBlock(Swc4jAstBlockStmt block) {
+        this.block = AssertionUtils.notNull(block, "Block");
+        return this;
+    }
+
+    public Swc4jAstTryStmt setFinalizer(Swc4jAstBlockStmt finalizer) {
+        this.finalizer = Optional.ofNullable(finalizer);
+        return this;
+    }
+
+    public Swc4jAstTryStmt setHandler(Swc4jAstCatchClause handler) {
+        this.handler = Optional.ofNullable(handler);
+        return this;
     }
 
     @Override

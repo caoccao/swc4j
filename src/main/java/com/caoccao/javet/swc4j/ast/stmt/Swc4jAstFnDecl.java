@@ -38,10 +38,10 @@ import java.util.List;
 public class Swc4jAstFnDecl
         extends Swc4jAst
         implements ISwc4jAstDecl {
-    protected final boolean declare;
+    protected boolean declare;
     @Jni2RustField(box = true)
-    protected final Swc4jAstFunction function;
-    protected final Swc4jAstIdent ident;
+    protected Swc4jAstFunction function;
+    protected Swc4jAstIdent ident;
 
     @Jni2RustMethod
     public Swc4jAstFnDecl(
@@ -50,9 +50,9 @@ public class Swc4jAstFnDecl
             Swc4jAstFunction function,
             Swc4jSpan span) {
         super(span);
-        this.function = AssertionUtils.notNull(function, "Function");
-        this.declare = declare;
-        this.ident = AssertionUtils.notNull(ident, "Ident");
+        setDeclare(declare);
+        setFunction(function);
+        setIdent(ident);
         updateParent();
     }
 
@@ -61,10 +61,12 @@ public class Swc4jAstFnDecl
         return SimpleList.of(function, ident);
     }
 
+    @Jni2RustMethod
     public Swc4jAstFunction getFunction() {
         return function;
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getIdent() {
         return ident;
     }
@@ -74,8 +76,24 @@ public class Swc4jAstFnDecl
         return Swc4jAstType.FnDecl;
     }
 
+    @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
+    }
+
+    public Swc4jAstFnDecl setDeclare(boolean declare) {
+        this.declare = declare;
+        return this;
+    }
+
+    public Swc4jAstFnDecl setFunction(Swc4jAstFunction function) {
+        this.function = AssertionUtils.notNull(function, "Function");
+        return this;
+    }
+
+    public Swc4jAstFnDecl setIdent(Swc4jAstIdent ident) {
+        this.ident = AssertionUtils.notNull(ident, "Ident");
+        return this;
     }
 
     @Override

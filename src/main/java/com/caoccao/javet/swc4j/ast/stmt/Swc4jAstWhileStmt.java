@@ -38,9 +38,9 @@ public class Swc4jAstWhileStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstStmt body;
+    protected ISwc4jAstStmt body;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr test;
+    protected ISwc4jAstExpr test;
 
     @Jni2RustMethod
     public Swc4jAstWhileStmt(
@@ -48,11 +48,12 @@ public class Swc4jAstWhileStmt
             ISwc4jAstStmt body,
             Swc4jSpan span) {
         super(span);
-        this.body = AssertionUtils.notNull(body, "Body");
-        this.test = AssertionUtils.notNull(test, "Test");
+        setBody(body);
+        setTest(test);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;
     }
@@ -62,6 +63,7 @@ public class Swc4jAstWhileStmt
         return SimpleList.of(test, body);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getTest() {
         return test;
     }
@@ -69,6 +71,16 @@ public class Swc4jAstWhileStmt
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.WhileStmt;
+    }
+
+    public Swc4jAstWhileStmt setBody(ISwc4jAstStmt body) {
+        this.body = AssertionUtils.notNull(body, "Body");
+        return this;
+    }
+
+    public Swc4jAstWhileStmt setTest(ISwc4jAstExpr test) {
+        this.test = AssertionUtils.notNull(test, "Test");
+        return this;
     }
 
     @Override

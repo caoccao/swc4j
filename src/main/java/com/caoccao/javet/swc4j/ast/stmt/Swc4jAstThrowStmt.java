@@ -38,17 +38,18 @@ public class Swc4jAstThrowStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr arg;
+    protected ISwc4jAstExpr arg;
 
     @Jni2RustMethod
     public Swc4jAstThrowStmt(
             ISwc4jAstExpr arg,
             Swc4jSpan span) {
         super(span);
-        this.arg = AssertionUtils.notNull(arg, "Discriminant");
+        setArg(arg);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getArg() {
         return arg;
     }
@@ -61,6 +62,11 @@ public class Swc4jAstThrowStmt
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ThrowStmt;
+    }
+
+    public Swc4jAstThrowStmt setArg(ISwc4jAstExpr arg) {
+        this.arg = AssertionUtils.notNull(arg, "Discriminant");
+        return this;
     }
 
     @Override

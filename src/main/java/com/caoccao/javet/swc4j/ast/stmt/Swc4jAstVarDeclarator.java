@@ -39,9 +39,9 @@ import java.util.Optional;
 public class Swc4jAstVarDeclarator
         extends Swc4jAst
         implements ISwc4jAstDecl {
-    protected final boolean definite;
-    protected final Optional<ISwc4jAstExpr> init;
-    protected final ISwc4jAstPat name;
+    protected boolean definite;
+    protected Optional<ISwc4jAstExpr> init;
+    protected ISwc4jAstPat name;
 
     @Jni2RustMethod
     public Swc4jAstVarDeclarator(
@@ -50,9 +50,9 @@ public class Swc4jAstVarDeclarator
             boolean definite,
             Swc4jSpan span) {
         super(span);
-        this.definite = definite;
-        this.init = Optional.ofNullable(init);
-        this.name = AssertionUtils.notNull(name, "Name");
+        setDefinite(definite);
+        setInit(init);
+        setName(name);
         updateParent();
     }
 
@@ -63,10 +63,12 @@ public class Swc4jAstVarDeclarator
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getInit() {
         return init;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstPat getName() {
         return name;
     }
@@ -76,8 +78,24 @@ public class Swc4jAstVarDeclarator
         return Swc4jAstType.VarDeclarator;
     }
 
+    @Jni2RustMethod
     public boolean isDefinite() {
         return definite;
+    }
+
+    public Swc4jAstVarDeclarator setDefinite(boolean definite) {
+        this.definite = definite;
+        return this;
+    }
+
+    public Swc4jAstVarDeclarator setInit(ISwc4jAstExpr init) {
+        this.init = Optional.ofNullable(init);
+        return this;
+    }
+
+    public Swc4jAstVarDeclarator setName(ISwc4jAstPat name) {
+        this.name = AssertionUtils.notNull(name, "Name");
+        return this;
     }
 
     @Override

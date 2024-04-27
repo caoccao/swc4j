@@ -37,11 +37,11 @@ import java.util.Optional;
 public class Swc4jAstTsTypeAliasDecl
         extends Swc4jAst
         implements ISwc4jAstDecl {
-    protected final boolean declare;
-    protected final Swc4jAstIdent id;
+    protected boolean declare;
+    protected Swc4jAstIdent id;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsType typeAnn;
-    protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
+    protected ISwc4jAstTsType typeAnn;
+    protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod
     public Swc4jAstTsTypeAliasDecl(
@@ -51,10 +51,10 @@ public class Swc4jAstTsTypeAliasDecl
             ISwc4jAstTsType typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.declare = declare;
-        this.id = AssertionUtils.notNull(id, "Id");
-        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
-        this.typeParams = Optional.ofNullable(typeParams);
+        setDeclare(declare);
+        setId(id);
+        setTypeAnn(typeAnn);
+        setTypeParams(typeParams);
         updateParent();
     }
 
@@ -65,6 +65,7 @@ public class Swc4jAstTsTypeAliasDecl
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
     }
@@ -74,16 +75,39 @@ public class Swc4jAstTsTypeAliasDecl
         return Swc4jAstType.TsTypeAliasDecl;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsType getTypeAnn() {
         return typeAnn;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 
+    @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
+    }
+
+    public Swc4jAstTsTypeAliasDecl setDeclare(boolean declare) {
+        this.declare = declare;
+        return this;
+    }
+
+    public Swc4jAstTsTypeAliasDecl setId(Swc4jAstIdent id) {
+        this.id = AssertionUtils.notNull(id, "Id");
+        return this;
+    }
+
+    public Swc4jAstTsTypeAliasDecl setTypeAnn(ISwc4jAstTsType typeAnn) {
+        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
+        return this;
+    }
+
+    public Swc4jAstTsTypeAliasDecl setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
+        this.typeParams = Optional.ofNullable(typeParams);
+        return this;
     }
 
     @Override

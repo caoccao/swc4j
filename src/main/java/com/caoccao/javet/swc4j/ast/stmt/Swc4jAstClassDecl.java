@@ -39,9 +39,9 @@ public class Swc4jAstClassDecl
         extends Swc4jAst
         implements ISwc4jAstDecl {
     @Jni2RustField(name = "class", box = true)
-    protected final Swc4jAstClass clazz;
-    protected final boolean declare;
-    protected final Swc4jAstIdent ident;
+    protected Swc4jAstClass clazz;
+    protected boolean declare;
+    protected Swc4jAstIdent ident;
 
     @Jni2RustMethod
     public Swc4jAstClassDecl(
@@ -50,9 +50,9 @@ public class Swc4jAstClassDecl
             Swc4jAstClass clazz,
             Swc4jSpan span) {
         super(span);
-        this.clazz = AssertionUtils.notNull(clazz, "Class");
-        this.declare = declare;
-        this.ident = AssertionUtils.notNull(ident, "Ident");
+        setClazz(clazz);
+        setDeclare(declare);
+        setIdent(ident);
         updateParent();
     }
 
@@ -61,10 +61,12 @@ public class Swc4jAstClassDecl
         return SimpleList.of(clazz, ident);
     }
 
+    @Jni2RustMethod
     public Swc4jAstClass getClazz() {
         return clazz;
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getIdent() {
         return ident;
     }
@@ -74,8 +76,24 @@ public class Swc4jAstClassDecl
         return Swc4jAstType.ClassDecl;
     }
 
+    @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
+    }
+
+    public Swc4jAstClassDecl setClazz(Swc4jAstClass clazz) {
+        this.clazz = AssertionUtils.notNull(clazz, "Class");
+        return this;
+    }
+
+    public Swc4jAstClassDecl setDeclare(boolean declare) {
+        this.declare = declare;
+        return this;
+    }
+
+    public Swc4jAstClassDecl setIdent(Swc4jAstIdent ident) {
+        this.ident = AssertionUtils.notNull(ident, "Ident");
+        return this;
     }
 
     @Override

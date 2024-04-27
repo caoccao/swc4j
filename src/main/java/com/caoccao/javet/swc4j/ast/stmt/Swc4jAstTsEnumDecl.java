@@ -35,11 +35,11 @@ import java.util.List;
 public class Swc4jAstTsEnumDecl
         extends Swc4jAst
         implements ISwc4jAstDecl {
-    @Jni2RustField(name = "is_const")
-    protected final boolean _const;
-    protected final boolean declare;
-    protected final Swc4jAstIdent id;
     protected final List<Swc4jAstTsEnumMember> members;
+    @Jni2RustField(name = "is_const")
+    protected boolean _const;
+    protected boolean declare;
+    protected Swc4jAstIdent id;
 
     @Jni2RustMethod
     public Swc4jAstTsEnumDecl(
@@ -49,9 +49,9 @@ public class Swc4jAstTsEnumDecl
             List<Swc4jAstTsEnumMember> members,
             Swc4jSpan span) {
         super(span);
-        this._const = _const;
-        this.declare = declare;
-        this.id = AssertionUtils.notNull(id, "Id");
+        setConst(_const);
+        setDeclare(declare);
+        setId(id);
         this.members = AssertionUtils.notNull(members, "TypeAnn");
         updateParent();
     }
@@ -82,6 +82,21 @@ public class Swc4jAstTsEnumDecl
 
     public boolean isDeclare() {
         return declare;
+    }
+
+    public Swc4jAstTsEnumDecl setConst(boolean _const) {
+        this._const = _const;
+        return this;
+    }
+
+    public Swc4jAstTsEnumDecl setDeclare(boolean declare) {
+        this.declare = declare;
+        return this;
+    }
+
+    public Swc4jAstTsEnumDecl setId(Swc4jAstIdent id) {
+        this.id = AssertionUtils.notNull(id, "Id");
+        return this;
     }
 
     @Override

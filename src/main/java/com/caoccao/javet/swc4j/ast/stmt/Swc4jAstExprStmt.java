@@ -38,14 +38,14 @@ public class Swc4jAstExprStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr expr;
+    protected ISwc4jAstExpr expr;
 
     @Jni2RustMethod
     public Swc4jAstExprStmt(
             ISwc4jAstExpr expr,
             Swc4jSpan span) {
         super(span);
-        this.expr = AssertionUtils.notNull(expr, "Expr");
+        setExpr(expr);
         updateParent();
     }
 
@@ -54,6 +54,7 @@ public class Swc4jAstExprStmt
         return SimpleList.of(expr);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
     }
@@ -61,6 +62,11 @@ public class Swc4jAstExprStmt
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ExprStmt;
+    }
+
+    public Swc4jAstExprStmt setExpr(ISwc4jAstExpr expr) {
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        return this;
     }
 
     @Override

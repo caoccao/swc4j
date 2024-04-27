@@ -35,9 +35,9 @@ import java.util.List;
 public class Swc4jAstUsingDecl
         extends Swc4jAst
         implements ISwc4jAstDecl, ISwc4jAstVarDeclOrExpr, ISwc4jAstForHead {
-    @Jni2RustField(name = "is_await")
-    protected final boolean await;
     protected final List<Swc4jAstVarDeclarator> decls;
+    @Jni2RustField(name = "is_await")
+    protected boolean await;
 
     @Jni2RustMethod
     public Swc4jAstUsingDecl(
@@ -45,7 +45,7 @@ public class Swc4jAstUsingDecl
             List<Swc4jAstVarDeclarator> decls,
             Swc4jSpan span) {
         super(span);
-        this.await = await;
+        setAwait(await);
         this.decls = AssertionUtils.notNull(decls, "Decls");
         updateParent();
     }
@@ -55,6 +55,7 @@ public class Swc4jAstUsingDecl
         return SimpleList.copyOf(decls);
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstVarDeclarator> getDecls() {
         return decls;
     }
@@ -64,8 +65,14 @@ public class Swc4jAstUsingDecl
         return Swc4jAstType.UsingDecl;
     }
 
+    @Jni2RustMethod
     public boolean isAwait() {
         return await;
+    }
+
+    public Swc4jAstUsingDecl setAwait(boolean await) {
+        this.await = await;
+        return this;
     }
 
     @Override

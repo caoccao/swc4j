@@ -38,8 +38,8 @@ public class Swc4jAstLabeledStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstStmt body;
-    protected final Swc4jAstIdent label;
+    protected ISwc4jAstStmt body;
+    protected Swc4jAstIdent label;
 
     @Jni2RustMethod
     public Swc4jAstLabeledStmt(
@@ -47,11 +47,12 @@ public class Swc4jAstLabeledStmt
             ISwc4jAstStmt body,
             Swc4jSpan span) {
         super(span);
-        this.body = AssertionUtils.notNull(body, "Body");
-        this.label = AssertionUtils.notNull(label, "Label");
+        setBody(body);
+        setLabel(label);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;
     }
@@ -61,6 +62,7 @@ public class Swc4jAstLabeledStmt
         return SimpleList.of(label, body);
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getLabel() {
         return label;
     }
@@ -68,6 +70,16 @@ public class Swc4jAstLabeledStmt
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.LabeledStmt;
+    }
+
+    public Swc4jAstLabeledStmt setBody(ISwc4jAstStmt body) {
+        this.body = AssertionUtils.notNull(body, "Body");
+        return this;
+    }
+
+    public Swc4jAstLabeledStmt setLabel(Swc4jAstIdent label) {
+        this.label = AssertionUtils.notNull(label, "Label");
+        return this;
     }
 
     @Override

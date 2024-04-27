@@ -37,14 +37,14 @@ import java.util.Optional;
 public class Swc4jAstBreakStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
-    protected final Optional<Swc4jAstIdent> label;
+    protected Optional<Swc4jAstIdent> label;
 
     @Jni2RustMethod
     public Swc4jAstBreakStmt(
             @Jni2RustParam(optional = true) Swc4jAstIdent label,
             Swc4jSpan span) {
         super(span);
-        this.label = Optional.ofNullable(label);
+        setLabel(label);
         updateParent();
     }
 
@@ -55,6 +55,7 @@ public class Swc4jAstBreakStmt
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstIdent> getLabel() {
         return label;
     }
@@ -62,6 +63,11 @@ public class Swc4jAstBreakStmt
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.BreakStmt;
+    }
+
+    public Swc4jAstBreakStmt setLabel(Swc4jAstIdent label) {
+        this.label = Optional.ofNullable(label);
+        return this;
     }
 
     @Override

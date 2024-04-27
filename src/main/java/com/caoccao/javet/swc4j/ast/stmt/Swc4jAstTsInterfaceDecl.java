@@ -43,10 +43,10 @@ public class Swc4jAstTsInterfaceDecl
         extends Swc4jAst
         implements ISwc4jAstDecl, ISwc4jAstDefaultDecl {
     protected final List<Swc4jAstTsExprWithTypeArgs> _extends;
-    protected final Swc4jAstTsInterfaceBody body;
-    protected final boolean declare;
-    protected final Swc4jAstIdent id;
-    protected final Optional<Swc4jAstTsTypeParamDecl> typeParams;
+    protected Swc4jAstTsInterfaceBody body;
+    protected boolean declare;
+    protected Swc4jAstIdent id;
+    protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod
     public Swc4jAstTsInterfaceDecl(
@@ -57,14 +57,15 @@ public class Swc4jAstTsInterfaceDecl
             Swc4jAstTsInterfaceBody body,
             Swc4jSpan span) {
         super(span);
+        setBody(body);
+        setDeclare(declare);
+        setId(id);
+        setTypeParams(typeParams);
         this._extends = AssertionUtils.notNull(_extends, "Extends");
-        this.body = AssertionUtils.notNull(body, "Body");
-        this.declare = declare;
-        this.id = AssertionUtils.notNull(id, "Id");
-        this.typeParams = Optional.ofNullable(typeParams);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Swc4jAstTsInterfaceBody getBody() {
         return body;
     }
@@ -78,10 +79,12 @@ public class Swc4jAstTsInterfaceDecl
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstTsExprWithTypeArgs> getExtends() {
         return _extends;
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
     }
@@ -91,12 +94,34 @@ public class Swc4jAstTsInterfaceDecl
         return Swc4jAstType.TsInterfaceDecl;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
         return typeParams;
     }
 
+    @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
+    }
+
+    public Swc4jAstTsInterfaceDecl setBody(Swc4jAstTsInterfaceBody body) {
+        this.body = AssertionUtils.notNull(body, "Body");
+        return this;
+    }
+
+    public Swc4jAstTsInterfaceDecl setDeclare(boolean declare) {
+        this.declare = declare;
+        return this;
+    }
+
+    public Swc4jAstTsInterfaceDecl setId(Swc4jAstIdent id) {
+        this.id = AssertionUtils.notNull(id, "Id");
+        return this;
+    }
+
+    public Swc4jAstTsInterfaceDecl setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
+        this.typeParams = Optional.ofNullable(typeParams);
+        return this;
     }
 
     @Override

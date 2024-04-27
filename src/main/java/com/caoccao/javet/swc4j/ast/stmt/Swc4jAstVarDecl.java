@@ -38,9 +38,9 @@ import java.util.List;
 public class Swc4jAstVarDecl
         extends Swc4jAst
         implements ISwc4jAstDecl, ISwc4jAstVarDeclOrExpr, ISwc4jAstForHead {
-    protected final boolean declare;
     protected final List<Swc4jAstVarDeclarator> decls;
-    protected final Swc4jAstVarDeclKind kind;
+    protected boolean declare;
+    protected Swc4jAstVarDeclKind kind;
 
     @Jni2RustMethod
     public Swc4jAstVarDecl(
@@ -49,9 +49,9 @@ public class Swc4jAstVarDecl
             List<Swc4jAstVarDeclarator> decls,
             Swc4jSpan span) {
         super(span);
-        this.declare = declare;
+        setDeclare(declare);
+        setKind(kind);
         this.decls = AssertionUtils.notNull(decls, "Decls");
-        this.kind = AssertionUtils.notNull(kind, "Kind");
         updateParent();
     }
 
@@ -60,6 +60,7 @@ public class Swc4jAstVarDecl
         return SimpleList.copyOf(decls);
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstVarDeclarator> getDecls() {
         return decls;
     }
@@ -73,8 +74,19 @@ public class Swc4jAstVarDecl
         return Swc4jAstType.VarDecl;
     }
 
+    @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
+    }
+
+    public Swc4jAstVarDecl setDeclare(boolean declare) {
+        this.declare = declare;
+        return this;
+    }
+
+    public Swc4jAstVarDecl setKind(Swc4jAstVarDeclKind kind) {
+        this.kind = AssertionUtils.notNull(kind, "Kind");
+        return this;
     }
 
     @Override

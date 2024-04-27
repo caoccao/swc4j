@@ -39,10 +39,10 @@ public class Swc4jAstForInStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstStmt body;
-    protected final ISwc4jAstForHead left;
+    protected ISwc4jAstStmt body;
+    protected ISwc4jAstForHead left;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr right;
+    protected ISwc4jAstExpr right;
 
     @Jni2RustMethod
     public Swc4jAstForInStmt(
@@ -51,12 +51,13 @@ public class Swc4jAstForInStmt
             ISwc4jAstStmt body,
             Swc4jSpan span) {
         super(span);
-        this.body = AssertionUtils.notNull(body, "Body");
-        this.left = AssertionUtils.notNull(left, "Left");
-        this.right = AssertionUtils.notNull(right, "Right");
+        setBody(body);
+        setLeft(left);
+        setRight(right);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;
     }
@@ -66,10 +67,12 @@ public class Swc4jAstForInStmt
         return SimpleList.of(left, right, body);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstForHead getLeft() {
         return left;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getRight() {
         return right;
     }
@@ -77,6 +80,21 @@ public class Swc4jAstForInStmt
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ForInStmt;
+    }
+
+    public Swc4jAstForInStmt setBody(ISwc4jAstStmt body) {
+        this.body = AssertionUtils.notNull(body, "Body");
+        return this;
+    }
+
+    public Swc4jAstForInStmt setLeft(ISwc4jAstForHead left) {
+        this.left = AssertionUtils.notNull(left, "Left");
+        return this;
+    }
+
+    public Swc4jAstForInStmt setRight(ISwc4jAstExpr right) {
+        this.right = AssertionUtils.notNull(right, "Right");
+        return this;
     }
 
     @Override

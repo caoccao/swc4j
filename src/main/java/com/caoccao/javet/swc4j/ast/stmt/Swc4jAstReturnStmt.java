@@ -37,17 +37,18 @@ import java.util.Optional;
 public class Swc4jAstReturnStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
-    protected final Optional<ISwc4jAstExpr> arg;
+    protected Optional<ISwc4jAstExpr> arg;
 
     @Jni2RustMethod
     public Swc4jAstReturnStmt(
             @Jni2RustParam(optional = true) ISwc4jAstExpr arg,
             Swc4jSpan span) {
         super(span);
-        this.arg = Optional.ofNullable(arg);
+        setArg(arg);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getArg() {
         return arg;
     }
@@ -62,6 +63,11 @@ public class Swc4jAstReturnStmt
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ReturnStmt;
+    }
+
+    public Swc4jAstReturnStmt setArg(ISwc4jAstExpr arg) {
+        this.arg = Optional.ofNullable(arg);
+        return this;
     }
 
     @Override

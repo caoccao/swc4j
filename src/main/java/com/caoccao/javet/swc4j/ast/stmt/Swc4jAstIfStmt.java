@@ -35,11 +35,11 @@ import java.util.Optional;
 public class Swc4jAstIfStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
-    protected final Optional<ISwc4jAstStmt> alt;
+    protected Optional<ISwc4jAstStmt> alt;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstStmt cons;
+    protected ISwc4jAstStmt cons;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr test;
+    protected ISwc4jAstExpr test;
 
     @Jni2RustMethod
     public Swc4jAstIfStmt(
@@ -48,12 +48,13 @@ public class Swc4jAstIfStmt
             @Jni2RustParam(optional = true) ISwc4jAstStmt alt,
             Swc4jSpan span) {
         super(span);
-        this.cons = AssertionUtils.notNull(cons, "Body");
-        this.alt = Optional.ofNullable(alt);
-        this.test = AssertionUtils.notNull(test, "Right");
+        setAlt(alt);
+        setCons(cons);
+        setTest(test);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstStmt> getAlt() {
         return alt;
     }
@@ -65,10 +66,12 @@ public class Swc4jAstIfStmt
         return childNodes;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstStmt getCons() {
         return cons;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getTest() {
         return test;
     }
@@ -76,6 +79,21 @@ public class Swc4jAstIfStmt
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.IfStmt;
+    }
+
+    public Swc4jAstIfStmt setAlt(ISwc4jAstStmt alt) {
+        this.alt = Optional.ofNullable(alt);
+        return this;
+    }
+
+    public Swc4jAstIfStmt setCons(ISwc4jAstStmt cons) {
+        this.cons = AssertionUtils.notNull(cons, "Body");
+        return this;
+    }
+
+    public Swc4jAstIfStmt setTest(ISwc4jAstExpr test) {
+        this.test = AssertionUtils.notNull(test, "Right");
+        return this;
     }
 
     @Override
