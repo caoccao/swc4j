@@ -58,6 +58,7 @@ public class Swc4jAstTsTplLitType
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstTplElement> getQuasis() {
         return quasis;
     }
@@ -67,6 +68,7 @@ public class Swc4jAstTsTplLitType
         return Swc4jAstType.TsTplLitType;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstTsType> getTypes() {
         return types;
     }

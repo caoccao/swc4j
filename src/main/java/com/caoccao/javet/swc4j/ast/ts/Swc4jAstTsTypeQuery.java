@@ -38,8 +38,8 @@ import java.util.Optional;
 public class Swc4jAstTsTypeQuery
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    protected final ISwc4jAstTsTypeQueryExpr exprName;
-    protected final Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
+    protected ISwc4jAstTsTypeQueryExpr exprName;
+    protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
     @Jni2RustMethod
     public Swc4jAstTsTypeQuery(
@@ -47,8 +47,8 @@ public class Swc4jAstTsTypeQuery
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
             Swc4jSpan span) {
         super(span);
-        this.exprName = AssertionUtils.notNull(exprName, "ExprName");
-        this.typeArgs = Optional.ofNullable(typeArgs);
+        setExprName(exprName);
+        setTypeArgs(typeArgs);
         updateParent();
     }
 
@@ -59,6 +59,7 @@ public class Swc4jAstTsTypeQuery
         return childNodes;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsTypeQueryExpr getExprName() {
         return exprName;
     }
@@ -68,8 +69,19 @@ public class Swc4jAstTsTypeQuery
         return Swc4jAstType.TsTypeQuery;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeArgs() {
         return typeArgs;
+    }
+
+    public Swc4jAstTsTypeQuery setExprName(ISwc4jAstTsTypeQueryExpr exprName) {
+        this.exprName = AssertionUtils.notNull(exprName, "Expr name");
+        return this;
+    }
+
+    public Swc4jAstTsTypeQuery setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
+        this.typeArgs = Optional.ofNullable(typeArgs);
+        return this;
     }
 
     @Override

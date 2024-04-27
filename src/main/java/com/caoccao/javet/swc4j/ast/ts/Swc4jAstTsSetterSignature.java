@@ -38,12 +38,12 @@ import java.util.List;
 public class Swc4jAstTsSetterSignature
         extends Swc4jAst
         implements ISwc4jAstTsTypeElement {
-    protected final boolean computed;
+    protected boolean computed;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr key;
-    protected final boolean optional;
-    protected final ISwc4jAstTsFnParam param;
-    protected final boolean readonly;
+    protected ISwc4jAstExpr key;
+    protected boolean optional;
+    protected ISwc4jAstTsFnParam param;
+    protected boolean readonly;
 
     @Jni2RustMethod
     public Swc4jAstTsSetterSignature(
@@ -54,11 +54,11 @@ public class Swc4jAstTsSetterSignature
             ISwc4jAstTsFnParam param,
             Swc4jSpan span) {
         super(span);
-        this.computed = computed;
-        this.key = AssertionUtils.notNull(key, "Key");
-        this.optional = optional;
-        this.readonly = readonly;
-        this.param = AssertionUtils.notNull(param, "Param");
+        setComputed(computed);
+        setKey(key);
+        setOptional(optional);
+        setParam(param);
+        setReadonly(readonly);
         updateParent();
     }
 
@@ -67,10 +67,12 @@ public class Swc4jAstTsSetterSignature
         return SimpleList.of(key, param);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getKey() {
         return key;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsFnParam getParam() {
         return param;
     }
@@ -80,16 +82,44 @@ public class Swc4jAstTsSetterSignature
         return Swc4jAstType.TsSetterSignature;
     }
 
+    @Jni2RustMethod
     public boolean isComputed() {
         return computed;
     }
 
+    @Jni2RustMethod
     public boolean isOptional() {
         return optional;
     }
 
+    @Jni2RustMethod
     public boolean isReadonly() {
         return readonly;
+    }
+
+    public Swc4jAstTsSetterSignature setComputed(boolean computed) {
+        this.computed = computed;
+        return this;
+    }
+
+    public Swc4jAstTsSetterSignature setKey(ISwc4jAstExpr key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
+    }
+
+    public Swc4jAstTsSetterSignature setOptional(boolean optional) {
+        this.optional = optional;
+        return this;
+    }
+
+    public Swc4jAstTsSetterSignature setParam(ISwc4jAstTsFnParam param) {
+        this.param = AssertionUtils.notNull(param, "Param");
+        return this;
+    }
+
+    public Swc4jAstTsSetterSignature setReadonly(boolean readonly) {
+        this.readonly = readonly;
+        return this;
     }
 
     @Override

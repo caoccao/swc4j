@@ -34,9 +34,9 @@ import java.util.Optional;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsTupleElement
         extends Swc4jAst {
-    protected final Optional<ISwc4jAstPat> label;
+    protected Optional<ISwc4jAstPat> label;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsType ty;
+    protected ISwc4jAstTsType ty;
 
     @Jni2RustMethod
     public Swc4jAstTsTupleElement(
@@ -44,8 +44,8 @@ public class Swc4jAstTsTupleElement
             ISwc4jAstTsType ty,
             Swc4jSpan span) {
         super(span);
-        this.label = Optional.ofNullable(label);
-        this.ty = AssertionUtils.notNull(ty, "Ty");
+        setLabel(label);
+        setTy(ty);
         updateParent();
     }
 
@@ -56,10 +56,12 @@ public class Swc4jAstTsTupleElement
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstPat> getLabel() {
         return label;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsType getTy() {
         return ty;
     }
@@ -67,6 +69,16 @@ public class Swc4jAstTsTupleElement
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsTupleElement;
+    }
+
+    public Swc4jAstTsTupleElement setLabel(ISwc4jAstPat label) {
+        this.label = Optional.ofNullable(label);
+        return this;
+    }
+
+    public Swc4jAstTsTupleElement setTy(ISwc4jAstTsType ty) {
+        this.ty = AssertionUtils.notNull(ty, "Ty");
+        return this;
     }
 
     @Override

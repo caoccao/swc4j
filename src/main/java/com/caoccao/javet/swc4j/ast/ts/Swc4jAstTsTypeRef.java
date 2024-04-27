@@ -38,8 +38,8 @@ import java.util.Optional;
 public class Swc4jAstTsTypeRef
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    protected final ISwc4jAstTsEntityName typeName;
-    protected final Optional<Swc4jAstTsTypeParamInstantiation> typeParams;
+    protected ISwc4jAstTsEntityName typeName;
+    protected Optional<Swc4jAstTsTypeParamInstantiation> typeParams;
 
     @Jni2RustMethod
     public Swc4jAstTsTypeRef(
@@ -47,8 +47,8 @@ public class Swc4jAstTsTypeRef
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeParams,
             Swc4jSpan span) {
         super(span);
-        this.typeName = AssertionUtils.notNull(typeName, "ExprName");
-        this.typeParams = Optional.ofNullable(typeParams);
+        setTypeName(typeName);
+        setTypeParams(typeParams);
         updateParent();
     }
 
@@ -64,12 +64,24 @@ public class Swc4jAstTsTypeRef
         return Swc4jAstType.TsTypeRef;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsEntityName getTypeName() {
         return typeName;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeParams() {
         return typeParams;
+    }
+
+    public Swc4jAstTsTypeRef setTypeName(ISwc4jAstTsEntityName typeName) {
+        this.typeName = AssertionUtils.notNull(typeName, "ExprName");
+        return this;
+    }
+
+    public Swc4jAstTsTypeRef setTypeParams(Swc4jAstTsTypeParamInstantiation typeParams) {
+        this.typeParams = Optional.ofNullable(typeParams);
+        return this;
     }
 
     @Override

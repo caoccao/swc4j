@@ -36,14 +36,14 @@ import java.util.List;
 public class Swc4jAstTsTypeAnn
         extends Swc4jAst {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsType typeAnn;
+    protected ISwc4jAstTsType typeAnn;
 
     @Jni2RustMethod
     public Swc4jAstTsTypeAnn(
             ISwc4jAstTsType typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.typeAnn = AssertionUtils.notNull(typeAnn, "Type ann");
+        setTypeAnn(typeAnn);
         updateParent();
     }
 
@@ -57,8 +57,14 @@ public class Swc4jAstTsTypeAnn
         return Swc4jAstType.TsTypeAnn;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsType getTypeAnn() {
         return typeAnn;
+    }
+
+    public Swc4jAstTsTypeAnn setTypeAnn(ISwc4jAstTsType typeAnn) {
+        this.typeAnn = AssertionUtils.notNull(typeAnn, "Type ann");
+        return this;
     }
 
     @Override

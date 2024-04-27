@@ -35,14 +35,14 @@ import java.util.Optional;
 public class Swc4jAstTsTypeParam
         extends Swc4jAst {
     @Jni2RustField(name = "is_const")
-    protected final boolean _const;
-    protected final Optional<ISwc4jAstTsType> _default;
-    protected final Optional<ISwc4jAstTsType> constraint;
+    protected boolean _const;
+    protected Optional<ISwc4jAstTsType> _default;
+    protected Optional<ISwc4jAstTsType> constraint;
     @Jni2RustField(name = "is_in")
-    protected final boolean in;
-    protected final Swc4jAstIdent name;
+    protected boolean in;
+    protected Swc4jAstIdent name;
     @Jni2RustField(name = "is_out")
-    protected final boolean out;
+    protected boolean out;
 
     @Jni2RustMethod
     public Swc4jAstTsTypeParam(
@@ -54,12 +54,12 @@ public class Swc4jAstTsTypeParam
             @Jni2RustParam(optional = true) ISwc4jAstTsType _default,
             Swc4jSpan span) {
         super(span);
-        this._const = _const;
-        this._default = Optional.ofNullable(_default);
-        this.constraint = Optional.ofNullable(constraint);
-        this.in = in;
-        this.name = AssertionUtils.notNull(name, "Name");
-        this.out = out;
+        setConst(_const);
+        setConstraint(constraint);
+        setDefault(_default);
+        setIn(in);
+        setName(name);
+        setOut(out);
         updateParent();
     }
 
@@ -71,14 +71,17 @@ public class Swc4jAstTsTypeParam
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstTsType> getConstraint() {
         return constraint;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstTsType> getDefault() {
         return _default;
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getName() {
         return name;
     }
@@ -88,16 +91,49 @@ public class Swc4jAstTsTypeParam
         return Swc4jAstType.TsTypeParam;
     }
 
+    @Jni2RustMethod
     public boolean isConst() {
         return _const;
     }
 
+    @Jni2RustMethod
     public boolean isIn() {
         return in;
     }
 
+    @Jni2RustMethod
     public boolean isOut() {
         return out;
+    }
+
+    public Swc4jAstTsTypeParam setConst(boolean _const) {
+        this._const = _const;
+        return this;
+    }
+
+    public Swc4jAstTsTypeParam setConstraint(ISwc4jAstTsType constraint) {
+        this.constraint = Optional.ofNullable(constraint);
+        return this;
+    }
+
+    public Swc4jAstTsTypeParam setDefault(ISwc4jAstTsType _default) {
+        this._default = Optional.ofNullable(_default);
+        return this;
+    }
+
+    public Swc4jAstTsTypeParam setIn(boolean in) {
+        this.in = in;
+        return this;
+    }
+
+    public Swc4jAstTsTypeParam setName(Swc4jAstIdent name) {
+        this.name = AssertionUtils.notNull(name, "Name");
+        return this;
+    }
+
+    public Swc4jAstTsTypeParam setOut(boolean out) {
+        this.out = out;
+        return this;
     }
 
     @Override

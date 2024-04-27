@@ -50,6 +50,7 @@ public class Swc4jAstTsTypeParamInstantiation
         return SimpleList.copyOf(params);
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstTsType> getParams() {
         return params;
     }

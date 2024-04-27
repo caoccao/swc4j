@@ -52,6 +52,7 @@ public class Swc4jAstTsTypeLit
         return SimpleList.copyOf(members);
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstTsTypeElement> getMembers() {
         return members;
     }

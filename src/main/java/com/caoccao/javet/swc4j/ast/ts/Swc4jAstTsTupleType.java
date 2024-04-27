@@ -51,6 +51,7 @@ public class Swc4jAstTsTupleType
         return SimpleList.copyOf(elemTypes);
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstTsTupleElement> getElemTypes() {
         return elemTypes;
     }

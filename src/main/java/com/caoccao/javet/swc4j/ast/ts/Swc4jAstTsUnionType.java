@@ -57,6 +57,7 @@ public class Swc4jAstTsUnionType
         return Swc4jAstType.TsUnionType;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstTsType> getTypes() {
         return types;
     }

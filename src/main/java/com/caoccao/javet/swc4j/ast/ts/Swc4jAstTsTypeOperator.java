@@ -37,9 +37,9 @@ import java.util.List;
 public class Swc4jAstTsTypeOperator
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    protected final Swc4jAstTsTypeOperatorOp op;
+    protected Swc4jAstTsTypeOperatorOp op;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsType typeAnn;
+    protected ISwc4jAstTsType typeAnn;
 
     @Jni2RustMethod
     public Swc4jAstTsTypeOperator(
@@ -47,8 +47,8 @@ public class Swc4jAstTsTypeOperator
             ISwc4jAstTsType typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.op = AssertionUtils.notNull(op, "Op");
-        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
+        setOp(op);
+        setTypeAnn(typeAnn);
         updateParent();
     }
 
@@ -57,6 +57,7 @@ public class Swc4jAstTsTypeOperator
         return SimpleList.of(typeAnn);
     }
 
+    @Jni2RustMethod
     public Swc4jAstTsTypeOperatorOp getOp() {
         return op;
     }
@@ -66,8 +67,19 @@ public class Swc4jAstTsTypeOperator
         return Swc4jAstType.TsTypeOperator;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsType getTypeAnn() {
         return typeAnn;
+    }
+
+    public Swc4jAstTsTypeOperator setOp(Swc4jAstTsTypeOperatorOp op) {
+        this.op = AssertionUtils.notNull(op, "Op");
+        return this;
+    }
+
+    public Swc4jAstTsTypeOperator setTypeAnn(ISwc4jAstTsType typeAnn) {
+        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
+        return this;
     }
 
     @Override

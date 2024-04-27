@@ -38,9 +38,9 @@ import java.util.Optional;
 public class Swc4jAstTsTypePredicate
         extends Swc4jAst
         implements ISwc4jAstTsType {
-    protected final boolean asserts;
-    protected final ISwc4jAstTsThisTypeOrIdent paramName;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
+    protected boolean asserts;
+    protected ISwc4jAstTsThisTypeOrIdent paramName;
+    protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     @Jni2RustMethod
     public Swc4jAstTsTypePredicate(
@@ -49,9 +49,9 @@ public class Swc4jAstTsTypePredicate
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.asserts = asserts;
-        this.paramName = AssertionUtils.notNull(paramName, "ParamName");
-        this.typeAnn = Optional.ofNullable(typeAnn);
+        setAsserts(asserts);
+        setParamName(paramName);
+        setTypeAnn(typeAnn);
         updateParent();
     }
 
@@ -62,6 +62,7 @@ public class Swc4jAstTsTypePredicate
         return childNodes;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsThisTypeOrIdent getParamName() {
         return paramName;
     }
@@ -71,12 +72,29 @@ public class Swc4jAstTsTypePredicate
         return Swc4jAstType.TsTypePredicate;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    @Jni2RustMethod
     public boolean isAsserts() {
         return asserts;
+    }
+
+    public Swc4jAstTsTypePredicate setAsserts(boolean asserts) {
+        this.asserts = asserts;
+        return this;
+    }
+
+    public Swc4jAstTsTypePredicate setParamName(ISwc4jAstTsThisTypeOrIdent paramName) {
+        this.paramName = AssertionUtils.notNull(paramName, "Param name");
+        return this;
+    }
+
+    public Swc4jAstTsTypePredicate setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        return this;
     }
 
     @Override

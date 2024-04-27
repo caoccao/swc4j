@@ -49,6 +49,7 @@ public class Swc4jAstTsTypeParamDecl
         return SimpleList.copyOf(params);
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstTsTypeParam> getParams() {
         return params;
     }

@@ -36,8 +36,8 @@ import java.util.List;
 public class Swc4jAstTsQualifiedName
         extends Swc4jAst
         implements ISwc4jAstTsEntityName {
-    protected final ISwc4jAstTsEntityName left;
-    protected final Swc4jAstIdent right;
+    protected ISwc4jAstTsEntityName left;
+    protected Swc4jAstIdent right;
 
     @Jni2RustMethod
     public Swc4jAstTsQualifiedName(
@@ -45,8 +45,8 @@ public class Swc4jAstTsQualifiedName
             Swc4jAstIdent right,
             Swc4jSpan span) {
         super(span);
-        this.left = AssertionUtils.notNull(left, "Left");
-        this.right = AssertionUtils.notNull(right, "Right");
+        setLeft(left);
+        setRight(right);
         updateParent();
     }
 
@@ -55,10 +55,12 @@ public class Swc4jAstTsQualifiedName
         return SimpleList.of(left, right);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsEntityName getLeft() {
         return left;
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getRight() {
         return right;
     }
@@ -66,6 +68,16 @@ public class Swc4jAstTsQualifiedName
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsQualifiedName;
+    }
+
+    public Swc4jAstTsQualifiedName setLeft(ISwc4jAstTsEntityName left) {
+        this.left = AssertionUtils.notNull(left, "Left");
+        return this;
+    }
+
+    public Swc4jAstTsQualifiedName setRight(Swc4jAstIdent right) {
+        this.right = AssertionUtils.notNull(right, "Right");
+        return this;
     }
 
     @Override
