@@ -36,10 +36,10 @@ public class Swc4jAstTaggedTpl
         extends Swc4jAst
         implements ISwc4jAstExpr {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr tag;
+    protected ISwc4jAstExpr tag;
     @Jni2RustField(box = true)
-    protected final Swc4jAstTpl tpl;
-    protected final Optional<Swc4jAstTsTypeParamInstantiation> typeParams;
+    protected Swc4jAstTpl tpl;
+    protected Optional<Swc4jAstTsTypeParamInstantiation> typeParams;
 
     @Jni2RustMethod
     public Swc4jAstTaggedTpl(
@@ -48,9 +48,9 @@ public class Swc4jAstTaggedTpl
             Swc4jAstTpl tpl,
             Swc4jSpan span) {
         super(span);
-        this.tag = AssertionUtils.notNull(tag, "Tag");
-        this.tpl = tpl;
-        this.typeParams = Optional.ofNullable(typeParams);
+        setTag(tag);
+        setTpl(tpl);
+        setTypeParams(typeParams);
         updateParent();
     }
 
@@ -61,10 +61,12 @@ public class Swc4jAstTaggedTpl
         return childNodes;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getTag() {
         return tag;
     }
 
+    @Jni2RustMethod
     public Swc4jAstTpl getTpl() {
         return tpl;
     }
@@ -74,8 +76,24 @@ public class Swc4jAstTaggedTpl
         return Swc4jAstType.TaggedTpl;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeParams() {
         return typeParams;
+    }
+
+    public Swc4jAstTaggedTpl setTag(ISwc4jAstExpr tag) {
+        this.tag = AssertionUtils.notNull(tag, "Tag");
+        return this;
+    }
+
+    public Swc4jAstTaggedTpl setTpl(Swc4jAstTpl tpl) {
+        this.tpl = tpl;
+        return this;
+    }
+
+    public Swc4jAstTaggedTpl setTypeParams(Swc4jAstTsTypeParamInstantiation typeParams) {
+        this.typeParams = Optional.ofNullable(typeParams);
+        return this;
     }
 
     @Override

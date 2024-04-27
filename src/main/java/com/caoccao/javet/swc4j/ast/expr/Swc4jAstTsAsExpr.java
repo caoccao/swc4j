@@ -39,9 +39,9 @@ public class Swc4jAstTsAsExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstSimpleAssignTarget {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr expr;
+    protected ISwc4jAstExpr expr;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsType typeAnn;
+    protected ISwc4jAstTsType typeAnn;
 
     @Jni2RustMethod
     public Swc4jAstTsAsExpr(
@@ -49,8 +49,8 @@ public class Swc4jAstTsAsExpr
             ISwc4jAstTsType typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.expr = AssertionUtils.notNull(expr, "Expr");
-        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
+        setExpr(expr);
+        setTypeAnn(typeAnn);
         updateParent();
     }
 
@@ -59,6 +59,7 @@ public class Swc4jAstTsAsExpr
         return SimpleList.of(expr, typeAnn);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
     }
@@ -68,8 +69,19 @@ public class Swc4jAstTsAsExpr
         return Swc4jAstType.TsAsExpr;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsType getTypeAnn() {
         return typeAnn;
+    }
+
+    public Swc4jAstTsAsExpr setExpr(ISwc4jAstExpr expr) {
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        return this;
+    }
+
+    public Swc4jAstTsAsExpr setTypeAnn(ISwc4jAstTsType typeAnn) {
+        this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
+        return this;
     }
 
     @Override

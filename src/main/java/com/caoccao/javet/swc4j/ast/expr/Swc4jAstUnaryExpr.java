@@ -38,8 +38,8 @@ public class Swc4jAstUnaryExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr arg;
-    protected final Swc4jAstUnaryOp op;
+    protected ISwc4jAstExpr arg;
+    protected Swc4jAstUnaryOp op;
 
     @Jni2RustMethod
     public Swc4jAstUnaryExpr(
@@ -47,11 +47,12 @@ public class Swc4jAstUnaryExpr
             ISwc4jAstExpr arg,
             Swc4jSpan span) {
         super(span);
-        this.arg = AssertionUtils.notNull(arg, "Arg");
-        this.op = AssertionUtils.notNull(op, "Op");
+        setArg(arg);
+        setOp(op);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getArg() {
         return arg;
     }
@@ -61,6 +62,7 @@ public class Swc4jAstUnaryExpr
         return SimpleList.of(arg);
     }
 
+    @Jni2RustMethod
     public Swc4jAstUnaryOp getOp() {
         return op;
     }
@@ -68,6 +70,16 @@ public class Swc4jAstUnaryExpr
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.UnaryExpr;
+    }
+
+    public Swc4jAstUnaryExpr setArg(ISwc4jAstExpr arg) {
+        this.arg = AssertionUtils.notNull(arg, "Arg");
+        return this;
+    }
+
+    public Swc4jAstUnaryExpr setOp(Swc4jAstUnaryOp op) {
+        this.op = AssertionUtils.notNull(op, "Op");
+        return this;
     }
 
     @Override

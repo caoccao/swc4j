@@ -38,14 +38,14 @@ public class Swc4jAstTsNonNullExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstSimpleAssignTarget {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr expr;
+    protected ISwc4jAstExpr expr;
 
     @Jni2RustMethod
     public Swc4jAstTsNonNullExpr(
             ISwc4jAstExpr expr,
             Swc4jSpan span) {
         super(span);
-        this.expr = AssertionUtils.notNull(expr, "Expr");
+        setExpr(expr);
         updateParent();
     }
 
@@ -54,6 +54,7 @@ public class Swc4jAstTsNonNullExpr
         return SimpleList.of(expr);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
     }
@@ -61,6 +62,11 @@ public class Swc4jAstTsNonNullExpr
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsNonNullExpr;
+    }
+
+    public Swc4jAstTsNonNullExpr setExpr(ISwc4jAstExpr expr) {
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        return this;
     }
 
     @Override

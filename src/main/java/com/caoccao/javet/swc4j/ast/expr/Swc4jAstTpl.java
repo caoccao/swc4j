@@ -57,10 +57,12 @@ public class Swc4jAstTpl
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstExpr> getExprs() {
         return exprs;
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstTplElement> getQuasis() {
         return quasis;
     }

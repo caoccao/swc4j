@@ -39,8 +39,8 @@ public class Swc4jAstOptChainExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstSimpleAssignTarget {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstOptChainBase base;
-    protected final boolean optional;
+    protected ISwc4jAstOptChainBase base;
+    protected boolean optional;
 
     @Jni2RustMethod
     public Swc4jAstOptChainExpr(
@@ -48,11 +48,12 @@ public class Swc4jAstOptChainExpr
             ISwc4jAstOptChainBase base,
             Swc4jSpan span) {
         super(span);
-        this.base = AssertionUtils.notNull(base, "Base");
-        this.optional = optional;
+        setBase(base);
+        setOptional(optional);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstOptChainBase getBase() {
         return base;
     }
@@ -67,8 +68,19 @@ public class Swc4jAstOptChainExpr
         return Swc4jAstType.OptChainExpr;
     }
 
+    @Jni2RustMethod
     public boolean isOptional() {
         return optional;
+    }
+
+    public Swc4jAstOptChainExpr setBase(ISwc4jAstOptChainBase base) {
+        this.base = AssertionUtils.notNull(base, "Base");
+        return this;
+    }
+
+    public Swc4jAstOptChainExpr setOptional(boolean optional) {
+        this.optional = optional;
+        return this;
     }
 
     @Override

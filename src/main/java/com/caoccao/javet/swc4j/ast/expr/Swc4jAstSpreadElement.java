@@ -38,9 +38,9 @@ import java.util.List;
 public class Swc4jAstSpreadElement
         extends Swc4jAst
         implements ISwc4jAstPropOrSpread, ISwc4jAstJsxAttrOrSpread {
-    protected final Swc4jSpan dot3Token;
+    protected Swc4jSpan dot3Token;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr expr;
+    protected ISwc4jAstExpr expr;
 
     @Jni2RustMethod
     public Swc4jAstSpreadElement(
@@ -48,8 +48,8 @@ public class Swc4jAstSpreadElement
             ISwc4jAstExpr expr,
             Swc4jSpan span) {
         super(span);
-        this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
-        this.expr = AssertionUtils.notNull(expr, "Expr");
+        setDot3Token(dot3Token);
+        setExpr(expr);
         updateParent();
     }
 
@@ -69,6 +69,16 @@ public class Swc4jAstSpreadElement
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.SpreadElement;
+    }
+
+    public Swc4jAstSpreadElement setDot3Token(Swc4jSpan dot3Token) {
+        this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
+        return this;
+    }
+
+    public Swc4jAstSpreadElement setExpr(ISwc4jAstExpr expr) {
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        return this;
     }
 
     @Override

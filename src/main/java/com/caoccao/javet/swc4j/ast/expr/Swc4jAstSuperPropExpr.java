@@ -38,8 +38,8 @@ import java.util.List;
 public class Swc4jAstSuperPropExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstSimpleAssignTarget {
-    protected final Swc4jAstSuper obj;
-    protected final ISwc4jAstSuperProp prop;
+    protected Swc4jAstSuper obj;
+    protected ISwc4jAstSuperProp prop;
 
     @Jni2RustMethod
     public Swc4jAstSuperPropExpr(
@@ -47,8 +47,8 @@ public class Swc4jAstSuperPropExpr
             ISwc4jAstSuperProp prop,
             Swc4jSpan span) {
         super(span);
-        this.prop = AssertionUtils.notNull(prop, "Prop");
-        this.obj = AssertionUtils.notNull(obj, "Obj");
+        setObj(obj);
+        setProp(prop);
         updateParent();
     }
 
@@ -57,10 +57,12 @@ public class Swc4jAstSuperPropExpr
         return SimpleList.of(obj, prop);
     }
 
+    @Jni2RustMethod
     public Swc4jAstSuper getObj() {
         return obj;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstSuperProp getProp() {
         return prop;
     }
@@ -68,6 +70,16 @@ public class Swc4jAstSuperPropExpr
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.SuperPropExpr;
+    }
+
+    public Swc4jAstSuperPropExpr setObj(Swc4jAstSuper obj) {
+        this.obj = AssertionUtils.notNull(obj, "Obj");
+        return this;
+    }
+
+    public Swc4jAstSuperPropExpr setProp(ISwc4jAstSuperProp prop) {
+        this.prop = AssertionUtils.notNull(prop, "Prop");
+        return this;
     }
 
     @Override

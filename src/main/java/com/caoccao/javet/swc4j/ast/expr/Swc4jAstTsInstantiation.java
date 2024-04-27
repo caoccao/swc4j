@@ -39,9 +39,9 @@ public class Swc4jAstTsInstantiation
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstSimpleAssignTarget {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr expr;
+    protected ISwc4jAstExpr expr;
     @Jni2RustField(box = true)
-    protected final Swc4jAstTsTypeParamInstantiation typeArgs;
+    protected Swc4jAstTsTypeParamInstantiation typeArgs;
 
     @Jni2RustMethod
     public Swc4jAstTsInstantiation(
@@ -49,8 +49,8 @@ public class Swc4jAstTsInstantiation
             Swc4jAstTsTypeParamInstantiation typeArgs,
             Swc4jSpan span) {
         super(span);
-        this.expr = AssertionUtils.notNull(expr, "Expr");
-        this.typeArgs = AssertionUtils.notNull(typeArgs, "TypeArgs");
+        setExpr(expr);
+        setTypeArgs(typeArgs);
         updateParent();
     }
 
@@ -59,6 +59,7 @@ public class Swc4jAstTsInstantiation
         return SimpleList.of(expr, typeArgs);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
     }
@@ -68,8 +69,19 @@ public class Swc4jAstTsInstantiation
         return Swc4jAstType.TsInstantiation;
     }
 
+    @Jni2RustMethod
     public Swc4jAstTsTypeParamInstantiation getTypeArgs() {
         return typeArgs;
+    }
+
+    public Swc4jAstTsInstantiation setExpr(ISwc4jAstExpr expr) {
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        return this;
+    }
+
+    public Swc4jAstTsInstantiation setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
+        this.typeArgs = AssertionUtils.notNull(typeArgs, "TypeArgs");
+        return this;
     }
 
     @Override

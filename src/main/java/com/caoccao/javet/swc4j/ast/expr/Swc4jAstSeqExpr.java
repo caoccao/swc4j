@@ -47,13 +47,14 @@ public class Swc4jAstSeqExpr
         updateParent();
     }
 
-    public List<ISwc4jAstExpr> getExprs() {
-        return exprs;
-    }
-
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.copyOf(exprs);
+    }
+
+    @Jni2RustMethod
+    public List<ISwc4jAstExpr> getExprs() {
+        return exprs;
     }
 
     @Override

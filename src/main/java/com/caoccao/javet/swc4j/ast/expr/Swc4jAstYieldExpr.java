@@ -36,8 +36,8 @@ import java.util.Optional;
 public class Swc4jAstYieldExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
-    protected final Optional<ISwc4jAstExpr> arg;
-    protected final boolean delegate;
+    protected Optional<ISwc4jAstExpr> arg;
+    protected boolean delegate;
 
     @Jni2RustMethod
     public Swc4jAstYieldExpr(
@@ -45,11 +45,12 @@ public class Swc4jAstYieldExpr
             boolean delegate,
             Swc4jSpan span) {
         super(span);
-        this.arg = Optional.ofNullable(arg);
-        this.delegate = delegate;
+        setArg(arg);
+        setDelegate(delegate);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getArg() {
         return arg;
     }
@@ -66,8 +67,19 @@ public class Swc4jAstYieldExpr
         return Swc4jAstType.YieldExpr;
     }
 
+    @Jni2RustMethod
     public boolean isDelegate() {
         return delegate;
+    }
+
+    public Swc4jAstYieldExpr setArg(ISwc4jAstExpr arg) {
+        this.arg = Optional.ofNullable(arg);
+        return this;
+    }
+
+    public Swc4jAstYieldExpr setDelegate(boolean delegate) {
+        this.delegate = delegate;
+        return this;
     }
 
     @Override

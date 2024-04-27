@@ -38,9 +38,9 @@ public class Swc4jAstUpdateExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr arg;
-    protected final Swc4jAstUpdateOp op;
-    protected final boolean prefix;
+    protected ISwc4jAstExpr arg;
+    protected Swc4jAstUpdateOp op;
+    protected boolean prefix;
 
     @Jni2RustMethod
     public Swc4jAstUpdateExpr(
@@ -49,12 +49,13 @@ public class Swc4jAstUpdateExpr
             ISwc4jAstExpr arg,
             Swc4jSpan span) {
         super(span);
-        this.arg = AssertionUtils.notNull(arg, "Arg");
-        this.op = AssertionUtils.notNull(op, "Op");
-        this.prefix = prefix;
+        setArg(arg);
+        setOp(op);
+        setPrefix(prefix);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getArg() {
         return arg;
     }
@@ -64,6 +65,7 @@ public class Swc4jAstUpdateExpr
         return SimpleList.of(arg);
     }
 
+    @Jni2RustMethod
     public Swc4jAstUpdateOp getOp() {
         return op;
     }
@@ -73,8 +75,24 @@ public class Swc4jAstUpdateExpr
         return Swc4jAstType.UpdateExpr;
     }
 
+    @Jni2RustMethod
     public boolean isPrefix() {
         return prefix;
+    }
+
+    public Swc4jAstUpdateExpr setArg(ISwc4jAstExpr arg) {
+        this.arg = AssertionUtils.notNull(arg, "Arg");
+        return this;
+    }
+
+    public Swc4jAstUpdateExpr setOp(Swc4jAstUpdateOp op) {
+        this.op = AssertionUtils.notNull(op, "Op");
+        return this;
+    }
+
+    public Swc4jAstUpdateExpr setPrefix(boolean prefix) {
+        this.prefix = prefix;
+        return this;
     }
 
     @Override
