@@ -34,9 +34,9 @@ import java.util.Optional;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTplElement
         extends Swc4jAst {
-    protected final Optional<String> cooked;
-    protected final String raw;
-    protected final boolean tail;
+    protected Optional<String> cooked;
+    protected String raw;
+    protected boolean tail;
 
     @Jni2RustMethod
     public Swc4jAstTplElement(
@@ -45,9 +45,9 @@ public class Swc4jAstTplElement
             String raw,
             Swc4jSpan span) {
         super(span);
-        this.cooked = Optional.ofNullable(cooked);
-        this.raw = AssertionUtils.notNull(raw, "Raw");
-        this.tail = tail;
+        setCooked(cooked);
+        setRaw(raw);
+        setTail(tail);
     }
 
     @Override
@@ -55,10 +55,12 @@ public class Swc4jAstTplElement
         return EMPTY_CHILD_NODES;
     }
 
+    @Jni2RustMethod
     public Optional<String> getCooked() {
         return cooked;
     }
 
+    @Jni2RustMethod
     public String getRaw() {
         return raw;
     }
@@ -68,8 +70,24 @@ public class Swc4jAstTplElement
         return Swc4jAstType.TplElement;
     }
 
+    @Jni2RustMethod
     public boolean isTail() {
         return tail;
+    }
+
+    public Swc4jAstTplElement setCooked(String cooked) {
+        this.cooked = Optional.ofNullable(cooked);
+        return this;
+    }
+
+    public Swc4jAstTplElement setRaw(String raw) {
+        this.raw = AssertionUtils.notNull(raw, "Raw");
+        return this;
+    }
+
+    public Swc4jAstTplElement setTail(boolean tail) {
+        this.tail = tail;
+        return this;
     }
 
     @Override

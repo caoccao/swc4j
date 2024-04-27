@@ -39,8 +39,8 @@ import java.util.Optional;
 public class Swc4jAstJsxAttr
         extends Swc4jAst
         implements ISwc4jAstJsxAttrOrSpread {
-    protected final ISwc4jAstJsxAttrName name;
-    protected final Optional<ISwc4jAstJsxAttrValue> value;
+    protected ISwc4jAstJsxAttrName name;
+    protected Optional<ISwc4jAstJsxAttrValue> value;
 
     @Jni2RustMethod
     public Swc4jAstJsxAttr(
@@ -48,8 +48,8 @@ public class Swc4jAstJsxAttr
             @Jni2RustParam(optional = true) ISwc4jAstJsxAttrValue value,
             Swc4jSpan span) {
         super(span);
-        this.name = AssertionUtils.notNull(name, "Name");
-        this.value = Optional.ofNullable(value);
+        setName(name);
+        setValue(value);
         updateParent();
     }
 
@@ -60,6 +60,7 @@ public class Swc4jAstJsxAttr
         return childNodes;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstJsxAttrName getName() {
         return name;
     }
@@ -69,8 +70,19 @@ public class Swc4jAstJsxAttr
         return Swc4jAstType.JsxAttr;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstJsxAttrValue> getValue() {
         return value;
+    }
+
+    public Swc4jAstJsxAttr setName(ISwc4jAstJsxAttrName name) {
+        this.name = AssertionUtils.notNull(name, "Name");
+        return this;
+    }
+
+    public Swc4jAstJsxAttr setValue(ISwc4jAstJsxAttrValue value) {
+        this.value = Optional.ofNullable(value);
+        return this;
     }
 
     @Override

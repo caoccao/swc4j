@@ -37,8 +37,8 @@ import java.util.Optional;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstCatchClause
         extends Swc4jAst {
-    protected final Swc4jAstBlockStmt body;
-    protected final Optional<ISwc4jAstPat> param;
+    protected Swc4jAstBlockStmt body;
+    protected Optional<ISwc4jAstPat> param;
 
     @Jni2RustMethod
     public Swc4jAstCatchClause(
@@ -46,11 +46,12 @@ public class Swc4jAstCatchClause
             Swc4jAstBlockStmt body,
             Swc4jSpan span) {
         super(span);
-        this.param = Optional.ofNullable(param);
-        this.body = AssertionUtils.notNull(body, "Body");
+        setBody(body);
+        setParam(param);
         updateParent();
     }
 
+    @Jni2RustMethod
     public Swc4jAstBlockStmt getBody() {
         return body;
     }
@@ -62,6 +63,7 @@ public class Swc4jAstCatchClause
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstPat> getParam() {
         return param;
     }
@@ -69,6 +71,16 @@ public class Swc4jAstCatchClause
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.CatchClause;
+    }
+
+    public Swc4jAstCatchClause setBody(Swc4jAstBlockStmt body) {
+        this.body = AssertionUtils.notNull(body, "Body");
+        return this;
+    }
+
+    public Swc4jAstCatchClause setParam(ISwc4jAstPat param) {
+        this.param = Optional.ofNullable(param);
+        return this;
     }
 
     @Override

@@ -39,8 +39,8 @@ public class Swc4jAstOptCall
         implements ISwc4jAstOptChainBase {
     protected final List<Swc4jAstExprOrSpread> args;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr callee;
-    protected final Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
+    protected ISwc4jAstExpr callee;
+    protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
     @Jni2RustMethod
     public Swc4jAstOptCall(
@@ -49,16 +49,18 @@ public class Swc4jAstOptCall
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
             Swc4jSpan span) {
         super(span);
+        setCallee(callee);
+        setTypeArgs(typeArgs);
         this.args = AssertionUtils.notNull(args, "Args");
-        this.callee = AssertionUtils.notNull(callee, "Callee");
-        this.typeArgs = Optional.ofNullable(typeArgs);
         updateParent();
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstExprOrSpread> getArgs() {
         return args;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getCallee() {
         return callee;
     }
@@ -76,8 +78,19 @@ public class Swc4jAstOptCall
         return Swc4jAstType.OptCall;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeArgs() {
         return typeArgs;
+    }
+
+    public Swc4jAstOptCall setCallee(ISwc4jAstExpr callee) {
+        this.callee = AssertionUtils.notNull(callee, "Callee");
+        return this;
+    }
+
+    public Swc4jAstOptCall setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
+        this.typeArgs = Optional.ofNullable(typeArgs);
+        return this;
     }
 
     @Override

@@ -39,9 +39,9 @@ import java.util.Optional;
 public class Swc4jAstJsxOpeningElement
         extends Swc4jAst {
     protected final List<ISwc4jAstJsxAttrOrSpread> attrs;
-    protected final ISwc4jAstJsxElementName name;
-    protected final boolean selfClosing;
-    protected final Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
+    protected ISwc4jAstJsxElementName name;
+    protected boolean selfClosing;
+    protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
     @Jni2RustMethod
     public Swc4jAstJsxOpeningElement(
@@ -51,13 +51,14 @@ public class Swc4jAstJsxOpeningElement
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
             Swc4jSpan span) {
         super(span);
+        setName(name);
+        setSelfClosing(selfClosing);
+        setTypeArgs(typeArgs);
         this.attrs = AssertionUtils.notNull(attrs, "Attrs");
-        this.name = AssertionUtils.notNull(name, "Name");
-        this.selfClosing = selfClosing;
-        this.typeArgs = Optional.ofNullable(typeArgs);
         updateParent();
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstJsxAttrOrSpread> getAttrs() {
         return attrs;
     }
@@ -70,6 +71,7 @@ public class Swc4jAstJsxOpeningElement
         return childNodes;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstJsxElementName getName() {
         return name;
     }
@@ -79,12 +81,29 @@ public class Swc4jAstJsxOpeningElement
         return Swc4jAstType.JsxOpeningElement;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeArgs() {
         return typeArgs;
     }
 
+    @Jni2RustMethod
     public boolean isSelfClosing() {
         return selfClosing;
+    }
+
+    public Swc4jAstJsxOpeningElement setName(ISwc4jAstJsxElementName name) {
+        this.name = AssertionUtils.notNull(name, "Name");
+        return this;
+    }
+
+    public Swc4jAstJsxOpeningElement setSelfClosing(boolean selfClosing) {
+        this.selfClosing = selfClosing;
+        return this;
+    }
+
+    public Swc4jAstJsxOpeningElement setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
+        this.typeArgs = Optional.ofNullable(typeArgs);
+        return this;
     }
 
     @Override

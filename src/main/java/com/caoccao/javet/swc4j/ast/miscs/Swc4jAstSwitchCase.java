@@ -38,7 +38,7 @@ import java.util.Optional;
 public class Swc4jAstSwitchCase
         extends Swc4jAst {
     protected final List<ISwc4jAstStmt> cons;
-    protected final Optional<ISwc4jAstExpr> test;
+    protected Optional<ISwc4jAstExpr> test;
 
     @Jni2RustMethod
     public Swc4jAstSwitchCase(
@@ -46,7 +46,7 @@ public class Swc4jAstSwitchCase
             List<ISwc4jAstStmt> cons,
             Swc4jSpan span) {
         super(span);
-        this.test = Optional.ofNullable(test);
+        setTest(test);
         this.cons = AssertionUtils.notNull(cons, "Cons");
         updateParent();
     }
@@ -58,10 +58,12 @@ public class Swc4jAstSwitchCase
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstStmt> getCons() {
         return cons;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getTest() {
         return test;
     }
@@ -69,6 +71,11 @@ public class Swc4jAstSwitchCase
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.SwitchCase;
+    }
+
+    public Swc4jAstSwitchCase setTest(ISwc4jAstExpr test) {
+        this.test = Optional.ofNullable(test);
+        return this;
     }
 
     @Override

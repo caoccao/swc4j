@@ -34,14 +34,14 @@ import java.util.List;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXClosingElement")
 public class Swc4jAstJsxClosingElement
         extends Swc4jAst {
-    protected final ISwc4jAstJsxElementName name;
+    protected ISwc4jAstJsxElementName name;
 
     @Jni2RustMethod
     public Swc4jAstJsxClosingElement(
             ISwc4jAstJsxElementName name,
             Swc4jSpan span) {
         super(span);
-        this.name = AssertionUtils.notNull(name, "Name");
+        setName(name);
         updateParent();
     }
 
@@ -50,6 +50,7 @@ public class Swc4jAstJsxClosingElement
         return SimpleList.of(name);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstJsxElementName getName() {
         return name;
     }
@@ -57,6 +58,11 @@ public class Swc4jAstJsxClosingElement
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.JsxClosingElement;
+    }
+
+    public Swc4jAstJsxClosingElement setName(ISwc4jAstJsxElementName name) {
+        this.name = AssertionUtils.notNull(name, "Name");
+        return this;
     }
 
     @Override
