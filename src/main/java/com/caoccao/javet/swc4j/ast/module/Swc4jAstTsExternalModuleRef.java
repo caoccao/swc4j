@@ -36,14 +36,14 @@ import java.util.List;
 public class Swc4jAstTsExternalModuleRef
         extends Swc4jAst
         implements ISwc4jAstTsModuleRef {
-    protected final Swc4jAstStr expr;
+    protected Swc4jAstStr expr;
 
     @Jni2RustMethod
     public Swc4jAstTsExternalModuleRef(
             Swc4jAstStr expr,
             Swc4jSpan span) {
         super(span);
-        this.expr = AssertionUtils.notNull(expr, "Expr");
+        setExpr(expr);
         updateParent();
     }
 
@@ -52,9 +52,19 @@ public class Swc4jAstTsExternalModuleRef
         return SimpleList.of(expr);
     }
 
+    @Jni2RustMethod
+    public Swc4jAstStr getExpr() {
+        return expr;
+    }
+
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsExternalModuleRef;
+    }
+
+    public Swc4jAstTsExternalModuleRef setExpr(Swc4jAstStr expr) {
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        return this;
     }
 
     @Override

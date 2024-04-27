@@ -36,14 +36,14 @@ import java.util.List;
 public class Swc4jAstExportNamespaceSpecifier
         extends Swc4jAst
         implements ISwc4jAstExportSpecifier {
-    protected final ISwc4jAstModuleExportName name;
+    protected ISwc4jAstModuleExportName name;
 
     @Jni2RustMethod
     public Swc4jAstExportNamespaceSpecifier(
             ISwc4jAstModuleExportName name,
             Swc4jSpan span) {
         super(span);
-        this.name = AssertionUtils.notNull(name, "Name");
+        setName(name);
         updateParent();
     }
 
@@ -52,6 +52,7 @@ public class Swc4jAstExportNamespaceSpecifier
         return SimpleList.of(name);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstModuleExportName getName() {
         return name;
     }
@@ -59,6 +60,11 @@ public class Swc4jAstExportNamespaceSpecifier
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ExportNamespaceSpecifier;
+    }
+
+    public Swc4jAstExportNamespaceSpecifier setName(ISwc4jAstModuleExportName name) {
+        this.name = AssertionUtils.notNull(name, "Name");
+        return this;
     }
 
     @Override

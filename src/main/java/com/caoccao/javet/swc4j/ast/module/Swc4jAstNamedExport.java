@@ -41,9 +41,9 @@ public class Swc4jAstNamedExport
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
     protected final List<ISwc4jAstExportSpecifier> specifiers;
-    protected final Optional<Swc4jAstStr> src;
-    protected final boolean typeOnly;
-    protected final Optional<Swc4jAstObjectLit> with;
+    protected Optional<Swc4jAstStr> src;
+    protected boolean typeOnly;
+    protected Optional<Swc4jAstObjectLit> with;
 
     @Jni2RustMethod
     public Swc4jAstNamedExport(
@@ -53,10 +53,10 @@ public class Swc4jAstNamedExport
             @Jni2RustParam(optional = true) Swc4jAstObjectLit with,
             Swc4jSpan span) {
         super(span);
+        setSrc(src);
+        setTypeOnly(typeOnly);
+        setWith(with);
         this.specifiers = AssertionUtils.notNull(specifiers, "Specifiers");
-        this.src = Optional.ofNullable(src);
-        this.typeOnly = typeOnly;
-        this.with = Optional.ofNullable(with);
         updateParent();
     }
 
@@ -68,10 +68,12 @@ public class Swc4jAstNamedExport
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstExportSpecifier> getSpecifiers() {
         return specifiers;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstStr> getSrc() {
         return src;
     }
@@ -81,12 +83,29 @@ public class Swc4jAstNamedExport
         return Swc4jAstType.NamedExport;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstObjectLit> getWith() {
         return with;
     }
 
+    @Jni2RustMethod
     public boolean isTypeOnly() {
         return typeOnly;
+    }
+
+    public Swc4jAstNamedExport setSrc(Swc4jAstStr src) {
+        this.src = Optional.ofNullable(src);
+        return this;
+    }
+
+    public Swc4jAstNamedExport setTypeOnly(boolean typeOnly) {
+        this.typeOnly = typeOnly;
+        return this;
+    }
+
+    public Swc4jAstNamedExport setWith(Swc4jAstObjectLit with) {
+        this.with = Optional.ofNullable(with);
+        return this;
     }
 
     @Override

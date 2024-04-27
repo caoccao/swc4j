@@ -37,9 +37,9 @@ public class Swc4jAstExportAll
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
     @Jni2RustField(box = true)
-    protected final Swc4jAstStr src;
-    protected final boolean typeOnly;
-    protected final Optional<Swc4jAstObjectLit> with;
+    protected Swc4jAstStr src;
+    protected boolean typeOnly;
+    protected Optional<Swc4jAstObjectLit> with;
 
     @Jni2RustMethod
     public Swc4jAstExportAll(
@@ -48,9 +48,9 @@ public class Swc4jAstExportAll
             @Jni2RustParam(optional = true) Swc4jAstObjectLit with,
             Swc4jSpan span) {
         super(span);
-        this.src = AssertionUtils.notNull(src, "Src");
-        this.typeOnly = typeOnly;
-        this.with = Optional.ofNullable(with);
+        setSrc(src);
+        setTypeOnly(typeOnly);
+        setWith(with);
         updateParent();
     }
 
@@ -61,6 +61,7 @@ public class Swc4jAstExportAll
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Swc4jAstStr getSrc() {
         return src;
     }
@@ -70,12 +71,29 @@ public class Swc4jAstExportAll
         return Swc4jAstType.ExportAll;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstObjectLit> getWith() {
         return with;
     }
 
+    @Jni2RustMethod
     public boolean isTypeOnly() {
         return typeOnly;
+    }
+
+    public Swc4jAstExportAll setSrc(Swc4jAstStr src) {
+        this.src = AssertionUtils.notNull(src, "Src");
+        return this;
+    }
+
+    public Swc4jAstExportAll setTypeOnly(boolean typeOnly) {
+        this.typeOnly = typeOnly;
+        return this;
+    }
+
+    public Swc4jAstExportAll setWith(Swc4jAstObjectLit with) {
+        this.with = Optional.ofNullable(with);
+        return this;
     }
 
     @Override

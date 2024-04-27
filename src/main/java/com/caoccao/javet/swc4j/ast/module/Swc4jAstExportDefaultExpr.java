@@ -38,14 +38,14 @@ public class Swc4jAstExportDefaultExpr
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr expr;
+    protected ISwc4jAstExpr expr;
 
     @Jni2RustMethod
     public Swc4jAstExportDefaultExpr(
             ISwc4jAstExpr expr,
             Swc4jSpan span) {
         super(span);
-        this.expr = AssertionUtils.notNull(expr, "Expr");
+        setExpr(expr);
         updateParent();
     }
 
@@ -54,6 +54,7 @@ public class Swc4jAstExportDefaultExpr
         return SimpleList.of(expr);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
     }
@@ -61,6 +62,11 @@ public class Swc4jAstExportDefaultExpr
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ExportDefaultExpr;
+    }
+
+    public Swc4jAstExportDefaultExpr setExpr(ISwc4jAstExpr expr) {
+        this.expr = AssertionUtils.notNull(expr, "Expr");
+        return this;
     }
 
     @Override

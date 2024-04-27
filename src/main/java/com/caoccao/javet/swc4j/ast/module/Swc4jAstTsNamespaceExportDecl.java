@@ -36,14 +36,14 @@ import java.util.List;
 public class Swc4jAstTsNamespaceExportDecl
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
-    protected final Swc4jAstIdent id;
+    protected Swc4jAstIdent id;
 
     @Jni2RustMethod
     public Swc4jAstTsNamespaceExportDecl(
             Swc4jAstIdent id,
             Swc4jSpan span) {
         super(span);
-        this.id = AssertionUtils.notNull(id, "Id");
+        setId(id);
         updateParent();
     }
 
@@ -52,6 +52,7 @@ public class Swc4jAstTsNamespaceExportDecl
         return SimpleList.of(id);
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
     }
@@ -59,6 +60,11 @@ public class Swc4jAstTsNamespaceExportDecl
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsNamespaceExportDecl;
+    }
+
+    public Swc4jAstTsNamespaceExportDecl setId(Swc4jAstIdent id) {
+        this.id = AssertionUtils.notNull(id, "Id");
+        return this;
     }
 
     @Override

@@ -35,10 +35,10 @@ import java.util.Optional;
 public class Swc4jAstExportNamedSpecifier
         extends Swc4jAst
         implements ISwc4jAstExportSpecifier {
-    protected final Optional<ISwc4jAstModuleExportName> exported;
-    protected final ISwc4jAstModuleExportName orig;
+    protected Optional<ISwc4jAstModuleExportName> exported;
+    protected ISwc4jAstModuleExportName orig;
     @Jni2RustField(name = "is_type_only")
-    protected final boolean typeOnly;
+    protected boolean typeOnly;
 
     @Jni2RustMethod
     public Swc4jAstExportNamedSpecifier(
@@ -47,9 +47,9 @@ public class Swc4jAstExportNamedSpecifier
             boolean typeOnly,
             Swc4jSpan span) {
         super(span);
-        this.exported = Optional.ofNullable(exported);
-        this.orig = AssertionUtils.notNull(orig, "Orig");
-        this.typeOnly = typeOnly;
+        setExported(exported);
+        setOrig(orig);
+        setTypeOnly(typeOnly);
         updateParent();
     }
 
@@ -60,10 +60,12 @@ public class Swc4jAstExportNamedSpecifier
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstModuleExportName> getExported() {
         return exported;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstModuleExportName getOrig() {
         return orig;
     }
@@ -73,8 +75,24 @@ public class Swc4jAstExportNamedSpecifier
         return Swc4jAstType.ExportNamedSpecifier;
     }
 
+    @Jni2RustMethod
     public boolean isTypeOnly() {
         return typeOnly;
+    }
+
+    public Swc4jAstExportNamedSpecifier setExported(ISwc4jAstModuleExportName exported) {
+        this.exported = Optional.ofNullable(exported);
+        return this;
+    }
+
+    public Swc4jAstExportNamedSpecifier setOrig(ISwc4jAstModuleExportName orig) {
+        this.orig = AssertionUtils.notNull(orig, "Orig");
+        return this;
+    }
+
+    public Swc4jAstExportNamedSpecifier setTypeOnly(boolean typeOnly) {
+        this.typeOnly = typeOnly;
+        return this;
     }
 
     @Override

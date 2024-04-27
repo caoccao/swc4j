@@ -3572,6 +3572,9 @@ impl JavaSwc4jAstEmptyStmt {
 struct JavaSwc4jAstExportAll {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_src: JMethodID,
+  method_get_with: JMethodID,
+  method_is_type_only: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportAll {}
 unsafe impl Sync for JavaSwc4jAstExportAll {}
@@ -3592,9 +3595,33 @@ impl JavaSwc4jAstExportAll {
         "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstExportAll::new");
+    let method_get_src = env
+      .get_method_id(
+        &class,
+        "getSrc",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;",
+      )
+      .expect("Couldn't find method Swc4jAstExportAll.getSrc");
+    let method_get_with = env
+      .get_method_id(
+        &class,
+        "getWith",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstExportAll.getWith");
+    let method_is_type_only = env
+      .get_method_id(
+        &class,
+        "isTypeOnly",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstExportAll.isTypeOnly");
     JavaSwc4jAstExportAll {
       class,
       method_construct,
+      method_get_src,
+      method_get_with,
+      method_is_type_only,
     }
   }
 
@@ -3622,12 +3649,65 @@ impl JavaSwc4jAstExportAll {
       );
     return_value
   }
+
+  pub fn get_src<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_src,
+        &[],
+        "Swc4jAstStr get_src()"
+      );
+    return_value
+  }
+
+  pub fn get_with<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_with,
+        &[],
+        "Optional get_with()"
+      );
+    return_value
+  }
+
+  pub fn is_type_only<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_type_only,
+        &[],
+        "boolean is_type_only()"
+      );
+    return_value
+  }
 }
 
 #[allow(dead_code)]
 struct JavaSwc4jAstExportDecl {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_decl: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportDecl {}
 unsafe impl Sync for JavaSwc4jAstExportDecl {}
@@ -3648,9 +3728,17 @@ impl JavaSwc4jAstExportDecl {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstDecl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstExportDecl::new");
+    let method_get_decl = env
+      .get_method_id(
+        &class,
+        "getDecl",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstDecl;",
+      )
+      .expect("Couldn't find method Swc4jAstExportDecl.getDecl");
     JavaSwc4jAstExportDecl {
       class,
       method_construct,
+      method_get_decl,
     }
   }
 
@@ -3674,12 +3762,31 @@ impl JavaSwc4jAstExportDecl {
       );
     return_value
   }
+
+  pub fn get_decl<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_decl,
+        &[],
+        "ISwc4jAstDecl get_decl()"
+      );
+    return_value
+  }
 }
 
 #[allow(dead_code)]
 struct JavaSwc4jAstExportDefaultDecl {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_decl: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportDefaultDecl {}
 unsafe impl Sync for JavaSwc4jAstExportDefaultDecl {}
@@ -3700,9 +3807,17 @@ impl JavaSwc4jAstExportDefaultDecl {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstDefaultDecl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstExportDefaultDecl::new");
+    let method_get_decl = env
+      .get_method_id(
+        &class,
+        "getDecl",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstDefaultDecl;",
+      )
+      .expect("Couldn't find method Swc4jAstExportDefaultDecl.getDecl");
     JavaSwc4jAstExportDefaultDecl {
       class,
       method_construct,
+      method_get_decl,
     }
   }
 
@@ -3726,12 +3841,31 @@ impl JavaSwc4jAstExportDefaultDecl {
       );
     return_value
   }
+
+  pub fn get_decl<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_decl,
+        &[],
+        "ISwc4jAstDefaultDecl get_decl()"
+      );
+    return_value
+  }
 }
 
 #[allow(dead_code)]
 struct JavaSwc4jAstExportDefaultExpr {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_expr: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportDefaultExpr {}
 unsafe impl Sync for JavaSwc4jAstExportDefaultExpr {}
@@ -3752,9 +3886,17 @@ impl JavaSwc4jAstExportDefaultExpr {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstExportDefaultExpr::new");
+    let method_get_expr = env
+      .get_method_id(
+        &class,
+        "getExpr",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstExportDefaultExpr.getExpr");
     JavaSwc4jAstExportDefaultExpr {
       class,
       method_construct,
+      method_get_expr,
     }
   }
 
@@ -3778,12 +3920,31 @@ impl JavaSwc4jAstExportDefaultExpr {
       );
     return_value
   }
+
+  pub fn get_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_expr,
+        &[],
+        "ISwc4jAstExpr get_expr()"
+      );
+    return_value
+  }
 }
 
 #[allow(dead_code)]
 struct JavaSwc4jAstExportDefaultSpecifier {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_exported: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportDefaultSpecifier {}
 unsafe impl Sync for JavaSwc4jAstExportDefaultSpecifier {}
@@ -3804,9 +3965,17 @@ impl JavaSwc4jAstExportDefaultSpecifier {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstExportDefaultSpecifier::new");
+    let method_get_exported = env
+      .get_method_id(
+        &class,
+        "getExported",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+      )
+      .expect("Couldn't find method Swc4jAstExportDefaultSpecifier.getExported");
     JavaSwc4jAstExportDefaultSpecifier {
       class,
       method_construct,
+      method_get_exported,
     }
   }
 
@@ -3830,12 +3999,33 @@ impl JavaSwc4jAstExportDefaultSpecifier {
       );
     return_value
   }
+
+  pub fn get_exported<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_exported,
+        &[],
+        "Swc4jAstIdent get_exported()"
+      );
+    return_value
+  }
 }
 
 #[allow(dead_code)]
 struct JavaSwc4jAstExportNamedSpecifier {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_exported: JMethodID,
+  method_get_orig: JMethodID,
+  method_is_type_only: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportNamedSpecifier {}
 unsafe impl Sync for JavaSwc4jAstExportNamedSpecifier {}
@@ -3856,9 +4046,33 @@ impl JavaSwc4jAstExportNamedSpecifier {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstExportNamedSpecifier::new");
+    let method_get_exported = env
+      .get_method_id(
+        &class,
+        "getExported",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstExportNamedSpecifier.getExported");
+    let method_get_orig = env
+      .get_method_id(
+        &class,
+        "getOrig",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;",
+      )
+      .expect("Couldn't find method Swc4jAstExportNamedSpecifier.getOrig");
+    let method_is_type_only = env
+      .get_method_id(
+        &class,
+        "isTypeOnly",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstExportNamedSpecifier.isTypeOnly");
     JavaSwc4jAstExportNamedSpecifier {
       class,
       method_construct,
+      method_get_exported,
+      method_get_orig,
+      method_is_type_only,
     }
   }
 
@@ -3886,12 +4100,65 @@ impl JavaSwc4jAstExportNamedSpecifier {
       );
     return_value
   }
+
+  pub fn get_exported<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_exported,
+        &[],
+        "Optional get_exported()"
+      );
+    return_value
+  }
+
+  pub fn get_orig<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_orig,
+        &[],
+        "ISwc4jAstModuleExportName get_orig()"
+      );
+    return_value
+  }
+
+  pub fn is_type_only<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_type_only,
+        &[],
+        "boolean is_type_only()"
+      );
+    return_value
+  }
 }
 
 #[allow(dead_code)]
 struct JavaSwc4jAstExportNamespaceSpecifier {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_name: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstExportNamespaceSpecifier {}
 unsafe impl Sync for JavaSwc4jAstExportNamespaceSpecifier {}
@@ -3912,9 +4179,17 @@ impl JavaSwc4jAstExportNamespaceSpecifier {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstExportNamespaceSpecifier::new");
+    let method_get_name = env
+      .get_method_id(
+        &class,
+        "getName",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;",
+      )
+      .expect("Couldn't find method Swc4jAstExportNamespaceSpecifier.getName");
     JavaSwc4jAstExportNamespaceSpecifier {
       class,
       method_construct,
+      method_get_name,
     }
   }
 
@@ -3935,6 +4210,24 @@ impl JavaSwc4jAstExportNamespaceSpecifier {
         self.method_construct,
         &[name, span],
         "Swc4jAstExportNamespaceSpecifier construct()"
+      );
+    return_value
+  }
+
+  pub fn get_name<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_name,
+        &[],
+        "ISwc4jAstModuleExportName get_name()"
       );
     return_value
   }
@@ -4991,6 +5284,7 @@ impl JavaSwc4jAstIfStmt {
 struct JavaSwc4jAstImport {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_phase: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstImport {}
 unsafe impl Sync for JavaSwc4jAstImport {}
@@ -5011,9 +5305,17 @@ impl JavaSwc4jAstImport {
         "(Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstImportPhase;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstImport::new");
+    let method_get_phase = env
+      .get_method_id(
+        &class,
+        "getPhase",
+        "()Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstImportPhase;",
+      )
+      .expect("Couldn't find method Swc4jAstImport.getPhase");
     JavaSwc4jAstImport {
       class,
       method_construct,
+      method_get_phase,
     }
   }
 
@@ -5037,12 +5339,35 @@ impl JavaSwc4jAstImport {
       );
     return_value
   }
+
+  pub fn get_phase<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_phase,
+        &[],
+        "Swc4jAstImportPhase get_phase()"
+      );
+    return_value
+  }
 }
 
 #[allow(dead_code)]
 struct JavaSwc4jAstImportDecl {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_phase: JMethodID,
+  method_get_specifiers: JMethodID,
+  method_get_src: JMethodID,
+  method_get_with: JMethodID,
+  method_is_type_only: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstImportDecl {}
 unsafe impl Sync for JavaSwc4jAstImportDecl {}
@@ -5063,9 +5388,49 @@ impl JavaSwc4jAstImportDecl {
         "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstImportPhase;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstImportDecl::new");
+    let method_get_phase = env
+      .get_method_id(
+        &class,
+        "getPhase",
+        "()Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstImportPhase;",
+      )
+      .expect("Couldn't find method Swc4jAstImportDecl.getPhase");
+    let method_get_specifiers = env
+      .get_method_id(
+        &class,
+        "getSpecifiers",
+        "()Ljava/util/List;",
+      )
+      .expect("Couldn't find method Swc4jAstImportDecl.getSpecifiers");
+    let method_get_src = env
+      .get_method_id(
+        &class,
+        "getSrc",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;",
+      )
+      .expect("Couldn't find method Swc4jAstImportDecl.getSrc");
+    let method_get_with = env
+      .get_method_id(
+        &class,
+        "getWith",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstImportDecl.getWith");
+    let method_is_type_only = env
+      .get_method_id(
+        &class,
+        "isTypeOnly",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstImportDecl.isTypeOnly");
     JavaSwc4jAstImportDecl {
       class,
       method_construct,
+      method_get_phase,
+      method_get_specifiers,
+      method_get_src,
+      method_get_with,
+      method_is_type_only,
     }
   }
 
@@ -5097,12 +5462,101 @@ impl JavaSwc4jAstImportDecl {
       );
     return_value
   }
+
+  pub fn get_phase<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_phase,
+        &[],
+        "Swc4jAstImportPhase get_phase()"
+      );
+    return_value
+  }
+
+  pub fn get_specifiers<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_specifiers,
+        &[],
+        "List get_specifiers()"
+      );
+    return_value
+  }
+
+  pub fn get_src<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_src,
+        &[],
+        "Swc4jAstStr get_src()"
+      );
+    return_value
+  }
+
+  pub fn get_with<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_with,
+        &[],
+        "Optional get_with()"
+      );
+    return_value
+  }
+
+  pub fn is_type_only<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_type_only,
+        &[],
+        "boolean is_type_only()"
+      );
+    return_value
+  }
 }
 
 #[allow(dead_code)]
 struct JavaSwc4jAstImportDefaultSpecifier {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_local: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstImportDefaultSpecifier {}
 unsafe impl Sync for JavaSwc4jAstImportDefaultSpecifier {}
@@ -5123,9 +5577,17 @@ impl JavaSwc4jAstImportDefaultSpecifier {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstImportDefaultSpecifier::new");
+    let method_get_local = env
+      .get_method_id(
+        &class,
+        "getLocal",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+      )
+      .expect("Couldn't find method Swc4jAstImportDefaultSpecifier.getLocal");
     JavaSwc4jAstImportDefaultSpecifier {
       class,
       method_construct,
+      method_get_local,
     }
   }
 
@@ -5149,12 +5611,33 @@ impl JavaSwc4jAstImportDefaultSpecifier {
       );
     return_value
   }
+
+  pub fn get_local<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_local,
+        &[],
+        "Swc4jAstIdent get_local()"
+      );
+    return_value
+  }
 }
 
 #[allow(dead_code)]
 struct JavaSwc4jAstImportNamedSpecifier {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_imported: JMethodID,
+  method_get_local: JMethodID,
+  method_is_type_only: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstImportNamedSpecifier {}
 unsafe impl Sync for JavaSwc4jAstImportNamedSpecifier {}
@@ -5175,9 +5658,33 @@ impl JavaSwc4jAstImportNamedSpecifier {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstModuleExportName;ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstImportNamedSpecifier::new");
+    let method_get_imported = env
+      .get_method_id(
+        &class,
+        "getImported",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstImportNamedSpecifier.getImported");
+    let method_get_local = env
+      .get_method_id(
+        &class,
+        "getLocal",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+      )
+      .expect("Couldn't find method Swc4jAstImportNamedSpecifier.getLocal");
+    let method_is_type_only = env
+      .get_method_id(
+        &class,
+        "isTypeOnly",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstImportNamedSpecifier.isTypeOnly");
     JavaSwc4jAstImportNamedSpecifier {
       class,
       method_construct,
+      method_get_imported,
+      method_get_local,
+      method_is_type_only,
     }
   }
 
@@ -5205,12 +5712,65 @@ impl JavaSwc4jAstImportNamedSpecifier {
       );
     return_value
   }
+
+  pub fn get_imported<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_imported,
+        &[],
+        "Optional get_imported()"
+      );
+    return_value
+  }
+
+  pub fn get_local<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_local,
+        &[],
+        "Swc4jAstIdent get_local()"
+      );
+    return_value
+  }
+
+  pub fn is_type_only<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_type_only,
+        &[],
+        "boolean is_type_only()"
+      );
+    return_value
+  }
 }
 
 #[allow(dead_code)]
 struct JavaSwc4jAstImportStarAsSpecifier {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_local: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstImportStarAsSpecifier {}
 unsafe impl Sync for JavaSwc4jAstImportStarAsSpecifier {}
@@ -5231,9 +5791,17 @@ impl JavaSwc4jAstImportStarAsSpecifier {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstImportStarAsSpecifier::new");
+    let method_get_local = env
+      .get_method_id(
+        &class,
+        "getLocal",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+      )
+      .expect("Couldn't find method Swc4jAstImportStarAsSpecifier.getLocal");
     JavaSwc4jAstImportStarAsSpecifier {
       class,
       method_construct,
+      method_get_local,
     }
   }
 
@@ -5254,6 +5822,24 @@ impl JavaSwc4jAstImportStarAsSpecifier {
         self.method_construct,
         &[local, span],
         "Swc4jAstImportStarAsSpecifier construct()"
+      );
+    return_value
+  }
+
+  pub fn get_local<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_local,
+        &[],
+        "Swc4jAstIdent get_local()"
       );
     return_value
   }
@@ -7143,6 +7729,10 @@ impl JavaSwc4jAstModule {
 struct JavaSwc4jAstNamedExport {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_specifiers: JMethodID,
+  method_get_src: JMethodID,
+  method_get_with: JMethodID,
+  method_is_type_only: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstNamedExport {}
 unsafe impl Sync for JavaSwc4jAstNamedExport {}
@@ -7163,9 +7753,41 @@ impl JavaSwc4jAstNamedExport {
         "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;ZLcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstNamedExport::new");
+    let method_get_specifiers = env
+      .get_method_id(
+        &class,
+        "getSpecifiers",
+        "()Ljava/util/List;",
+      )
+      .expect("Couldn't find method Swc4jAstNamedExport.getSpecifiers");
+    let method_get_src = env
+      .get_method_id(
+        &class,
+        "getSrc",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstNamedExport.getSrc");
+    let method_get_with = env
+      .get_method_id(
+        &class,
+        "getWith",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstNamedExport.getWith");
+    let method_is_type_only = env
+      .get_method_id(
+        &class,
+        "isTypeOnly",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstNamedExport.isTypeOnly");
     JavaSwc4jAstNamedExport {
       class,
       method_construct,
+      method_get_specifiers,
+      method_get_src,
+      method_get_with,
+      method_is_type_only,
     }
   }
 
@@ -7192,6 +7814,76 @@ impl JavaSwc4jAstNamedExport {
         self.method_construct,
         &[specifiers, src, type_only, with, span],
         "Swc4jAstNamedExport construct()"
+      );
+    return_value
+  }
+
+  pub fn get_specifiers<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_specifiers,
+        &[],
+        "List get_specifiers()"
+      );
+    return_value
+  }
+
+  pub fn get_src<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_src,
+        &[],
+        "Optional get_src()"
+      );
+    return_value
+  }
+
+  pub fn get_with<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_with,
+        &[],
+        "Optional get_with()"
+      );
+    return_value
+  }
+
+  pub fn is_type_only<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_type_only,
+        &[],
+        "boolean is_type_only()"
       );
     return_value
   }
@@ -10930,6 +11622,7 @@ impl JavaSwc4jAstTsEnumMember {
 struct JavaSwc4jAstTsExportAssignment {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_expr: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsExportAssignment {}
 unsafe impl Sync for JavaSwc4jAstTsExportAssignment {}
@@ -10950,9 +11643,17 @@ impl JavaSwc4jAstTsExportAssignment {
         "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTsExportAssignment::new");
+    let method_get_expr = env
+      .get_method_id(
+        &class,
+        "getExpr",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;",
+      )
+      .expect("Couldn't find method Swc4jAstTsExportAssignment.getExpr");
     JavaSwc4jAstTsExportAssignment {
       class,
       method_construct,
+      method_get_expr,
     }
   }
 
@@ -10973,6 +11674,24 @@ impl JavaSwc4jAstTsExportAssignment {
         self.method_construct,
         &[expr, span],
         "Swc4jAstTsExportAssignment construct()"
+      );
+    return_value
+  }
+
+  pub fn get_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_expr,
+        &[],
+        "ISwc4jAstExpr get_expr()"
       );
     return_value
   }
@@ -11036,6 +11755,7 @@ impl JavaSwc4jAstTsExprWithTypeArgs {
 struct JavaSwc4jAstTsExternalModuleRef {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_expr: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsExternalModuleRef {}
 unsafe impl Sync for JavaSwc4jAstTsExternalModuleRef {}
@@ -11056,9 +11776,17 @@ impl JavaSwc4jAstTsExternalModuleRef {
         "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTsExternalModuleRef::new");
+    let method_get_expr = env
+      .get_method_id(
+        &class,
+        "getExpr",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;",
+      )
+      .expect("Couldn't find method Swc4jAstTsExternalModuleRef.getExpr");
     JavaSwc4jAstTsExternalModuleRef {
       class,
       method_construct,
+      method_get_expr,
     }
   }
 
@@ -11079,6 +11807,24 @@ impl JavaSwc4jAstTsExternalModuleRef {
         self.method_construct,
         &[expr, span],
         "Swc4jAstTsExternalModuleRef construct()"
+      );
+    return_value
+  }
+
+  pub fn get_expr<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_expr,
+        &[],
+        "Swc4jAstStr get_expr()"
       );
     return_value
   }
@@ -11204,6 +11950,10 @@ impl JavaSwc4jAstTsGetterSignature {
 struct JavaSwc4jAstTsImportEqualsDecl {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_id: JMethodID,
+  method_get_module_ref: JMethodID,
+  method_is_export: JMethodID,
+  method_is_type_only: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsImportEqualsDecl {}
 unsafe impl Sync for JavaSwc4jAstTsImportEqualsDecl {}
@@ -11224,9 +11974,41 @@ impl JavaSwc4jAstTsImportEqualsDecl {
         "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleRef;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTsImportEqualsDecl::new");
+    let method_get_id = env
+      .get_method_id(
+        &class,
+        "getId",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+      )
+      .expect("Couldn't find method Swc4jAstTsImportEqualsDecl.getId");
+    let method_get_module_ref = env
+      .get_method_id(
+        &class,
+        "getModuleRef",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleRef;",
+      )
+      .expect("Couldn't find method Swc4jAstTsImportEqualsDecl.getModuleRef");
+    let method_is_export = env
+      .get_method_id(
+        &class,
+        "isExport",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstTsImportEqualsDecl.isExport");
+    let method_is_type_only = env
+      .get_method_id(
+        &class,
+        "isTypeOnly",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstTsImportEqualsDecl.isTypeOnly");
     JavaSwc4jAstTsImportEqualsDecl {
       class,
       method_construct,
+      method_get_id,
+      method_get_module_ref,
+      method_is_export,
+      method_is_type_only,
     }
   }
 
@@ -11253,6 +12035,74 @@ impl JavaSwc4jAstTsImportEqualsDecl {
         self.method_construct,
         &[export, type_only, id, module_ref, span],
         "Swc4jAstTsImportEqualsDecl construct()"
+      );
+    return_value
+  }
+
+  pub fn get_id<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_id,
+        &[],
+        "Swc4jAstIdent get_id()"
+      );
+    return_value
+  }
+
+  pub fn get_module_ref<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_module_ref,
+        &[],
+        "ISwc4jAstTsModuleRef get_module_ref()"
+      );
+    return_value
+  }
+
+  pub fn is_export<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_export,
+        &[],
+        "boolean is_export()"
+      );
+    return_value
+  }
+
+  pub fn is_type_only<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_type_only,
+        &[],
+        "boolean is_type_only()"
       );
     return_value
   }
@@ -11984,6 +12834,7 @@ impl JavaSwc4jAstTsMethodSignature {
 struct JavaSwc4jAstTsModuleBlock {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_body: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsModuleBlock {}
 unsafe impl Sync for JavaSwc4jAstTsModuleBlock {}
@@ -12004,9 +12855,17 @@ impl JavaSwc4jAstTsModuleBlock {
         "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTsModuleBlock::new");
+    let method_get_body = env
+      .get_method_id(
+        &class,
+        "getBody",
+        "()Ljava/util/List;",
+      )
+      .expect("Couldn't find method Swc4jAstTsModuleBlock.getBody");
     JavaSwc4jAstTsModuleBlock {
       class,
       method_construct,
+      method_get_body,
     }
   }
 
@@ -12027,6 +12886,24 @@ impl JavaSwc4jAstTsModuleBlock {
         self.method_construct,
         &[body, span],
         "Swc4jAstTsModuleBlock construct()"
+      );
+    return_value
+  }
+
+  pub fn get_body<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_body,
+        &[],
+        "List get_body()"
       );
     return_value
   }
@@ -12094,6 +12971,10 @@ impl JavaSwc4jAstTsModuleDecl {
 struct JavaSwc4jAstTsNamespaceDecl {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_body: JMethodID,
+  method_get_id: JMethodID,
+  method_is_declare: JMethodID,
+  method_is_global: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsNamespaceDecl {}
 unsafe impl Sync for JavaSwc4jAstTsNamespaceDecl {}
@@ -12114,9 +12995,41 @@ impl JavaSwc4jAstTsNamespaceDecl {
         "(ZZLcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsNamespaceBody;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTsNamespaceDecl::new");
+    let method_get_body = env
+      .get_method_id(
+        &class,
+        "getBody",
+        "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsNamespaceBody;",
+      )
+      .expect("Couldn't find method Swc4jAstTsNamespaceDecl.getBody");
+    let method_get_id = env
+      .get_method_id(
+        &class,
+        "getId",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+      )
+      .expect("Couldn't find method Swc4jAstTsNamespaceDecl.getId");
+    let method_is_declare = env
+      .get_method_id(
+        &class,
+        "isDeclare",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstTsNamespaceDecl.isDeclare");
+    let method_is_global = env
+      .get_method_id(
+        &class,
+        "isGlobal",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstTsNamespaceDecl.isGlobal");
     JavaSwc4jAstTsNamespaceDecl {
       class,
       method_construct,
+      method_get_body,
+      method_get_id,
+      method_is_declare,
+      method_is_global,
     }
   }
 
@@ -12146,12 +13059,81 @@ impl JavaSwc4jAstTsNamespaceDecl {
       );
     return_value
   }
+
+  pub fn get_body<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_body,
+        &[],
+        "ISwc4jAstTsNamespaceBody get_body()"
+      );
+    return_value
+  }
+
+  pub fn get_id<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_id,
+        &[],
+        "Swc4jAstIdent get_id()"
+      );
+    return_value
+  }
+
+  pub fn is_declare<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_declare,
+        &[],
+        "boolean is_declare()"
+      );
+    return_value
+  }
+
+  pub fn is_global<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_global,
+        &[],
+        "boolean is_global()"
+      );
+    return_value
+  }
 }
 
 #[allow(dead_code)]
 struct JavaSwc4jAstTsNamespaceExportDecl {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_id: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsNamespaceExportDecl {}
 unsafe impl Sync for JavaSwc4jAstTsNamespaceExportDecl {}
@@ -12172,9 +13154,17 @@ impl JavaSwc4jAstTsNamespaceExportDecl {
         "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTsNamespaceExportDecl::new");
+    let method_get_id = env
+      .get_method_id(
+        &class,
+        "getId",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+      )
+      .expect("Couldn't find method Swc4jAstTsNamespaceExportDecl.getId");
     JavaSwc4jAstTsNamespaceExportDecl {
       class,
       method_construct,
+      method_get_id,
     }
   }
 
@@ -12195,6 +13185,24 @@ impl JavaSwc4jAstTsNamespaceExportDecl {
         self.method_construct,
         &[id, span],
         "Swc4jAstTsNamespaceExportDecl construct()"
+      );
+    return_value
+  }
+
+  pub fn get_id<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_id,
+        &[],
+        "Swc4jAstIdent get_id()"
       );
     return_value
   }

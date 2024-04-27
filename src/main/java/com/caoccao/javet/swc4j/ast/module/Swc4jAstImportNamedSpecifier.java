@@ -36,10 +36,10 @@ import java.util.Optional;
 public class Swc4jAstImportNamedSpecifier
         extends Swc4jAst
         implements ISwc4jAstImportSpecifier {
-    protected final Optional<ISwc4jAstModuleExportName> imported;
-    protected final Swc4jAstIdent local;
+    protected Optional<ISwc4jAstModuleExportName> imported;
+    protected Swc4jAstIdent local;
     @Jni2RustField(name = "is_type_only")
-    protected final boolean typeOnly;
+    protected boolean typeOnly;
 
     @Jni2RustMethod
     public Swc4jAstImportNamedSpecifier(
@@ -48,9 +48,9 @@ public class Swc4jAstImportNamedSpecifier
             boolean typeOnly,
             Swc4jSpan span) {
         super(span);
-        this.imported = Optional.ofNullable(imported);
-        this.local = AssertionUtils.notNull(local, "Local");
-        this.typeOnly = typeOnly;
+        setImported(imported);
+        setLocal(local);
+        setTypeOnly(typeOnly);
         updateParent();
     }
 
@@ -61,10 +61,12 @@ public class Swc4jAstImportNamedSpecifier
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstModuleExportName> getImported() {
         return imported;
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getLocal() {
         return local;
     }
@@ -74,8 +76,24 @@ public class Swc4jAstImportNamedSpecifier
         return Swc4jAstType.ImportNamedSpecifier;
     }
 
+    @Jni2RustMethod
     public boolean isTypeOnly() {
         return typeOnly;
+    }
+
+    public Swc4jAstImportNamedSpecifier setImported(ISwc4jAstModuleExportName imported) {
+        this.imported = Optional.ofNullable(imported);
+        return this;
+    }
+
+    public Swc4jAstImportNamedSpecifier setLocal(Swc4jAstIdent local) {
+        this.local = AssertionUtils.notNull(local, "Local");
+        return this;
+    }
+
+    public Swc4jAstImportNamedSpecifier setTypeOnly(boolean typeOnly) {
+        this.typeOnly = typeOnly;
+        return this;
     }
 
     @Override

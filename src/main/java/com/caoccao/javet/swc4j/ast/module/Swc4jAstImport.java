@@ -35,18 +35,14 @@ import java.util.List;
 public class Swc4jAstImport
         extends Swc4jAst
         implements ISwc4jAstCallee {
-    protected final Swc4jAstImportPhase phase;
+    protected Swc4jAstImportPhase phase;
 
     @Jni2RustMethod
     public Swc4jAstImport(
             Swc4jAstImportPhase phase,
             Swc4jSpan span) {
         super(span);
-        this.phase = AssertionUtils.notNull(phase, "Phase");
-    }
-
-    public Swc4jAstImportPhase getPhase() {
-        return phase;
+        setPhase(phase);
     }
 
     @Override
@@ -54,9 +50,19 @@ public class Swc4jAstImport
         return EMPTY_CHILD_NODES;
     }
 
+    @Jni2RustMethod
+    public Swc4jAstImportPhase getPhase() {
+        return phase;
+    }
+
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.Import;
+    }
+
+    public Swc4jAstImport setPhase(Swc4jAstImportPhase phase) {
+        this.phase = AssertionUtils.notNull(phase, "Phase");
+        return this;
     }
 
     @Override

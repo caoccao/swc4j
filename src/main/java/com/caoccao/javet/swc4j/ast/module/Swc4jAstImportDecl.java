@@ -38,12 +38,12 @@ import java.util.Optional;
 public class Swc4jAstImportDecl
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
-    protected final Swc4jAstImportPhase phase;
     protected final List<ISwc4jAstImportSpecifier> specifiers;
+    protected Swc4jAstImportPhase phase;
     @Jni2RustField(box = true)
-    protected final Swc4jAstStr src;
-    protected final boolean typeOnly;
-    protected final Optional<Swc4jAstObjectLit> with;
+    protected Swc4jAstStr src;
+    protected boolean typeOnly;
+    protected Optional<Swc4jAstObjectLit> with;
 
     @Jni2RustMethod
     public Swc4jAstImportDecl(
@@ -54,11 +54,11 @@ public class Swc4jAstImportDecl
             Swc4jAstImportPhase phase,
             Swc4jSpan span) {
         super(span);
+        setSrc(src);
+        setPhase(phase);
+        setTypeOnly(typeOnly);
+        setWith(with);
         this.specifiers = AssertionUtils.notNull(specifiers, "Specifiers");
-        this.src = AssertionUtils.notNull(src, "Src");
-        this.typeOnly = typeOnly;
-        this.with = Optional.ofNullable(with);
-        this.phase = AssertionUtils.notNull(phase, "Phase");
         updateParent();
     }
 
@@ -70,14 +70,17 @@ public class Swc4jAstImportDecl
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Swc4jAstImportPhase getPhase() {
         return phase;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstImportSpecifier> getSpecifiers() {
         return specifiers;
     }
 
+    @Jni2RustMethod
     public Swc4jAstStr getSrc() {
         return src;
     }
@@ -87,12 +90,34 @@ public class Swc4jAstImportDecl
         return Swc4jAstType.ImportDecl;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstObjectLit> getWith() {
         return with;
     }
 
+    @Jni2RustMethod
     public boolean isTypeOnly() {
         return typeOnly;
+    }
+
+    public Swc4jAstImportDecl setPhase(Swc4jAstImportPhase phase) {
+        this.phase = AssertionUtils.notNull(phase, "Phase");
+        return this;
+    }
+
+    public Swc4jAstImportDecl setSrc(Swc4jAstStr src) {
+        this.src = AssertionUtils.notNull(src, "Src");
+        return this;
+    }
+
+    public Swc4jAstImportDecl setTypeOnly(boolean typeOnly) {
+        this.typeOnly = typeOnly;
+        return this;
+    }
+
+    public Swc4jAstImportDecl setWith(Swc4jAstObjectLit with) {
+        this.with = Optional.ofNullable(with);
+        return this;
     }
 
     @Override

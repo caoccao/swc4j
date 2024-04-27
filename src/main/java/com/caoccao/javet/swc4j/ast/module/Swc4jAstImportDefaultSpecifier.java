@@ -36,14 +36,14 @@ import java.util.List;
 public class Swc4jAstImportDefaultSpecifier
         extends Swc4jAst
         implements ISwc4jAstImportSpecifier {
-    protected final Swc4jAstIdent local;
+    protected Swc4jAstIdent local;
 
     @Jni2RustMethod
     public Swc4jAstImportDefaultSpecifier(
             Swc4jAstIdent local,
             Swc4jSpan span) {
         super(span);
-        this.local = AssertionUtils.notNull(local, "Local");
+        setLocal(local);
         updateParent();
     }
 
@@ -52,6 +52,7 @@ public class Swc4jAstImportDefaultSpecifier
         return SimpleList.of(local);
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getLocal() {
         return local;
     }
@@ -59,6 +60,11 @@ public class Swc4jAstImportDefaultSpecifier
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ImportDefaultSpecifier;
+    }
+
+    public Swc4jAstImportDefaultSpecifier setLocal(Swc4jAstIdent local) {
+        this.local = AssertionUtils.notNull(local, "Local");
+        return this;
     }
 
     @Override

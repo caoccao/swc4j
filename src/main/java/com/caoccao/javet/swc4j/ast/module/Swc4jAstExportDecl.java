@@ -36,14 +36,14 @@ import java.util.List;
 public class Swc4jAstExportDecl
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
-    protected final ISwc4jAstDecl decl;
+    protected ISwc4jAstDecl decl;
 
     @Jni2RustMethod
     public Swc4jAstExportDecl(
             ISwc4jAstDecl decl,
             Swc4jSpan span) {
         super(span);
-        this.decl = AssertionUtils.notNull(decl, "Decl");
+        setDecl(decl);
         updateParent();
     }
 
@@ -52,6 +52,7 @@ public class Swc4jAstExportDecl
         return SimpleList.of(decl);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstDecl getDecl() {
         return decl;
     }
@@ -59,6 +60,11 @@ public class Swc4jAstExportDecl
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ExportDecl;
+    }
+
+    public Swc4jAstExportDecl setDecl(ISwc4jAstDecl decl) {
+        this.decl = AssertionUtils.notNull(decl, "Decl");
+        return this;
     }
 
     @Override

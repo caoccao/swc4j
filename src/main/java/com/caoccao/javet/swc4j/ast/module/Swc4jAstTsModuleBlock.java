@@ -47,6 +47,7 @@ public class Swc4jAstTsModuleBlock
         updateParent();
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstModuleItem> getBody() {
         return body;
     }

@@ -38,10 +38,10 @@ public class Swc4jAstTsNamespaceDecl
         extends Swc4jAst
         implements ISwc4jAstTsNamespaceBody {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstTsNamespaceBody body;
-    protected final boolean declare;
-    protected final boolean global;
-    protected final Swc4jAstIdent id;
+    protected ISwc4jAstTsNamespaceBody body;
+    protected boolean declare;
+    protected boolean global;
+    protected Swc4jAstIdent id;
 
     @Jni2RustMethod
     public Swc4jAstTsNamespaceDecl(
@@ -51,13 +51,14 @@ public class Swc4jAstTsNamespaceDecl
             ISwc4jAstTsNamespaceBody body,
             Swc4jSpan span) {
         super(span);
-        this.declare = declare;
-        this.global = global;
-        this.body = AssertionUtils.notNull(body, "Body");
-        this.id = AssertionUtils.notNull(id, "Id");
+        setBody(body);
+        setDeclare(declare);
+        setGlobal(global);
+        setId(id);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsNamespaceBody getBody() {
         return body;
     }
@@ -67,6 +68,7 @@ public class Swc4jAstTsNamespaceDecl
         return SimpleList.of(id, body);
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
     }
@@ -76,12 +78,34 @@ public class Swc4jAstTsNamespaceDecl
         return Swc4jAstType.TsNamespaceDecl;
     }
 
+    @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
     }
 
+    @Jni2RustMethod
     public boolean isGlobal() {
         return global;
+    }
+
+    public Swc4jAstTsNamespaceDecl setBody(ISwc4jAstTsNamespaceBody body) {
+        this.body = AssertionUtils.notNull(body, "Body");
+        return this;
+    }
+
+    public Swc4jAstTsNamespaceDecl setDeclare(boolean declare) {
+        this.declare = declare;
+        return this;
+    }
+
+    public Swc4jAstTsNamespaceDecl setGlobal(boolean global) {
+        this.global = global;
+        return this;
+    }
+
+    public Swc4jAstTsNamespaceDecl setId(Swc4jAstIdent id) {
+        this.id = AssertionUtils.notNull(id, "Id");
+        return this;
     }
 
     @Override

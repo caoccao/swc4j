@@ -39,11 +39,11 @@ public class Swc4jAstTsImportEqualsDecl
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
     @Jni2RustField(name = "is_export")
-    protected final boolean export;
-    protected final Swc4jAstIdent id;
-    protected final ISwc4jAstTsModuleRef moduleRef;
+    protected boolean export;
+    protected Swc4jAstIdent id;
+    protected ISwc4jAstTsModuleRef moduleRef;
     @Jni2RustField(name = "is_type_only")
-    protected final boolean typeOnly;
+    protected boolean typeOnly;
 
     @Jni2RustMethod
     public Swc4jAstTsImportEqualsDecl(
@@ -53,10 +53,10 @@ public class Swc4jAstTsImportEqualsDecl
             ISwc4jAstTsModuleRef moduleRef,
             Swc4jSpan span) {
         super(span);
-        this.export = export;
-        this.id = AssertionUtils.notNull(id, "Id");
-        this.moduleRef = AssertionUtils.notNull(moduleRef, "ModuleRef");
-        this.typeOnly = typeOnly;
+        setExport(export);
+        setId(id);
+        setModuleRef(moduleRef);
+        setTypeOnly(typeOnly);
         updateParent();
     }
 
@@ -65,10 +65,12 @@ public class Swc4jAstTsImportEqualsDecl
         return SimpleList.of(id, moduleRef);
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstTsModuleRef getModuleRef() {
         return moduleRef;
     }
@@ -78,12 +80,34 @@ public class Swc4jAstTsImportEqualsDecl
         return Swc4jAstType.TsImportEqualsDecl;
     }
 
+    @Jni2RustMethod
     public boolean isExport() {
         return export;
     }
 
+    @Jni2RustMethod
     public boolean isTypeOnly() {
         return typeOnly;
+    }
+
+    public Swc4jAstTsImportEqualsDecl setExport(boolean export) {
+        this.export = export;
+        return this;
+    }
+
+    public Swc4jAstTsImportEqualsDecl setId(Swc4jAstIdent id) {
+        this.id = AssertionUtils.notNull(id, "Id");
+        return this;
+    }
+
+    public Swc4jAstTsImportEqualsDecl setModuleRef(ISwc4jAstTsModuleRef moduleRef) {
+        this.moduleRef = AssertionUtils.notNull(moduleRef, "ModuleRef");
+        return this;
+    }
+
+    public Swc4jAstTsImportEqualsDecl setTypeOnly(boolean typeOnly) {
+        this.typeOnly = typeOnly;
+        return this;
     }
 
     @Override

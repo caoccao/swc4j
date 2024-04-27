@@ -36,14 +36,14 @@ import java.util.List;
 public class Swc4jAstImportStarAsSpecifier
         extends Swc4jAst
         implements ISwc4jAstImportSpecifier {
-    protected final Swc4jAstIdent local;
+    protected Swc4jAstIdent local;
 
     @Jni2RustMethod
     public Swc4jAstImportStarAsSpecifier(
             Swc4jAstIdent local,
             Swc4jSpan span) {
         super(span);
-        this.local = AssertionUtils.notNull(local, "Local");
+        setLocal(local);
         updateParent();
     }
 
@@ -52,6 +52,7 @@ public class Swc4jAstImportStarAsSpecifier
         return SimpleList.of(local);
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getLocal() {
         return local;
     }
@@ -59,6 +60,11 @@ public class Swc4jAstImportStarAsSpecifier
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ImportStarAsSpecifier;
+    }
+
+    public Swc4jAstImportStarAsSpecifier setLocal(Swc4jAstIdent local) {
+        this.local = AssertionUtils.notNull(local, "Local");
+        return this;
     }
 
     @Override

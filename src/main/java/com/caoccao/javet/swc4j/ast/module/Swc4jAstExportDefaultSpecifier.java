@@ -37,14 +37,14 @@ import java.util.List;
 public class Swc4jAstExportDefaultSpecifier
         extends Swc4jAst
         implements ISwc4jAstModuleDecl, ISwc4jAstExportSpecifier {
-    protected final Swc4jAstIdent exported;
+    protected Swc4jAstIdent exported;
 
     @Jni2RustMethod
     public Swc4jAstExportDefaultSpecifier(
             Swc4jAstIdent exported,
             Swc4jSpan span) {
         super(span);
-        this.exported = AssertionUtils.notNull(exported, "Exported");
+        setExported(exported);
         updateParent();
     }
 
@@ -53,6 +53,7 @@ public class Swc4jAstExportDefaultSpecifier
         return SimpleList.of(exported);
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getExported() {
         return exported;
     }
@@ -60,6 +61,11 @@ public class Swc4jAstExportDefaultSpecifier
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ExportDefaultSpecifier;
+    }
+
+    public Swc4jAstExportDefaultSpecifier setExported(Swc4jAstIdent exported) {
+        this.exported = AssertionUtils.notNull(exported, "Exported");
+        return this;
     }
 
     @Override
