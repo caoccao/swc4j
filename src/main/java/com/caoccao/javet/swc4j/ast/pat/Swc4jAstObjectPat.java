@@ -37,9 +37,9 @@ import java.util.Optional;
 public class Swc4jAstObjectPat
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstAssignTargetPat, ISwc4jAstTsFnParam, ISwc4jAstSimpleAssignTarget {
-    protected final boolean optional;
     protected final List<ISwc4jAstObjectPatProp> props;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
+    protected boolean optional;
+    protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     @Jni2RustMethod
     public Swc4jAstObjectPat(
@@ -48,9 +48,9 @@ public class Swc4jAstObjectPat
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
+        setOptional(optional);
+        setTypeAnn(typeAnn);
         this.props = AssertionUtils.notNull(props, "Props");
-        this.optional = optional;
-        this.typeAnn = Optional.ofNullable(typeAnn);
         updateParent();
     }
 
@@ -61,6 +61,7 @@ public class Swc4jAstObjectPat
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<ISwc4jAstObjectPatProp> getProps() {
         return props;
     }
@@ -70,12 +71,24 @@ public class Swc4jAstObjectPat
         return Swc4jAstType.ObjectPat;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    @Jni2RustMethod
     public boolean isOptional() {
         return optional;
+    }
+
+    public Swc4jAstObjectPat setOptional(boolean optional) {
+        this.optional = optional;
+        return this;
+    }
+
+    public Swc4jAstObjectPat setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        return this;
     }
 
     @Override

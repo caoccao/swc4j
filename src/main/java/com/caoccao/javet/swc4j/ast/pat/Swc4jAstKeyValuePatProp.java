@@ -38,9 +38,9 @@ import java.util.List;
 public class Swc4jAstKeyValuePatProp
         extends Swc4jAst
         implements ISwc4jAstObjectPatProp {
-    protected final ISwc4jAstPropName key;
+    protected ISwc4jAstPropName key;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstPat value;
+    protected ISwc4jAstPat value;
 
     @Jni2RustMethod
     public Swc4jAstKeyValuePatProp(
@@ -48,8 +48,8 @@ public class Swc4jAstKeyValuePatProp
             ISwc4jAstPat value,
             Swc4jSpan span) {
         super(span);
-        this.key = AssertionUtils.notNull(key, "Key");
-        this.value = AssertionUtils.notNull(value, "Value");
+        setKey(key);
+        setValue(value);
         updateParent();
     }
 
@@ -58,6 +58,7 @@ public class Swc4jAstKeyValuePatProp
         return SimpleList.of(key, value);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstPropName getKey() {
         return key;
     }
@@ -67,8 +68,19 @@ public class Swc4jAstKeyValuePatProp
         return Swc4jAstType.KeyValuePatProp;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstPat getValue() {
         return value;
+    }
+
+    public Swc4jAstKeyValuePatProp setKey(ISwc4jAstPropName key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
+    }
+
+    public Swc4jAstKeyValuePatProp setValue(ISwc4jAstPat value) {
+        this.value = AssertionUtils.notNull(value, "Value");
+        return this;
     }
 
     @Override

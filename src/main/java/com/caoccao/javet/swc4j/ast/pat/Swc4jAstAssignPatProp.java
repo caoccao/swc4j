@@ -38,8 +38,8 @@ import java.util.Optional;
 public class Swc4jAstAssignPatProp
         extends Swc4jAst
         implements ISwc4jAstObjectPatProp {
-    protected final Swc4jAstBindingIdent key;
-    protected final Optional<ISwc4jAstExpr> value;
+    protected Swc4jAstBindingIdent key;
+    protected Optional<ISwc4jAstExpr> value;
 
     @Jni2RustMethod
     public Swc4jAstAssignPatProp(
@@ -47,8 +47,8 @@ public class Swc4jAstAssignPatProp
             @Jni2RustParam(optional = true) ISwc4jAstExpr value,
             Swc4jSpan span) {
         super(span);
-        this.key = AssertionUtils.notNull(key, "Key");
-        this.value = Optional.ofNullable(value);
+        setKey(key);
+        setValue(value);
         updateParent();
     }
 
@@ -59,6 +59,7 @@ public class Swc4jAstAssignPatProp
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Swc4jAstBindingIdent getKey() {
         return key;
     }
@@ -68,8 +69,19 @@ public class Swc4jAstAssignPatProp
         return Swc4jAstType.AssignPatProp;
     }
 
+    @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getValue() {
         return value;
+    }
+
+    public Swc4jAstAssignPatProp setKey(Swc4jAstBindingIdent key) {
+        this.key = AssertionUtils.notNull(key, "Key");
+        return this;
+    }
+
+    public Swc4jAstAssignPatProp setValue(ISwc4jAstExpr value) {
+        this.value = Optional.ofNullable(value);
+        return this;
     }
 
     @Override

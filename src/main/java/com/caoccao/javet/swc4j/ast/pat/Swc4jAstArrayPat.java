@@ -39,8 +39,8 @@ public class Swc4jAstArrayPat
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstAssignTargetPat, ISwc4jAstTsFnParam, ISwc4jAstSimpleAssignTarget {
     protected final List<Optional<ISwc4jAstPat>> elems;
-    protected final boolean optional;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
+    protected boolean optional;
+    protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     @Jni2RustMethod
     public Swc4jAstArrayPat(
@@ -49,11 +49,11 @@ public class Swc4jAstArrayPat
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
+        setOptional(optional);
+        setTypeAnn(typeAnn);
         this.elems = AssertionUtils.notNull(elems, "Elems").stream()
                 .map(Optional::ofNullable)
                 .collect(Collectors.toList());
-        this.optional = optional;
-        this.typeAnn = Optional.ofNullable(typeAnn);
         updateParent();
     }
 
@@ -68,6 +68,7 @@ public class Swc4jAstArrayPat
         return childNodes;
     }
 
+    @Jni2RustMethod
     public List<Optional<ISwc4jAstPat>> getElems() {
         return elems;
     }
@@ -77,12 +78,24 @@ public class Swc4jAstArrayPat
         return Swc4jAstType.ArrayPat;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
     }
 
+    @Jni2RustMethod
     public boolean isOptional() {
         return optional;
+    }
+
+    public Swc4jAstArrayPat setOptional(boolean optional) {
+        this.optional = optional;
+        return this;
+    }
+
+    public Swc4jAstArrayPat setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        return this;
     }
 
     @Override

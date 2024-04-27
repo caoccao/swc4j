@@ -54,7 +54,7 @@ public class Swc4jAstScript
      *
      * @since 0.2.0
      */
-    protected final Optional<String> shebang;
+    protected Optional<String> shebang;
 
     /**
      * Instantiates a new Swc4j ast script.
@@ -70,11 +70,12 @@ public class Swc4jAstScript
             @Jni2RustParam(optional = true) String shebang,
             Swc4jSpan span) {
         super(span);
+        setShebang(shebang);
         this.body = AssertionUtils.notNull(body, "Body");
-        this.shebang = Optional.ofNullable(shebang);
         updateParent();
     }
 
+    @Jni2RustMethod
     @Override
     public List<ISwc4jAstStmt> getBody() {
         return body;
@@ -85,6 +86,7 @@ public class Swc4jAstScript
         return SimpleList.copyOf(body);
     }
 
+    @Jni2RustMethod
     @Override
     public Optional<String> getShebang() {
         return shebang;
@@ -93,6 +95,11 @@ public class Swc4jAstScript
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.Script;
+    }
+
+    public Swc4jAstScript setShebang(String shebang) {
+        this.shebang = Optional.ofNullable(shebang);
+        return this;
     }
 
     @Override

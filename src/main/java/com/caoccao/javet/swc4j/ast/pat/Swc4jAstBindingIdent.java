@@ -38,8 +38,8 @@ import java.util.Optional;
 public class Swc4jAstBindingIdent
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstTsFnParam, ISwc4jAstTsParamPropParam, ISwc4jAstSimpleAssignTarget {
-    protected final Swc4jAstIdent id;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
+    protected Swc4jAstIdent id;
+    protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     @Jni2RustMethod
     public Swc4jAstBindingIdent(
@@ -47,8 +47,8 @@ public class Swc4jAstBindingIdent
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.id = AssertionUtils.notNull(id, "Id");
-        this.typeAnn = Optional.ofNullable(typeAnn);
+        setId(id);
+        setTypeAnn(typeAnn);
         updateParent();
     }
 
@@ -59,6 +59,7 @@ public class Swc4jAstBindingIdent
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
     }
@@ -68,8 +69,19 @@ public class Swc4jAstBindingIdent
         return Swc4jAstType.BindingIdent;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
+    }
+
+    public Swc4jAstBindingIdent setId(Swc4jAstIdent id) {
+        this.id = AssertionUtils.notNull(id, "Id");
+        return this;
+    }
+
+    public Swc4jAstBindingIdent setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        return this;
     }
 
     @Override

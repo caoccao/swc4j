@@ -38,9 +38,9 @@ public class Swc4jAstRestPat
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstObjectPatProp, ISwc4jAstTsFnParam {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstPat arg;
-    protected final Swc4jSpan dot3Token;
-    protected final Optional<Swc4jAstTsTypeAnn> typeAnn;
+    protected ISwc4jAstPat arg;
+    protected Swc4jSpan dot3Token;
+    protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     @Jni2RustMethod
     public Swc4jAstRestPat(
@@ -49,12 +49,13 @@ public class Swc4jAstRestPat
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
-        this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
-        this.arg = AssertionUtils.notNull(arg, "Expr");
-        this.typeAnn = Optional.ofNullable(typeAnn);
+        setArg(arg);
+        setDot3Token(dot3Token);
+        setTypeAnn(typeAnn);
         updateParent();
     }
 
+    @Jni2RustMethod
     public ISwc4jAstPat getArg() {
         return arg;
     }
@@ -66,6 +67,7 @@ public class Swc4jAstRestPat
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Swc4jSpan getDot3Token() {
         return dot3Token;
     }
@@ -75,8 +77,24 @@ public class Swc4jAstRestPat
         return Swc4jAstType.RestPat;
     }
 
+    @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
+    }
+
+    public Swc4jAstRestPat setArg(ISwc4jAstPat arg) {
+        this.arg = AssertionUtils.notNull(arg, "Expr");
+        return this;
+    }
+
+    public Swc4jAstRestPat setDot3Token(Swc4jSpan dot3Token) {
+        this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
+        return this;
+    }
+
+    public Swc4jAstRestPat setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
+        this.typeAnn = Optional.ofNullable(typeAnn);
+        return this;
     }
 
     @Override

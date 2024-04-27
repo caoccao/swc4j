@@ -39,9 +39,9 @@ public class Swc4jAstAssignPat
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstTsParamPropParam {
     @Jni2RustField(box = true)
-    protected final ISwc4jAstPat left;
+    protected ISwc4jAstPat left;
     @Jni2RustField(box = true)
-    protected final ISwc4jAstExpr right;
+    protected ISwc4jAstExpr right;
 
     @Jni2RustMethod
     public Swc4jAstAssignPat(
@@ -49,8 +49,8 @@ public class Swc4jAstAssignPat
             ISwc4jAstExpr right,
             Swc4jSpan span) {
         super(span);
-        this.left = AssertionUtils.notNull(left, "Left");
-        this.right = AssertionUtils.notNull(right, "Right");
+        setLeft(left);
+        setRight(right);
         updateParent();
     }
 
@@ -59,10 +59,12 @@ public class Swc4jAstAssignPat
         return SimpleList.of(left, right);
     }
 
+    @Jni2RustMethod
     public ISwc4jAstPat getLeft() {
         return left;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getRight() {
         return right;
     }
@@ -70,6 +72,16 @@ public class Swc4jAstAssignPat
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.AssignPat;
+    }
+
+    public Swc4jAstAssignPat setLeft(ISwc4jAstPat left) {
+        this.left = AssertionUtils.notNull(left, "Left");
+        return this;
+    }
+
+    public Swc4jAstAssignPat setRight(ISwc4jAstExpr right) {
+        this.right = AssertionUtils.notNull(right, "Right");
+        return this;
     }
 
     @Override
