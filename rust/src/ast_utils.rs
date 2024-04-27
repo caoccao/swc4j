@@ -2649,6 +2649,7 @@ struct JavaSwc4jAstClassMethod {
   method_get_key: JMethodID,
   method_get_kind: JMethodID,
   method_is_abstract: JMethodID,
+  method_is_optional: JMethodID,
   method_is_override: JMethodID,
   method_is_static: JMethodID,
 }
@@ -2706,6 +2707,13 @@ impl JavaSwc4jAstClassMethod {
         "()Z",
       )
       .expect("Couldn't find method Swc4jAstClassMethod.isAbstract");
+    let method_is_optional = env
+      .get_method_id(
+        &class,
+        "isOptional",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstClassMethod.isOptional");
     let method_is_override = env
       .get_method_id(
         &class,
@@ -2728,6 +2736,7 @@ impl JavaSwc4jAstClassMethod {
       method_get_key,
       method_get_kind,
       method_is_abstract,
+      method_is_optional,
       method_is_override,
       method_is_static,
     }
@@ -2856,6 +2865,22 @@ impl JavaSwc4jAstClassMethod {
     return_value
   }
 
+  pub fn is_optional<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_optional,
+        &[],
+        "boolean is_optional()"
+      );
+    return_value
+  }
+
   pub fn is_override<'local>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -2901,6 +2926,7 @@ struct JavaSwc4jAstClassProp {
   method_is_abstract: JMethodID,
   method_is_declare: JMethodID,
   method_is_definite: JMethodID,
+  method_is_optional: JMethodID,
   method_is_override: JMethodID,
   method_is_readonly: JMethodID,
   method_is_static: JMethodID,
@@ -2980,6 +3006,13 @@ impl JavaSwc4jAstClassProp {
         "()Z",
       )
       .expect("Couldn't find method Swc4jAstClassProp.isDefinite");
+    let method_is_optional = env
+      .get_method_id(
+        &class,
+        "isOptional",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstClassProp.isOptional");
     let method_is_override = env
       .get_method_id(
         &class,
@@ -3012,6 +3045,7 @@ impl JavaSwc4jAstClassProp {
       method_is_abstract,
       method_is_declare,
       method_is_definite,
+      method_is_optional,
       method_is_override,
       method_is_readonly,
       method_is_static,
@@ -3195,6 +3229,22 @@ impl JavaSwc4jAstClassProp {
         self.method_is_definite,
         &[],
         "boolean is_definite()"
+      );
+    return_value
+  }
+
+  pub fn is_optional<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_optional,
+        &[],
+        "boolean is_optional()"
       );
     return_value
   }
@@ -9936,6 +9986,7 @@ struct JavaSwc4jAstPrivateMethod {
   method_get_key: JMethodID,
   method_get_kind: JMethodID,
   method_is_abstract: JMethodID,
+  method_is_optional: JMethodID,
   method_is_override: JMethodID,
   method_is_static: JMethodID,
 }
@@ -9993,6 +10044,13 @@ impl JavaSwc4jAstPrivateMethod {
         "()Z",
       )
       .expect("Couldn't find method Swc4jAstPrivateMethod.isAbstract");
+    let method_is_optional = env
+      .get_method_id(
+        &class,
+        "isOptional",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstPrivateMethod.isOptional");
     let method_is_override = env
       .get_method_id(
         &class,
@@ -10015,6 +10073,7 @@ impl JavaSwc4jAstPrivateMethod {
       method_get_key,
       method_get_kind,
       method_is_abstract,
+      method_is_optional,
       method_is_override,
       method_is_static,
     }
@@ -10139,6 +10198,22 @@ impl JavaSwc4jAstPrivateMethod {
         self.method_is_abstract,
         &[],
         "boolean is_abstract()"
+      );
+    return_value
+  }
+
+  pub fn is_optional<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_optional,
+        &[],
+        "boolean is_optional()"
       );
     return_value
   }

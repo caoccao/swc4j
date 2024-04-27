@@ -16,22 +16,29 @@
 
 package com.caoccao.javet.swc4j.ast;
 
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClassUtils;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFieldUtils;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.utils.AnnotationUtils;
 import com.caoccao.javet.swc4j.utils.OSUtils;
+import com.caoccao.javet.swc4j.utils.ReflectionUtils;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -98,17 +105,51 @@ public final class Swc4jAstStore {
                                 String className = matcherFileName.group(1);
                                 enumMap.put(className, clazz);
                             }
-                        } else if (Swc4jAst.class.isAssignableFrom(clazz)) {
+                        } else if (Swc4jAst.class.isAssignableFrom(clazz) && Swc4jAst.class != clazz) {
                             Matcher matcherFileName = PATTERN_FOR_CLASS_NAME.matcher(clazz.getSimpleName());
-                            if (matcherFileName.matches()) {
-                                String className = matcherFileName.group(1);
-                                structMap.put(className, clazz);
-                                assertTrue(AnnotationUtils.isAnnotationPresent(clazz, Jni2RustClass.class));
-                                assertTrue(Stream.of(clazz.getConstructors())
-                                        .findFirst()
-                                        .map(c -> c.isAnnotationPresent(Jni2RustMethod.class))
-                                        .orElse(false));
-                            }
+                            assertTrue(
+                                    matcherFileName.matches(),
+                                    "Class " + clazz + " violates the naming convention");
+                            String className = matcherFileName.group(1);
+                            structMap.put(className, clazz);
+                            assertTrue(
+                                    AnnotationUtils.isAnnotationPresent(clazz, Jni2RustClass.class),
+                                    "Class " + clazz.getSimpleName() + " is not annotated by Jni2RustClass");
+                            assertTrue(
+                                    Stream.of(clazz.getConstructors())
+                                            .findFirst()
+                                            .map(c -> c.isAnnotationPresent(Jni2RustMethod.class))
+                                            .orElse(false),
+                                    "Class " + clazz.getSimpleName() + " constructor is not annotated by Jni2RustMethod");
+                            Map<String, Method> methodMap = Stream.of(clazz.getDeclaredMethods())
+                                    .collect(Collectors.toMap(Method::getName, Function.identity()));
+                            ReflectionUtils.getDeclaredFields(clazz).values().stream()
+                                    .filter(field -> !Modifier.isStatic(field.getModifiers()))
+                                    .filter(field -> !new Jni2RustFieldUtils(field).isIgnore())
+                                    .filter(field -> !(field.getName().equals("value") && clazz == Swc4jAstBool.class))
+                                    .forEach(field -> {
+                                        String fieldName = field.getName();
+                                        if (fieldName.startsWith("_")) {
+                                            fieldName = fieldName.substring(1);
+                                        }
+                                        String getterMethodPrefix = field.getType() == boolean.class ? "is" : "get";
+                                        String getterMethodName = getterMethodPrefix +
+                                                fieldName.substring(0, 1).toUpperCase() +
+                                                fieldName.substring(1);
+                                        Method getterMethod = methodMap.get(getterMethodName);
+                                        assertNotNull(
+                                                getterMethod,
+                                                getterMethodName + " is not found from " + clazz.getSimpleName());
+                                        String setterMethodName = "set" +
+                                                fieldName.substring(0, 1).toUpperCase() +
+                                                fieldName.substring(1);
+                                        if (field.getType() != List.class) {
+                                            Method setterMethod = methodMap.get(setterMethodName);
+                                            assertNotNull(
+                                                    setterMethod,
+                                                    setterMethodName + " is not found from " + clazz.getSimpleName());
+                                        }
+                                    });
                         }
                     });
         } catch (Exception e) {

@@ -109,6 +109,11 @@ public class Swc4jAstPrivateMethod
     }
 
     @Jni2RustMethod
+    public boolean isOptional() {
+        return optional;
+    }
+
+    @Jni2RustMethod
     public boolean isOverride() {
         return _override;
     }
