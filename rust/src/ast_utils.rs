@@ -20602,8 +20602,8 @@ fn create_big_int<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, no
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
-  let java_sign = node.value.sign().to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
+  let java_sign = node.value.sign().to_java(env);
   let optional_raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
   let return_value =
     unsafe { JAVA_CLASS_BIG_INT.as_ref().unwrap() }.construct(env, &java_sign, &optional_raw, &java_span_ex);
@@ -21958,7 +21958,7 @@ fn create_array_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, 
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_elems = list_new(env, node.elems.len());
   node.elems.iter().for_each(|node| {
     let java_node = node.as_ref().map_or_else(
@@ -21986,7 +21986,7 @@ fn create_array_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, 
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_elems = list_new(env, node.elems.len());
   node.elems.iter().for_each(|node| {
     let java_node = node.as_ref().map_or_else(
@@ -22019,7 +22019,7 @@ fn create_arrow_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_params = list_new(env, node.params.len());
   node.params.iter().for_each(|node| {
     let java_node = enum_create_pat(env, map, node);
@@ -22051,8 +22051,8 @@ fn create_assign_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
-  let java_op = node.op.to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
+  let java_op = node.op.to_java(env);
   let java_left = enum_create_assign_target(env, map, &node.left);
   let java_right = enum_create_expr(env, map, &node.right);
   let return_value = unsafe { JAVA_CLASS_ASSIGN_EXPR.as_ref().unwrap() }
@@ -22074,7 +22074,7 @@ fn create_assign_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_left = enum_create_pat(env, map, &node.left);
   let java_right = enum_create_expr(env, map, &node.right);
   let return_value = unsafe { JAVA_CLASS_ASSIGN_PAT.as_ref().unwrap() }
@@ -22095,7 +22095,7 @@ fn create_assign_pat_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToInde
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_key = create_binding_ident(env, map, &node.key);
   let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
   let return_value = unsafe { JAVA_CLASS_ASSIGN_PAT_PROP.as_ref().unwrap() }
@@ -22116,7 +22116,7 @@ fn create_assign_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
   let java_key = create_ident(env, map, &node.key);
   let java_value = enum_create_expr(env, map, &node.value);
   let return_value = unsafe { JAVA_CLASS_ASSIGN_PROP.as_ref().unwrap() }
@@ -22141,7 +22141,7 @@ fn create_auto_accessor<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexM
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_key = enum_create_key(env, map, &node.key);
   let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
   let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
@@ -22152,7 +22152,7 @@ where
     list_add(env, &java_decorators, &java_node);
     delete_local_ref!(env, java_node);
   });
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_jni_type(env));
+  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
   let is_override = node.is_override;
   let definite = node.definite;
   let return_value = unsafe { JAVA_CLASS_AUTO_ACCESSOR.as_ref().unwrap() }
@@ -22175,7 +22175,7 @@ fn create_await_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_arg = enum_create_expr(env, map, &node.arg);
   let return_value = unsafe { JAVA_CLASS_AWAIT_EXPR.as_ref().unwrap() }
     .construct(env, &java_arg, &java_span_ex);
@@ -22198,8 +22198,8 @@ fn create_bin_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, n
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
-  let java_op = node.op.to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
+  let java_op = node.op.to_java(env);
   let java_left = enum_create_expr(env, map, &node.left);
   let java_right = enum_create_expr(env, map, &node.right);
   let return_value = unsafe { JAVA_CLASS_BIN_EXPR.as_ref().unwrap() }
@@ -22221,7 +22221,7 @@ fn create_binding_ident<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexM
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
   let java_id = create_ident(env, map, &node.id);
   let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
   let return_value = unsafe { JAVA_CLASS_BINDING_IDENT.as_ref().unwrap() }
@@ -22243,7 +22243,7 @@ fn create_block_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_stmts = list_new(env, node.stmts.len());
   node.stmts.iter().for_each(|node| {
     let java_node = enum_create_stmt(env, map, node);
@@ -22265,7 +22265,7 @@ fn create_bool<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node:
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let value = node.value;
   let return_value = unsafe { JAVA_CLASS_BOOL.as_ref().unwrap() }
     .construct(env, value, &java_span_ex);
@@ -22282,7 +22282,7 @@ fn create_break_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_optional_label = node.label.as_ref().map(|node| create_ident(env, map, node));
   let return_value = unsafe { JAVA_CLASS_BREAK_STMT.as_ref().unwrap() }
     .construct(env, &java_optional_label, &java_span_ex);
@@ -22304,7 +22304,7 @@ fn create_call_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, 
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_callee = enum_create_callee(env, map, &node.callee);
   let java_args = list_new(env, node.args.len());
   node.args.iter().for_each(|node| {
@@ -22332,7 +22332,7 @@ fn create_catch_clause<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMa
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_optional_param = node.param.as_ref().map(|node| enum_create_pat(env, map, node));
   let java_body = create_block_stmt(env, map, &node.body);
   let return_value = unsafe { JAVA_CLASS_CATCH_CLAUSE.as_ref().unwrap() }
@@ -22363,7 +22363,7 @@ fn create_class<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_decorators = list_new(env, node.decorators.len());
   node.decorators.iter().for_each(|node| {
     let java_node = create_decorator(env, map, node);
@@ -22408,7 +22408,7 @@ fn create_class_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
   let java_ident = create_ident(env, map, &node.ident);
   let declare = node.declare;
   let java_class = create_class(env, map, &node.class);
@@ -22430,7 +22430,7 @@ fn create_class_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
   let java_optional_ident = node.ident.as_ref().map(|node| create_ident(env, map, node));
   let java_class = create_class(env, map, &node.class);
   let return_value = unsafe { JAVA_CLASS_CLASS_EXPR.as_ref().unwrap() }
@@ -22451,12 +22451,12 @@ fn create_class_method<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMa
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_key = enum_create_prop_name(env, map, &node.key);
   let java_function = create_function(env, map, &node.function);
-  let java_kind = node.kind.to_jni_type(env);
+  let java_kind = node.kind.to_java(env);
   let is_static = node.is_static;
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_jni_type(env));
+  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
   let is_abstract = node.is_abstract;
   let is_optional = node.is_optional;
   let is_override = node.is_override;
@@ -22484,7 +22484,7 @@ fn create_class_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_key = enum_create_prop_name(env, map, &node.key);
   let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
   let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
@@ -22495,7 +22495,7 @@ where
     list_add(env, &java_decorators, &java_node);
     delete_local_ref!(env, java_node);
   });
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_jni_type(env));
+  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
   let is_abstract = node.is_abstract;
   let is_optional = node.is_optional;
   let is_override = node.is_override;
@@ -22522,7 +22522,7 @@ fn create_computed_prop_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToI
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let return_value = unsafe { JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap() }
     .construct(env, &java_expr, &java_span_ex);
@@ -22542,7 +22542,7 @@ fn create_cond_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, 
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_test = enum_create_expr(env, map, &node.test);
   let java_cons = enum_create_expr(env, map, &node.cons);
   let java_alt = enum_create_expr(env, map, &node.alt);
@@ -22568,7 +22568,7 @@ fn create_constructor<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_key = enum_create_prop_name(env, map, &node.key);
   let java_params = list_new(env, node.params.len());
   node.params.iter().for_each(|node| {
@@ -22577,7 +22577,7 @@ where
     delete_local_ref!(env, java_node);
   });
   let java_optional_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_jni_type(env));
+  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
   let is_optional = node.is_optional;
   let return_value = unsafe { JAVA_CLASS_CONSTRUCTOR.as_ref().unwrap() }
     .construct(env, &java_key, &java_params, &java_optional_body, &java_optional_accessibility, is_optional, &java_span_ex);
@@ -22598,7 +22598,7 @@ fn create_continue_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexM
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_optional_label = node.label.as_ref().map(|node| create_ident(env, map, node));
   let return_value = unsafe { JAVA_CLASS_CONTINUE_STMT.as_ref().unwrap() }
     .construct(env, &java_optional_label, &java_span_ex);
@@ -22615,7 +22615,7 @@ fn create_debugger_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexM
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let return_value = unsafe { JAVA_CLASS_DEBUGGER_STMT.as_ref().unwrap() }
     .construct(env, &java_span_ex);
   delete_local_ref!(env, java_span_ex);
@@ -22631,7 +22631,7 @@ fn create_decorator<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, 
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let return_value = unsafe { JAVA_CLASS_DECORATOR.as_ref().unwrap() }
     .construct(env, &java_expr, &java_span_ex);
@@ -22650,7 +22650,7 @@ fn create_do_while_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexM
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_test = enum_create_expr(env, map, &node.test);
   let java_body = enum_create_stmt(env, map, &node.body);
   let return_value = unsafe { JAVA_CLASS_DO_WHILE_STMT.as_ref().unwrap() }
@@ -22669,7 +22669,7 @@ fn create_empty_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let return_value = unsafe { JAVA_CLASS_EMPTY_STMT.as_ref().unwrap() }
     .construct(env, &java_span_ex);
   delete_local_ref!(env, java_span_ex);
@@ -22686,7 +22686,7 @@ fn create_export_all<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_src = create_str(env, map, &node.src);
   let type_only = node.type_only;
   let java_optional_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
@@ -22707,7 +22707,7 @@ fn create_export_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_decl = enum_create_decl(env, map, &node.decl);
   let return_value = unsafe { JAVA_CLASS_EXPORT_DECL.as_ref().unwrap() }
     .construct(env, &java_decl, &java_span_ex);
@@ -22725,7 +22725,7 @@ fn create_export_default_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteTo
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_decl = enum_create_default_decl(env, map, &node.decl);
   let return_value = unsafe { JAVA_CLASS_EXPORT_DEFAULT_DECL.as_ref().unwrap() }
     .construct(env, &java_decl, &java_span_ex);
@@ -22743,7 +22743,7 @@ fn create_export_default_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteTo
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let return_value = unsafe { JAVA_CLASS_EXPORT_DEFAULT_EXPR.as_ref().unwrap() }
     .construct(env, &java_expr, &java_span_ex);
@@ -22761,7 +22761,7 @@ fn create_export_default_specifier<'local, 'a>(env: &mut JNIEnv<'local>, map: &B
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
   let java_exported = create_ident(env, map, &node.exported);
   let return_value = unsafe { JAVA_CLASS_EXPORT_DEFAULT_SPECIFIER.as_ref().unwrap() }
     .construct(env, &java_exported, &java_span_ex);
@@ -22780,7 +22780,7 @@ fn create_export_named_specifier<'local, 'a>(env: &mut JNIEnv<'local>, map: &Byt
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_orig = enum_create_module_export_name(env, map, &node.orig);
   let java_optional_exported = node.exported.as_ref().map(|node| enum_create_module_export_name(env, map, node));
   let is_type_only = node.is_type_only;
@@ -22801,7 +22801,7 @@ fn create_export_namespace_specifier<'local, 'a>(env: &mut JNIEnv<'local>, map: 
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_name = enum_create_module_export_name(env, map, &node.name);
   let return_value = unsafe { JAVA_CLASS_EXPORT_NAMESPACE_SPECIFIER.as_ref().unwrap() }
     .construct(env, &java_name, &java_span_ex);
@@ -22820,8 +22820,8 @@ fn create_expr_or_spread<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndex
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
-  let java_optional_spread = node.spread.as_ref().map(|node| map.get_span_ex_by_span(node).to_jni_type(env));
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
+  let java_optional_spread = node.spread.as_ref().map(|node| map.get_span_ex_by_span(node).to_java(env));
   let java_expr = enum_create_expr(env, map, &node.expr);
   let return_value = unsafe { JAVA_CLASS_EXPR_OR_SPREAD.as_ref().unwrap() }
     .construct(env, &java_optional_spread, &java_expr, &java_span_ex);
@@ -22840,7 +22840,7 @@ fn create_expr_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, 
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let return_value = unsafe { JAVA_CLASS_EXPR_STMT.as_ref().unwrap() }
     .construct(env, &java_expr, &java_span_ex);
@@ -22859,7 +22859,7 @@ fn create_fn_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, no
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
   let java_ident = create_ident(env, map, &node.ident);
   let declare = node.declare;
   let java_function = create_function(env, map, &node.function);
@@ -22881,7 +22881,7 @@ fn create_fn_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, no
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
   let java_optional_ident = node.ident.as_ref().map(|node| create_ident(env, map, node));
   let java_function = create_function(env, map, &node.function);
   let return_value = unsafe { JAVA_CLASS_FN_EXPR.as_ref().unwrap() }
@@ -22903,7 +22903,7 @@ fn create_for_in_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_left = enum_create_for_head(env, map, &node.left);
   let java_right = enum_create_expr(env, map, &node.right);
   let java_body = enum_create_stmt(env, map, &node.body);
@@ -22927,7 +22927,7 @@ fn create_for_of_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let is_await = node.is_await;
   let java_left = enum_create_for_head(env, map, &node.left);
   let java_right = enum_create_expr(env, map, &node.right);
@@ -22953,7 +22953,7 @@ fn create_for_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, n
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_optional_init = node.init.as_ref().map(|node| enum_create_var_decl_or_expr(env, map, node));
   let java_optional_test = node.test.as_ref().map(|node| enum_create_expr(env, map, node));
   let java_optional_update = node.update.as_ref().map(|node| enum_create_expr(env, map, node));
@@ -22985,7 +22985,7 @@ fn create_function<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, n
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_params = list_new(env, node.params.len());
   node.params.iter().for_each(|node| {
     let java_node = create_param(env, map, node);
@@ -23025,7 +23025,7 @@ fn create_getter_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_key = enum_create_prop_name(env, map, &node.key);
   let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
   let java_optional_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
@@ -23046,7 +23046,7 @@ fn create_ident<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let sym = node.sym.as_str();
   let optional = node.optional;
   let return_value = unsafe { JAVA_CLASS_IDENT.as_ref().unwrap() }
@@ -23066,7 +23066,7 @@ fn create_if_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, no
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_test = enum_create_expr(env, map, &node.test);
   let java_cons = enum_create_stmt(env, map, &node.cons);
   let java_optional_alt = node.alt.as_ref().map(|node| enum_create_stmt(env, map, node));
@@ -23087,8 +23087,8 @@ fn create_import<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, nod
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
-  let java_phase = node.phase.to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
+  let java_phase = node.phase.to_java(env);
   let return_value = unsafe { JAVA_CLASS_IMPORT.as_ref().unwrap() }
     .construct(env, &java_phase, &java_span_ex);
   delete_local_ref!(env, java_phase);
@@ -23109,7 +23109,7 @@ fn create_import_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_specifiers = list_new(env, node.specifiers.len());
   node.specifiers.iter().for_each(|node| {
     let java_node = enum_create_import_specifier(env, map, node);
@@ -23119,7 +23119,7 @@ where
   let java_src = create_str(env, map, &node.src);
   let type_only = node.type_only;
   let java_optional_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
-  let java_phase = node.phase.to_jni_type(env);
+  let java_phase = node.phase.to_java(env);
   let return_value = unsafe { JAVA_CLASS_IMPORT_DECL.as_ref().unwrap() }
     .construct(env, &java_specifiers, &java_src, type_only, &java_optional_with, &java_phase, &java_span_ex);
   delete_local_optional_ref!(env, java_optional_with);
@@ -23139,7 +23139,7 @@ fn create_import_default_specifier<'local, 'a>(env: &mut JNIEnv<'local>, map: &B
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_local = create_ident(env, map, &node.local);
   let return_value = unsafe { JAVA_CLASS_IMPORT_DEFAULT_SPECIFIER.as_ref().unwrap() }
     .construct(env, &java_local, &java_span_ex);
@@ -23158,7 +23158,7 @@ fn create_import_named_specifier<'local, 'a>(env: &mut JNIEnv<'local>, map: &Byt
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_local = create_ident(env, map, &node.local);
   let java_optional_imported = node.imported.as_ref().map(|node| enum_create_module_export_name(env, map, node));
   let is_type_only = node.is_type_only;
@@ -23179,7 +23179,7 @@ fn create_import_star_as_specifier<'local, 'a>(env: &mut JNIEnv<'local>, map: &B
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_local = create_ident(env, map, &node.local);
   let return_value = unsafe { JAVA_CLASS_IMPORT_STAR_AS_SPECIFIER.as_ref().unwrap() }
     .construct(env, &java_local, &java_span_ex);
@@ -23196,7 +23196,7 @@ fn create_invalid<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, no
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let return_value = unsafe { JAVA_CLASS_INVALID.as_ref().unwrap() }
     .construct(env, &java_span_ex);
   delete_local_ref!(env, java_span_ex);
@@ -23213,7 +23213,7 @@ fn create_jsx_attr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, n
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_name = enum_create_jsx_attr_name(env, map, &node.name);
   let java_optional_value = node.value.as_ref().map(|node| enum_create_jsx_attr_value(env, map, node));
   let return_value = unsafe { JAVA_CLASS_JSX_ATTR.as_ref().unwrap() }
@@ -23233,7 +23233,7 @@ fn create_jsx_closing_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteTo
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_name = enum_create_jsx_element_name(env, map, &node.name);
   let return_value = unsafe { JAVA_CLASS_JSX_CLOSING_ELEMENT.as_ref().unwrap() }
     .construct(env, &java_name, &java_span_ex);
@@ -23250,7 +23250,7 @@ fn create_jsx_closing_fragment<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteT
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let return_value = unsafe { JAVA_CLASS_JSX_CLOSING_FRAGMENT.as_ref().unwrap() }
     .construct(env, &java_span_ex);
   delete_local_ref!(env, java_span_ex);
@@ -23270,7 +23270,7 @@ fn create_jsx_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_opening = create_jsx_opening_element(env, map, &node.opening);
   let java_children = list_new(env, node.children.len());
   node.children.iter().for_each(|node| {
@@ -23296,7 +23296,7 @@ fn create_jsx_empty_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndex
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let return_value = unsafe { JAVA_CLASS_JSX_EMPTY_EXPR.as_ref().unwrap() }
     .construct(env, &java_span_ex);
   delete_local_ref!(env, java_span_ex);
@@ -23312,7 +23312,7 @@ fn create_jsx_expr_container<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToI
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_jsx_expr(env, map, &node.expr);
   let return_value = unsafe { JAVA_CLASS_JSX_EXPR_CONTAINER.as_ref().unwrap() }
     .construct(env, &java_expr, &java_span_ex);
@@ -23334,7 +23334,7 @@ fn create_jsx_fragment<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMa
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_opening = create_jsx_opening_fragment(env, map, &node.opening);
   let java_children = list_new(env, node.children.len());
   node.children.iter().for_each(|node| {
@@ -23362,7 +23362,7 @@ fn create_jsx_member_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToInde
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
   let java_obj = enum_create_jsx_object(env, map, &node.obj);
   let java_prop = create_ident(env, map, &node.prop);
   let return_value = unsafe { JAVA_CLASS_JSX_MEMBER_EXPR.as_ref().unwrap() }
@@ -23383,7 +23383,7 @@ fn create_jsx_namespaced_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteTo
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
   let java_ns = create_ident(env, map, &node.ns);
   let java_name = create_ident(env, map, &node.name);
   let return_value = unsafe { JAVA_CLASS_JSX_NAMESPACED_NAME.as_ref().unwrap() }
@@ -23407,7 +23407,7 @@ fn create_jsx_opening_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteTo
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_name = enum_create_jsx_element_name(env, map, &node.name);
   let java_attrs = list_new(env, node.attrs.len());
   node.attrs.iter().for_each(|node| {
@@ -23434,7 +23434,7 @@ fn create_jsx_opening_fragment<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteT
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let return_value = unsafe { JAVA_CLASS_JSX_OPENING_FRAGMENT.as_ref().unwrap() }
     .construct(env, &java_span_ex);
   delete_local_ref!(env, java_span_ex);
@@ -23450,7 +23450,7 @@ fn create_jsx_spread_child<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToInd
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let return_value = unsafe { JAVA_CLASS_JSX_SPREAD_CHILD.as_ref().unwrap() }
     .construct(env, &java_expr, &java_span_ex);
@@ -23467,7 +23467,7 @@ fn create_jsx_text<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, n
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let value = node.value.as_str();
   let raw = node.raw.as_str();
   let return_value = unsafe { JAVA_CLASS_JSX_TEXT.as_ref().unwrap() }
@@ -23486,7 +23486,7 @@ fn create_key_value_pat_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToI
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
   let java_key = enum_create_prop_name(env, map, &node.key);
   let java_value = enum_create_pat(env, map, &node.value);
   let return_value = unsafe { JAVA_CLASS_KEY_VALUE_PAT_PROP.as_ref().unwrap() }
@@ -23507,7 +23507,7 @@ fn create_key_value_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndex
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
   let java_key = enum_create_prop_name(env, map, &node.key);
   let java_value = enum_create_expr(env, map, &node.value);
   let return_value = unsafe { JAVA_CLASS_KEY_VALUE_PROP.as_ref().unwrap() }
@@ -23528,7 +23528,7 @@ fn create_labeled_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMa
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_label = create_ident(env, map, &node.label);
   let java_body = enum_create_stmt(env, map, &node.body);
   let return_value = unsafe { JAVA_CLASS_LABELED_STMT.as_ref().unwrap() }
@@ -23549,7 +23549,7 @@ fn create_member_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_obj = enum_create_expr(env, map, &node.obj);
   let java_prop = enum_create_member_prop(env, map, &node.prop);
   let return_value = unsafe { JAVA_CLASS_MEMBER_EXPR.as_ref().unwrap() }
@@ -23568,8 +23568,8 @@ fn create_meta_prop_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndex
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
-  let java_kind = node.kind.to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
+  let java_kind = node.kind.to_java(env);
   let return_value = unsafe { JAVA_CLASS_META_PROP_EXPR.as_ref().unwrap() }
     .construct(env, &java_kind, &java_span_ex);
   delete_local_ref!(env, java_kind);
@@ -23587,7 +23587,7 @@ fn create_method_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
   let java_key = enum_create_prop_name(env, map, &node.key);
   let java_function = create_function(env, map, &node.function);
   let return_value = unsafe { JAVA_CLASS_METHOD_PROP.as_ref().unwrap() }
@@ -23609,7 +23609,7 @@ fn create_module<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, nod
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_body = list_new(env, node.body.len());
   node.body.iter().for_each(|node| {
     let java_node = enum_create_module_item(env, map, node);
@@ -23637,7 +23637,7 @@ fn create_named_export<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMa
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_specifiers = list_new(env, node.specifiers.len());
   node.specifiers.iter().for_each(|node| {
     let java_node = enum_create_export_specifier(env, map, node);
@@ -23667,7 +23667,7 @@ fn create_new_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, n
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_callee = enum_create_expr(env, map, &node.callee);
   let java_optional_args = node.args.as_ref().map(|nodes| {
     let java_args = list_new(env, nodes.len());
@@ -23696,7 +23696,7 @@ fn create_null<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node:
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let return_value = unsafe { JAVA_CLASS_NULL.as_ref().unwrap() }
     .construct(env, &java_span_ex);
   delete_local_ref!(env, java_span_ex);
@@ -23711,7 +23711,7 @@ fn create_number<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, nod
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let value = node.value;
   let optional_raw = node.raw.as_ref().map(|node| node.to_string());
   let return_value = unsafe { JAVA_CLASS_NUMBER.as_ref().unwrap() }
@@ -23731,7 +23731,7 @@ fn create_object_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_props = list_new(env, node.props.len());
   node.props.iter().for_each(|node| {
     let java_node = enum_create_prop_or_spread(env, map, node);
@@ -23757,7 +23757,7 @@ fn create_object_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_props = list_new(env, node.props.len());
   node.props.iter().for_each(|node| {
     let java_node = enum_create_object_pat_prop(env, map, node);
@@ -23787,7 +23787,7 @@ fn create_opt_call<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, n
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_callee = enum_create_expr(env, map, &node.callee);
   let java_args = list_new(env, node.args.len());
   node.args.iter().for_each(|node| {
@@ -23814,7 +23814,7 @@ fn create_opt_chain_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndex
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let optional = node.optional;
   let java_base = enum_create_opt_chain_base(env, map, &node.base);
   let return_value = unsafe { JAVA_CLASS_OPT_CHAIN_EXPR.as_ref().unwrap() }
@@ -23836,7 +23836,7 @@ fn create_param<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_decorators = list_new(env, node.decorators.len());
   node.decorators.iter().for_each(|node| {
     let java_node = create_decorator(env, map, node);
@@ -23861,7 +23861,7 @@ fn create_paren_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let return_value = unsafe { JAVA_CLASS_PAREN_EXPR.as_ref().unwrap() }
     .construct(env, &java_expr, &java_span_ex);
@@ -23880,12 +23880,12 @@ fn create_private_method<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndex
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_key = create_private_name(env, map, &node.key);
   let java_function = create_function(env, map, &node.function);
-  let java_kind = node.kind.to_jni_type(env);
+  let java_kind = node.kind.to_java(env);
   let is_static = node.is_static;
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_jni_type(env));
+  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
   let is_abstract = node.is_abstract;
   let is_optional = node.is_optional;
   let is_override = node.is_override;
@@ -23908,7 +23908,7 @@ fn create_private_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMa
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_id = create_ident(env, map, &node.id);
   let return_value = unsafe { JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap() }
     .construct(env, &java_id, &java_span_ex);
@@ -23931,7 +23931,7 @@ fn create_private_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMa
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_key = create_private_name(env, map, &node.key);
   let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
   let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
@@ -23942,7 +23942,7 @@ where
     list_add(env, &java_decorators, &java_node);
     delete_local_ref!(env, java_node);
   });
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_jni_type(env));
+  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
   let is_optional = node.is_optional;
   let is_override = node.is_override;
   let readonly = node.readonly;
@@ -23966,7 +23966,7 @@ fn create_regex<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let exp = node.exp.as_str();
   let flags = node.flags.as_str();
   let return_value = unsafe { JAVA_CLASS_REGEX.as_ref().unwrap() }
@@ -23986,8 +23986,8 @@ fn create_rest_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, n
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
-  let java_dot3_token = map.get_span_ex_by_span(&node.dot3_token).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
+  let java_dot3_token = map.get_span_ex_by_span(&node.dot3_token).to_java(env);
   let java_arg = enum_create_pat(env, map, &node.arg);
   let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
   let return_value = unsafe { JAVA_CLASS_REST_PAT.as_ref().unwrap() }
@@ -24008,7 +24008,7 @@ fn create_return_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_optional_arg = node.arg.as_ref().map(|node| enum_create_expr(env, map, node));
   let return_value = unsafe { JAVA_CLASS_RETURN_STMT.as_ref().unwrap() }
     .construct(env, &java_optional_arg, &java_span_ex);
@@ -24028,7 +24028,7 @@ fn create_script<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, nod
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_body = list_new(env, node.body.len());
   node.body.iter().for_each(|node| {
     let java_node = enum_create_stmt(env, map, node);
@@ -24054,7 +24054,7 @@ fn create_seq_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, n
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_exprs = list_new(env, node.exprs.len());
   node.exprs.iter().for_each(|node| {
     let java_node = enum_create_expr(env, map, node);
@@ -24080,7 +24080,7 @@ fn create_setter_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_key = enum_create_prop_name(env, map, &node.key);
   let java_optional_this_param = node.this_param.as_ref().map(|node| enum_create_pat(env, map, node));
   let java_param = enum_create_pat(env, map, &node.param);
@@ -24105,8 +24105,8 @@ fn create_spread_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndex
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
-  let java_dot3_token = map.get_span_ex_by_span(&node.dot3_token).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
+  let java_dot3_token = map.get_span_ex_by_span(&node.dot3_token).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let return_value = unsafe { JAVA_CLASS_SPREAD_ELEMENT.as_ref().unwrap() }
     .construct(env, &java_dot3_token, &java_expr, &java_span_ex);
@@ -24125,7 +24125,7 @@ fn create_static_block<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMa
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_body = create_block_stmt(env, map, &node.body);
   let return_value = unsafe { JAVA_CLASS_STATIC_BLOCK.as_ref().unwrap() }
     .construct(env, &java_body, &java_span_ex);
@@ -24142,7 +24142,7 @@ fn create_str<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: 
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let value = node.value.as_str();
   let optional_raw = node.raw.as_ref().map(|node| node.to_string());
   let return_value = unsafe { JAVA_CLASS_STR.as_ref().unwrap() }
@@ -24159,7 +24159,7 @@ fn create_super<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let return_value = unsafe { JAVA_CLASS_SUPER.as_ref().unwrap() }
     .construct(env, &java_span_ex);
   delete_local_ref!(env, java_span_ex);
@@ -24176,7 +24176,7 @@ fn create_super_prop_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToInde
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_obj = create_super(env, map, &node.obj);
   let java_prop = enum_create_super_prop(env, map, &node.prop);
   let return_value = unsafe { JAVA_CLASS_SUPER_PROP_EXPR.as_ref().unwrap() }
@@ -24199,7 +24199,7 @@ fn create_switch_case<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_optional_test = node.test.as_ref().map(|node| enum_create_expr(env, map, node));
   let java_cons = list_new(env, node.cons.len());
   node.cons.iter().for_each(|node| {
@@ -24227,7 +24227,7 @@ fn create_switch_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_discriminant = enum_create_expr(env, map, &node.discriminant);
   let java_cases = list_new(env, node.cases.len());
   node.cases.iter().for_each(|node| {
@@ -24254,7 +24254,7 @@ fn create_tagged_tpl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_tag = enum_create_expr(env, map, &node.tag);
   let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
   let java_tpl = create_tpl(env, map, &node.tpl);
@@ -24275,7 +24275,7 @@ fn create_this_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, 
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let return_value = unsafe { JAVA_CLASS_THIS_EXPR.as_ref().unwrap() }
     .construct(env, &java_span_ex);
   delete_local_ref!(env, java_span_ex);
@@ -24291,7 +24291,7 @@ fn create_throw_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_arg = enum_create_expr(env, map, &node.arg);
   let return_value = unsafe { JAVA_CLASS_THROW_STMT.as_ref().unwrap() }
     .construct(env, &java_arg, &java_span_ex);
@@ -24314,7 +24314,7 @@ fn create_tpl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: 
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_exprs = list_new(env, node.exprs.len());
   node.exprs.iter().for_each(|node| {
     let java_node = enum_create_expr(env, map, node);
@@ -24343,7 +24343,7 @@ fn create_tpl_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let tail = node.tail;
   let optional_cooked = node.cooked.as_ref().map(|node| node.to_string());
   let raw = node.raw.as_str();
@@ -24364,7 +24364,7 @@ fn create_try_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, n
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_block = create_block_stmt(env, map, &node.block);
   let java_optional_handler = node.handler.as_ref().map(|node| create_catch_clause(env, map, node));
   let java_optional_finalizer = node.finalizer.as_ref().map(|node| create_block_stmt(env, map, node));
@@ -24386,7 +24386,7 @@ fn create_ts_array_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexM
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_elem_type = enum_create_ts_type(env, map, &node.elem_type);
   let return_value = unsafe { JAVA_CLASS_TS_ARRAY_TYPE.as_ref().unwrap() }
     .construct(env, &java_elem_type, &java_span_ex);
@@ -24405,7 +24405,7 @@ fn create_ts_as_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
   let return_value = unsafe { JAVA_CLASS_TS_AS_EXPR.as_ref().unwrap() }
@@ -24429,7 +24429,7 @@ fn create_ts_call_signature_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &Byt
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_params = list_new(env, node.params.len());
   node.params.iter().for_each(|node| {
     let java_node = enum_create_ts_fn_param(env, map, node);
@@ -24459,7 +24459,7 @@ fn create_ts_conditional_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteTo
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_check_type = enum_create_ts_type(env, map, &node.check_type);
   let java_extends_type = enum_create_ts_type(env, map, &node.extends_type);
   let java_true_type = enum_create_ts_type(env, map, &node.true_type);
@@ -24483,7 +24483,7 @@ fn create_ts_const_assertion<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToI
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let return_value = unsafe { JAVA_CLASS_TS_CONST_ASSERTION.as_ref().unwrap() }
     .construct(env, &java_expr, &java_span_ex);
@@ -24505,7 +24505,7 @@ fn create_ts_construct_signature_decl<'local, 'a>(env: &mut JNIEnv<'local>, map:
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_params = list_new(env, node.params.len());
   node.params.iter().for_each(|node| {
     let java_node = enum_create_ts_fn_param(env, map, node);
@@ -24536,7 +24536,7 @@ fn create_ts_constructor_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteTo
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_params = list_new(env, node.params.len());
   node.params.iter().for_each(|node| {
     let java_node = enum_create_ts_fn_param(env, map, node);
@@ -24567,7 +24567,7 @@ fn create_ts_enum_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMa
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let declare = node.declare;
   let is_const = node.is_const;
   let java_id = create_ident(env, map, &node.id);
@@ -24595,7 +24595,7 @@ fn create_ts_enum_member<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndex
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_id = enum_create_ts_enum_member_id(env, map, &node.id);
   let java_optional_init = node.init.as_ref().map(|node| enum_create_expr(env, map, node));
   let return_value = unsafe { JAVA_CLASS_TS_ENUM_MEMBER.as_ref().unwrap() }
@@ -24615,7 +24615,7 @@ fn create_ts_export_assignment<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteT
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let return_value = unsafe { JAVA_CLASS_TS_EXPORT_ASSIGNMENT.as_ref().unwrap() }
     .construct(env, &java_expr, &java_span_ex);
@@ -24634,7 +24634,7 @@ fn create_ts_expr_with_type_args<'local, 'a>(env: &mut JNIEnv<'local>, map: &Byt
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let java_optional_type_args = node.type_args.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
   let return_value = unsafe { JAVA_CLASS_TS_EXPR_WITH_TYPE_ARGS.as_ref().unwrap() }
@@ -24654,7 +24654,7 @@ fn create_ts_external_module_ref<'local, 'a>(env: &mut JNIEnv<'local>, map: &Byt
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = create_str(env, map, &node.expr);
   let return_value = unsafe { JAVA_CLASS_TS_EXTERNAL_MODULE_REF.as_ref().unwrap() }
     .construct(env, &java_expr, &java_span_ex);
@@ -24676,7 +24676,7 @@ fn create_ts_fn_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_params = list_new(env, node.params.len());
   node.params.iter().for_each(|node| {
     let java_node = enum_create_ts_fn_param(env, map, node);
@@ -24704,7 +24704,7 @@ fn create_ts_getter_signature<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteTo
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let readonly = node.readonly;
   let java_key = enum_create_expr(env, map, &node.key);
   let computed = node.computed;
@@ -24728,7 +24728,7 @@ fn create_ts_import_equals_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &Byte
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let is_export = node.is_export;
   let is_type_only = node.is_type_only;
   let java_id = create_ident(env, map, &node.id);
@@ -24752,7 +24752,7 @@ fn create_ts_import_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndex
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_arg = create_str(env, map, &node.arg);
   let java_optional_qualifier = node.qualifier.as_ref().map(|node| enum_create_ts_entity_name(env, map, node));
   let java_optional_type_args = node.type_args.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
@@ -24777,7 +24777,7 @@ fn create_ts_index_signature<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToI
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_params = list_new(env, node.params.len());
   node.params.iter().for_each(|node| {
     let java_node = enum_create_ts_fn_param(env, map, node);
@@ -24805,7 +24805,7 @@ fn create_ts_indexed_access_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &Byt
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let readonly = node.readonly;
   let java_obj_type = enum_create_ts_type(env, map, &node.obj_type);
   let java_index_type = enum_create_ts_type(env, map, &node.index_type);
@@ -24826,7 +24826,7 @@ fn create_ts_infer_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexM
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_type_param = create_ts_type_param(env, map, &node.type_param);
   let return_value = unsafe { JAVA_CLASS_TS_INFER_TYPE.as_ref().unwrap() }
     .construct(env, &java_type_param, &java_span_ex);
@@ -24845,7 +24845,7 @@ fn create_ts_instantiation<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToInd
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let java_type_args = create_ts_type_param_instantiation(env, map, &node.type_args);
   let return_value = unsafe { JAVA_CLASS_TS_INSTANTIATION.as_ref().unwrap() }
@@ -24867,7 +24867,7 @@ fn create_ts_interface_body<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIn
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_body = list_new(env, node.body.len());
   node.body.iter().for_each(|node| {
     let java_node = enum_create_ts_type_element(env, map, node);
@@ -24895,7 +24895,7 @@ fn create_ts_interface_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIn
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_id = create_ident(env, map, &node.id);
   let declare = node.declare;
   let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_decl(env, map, node));
@@ -24927,7 +24927,7 @@ fn create_ts_intersection_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteT
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_types = list_new(env, node.types.len());
   node.types.iter().for_each(|node| {
     let java_node = enum_create_ts_type(env, map, node);
@@ -24949,8 +24949,8 @@ fn create_ts_keyword_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToInde
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
-  let java_kind = node.kind.to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
+  let java_kind = node.kind.to_java(env);
   let return_value = unsafe { JAVA_CLASS_TS_KEYWORD_TYPE.as_ref().unwrap() }
     .construct(env, &java_kind, &java_span_ex);
   delete_local_ref!(env, java_kind);
@@ -24967,7 +24967,7 @@ fn create_ts_lit_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_lit = enum_create_ts_lit(env, map, &node.lit);
   let return_value = unsafe { JAVA_CLASS_TS_LIT_TYPE.as_ref().unwrap() }
     .construct(env, &java_lit, &java_span_ex);
@@ -24987,11 +24987,11 @@ fn create_ts_mapped_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndex
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
-  let java_optional_readonly = node.readonly.as_ref().map(|node| node.to_jni_type(env));
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
+  let java_optional_readonly = node.readonly.as_ref().map(|node| node.to_java(env));
   let java_type_param = create_ts_type_param(env, map, &node.type_param);
   let java_optional_name_type = node.name_type.as_ref().map(|node| enum_create_ts_type(env, map, node));
-  let java_optional_optional = node.optional.as_ref().map(|node| node.to_jni_type(env));
+  let java_optional_optional = node.optional.as_ref().map(|node| node.to_java(env));
   let java_optional_type_ann = node.type_ann.as_ref().map(|node| enum_create_ts_type(env, map, node));
   let return_value = unsafe { JAVA_CLASS_TS_MAPPED_TYPE.as_ref().unwrap() }
     .construct(env, &java_optional_readonly, &java_type_param, &java_optional_name_type, &java_optional_optional, &java_optional_type_ann, &java_span_ex);
@@ -25018,7 +25018,7 @@ fn create_ts_method_signature<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteTo
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let readonly = node.readonly;
   let java_key = enum_create_expr(env, map, &node.key);
   let computed = node.computed;
@@ -25052,7 +25052,7 @@ fn create_ts_module_block<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToInde
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_body = list_new(env, node.body.len());
   node.body.iter().for_each(|node| {
     let java_node = enum_create_module_item(env, map, node);
@@ -25076,7 +25076,7 @@ fn create_ts_module_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndex
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let declare = node.declare;
   let global = node.global;
   let java_id = enum_create_ts_module_name(env, map, &node.id);
@@ -25099,7 +25099,7 @@ fn create_ts_namespace_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIn
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let declare = node.declare;
   let global = node.global;
   let java_id = create_ident(env, map, &node.id);
@@ -25121,7 +25121,7 @@ fn create_ts_namespace_export_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &B
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_id = create_ident(env, map, &node.id);
   let return_value = unsafe { JAVA_CLASS_TS_NAMESPACE_EXPORT_DECL.as_ref().unwrap() }
     .construct(env, &java_id, &java_span_ex);
@@ -25139,7 +25139,7 @@ fn create_ts_non_null_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToInd
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let return_value = unsafe { JAVA_CLASS_TS_NON_NULL_EXPR.as_ref().unwrap() }
     .construct(env, &java_expr, &java_span_ex);
@@ -25157,7 +25157,7 @@ fn create_ts_optional_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToInd
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
   let return_value = unsafe { JAVA_CLASS_TS_OPTIONAL_TYPE.as_ref().unwrap() }
     .construct(env, &java_type_ann, &java_span_ex);
@@ -25178,14 +25178,14 @@ fn create_ts_param_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexM
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_decorators = list_new(env, node.decorators.len());
   node.decorators.iter().for_each(|node| {
     let java_node = create_decorator(env, map, node);
     list_add(env, &java_decorators, &java_node);
     delete_local_ref!(env, java_node);
   });
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_jni_type(env));
+  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
   let is_override = node.is_override;
   let readonly = node.readonly;
   let java_param = enum_create_ts_param_prop_param(env, map, &node.param);
@@ -25207,7 +25207,7 @@ fn create_ts_parenthesized_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &Byte
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
   let return_value = unsafe { JAVA_CLASS_TS_PARENTHESIZED_TYPE.as_ref().unwrap() }
     .construct(env, &java_type_ann, &java_span_ex);
@@ -25231,7 +25231,7 @@ fn create_ts_property_signature<'local, 'a>(env: &mut JNIEnv<'local>, map: &Byte
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let readonly = node.readonly;
   let java_key = enum_create_expr(env, map, &node.key);
   let computed = node.computed;
@@ -25266,7 +25266,7 @@ fn create_ts_qualified_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIn
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
   let java_left = enum_create_ts_entity_name(env, map, &node.left);
   let java_right = create_ident(env, map, &node.right);
   let return_value = unsafe { JAVA_CLASS_TS_QUALIFIED_NAME.as_ref().unwrap() }
@@ -25286,7 +25286,7 @@ fn create_ts_rest_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMa
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
   let return_value = unsafe { JAVA_CLASS_TS_REST_TYPE.as_ref().unwrap() }
     .construct(env, &java_type_ann, &java_span_ex);
@@ -25305,7 +25305,7 @@ fn create_ts_satisfies_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIn
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
   let return_value = unsafe { JAVA_CLASS_TS_SATISFIES_EXPR.as_ref().unwrap() }
@@ -25326,7 +25326,7 @@ fn create_ts_setter_signature<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteTo
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let readonly = node.readonly;
   let java_key = enum_create_expr(env, map, &node.key);
   let computed = node.computed;
@@ -25348,7 +25348,7 @@ fn create_ts_this_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMa
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let return_value = unsafe { JAVA_CLASS_TS_THIS_TYPE.as_ref().unwrap() }
     .construct(env, &java_span_ex);
   delete_local_ref!(env, java_span_ex);
@@ -25369,7 +25369,7 @@ fn create_ts_tpl_lit_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToInde
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_types = list_new(env, node.types.len());
   node.types.iter().for_each(|node| {
     let java_node = enum_create_ts_type(env, map, node);
@@ -25400,7 +25400,7 @@ fn create_ts_tuple_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToInd
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_optional_label = node.label.as_ref().map(|node| enum_create_pat(env, map, node));
   let java_ty = enum_create_ts_type(env, map, &node.ty);
   let return_value = unsafe { JAVA_CLASS_TS_TUPLE_ELEMENT.as_ref().unwrap() }
@@ -25422,7 +25422,7 @@ fn create_ts_tuple_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexM
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_elem_types = list_new(env, node.elem_types.len());
   node.elem_types.iter().for_each(|node| {
     let java_node = create_ts_tuple_element(env, map, node);
@@ -25447,7 +25447,7 @@ fn create_ts_type_alias_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToI
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_id = create_ident(env, map, &node.id);
   let declare = node.declare;
   let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_decl(env, map, node));
@@ -25470,7 +25470,7 @@ fn create_ts_type_ann<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
   let return_value = unsafe { JAVA_CLASS_TS_TYPE_ANN.as_ref().unwrap() }
     .construct(env, &java_type_ann, &java_span_ex);
@@ -25489,7 +25489,7 @@ fn create_ts_type_assertion<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIn
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr = enum_create_expr(env, map, &node.expr);
   let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
   let return_value = unsafe { JAVA_CLASS_TS_TYPE_ASSERTION.as_ref().unwrap() }
@@ -25511,7 +25511,7 @@ fn create_ts_type_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_members = list_new(env, node.members.len());
   node.members.iter().for_each(|node| {
     let java_node = enum_create_ts_type_element(env, map, node);
@@ -25534,8 +25534,8 @@ fn create_ts_type_operator<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToInd
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
-  let java_op = node.op.to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
+  let java_op = node.op.to_java(env);
   let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
   let return_value = unsafe { JAVA_CLASS_TS_TYPE_OPERATOR.as_ref().unwrap() }
     .construct(env, &java_op, &java_type_ann, &java_span_ex);
@@ -25556,7 +25556,7 @@ fn create_ts_type_param<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexM
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_name = create_ident(env, map, &node.name);
   let is_in = node.is_in;
   let is_out = node.is_out;
@@ -25583,7 +25583,7 @@ fn create_ts_type_param_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToI
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_params = list_new(env, node.params.len());
   node.params.iter().for_each(|node| {
     let java_node = create_ts_type_param(env, map, node);
@@ -25608,7 +25608,7 @@ fn create_ts_type_param_instantiation<'local, 'a>(env: &mut JNIEnv<'local>, map:
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_params = list_new(env, node.params.len());
   node.params.iter().for_each(|node| {
     let java_node = enum_create_ts_type(env, map, node);
@@ -25632,7 +25632,7 @@ fn create_ts_type_predicate<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIn
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let asserts = node.asserts;
   let java_param_name = enum_create_ts_this_type_or_ident(env, map, &node.param_name);
   let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
@@ -25654,7 +25654,7 @@ fn create_ts_type_query<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexM
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_expr_name = enum_create_ts_type_query_expr(env, map, &node.expr_name);
   let java_optional_type_args = node.type_args.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
   let return_value = unsafe { JAVA_CLASS_TS_TYPE_QUERY.as_ref().unwrap() }
@@ -25675,7 +25675,7 @@ fn create_ts_type_ref<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_type_name = enum_create_ts_entity_name(env, map, &node.type_name);
   let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
   let return_value = unsafe { JAVA_CLASS_TS_TYPE_REF.as_ref().unwrap() }
@@ -25697,7 +25697,7 @@ fn create_ts_union_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexM
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_types = list_new(env, node.types.len());
   node.types.iter().for_each(|node| {
     let java_node = enum_create_ts_type(env, map, node);
@@ -25720,8 +25720,8 @@ fn create_unary_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
-  let java_op = node.op.to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
+  let java_op = node.op.to_java(env);
   let java_arg = enum_create_expr(env, map, &node.arg);
   let return_value = unsafe { JAVA_CLASS_UNARY_EXPR.as_ref().unwrap() }
     .construct(env, &java_op, &java_arg, &java_span_ex);
@@ -25740,8 +25740,8 @@ fn create_update_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
-  let java_op = node.op.to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
+  let java_op = node.op.to_java(env);
   let prefix = node.prefix;
   let java_arg = enum_create_expr(env, map, &node.arg);
   let return_value = unsafe { JAVA_CLASS_UPDATE_EXPR.as_ref().unwrap() }
@@ -25763,7 +25763,7 @@ fn create_using_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let is_await = node.is_await;
   let java_decls = list_new(env, node.decls.len());
   node.decls.iter().for_each(|node| {
@@ -25789,8 +25789,8 @@ fn create_var_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, n
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
-  let java_kind = node.kind.to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
+  let java_kind = node.kind.to_java(env);
   let declare = node.declare;
   let java_decls = list_new(env, node.decls.len());
   node.decls.iter().for_each(|node| {
@@ -25816,7 +25816,7 @@ fn create_var_declarator<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndex
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_name = enum_create_pat(env, map, &node.name);
   let java_optional_init = node.init.as_ref().map(|node| enum_create_expr(env, map, node));
   let definite = node.definite;
@@ -25838,7 +25838,7 @@ fn create_while_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_test = enum_create_expr(env, map, &node.test);
   let java_body = enum_create_stmt(env, map, &node.body);
   let return_value = unsafe { JAVA_CLASS_WHILE_STMT.as_ref().unwrap() }
@@ -25859,7 +25859,7 @@ fn create_with_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, 
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_obj = enum_create_expr(env, map, &node.obj);
   let java_body = enum_create_stmt(env, map, &node.body);
   let return_value = unsafe { JAVA_CLASS_WITH_STMT.as_ref().unwrap() }
@@ -25879,7 +25879,7 @@ fn create_yield_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap,
 where
   'local: 'a,
 {
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_jni_type(env);
+  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
   let java_optional_arg = node.arg.as_ref().map(|node| enum_create_expr(env, map, node));
   let delegate = node.delegate;
   let return_value = unsafe { JAVA_CLASS_YIELD_EXPR.as_ref().unwrap() }

@@ -21,7 +21,7 @@ import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 /**
@@ -65,12 +65,12 @@ public class Swc4jTransformOutput {
      * @param sourceMap the source map
      * @since 0.5.0
      */
-    @Jni2RustMethod(mode = Jni2RustMethodMode.DefinitionOnly)
+    @Jni2RustMethod
     public Swc4jTransformOutput(
             String code,
             Swc4jMediaType mediaType,
             Swc4jParseMode parseMode,
-            String sourceMap) {
+            @Jni2RustParam(optional = true) String sourceMap) {
         this.code = code;
         this.mediaType = AssertionUtils.notNull(mediaType, "Media type");
         this.parseMode = AssertionUtils.notNull(parseMode, "Parse mode");

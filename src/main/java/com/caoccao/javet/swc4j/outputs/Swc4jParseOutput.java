@@ -24,7 +24,6 @@ import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
 import com.caoccao.javet.swc4j.tokens.Swc4jToken;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
@@ -85,7 +84,7 @@ public class Swc4jParseOutput {
      * @param comments   the comments
      * @since 0.2.0
      */
-    @Jni2RustMethod(mode = Jni2RustMethodMode.DefinitionOnly)
+    @Jni2RustMethod
     public Swc4jParseOutput(
             ISwc4jAstProgram<? extends ISwc4jAst> program,
             Swc4jMediaType mediaType,

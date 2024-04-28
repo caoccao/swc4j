@@ -24,7 +24,7 @@ import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
 import com.caoccao.javet.swc4j.tokens.Swc4jToken;
 
 import java.util.List;
@@ -61,13 +61,13 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
      * @param tokens     the tokens
      * @since 0.1.0
      */
-    @Jni2RustMethod(mode = Jni2RustMethodMode.DefinitionOnly)
+    @Jni2RustMethod
     public Swc4jTranspileOutput(
             ISwc4jAstProgram<? extends ISwc4jAst> program,
             String code,
             Swc4jMediaType mediaType,
             Swc4jParseMode parseMode,
-            String sourceMap,
+            @Jni2RustParam(optional = true) String sourceMap,
             String sourceText,
             List<Swc4jToken> tokens,
             Swc4jComments comments) {

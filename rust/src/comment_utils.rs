@@ -63,9 +63,9 @@ impl JavaSwc4jComment {
   {
     let java_text = string_to_jstring!(env, &comment.text);
     let text = object_to_jvalue!(java_text);
-    let java_comment_kind = comment.kind.to_jni_type(env);
+    let java_comment_kind = comment.kind.to_java(env);
     let comment_kind = object_to_jvalue!(java_comment_kind);
-    let java_span_ex = map.get_span_ex_by_span(&comment.span).to_jni_type(env);
+    let java_span_ex = map.get_span_ex_by_span(&comment.span).to_java(env);
     let span_ex = object_to_jvalue!(java_span_ex);
     let return_value = call_as_construct!(
       env,

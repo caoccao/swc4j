@@ -392,7 +392,7 @@ public class TestCodeGen {
                         lines.add("where");
                         lines.add("  'local: 'a,");
                         lines.add("{");
-                        lines.add(String.format("  let java_span_ex = map.get_span_ex_by_span(&node.span%s).to_jni_type(env);", spanCall));
+                        lines.add(String.format("  let java_span_ex = map.get_span_ex_by_span(&node.span%s).to_java(env);", spanCall));
                         ReflectionUtils.getDeclaredFields(clazz).values().stream()
                                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
                                 .filter(field -> !new Jni2RustFieldUtils(field).isIgnore())
@@ -429,7 +429,7 @@ public class TestCodeGen {
                                                     String javaOptionalVar = String.format("java_optional_%s", StringUtils.toSnakeCase(fieldName));
                                                     args.add("&" + javaOptionalVar);
                                                     javaOptionalVars.add(javaOptionalVar);
-                                                    lines.add(String.format("  let %s = node.%s.as_ref().map(|node| map.get_span_ex_by_span(node).to_jni_type(env));",
+                                                    lines.add(String.format("  let %s = node.%s.as_ref().map(|node| map.get_span_ex_by_span(node).to_java(env));",
                                                             javaOptionalVar,
                                                             StringUtils.toSnakeCase(fieldName)));
                                                 } else if (innerClass == String.class) {
@@ -442,7 +442,7 @@ public class TestCodeGen {
                                                     String javaOptionalVar = String.format("java_optional_%s", StringUtils.toSnakeCase(fieldName));
                                                     args.add("&" + javaOptionalVar);
                                                     javaOptionalVars.add(javaOptionalVar);
-                                                    lines.add(String.format("  let %s = node.%s.as_ref().map(|node| node.to_jni_type(env));",
+                                                    lines.add(String.format("  let %s = node.%s.as_ref().map(|node| node.to_java(env));",
                                                             javaOptionalVar,
                                                             StringUtils.toSnakeCase(fieldName)));
                                                 } else {
@@ -568,7 +568,7 @@ public class TestCodeGen {
                                         String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
                                         args.add("&" + javaVar);
                                         javaVars.add(javaVar);
-                                        lines.add(String.format("  let %s = map.get_span_ex_by_span(&node.%s).to_jni_type(env);",
+                                        lines.add(String.format("  let %s = map.get_span_ex_by_span(&node.%s).to_java(env);",
                                                 javaVar,
                                                 StringUtils.toSnakeCase(fieldName)));
                                     } else if (fieldType.isPrimitive()) {
@@ -583,7 +583,7 @@ public class TestCodeGen {
                                         String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
                                         args.add("&" + javaVar);
                                         javaVars.add(javaVar);
-                                        lines.add(String.format("  let %s = node.%s.to_jni_type(env);",
+                                        lines.add(String.format("  let %s = node.%s.to_java(env);",
                                                 javaVar,
                                                 StringUtils.toSnakeCase(fieldName)));
                                     } else {

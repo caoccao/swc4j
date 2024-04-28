@@ -81,8 +81,8 @@ macro_rules! declare_identifiable_enum {
 
     static mut $static_name: Option<$struct_name> = None;
 
-    impl FromJniType for $enum_name {
-      fn from_jni_type<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> $enum_name {
+    impl FromJava for $enum_name {
+      fn from_java<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> $enum_name {
         let id = call_as_int!(
           env,
           obj.as_ref(),
@@ -94,8 +94,8 @@ macro_rules! declare_identifiable_enum {
       }
     }
 
-    impl ToJniType for $enum_name {
-      fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+    impl ToJava for $enum_name {
+      fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
       where
         'local: 'a,
       {

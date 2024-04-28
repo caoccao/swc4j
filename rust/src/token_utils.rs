@@ -30,7 +30,6 @@ use crate::jni_utils::*;
 use crate::span_utils::ByteToIndexMap;
 
 use std::ops::Range;
-use std::ptr::null_mut;
 use std::sync::Arc;
 
 /* JavaSwc4jTokenFactory Begin */
@@ -719,102 +718,101 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
   }
 }
 
-pub fn token_and_spans_to_java_list<'local>(
+pub fn token_and_spans_to_java_list<'local, 'a>(
   env: &mut JNIEnv<'local>,
   map: &ByteToIndexMap,
   source_text: &str,
   token_and_spans: Option<Arc<Vec<TokenAndSpan>>>,
-) -> jvalue {
-  jvalue {
-    l: match token_and_spans {
-      Some(token_and_spans) => {
-        let java_token_factory = unsafe { JAVA_TOKEN_FACTORY.as_ref().unwrap() };
-        let list = list_new(env, token_and_spans.len());
-        token_and_spans.iter().for_each(|token_and_span| {
-          let line_break_ahead = token_and_span.had_line_break;
-          let text = &source_text[Range {
-            start: token_and_span.span.lo().to_usize() - 1,
-            end: token_and_span.span.hi().to_usize() - 1,
-          }];
-          let java_span_ex = map.get_span_ex_by_span(&token_and_span.span).to_jni_type(env);
-          let java_token = match &token_and_span.token {
-            Token::Word(word) => match word {
-              Word::Keyword(keyword) => java_token_factory.create_keyword(
-                env,
-                &TokenType::parse_by_keyword(&keyword),
-                &java_span_ex,
-                line_break_ahead,
-              ),
-              Word::Null => java_token_factory.create_null(env, &java_span_ex, line_break_ahead),
-              Word::True => java_token_factory.create_true(env, &java_span_ex, line_break_ahead),
-              Word::False => java_token_factory.create_false(env, &java_span_ex, line_break_ahead),
-              Word::Ident(ident) => match ident {
-                IdentLike::Known(known_ident) => {
-                  java_token_factory.create_ident_known(env, &Atom::from(*known_ident), &java_span_ex, line_break_ahead)
-                }
-                IdentLike::Other(js_word) => {
-                  java_token_factory.create_ident_other(env, &js_word, &java_span_ex, line_break_ahead)
-                }
-              },
-            },
-            Token::BinOp(bin_op) => java_token_factory.create_binary_operator(
+) -> JObject<'a>
+where
+  'local: 'a,
+{
+  match token_and_spans {
+    Some(token_and_spans) => {
+      let java_token_factory = unsafe { JAVA_TOKEN_FACTORY.as_ref().unwrap() };
+      let list = list_new(env, token_and_spans.len());
+      token_and_spans.iter().for_each(|token_and_span| {
+        let line_break_ahead = token_and_span.had_line_break;
+        let text = &source_text[Range {
+          start: token_and_span.span.lo().to_usize() - 1,
+          end: token_and_span.span.hi().to_usize() - 1,
+        }];
+        let java_span_ex = map.get_span_ex_by_span(&token_and_span.span).to_java(env);
+        let java_token = match &token_and_span.token {
+          Token::Word(word) => match word {
+            Word::Keyword(keyword) => java_token_factory.create_keyword(
               env,
-              &TokenType::parse_by_binary_operator(bin_op),
+              &TokenType::parse_by_keyword(&keyword),
               &java_span_ex,
               line_break_ahead,
             ),
-            Token::AssignOp(assign_op) => java_token_factory.create_assign_operator(
-              env,
-              &TokenType::parse_by_assign_operator(assign_op),
-              &java_span_ex,
-              line_break_ahead,
-            ),
-            Token::Str { value, raw } => {
-              java_token_factory.create_string(env, &raw, &value, &java_span_ex, line_break_ahead)
-            }
-            Token::Num { value, raw } => {
-              java_token_factory.create_number(env, &raw, *value, &java_span_ex, line_break_ahead)
-            }
-            Token::BigInt { value: _, raw } => {
-              java_token_factory.create_big_int(env, &raw, &java_span_ex, line_break_ahead)
-            }
-            Token::Regex(value, flags) => {
-              java_token_factory.create_regex(env, &text, &value, &flags, &java_span_ex, line_break_ahead)
-            }
-            Token::Template { raw, cooked } => {
-              let cooked = match &cooked {
-                Ok(atom) => Some(atom.as_str().to_owned()),
-                Err(_) => None,
-              };
-              java_token_factory.create_template(env, &raw, &cooked, &java_span_ex, line_break_ahead)
-            }
-            Token::Shebang(shebang) => {
-              java_token_factory.create_shebang(env, &text, &shebang, &java_span_ex, line_break_ahead)
-            }
-            Token::Error(error) => java_token_factory.create_error(env, &text, &error, &java_span_ex, line_break_ahead),
-            Token::JSXName { name } => {
-              java_token_factory.create_jsx_tag_name(env, &name, &java_span_ex, line_break_ahead)
-            }
-            Token::JSXText { raw } => {
-              java_token_factory.create_jsx_tag_text(env, &raw, &java_span_ex, line_break_ahead)
-            }
-            token => match &TokenType::parse_by_generic_operator(token) {
-              TokenType::Unknown => {
-                eprintln!("Unknown {:?}", token);
-                java_token_factory.create_unknown(env, &text, &java_span_ex, line_break_ahead)
+            Word::Null => java_token_factory.create_null(env, &java_span_ex, line_break_ahead),
+            Word::True => java_token_factory.create_true(env, &java_span_ex, line_break_ahead),
+            Word::False => java_token_factory.create_false(env, &java_span_ex, line_break_ahead),
+            Word::Ident(ident) => match ident {
+              IdentLike::Known(known_ident) => {
+                java_token_factory.create_ident_known(env, &Atom::from(*known_ident), &java_span_ex, line_break_ahead)
               }
-              generic_operator_type => {
-                java_token_factory.create_generic_operator(env, generic_operator_type, &java_span_ex, line_break_ahead)
+              IdentLike::Other(js_word) => {
+                java_token_factory.create_ident_other(env, &js_word, &java_span_ex, line_break_ahead)
               }
             },
-          };
-          list_add(env, &list, &java_token);
-          delete_local_ref!(env, java_token);
-          delete_local_ref!(env, java_span_ex);
-        });
-        list.as_raw()
-      }
-      None => null_mut(),
-    },
+          },
+          Token::BinOp(bin_op) => java_token_factory.create_binary_operator(
+            env,
+            &TokenType::parse_by_binary_operator(bin_op),
+            &java_span_ex,
+            line_break_ahead,
+          ),
+          Token::AssignOp(assign_op) => java_token_factory.create_assign_operator(
+            env,
+            &TokenType::parse_by_assign_operator(assign_op),
+            &java_span_ex,
+            line_break_ahead,
+          ),
+          Token::Str { value, raw } => {
+            java_token_factory.create_string(env, &raw, &value, &java_span_ex, line_break_ahead)
+          }
+          Token::Num { value, raw } => {
+            java_token_factory.create_number(env, &raw, *value, &java_span_ex, line_break_ahead)
+          }
+          Token::BigInt { value: _, raw } => {
+            java_token_factory.create_big_int(env, &raw, &java_span_ex, line_break_ahead)
+          }
+          Token::Regex(value, flags) => {
+            java_token_factory.create_regex(env, &text, &value, &flags, &java_span_ex, line_break_ahead)
+          }
+          Token::Template { raw, cooked } => {
+            let cooked = match &cooked {
+              Ok(atom) => Some(atom.as_str().to_owned()),
+              Err(_) => None,
+            };
+            java_token_factory.create_template(env, &raw, &cooked, &java_span_ex, line_break_ahead)
+          }
+          Token::Shebang(shebang) => {
+            java_token_factory.create_shebang(env, &text, &shebang, &java_span_ex, line_break_ahead)
+          }
+          Token::Error(error) => java_token_factory.create_error(env, &text, &error, &java_span_ex, line_break_ahead),
+          Token::JSXName { name } => {
+            java_token_factory.create_jsx_tag_name(env, &name, &java_span_ex, line_break_ahead)
+          }
+          Token::JSXText { raw } => java_token_factory.create_jsx_tag_text(env, &raw, &java_span_ex, line_break_ahead),
+          token => match &TokenType::parse_by_generic_operator(token) {
+            TokenType::Unknown => {
+              eprintln!("Unknown {:?}", token);
+              java_token_factory.create_unknown(env, &text, &java_span_ex, line_break_ahead)
+            }
+            generic_operator_type => {
+              java_token_factory.create_generic_operator(env, generic_operator_type, &java_span_ex, line_break_ahead)
+            }
+          },
+        };
+        list_add(env, &list, &java_token);
+        delete_local_ref!(env, java_token);
+        delete_local_ref!(env, java_span_ex);
+      });
+      list
+    }
+    None => Default::default(),
   }
 }

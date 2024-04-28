@@ -46,22 +46,17 @@ impl Default for SpanEx {
   }
 }
 
-impl ToJniType for SpanEx {
-  fn to_jni_type<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+impl ToJava for SpanEx {
+  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_span = unsafe { JAVA_SPAN.as_ref().unwrap() };
-    let start = int_to_jvalue!(self.start);
-    let end = int_to_jvalue!(self.end);
-    let line = int_to_jvalue!(self.line);
-    let column = int_to_jvalue!(self.column);
-    call_as_construct!(
+    unsafe { JAVA_CLASS_SPAN.as_ref().unwrap() }.construct(
       env,
-      &java_span.class,
-      java_span.method_construct,
-      &[start, end, line, column],
-      "Swc4jComment"
+      self.start as i32,
+      self.end as i32,
+      self.line as i32,
+      self.column as i32,
     )
   }
 }
@@ -184,6 +179,31 @@ impl JavaSwc4jSpan {
     }
   }
 
+  pub fn construct<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    start: i32,
+    end: i32,
+    line: i32,
+    column: i32,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let start = int_to_jvalue!(start);
+    let end = int_to_jvalue!(end);
+    let line = int_to_jvalue!(line);
+    let column = int_to_jvalue!(column);
+    let return_value = call_as_construct!(
+        env,
+        &self.class,
+        self.method_construct,
+        &[start, end, line, column],
+        "Swc4jSpan construct()"
+      );
+    return_value
+  }
+
   pub fn get_column<'local>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -250,10 +270,10 @@ impl JavaSwc4jSpan {
 }
 /* JavaSwc4jSpan End */
 
-static mut JAVA_SPAN: Option<JavaSwc4jSpan> = None;
+static mut JAVA_CLASS_SPAN: Option<JavaSwc4jSpan> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   unsafe {
-    JAVA_SPAN = Some(JavaSwc4jSpan::new(env));
+    JAVA_CLASS_SPAN = Some(JavaSwc4jSpan::new(env));
   }
 }

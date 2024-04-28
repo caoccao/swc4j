@@ -18,7 +18,7 @@
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jint, jobject, jstring, JNI_VERSION_1_8};
 use jni::{JNIEnv, JavaVM};
-use jni_utils::FromJniType;
+use jni_utils::FromJava;
 
 use debug_print::debug_println;
 use std::ffi::c_void;
@@ -35,7 +35,7 @@ pub mod outputs;
 pub mod span_utils;
 pub mod token_utils;
 
-use crate::jni_utils::{jstring_to_optional_string, jstring_to_string, string_to_jstring, ToJniType};
+use crate::jni_utils::{jstring_to_optional_string, jstring_to_string, string_to_jstring, ToJava};
 
 #[no_mangle]
 pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
@@ -70,9 +70,9 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse<'local
 ) -> jobject {
   let code = jstring_to_string!(env, code);
   let options = unsafe { JObject::from_raw(options) };
-  let options = options::ParseOptions::from_jni_type(&mut env, &options);
+  let options = options::ParseOptions::from_java(&mut env, &options);
   match core::parse(code, options) {
-    Ok(output) => output.to_jni_type(&mut env).as_raw(),
+    Ok(output) => output.to_java(&mut env).as_raw(),
     Err(message) => {
       error::throw_parse_error(&mut env, message.as_str());
       null_mut()
@@ -89,9 +89,9 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTransform<'l
 ) -> jobject {
   let code = jstring_to_string!(env, code);
   let options = unsafe { JObject::from_raw(options) };
-  let options = options::TransformOptions::from_jni_type(&mut env, &options);
+  let options = options::TransformOptions::from_java(&mut env, &options);
   match core::transform(code, options) {
-    Ok(output) => output.to_jni_type(&mut env).as_raw(),
+    Ok(output) => output.to_java(&mut env).as_raw(),
     Err(message) => {
       error::throw_parse_error(&mut env, message.as_str());
       null_mut()
@@ -108,9 +108,9 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'l
 ) -> jobject {
   let code = jstring_to_string!(env, code);
   let options = unsafe { JObject::from_raw(options) };
-  let options = options::TranspileOptions::from_jni_type(&mut env, &options);
+  let options = options::TranspileOptions::from_java(&mut env, &options);
   match core::transpile(code, options) {
-    Ok(output) => output.to_jni_type(&mut env).as_raw(),
+    Ok(output) => output.to_java(&mut env).as_raw(),
     Err(message) => {
       error::throw_transpile_error(&mut env, message.as_str());
       null_mut()
