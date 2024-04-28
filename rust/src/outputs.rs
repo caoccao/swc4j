@@ -25,12 +25,11 @@ use jni::JNIEnv;
 
 use std::sync::Arc;
 
-use crate::ast_utils::*;
 use crate::comment_utils::*;
 use crate::enums::*;
 use crate::jni_utils::*;
 use crate::options::*;
-use crate::span_utils::ByteToIndexMap;
+use crate::span_utils::{ByteToIndexMap, RegisterWithMap, ToJavaWithMap};
 use crate::token_utils;
 
 /* JavaSwc4jParseOutput Begin */
@@ -303,7 +302,7 @@ impl ParseOutput {
     self
       .program
       .as_ref()
-      .map(|program| enum_register_program(&mut map, program));
+      .map(|program| program.register_with_map(&mut map));
     self.tokens.as_ref().map(|token_and_spans| {
       token_and_spans.iter().for_each(|token_and_span| {
         map.register_by_span(&token_and_span.span);
@@ -339,7 +338,7 @@ impl ToJava for ParseOutput {
   {
     let byte_to_index_map = self.get_byte_to_index_map();
     let java_program = self.program.as_ref().map_or(Default::default(), |program| {
-      enum_create_program(env, &byte_to_index_map, &program)
+        program.to_java_with_map(env, &byte_to_index_map)
     });
     let java_media_type = self.media_type.to_java(env);
     let java_parse_mode = self.parse_mode.to_java(env);
@@ -479,7 +478,7 @@ impl ToJava for TranspileOutput {
       .program
       .as_ref()
       .map_or(Default::default(), |program| {
-        enum_create_program(env, &byte_to_index_map, &program)
+        program.to_java_with_map(env, &byte_to_index_map)
       });
     let code = self.code.as_str();
     let java_media_type = self.parse_output.media_type.to_java(env);

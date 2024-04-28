@@ -61,6 +61,10 @@ impl ToJava for SpanEx {
   }
 }
 
+pub trait RegisterWithMap<Map> {
+  fn register_with_map<'local>(&self, map: &'_ mut Map);
+}
+
 pub trait ToJavaWithMap<Map> {
   fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ Map) -> JObject<'a>
   where

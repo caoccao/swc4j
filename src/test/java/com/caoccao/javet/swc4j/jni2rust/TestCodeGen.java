@@ -16,7 +16,6 @@
 
 package com.caoccao.javet.swc4j.jni2rust;
 
-import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.Swc4jAstStore;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.comments.Swc4jComment;
@@ -78,65 +77,40 @@ public class TestCodeGen {
                     Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
                     String enumName = jni2RustClassUtils.getName();
                     // Span
-                    lines.add(String.format("%sfn enum_register_%s(map: &mut ByteToIndexMap, node: &%s) {",
-                            jni2RustClassUtils.isOpen() ? "pub " : "",
-                            StringUtils.toSnakeCase(enumName),
-                            enumName));
-                    lines.add("  match node {");
+                    lines.add(String.format("impl RegisterWithMap<ByteToIndexMap> for %s {", enumName));
+                    lines.add("  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {");
+                    lines.add("    match self {");
                     Stream.of(jni2RustClassUtils.getMappings())
                             .sorted(Comparator.comparing(Jni2RustEnumMapping::name))
                             .forEach(mapping -> {
                                 assertTrue(
                                         clazz.isAssignableFrom(mapping.type()),
                                         mapping.type().getSimpleName() + " should implement " + clazz.getSimpleName());
-                                if (mapping.type().isInterface()) {
-                                    String typeName = new Jni2RustClassUtils<>(mapping.type()).getName();
-                                    lines.add(String.format("    %s::%s(node) => enum_register_%s(map, node),",
-                                            enumName,
-                                            mapping.name(),
-                                            StringUtils.toSnakeCase(typeName)));
-                                } else {
-                                    String typeName = new Jni2RustClassUtils<>(mapping.type()).getName();
-                                    lines.add(String.format("    %s::%s(node) => register_%s(map, node),",
-                                            enumName,
-                                            mapping.name(),
-                                            StringUtils.toSnakeCase(typeName)));
-                                }
+                                lines.add(String.format("      %s::%s(node) => node.register_with_map(map),",
+                                        enumName,
+                                        mapping.name()));
                             });
+                    lines.add("    }");
                     lines.add("  }");
                     lines.add("}\n");
                     // AST
-                    lines.add(String.format("%sfn enum_create_%s<'local, 'a>(",
-                            jni2RustClassUtils.isOpen() ? "pub " : "",
-                            StringUtils.toSnakeCase(enumName),
-                            enumName));
-                    lines.add("  env: &mut JNIEnv<'local>,");
-                    lines.add("  map: &ByteToIndexMap,");
-                    lines.add(String.format("  node: &%s,", enumName));
-                    lines.add(") -> JObject<'a>");
-                    lines.add("where");
-                    lines.add("  'local: 'a,");
-                    lines.add("{");
-                    lines.add("  match node {");
+                    lines.add(String.format("impl ToJavaWithMap<ByteToIndexMap> for %s {", enumName));
+                    lines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>");
+                    lines.add("  where");
+                    lines.add("    'local: 'a,");
+                    lines.add("  {");
+                    lines.add("    match self {");
                     Stream.of(jni2RustClassUtils.getMappings())
                             .sorted(Comparator.comparing(Jni2RustEnumMapping::name))
                             .forEach(mapping -> {
                                 assertTrue(
                                         clazz.isAssignableFrom(mapping.type()),
                                         mapping.type().getSimpleName() + " should implement " + clazz.getSimpleName());
-                                String typeName = new Jni2RustClassUtils<>(mapping.type()).getName();
-                                if (mapping.type().isInterface()) {
-                                    lines.add(String.format("    %s::%s(node) => enum_create_%s(env, map, node),",
-                                            enumName,
-                                            mapping.name(),
-                                            StringUtils.toSnakeCase(typeName)));
-                                } else {
-                                    lines.add(String.format("    %s::%s(node) => create_%s(env, map, node),",
-                                            enumName,
-                                            mapping.name(),
-                                            StringUtils.toSnakeCase(typeName)));
-                                }
+                                lines.add(String.format("      %s::%s(node) => node.to_java_with_map(env, map),",
+                                        enumName,
+                                        mapping.name()));
                             });
+                    lines.add("    }");
                     lines.add("  }");
                     lines.add("}\n");
                     enumCounter.incrementAndGet();
@@ -257,10 +231,9 @@ public class TestCodeGen {
                     String enumName = jni2RustClassUtils.getName();
                     String spanCall = jni2RustClassUtils.isSpan() ? "" : "()";
                     // Span
-                    lines.add(String.format("fn register_%s(map: &mut ByteToIndexMap, node: &%s) {",
-                            StringUtils.toSnakeCase(enumName),
-                            enumName));
-                    lines.add(String.format("  map.register_by_span(&node.span%s);", spanCall));
+                    lines.add(String.format("impl RegisterWithMap<ByteToIndexMap> for %s {", enumName));
+                    lines.add("  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {");
+                    lines.add(String.format("    map.register_by_span(&self.span%s);", spanCall));
                     ReflectionUtils.getDeclaredFields(clazz).values().stream()
                             .filter(field -> !Modifier.isStatic(field.getModifiers()))
                             .filter(field -> !new Jni2RustFieldUtils(field).isIgnore())
@@ -273,43 +246,16 @@ public class TestCodeGen {
                                     if (field.getGenericType() instanceof ParameterizedType) {
                                         Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                                         if (innerType instanceof Class) {
-                                            Class<?> innerClass = (Class<?>) innerType;
-                                            if (ISwc4jAst.class.isAssignableFrom(innerClass)) {
-                                                if (innerClass.isInterface()) {
-                                                    String fieldTypeName = new Jni2RustClassUtils<>(innerClass).getName();
-                                                    lines.add(String.format("  node.%s.as_ref().map(|node| enum_register_%s(map, node));",
-                                                            StringUtils.toSnakeCase(fieldName),
-                                                            StringUtils.toSnakeCase(fieldTypeName)));
-                                                } else if (Swc4jAst.class.isAssignableFrom(innerClass)) {
-                                                    String fieldTypeName = new Jni2RustClassUtils<>(innerClass).getName();
-                                                    lines.add(String.format("  node.%s.as_ref().map(|node| register_%s(map, node));",
-                                                            StringUtils.toSnakeCase(fieldName),
-                                                            StringUtils.toSnakeCase(fieldTypeName)));
-                                                } else {
-                                                    fail(innerClass.getName() + " is not expected");
-                                                }
-                                            } else if (Swc4jSpan.class.isAssignableFrom(innerClass)) {
-                                                lines.add(String.format("  node.%s.as_ref().map(|node| map.register_by_span(node));",
+                                            if (ISwc4jAst.class.isAssignableFrom((Class<?>) innerType)) {
+                                                lines.add(String.format("    self.%s.as_ref().map(|node| node.register_with_map(map));",
                                                         StringUtils.toSnakeCase(fieldName)));
                                             }
                                         } else if (innerType instanceof ParameterizedType) {
                                             assertTrue(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
                                             Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
                                             assertInstanceOf(Class.class, innerType2);
-                                            Class<?> innerClass2 = (Class<?>) innerType2;
-                                            if (innerClass2.isInterface()) {
-                                                String fieldTypeName = new Jni2RustClassUtils<>(innerClass2).getName();
-                                                lines.add(String.format("  node.%s.as_ref().map(|nodes| nodes.iter().for_each(|node| enum_register_%s(map, node)));",
-                                                        StringUtils.toSnakeCase(fieldName),
-                                                        StringUtils.toSnakeCase(fieldTypeName)));
-                                            } else if (Swc4jAst.class.isAssignableFrom(innerClass2)) {
-                                                String fieldTypeName = new Jni2RustClassUtils<>(innerClass2).getName();
-                                                lines.add(String.format("  node.%s.as_ref().map(|nodes| nodes.iter().for_each(|node| register_%s(map, node)));",
-                                                        StringUtils.toSnakeCase(fieldName),
-                                                        StringUtils.toSnakeCase(fieldTypeName)));
-                                            } else {
-                                                fail(innerClass2.getName() + " is not expected");
-                                            }
+                                            lines.add(String.format("    self.%s.as_ref().map(|nodes| nodes.iter().for_each(|node| node.register_with_map(map)));",
+                                                    StringUtils.toSnakeCase(fieldName)));
                                         } else {
                                             fail(field.getGenericType().getTypeName() + " is not expected");
                                         }
@@ -318,81 +264,44 @@ public class TestCodeGen {
                                     }
                                 } else if (List.class.isAssignableFrom(fieldType)) {
                                     if (field.getGenericType() instanceof ParameterizedType) {
-                                        lines.add(String.format("  node.%s.iter().for_each(|node| {",
+                                        lines.add(String.format("    self.%s.iter().for_each(|node| {",
                                                 StringUtils.toSnakeCase(fieldName)));
                                         Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                                         if (innerType instanceof Class) {
-                                            Class<?> innerClass = (Class<?>) innerType;
-                                            if (ISwc4jAst.class.isAssignableFrom(innerClass)) {
-                                                if (innerClass.isInterface()) {
-                                                    String fieldTypeName = new Jni2RustClassUtils<>(innerClass).getName();
-                                                    lines.add(String.format("    enum_register_%s(map, node);",
-                                                            StringUtils.toSnakeCase(fieldTypeName)));
-                                                } else if (Swc4jAst.class.isAssignableFrom(innerClass)) {
-                                                    String fieldTypeName = new Jni2RustClassUtils<>(innerClass).getName();
-                                                    lines.add(String.format("    register_%s(map, node);",
-                                                            StringUtils.toSnakeCase(fieldTypeName)));
-                                                } else {
-                                                    fail(innerClass.getName() + " is not expected");
-                                                }
-                                            } else {
-                                                fail(innerClass.getName() + " is not expected");
-                                            }
+                                            lines.add("      node.register_with_map(map);");
                                         } else if (innerType instanceof ParameterizedType) {
                                             assertTrue(Optional.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
                                             Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
                                             assertInstanceOf(Class.class, innerType2);
-                                            Class<?> innerClass2 = (Class<?>) innerType2;
-                                            if (innerClass2.isInterface()) {
-                                                String fieldTypeName = new Jni2RustClassUtils<>(innerClass2).getName();
-                                                lines.add(String.format("    node.as_ref().map(|node| enum_register_%s(map, node));",
-                                                        StringUtils.toSnakeCase(fieldTypeName)));
-                                            } else if (Swc4jAst.class.isAssignableFrom(innerClass2)) {
-                                                String fieldTypeName = new Jni2RustClassUtils<>(innerClass2).getName();
-                                                lines.add(String.format("    node.as_ref().map(|node| register_%s(map, node));",
-                                                        StringUtils.toSnakeCase(fieldTypeName)));
-                                            } else {
-                                                fail(innerClass2.getName() + " is not expected");
-                                            }
+                                            lines.add("      node.as_ref().map(|node| node.register_with_map(map));");
                                         } else {
                                             fail(innerType.getTypeName() + " is not expected");
                                         }
-                                        lines.add("  });");
+                                        lines.add("    });");
                                     } else {
                                         fail(field.getGenericType().getTypeName() + " is not expected");
                                     }
                                 } else if (ISwc4jAst.class.isAssignableFrom(fieldType)) {
-                                    if (fieldType.isInterface()) {
-                                        String fieldTypeName = new Jni2RustClassUtils<>(fieldType).getName();
-                                        lines.add(String.format("  enum_register_%s(map, &node.%s);",
-                                                StringUtils.toSnakeCase(fieldTypeName),
-                                                StringUtils.toSnakeCase(fieldName)));
-                                    } else if (Swc4jAst.class.isAssignableFrom(fieldType)) {
-                                        String fieldTypeName = new Jni2RustClassUtils<>(fieldType).getName();
-                                        lines.add(String.format("  register_%s(map, &node.%s);",
-                                                StringUtils.toSnakeCase(fieldTypeName),
-                                                StringUtils.toSnakeCase(fieldName)));
-                                    } else {
-                                        fail(fieldType.getName() + " is not expected");
-                                    }
+                                    lines.add(String.format("    self.%s.register_with_map(map);",
+                                            StringUtils.toSnakeCase(fieldName)));
                                 } else if (Swc4jSpan.class.isAssignableFrom(fieldType)) {
-                                    lines.add(String.format("  map.register_by_span(&node.%s);",
+                                    lines.add(String.format("    map.register_by_span(&self.%s);",
                                             StringUtils.toSnakeCase(fieldName)));
                                 }
                             });
+                    lines.add("  }");
                     lines.add("}\n");
                     // AST
                     if (!jni2RustClassUtils.isCustomCreation()) {
                         List<String> args = new ArrayList<>();
                         List<String> javaVars = new ArrayList<>();
                         List<String> javaOptionalVars = new ArrayList<>();
-                        lines.add(String.format("fn create_%s<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &%s) -> JObject<'a>",
-                                StringUtils.toSnakeCase(enumName),
-                                enumName));
-                        lines.add("where");
-                        lines.add("  'local: 'a,");
-                        lines.add("{");
-                        lines.add(String.format("  let java_span_ex = map.get_span_ex_by_span(&node.span%s).to_java(env);", spanCall));
+                        lines.add(String.format("impl ToJavaWithMap<ByteToIndexMap> for %s {", enumName));
+                        lines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>");
+                        lines.add("  where");
+                        lines.add("    'local: 'a,");
+                        lines.add("  {");
+                        lines.add(String.format("    let java_span_ex = map.get_span_ex_by_span(&self.span%s).to_java(env);", spanCall));
                         ReflectionUtils.getDeclaredFields(clazz).values().stream()
                                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
                                 .filter(field -> !new Jni2RustFieldUtils(field).isIgnore())
@@ -410,39 +319,27 @@ public class TestCodeGen {
                                                     String javaOptionalVar = String.format("java_optional_%s", StringUtils.toSnakeCase(fieldName));
                                                     args.add("&" + javaOptionalVar);
                                                     javaOptionalVars.add(javaOptionalVar);
-                                                    if (innerClass.isInterface()) {
-                                                        String fieldTypeName = new Jni2RustClassUtils<>(innerClass).getName();
-                                                        lines.add(String.format("  let %s = node.%s.as_ref().map(|node| enum_create_%s(env, map, node));",
-                                                                javaOptionalVar,
-                                                                StringUtils.toSnakeCase(fieldName),
-                                                                StringUtils.toSnakeCase(fieldTypeName)));
-                                                    } else if (Swc4jAst.class.isAssignableFrom(innerClass)) {
-                                                        String fieldTypeName = new Jni2RustClassUtils<>(innerClass).getName();
-                                                        lines.add(String.format("  let %s = node.%s.as_ref().map(|node| create_%s(env, map, node));",
-                                                                javaOptionalVar,
-                                                                StringUtils.toSnakeCase(fieldName),
-                                                                StringUtils.toSnakeCase(fieldTypeName)));
-                                                    } else {
-                                                        fail(innerClass.getName() + " is not expected");
-                                                    }
+                                                    lines.add(String.format("    let %s = self.%s.as_ref().map(|node| node.to_java_with_map(env, map));",
+                                                            javaOptionalVar,
+                                                            StringUtils.toSnakeCase(fieldName)));
                                                 } else if (Swc4jSpan.class.isAssignableFrom(innerClass)) {
                                                     String javaOptionalVar = String.format("java_optional_%s", StringUtils.toSnakeCase(fieldName));
                                                     args.add("&" + javaOptionalVar);
                                                     javaOptionalVars.add(javaOptionalVar);
-                                                    lines.add(String.format("  let %s = node.%s.as_ref().map(|node| map.get_span_ex_by_span(node).to_java(env));",
+                                                    lines.add(String.format("    let %s = self.%s.as_ref().map(|node| map.get_span_ex_by_span(node).to_java(env));",
                                                             javaOptionalVar,
                                                             StringUtils.toSnakeCase(fieldName)));
                                                 } else if (innerClass == String.class) {
                                                     String optionalVar = String.format("optional_%s", StringUtils.toSnakeCase(fieldName));
                                                     args.add("&" + optionalVar);
-                                                    lines.add(String.format("  let %s = node.%s.as_ref().map(|node| node.to_string());",
+                                                    lines.add(String.format("    let %s = self.%s.as_ref().map(|node| node.to_string());",
                                                             optionalVar,
                                                             StringUtils.toSnakeCase(fieldName)));
                                                 } else if (innerClass.isEnum()) {
                                                     String javaOptionalVar = String.format("java_optional_%s", StringUtils.toSnakeCase(fieldName));
                                                     args.add("&" + javaOptionalVar);
                                                     javaOptionalVars.add(javaOptionalVar);
-                                                    lines.add(String.format("  let %s = node.%s.as_ref().map(|node| node.to_java(env));",
+                                                    lines.add(String.format("    let %s = self.%s.as_ref().map(|node| node.to_java(env));",
                                                             javaOptionalVar,
                                                             StringUtils.toSnakeCase(fieldName)));
                                                 } else {
@@ -456,29 +353,20 @@ public class TestCodeGen {
                                                 String javaOptionalVar = String.format("java_optional_%s", StringUtils.toSnakeCase(fieldName));
                                                 args.add("&" + javaOptionalVar);
                                                 javaOptionalVars.add(javaOptionalVar);
-                                                String fieldTypeName = new Jni2RustClassUtils<>(innerClass2).getName();
-                                                lines.add(String.format("  let %s = node.%s.as_ref().map(|nodes| {",
+                                                lines.add(String.format("    let %s = self.%s.as_ref().map(|nodes| {",
                                                         javaOptionalVar,
                                                         StringUtils.toSnakeCase(fieldName)));
-                                                lines.add(String.format("    let java_%s = list_new(env, nodes.len());",
+                                                lines.add(String.format("      let java_%s = list_new(env, nodes.len());",
                                                         StringUtils.toSnakeCase(fieldName)));
-                                                lines.add("    nodes.iter().for_each(|node| {");
-                                                if (innerClass2.isInterface()) {
-                                                    lines.add(String.format("      let java_node = enum_create_%s(env, map, node);",
-                                                            StringUtils.toSnakeCase(fieldTypeName)));
-                                                } else if (Swc4jAst.class.isAssignableFrom(innerClass2)) {
-                                                    lines.add(String.format("      let java_node = create_%s(env, map, node);",
-                                                            StringUtils.toSnakeCase(fieldTypeName)));
-                                                } else {
-                                                    fail(innerClass2.getName() + " is not expected");
-                                                }
-                                                lines.add(String.format("      list_add(env, &java_%s, &java_node);",
+                                                lines.add("      nodes.iter().for_each(|node| {");
+                                                lines.add("        let java_node = node.to_java_with_map(env, map);");
+                                                lines.add(String.format("        list_add(env, &java_%s, &java_node);",
                                                         StringUtils.toSnakeCase(fieldName)));
-                                                lines.add("      delete_local_ref!(env, java_node);");
+                                                lines.add("        delete_local_ref!(env, java_node);");
+                                                lines.add("      });");
+                                                lines.add(String.format("      java_%s",
+                                                        StringUtils.toSnakeCase(fieldName)));
                                                 lines.add("    });");
-                                                lines.add(String.format("    java_%s",
-                                                        StringUtils.toSnakeCase(fieldName)));
-                                                lines.add("  });");
                                             } else {
                                                 fail(field.getGenericType().getTypeName() + " is not expected");
                                             }
@@ -490,28 +378,18 @@ public class TestCodeGen {
                                             String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
                                             args.add("&" + javaVar);
                                             javaVars.add(javaVar);
-                                            lines.add(String.format("  let %s = list_new(env, node.%s.len());",
+                                            lines.add(String.format("    let %s = list_new(env, self.%s.len());",
                                                     javaVar,
                                                     StringUtils.toSnakeCase(fieldName)));
-                                            lines.add(String.format("  node.%s.iter().for_each(|node| {",
+                                            lines.add(String.format("    self.%s.iter().for_each(|node| {",
                                                     StringUtils.toSnakeCase(fieldName)));
                                             Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                                             if (innerType instanceof Class) {
                                                 Class<?> innerClass = (Class<?>) innerType;
                                                 if (ISwc4jAst.class.isAssignableFrom(innerClass)) {
-                                                    if (innerClass.isInterface()) {
-                                                        String fieldTypeName = new Jni2RustClassUtils<>(innerClass).getName();
-                                                        lines.add(String.format("    let java_node = enum_create_%s(env, map, node);",
-                                                                StringUtils.toSnakeCase(fieldTypeName)));
-                                                    } else if (Swc4jAst.class.isAssignableFrom(innerClass)) {
-                                                        String fieldTypeName = new Jni2RustClassUtils<>(innerClass).getName();
-                                                        lines.add(String.format("    let java_node = create_%s(env, map, node);",
-                                                                StringUtils.toSnakeCase(fieldTypeName)));
-                                                    } else {
-                                                        fail(innerClass.getName() + " is not expected");
-                                                    }
-                                                    lines.add(String.format("    list_add(env, &%s, &java_node);", javaVar));
-                                                    lines.add("    delete_local_ref!(env, java_node);");
+                                                    lines.add("      let java_node = node.to_java_with_map(env, map);");
+                                                    lines.add(String.format("      list_add(env, &%s, &java_node);", javaVar));
+                                                    lines.add("      delete_local_ref!(env, java_node);");
                                                 } else {
                                                     fail(innerClass.getName() + " is not expected");
                                                 }
@@ -519,71 +397,45 @@ public class TestCodeGen {
                                                 assertTrue(Optional.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
                                                 Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
                                                 assertInstanceOf(Class.class, innerType2);
-                                                Class<?> innerClass2 = (Class<?>) innerType2;
-                                                lines.add("    let java_node = node.as_ref().map_or_else(");
-                                                lines.add("      || Default::default(),");
-                                                if (innerClass2.isInterface()) {
-                                                    String fieldTypeName = new Jni2RustClassUtils<>(innerClass2).getName();
-                                                    lines.add(String.format("      |node| enum_create_%s(env, map, node));",
-                                                            StringUtils.toSnakeCase(fieldTypeName)));
-                                                } else if (Swc4jAst.class.isAssignableFrom(innerClass2)) {
-                                                    String fieldTypeName = new Jni2RustClassUtils<>(innerClass2).getName();
-                                                    lines.add(String.format("      |node| create_%s(env, map, node));",
-                                                            StringUtils.toSnakeCase(fieldTypeName)));
-                                                } else {
-                                                    fail(innerClass2.getName() + " is not expected");
-                                                }
+                                                lines.add("      let java_node = node.as_ref().map_or_else(");
+                                                lines.add("        || Default::default(),");
+                                                lines.add("        |node| node.to_java_with_map(env, map));");
                                                 lines.add(String.format("    list_add(env, &%s, &java_node);", javaVar));
-                                                lines.add("    delete_local_ref!(env, java_node);");
+                                                lines.add("      delete_local_ref!(env, java_node);");
                                             } else {
                                                 fail(innerType.getTypeName() + " is not expected");
                                             }
-                                            lines.add("  });");
+                                            lines.add("    });");
                                         } else {
                                             fail(field.getGenericType().getTypeName() + " is not expected");
                                         }
                                     } else if (ISwc4jAst.class.isAssignableFrom(fieldType)) {
-                                        if (fieldType.isInterface()) {
-                                            String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
-                                            args.add("&" + javaVar);
-                                            javaVars.add(javaVar);
-                                            String fieldTypeName = new Jni2RustClassUtils<>(fieldType).getName();
-                                            lines.add(String.format("  let %s = enum_create_%s(env, map, &node.%s);",
-                                                    javaVar,
-                                                    StringUtils.toSnakeCase(fieldTypeName),
-                                                    StringUtils.toSnakeCase(fieldName)));
-                                        } else if (Swc4jAst.class.isAssignableFrom(fieldType)) {
-                                            String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
-                                            args.add("&" + javaVar);
-                                            javaVars.add(javaVar);
-                                            String fieldTypeName = new Jni2RustClassUtils<>(fieldType).getName();
-                                            lines.add(String.format("  let %s = create_%s(env, map, &node.%s);",
-                                                    javaVar,
-                                                    StringUtils.toSnakeCase(fieldTypeName),
-                                                    StringUtils.toSnakeCase(fieldName)));
-                                        } else {
-                                            fail(fieldType.getName() + " is not expected");
-                                        }
+                                        String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
+                                        args.add("&" + javaVar);
+                                        javaVars.add(javaVar);
+                                        lines.add(String.format("    let %s = self.%s.to_java_with_map(env, map);",
+                                                javaVar,
+                                                StringUtils.toSnakeCase(fieldName)));
                                     } else if (Swc4jSpan.class.isAssignableFrom(fieldType)) {
                                         String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
                                         args.add("&" + javaVar);
                                         javaVars.add(javaVar);
-                                        lines.add(String.format("  let %s = map.get_span_ex_by_span(&node.%s).to_java(env);",
+                                        lines.add(String.format("    let %s = map.get_span_ex_by_span(&self.%s).to_java(env);",
                                                 javaVar,
                                                 StringUtils.toSnakeCase(fieldName)));
                                     } else if (fieldType.isPrimitive()) {
                                         String arg = StringUtils.toSnakeCase(fieldName);
                                         args.add(arg);
-                                        lines.add(String.format("  let %s = node.%s;", arg, arg));
+                                        lines.add(String.format("    let %s = self.%s;", arg, arg));
                                     } else if (fieldType == String.class) {
                                         String arg = StringUtils.toSnakeCase(fieldName);
                                         args.add(arg);
-                                        lines.add(String.format("  let %s = node.%s.as_str();", arg, arg));
+                                        lines.add(String.format("    let %s = self.%s.as_str();", arg, arg));
                                     } else if (fieldType.isEnum()) {
                                         String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
                                         args.add("&" + javaVar);
                                         javaVars.add(javaVar);
-                                        lines.add(String.format("  let %s = node.%s.to_java(env);",
+                                        lines.add(String.format("    let %s = self.%s.to_java(env);",
                                                 javaVar,
                                                 StringUtils.toSnakeCase(fieldName)));
                                     } else {
@@ -592,13 +444,14 @@ public class TestCodeGen {
                                 });
                         args.add("&java_span_ex");
                         javaVars.add("java_span_ex");
-                        lines.add(String.format("  let return_value = unsafe { JAVA_CLASS_%s.as_ref().unwrap() }",
+                        lines.add(String.format("    let return_value = unsafe { JAVA_CLASS_%s.as_ref().unwrap() }",
                                 StringUtils.toSnakeCase(jni2RustClassUtils.getName()).toUpperCase()));
-                        lines.add(String.format("    .construct(env, %s);",
+                        lines.add(String.format("      .construct(env, %s);",
                                 StringUtils.join(", ", args)));
-                        javaOptionalVars.forEach(javaOptionalVar -> lines.add(String.format("  delete_local_optional_ref!(env, %s);", javaOptionalVar)));
-                        javaVars.forEach(javaVar -> lines.add(String.format("  delete_local_ref!(env, %s);", javaVar)));
-                        lines.add("  return_value");
+                        javaOptionalVars.forEach(javaOptionalVar -> lines.add(String.format("    delete_local_optional_ref!(env, %s);", javaOptionalVar)));
+                        javaVars.forEach(javaVar -> lines.add(String.format("    delete_local_ref!(env, %s);", javaVar)));
+                        lines.add("    return_value");
+                        lines.add("  }");
                         lines.add("}\n");
                     }
                     structCounter.incrementAndGet();

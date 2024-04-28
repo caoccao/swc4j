@@ -21,7 +21,7 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use crate::jni_utils::*;
-use crate::span_utils::ByteToIndexMap;
+use crate::span_utils::{ByteToIndexMap, RegisterWithMap, ToJavaWithMap};
 
 use deno_ast::swc::ast::*;
 use deno_ast::swc::common::Spanned;
@@ -20598,5294 +20598,5973 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 }
 /* JNI End */
 
-fn create_big_int<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BigInt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_sign = node.value.sign().to_java(env);
-  let optional_raw = node.raw.as_ref().map(|node| node.as_str().to_owned());
-  let return_value =
-    unsafe { JAVA_CLASS_BIG_INT.as_ref().unwrap() }.construct(env, &java_sign, &optional_raw, &java_span_ex);
-  delete_local_ref!(env, java_sign);
-  delete_local_ref!(env, java_span_ex);
-  return_value
+impl ToJavaWithMap<ByteToIndexMap> for BigInt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_sign = self.value.sign().to_java(env);
+    let optional_raw = self.raw.as_ref().map(|node| node.as_str().to_owned());
+    let return_value =
+      unsafe { JAVA_CLASS_BIG_INT.as_ref().unwrap() }.construct(env, &java_sign, &optional_raw, &java_span_ex);
+    delete_local_ref!(env, java_sign);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
 }
 
 /* Enum Begin */
-fn enum_register_assign_target(map: &mut ByteToIndexMap, node: &AssignTarget) {
-  match node {
-    AssignTarget::Pat(node) => enum_register_assign_target_pat(map, node),
-    AssignTarget::Simple(node) => enum_register_simple_assign_target(map, node),
+impl RegisterWithMap<ByteToIndexMap> for AssignTarget {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      AssignTarget::Pat(node) => node.register_with_map(map),
+      AssignTarget::Simple(node) => node.register_with_map(map),
+    }
   }
 }
 
-fn enum_create_assign_target<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &AssignTarget,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    AssignTarget::Pat(node) => enum_create_assign_target_pat(env, map, node),
-    AssignTarget::Simple(node) => enum_create_simple_assign_target(env, map, node),
-  }
-}
-
-fn enum_register_assign_target_pat(map: &mut ByteToIndexMap, node: &AssignTargetPat) {
-  match node {
-    AssignTargetPat::Array(node) => register_array_pat(map, node),
-    AssignTargetPat::Invalid(node) => register_invalid(map, node),
-    AssignTargetPat::Object(node) => register_object_pat(map, node),
-  }
-}
-
-fn enum_create_assign_target_pat<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &AssignTargetPat,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    AssignTargetPat::Array(node) => create_array_pat(env, map, node),
-    AssignTargetPat::Invalid(node) => create_invalid(env, map, node),
-    AssignTargetPat::Object(node) => create_object_pat(env, map, node),
-  }
-}
-
-fn enum_register_block_stmt_or_expr(map: &mut ByteToIndexMap, node: &BlockStmtOrExpr) {
-  match node {
-    BlockStmtOrExpr::BlockStmt(node) => register_block_stmt(map, node),
-    BlockStmtOrExpr::Expr(node) => enum_register_expr(map, node),
-  }
-}
-
-fn enum_create_block_stmt_or_expr<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &BlockStmtOrExpr,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    BlockStmtOrExpr::BlockStmt(node) => create_block_stmt(env, map, node),
-    BlockStmtOrExpr::Expr(node) => enum_create_expr(env, map, node),
-  }
-}
-
-fn enum_register_callee(map: &mut ByteToIndexMap, node: &Callee) {
-  match node {
-    Callee::Expr(node) => enum_register_expr(map, node),
-    Callee::Import(node) => register_import(map, node),
-    Callee::Super(node) => register_super(map, node),
-  }
-}
-
-fn enum_create_callee<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &Callee,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    Callee::Expr(node) => enum_create_expr(env, map, node),
-    Callee::Import(node) => create_import(env, map, node),
-    Callee::Super(node) => create_super(env, map, node),
-  }
-}
-
-fn enum_register_class_member(map: &mut ByteToIndexMap, node: &ClassMember) {
-  match node {
-    ClassMember::AutoAccessor(node) => register_auto_accessor(map, node),
-    ClassMember::ClassProp(node) => register_class_prop(map, node),
-    ClassMember::Constructor(node) => register_constructor(map, node),
-    ClassMember::Empty(node) => register_empty_stmt(map, node),
-    ClassMember::Method(node) => register_class_method(map, node),
-    ClassMember::PrivateMethod(node) => register_private_method(map, node),
-    ClassMember::PrivateProp(node) => register_private_prop(map, node),
-    ClassMember::StaticBlock(node) => register_static_block(map, node),
-    ClassMember::TsIndexSignature(node) => register_ts_index_signature(map, node),
-  }
-}
-
-fn enum_create_class_member<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &ClassMember,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    ClassMember::AutoAccessor(node) => create_auto_accessor(env, map, node),
-    ClassMember::ClassProp(node) => create_class_prop(env, map, node),
-    ClassMember::Constructor(node) => create_constructor(env, map, node),
-    ClassMember::Empty(node) => create_empty_stmt(env, map, node),
-    ClassMember::Method(node) => create_class_method(env, map, node),
-    ClassMember::PrivateMethod(node) => create_private_method(env, map, node),
-    ClassMember::PrivateProp(node) => create_private_prop(env, map, node),
-    ClassMember::StaticBlock(node) => create_static_block(env, map, node),
-    ClassMember::TsIndexSignature(node) => create_ts_index_signature(env, map, node),
-  }
-}
-
-fn enum_register_decl(map: &mut ByteToIndexMap, node: &Decl) {
-  match node {
-    Decl::Class(node) => register_class_decl(map, node),
-    Decl::Fn(node) => register_fn_decl(map, node),
-    Decl::TsEnum(node) => register_ts_enum_decl(map, node),
-    Decl::TsInterface(node) => register_ts_interface_decl(map, node),
-    Decl::TsModule(node) => register_ts_module_decl(map, node),
-    Decl::TsTypeAlias(node) => register_ts_type_alias_decl(map, node),
-    Decl::Using(node) => register_using_decl(map, node),
-    Decl::Var(node) => register_var_decl(map, node),
-  }
-}
-
-fn enum_create_decl<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &Decl,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    Decl::Class(node) => create_class_decl(env, map, node),
-    Decl::Fn(node) => create_fn_decl(env, map, node),
-    Decl::TsEnum(node) => create_ts_enum_decl(env, map, node),
-    Decl::TsInterface(node) => create_ts_interface_decl(env, map, node),
-    Decl::TsModule(node) => create_ts_module_decl(env, map, node),
-    Decl::TsTypeAlias(node) => create_ts_type_alias_decl(env, map, node),
-    Decl::Using(node) => create_using_decl(env, map, node),
-    Decl::Var(node) => create_var_decl(env, map, node),
-  }
-}
-
-fn enum_register_default_decl(map: &mut ByteToIndexMap, node: &DefaultDecl) {
-  match node {
-    DefaultDecl::Class(node) => register_class_expr(map, node),
-    DefaultDecl::Fn(node) => register_fn_expr(map, node),
-    DefaultDecl::TsInterfaceDecl(node) => register_ts_interface_decl(map, node),
-  }
-}
-
-fn enum_create_default_decl<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &DefaultDecl,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    DefaultDecl::Class(node) => create_class_expr(env, map, node),
-    DefaultDecl::Fn(node) => create_fn_expr(env, map, node),
-    DefaultDecl::TsInterfaceDecl(node) => create_ts_interface_decl(env, map, node),
-  }
-}
-
-fn enum_register_export_specifier(map: &mut ByteToIndexMap, node: &ExportSpecifier) {
-  match node {
-    ExportSpecifier::Default(node) => register_export_default_specifier(map, node),
-    ExportSpecifier::Named(node) => register_export_named_specifier(map, node),
-    ExportSpecifier::Namespace(node) => register_export_namespace_specifier(map, node),
-  }
-}
-
-fn enum_create_export_specifier<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &ExportSpecifier,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    ExportSpecifier::Default(node) => create_export_default_specifier(env, map, node),
-    ExportSpecifier::Named(node) => create_export_named_specifier(env, map, node),
-    ExportSpecifier::Namespace(node) => create_export_namespace_specifier(env, map, node),
-  }
-}
-
-fn enum_register_expr(map: &mut ByteToIndexMap, node: &Expr) {
-  match node {
-    Expr::Array(node) => register_array_lit(map, node),
-    Expr::Arrow(node) => register_arrow_expr(map, node),
-    Expr::Assign(node) => register_assign_expr(map, node),
-    Expr::Await(node) => register_await_expr(map, node),
-    Expr::Bin(node) => register_bin_expr(map, node),
-    Expr::Call(node) => register_call_expr(map, node),
-    Expr::Class(node) => register_class_expr(map, node),
-    Expr::Cond(node) => register_cond_expr(map, node),
-    Expr::Fn(node) => register_fn_expr(map, node),
-    Expr::Ident(node) => register_ident(map, node),
-    Expr::Invalid(node) => register_invalid(map, node),
-    Expr::JSXElement(node) => register_jsx_element(map, node),
-    Expr::JSXEmpty(node) => register_jsx_empty_expr(map, node),
-    Expr::JSXFragment(node) => register_jsx_fragment(map, node),
-    Expr::JSXMember(node) => register_jsx_member_expr(map, node),
-    Expr::JSXNamespacedName(node) => register_jsx_namespaced_name(map, node),
-    Expr::Lit(node) => enum_register_lit(map, node),
-    Expr::Member(node) => register_member_expr(map, node),
-    Expr::MetaProp(node) => register_meta_prop_expr(map, node),
-    Expr::New(node) => register_new_expr(map, node),
-    Expr::Object(node) => register_object_lit(map, node),
-    Expr::OptChain(node) => register_opt_chain_expr(map, node),
-    Expr::Paren(node) => register_paren_expr(map, node),
-    Expr::PrivateName(node) => register_private_name(map, node),
-    Expr::Seq(node) => register_seq_expr(map, node),
-    Expr::SuperProp(node) => register_super_prop_expr(map, node),
-    Expr::TaggedTpl(node) => register_tagged_tpl(map, node),
-    Expr::This(node) => register_this_expr(map, node),
-    Expr::Tpl(node) => register_tpl(map, node),
-    Expr::TsAs(node) => register_ts_as_expr(map, node),
-    Expr::TsConstAssertion(node) => register_ts_const_assertion(map, node),
-    Expr::TsInstantiation(node) => register_ts_instantiation(map, node),
-    Expr::TsNonNull(node) => register_ts_non_null_expr(map, node),
-    Expr::TsSatisfies(node) => register_ts_satisfies_expr(map, node),
-    Expr::TsTypeAssertion(node) => register_ts_type_assertion(map, node),
-    Expr::Unary(node) => register_unary_expr(map, node),
-    Expr::Update(node) => register_update_expr(map, node),
-    Expr::Yield(node) => register_yield_expr(map, node),
-  }
-}
-
-fn enum_create_expr<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &Expr,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    Expr::Array(node) => create_array_lit(env, map, node),
-    Expr::Arrow(node) => create_arrow_expr(env, map, node),
-    Expr::Assign(node) => create_assign_expr(env, map, node),
-    Expr::Await(node) => create_await_expr(env, map, node),
-    Expr::Bin(node) => create_bin_expr(env, map, node),
-    Expr::Call(node) => create_call_expr(env, map, node),
-    Expr::Class(node) => create_class_expr(env, map, node),
-    Expr::Cond(node) => create_cond_expr(env, map, node),
-    Expr::Fn(node) => create_fn_expr(env, map, node),
-    Expr::Ident(node) => create_ident(env, map, node),
-    Expr::Invalid(node) => create_invalid(env, map, node),
-    Expr::JSXElement(node) => create_jsx_element(env, map, node),
-    Expr::JSXEmpty(node) => create_jsx_empty_expr(env, map, node),
-    Expr::JSXFragment(node) => create_jsx_fragment(env, map, node),
-    Expr::JSXMember(node) => create_jsx_member_expr(env, map, node),
-    Expr::JSXNamespacedName(node) => create_jsx_namespaced_name(env, map, node),
-    Expr::Lit(node) => enum_create_lit(env, map, node),
-    Expr::Member(node) => create_member_expr(env, map, node),
-    Expr::MetaProp(node) => create_meta_prop_expr(env, map, node),
-    Expr::New(node) => create_new_expr(env, map, node),
-    Expr::Object(node) => create_object_lit(env, map, node),
-    Expr::OptChain(node) => create_opt_chain_expr(env, map, node),
-    Expr::Paren(node) => create_paren_expr(env, map, node),
-    Expr::PrivateName(node) => create_private_name(env, map, node),
-    Expr::Seq(node) => create_seq_expr(env, map, node),
-    Expr::SuperProp(node) => create_super_prop_expr(env, map, node),
-    Expr::TaggedTpl(node) => create_tagged_tpl(env, map, node),
-    Expr::This(node) => create_this_expr(env, map, node),
-    Expr::Tpl(node) => create_tpl(env, map, node),
-    Expr::TsAs(node) => create_ts_as_expr(env, map, node),
-    Expr::TsConstAssertion(node) => create_ts_const_assertion(env, map, node),
-    Expr::TsInstantiation(node) => create_ts_instantiation(env, map, node),
-    Expr::TsNonNull(node) => create_ts_non_null_expr(env, map, node),
-    Expr::TsSatisfies(node) => create_ts_satisfies_expr(env, map, node),
-    Expr::TsTypeAssertion(node) => create_ts_type_assertion(env, map, node),
-    Expr::Unary(node) => create_unary_expr(env, map, node),
-    Expr::Update(node) => create_update_expr(env, map, node),
-    Expr::Yield(node) => create_yield_expr(env, map, node),
-  }
-}
-
-fn enum_register_for_head(map: &mut ByteToIndexMap, node: &ForHead) {
-  match node {
-    ForHead::Pat(node) => enum_register_pat(map, node),
-    ForHead::UsingDecl(node) => register_using_decl(map, node),
-    ForHead::VarDecl(node) => register_var_decl(map, node),
-  }
-}
-
-fn enum_create_for_head<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &ForHead,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    ForHead::Pat(node) => enum_create_pat(env, map, node),
-    ForHead::UsingDecl(node) => create_using_decl(env, map, node),
-    ForHead::VarDecl(node) => create_var_decl(env, map, node),
-  }
-}
-
-fn enum_register_import_specifier(map: &mut ByteToIndexMap, node: &ImportSpecifier) {
-  match node {
-    ImportSpecifier::Default(node) => register_import_default_specifier(map, node),
-    ImportSpecifier::Named(node) => register_import_named_specifier(map, node),
-    ImportSpecifier::Namespace(node) => register_import_star_as_specifier(map, node),
-  }
-}
-
-fn enum_create_import_specifier<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &ImportSpecifier,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    ImportSpecifier::Default(node) => create_import_default_specifier(env, map, node),
-    ImportSpecifier::Named(node) => create_import_named_specifier(env, map, node),
-    ImportSpecifier::Namespace(node) => create_import_star_as_specifier(env, map, node),
-  }
-}
-
-fn enum_register_jsx_attr_name(map: &mut ByteToIndexMap, node: &JSXAttrName) {
-  match node {
-    JSXAttrName::Ident(node) => register_ident(map, node),
-    JSXAttrName::JSXNamespacedName(node) => register_jsx_namespaced_name(map, node),
-  }
-}
-
-fn enum_create_jsx_attr_name<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &JSXAttrName,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    JSXAttrName::Ident(node) => create_ident(env, map, node),
-    JSXAttrName::JSXNamespacedName(node) => create_jsx_namespaced_name(env, map, node),
-  }
-}
-
-fn enum_register_jsx_attr_or_spread(map: &mut ByteToIndexMap, node: &JSXAttrOrSpread) {
-  match node {
-    JSXAttrOrSpread::JSXAttr(node) => register_jsx_attr(map, node),
-    JSXAttrOrSpread::SpreadElement(node) => register_spread_element(map, node),
-  }
-}
-
-fn enum_create_jsx_attr_or_spread<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &JSXAttrOrSpread,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    JSXAttrOrSpread::JSXAttr(node) => create_jsx_attr(env, map, node),
-    JSXAttrOrSpread::SpreadElement(node) => create_spread_element(env, map, node),
-  }
-}
-
-fn enum_register_jsx_attr_value(map: &mut ByteToIndexMap, node: &JSXAttrValue) {
-  match node {
-    JSXAttrValue::JSXElement(node) => register_jsx_element(map, node),
-    JSXAttrValue::JSXExprContainer(node) => register_jsx_expr_container(map, node),
-    JSXAttrValue::JSXFragment(node) => register_jsx_fragment(map, node),
-    JSXAttrValue::Lit(node) => enum_register_lit(map, node),
-  }
-}
-
-fn enum_create_jsx_attr_value<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &JSXAttrValue,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    JSXAttrValue::JSXElement(node) => create_jsx_element(env, map, node),
-    JSXAttrValue::JSXExprContainer(node) => create_jsx_expr_container(env, map, node),
-    JSXAttrValue::JSXFragment(node) => create_jsx_fragment(env, map, node),
-    JSXAttrValue::Lit(node) => enum_create_lit(env, map, node),
-  }
-}
-
-fn enum_register_jsx_element_child(map: &mut ByteToIndexMap, node: &JSXElementChild) {
-  match node {
-    JSXElementChild::JSXElement(node) => register_jsx_element(map, node),
-    JSXElementChild::JSXExprContainer(node) => register_jsx_expr_container(map, node),
-    JSXElementChild::JSXFragment(node) => register_jsx_fragment(map, node),
-    JSXElementChild::JSXSpreadChild(node) => register_jsx_spread_child(map, node),
-    JSXElementChild::JSXText(node) => register_jsx_text(map, node),
-  }
-}
-
-fn enum_create_jsx_element_child<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &JSXElementChild,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    JSXElementChild::JSXElement(node) => create_jsx_element(env, map, node),
-    JSXElementChild::JSXExprContainer(node) => create_jsx_expr_container(env, map, node),
-    JSXElementChild::JSXFragment(node) => create_jsx_fragment(env, map, node),
-    JSXElementChild::JSXSpreadChild(node) => create_jsx_spread_child(env, map, node),
-    JSXElementChild::JSXText(node) => create_jsx_text(env, map, node),
-  }
-}
-
-fn enum_register_jsx_element_name(map: &mut ByteToIndexMap, node: &JSXElementName) {
-  match node {
-    JSXElementName::Ident(node) => register_ident(map, node),
-    JSXElementName::JSXMemberExpr(node) => register_jsx_member_expr(map, node),
-    JSXElementName::JSXNamespacedName(node) => register_jsx_namespaced_name(map, node),
-  }
-}
-
-fn enum_create_jsx_element_name<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &JSXElementName,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    JSXElementName::Ident(node) => create_ident(env, map, node),
-    JSXElementName::JSXMemberExpr(node) => create_jsx_member_expr(env, map, node),
-    JSXElementName::JSXNamespacedName(node) => create_jsx_namespaced_name(env, map, node),
-  }
-}
-
-fn enum_register_jsx_expr(map: &mut ByteToIndexMap, node: &JSXExpr) {
-  match node {
-    JSXExpr::Expr(node) => enum_register_expr(map, node),
-    JSXExpr::JSXEmptyExpr(node) => register_jsx_empty_expr(map, node),
-  }
-}
-
-fn enum_create_jsx_expr<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &JSXExpr,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    JSXExpr::Expr(node) => enum_create_expr(env, map, node),
-    JSXExpr::JSXEmptyExpr(node) => create_jsx_empty_expr(env, map, node),
-  }
-}
-
-fn enum_register_jsx_object(map: &mut ByteToIndexMap, node: &JSXObject) {
-  match node {
-    JSXObject::Ident(node) => register_ident(map, node),
-    JSXObject::JSXMemberExpr(node) => register_jsx_member_expr(map, node),
-  }
-}
-
-fn enum_create_jsx_object<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &JSXObject,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    JSXObject::Ident(node) => create_ident(env, map, node),
-    JSXObject::JSXMemberExpr(node) => create_jsx_member_expr(env, map, node),
-  }
-}
-
-fn enum_register_key(map: &mut ByteToIndexMap, node: &Key) {
-  match node {
-    Key::Private(node) => register_private_name(map, node),
-    Key::Public(node) => enum_register_prop_name(map, node),
-  }
-}
-
-fn enum_create_key<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &Key,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    Key::Private(node) => create_private_name(env, map, node),
-    Key::Public(node) => enum_create_prop_name(env, map, node),
-  }
-}
-
-fn enum_register_lit(map: &mut ByteToIndexMap, node: &Lit) {
-  match node {
-    Lit::BigInt(node) => register_big_int(map, node),
-    Lit::Bool(node) => register_bool(map, node),
-    Lit::JSXText(node) => register_jsx_text(map, node),
-    Lit::Null(node) => register_null(map, node),
-    Lit::Num(node) => register_number(map, node),
-    Lit::Regex(node) => register_regex(map, node),
-    Lit::Str(node) => register_str(map, node),
-  }
-}
-
-fn enum_create_lit<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &Lit,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    Lit::BigInt(node) => create_big_int(env, map, node),
-    Lit::Bool(node) => create_bool(env, map, node),
-    Lit::JSXText(node) => create_jsx_text(env, map, node),
-    Lit::Null(node) => create_null(env, map, node),
-    Lit::Num(node) => create_number(env, map, node),
-    Lit::Regex(node) => create_regex(env, map, node),
-    Lit::Str(node) => create_str(env, map, node),
-  }
-}
-
-fn enum_register_member_prop(map: &mut ByteToIndexMap, node: &MemberProp) {
-  match node {
-    MemberProp::Computed(node) => register_computed_prop_name(map, node),
-    MemberProp::Ident(node) => register_ident(map, node),
-    MemberProp::PrivateName(node) => register_private_name(map, node),
-  }
-}
-
-fn enum_create_member_prop<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &MemberProp,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    MemberProp::Computed(node) => create_computed_prop_name(env, map, node),
-    MemberProp::Ident(node) => create_ident(env, map, node),
-    MemberProp::PrivateName(node) => create_private_name(env, map, node),
-  }
-}
-
-fn enum_register_module_decl(map: &mut ByteToIndexMap, node: &ModuleDecl) {
-  match node {
-    ModuleDecl::ExportAll(node) => register_export_all(map, node),
-    ModuleDecl::ExportDecl(node) => register_export_decl(map, node),
-    ModuleDecl::ExportDefaultDecl(node) => register_export_default_decl(map, node),
-    ModuleDecl::ExportDefaultExpr(node) => register_export_default_expr(map, node),
-    ModuleDecl::ExportNamed(node) => register_named_export(map, node),
-    ModuleDecl::Import(node) => register_import_decl(map, node),
-    ModuleDecl::TsExportAssignment(node) => register_ts_export_assignment(map, node),
-    ModuleDecl::TsImportEquals(node) => register_ts_import_equals_decl(map, node),
-    ModuleDecl::TsNamespaceExport(node) => register_ts_namespace_export_decl(map, node),
-  }
-}
-
-fn enum_create_module_decl<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &ModuleDecl,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    ModuleDecl::ExportAll(node) => create_export_all(env, map, node),
-    ModuleDecl::ExportDecl(node) => create_export_decl(env, map, node),
-    ModuleDecl::ExportDefaultDecl(node) => create_export_default_decl(env, map, node),
-    ModuleDecl::ExportDefaultExpr(node) => create_export_default_expr(env, map, node),
-    ModuleDecl::ExportNamed(node) => create_named_export(env, map, node),
-    ModuleDecl::Import(node) => create_import_decl(env, map, node),
-    ModuleDecl::TsExportAssignment(node) => create_ts_export_assignment(env, map, node),
-    ModuleDecl::TsImportEquals(node) => create_ts_import_equals_decl(env, map, node),
-    ModuleDecl::TsNamespaceExport(node) => create_ts_namespace_export_decl(env, map, node),
-  }
-}
-
-fn enum_register_module_export_name(map: &mut ByteToIndexMap, node: &ModuleExportName) {
-  match node {
-    ModuleExportName::Ident(node) => register_ident(map, node),
-    ModuleExportName::Str(node) => register_str(map, node),
-  }
-}
-
-fn enum_create_module_export_name<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &ModuleExportName,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    ModuleExportName::Ident(node) => create_ident(env, map, node),
-    ModuleExportName::Str(node) => create_str(env, map, node),
-  }
-}
-
-fn enum_register_module_item(map: &mut ByteToIndexMap, node: &ModuleItem) {
-  match node {
-    ModuleItem::ModuleDecl(node) => enum_register_module_decl(map, node),
-    ModuleItem::Stmt(node) => enum_register_stmt(map, node),
-  }
-}
-
-fn enum_create_module_item<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &ModuleItem,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    ModuleItem::ModuleDecl(node) => enum_create_module_decl(env, map, node),
-    ModuleItem::Stmt(node) => enum_create_stmt(env, map, node),
-  }
-}
-
-fn enum_register_object_pat_prop(map: &mut ByteToIndexMap, node: &ObjectPatProp) {
-  match node {
-    ObjectPatProp::Assign(node) => register_assign_pat_prop(map, node),
-    ObjectPatProp::KeyValue(node) => register_key_value_pat_prop(map, node),
-    ObjectPatProp::Rest(node) => register_rest_pat(map, node),
-  }
-}
-
-fn enum_create_object_pat_prop<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &ObjectPatProp,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    ObjectPatProp::Assign(node) => create_assign_pat_prop(env, map, node),
-    ObjectPatProp::KeyValue(node) => create_key_value_pat_prop(env, map, node),
-    ObjectPatProp::Rest(node) => create_rest_pat(env, map, node),
-  }
-}
-
-fn enum_register_opt_chain_base(map: &mut ByteToIndexMap, node: &OptChainBase) {
-  match node {
-    OptChainBase::Call(node) => register_opt_call(map, node),
-    OptChainBase::Member(node) => register_member_expr(map, node),
-  }
-}
-
-fn enum_create_opt_chain_base<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &OptChainBase,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    OptChainBase::Call(node) => create_opt_call(env, map, node),
-    OptChainBase::Member(node) => create_member_expr(env, map, node),
-  }
-}
-
-fn enum_register_param_or_ts_param_prop(map: &mut ByteToIndexMap, node: &ParamOrTsParamProp) {
-  match node {
-    ParamOrTsParamProp::Param(node) => register_param(map, node),
-    ParamOrTsParamProp::TsParamProp(node) => register_ts_param_prop(map, node),
-  }
-}
-
-fn enum_create_param_or_ts_param_prop<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &ParamOrTsParamProp,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    ParamOrTsParamProp::Param(node) => create_param(env, map, node),
-    ParamOrTsParamProp::TsParamProp(node) => create_ts_param_prop(env, map, node),
-  }
-}
-
-fn enum_register_pat(map: &mut ByteToIndexMap, node: &Pat) {
-  match node {
-    Pat::Array(node) => register_array_pat(map, node),
-    Pat::Assign(node) => register_assign_pat(map, node),
-    Pat::Expr(node) => enum_register_expr(map, node),
-    Pat::Ident(node) => register_binding_ident(map, node),
-    Pat::Invalid(node) => register_invalid(map, node),
-    Pat::Object(node) => register_object_pat(map, node),
-    Pat::Rest(node) => register_rest_pat(map, node),
-  }
-}
-
-fn enum_create_pat<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &Pat,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    Pat::Array(node) => create_array_pat(env, map, node),
-    Pat::Assign(node) => create_assign_pat(env, map, node),
-    Pat::Expr(node) => enum_create_expr(env, map, node),
-    Pat::Ident(node) => create_binding_ident(env, map, node),
-    Pat::Invalid(node) => create_invalid(env, map, node),
-    Pat::Object(node) => create_object_pat(env, map, node),
-    Pat::Rest(node) => create_rest_pat(env, map, node),
-  }
-}
-
-pub fn enum_register_program(map: &mut ByteToIndexMap, node: &Program) {
-  match node {
-    Program::Module(node) => register_module(map, node),
-    Program::Script(node) => register_script(map, node),
-  }
-}
-
-pub fn enum_create_program<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &Program,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    Program::Module(node) => create_module(env, map, node),
-    Program::Script(node) => create_script(env, map, node),
-  }
-}
-
-fn enum_register_prop(map: &mut ByteToIndexMap, node: &Prop) {
-  match node {
-    Prop::Assign(node) => register_assign_prop(map, node),
-    Prop::Getter(node) => register_getter_prop(map, node),
-    Prop::KeyValue(node) => register_key_value_prop(map, node),
-    Prop::Method(node) => register_method_prop(map, node),
-    Prop::Setter(node) => register_setter_prop(map, node),
-    Prop::Shorthand(node) => register_ident(map, node),
-  }
-}
-
-fn enum_create_prop<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &Prop,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    Prop::Assign(node) => create_assign_prop(env, map, node),
-    Prop::Getter(node) => create_getter_prop(env, map, node),
-    Prop::KeyValue(node) => create_key_value_prop(env, map, node),
-    Prop::Method(node) => create_method_prop(env, map, node),
-    Prop::Setter(node) => create_setter_prop(env, map, node),
-    Prop::Shorthand(node) => create_ident(env, map, node),
-  }
-}
-
-fn enum_register_prop_name(map: &mut ByteToIndexMap, node: &PropName) {
-  match node {
-    PropName::BigInt(node) => register_big_int(map, node),
-    PropName::Computed(node) => register_computed_prop_name(map, node),
-    PropName::Ident(node) => register_ident(map, node),
-    PropName::Num(node) => register_number(map, node),
-    PropName::Str(node) => register_str(map, node),
-  }
-}
-
-fn enum_create_prop_name<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &PropName,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    PropName::BigInt(node) => create_big_int(env, map, node),
-    PropName::Computed(node) => create_computed_prop_name(env, map, node),
-    PropName::Ident(node) => create_ident(env, map, node),
-    PropName::Num(node) => create_number(env, map, node),
-    PropName::Str(node) => create_str(env, map, node),
-  }
-}
-
-fn enum_register_prop_or_spread(map: &mut ByteToIndexMap, node: &PropOrSpread) {
-  match node {
-    PropOrSpread::Prop(node) => enum_register_prop(map, node),
-    PropOrSpread::Spread(node) => register_spread_element(map, node),
-  }
-}
-
-fn enum_create_prop_or_spread<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &PropOrSpread,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    PropOrSpread::Prop(node) => enum_create_prop(env, map, node),
-    PropOrSpread::Spread(node) => create_spread_element(env, map, node),
-  }
-}
-
-fn enum_register_simple_assign_target(map: &mut ByteToIndexMap, node: &SimpleAssignTarget) {
-  match node {
-    SimpleAssignTarget::Ident(node) => register_binding_ident(map, node),
-    SimpleAssignTarget::Invalid(node) => register_invalid(map, node),
-    SimpleAssignTarget::Member(node) => register_member_expr(map, node),
-    SimpleAssignTarget::OptChain(node) => register_opt_chain_expr(map, node),
-    SimpleAssignTarget::Paren(node) => register_paren_expr(map, node),
-    SimpleAssignTarget::SuperProp(node) => register_super_prop_expr(map, node),
-    SimpleAssignTarget::TsAs(node) => register_ts_as_expr(map, node),
-    SimpleAssignTarget::TsInstantiation(node) => register_ts_instantiation(map, node),
-    SimpleAssignTarget::TsNonNull(node) => register_ts_non_null_expr(map, node),
-    SimpleAssignTarget::TsSatisfies(node) => register_ts_satisfies_expr(map, node),
-    SimpleAssignTarget::TsTypeAssertion(node) => register_ts_type_assertion(map, node),
-  }
-}
-
-fn enum_create_simple_assign_target<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &SimpleAssignTarget,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    SimpleAssignTarget::Ident(node) => create_binding_ident(env, map, node),
-    SimpleAssignTarget::Invalid(node) => create_invalid(env, map, node),
-    SimpleAssignTarget::Member(node) => create_member_expr(env, map, node),
-    SimpleAssignTarget::OptChain(node) => create_opt_chain_expr(env, map, node),
-    SimpleAssignTarget::Paren(node) => create_paren_expr(env, map, node),
-    SimpleAssignTarget::SuperProp(node) => create_super_prop_expr(env, map, node),
-    SimpleAssignTarget::TsAs(node) => create_ts_as_expr(env, map, node),
-    SimpleAssignTarget::TsInstantiation(node) => create_ts_instantiation(env, map, node),
-    SimpleAssignTarget::TsNonNull(node) => create_ts_non_null_expr(env, map, node),
-    SimpleAssignTarget::TsSatisfies(node) => create_ts_satisfies_expr(env, map, node),
-    SimpleAssignTarget::TsTypeAssertion(node) => create_ts_type_assertion(env, map, node),
-  }
-}
-
-fn enum_register_stmt(map: &mut ByteToIndexMap, node: &Stmt) {
-  match node {
-    Stmt::Block(node) => register_block_stmt(map, node),
-    Stmt::Break(node) => register_break_stmt(map, node),
-    Stmt::Continue(node) => register_continue_stmt(map, node),
-    Stmt::Debugger(node) => register_debugger_stmt(map, node),
-    Stmt::Decl(node) => enum_register_decl(map, node),
-    Stmt::DoWhile(node) => register_do_while_stmt(map, node),
-    Stmt::Empty(node) => register_empty_stmt(map, node),
-    Stmt::Expr(node) => register_expr_stmt(map, node),
-    Stmt::For(node) => register_for_stmt(map, node),
-    Stmt::ForIn(node) => register_for_in_stmt(map, node),
-    Stmt::ForOf(node) => register_for_of_stmt(map, node),
-    Stmt::If(node) => register_if_stmt(map, node),
-    Stmt::Labeled(node) => register_labeled_stmt(map, node),
-    Stmt::Return(node) => register_return_stmt(map, node),
-    Stmt::Switch(node) => register_switch_stmt(map, node),
-    Stmt::Throw(node) => register_throw_stmt(map, node),
-    Stmt::Try(node) => register_try_stmt(map, node),
-    Stmt::While(node) => register_while_stmt(map, node),
-    Stmt::With(node) => register_with_stmt(map, node),
-  }
-}
-
-fn enum_create_stmt<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &Stmt,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    Stmt::Block(node) => create_block_stmt(env, map, node),
-    Stmt::Break(node) => create_break_stmt(env, map, node),
-    Stmt::Continue(node) => create_continue_stmt(env, map, node),
-    Stmt::Debugger(node) => create_debugger_stmt(env, map, node),
-    Stmt::Decl(node) => enum_create_decl(env, map, node),
-    Stmt::DoWhile(node) => create_do_while_stmt(env, map, node),
-    Stmt::Empty(node) => create_empty_stmt(env, map, node),
-    Stmt::Expr(node) => create_expr_stmt(env, map, node),
-    Stmt::For(node) => create_for_stmt(env, map, node),
-    Stmt::ForIn(node) => create_for_in_stmt(env, map, node),
-    Stmt::ForOf(node) => create_for_of_stmt(env, map, node),
-    Stmt::If(node) => create_if_stmt(env, map, node),
-    Stmt::Labeled(node) => create_labeled_stmt(env, map, node),
-    Stmt::Return(node) => create_return_stmt(env, map, node),
-    Stmt::Switch(node) => create_switch_stmt(env, map, node),
-    Stmt::Throw(node) => create_throw_stmt(env, map, node),
-    Stmt::Try(node) => create_try_stmt(env, map, node),
-    Stmt::While(node) => create_while_stmt(env, map, node),
-    Stmt::With(node) => create_with_stmt(env, map, node),
-  }
-}
-
-fn enum_register_super_prop(map: &mut ByteToIndexMap, node: &SuperProp) {
-  match node {
-    SuperProp::Computed(node) => register_computed_prop_name(map, node),
-    SuperProp::Ident(node) => register_ident(map, node),
-  }
-}
-
-fn enum_create_super_prop<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &SuperProp,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    SuperProp::Computed(node) => create_computed_prop_name(env, map, node),
-    SuperProp::Ident(node) => create_ident(env, map, node),
-  }
-}
-
-fn enum_register_ts_entity_name(map: &mut ByteToIndexMap, node: &TsEntityName) {
-  match node {
-    TsEntityName::Ident(node) => register_ident(map, node),
-    TsEntityName::TsQualifiedName(node) => register_ts_qualified_name(map, node),
-  }
-}
-
-fn enum_create_ts_entity_name<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsEntityName,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsEntityName::Ident(node) => create_ident(env, map, node),
-    TsEntityName::TsQualifiedName(node) => create_ts_qualified_name(env, map, node),
-  }
-}
-
-fn enum_register_ts_enum_member_id(map: &mut ByteToIndexMap, node: &TsEnumMemberId) {
-  match node {
-    TsEnumMemberId::Ident(node) => register_ident(map, node),
-    TsEnumMemberId::Str(node) => register_str(map, node),
-  }
-}
-
-fn enum_create_ts_enum_member_id<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsEnumMemberId,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsEnumMemberId::Ident(node) => create_ident(env, map, node),
-    TsEnumMemberId::Str(node) => create_str(env, map, node),
-  }
-}
-
-fn enum_register_ts_fn_or_constructor_type(map: &mut ByteToIndexMap, node: &TsFnOrConstructorType) {
-  match node {
-    TsFnOrConstructorType::TsConstructorType(node) => register_ts_constructor_type(map, node),
-    TsFnOrConstructorType::TsFnType(node) => register_ts_fn_type(map, node),
-  }
-}
-
-fn enum_create_ts_fn_or_constructor_type<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsFnOrConstructorType,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsFnOrConstructorType::TsConstructorType(node) => create_ts_constructor_type(env, map, node),
-    TsFnOrConstructorType::TsFnType(node) => create_ts_fn_type(env, map, node),
-  }
-}
-
-fn enum_register_ts_fn_param(map: &mut ByteToIndexMap, node: &TsFnParam) {
-  match node {
-    TsFnParam::Array(node) => register_array_pat(map, node),
-    TsFnParam::Ident(node) => register_binding_ident(map, node),
-    TsFnParam::Object(node) => register_object_pat(map, node),
-    TsFnParam::Rest(node) => register_rest_pat(map, node),
-  }
-}
-
-fn enum_create_ts_fn_param<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsFnParam,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsFnParam::Array(node) => create_array_pat(env, map, node),
-    TsFnParam::Ident(node) => create_binding_ident(env, map, node),
-    TsFnParam::Object(node) => create_object_pat(env, map, node),
-    TsFnParam::Rest(node) => create_rest_pat(env, map, node),
-  }
-}
-
-fn enum_register_ts_lit(map: &mut ByteToIndexMap, node: &TsLit) {
-  match node {
-    TsLit::BigInt(node) => register_big_int(map, node),
-    TsLit::Bool(node) => register_bool(map, node),
-    TsLit::Number(node) => register_number(map, node),
-    TsLit::Str(node) => register_str(map, node),
-    TsLit::Tpl(node) => register_ts_tpl_lit_type(map, node),
-  }
-}
-
-fn enum_create_ts_lit<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsLit,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsLit::BigInt(node) => create_big_int(env, map, node),
-    TsLit::Bool(node) => create_bool(env, map, node),
-    TsLit::Number(node) => create_number(env, map, node),
-    TsLit::Str(node) => create_str(env, map, node),
-    TsLit::Tpl(node) => create_ts_tpl_lit_type(env, map, node),
-  }
-}
-
-fn enum_register_ts_module_name(map: &mut ByteToIndexMap, node: &TsModuleName) {
-  match node {
-    TsModuleName::Ident(node) => register_ident(map, node),
-    TsModuleName::Str(node) => register_str(map, node),
-  }
-}
-
-fn enum_create_ts_module_name<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsModuleName,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsModuleName::Ident(node) => create_ident(env, map, node),
-    TsModuleName::Str(node) => create_str(env, map, node),
-  }
-}
-
-fn enum_register_ts_module_ref(map: &mut ByteToIndexMap, node: &TsModuleRef) {
-  match node {
-    TsModuleRef::TsEntityName(node) => enum_register_ts_entity_name(map, node),
-    TsModuleRef::TsExternalModuleRef(node) => register_ts_external_module_ref(map, node),
-  }
-}
-
-fn enum_create_ts_module_ref<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsModuleRef,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsModuleRef::TsEntityName(node) => enum_create_ts_entity_name(env, map, node),
-    TsModuleRef::TsExternalModuleRef(node) => create_ts_external_module_ref(env, map, node),
-  }
-}
-
-fn enum_register_ts_namespace_body(map: &mut ByteToIndexMap, node: &TsNamespaceBody) {
-  match node {
-    TsNamespaceBody::TsModuleBlock(node) => register_ts_module_block(map, node),
-    TsNamespaceBody::TsNamespaceDecl(node) => register_ts_namespace_decl(map, node),
-  }
-}
-
-fn enum_create_ts_namespace_body<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsNamespaceBody,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsNamespaceBody::TsModuleBlock(node) => create_ts_module_block(env, map, node),
-    TsNamespaceBody::TsNamespaceDecl(node) => create_ts_namespace_decl(env, map, node),
-  }
-}
-
-fn enum_register_ts_param_prop_param(map: &mut ByteToIndexMap, node: &TsParamPropParam) {
-  match node {
-    TsParamPropParam::Assign(node) => register_assign_pat(map, node),
-    TsParamPropParam::Ident(node) => register_binding_ident(map, node),
-  }
-}
-
-fn enum_create_ts_param_prop_param<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsParamPropParam,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsParamPropParam::Assign(node) => create_assign_pat(env, map, node),
-    TsParamPropParam::Ident(node) => create_binding_ident(env, map, node),
-  }
-}
-
-fn enum_register_ts_this_type_or_ident(map: &mut ByteToIndexMap, node: &TsThisTypeOrIdent) {
-  match node {
-    TsThisTypeOrIdent::Ident(node) => register_ident(map, node),
-    TsThisTypeOrIdent::TsThisType(node) => register_ts_this_type(map, node),
-  }
-}
-
-fn enum_create_ts_this_type_or_ident<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsThisTypeOrIdent,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsThisTypeOrIdent::Ident(node) => create_ident(env, map, node),
-    TsThisTypeOrIdent::TsThisType(node) => create_ts_this_type(env, map, node),
-  }
-}
-
-fn enum_register_ts_type(map: &mut ByteToIndexMap, node: &TsType) {
-  match node {
-    TsType::TsArrayType(node) => register_ts_array_type(map, node),
-    TsType::TsConditionalType(node) => register_ts_conditional_type(map, node),
-    TsType::TsFnOrConstructorType(node) => enum_register_ts_fn_or_constructor_type(map, node),
-    TsType::TsImportType(node) => register_ts_import_type(map, node),
-    TsType::TsIndexedAccessType(node) => register_ts_indexed_access_type(map, node),
-    TsType::TsInferType(node) => register_ts_infer_type(map, node),
-    TsType::TsKeywordType(node) => register_ts_keyword_type(map, node),
-    TsType::TsLitType(node) => register_ts_lit_type(map, node),
-    TsType::TsMappedType(node) => register_ts_mapped_type(map, node),
-    TsType::TsOptionalType(node) => register_ts_optional_type(map, node),
-    TsType::TsParenthesizedType(node) => register_ts_parenthesized_type(map, node),
-    TsType::TsRestType(node) => register_ts_rest_type(map, node),
-    TsType::TsThisType(node) => register_ts_this_type(map, node),
-    TsType::TsTupleType(node) => register_ts_tuple_type(map, node),
-    TsType::TsTypeLit(node) => register_ts_type_lit(map, node),
-    TsType::TsTypeOperator(node) => register_ts_type_operator(map, node),
-    TsType::TsTypePredicate(node) => register_ts_type_predicate(map, node),
-    TsType::TsTypeQuery(node) => register_ts_type_query(map, node),
-    TsType::TsTypeRef(node) => register_ts_type_ref(map, node),
-    TsType::TsUnionOrIntersectionType(node) => enum_register_ts_union_or_intersection_type(map, node),
-  }
-}
-
-fn enum_create_ts_type<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsType,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsType::TsArrayType(node) => create_ts_array_type(env, map, node),
-    TsType::TsConditionalType(node) => create_ts_conditional_type(env, map, node),
-    TsType::TsFnOrConstructorType(node) => enum_create_ts_fn_or_constructor_type(env, map, node),
-    TsType::TsImportType(node) => create_ts_import_type(env, map, node),
-    TsType::TsIndexedAccessType(node) => create_ts_indexed_access_type(env, map, node),
-    TsType::TsInferType(node) => create_ts_infer_type(env, map, node),
-    TsType::TsKeywordType(node) => create_ts_keyword_type(env, map, node),
-    TsType::TsLitType(node) => create_ts_lit_type(env, map, node),
-    TsType::TsMappedType(node) => create_ts_mapped_type(env, map, node),
-    TsType::TsOptionalType(node) => create_ts_optional_type(env, map, node),
-    TsType::TsParenthesizedType(node) => create_ts_parenthesized_type(env, map, node),
-    TsType::TsRestType(node) => create_ts_rest_type(env, map, node),
-    TsType::TsThisType(node) => create_ts_this_type(env, map, node),
-    TsType::TsTupleType(node) => create_ts_tuple_type(env, map, node),
-    TsType::TsTypeLit(node) => create_ts_type_lit(env, map, node),
-    TsType::TsTypeOperator(node) => create_ts_type_operator(env, map, node),
-    TsType::TsTypePredicate(node) => create_ts_type_predicate(env, map, node),
-    TsType::TsTypeQuery(node) => create_ts_type_query(env, map, node),
-    TsType::TsTypeRef(node) => create_ts_type_ref(env, map, node),
-    TsType::TsUnionOrIntersectionType(node) => enum_create_ts_union_or_intersection_type(env, map, node),
-  }
-}
-
-fn enum_register_ts_type_element(map: &mut ByteToIndexMap, node: &TsTypeElement) {
-  match node {
-    TsTypeElement::TsCallSignatureDecl(node) => register_ts_call_signature_decl(map, node),
-    TsTypeElement::TsConstructSignatureDecl(node) => register_ts_construct_signature_decl(map, node),
-    TsTypeElement::TsGetterSignature(node) => register_ts_getter_signature(map, node),
-    TsTypeElement::TsIndexSignature(node) => register_ts_index_signature(map, node),
-    TsTypeElement::TsMethodSignature(node) => register_ts_method_signature(map, node),
-    TsTypeElement::TsPropertySignature(node) => register_ts_property_signature(map, node),
-    TsTypeElement::TsSetterSignature(node) => register_ts_setter_signature(map, node),
-  }
-}
-
-fn enum_create_ts_type_element<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsTypeElement,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsTypeElement::TsCallSignatureDecl(node) => create_ts_call_signature_decl(env, map, node),
-    TsTypeElement::TsConstructSignatureDecl(node) => create_ts_construct_signature_decl(env, map, node),
-    TsTypeElement::TsGetterSignature(node) => create_ts_getter_signature(env, map, node),
-    TsTypeElement::TsIndexSignature(node) => create_ts_index_signature(env, map, node),
-    TsTypeElement::TsMethodSignature(node) => create_ts_method_signature(env, map, node),
-    TsTypeElement::TsPropertySignature(node) => create_ts_property_signature(env, map, node),
-    TsTypeElement::TsSetterSignature(node) => create_ts_setter_signature(env, map, node),
-  }
-}
-
-fn enum_register_ts_type_query_expr(map: &mut ByteToIndexMap, node: &TsTypeQueryExpr) {
-  match node {
-    TsTypeQueryExpr::Import(node) => register_ts_import_type(map, node),
-    TsTypeQueryExpr::TsEntityName(node) => enum_register_ts_entity_name(map, node),
-  }
-}
-
-fn enum_create_ts_type_query_expr<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsTypeQueryExpr,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsTypeQueryExpr::Import(node) => create_ts_import_type(env, map, node),
-    TsTypeQueryExpr::TsEntityName(node) => enum_create_ts_entity_name(env, map, node),
-  }
-}
-
-fn enum_register_ts_union_or_intersection_type(map: &mut ByteToIndexMap, node: &TsUnionOrIntersectionType) {
-  match node {
-    TsUnionOrIntersectionType::TsIntersectionType(node) => register_ts_intersection_type(map, node),
-    TsUnionOrIntersectionType::TsUnionType(node) => register_ts_union_type(map, node),
-  }
-}
-
-fn enum_create_ts_union_or_intersection_type<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &TsUnionOrIntersectionType,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    TsUnionOrIntersectionType::TsIntersectionType(node) => create_ts_intersection_type(env, map, node),
-    TsUnionOrIntersectionType::TsUnionType(node) => create_ts_union_type(env, map, node),
-  }
-}
-
-fn enum_register_var_decl_or_expr(map: &mut ByteToIndexMap, node: &VarDeclOrExpr) {
-  match node {
-    VarDeclOrExpr::Expr(node) => enum_register_expr(map, node),
-    VarDeclOrExpr::VarDecl(node) => register_var_decl(map, node),
-  }
-}
-
-fn enum_create_var_decl_or_expr<'local, 'a>(
-  env: &mut JNIEnv<'local>,
-  map: &ByteToIndexMap,
-  node: &VarDeclOrExpr,
-) -> JObject<'a>
-where
-  'local: 'a,
-{
-  match node {
-    VarDeclOrExpr::Expr(node) => enum_create_expr(env, map, node),
-    VarDeclOrExpr::VarDecl(node) => create_var_decl(env, map, node),
+impl ToJavaWithMap<ByteToIndexMap> for AssignTarget {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      AssignTarget::Pat(node) => node.to_java_with_map(env, map),
+      AssignTarget::Simple(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for AssignTargetPat {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      AssignTargetPat::Array(node) => node.register_with_map(map),
+      AssignTargetPat::Invalid(node) => node.register_with_map(map),
+      AssignTargetPat::Object(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for AssignTargetPat {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      AssignTargetPat::Array(node) => node.to_java_with_map(env, map),
+      AssignTargetPat::Invalid(node) => node.to_java_with_map(env, map),
+      AssignTargetPat::Object(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for BlockStmtOrExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      BlockStmtOrExpr::BlockStmt(node) => node.register_with_map(map),
+      BlockStmtOrExpr::Expr(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for BlockStmtOrExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      BlockStmtOrExpr::BlockStmt(node) => node.to_java_with_map(env, map),
+      BlockStmtOrExpr::Expr(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Callee {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      Callee::Expr(node) => node.register_with_map(map),
+      Callee::Import(node) => node.register_with_map(map),
+      Callee::Super(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Callee {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      Callee::Expr(node) => node.to_java_with_map(env, map),
+      Callee::Import(node) => node.to_java_with_map(env, map),
+      Callee::Super(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ClassMember {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      ClassMember::AutoAccessor(node) => node.register_with_map(map),
+      ClassMember::ClassProp(node) => node.register_with_map(map),
+      ClassMember::Constructor(node) => node.register_with_map(map),
+      ClassMember::Empty(node) => node.register_with_map(map),
+      ClassMember::Method(node) => node.register_with_map(map),
+      ClassMember::PrivateMethod(node) => node.register_with_map(map),
+      ClassMember::PrivateProp(node) => node.register_with_map(map),
+      ClassMember::StaticBlock(node) => node.register_with_map(map),
+      ClassMember::TsIndexSignature(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ClassMember {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      ClassMember::AutoAccessor(node) => node.to_java_with_map(env, map),
+      ClassMember::ClassProp(node) => node.to_java_with_map(env, map),
+      ClassMember::Constructor(node) => node.to_java_with_map(env, map),
+      ClassMember::Empty(node) => node.to_java_with_map(env, map),
+      ClassMember::Method(node) => node.to_java_with_map(env, map),
+      ClassMember::PrivateMethod(node) => node.to_java_with_map(env, map),
+      ClassMember::PrivateProp(node) => node.to_java_with_map(env, map),
+      ClassMember::StaticBlock(node) => node.to_java_with_map(env, map),
+      ClassMember::TsIndexSignature(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Decl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      Decl::Class(node) => node.register_with_map(map),
+      Decl::Fn(node) => node.register_with_map(map),
+      Decl::TsEnum(node) => node.register_with_map(map),
+      Decl::TsInterface(node) => node.register_with_map(map),
+      Decl::TsModule(node) => node.register_with_map(map),
+      Decl::TsTypeAlias(node) => node.register_with_map(map),
+      Decl::Using(node) => node.register_with_map(map),
+      Decl::Var(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Decl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      Decl::Class(node) => node.to_java_with_map(env, map),
+      Decl::Fn(node) => node.to_java_with_map(env, map),
+      Decl::TsEnum(node) => node.to_java_with_map(env, map),
+      Decl::TsInterface(node) => node.to_java_with_map(env, map),
+      Decl::TsModule(node) => node.to_java_with_map(env, map),
+      Decl::TsTypeAlias(node) => node.to_java_with_map(env, map),
+      Decl::Using(node) => node.to_java_with_map(env, map),
+      Decl::Var(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for DefaultDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      DefaultDecl::Class(node) => node.register_with_map(map),
+      DefaultDecl::Fn(node) => node.register_with_map(map),
+      DefaultDecl::TsInterfaceDecl(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for DefaultDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      DefaultDecl::Class(node) => node.to_java_with_map(env, map),
+      DefaultDecl::Fn(node) => node.to_java_with_map(env, map),
+      DefaultDecl::TsInterfaceDecl(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ExportSpecifier {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      ExportSpecifier::Default(node) => node.register_with_map(map),
+      ExportSpecifier::Named(node) => node.register_with_map(map),
+      ExportSpecifier::Namespace(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ExportSpecifier {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      ExportSpecifier::Default(node) => node.to_java_with_map(env, map),
+      ExportSpecifier::Named(node) => node.to_java_with_map(env, map),
+      ExportSpecifier::Namespace(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Expr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      Expr::Array(node) => node.register_with_map(map),
+      Expr::Arrow(node) => node.register_with_map(map),
+      Expr::Assign(node) => node.register_with_map(map),
+      Expr::Await(node) => node.register_with_map(map),
+      Expr::Bin(node) => node.register_with_map(map),
+      Expr::Call(node) => node.register_with_map(map),
+      Expr::Class(node) => node.register_with_map(map),
+      Expr::Cond(node) => node.register_with_map(map),
+      Expr::Fn(node) => node.register_with_map(map),
+      Expr::Ident(node) => node.register_with_map(map),
+      Expr::Invalid(node) => node.register_with_map(map),
+      Expr::JSXElement(node) => node.register_with_map(map),
+      Expr::JSXEmpty(node) => node.register_with_map(map),
+      Expr::JSXFragment(node) => node.register_with_map(map),
+      Expr::JSXMember(node) => node.register_with_map(map),
+      Expr::JSXNamespacedName(node) => node.register_with_map(map),
+      Expr::Lit(node) => node.register_with_map(map),
+      Expr::Member(node) => node.register_with_map(map),
+      Expr::MetaProp(node) => node.register_with_map(map),
+      Expr::New(node) => node.register_with_map(map),
+      Expr::Object(node) => node.register_with_map(map),
+      Expr::OptChain(node) => node.register_with_map(map),
+      Expr::Paren(node) => node.register_with_map(map),
+      Expr::PrivateName(node) => node.register_with_map(map),
+      Expr::Seq(node) => node.register_with_map(map),
+      Expr::SuperProp(node) => node.register_with_map(map),
+      Expr::TaggedTpl(node) => node.register_with_map(map),
+      Expr::This(node) => node.register_with_map(map),
+      Expr::Tpl(node) => node.register_with_map(map),
+      Expr::TsAs(node) => node.register_with_map(map),
+      Expr::TsConstAssertion(node) => node.register_with_map(map),
+      Expr::TsInstantiation(node) => node.register_with_map(map),
+      Expr::TsNonNull(node) => node.register_with_map(map),
+      Expr::TsSatisfies(node) => node.register_with_map(map),
+      Expr::TsTypeAssertion(node) => node.register_with_map(map),
+      Expr::Unary(node) => node.register_with_map(map),
+      Expr::Update(node) => node.register_with_map(map),
+      Expr::Yield(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Expr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      Expr::Array(node) => node.to_java_with_map(env, map),
+      Expr::Arrow(node) => node.to_java_with_map(env, map),
+      Expr::Assign(node) => node.to_java_with_map(env, map),
+      Expr::Await(node) => node.to_java_with_map(env, map),
+      Expr::Bin(node) => node.to_java_with_map(env, map),
+      Expr::Call(node) => node.to_java_with_map(env, map),
+      Expr::Class(node) => node.to_java_with_map(env, map),
+      Expr::Cond(node) => node.to_java_with_map(env, map),
+      Expr::Fn(node) => node.to_java_with_map(env, map),
+      Expr::Ident(node) => node.to_java_with_map(env, map),
+      Expr::Invalid(node) => node.to_java_with_map(env, map),
+      Expr::JSXElement(node) => node.to_java_with_map(env, map),
+      Expr::JSXEmpty(node) => node.to_java_with_map(env, map),
+      Expr::JSXFragment(node) => node.to_java_with_map(env, map),
+      Expr::JSXMember(node) => node.to_java_with_map(env, map),
+      Expr::JSXNamespacedName(node) => node.to_java_with_map(env, map),
+      Expr::Lit(node) => node.to_java_with_map(env, map),
+      Expr::Member(node) => node.to_java_with_map(env, map),
+      Expr::MetaProp(node) => node.to_java_with_map(env, map),
+      Expr::New(node) => node.to_java_with_map(env, map),
+      Expr::Object(node) => node.to_java_with_map(env, map),
+      Expr::OptChain(node) => node.to_java_with_map(env, map),
+      Expr::Paren(node) => node.to_java_with_map(env, map),
+      Expr::PrivateName(node) => node.to_java_with_map(env, map),
+      Expr::Seq(node) => node.to_java_with_map(env, map),
+      Expr::SuperProp(node) => node.to_java_with_map(env, map),
+      Expr::TaggedTpl(node) => node.to_java_with_map(env, map),
+      Expr::This(node) => node.to_java_with_map(env, map),
+      Expr::Tpl(node) => node.to_java_with_map(env, map),
+      Expr::TsAs(node) => node.to_java_with_map(env, map),
+      Expr::TsConstAssertion(node) => node.to_java_with_map(env, map),
+      Expr::TsInstantiation(node) => node.to_java_with_map(env, map),
+      Expr::TsNonNull(node) => node.to_java_with_map(env, map),
+      Expr::TsSatisfies(node) => node.to_java_with_map(env, map),
+      Expr::TsTypeAssertion(node) => node.to_java_with_map(env, map),
+      Expr::Unary(node) => node.to_java_with_map(env, map),
+      Expr::Update(node) => node.to_java_with_map(env, map),
+      Expr::Yield(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ForHead {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      ForHead::Pat(node) => node.register_with_map(map),
+      ForHead::UsingDecl(node) => node.register_with_map(map),
+      ForHead::VarDecl(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ForHead {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      ForHead::Pat(node) => node.to_java_with_map(env, map),
+      ForHead::UsingDecl(node) => node.to_java_with_map(env, map),
+      ForHead::VarDecl(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ImportSpecifier {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      ImportSpecifier::Default(node) => node.register_with_map(map),
+      ImportSpecifier::Named(node) => node.register_with_map(map),
+      ImportSpecifier::Namespace(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ImportSpecifier {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      ImportSpecifier::Default(node) => node.to_java_with_map(env, map),
+      ImportSpecifier::Named(node) => node.to_java_with_map(env, map),
+      ImportSpecifier::Namespace(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXAttrName {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      JSXAttrName::Ident(node) => node.register_with_map(map),
+      JSXAttrName::JSXNamespacedName(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXAttrName {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      JSXAttrName::Ident(node) => node.to_java_with_map(env, map),
+      JSXAttrName::JSXNamespacedName(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXAttrOrSpread {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      JSXAttrOrSpread::JSXAttr(node) => node.register_with_map(map),
+      JSXAttrOrSpread::SpreadElement(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXAttrOrSpread {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      JSXAttrOrSpread::JSXAttr(node) => node.to_java_with_map(env, map),
+      JSXAttrOrSpread::SpreadElement(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXAttrValue {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      JSXAttrValue::JSXElement(node) => node.register_with_map(map),
+      JSXAttrValue::JSXExprContainer(node) => node.register_with_map(map),
+      JSXAttrValue::JSXFragment(node) => node.register_with_map(map),
+      JSXAttrValue::Lit(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXAttrValue {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      JSXAttrValue::JSXElement(node) => node.to_java_with_map(env, map),
+      JSXAttrValue::JSXExprContainer(node) => node.to_java_with_map(env, map),
+      JSXAttrValue::JSXFragment(node) => node.to_java_with_map(env, map),
+      JSXAttrValue::Lit(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXElementChild {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      JSXElementChild::JSXElement(node) => node.register_with_map(map),
+      JSXElementChild::JSXExprContainer(node) => node.register_with_map(map),
+      JSXElementChild::JSXFragment(node) => node.register_with_map(map),
+      JSXElementChild::JSXSpreadChild(node) => node.register_with_map(map),
+      JSXElementChild::JSXText(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXElementChild {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      JSXElementChild::JSXElement(node) => node.to_java_with_map(env, map),
+      JSXElementChild::JSXExprContainer(node) => node.to_java_with_map(env, map),
+      JSXElementChild::JSXFragment(node) => node.to_java_with_map(env, map),
+      JSXElementChild::JSXSpreadChild(node) => node.to_java_with_map(env, map),
+      JSXElementChild::JSXText(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXElementName {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      JSXElementName::Ident(node) => node.register_with_map(map),
+      JSXElementName::JSXMemberExpr(node) => node.register_with_map(map),
+      JSXElementName::JSXNamespacedName(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXElementName {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      JSXElementName::Ident(node) => node.to_java_with_map(env, map),
+      JSXElementName::JSXMemberExpr(node) => node.to_java_with_map(env, map),
+      JSXElementName::JSXNamespacedName(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      JSXExpr::Expr(node) => node.register_with_map(map),
+      JSXExpr::JSXEmptyExpr(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      JSXExpr::Expr(node) => node.to_java_with_map(env, map),
+      JSXExpr::JSXEmptyExpr(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXObject {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      JSXObject::Ident(node) => node.register_with_map(map),
+      JSXObject::JSXMemberExpr(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXObject {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      JSXObject::Ident(node) => node.to_java_with_map(env, map),
+      JSXObject::JSXMemberExpr(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Key {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      Key::Private(node) => node.register_with_map(map),
+      Key::Public(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Key {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      Key::Private(node) => node.to_java_with_map(env, map),
+      Key::Public(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Lit {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      Lit::BigInt(node) => node.register_with_map(map),
+      Lit::Bool(node) => node.register_with_map(map),
+      Lit::JSXText(node) => node.register_with_map(map),
+      Lit::Null(node) => node.register_with_map(map),
+      Lit::Num(node) => node.register_with_map(map),
+      Lit::Regex(node) => node.register_with_map(map),
+      Lit::Str(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Lit {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      Lit::BigInt(node) => node.to_java_with_map(env, map),
+      Lit::Bool(node) => node.to_java_with_map(env, map),
+      Lit::JSXText(node) => node.to_java_with_map(env, map),
+      Lit::Null(node) => node.to_java_with_map(env, map),
+      Lit::Num(node) => node.to_java_with_map(env, map),
+      Lit::Regex(node) => node.to_java_with_map(env, map),
+      Lit::Str(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for MemberProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      MemberProp::Computed(node) => node.register_with_map(map),
+      MemberProp::Ident(node) => node.register_with_map(map),
+      MemberProp::PrivateName(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for MemberProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      MemberProp::Computed(node) => node.to_java_with_map(env, map),
+      MemberProp::Ident(node) => node.to_java_with_map(env, map),
+      MemberProp::PrivateName(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ModuleDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      ModuleDecl::ExportAll(node) => node.register_with_map(map),
+      ModuleDecl::ExportDecl(node) => node.register_with_map(map),
+      ModuleDecl::ExportDefaultDecl(node) => node.register_with_map(map),
+      ModuleDecl::ExportDefaultExpr(node) => node.register_with_map(map),
+      ModuleDecl::ExportNamed(node) => node.register_with_map(map),
+      ModuleDecl::Import(node) => node.register_with_map(map),
+      ModuleDecl::TsExportAssignment(node) => node.register_with_map(map),
+      ModuleDecl::TsImportEquals(node) => node.register_with_map(map),
+      ModuleDecl::TsNamespaceExport(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ModuleDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      ModuleDecl::ExportAll(node) => node.to_java_with_map(env, map),
+      ModuleDecl::ExportDecl(node) => node.to_java_with_map(env, map),
+      ModuleDecl::ExportDefaultDecl(node) => node.to_java_with_map(env, map),
+      ModuleDecl::ExportDefaultExpr(node) => node.to_java_with_map(env, map),
+      ModuleDecl::ExportNamed(node) => node.to_java_with_map(env, map),
+      ModuleDecl::Import(node) => node.to_java_with_map(env, map),
+      ModuleDecl::TsExportAssignment(node) => node.to_java_with_map(env, map),
+      ModuleDecl::TsImportEquals(node) => node.to_java_with_map(env, map),
+      ModuleDecl::TsNamespaceExport(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ModuleExportName {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      ModuleExportName::Ident(node) => node.register_with_map(map),
+      ModuleExportName::Str(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ModuleExportName {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      ModuleExportName::Ident(node) => node.to_java_with_map(env, map),
+      ModuleExportName::Str(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ModuleItem {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      ModuleItem::ModuleDecl(node) => node.register_with_map(map),
+      ModuleItem::Stmt(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ModuleItem {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      ModuleItem::ModuleDecl(node) => node.to_java_with_map(env, map),
+      ModuleItem::Stmt(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ObjectPatProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      ObjectPatProp::Assign(node) => node.register_with_map(map),
+      ObjectPatProp::KeyValue(node) => node.register_with_map(map),
+      ObjectPatProp::Rest(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ObjectPatProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      ObjectPatProp::Assign(node) => node.to_java_with_map(env, map),
+      ObjectPatProp::KeyValue(node) => node.to_java_with_map(env, map),
+      ObjectPatProp::Rest(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for OptChainBase {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      OptChainBase::Call(node) => node.register_with_map(map),
+      OptChainBase::Member(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for OptChainBase {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      OptChainBase::Call(node) => node.to_java_with_map(env, map),
+      OptChainBase::Member(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ParamOrTsParamProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      ParamOrTsParamProp::Param(node) => node.register_with_map(map),
+      ParamOrTsParamProp::TsParamProp(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ParamOrTsParamProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      ParamOrTsParamProp::Param(node) => node.to_java_with_map(env, map),
+      ParamOrTsParamProp::TsParamProp(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Pat {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      Pat::Array(node) => node.register_with_map(map),
+      Pat::Assign(node) => node.register_with_map(map),
+      Pat::Expr(node) => node.register_with_map(map),
+      Pat::Ident(node) => node.register_with_map(map),
+      Pat::Invalid(node) => node.register_with_map(map),
+      Pat::Object(node) => node.register_with_map(map),
+      Pat::Rest(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Pat {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      Pat::Array(node) => node.to_java_with_map(env, map),
+      Pat::Assign(node) => node.to_java_with_map(env, map),
+      Pat::Expr(node) => node.to_java_with_map(env, map),
+      Pat::Ident(node) => node.to_java_with_map(env, map),
+      Pat::Invalid(node) => node.to_java_with_map(env, map),
+      Pat::Object(node) => node.to_java_with_map(env, map),
+      Pat::Rest(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Program {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      Program::Module(node) => node.register_with_map(map),
+      Program::Script(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Program {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      Program::Module(node) => node.to_java_with_map(env, map),
+      Program::Script(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Prop {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      Prop::Assign(node) => node.register_with_map(map),
+      Prop::Getter(node) => node.register_with_map(map),
+      Prop::KeyValue(node) => node.register_with_map(map),
+      Prop::Method(node) => node.register_with_map(map),
+      Prop::Setter(node) => node.register_with_map(map),
+      Prop::Shorthand(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Prop {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      Prop::Assign(node) => node.to_java_with_map(env, map),
+      Prop::Getter(node) => node.to_java_with_map(env, map),
+      Prop::KeyValue(node) => node.to_java_with_map(env, map),
+      Prop::Method(node) => node.to_java_with_map(env, map),
+      Prop::Setter(node) => node.to_java_with_map(env, map),
+      Prop::Shorthand(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for PropName {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      PropName::BigInt(node) => node.register_with_map(map),
+      PropName::Computed(node) => node.register_with_map(map),
+      PropName::Ident(node) => node.register_with_map(map),
+      PropName::Num(node) => node.register_with_map(map),
+      PropName::Str(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for PropName {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      PropName::BigInt(node) => node.to_java_with_map(env, map),
+      PropName::Computed(node) => node.to_java_with_map(env, map),
+      PropName::Ident(node) => node.to_java_with_map(env, map),
+      PropName::Num(node) => node.to_java_with_map(env, map),
+      PropName::Str(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for PropOrSpread {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      PropOrSpread::Prop(node) => node.register_with_map(map),
+      PropOrSpread::Spread(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for PropOrSpread {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      PropOrSpread::Prop(node) => node.to_java_with_map(env, map),
+      PropOrSpread::Spread(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for SimpleAssignTarget {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      SimpleAssignTarget::Ident(node) => node.register_with_map(map),
+      SimpleAssignTarget::Invalid(node) => node.register_with_map(map),
+      SimpleAssignTarget::Member(node) => node.register_with_map(map),
+      SimpleAssignTarget::OptChain(node) => node.register_with_map(map),
+      SimpleAssignTarget::Paren(node) => node.register_with_map(map),
+      SimpleAssignTarget::SuperProp(node) => node.register_with_map(map),
+      SimpleAssignTarget::TsAs(node) => node.register_with_map(map),
+      SimpleAssignTarget::TsInstantiation(node) => node.register_with_map(map),
+      SimpleAssignTarget::TsNonNull(node) => node.register_with_map(map),
+      SimpleAssignTarget::TsSatisfies(node) => node.register_with_map(map),
+      SimpleAssignTarget::TsTypeAssertion(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for SimpleAssignTarget {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      SimpleAssignTarget::Ident(node) => node.to_java_with_map(env, map),
+      SimpleAssignTarget::Invalid(node) => node.to_java_with_map(env, map),
+      SimpleAssignTarget::Member(node) => node.to_java_with_map(env, map),
+      SimpleAssignTarget::OptChain(node) => node.to_java_with_map(env, map),
+      SimpleAssignTarget::Paren(node) => node.to_java_with_map(env, map),
+      SimpleAssignTarget::SuperProp(node) => node.to_java_with_map(env, map),
+      SimpleAssignTarget::TsAs(node) => node.to_java_with_map(env, map),
+      SimpleAssignTarget::TsInstantiation(node) => node.to_java_with_map(env, map),
+      SimpleAssignTarget::TsNonNull(node) => node.to_java_with_map(env, map),
+      SimpleAssignTarget::TsSatisfies(node) => node.to_java_with_map(env, map),
+      SimpleAssignTarget::TsTypeAssertion(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Stmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      Stmt::Block(node) => node.register_with_map(map),
+      Stmt::Break(node) => node.register_with_map(map),
+      Stmt::Continue(node) => node.register_with_map(map),
+      Stmt::Debugger(node) => node.register_with_map(map),
+      Stmt::Decl(node) => node.register_with_map(map),
+      Stmt::DoWhile(node) => node.register_with_map(map),
+      Stmt::Empty(node) => node.register_with_map(map),
+      Stmt::Expr(node) => node.register_with_map(map),
+      Stmt::For(node) => node.register_with_map(map),
+      Stmt::ForIn(node) => node.register_with_map(map),
+      Stmt::ForOf(node) => node.register_with_map(map),
+      Stmt::If(node) => node.register_with_map(map),
+      Stmt::Labeled(node) => node.register_with_map(map),
+      Stmt::Return(node) => node.register_with_map(map),
+      Stmt::Switch(node) => node.register_with_map(map),
+      Stmt::Throw(node) => node.register_with_map(map),
+      Stmt::Try(node) => node.register_with_map(map),
+      Stmt::While(node) => node.register_with_map(map),
+      Stmt::With(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Stmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      Stmt::Block(node) => node.to_java_with_map(env, map),
+      Stmt::Break(node) => node.to_java_with_map(env, map),
+      Stmt::Continue(node) => node.to_java_with_map(env, map),
+      Stmt::Debugger(node) => node.to_java_with_map(env, map),
+      Stmt::Decl(node) => node.to_java_with_map(env, map),
+      Stmt::DoWhile(node) => node.to_java_with_map(env, map),
+      Stmt::Empty(node) => node.to_java_with_map(env, map),
+      Stmt::Expr(node) => node.to_java_with_map(env, map),
+      Stmt::For(node) => node.to_java_with_map(env, map),
+      Stmt::ForIn(node) => node.to_java_with_map(env, map),
+      Stmt::ForOf(node) => node.to_java_with_map(env, map),
+      Stmt::If(node) => node.to_java_with_map(env, map),
+      Stmt::Labeled(node) => node.to_java_with_map(env, map),
+      Stmt::Return(node) => node.to_java_with_map(env, map),
+      Stmt::Switch(node) => node.to_java_with_map(env, map),
+      Stmt::Throw(node) => node.to_java_with_map(env, map),
+      Stmt::Try(node) => node.to_java_with_map(env, map),
+      Stmt::While(node) => node.to_java_with_map(env, map),
+      Stmt::With(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for SuperProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      SuperProp::Computed(node) => node.register_with_map(map),
+      SuperProp::Ident(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for SuperProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      SuperProp::Computed(node) => node.to_java_with_map(env, map),
+      SuperProp::Ident(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsEntityName {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsEntityName::Ident(node) => node.register_with_map(map),
+      TsEntityName::TsQualifiedName(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsEntityName {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsEntityName::Ident(node) => node.to_java_with_map(env, map),
+      TsEntityName::TsQualifiedName(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsEnumMemberId {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsEnumMemberId::Ident(node) => node.register_with_map(map),
+      TsEnumMemberId::Str(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsEnumMemberId {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsEnumMemberId::Ident(node) => node.to_java_with_map(env, map),
+      TsEnumMemberId::Str(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsFnOrConstructorType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsFnOrConstructorType::TsConstructorType(node) => node.register_with_map(map),
+      TsFnOrConstructorType::TsFnType(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsFnOrConstructorType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsFnOrConstructorType::TsConstructorType(node) => node.to_java_with_map(env, map),
+      TsFnOrConstructorType::TsFnType(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsFnParam {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsFnParam::Array(node) => node.register_with_map(map),
+      TsFnParam::Ident(node) => node.register_with_map(map),
+      TsFnParam::Object(node) => node.register_with_map(map),
+      TsFnParam::Rest(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsFnParam {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsFnParam::Array(node) => node.to_java_with_map(env, map),
+      TsFnParam::Ident(node) => node.to_java_with_map(env, map),
+      TsFnParam::Object(node) => node.to_java_with_map(env, map),
+      TsFnParam::Rest(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsLit {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsLit::BigInt(node) => node.register_with_map(map),
+      TsLit::Bool(node) => node.register_with_map(map),
+      TsLit::Number(node) => node.register_with_map(map),
+      TsLit::Str(node) => node.register_with_map(map),
+      TsLit::Tpl(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsLit {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsLit::BigInt(node) => node.to_java_with_map(env, map),
+      TsLit::Bool(node) => node.to_java_with_map(env, map),
+      TsLit::Number(node) => node.to_java_with_map(env, map),
+      TsLit::Str(node) => node.to_java_with_map(env, map),
+      TsLit::Tpl(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsModuleName {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsModuleName::Ident(node) => node.register_with_map(map),
+      TsModuleName::Str(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsModuleName {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsModuleName::Ident(node) => node.to_java_with_map(env, map),
+      TsModuleName::Str(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsModuleRef {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsModuleRef::TsEntityName(node) => node.register_with_map(map),
+      TsModuleRef::TsExternalModuleRef(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsModuleRef {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsModuleRef::TsEntityName(node) => node.to_java_with_map(env, map),
+      TsModuleRef::TsExternalModuleRef(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsNamespaceBody {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsNamespaceBody::TsModuleBlock(node) => node.register_with_map(map),
+      TsNamespaceBody::TsNamespaceDecl(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsNamespaceBody {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsNamespaceBody::TsModuleBlock(node) => node.to_java_with_map(env, map),
+      TsNamespaceBody::TsNamespaceDecl(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsParamPropParam {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsParamPropParam::Assign(node) => node.register_with_map(map),
+      TsParamPropParam::Ident(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsParamPropParam {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsParamPropParam::Assign(node) => node.to_java_with_map(env, map),
+      TsParamPropParam::Ident(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsThisTypeOrIdent {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsThisTypeOrIdent::Ident(node) => node.register_with_map(map),
+      TsThisTypeOrIdent::TsThisType(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsThisTypeOrIdent {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsThisTypeOrIdent::Ident(node) => node.to_java_with_map(env, map),
+      TsThisTypeOrIdent::TsThisType(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsType::TsArrayType(node) => node.register_with_map(map),
+      TsType::TsConditionalType(node) => node.register_with_map(map),
+      TsType::TsFnOrConstructorType(node) => node.register_with_map(map),
+      TsType::TsImportType(node) => node.register_with_map(map),
+      TsType::TsIndexedAccessType(node) => node.register_with_map(map),
+      TsType::TsInferType(node) => node.register_with_map(map),
+      TsType::TsKeywordType(node) => node.register_with_map(map),
+      TsType::TsLitType(node) => node.register_with_map(map),
+      TsType::TsMappedType(node) => node.register_with_map(map),
+      TsType::TsOptionalType(node) => node.register_with_map(map),
+      TsType::TsParenthesizedType(node) => node.register_with_map(map),
+      TsType::TsRestType(node) => node.register_with_map(map),
+      TsType::TsThisType(node) => node.register_with_map(map),
+      TsType::TsTupleType(node) => node.register_with_map(map),
+      TsType::TsTypeLit(node) => node.register_with_map(map),
+      TsType::TsTypeOperator(node) => node.register_with_map(map),
+      TsType::TsTypePredicate(node) => node.register_with_map(map),
+      TsType::TsTypeQuery(node) => node.register_with_map(map),
+      TsType::TsTypeRef(node) => node.register_with_map(map),
+      TsType::TsUnionOrIntersectionType(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsType::TsArrayType(node) => node.to_java_with_map(env, map),
+      TsType::TsConditionalType(node) => node.to_java_with_map(env, map),
+      TsType::TsFnOrConstructorType(node) => node.to_java_with_map(env, map),
+      TsType::TsImportType(node) => node.to_java_with_map(env, map),
+      TsType::TsIndexedAccessType(node) => node.to_java_with_map(env, map),
+      TsType::TsInferType(node) => node.to_java_with_map(env, map),
+      TsType::TsKeywordType(node) => node.to_java_with_map(env, map),
+      TsType::TsLitType(node) => node.to_java_with_map(env, map),
+      TsType::TsMappedType(node) => node.to_java_with_map(env, map),
+      TsType::TsOptionalType(node) => node.to_java_with_map(env, map),
+      TsType::TsParenthesizedType(node) => node.to_java_with_map(env, map),
+      TsType::TsRestType(node) => node.to_java_with_map(env, map),
+      TsType::TsThisType(node) => node.to_java_with_map(env, map),
+      TsType::TsTupleType(node) => node.to_java_with_map(env, map),
+      TsType::TsTypeLit(node) => node.to_java_with_map(env, map),
+      TsType::TsTypeOperator(node) => node.to_java_with_map(env, map),
+      TsType::TsTypePredicate(node) => node.to_java_with_map(env, map),
+      TsType::TsTypeQuery(node) => node.to_java_with_map(env, map),
+      TsType::TsTypeRef(node) => node.to_java_with_map(env, map),
+      TsType::TsUnionOrIntersectionType(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTypeElement {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsTypeElement::TsCallSignatureDecl(node) => node.register_with_map(map),
+      TsTypeElement::TsConstructSignatureDecl(node) => node.register_with_map(map),
+      TsTypeElement::TsGetterSignature(node) => node.register_with_map(map),
+      TsTypeElement::TsIndexSignature(node) => node.register_with_map(map),
+      TsTypeElement::TsMethodSignature(node) => node.register_with_map(map),
+      TsTypeElement::TsPropertySignature(node) => node.register_with_map(map),
+      TsTypeElement::TsSetterSignature(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTypeElement {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsTypeElement::TsCallSignatureDecl(node) => node.to_java_with_map(env, map),
+      TsTypeElement::TsConstructSignatureDecl(node) => node.to_java_with_map(env, map),
+      TsTypeElement::TsGetterSignature(node) => node.to_java_with_map(env, map),
+      TsTypeElement::TsIndexSignature(node) => node.to_java_with_map(env, map),
+      TsTypeElement::TsMethodSignature(node) => node.to_java_with_map(env, map),
+      TsTypeElement::TsPropertySignature(node) => node.to_java_with_map(env, map),
+      TsTypeElement::TsSetterSignature(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTypeQueryExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsTypeQueryExpr::Import(node) => node.register_with_map(map),
+      TsTypeQueryExpr::TsEntityName(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTypeQueryExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsTypeQueryExpr::Import(node) => node.to_java_with_map(env, map),
+      TsTypeQueryExpr::TsEntityName(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsUnionOrIntersectionType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      TsUnionOrIntersectionType::TsIntersectionType(node) => node.register_with_map(map),
+      TsUnionOrIntersectionType::TsUnionType(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsUnionOrIntersectionType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      TsUnionOrIntersectionType::TsIntersectionType(node) => node.to_java_with_map(env, map),
+      TsUnionOrIntersectionType::TsUnionType(node) => node.to_java_with_map(env, map),
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for VarDeclOrExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    match self {
+      VarDeclOrExpr::Expr(node) => node.register_with_map(map),
+      VarDeclOrExpr::VarDecl(node) => node.register_with_map(map),
+    }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for VarDeclOrExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    match self {
+      VarDeclOrExpr::Expr(node) => node.to_java_with_map(env, map),
+      VarDeclOrExpr::VarDecl(node) => node.to_java_with_map(env, map),
+    }
   }
 }
 /* Enum End */
 
 /* Node Begin */
-fn register_array_lit(map: &mut ByteToIndexMap, node: &ArrayLit) {
-  map.register_by_span(&node.span);
-  node.elems.iter().for_each(|node| {
-    node.as_ref().map(|node| register_expr_or_spread(map, node));
-  });
+impl RegisterWithMap<ByteToIndexMap> for ArrayLit {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.elems.iter().for_each(|node| {
+      node.as_ref().map(|node| node.register_with_map(map));
+    });
+  }
 }
 
-fn create_array_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ArrayLit) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_elems = list_new(env, node.elems.len());
-  node.elems.iter().for_each(|node| {
-    let java_node = node.as_ref().map_or_else(
-      || Default::default(),
-      |node| create_expr_or_spread(env, map, node));
+impl ToJavaWithMap<ByteToIndexMap> for ArrayLit {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_elems = list_new(env, self.elems.len());
+    self.elems.iter().for_each(|node| {
+      let java_node = node.as_ref().map_or_else(
+        || Default::default(),
+        |node| node.to_java_with_map(env, map));
     list_add(env, &java_elems, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_ARRAY_LIT.as_ref().unwrap() }
-    .construct(env, &java_elems, &java_span_ex);
-  delete_local_ref!(env, java_elems);
-  delete_local_ref!(env, java_span_ex);
-  return_value
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_ARRAY_LIT.as_ref().unwrap() }
+      .construct(env, &java_elems, &java_span_ex);
+    delete_local_ref!(env, java_elems);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
 }
 
-fn register_array_pat(map: &mut ByteToIndexMap, node: &ArrayPat) {
-  map.register_by_span(&node.span);
-  node.elems.iter().for_each(|node| {
-    node.as_ref().map(|node| enum_register_pat(map, node));
-  });
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
+impl RegisterWithMap<ByteToIndexMap> for ArrayPat {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.elems.iter().for_each(|node| {
+      node.as_ref().map(|node| node.register_with_map(map));
+    });
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+  }
 }
 
-fn create_array_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ArrayPat) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_elems = list_new(env, node.elems.len());
-  node.elems.iter().for_each(|node| {
-    let java_node = node.as_ref().map_or_else(
-      || Default::default(),
-      |node| enum_create_pat(env, map, node));
+impl ToJavaWithMap<ByteToIndexMap> for ArrayPat {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_elems = list_new(env, self.elems.len());
+    self.elems.iter().for_each(|node| {
+      let java_node = node.as_ref().map_or_else(
+        || Default::default(),
+        |node| node.to_java_with_map(env, map));
     list_add(env, &java_elems, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let optional = node.optional;
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_ARRAY_PAT.as_ref().unwrap() }
-    .construct(env, &java_elems, optional, &java_optional_type_ann, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_ref!(env, java_elems);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_arrow_expr(map: &mut ByteToIndexMap, node: &ArrowExpr) {
-  map.register_by_span(&node.span);
-  node.params.iter().for_each(|node| {
-    enum_register_pat(map, node);
-  });
-  enum_register_block_stmt_or_expr(map, &node.body);
-  node.type_params.as_ref().map(|node| register_ts_type_param_decl(map, node));
-  node.return_type.as_ref().map(|node| register_ts_type_ann(map, node));
-}
-
-fn create_arrow_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ArrowExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_params = list_new(env, node.params.len());
-  node.params.iter().for_each(|node| {
-    let java_node = enum_create_pat(env, map, node);
-    list_add(env, &java_params, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_body = enum_create_block_stmt_or_expr(env, map, &node.body);
-  let is_async = node.is_async;
-  let is_generator = node.is_generator;
-  let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_decl(env, map, node));
-  let java_optional_return_type = node.return_type.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_ARROW_EXPR.as_ref().unwrap() }
-    .construct(env, &java_params, &java_body, is_async, is_generator, &java_optional_type_params, &java_optional_return_type, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_params);
-  delete_local_optional_ref!(env, java_optional_return_type);
-  delete_local_ref!(env, java_params);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_assign_expr(map: &mut ByteToIndexMap, node: &AssignExpr) {
-  map.register_by_span(&node.span);
-  enum_register_assign_target(map, &node.left);
-  enum_register_expr(map, &node.right);
-}
-
-fn create_assign_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &AssignExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_op = node.op.to_java(env);
-  let java_left = enum_create_assign_target(env, map, &node.left);
-  let java_right = enum_create_expr(env, map, &node.right);
-  let return_value = unsafe { JAVA_CLASS_ASSIGN_EXPR.as_ref().unwrap() }
-    .construct(env, &java_op, &java_left, &java_right, &java_span_ex);
-  delete_local_ref!(env, java_op);
-  delete_local_ref!(env, java_left);
-  delete_local_ref!(env, java_right);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_assign_pat(map: &mut ByteToIndexMap, node: &AssignPat) {
-  map.register_by_span(&node.span);
-  enum_register_pat(map, &node.left);
-  enum_register_expr(map, &node.right);
-}
-
-fn create_assign_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &AssignPat) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_left = enum_create_pat(env, map, &node.left);
-  let java_right = enum_create_expr(env, map, &node.right);
-  let return_value = unsafe { JAVA_CLASS_ASSIGN_PAT.as_ref().unwrap() }
-    .construct(env, &java_left, &java_right, &java_span_ex);
-  delete_local_ref!(env, java_left);
-  delete_local_ref!(env, java_right);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_assign_pat_prop(map: &mut ByteToIndexMap, node: &AssignPatProp) {
-  map.register_by_span(&node.span);
-  register_binding_ident(map, &node.key);
-  node.value.as_ref().map(|node| enum_register_expr(map, node));
-}
-
-fn create_assign_pat_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &AssignPatProp) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_key = create_binding_ident(env, map, &node.key);
-  let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_ASSIGN_PAT_PROP.as_ref().unwrap() }
-    .construct(env, &java_key, &java_optional_value, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_value);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_assign_prop(map: &mut ByteToIndexMap, node: &AssignProp) {
-  map.register_by_span(&node.span());
-  register_ident(map, &node.key);
-  enum_register_expr(map, &node.value);
-}
-
-fn create_assign_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &AssignProp) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_key = create_ident(env, map, &node.key);
-  let java_value = enum_create_expr(env, map, &node.value);
-  let return_value = unsafe { JAVA_CLASS_ASSIGN_PROP.as_ref().unwrap() }
-    .construct(env, &java_key, &java_value, &java_span_ex);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_value);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_auto_accessor(map: &mut ByteToIndexMap, node: &AutoAccessor) {
-  map.register_by_span(&node.span);
-  enum_register_key(map, &node.key);
-  node.value.as_ref().map(|node| enum_register_expr(map, node));
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-  node.decorators.iter().for_each(|node| {
-    register_decorator(map, node);
-  });
-}
-
-fn create_auto_accessor<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &AutoAccessor) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_key = enum_create_key(env, map, &node.key);
-  let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let is_static = node.is_static;
-  let java_decorators = list_new(env, node.decorators.len());
-  node.decorators.iter().for_each(|node| {
-    let java_node = create_decorator(env, map, node);
-    list_add(env, &java_decorators, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
-  let is_override = node.is_override;
-  let definite = node.definite;
-  let return_value = unsafe { JAVA_CLASS_AUTO_ACCESSOR.as_ref().unwrap() }
-    .construct(env, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_override, definite, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_value);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_optional_ref!(env, java_optional_accessibility);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_decorators);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_await_expr(map: &mut ByteToIndexMap, node: &AwaitExpr) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.arg);
-}
-
-fn create_await_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &AwaitExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_arg = enum_create_expr(env, map, &node.arg);
-  let return_value = unsafe { JAVA_CLASS_AWAIT_EXPR.as_ref().unwrap() }
-    .construct(env, &java_arg, &java_span_ex);
-  delete_local_ref!(env, java_arg);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_big_int(map: &mut ByteToIndexMap, node: &BigInt) {
-  map.register_by_span(&node.span);
-}
-
-fn register_bin_expr(map: &mut ByteToIndexMap, node: &BinExpr) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.left);
-  enum_register_expr(map, &node.right);
-}
-
-fn create_bin_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BinExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_op = node.op.to_java(env);
-  let java_left = enum_create_expr(env, map, &node.left);
-  let java_right = enum_create_expr(env, map, &node.right);
-  let return_value = unsafe { JAVA_CLASS_BIN_EXPR.as_ref().unwrap() }
-    .construct(env, &java_op, &java_left, &java_right, &java_span_ex);
-  delete_local_ref!(env, java_op);
-  delete_local_ref!(env, java_left);
-  delete_local_ref!(env, java_right);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_binding_ident(map: &mut ByteToIndexMap, node: &BindingIdent) {
-  map.register_by_span(&node.span());
-  register_ident(map, &node.id);
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-}
-
-fn create_binding_ident<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BindingIdent) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_id = create_ident(env, map, &node.id);
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_BINDING_IDENT.as_ref().unwrap() }
-    .construct(env, &java_id, &java_optional_type_ann, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_ref!(env, java_id);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_block_stmt(map: &mut ByteToIndexMap, node: &BlockStmt) {
-  map.register_by_span(&node.span);
-  node.stmts.iter().for_each(|node| {
-    enum_register_stmt(map, node);
-  });
-}
-
-fn create_block_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BlockStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_stmts = list_new(env, node.stmts.len());
-  node.stmts.iter().for_each(|node| {
-    let java_node = enum_create_stmt(env, map, node);
-    list_add(env, &java_stmts, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_BLOCK_STMT.as_ref().unwrap() }
-    .construct(env, &java_stmts, &java_span_ex);
-  delete_local_ref!(env, java_stmts);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_bool(map: &mut ByteToIndexMap, node: &Bool) {
-  map.register_by_span(&node.span);
-}
-
-fn create_bool<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Bool) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let value = node.value;
-  let return_value = unsafe { JAVA_CLASS_BOOL.as_ref().unwrap() }
-    .construct(env, value, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_break_stmt(map: &mut ByteToIndexMap, node: &BreakStmt) {
-  map.register_by_span(&node.span);
-  node.label.as_ref().map(|node| register_ident(map, node));
-}
-
-fn create_break_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &BreakStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_optional_label = node.label.as_ref().map(|node| create_ident(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_BREAK_STMT.as_ref().unwrap() }
-    .construct(env, &java_optional_label, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_label);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_call_expr(map: &mut ByteToIndexMap, node: &CallExpr) {
-  map.register_by_span(&node.span);
-  enum_register_callee(map, &node.callee);
-  node.args.iter().for_each(|node| {
-    register_expr_or_spread(map, node);
-  });
-  node.type_args.as_ref().map(|node| register_ts_type_param_instantiation(map, node));
-}
-
-fn create_call_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &CallExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_callee = enum_create_callee(env, map, &node.callee);
-  let java_args = list_new(env, node.args.len());
-  node.args.iter().for_each(|node| {
-    let java_node = create_expr_or_spread(env, map, node);
-    list_add(env, &java_args, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_type_args = node.type_args.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_CALL_EXPR.as_ref().unwrap() }
-    .construct(env, &java_callee, &java_args, &java_optional_type_args, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_args);
-  delete_local_ref!(env, java_callee);
-  delete_local_ref!(env, java_args);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_catch_clause(map: &mut ByteToIndexMap, node: &CatchClause) {
-  map.register_by_span(&node.span);
-  node.param.as_ref().map(|node| enum_register_pat(map, node));
-  register_block_stmt(map, &node.body);
-}
-
-fn create_catch_clause<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &CatchClause) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_optional_param = node.param.as_ref().map(|node| enum_create_pat(env, map, node));
-  let java_body = create_block_stmt(env, map, &node.body);
-  let return_value = unsafe { JAVA_CLASS_CATCH_CLAUSE.as_ref().unwrap() }
-    .construct(env, &java_optional_param, &java_body, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_param);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_class(map: &mut ByteToIndexMap, node: &Class) {
-  map.register_by_span(&node.span);
-  node.decorators.iter().for_each(|node| {
-    register_decorator(map, node);
-  });
-  node.body.iter().for_each(|node| {
-    enum_register_class_member(map, node);
-  });
-  node.super_class.as_ref().map(|node| enum_register_expr(map, node));
-  node.type_params.as_ref().map(|node| register_ts_type_param_decl(map, node));
-  node.super_type_params.as_ref().map(|node| register_ts_type_param_instantiation(map, node));
-  node.implements.iter().for_each(|node| {
-    register_ts_expr_with_type_args(map, node);
-  });
-}
-
-fn create_class<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Class) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_decorators = list_new(env, node.decorators.len());
-  node.decorators.iter().for_each(|node| {
-    let java_node = create_decorator(env, map, node);
-    list_add(env, &java_decorators, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_body = list_new(env, node.body.len());
-  node.body.iter().for_each(|node| {
-    let java_node = enum_create_class_member(env, map, node);
-    list_add(env, &java_body, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_super_class = node.super_class.as_ref().map(|node| enum_create_expr(env, map, node));
-  let is_abstract = node.is_abstract;
-  let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_decl(env, map, node));
-  let java_optional_super_type_params = node.super_type_params.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
-  let java_implements = list_new(env, node.implements.len());
-  node.implements.iter().for_each(|node| {
-    let java_node = create_ts_expr_with_type_args(env, map, node);
-    list_add(env, &java_implements, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_CLASS.as_ref().unwrap() }
-    .construct(env, &java_decorators, &java_body, &java_optional_super_class, is_abstract, &java_optional_type_params, &java_optional_super_type_params, &java_implements, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_super_class);
-  delete_local_optional_ref!(env, java_optional_type_params);
-  delete_local_optional_ref!(env, java_optional_super_type_params);
-  delete_local_ref!(env, java_decorators);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_implements);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_class_decl(map: &mut ByteToIndexMap, node: &ClassDecl) {
-  map.register_by_span(&node.span());
-  register_ident(map, &node.ident);
-  register_class(map, &node.class);
-}
-
-fn create_class_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ClassDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_ident = create_ident(env, map, &node.ident);
-  let declare = node.declare;
-  let java_class = create_class(env, map, &node.class);
-  let return_value = unsafe { JAVA_CLASS_CLASS_DECL.as_ref().unwrap() }
-    .construct(env, &java_ident, declare, &java_class, &java_span_ex);
-  delete_local_ref!(env, java_ident);
-  delete_local_ref!(env, java_class);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_class_expr(map: &mut ByteToIndexMap, node: &ClassExpr) {
-  map.register_by_span(&node.span());
-  node.ident.as_ref().map(|node| register_ident(map, node));
-  register_class(map, &node.class);
-}
-
-fn create_class_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ClassExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_optional_ident = node.ident.as_ref().map(|node| create_ident(env, map, node));
-  let java_class = create_class(env, map, &node.class);
-  let return_value = unsafe { JAVA_CLASS_CLASS_EXPR.as_ref().unwrap() }
-    .construct(env, &java_optional_ident, &java_class, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_ident);
-  delete_local_ref!(env, java_class);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_class_method(map: &mut ByteToIndexMap, node: &ClassMethod) {
-  map.register_by_span(&node.span);
-  enum_register_prop_name(map, &node.key);
-  register_function(map, &node.function);
-}
-
-fn create_class_method<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ClassMethod) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_key = enum_create_prop_name(env, map, &node.key);
-  let java_function = create_function(env, map, &node.function);
-  let java_kind = node.kind.to_java(env);
-  let is_static = node.is_static;
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
-  let is_abstract = node.is_abstract;
-  let is_optional = node.is_optional;
-  let is_override = node.is_override;
-  let return_value = unsafe { JAVA_CLASS_CLASS_METHOD.as_ref().unwrap() }
-    .construct(env, &java_key, &java_function, &java_kind, is_static, &java_optional_accessibility, is_abstract, is_optional, is_override, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_accessibility);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_function);
-  delete_local_ref!(env, java_kind);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_class_prop(map: &mut ByteToIndexMap, node: &ClassProp) {
-  map.register_by_span(&node.span);
-  enum_register_prop_name(map, &node.key);
-  node.value.as_ref().map(|node| enum_register_expr(map, node));
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-  node.decorators.iter().for_each(|node| {
-    register_decorator(map, node);
-  });
-}
-
-fn create_class_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ClassProp) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_key = enum_create_prop_name(env, map, &node.key);
-  let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let is_static = node.is_static;
-  let java_decorators = list_new(env, node.decorators.len());
-  node.decorators.iter().for_each(|node| {
-    let java_node = create_decorator(env, map, node);
-    list_add(env, &java_decorators, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
-  let is_abstract = node.is_abstract;
-  let is_optional = node.is_optional;
-  let is_override = node.is_override;
-  let readonly = node.readonly;
-  let declare = node.declare;
-  let definite = node.definite;
-  let return_value = unsafe { JAVA_CLASS_CLASS_PROP.as_ref().unwrap() }
-    .construct(env, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_abstract, is_optional, is_override, readonly, declare, definite, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_value);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_optional_ref!(env, java_optional_accessibility);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_decorators);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_computed_prop_name(map: &mut ByteToIndexMap, node: &ComputedPropName) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-}
-
-fn create_computed_prop_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ComputedPropName) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let return_value = unsafe { JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_cond_expr(map: &mut ByteToIndexMap, node: &CondExpr) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.test);
-  enum_register_expr(map, &node.cons);
-  enum_register_expr(map, &node.alt);
-}
-
-fn create_cond_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &CondExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_test = enum_create_expr(env, map, &node.test);
-  let java_cons = enum_create_expr(env, map, &node.cons);
-  let java_alt = enum_create_expr(env, map, &node.alt);
-  let return_value = unsafe { JAVA_CLASS_COND_EXPR.as_ref().unwrap() }
-    .construct(env, &java_test, &java_cons, &java_alt, &java_span_ex);
-  delete_local_ref!(env, java_test);
-  delete_local_ref!(env, java_cons);
-  delete_local_ref!(env, java_alt);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_constructor(map: &mut ByteToIndexMap, node: &Constructor) {
-  map.register_by_span(&node.span);
-  enum_register_prop_name(map, &node.key);
-  node.params.iter().for_each(|node| {
-    enum_register_param_or_ts_param_prop(map, node);
-  });
-  node.body.as_ref().map(|node| register_block_stmt(map, node));
-}
-
-fn create_constructor<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Constructor) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_key = enum_create_prop_name(env, map, &node.key);
-  let java_params = list_new(env, node.params.len());
-  node.params.iter().for_each(|node| {
-    let java_node = enum_create_param_or_ts_param_prop(env, map, node);
-    list_add(env, &java_params, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
-  let is_optional = node.is_optional;
-  let return_value = unsafe { JAVA_CLASS_CONSTRUCTOR.as_ref().unwrap() }
-    .construct(env, &java_key, &java_params, &java_optional_body, &java_optional_accessibility, is_optional, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_body);
-  delete_local_optional_ref!(env, java_optional_accessibility);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_params);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_continue_stmt(map: &mut ByteToIndexMap, node: &ContinueStmt) {
-  map.register_by_span(&node.span);
-  node.label.as_ref().map(|node| register_ident(map, node));
-}
-
-fn create_continue_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ContinueStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_optional_label = node.label.as_ref().map(|node| create_ident(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_CONTINUE_STMT.as_ref().unwrap() }
-    .construct(env, &java_optional_label, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_label);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_debugger_stmt(map: &mut ByteToIndexMap, node: &DebuggerStmt) {
-  map.register_by_span(&node.span);
-}
-
-fn create_debugger_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &DebuggerStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let return_value = unsafe { JAVA_CLASS_DEBUGGER_STMT.as_ref().unwrap() }
-    .construct(env, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_decorator(map: &mut ByteToIndexMap, node: &Decorator) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-}
-
-fn create_decorator<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Decorator) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let return_value = unsafe { JAVA_CLASS_DECORATOR.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_do_while_stmt(map: &mut ByteToIndexMap, node: &DoWhileStmt) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.test);
-  enum_register_stmt(map, &node.body);
-}
-
-fn create_do_while_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &DoWhileStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_test = enum_create_expr(env, map, &node.test);
-  let java_body = enum_create_stmt(env, map, &node.body);
-  let return_value = unsafe { JAVA_CLASS_DO_WHILE_STMT.as_ref().unwrap() }
-    .construct(env, &java_test, &java_body, &java_span_ex);
-  delete_local_ref!(env, java_test);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_empty_stmt(map: &mut ByteToIndexMap, node: &EmptyStmt) {
-  map.register_by_span(&node.span);
-}
-
-fn create_empty_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &EmptyStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let return_value = unsafe { JAVA_CLASS_EMPTY_STMT.as_ref().unwrap() }
-    .construct(env, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_export_all(map: &mut ByteToIndexMap, node: &ExportAll) {
-  map.register_by_span(&node.span);
-  register_str(map, &node.src);
-  node.with.as_ref().map(|node| register_object_lit(map, node));
-}
-
-fn create_export_all<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ExportAll) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_src = create_str(env, map, &node.src);
-  let type_only = node.type_only;
-  let java_optional_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_EXPORT_ALL.as_ref().unwrap() }
-    .construct(env, &java_src, type_only, &java_optional_with, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_with);
-  delete_local_ref!(env, java_src);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_export_decl(map: &mut ByteToIndexMap, node: &ExportDecl) {
-  map.register_by_span(&node.span);
-  enum_register_decl(map, &node.decl);
-}
-
-fn create_export_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ExportDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_decl = enum_create_decl(env, map, &node.decl);
-  let return_value = unsafe { JAVA_CLASS_EXPORT_DECL.as_ref().unwrap() }
-    .construct(env, &java_decl, &java_span_ex);
-  delete_local_ref!(env, java_decl);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_export_default_decl(map: &mut ByteToIndexMap, node: &ExportDefaultDecl) {
-  map.register_by_span(&node.span);
-  enum_register_default_decl(map, &node.decl);
-}
-
-fn create_export_default_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ExportDefaultDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_decl = enum_create_default_decl(env, map, &node.decl);
-  let return_value = unsafe { JAVA_CLASS_EXPORT_DEFAULT_DECL.as_ref().unwrap() }
-    .construct(env, &java_decl, &java_span_ex);
-  delete_local_ref!(env, java_decl);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_export_default_expr(map: &mut ByteToIndexMap, node: &ExportDefaultExpr) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-}
-
-fn create_export_default_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ExportDefaultExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let return_value = unsafe { JAVA_CLASS_EXPORT_DEFAULT_EXPR.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_export_default_specifier(map: &mut ByteToIndexMap, node: &ExportDefaultSpecifier) {
-  map.register_by_span(&node.span());
-  register_ident(map, &node.exported);
-}
-
-fn create_export_default_specifier<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ExportDefaultSpecifier) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_exported = create_ident(env, map, &node.exported);
-  let return_value = unsafe { JAVA_CLASS_EXPORT_DEFAULT_SPECIFIER.as_ref().unwrap() }
-    .construct(env, &java_exported, &java_span_ex);
-  delete_local_ref!(env, java_exported);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_export_named_specifier(map: &mut ByteToIndexMap, node: &ExportNamedSpecifier) {
-  map.register_by_span(&node.span);
-  enum_register_module_export_name(map, &node.orig);
-  node.exported.as_ref().map(|node| enum_register_module_export_name(map, node));
-}
-
-fn create_export_named_specifier<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ExportNamedSpecifier) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_orig = enum_create_module_export_name(env, map, &node.orig);
-  let java_optional_exported = node.exported.as_ref().map(|node| enum_create_module_export_name(env, map, node));
-  let is_type_only = node.is_type_only;
-  let return_value = unsafe { JAVA_CLASS_EXPORT_NAMED_SPECIFIER.as_ref().unwrap() }
-    .construct(env, &java_orig, &java_optional_exported, is_type_only, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_exported);
-  delete_local_ref!(env, java_orig);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_export_namespace_specifier(map: &mut ByteToIndexMap, node: &ExportNamespaceSpecifier) {
-  map.register_by_span(&node.span);
-  enum_register_module_export_name(map, &node.name);
-}
-
-fn create_export_namespace_specifier<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ExportNamespaceSpecifier) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_name = enum_create_module_export_name(env, map, &node.name);
-  let return_value = unsafe { JAVA_CLASS_EXPORT_NAMESPACE_SPECIFIER.as_ref().unwrap() }
-    .construct(env, &java_name, &java_span_ex);
-  delete_local_ref!(env, java_name);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_expr_or_spread(map: &mut ByteToIndexMap, node: &ExprOrSpread) {
-  map.register_by_span(&node.span());
-  node.spread.as_ref().map(|node| map.register_by_span(node));
-  enum_register_expr(map, &node.expr);
-}
-
-fn create_expr_or_spread<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ExprOrSpread) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_optional_spread = node.spread.as_ref().map(|node| map.get_span_ex_by_span(node).to_java(env));
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let return_value = unsafe { JAVA_CLASS_EXPR_OR_SPREAD.as_ref().unwrap() }
-    .construct(env, &java_optional_spread, &java_expr, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_spread);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_expr_stmt(map: &mut ByteToIndexMap, node: &ExprStmt) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-}
-
-fn create_expr_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ExprStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let return_value = unsafe { JAVA_CLASS_EXPR_STMT.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_fn_decl(map: &mut ByteToIndexMap, node: &FnDecl) {
-  map.register_by_span(&node.span());
-  register_ident(map, &node.ident);
-  register_function(map, &node.function);
-}
-
-fn create_fn_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &FnDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_ident = create_ident(env, map, &node.ident);
-  let declare = node.declare;
-  let java_function = create_function(env, map, &node.function);
-  let return_value = unsafe { JAVA_CLASS_FN_DECL.as_ref().unwrap() }
-    .construct(env, &java_ident, declare, &java_function, &java_span_ex);
-  delete_local_ref!(env, java_ident);
-  delete_local_ref!(env, java_function);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_fn_expr(map: &mut ByteToIndexMap, node: &FnExpr) {
-  map.register_by_span(&node.span());
-  node.ident.as_ref().map(|node| register_ident(map, node));
-  register_function(map, &node.function);
-}
-
-fn create_fn_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &FnExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_optional_ident = node.ident.as_ref().map(|node| create_ident(env, map, node));
-  let java_function = create_function(env, map, &node.function);
-  let return_value = unsafe { JAVA_CLASS_FN_EXPR.as_ref().unwrap() }
-    .construct(env, &java_optional_ident, &java_function, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_ident);
-  delete_local_ref!(env, java_function);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_for_in_stmt(map: &mut ByteToIndexMap, node: &ForInStmt) {
-  map.register_by_span(&node.span);
-  enum_register_for_head(map, &node.left);
-  enum_register_expr(map, &node.right);
-  enum_register_stmt(map, &node.body);
-}
-
-fn create_for_in_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ForInStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_left = enum_create_for_head(env, map, &node.left);
-  let java_right = enum_create_expr(env, map, &node.right);
-  let java_body = enum_create_stmt(env, map, &node.body);
-  let return_value = unsafe { JAVA_CLASS_FOR_IN_STMT.as_ref().unwrap() }
-    .construct(env, &java_left, &java_right, &java_body, &java_span_ex);
-  delete_local_ref!(env, java_left);
-  delete_local_ref!(env, java_right);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_for_of_stmt(map: &mut ByteToIndexMap, node: &ForOfStmt) {
-  map.register_by_span(&node.span);
-  enum_register_for_head(map, &node.left);
-  enum_register_expr(map, &node.right);
-  enum_register_stmt(map, &node.body);
-}
-
-fn create_for_of_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ForOfStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let is_await = node.is_await;
-  let java_left = enum_create_for_head(env, map, &node.left);
-  let java_right = enum_create_expr(env, map, &node.right);
-  let java_body = enum_create_stmt(env, map, &node.body);
-  let return_value = unsafe { JAVA_CLASS_FOR_OF_STMT.as_ref().unwrap() }
-    .construct(env, is_await, &java_left, &java_right, &java_body, &java_span_ex);
-  delete_local_ref!(env, java_left);
-  delete_local_ref!(env, java_right);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_for_stmt(map: &mut ByteToIndexMap, node: &ForStmt) {
-  map.register_by_span(&node.span);
-  node.init.as_ref().map(|node| enum_register_var_decl_or_expr(map, node));
-  node.test.as_ref().map(|node| enum_register_expr(map, node));
-  node.update.as_ref().map(|node| enum_register_expr(map, node));
-  enum_register_stmt(map, &node.body);
-}
-
-fn create_for_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ForStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_optional_init = node.init.as_ref().map(|node| enum_create_var_decl_or_expr(env, map, node));
-  let java_optional_test = node.test.as_ref().map(|node| enum_create_expr(env, map, node));
-  let java_optional_update = node.update.as_ref().map(|node| enum_create_expr(env, map, node));
-  let java_body = enum_create_stmt(env, map, &node.body);
-  let return_value = unsafe { JAVA_CLASS_FOR_STMT.as_ref().unwrap() }
-    .construct(env, &java_optional_init, &java_optional_test, &java_optional_update, &java_body, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_init);
-  delete_local_optional_ref!(env, java_optional_test);
-  delete_local_optional_ref!(env, java_optional_update);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_function(map: &mut ByteToIndexMap, node: &Function) {
-  map.register_by_span(&node.span);
-  node.params.iter().for_each(|node| {
-    register_param(map, node);
-  });
-  node.decorators.iter().for_each(|node| {
-    register_decorator(map, node);
-  });
-  node.body.as_ref().map(|node| register_block_stmt(map, node));
-  node.type_params.as_ref().map(|node| register_ts_type_param_decl(map, node));
-  node.return_type.as_ref().map(|node| register_ts_type_ann(map, node));
-}
-
-fn create_function<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Function) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_params = list_new(env, node.params.len());
-  node.params.iter().for_each(|node| {
-    let java_node = create_param(env, map, node);
-    list_add(env, &java_params, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_decorators = list_new(env, node.decorators.len());
-  node.decorators.iter().for_each(|node| {
-    let java_node = create_decorator(env, map, node);
-    list_add(env, &java_decorators, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
-  let is_generator = node.is_generator;
-  let is_async = node.is_async;
-  let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_decl(env, map, node));
-  let java_optional_return_type = node.return_type.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_FUNCTION.as_ref().unwrap() }
-    .construct(env, &java_params, &java_decorators, &java_optional_body, is_generator, is_async, &java_optional_type_params, &java_optional_return_type, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_body);
-  delete_local_optional_ref!(env, java_optional_type_params);
-  delete_local_optional_ref!(env, java_optional_return_type);
-  delete_local_ref!(env, java_params);
-  delete_local_ref!(env, java_decorators);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_getter_prop(map: &mut ByteToIndexMap, node: &GetterProp) {
-  map.register_by_span(&node.span);
-  enum_register_prop_name(map, &node.key);
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-  node.body.as_ref().map(|node| register_block_stmt(map, node));
-}
-
-fn create_getter_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &GetterProp) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_key = enum_create_prop_name(env, map, &node.key);
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let java_optional_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_GETTER_PROP.as_ref().unwrap() }
-    .construct(env, &java_key, &java_optional_type_ann, &java_optional_body, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_optional_ref!(env, java_optional_body);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ident(map: &mut ByteToIndexMap, node: &Ident) {
-  map.register_by_span(&node.span);
-}
-
-fn create_ident<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Ident) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let sym = node.sym.as_str();
-  let optional = node.optional;
-  let return_value = unsafe { JAVA_CLASS_IDENT.as_ref().unwrap() }
-    .construct(env, sym, optional, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_if_stmt(map: &mut ByteToIndexMap, node: &IfStmt) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.test);
-  enum_register_stmt(map, &node.cons);
-  node.alt.as_ref().map(|node| enum_register_stmt(map, node));
-}
-
-fn create_if_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &IfStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_test = enum_create_expr(env, map, &node.test);
-  let java_cons = enum_create_stmt(env, map, &node.cons);
-  let java_optional_alt = node.alt.as_ref().map(|node| enum_create_stmt(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_IF_STMT.as_ref().unwrap() }
-    .construct(env, &java_test, &java_cons, &java_optional_alt, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_alt);
-  delete_local_ref!(env, java_test);
-  delete_local_ref!(env, java_cons);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_import(map: &mut ByteToIndexMap, node: &Import) {
-  map.register_by_span(&node.span);
-}
-
-fn create_import<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Import) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_phase = node.phase.to_java(env);
-  let return_value = unsafe { JAVA_CLASS_IMPORT.as_ref().unwrap() }
-    .construct(env, &java_phase, &java_span_ex);
-  delete_local_ref!(env, java_phase);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_import_decl(map: &mut ByteToIndexMap, node: &ImportDecl) {
-  map.register_by_span(&node.span);
-  node.specifiers.iter().for_each(|node| {
-    enum_register_import_specifier(map, node);
-  });
-  register_str(map, &node.src);
-  node.with.as_ref().map(|node| register_object_lit(map, node));
-}
-
-fn create_import_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ImportDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_specifiers = list_new(env, node.specifiers.len());
-  node.specifiers.iter().for_each(|node| {
-    let java_node = enum_create_import_specifier(env, map, node);
-    list_add(env, &java_specifiers, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_src = create_str(env, map, &node.src);
-  let type_only = node.type_only;
-  let java_optional_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
-  let java_phase = node.phase.to_java(env);
-  let return_value = unsafe { JAVA_CLASS_IMPORT_DECL.as_ref().unwrap() }
-    .construct(env, &java_specifiers, &java_src, type_only, &java_optional_with, &java_phase, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_with);
-  delete_local_ref!(env, java_specifiers);
-  delete_local_ref!(env, java_src);
-  delete_local_ref!(env, java_phase);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_import_default_specifier(map: &mut ByteToIndexMap, node: &ImportDefaultSpecifier) {
-  map.register_by_span(&node.span);
-  register_ident(map, &node.local);
-}
-
-fn create_import_default_specifier<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ImportDefaultSpecifier) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_local = create_ident(env, map, &node.local);
-  let return_value = unsafe { JAVA_CLASS_IMPORT_DEFAULT_SPECIFIER.as_ref().unwrap() }
-    .construct(env, &java_local, &java_span_ex);
-  delete_local_ref!(env, java_local);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_import_named_specifier(map: &mut ByteToIndexMap, node: &ImportNamedSpecifier) {
-  map.register_by_span(&node.span);
-  register_ident(map, &node.local);
-  node.imported.as_ref().map(|node| enum_register_module_export_name(map, node));
-}
-
-fn create_import_named_specifier<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ImportNamedSpecifier) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_local = create_ident(env, map, &node.local);
-  let java_optional_imported = node.imported.as_ref().map(|node| enum_create_module_export_name(env, map, node));
-  let is_type_only = node.is_type_only;
-  let return_value = unsafe { JAVA_CLASS_IMPORT_NAMED_SPECIFIER.as_ref().unwrap() }
-    .construct(env, &java_local, &java_optional_imported, is_type_only, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_imported);
-  delete_local_ref!(env, java_local);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_import_star_as_specifier(map: &mut ByteToIndexMap, node: &ImportStarAsSpecifier) {
-  map.register_by_span(&node.span);
-  register_ident(map, &node.local);
-}
-
-fn create_import_star_as_specifier<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ImportStarAsSpecifier) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_local = create_ident(env, map, &node.local);
-  let return_value = unsafe { JAVA_CLASS_IMPORT_STAR_AS_SPECIFIER.as_ref().unwrap() }
-    .construct(env, &java_local, &java_span_ex);
-  delete_local_ref!(env, java_local);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_invalid(map: &mut ByteToIndexMap, node: &Invalid) {
-  map.register_by_span(&node.span);
-}
-
-fn create_invalid<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Invalid) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let return_value = unsafe { JAVA_CLASS_INVALID.as_ref().unwrap() }
-    .construct(env, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_jsx_attr(map: &mut ByteToIndexMap, node: &JSXAttr) {
-  map.register_by_span(&node.span);
-  enum_register_jsx_attr_name(map, &node.name);
-  node.value.as_ref().map(|node| enum_register_jsx_attr_value(map, node));
-}
-
-fn create_jsx_attr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXAttr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_name = enum_create_jsx_attr_name(env, map, &node.name);
-  let java_optional_value = node.value.as_ref().map(|node| enum_create_jsx_attr_value(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_JSX_ATTR.as_ref().unwrap() }
-    .construct(env, &java_name, &java_optional_value, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_value);
-  delete_local_ref!(env, java_name);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_jsx_closing_element(map: &mut ByteToIndexMap, node: &JSXClosingElement) {
-  map.register_by_span(&node.span);
-  enum_register_jsx_element_name(map, &node.name);
-}
-
-fn create_jsx_closing_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXClosingElement) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_name = enum_create_jsx_element_name(env, map, &node.name);
-  let return_value = unsafe { JAVA_CLASS_JSX_CLOSING_ELEMENT.as_ref().unwrap() }
-    .construct(env, &java_name, &java_span_ex);
-  delete_local_ref!(env, java_name);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_jsx_closing_fragment(map: &mut ByteToIndexMap, node: &JSXClosingFragment) {
-  map.register_by_span(&node.span);
-}
-
-fn create_jsx_closing_fragment<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXClosingFragment) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let return_value = unsafe { JAVA_CLASS_JSX_CLOSING_FRAGMENT.as_ref().unwrap() }
-    .construct(env, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_jsx_element(map: &mut ByteToIndexMap, node: &JSXElement) {
-  map.register_by_span(&node.span);
-  register_jsx_opening_element(map, &node.opening);
-  node.children.iter().for_each(|node| {
-    enum_register_jsx_element_child(map, node);
-  });
-  node.closing.as_ref().map(|node| register_jsx_closing_element(map, node));
-}
-
-fn create_jsx_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXElement) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_opening = create_jsx_opening_element(env, map, &node.opening);
-  let java_children = list_new(env, node.children.len());
-  node.children.iter().for_each(|node| {
-    let java_node = enum_create_jsx_element_child(env, map, node);
-    list_add(env, &java_children, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_closing = node.closing.as_ref().map(|node| create_jsx_closing_element(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_JSX_ELEMENT.as_ref().unwrap() }
-    .construct(env, &java_opening, &java_children, &java_optional_closing, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_closing);
-  delete_local_ref!(env, java_opening);
-  delete_local_ref!(env, java_children);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_jsx_empty_expr(map: &mut ByteToIndexMap, node: &JSXEmptyExpr) {
-  map.register_by_span(&node.span);
-}
-
-fn create_jsx_empty_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXEmptyExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let return_value = unsafe { JAVA_CLASS_JSX_EMPTY_EXPR.as_ref().unwrap() }
-    .construct(env, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_jsx_expr_container(map: &mut ByteToIndexMap, node: &JSXExprContainer) {
-  map.register_by_span(&node.span);
-  enum_register_jsx_expr(map, &node.expr);
-}
-
-fn create_jsx_expr_container<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXExprContainer) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_jsx_expr(env, map, &node.expr);
-  let return_value = unsafe { JAVA_CLASS_JSX_EXPR_CONTAINER.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_jsx_fragment(map: &mut ByteToIndexMap, node: &JSXFragment) {
-  map.register_by_span(&node.span);
-  register_jsx_opening_fragment(map, &node.opening);
-  node.children.iter().for_each(|node| {
-    enum_register_jsx_element_child(map, node);
-  });
-  register_jsx_closing_fragment(map, &node.closing);
-}
-
-fn create_jsx_fragment<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXFragment) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_opening = create_jsx_opening_fragment(env, map, &node.opening);
-  let java_children = list_new(env, node.children.len());
-  node.children.iter().for_each(|node| {
-    let java_node = enum_create_jsx_element_child(env, map, node);
-    list_add(env, &java_children, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_closing = create_jsx_closing_fragment(env, map, &node.closing);
-  let return_value = unsafe { JAVA_CLASS_JSX_FRAGMENT.as_ref().unwrap() }
-    .construct(env, &java_opening, &java_children, &java_closing, &java_span_ex);
-  delete_local_ref!(env, java_opening);
-  delete_local_ref!(env, java_children);
-  delete_local_ref!(env, java_closing);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_jsx_member_expr(map: &mut ByteToIndexMap, node: &JSXMemberExpr) {
-  map.register_by_span(&node.span());
-  enum_register_jsx_object(map, &node.obj);
-  register_ident(map, &node.prop);
-}
-
-fn create_jsx_member_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXMemberExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_obj = enum_create_jsx_object(env, map, &node.obj);
-  let java_prop = create_ident(env, map, &node.prop);
-  let return_value = unsafe { JAVA_CLASS_JSX_MEMBER_EXPR.as_ref().unwrap() }
-    .construct(env, &java_obj, &java_prop, &java_span_ex);
-  delete_local_ref!(env, java_obj);
-  delete_local_ref!(env, java_prop);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_jsx_namespaced_name(map: &mut ByteToIndexMap, node: &JSXNamespacedName) {
-  map.register_by_span(&node.span());
-  register_ident(map, &node.ns);
-  register_ident(map, &node.name);
-}
-
-fn create_jsx_namespaced_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXNamespacedName) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_ns = create_ident(env, map, &node.ns);
-  let java_name = create_ident(env, map, &node.name);
-  let return_value = unsafe { JAVA_CLASS_JSX_NAMESPACED_NAME.as_ref().unwrap() }
-    .construct(env, &java_ns, &java_name, &java_span_ex);
-  delete_local_ref!(env, java_ns);
-  delete_local_ref!(env, java_name);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_jsx_opening_element(map: &mut ByteToIndexMap, node: &JSXOpeningElement) {
-  map.register_by_span(&node.span);
-  enum_register_jsx_element_name(map, &node.name);
-  node.attrs.iter().for_each(|node| {
-    enum_register_jsx_attr_or_spread(map, node);
-  });
-  node.type_args.as_ref().map(|node| register_ts_type_param_instantiation(map, node));
-}
-
-fn create_jsx_opening_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXOpeningElement) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_name = enum_create_jsx_element_name(env, map, &node.name);
-  let java_attrs = list_new(env, node.attrs.len());
-  node.attrs.iter().for_each(|node| {
-    let java_node = enum_create_jsx_attr_or_spread(env, map, node);
-    list_add(env, &java_attrs, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let self_closing = node.self_closing;
-  let java_optional_type_args = node.type_args.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_JSX_OPENING_ELEMENT.as_ref().unwrap() }
-    .construct(env, &java_name, &java_attrs, self_closing, &java_optional_type_args, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_args);
-  delete_local_ref!(env, java_name);
-  delete_local_ref!(env, java_attrs);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_jsx_opening_fragment(map: &mut ByteToIndexMap, node: &JSXOpeningFragment) {
-  map.register_by_span(&node.span);
-}
-
-fn create_jsx_opening_fragment<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXOpeningFragment) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let return_value = unsafe { JAVA_CLASS_JSX_OPENING_FRAGMENT.as_ref().unwrap() }
-    .construct(env, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_jsx_spread_child(map: &mut ByteToIndexMap, node: &JSXSpreadChild) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-}
-
-fn create_jsx_spread_child<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXSpreadChild) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let return_value = unsafe { JAVA_CLASS_JSX_SPREAD_CHILD.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_jsx_text(map: &mut ByteToIndexMap, node: &JSXText) {
-  map.register_by_span(&node.span);
-}
-
-fn create_jsx_text<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &JSXText) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let value = node.value.as_str();
-  let raw = node.raw.as_str();
-  let return_value = unsafe { JAVA_CLASS_JSX_TEXT.as_ref().unwrap() }
-    .construct(env, value, raw, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_key_value_pat_prop(map: &mut ByteToIndexMap, node: &KeyValuePatProp) {
-  map.register_by_span(&node.span());
-  enum_register_prop_name(map, &node.key);
-  enum_register_pat(map, &node.value);
-}
-
-fn create_key_value_pat_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &KeyValuePatProp) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_key = enum_create_prop_name(env, map, &node.key);
-  let java_value = enum_create_pat(env, map, &node.value);
-  let return_value = unsafe { JAVA_CLASS_KEY_VALUE_PAT_PROP.as_ref().unwrap() }
-    .construct(env, &java_key, &java_value, &java_span_ex);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_value);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_key_value_prop(map: &mut ByteToIndexMap, node: &KeyValueProp) {
-  map.register_by_span(&node.span());
-  enum_register_prop_name(map, &node.key);
-  enum_register_expr(map, &node.value);
-}
-
-fn create_key_value_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &KeyValueProp) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_key = enum_create_prop_name(env, map, &node.key);
-  let java_value = enum_create_expr(env, map, &node.value);
-  let return_value = unsafe { JAVA_CLASS_KEY_VALUE_PROP.as_ref().unwrap() }
-    .construct(env, &java_key, &java_value, &java_span_ex);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_value);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_labeled_stmt(map: &mut ByteToIndexMap, node: &LabeledStmt) {
-  map.register_by_span(&node.span);
-  register_ident(map, &node.label);
-  enum_register_stmt(map, &node.body);
-}
-
-fn create_labeled_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &LabeledStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_label = create_ident(env, map, &node.label);
-  let java_body = enum_create_stmt(env, map, &node.body);
-  let return_value = unsafe { JAVA_CLASS_LABELED_STMT.as_ref().unwrap() }
-    .construct(env, &java_label, &java_body, &java_span_ex);
-  delete_local_ref!(env, java_label);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_member_expr(map: &mut ByteToIndexMap, node: &MemberExpr) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.obj);
-  enum_register_member_prop(map, &node.prop);
-}
-
-fn create_member_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &MemberExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_obj = enum_create_expr(env, map, &node.obj);
-  let java_prop = enum_create_member_prop(env, map, &node.prop);
-  let return_value = unsafe { JAVA_CLASS_MEMBER_EXPR.as_ref().unwrap() }
-    .construct(env, &java_obj, &java_prop, &java_span_ex);
-  delete_local_ref!(env, java_obj);
-  delete_local_ref!(env, java_prop);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_meta_prop_expr(map: &mut ByteToIndexMap, node: &MetaPropExpr) {
-  map.register_by_span(&node.span);
-}
-
-fn create_meta_prop_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &MetaPropExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_kind = node.kind.to_java(env);
-  let return_value = unsafe { JAVA_CLASS_META_PROP_EXPR.as_ref().unwrap() }
-    .construct(env, &java_kind, &java_span_ex);
-  delete_local_ref!(env, java_kind);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_method_prop(map: &mut ByteToIndexMap, node: &MethodProp) {
-  map.register_by_span(&node.span());
-  enum_register_prop_name(map, &node.key);
-  register_function(map, &node.function);
-}
-
-fn create_method_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &MethodProp) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_key = enum_create_prop_name(env, map, &node.key);
-  let java_function = create_function(env, map, &node.function);
-  let return_value = unsafe { JAVA_CLASS_METHOD_PROP.as_ref().unwrap() }
-    .construct(env, &java_key, &java_function, &java_span_ex);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_function);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_module(map: &mut ByteToIndexMap, node: &Module) {
-  map.register_by_span(&node.span);
-  node.body.iter().for_each(|node| {
-    enum_register_module_item(map, node);
-  });
-}
-
-fn create_module<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Module) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_body = list_new(env, node.body.len());
-  node.body.iter().for_each(|node| {
-    let java_node = enum_create_module_item(env, map, node);
-    list_add(env, &java_body, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let optional_shebang = node.shebang.as_ref().map(|node| node.to_string());
-  let return_value = unsafe { JAVA_CLASS_MODULE.as_ref().unwrap() }
-    .construct(env, &java_body, &optional_shebang, &java_span_ex);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_named_export(map: &mut ByteToIndexMap, node: &NamedExport) {
-  map.register_by_span(&node.span);
-  node.specifiers.iter().for_each(|node| {
-    enum_register_export_specifier(map, node);
-  });
-  node.src.as_ref().map(|node| register_str(map, node));
-  node.with.as_ref().map(|node| register_object_lit(map, node));
-}
-
-fn create_named_export<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &NamedExport) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_specifiers = list_new(env, node.specifiers.len());
-  node.specifiers.iter().for_each(|node| {
-    let java_node = enum_create_export_specifier(env, map, node);
-    list_add(env, &java_specifiers, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_src = node.src.as_ref().map(|node| create_str(env, map, node));
-  let type_only = node.type_only;
-  let java_optional_with = node.with.as_ref().map(|node| create_object_lit(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_NAMED_EXPORT.as_ref().unwrap() }
-    .construct(env, &java_specifiers, &java_optional_src, type_only, &java_optional_with, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_src);
-  delete_local_optional_ref!(env, java_optional_with);
-  delete_local_ref!(env, java_specifiers);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_new_expr(map: &mut ByteToIndexMap, node: &NewExpr) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.callee);
-  node.args.as_ref().map(|nodes| nodes.iter().for_each(|node| register_expr_or_spread(map, node)));
-  node.type_args.as_ref().map(|node| register_ts_type_param_instantiation(map, node));
-}
-
-fn create_new_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &NewExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_callee = enum_create_expr(env, map, &node.callee);
-  let java_optional_args = node.args.as_ref().map(|nodes| {
-    let java_args = list_new(env, nodes.len());
-    nodes.iter().for_each(|node| {
-      let java_node = create_expr_or_spread(env, map, node);
+      delete_local_ref!(env, java_node);
+    });
+    let optional = self.optional;
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_ARRAY_PAT.as_ref().unwrap() }
+      .construct(env, &java_elems, optional, &java_optional_type_ann, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_ref!(env, java_elems);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ArrowExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.params.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.body.register_with_map(map);
+    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    self.return_type.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ArrowExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_params = list_new(env, self.params.len());
+    self.params.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_body = self.body.to_java_with_map(env, map);
+    let is_async = self.is_async;
+    let is_generator = self.is_generator;
+    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_return_type = self.return_type.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_ARROW_EXPR.as_ref().unwrap() }
+      .construct(env, &java_params, &java_body, is_async, is_generator, &java_optional_type_params, &java_optional_return_type, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_optional_ref!(env, java_optional_return_type);
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for AssignExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.left.register_with_map(map);
+    self.right.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for AssignExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_op = self.op.to_java(env);
+    let java_left = self.left.to_java_with_map(env, map);
+    let java_right = self.right.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_ASSIGN_EXPR.as_ref().unwrap() }
+      .construct(env, &java_op, &java_left, &java_right, &java_span_ex);
+    delete_local_ref!(env, java_op);
+    delete_local_ref!(env, java_left);
+    delete_local_ref!(env, java_right);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for AssignPat {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.left.register_with_map(map);
+    self.right.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for AssignPat {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_left = self.left.to_java_with_map(env, map);
+    let java_right = self.right.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_ASSIGN_PAT.as_ref().unwrap() }
+      .construct(env, &java_left, &java_right, &java_span_ex);
+    delete_local_ref!(env, java_left);
+    delete_local_ref!(env, java_right);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for AssignPatProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.key.register_with_map(map);
+    self.value.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for AssignPatProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_key = self.key.to_java_with_map(env, map);
+    let java_optional_value = self.value.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_ASSIGN_PAT_PROP.as_ref().unwrap() }
+      .construct(env, &java_key, &java_optional_value, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_value);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for AssignProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.key.register_with_map(map);
+    self.value.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for AssignProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_key = self.key.to_java_with_map(env, map);
+    let java_value = self.value.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_ASSIGN_PROP.as_ref().unwrap() }
+      .construct(env, &java_key, &java_value, &java_span_ex);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_value);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for AutoAccessor {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.key.register_with_map(map);
+    self.value.as_ref().map(|node| node.register_with_map(map));
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    self.decorators.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for AutoAccessor {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_key = self.key.to_java_with_map(env, map);
+    let java_optional_value = self.value.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let is_static = self.is_static;
+    let java_decorators = list_new(env, self.decorators.len());
+    self.decorators.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    let is_override = self.is_override;
+    let definite = self.definite;
+    let return_value = unsafe { JAVA_CLASS_AUTO_ACCESSOR.as_ref().unwrap() }
+      .construct(env, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_override, definite, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_value);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_optional_ref!(env, java_optional_accessibility);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_decorators);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for AwaitExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.arg.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for AwaitExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_arg = self.arg.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_AWAIT_EXPR.as_ref().unwrap() }
+      .construct(env, &java_arg, &java_span_ex);
+    delete_local_ref!(env, java_arg);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for BigInt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for BinExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.left.register_with_map(map);
+    self.right.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for BinExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_op = self.op.to_java(env);
+    let java_left = self.left.to_java_with_map(env, map);
+    let java_right = self.right.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_BIN_EXPR.as_ref().unwrap() }
+      .construct(env, &java_op, &java_left, &java_right, &java_span_ex);
+    delete_local_ref!(env, java_op);
+    delete_local_ref!(env, java_left);
+    delete_local_ref!(env, java_right);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for BindingIdent {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.id.register_with_map(map);
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for BindingIdent {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_id = self.id.to_java_with_map(env, map);
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_BINDING_IDENT.as_ref().unwrap() }
+      .construct(env, &java_id, &java_optional_type_ann, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for BlockStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.stmts.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for BlockStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_stmts = list_new(env, self.stmts.len());
+    self.stmts.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_stmts, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_BLOCK_STMT.as_ref().unwrap() }
+      .construct(env, &java_stmts, &java_span_ex);
+    delete_local_ref!(env, java_stmts);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Bool {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Bool {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let value = self.value;
+    let return_value = unsafe { JAVA_CLASS_BOOL.as_ref().unwrap() }
+      .construct(env, value, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for BreakStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.label.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for BreakStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_optional_label = self.label.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_BREAK_STMT.as_ref().unwrap() }
+      .construct(env, &java_optional_label, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_label);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for CallExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.callee.register_with_map(map);
+    self.args.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.type_args.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for CallExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_callee = self.callee.to_java_with_map(env, map);
+    let java_args = list_new(env, self.args.len());
+    self.args.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
       list_add(env, &java_args, &java_node);
       delete_local_ref!(env, java_node);
     });
-    java_args
-  });
-  let java_optional_type_args = node.type_args.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_NEW_EXPR.as_ref().unwrap() }
-    .construct(env, &java_callee, &java_optional_args, &java_optional_type_args, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_args);
-  delete_local_optional_ref!(env, java_optional_type_args);
-  delete_local_ref!(env, java_callee);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_null(map: &mut ByteToIndexMap, node: &Null) {
-  map.register_by_span(&node.span);
-}
-
-fn create_null<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Null) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let return_value = unsafe { JAVA_CLASS_NULL.as_ref().unwrap() }
-    .construct(env, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_number(map: &mut ByteToIndexMap, node: &Number) {
-  map.register_by_span(&node.span);
-}
-
-fn create_number<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Number) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let value = node.value;
-  let optional_raw = node.raw.as_ref().map(|node| node.to_string());
-  let return_value = unsafe { JAVA_CLASS_NUMBER.as_ref().unwrap() }
-    .construct(env, value, &optional_raw, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_object_lit(map: &mut ByteToIndexMap, node: &ObjectLit) {
-  map.register_by_span(&node.span);
-  node.props.iter().for_each(|node| {
-    enum_register_prop_or_spread(map, node);
-  });
-}
-
-fn create_object_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ObjectLit) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_props = list_new(env, node.props.len());
-  node.props.iter().for_each(|node| {
-    let java_node = enum_create_prop_or_spread(env, map, node);
-    list_add(env, &java_props, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_OBJECT_LIT.as_ref().unwrap() }
-    .construct(env, &java_props, &java_span_ex);
-  delete_local_ref!(env, java_props);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_object_pat(map: &mut ByteToIndexMap, node: &ObjectPat) {
-  map.register_by_span(&node.span);
-  node.props.iter().for_each(|node| {
-    enum_register_object_pat_prop(map, node);
-  });
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-}
-
-fn create_object_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ObjectPat) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_props = list_new(env, node.props.len());
-  node.props.iter().for_each(|node| {
-    let java_node = enum_create_object_pat_prop(env, map, node);
-    list_add(env, &java_props, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let optional = node.optional;
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_OBJECT_PAT.as_ref().unwrap() }
-    .construct(env, &java_props, optional, &java_optional_type_ann, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_ref!(env, java_props);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_opt_call(map: &mut ByteToIndexMap, node: &OptCall) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.callee);
-  node.args.iter().for_each(|node| {
-    register_expr_or_spread(map, node);
-  });
-  node.type_args.as_ref().map(|node| register_ts_type_param_instantiation(map, node));
-}
-
-fn create_opt_call<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &OptCall) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_callee = enum_create_expr(env, map, &node.callee);
-  let java_args = list_new(env, node.args.len());
-  node.args.iter().for_each(|node| {
-    let java_node = create_expr_or_spread(env, map, node);
-    list_add(env, &java_args, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_type_args = node.type_args.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_OPT_CALL.as_ref().unwrap() }
-    .construct(env, &java_callee, &java_args, &java_optional_type_args, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_args);
-  delete_local_ref!(env, java_callee);
-  delete_local_ref!(env, java_args);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_opt_chain_expr(map: &mut ByteToIndexMap, node: &OptChainExpr) {
-  map.register_by_span(&node.span);
-  enum_register_opt_chain_base(map, &node.base);
-}
-
-fn create_opt_chain_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &OptChainExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let optional = node.optional;
-  let java_base = enum_create_opt_chain_base(env, map, &node.base);
-  let return_value = unsafe { JAVA_CLASS_OPT_CHAIN_EXPR.as_ref().unwrap() }
-    .construct(env, optional, &java_base, &java_span_ex);
-  delete_local_ref!(env, java_base);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_param(map: &mut ByteToIndexMap, node: &Param) {
-  map.register_by_span(&node.span);
-  node.decorators.iter().for_each(|node| {
-    register_decorator(map, node);
-  });
-  enum_register_pat(map, &node.pat);
-}
-
-fn create_param<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Param) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_decorators = list_new(env, node.decorators.len());
-  node.decorators.iter().for_each(|node| {
-    let java_node = create_decorator(env, map, node);
-    list_add(env, &java_decorators, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_pat = enum_create_pat(env, map, &node.pat);
-  let return_value = unsafe { JAVA_CLASS_PARAM.as_ref().unwrap() }
-    .construct(env, &java_decorators, &java_pat, &java_span_ex);
-  delete_local_ref!(env, java_decorators);
-  delete_local_ref!(env, java_pat);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_paren_expr(map: &mut ByteToIndexMap, node: &ParenExpr) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-}
-
-fn create_paren_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ParenExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let return_value = unsafe { JAVA_CLASS_PAREN_EXPR.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_private_method(map: &mut ByteToIndexMap, node: &PrivateMethod) {
-  map.register_by_span(&node.span);
-  register_private_name(map, &node.key);
-  register_function(map, &node.function);
-}
-
-fn create_private_method<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &PrivateMethod) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_key = create_private_name(env, map, &node.key);
-  let java_function = create_function(env, map, &node.function);
-  let java_kind = node.kind.to_java(env);
-  let is_static = node.is_static;
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
-  let is_abstract = node.is_abstract;
-  let is_optional = node.is_optional;
-  let is_override = node.is_override;
-  let return_value = unsafe { JAVA_CLASS_PRIVATE_METHOD.as_ref().unwrap() }
-    .construct(env, &java_key, &java_function, &java_kind, is_static, &java_optional_accessibility, is_abstract, is_optional, is_override, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_accessibility);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_function);
-  delete_local_ref!(env, java_kind);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_private_name(map: &mut ByteToIndexMap, node: &PrivateName) {
-  map.register_by_span(&node.span);
-  register_ident(map, &node.id);
-}
-
-fn create_private_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &PrivateName) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_id = create_ident(env, map, &node.id);
-  let return_value = unsafe { JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap() }
-    .construct(env, &java_id, &java_span_ex);
-  delete_local_ref!(env, java_id);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_private_prop(map: &mut ByteToIndexMap, node: &PrivateProp) {
-  map.register_by_span(&node.span);
-  register_private_name(map, &node.key);
-  node.value.as_ref().map(|node| enum_register_expr(map, node));
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-  node.decorators.iter().for_each(|node| {
-    register_decorator(map, node);
-  });
-}
-
-fn create_private_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &PrivateProp) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_key = create_private_name(env, map, &node.key);
-  let java_optional_value = node.value.as_ref().map(|node| enum_create_expr(env, map, node));
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let is_static = node.is_static;
-  let java_decorators = list_new(env, node.decorators.len());
-  node.decorators.iter().for_each(|node| {
-    let java_node = create_decorator(env, map, node);
-    list_add(env, &java_decorators, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
-  let is_optional = node.is_optional;
-  let is_override = node.is_override;
-  let readonly = node.readonly;
-  let definite = node.definite;
-  let return_value = unsafe { JAVA_CLASS_PRIVATE_PROP.as_ref().unwrap() }
-    .construct(env, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_optional, is_override, readonly, definite, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_value);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_optional_ref!(env, java_optional_accessibility);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_decorators);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_regex(map: &mut ByteToIndexMap, node: &Regex) {
-  map.register_by_span(&node.span);
-}
-
-fn create_regex<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Regex) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let exp = node.exp.as_str();
-  let flags = node.flags.as_str();
-  let return_value = unsafe { JAVA_CLASS_REGEX.as_ref().unwrap() }
-    .construct(env, exp, flags, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_rest_pat(map: &mut ByteToIndexMap, node: &RestPat) {
-  map.register_by_span(&node.span);
-  map.register_by_span(&node.dot3_token);
-  enum_register_pat(map, &node.arg);
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-}
-
-fn create_rest_pat<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &RestPat) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_dot3_token = map.get_span_ex_by_span(&node.dot3_token).to_java(env);
-  let java_arg = enum_create_pat(env, map, &node.arg);
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_REST_PAT.as_ref().unwrap() }
-    .construct(env, &java_dot3_token, &java_arg, &java_optional_type_ann, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_ref!(env, java_dot3_token);
-  delete_local_ref!(env, java_arg);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_return_stmt(map: &mut ByteToIndexMap, node: &ReturnStmt) {
-  map.register_by_span(&node.span);
-  node.arg.as_ref().map(|node| enum_register_expr(map, node));
-}
-
-fn create_return_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ReturnStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_optional_arg = node.arg.as_ref().map(|node| enum_create_expr(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_RETURN_STMT.as_ref().unwrap() }
-    .construct(env, &java_optional_arg, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_arg);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_script(map: &mut ByteToIndexMap, node: &Script) {
-  map.register_by_span(&node.span);
-  node.body.iter().for_each(|node| {
-    enum_register_stmt(map, node);
-  });
-}
-
-fn create_script<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Script) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_body = list_new(env, node.body.len());
-  node.body.iter().for_each(|node| {
-    let java_node = enum_create_stmt(env, map, node);
-    list_add(env, &java_body, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let optional_shebang = node.shebang.as_ref().map(|node| node.to_string());
-  let return_value = unsafe { JAVA_CLASS_SCRIPT.as_ref().unwrap() }
-    .construct(env, &java_body, &optional_shebang, &java_span_ex);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_seq_expr(map: &mut ByteToIndexMap, node: &SeqExpr) {
-  map.register_by_span(&node.span);
-  node.exprs.iter().for_each(|node| {
-    enum_register_expr(map, node);
-  });
-}
-
-fn create_seq_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SeqExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_exprs = list_new(env, node.exprs.len());
-  node.exprs.iter().for_each(|node| {
-    let java_node = enum_create_expr(env, map, node);
-    list_add(env, &java_exprs, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_SEQ_EXPR.as_ref().unwrap() }
-    .construct(env, &java_exprs, &java_span_ex);
-  delete_local_ref!(env, java_exprs);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_setter_prop(map: &mut ByteToIndexMap, node: &SetterProp) {
-  map.register_by_span(&node.span);
-  enum_register_prop_name(map, &node.key);
-  node.this_param.as_ref().map(|node| enum_register_pat(map, node));
-  enum_register_pat(map, &node.param);
-  node.body.as_ref().map(|node| register_block_stmt(map, node));
-}
-
-fn create_setter_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SetterProp) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_key = enum_create_prop_name(env, map, &node.key);
-  let java_optional_this_param = node.this_param.as_ref().map(|node| enum_create_pat(env, map, node));
-  let java_param = enum_create_pat(env, map, &node.param);
-  let java_optional_body = node.body.as_ref().map(|node| create_block_stmt(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_SETTER_PROP.as_ref().unwrap() }
-    .construct(env, &java_key, &java_optional_this_param, &java_param, &java_optional_body, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_this_param);
-  delete_local_optional_ref!(env, java_optional_body);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_param);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_spread_element(map: &mut ByteToIndexMap, node: &SpreadElement) {
-  map.register_by_span(&node.span());
-  map.register_by_span(&node.dot3_token);
-  enum_register_expr(map, &node.expr);
-}
-
-fn create_spread_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SpreadElement) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_dot3_token = map.get_span_ex_by_span(&node.dot3_token).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let return_value = unsafe { JAVA_CLASS_SPREAD_ELEMENT.as_ref().unwrap() }
-    .construct(env, &java_dot3_token, &java_expr, &java_span_ex);
-  delete_local_ref!(env, java_dot3_token);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_static_block(map: &mut ByteToIndexMap, node: &StaticBlock) {
-  map.register_by_span(&node.span);
-  register_block_stmt(map, &node.body);
-}
-
-fn create_static_block<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &StaticBlock) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_body = create_block_stmt(env, map, &node.body);
-  let return_value = unsafe { JAVA_CLASS_STATIC_BLOCK.as_ref().unwrap() }
-    .construct(env, &java_body, &java_span_ex);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_str(map: &mut ByteToIndexMap, node: &Str) {
-  map.register_by_span(&node.span);
-}
-
-fn create_str<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Str) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let value = node.value.as_str();
-  let optional_raw = node.raw.as_ref().map(|node| node.to_string());
-  let return_value = unsafe { JAVA_CLASS_STR.as_ref().unwrap() }
-    .construct(env, value, &optional_raw, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_super(map: &mut ByteToIndexMap, node: &Super) {
-  map.register_by_span(&node.span);
-}
-
-fn create_super<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Super) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let return_value = unsafe { JAVA_CLASS_SUPER.as_ref().unwrap() }
-    .construct(env, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_super_prop_expr(map: &mut ByteToIndexMap, node: &SuperPropExpr) {
-  map.register_by_span(&node.span);
-  register_super(map, &node.obj);
-  enum_register_super_prop(map, &node.prop);
-}
-
-fn create_super_prop_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SuperPropExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_obj = create_super(env, map, &node.obj);
-  let java_prop = enum_create_super_prop(env, map, &node.prop);
-  let return_value = unsafe { JAVA_CLASS_SUPER_PROP_EXPR.as_ref().unwrap() }
-    .construct(env, &java_obj, &java_prop, &java_span_ex);
-  delete_local_ref!(env, java_obj);
-  delete_local_ref!(env, java_prop);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_switch_case(map: &mut ByteToIndexMap, node: &SwitchCase) {
-  map.register_by_span(&node.span);
-  node.test.as_ref().map(|node| enum_register_expr(map, node));
-  node.cons.iter().for_each(|node| {
-    enum_register_stmt(map, node);
-  });
-}
-
-fn create_switch_case<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SwitchCase) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_optional_test = node.test.as_ref().map(|node| enum_create_expr(env, map, node));
-  let java_cons = list_new(env, node.cons.len());
-  node.cons.iter().for_each(|node| {
-    let java_node = enum_create_stmt(env, map, node);
-    list_add(env, &java_cons, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_SWITCH_CASE.as_ref().unwrap() }
-    .construct(env, &java_optional_test, &java_cons, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_test);
-  delete_local_ref!(env, java_cons);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_switch_stmt(map: &mut ByteToIndexMap, node: &SwitchStmt) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.discriminant);
-  node.cases.iter().for_each(|node| {
-    register_switch_case(map, node);
-  });
-}
-
-fn create_switch_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &SwitchStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_discriminant = enum_create_expr(env, map, &node.discriminant);
-  let java_cases = list_new(env, node.cases.len());
-  node.cases.iter().for_each(|node| {
-    let java_node = create_switch_case(env, map, node);
-    list_add(env, &java_cases, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_SWITCH_STMT.as_ref().unwrap() }
-    .construct(env, &java_discriminant, &java_cases, &java_span_ex);
-  delete_local_ref!(env, java_discriminant);
-  delete_local_ref!(env, java_cases);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_tagged_tpl(map: &mut ByteToIndexMap, node: &TaggedTpl) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.tag);
-  node.type_params.as_ref().map(|node| register_ts_type_param_instantiation(map, node));
-  register_tpl(map, &node.tpl);
-}
-
-fn create_tagged_tpl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TaggedTpl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_tag = enum_create_expr(env, map, &node.tag);
-  let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
-  let java_tpl = create_tpl(env, map, &node.tpl);
-  let return_value = unsafe { JAVA_CLASS_TAGGED_TPL.as_ref().unwrap() }
-    .construct(env, &java_tag, &java_optional_type_params, &java_tpl, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_params);
-  delete_local_ref!(env, java_tag);
-  delete_local_ref!(env, java_tpl);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_this_expr(map: &mut ByteToIndexMap, node: &ThisExpr) {
-  map.register_by_span(&node.span);
-}
-
-fn create_this_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ThisExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let return_value = unsafe { JAVA_CLASS_THIS_EXPR.as_ref().unwrap() }
-    .construct(env, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_throw_stmt(map: &mut ByteToIndexMap, node: &ThrowStmt) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.arg);
-}
-
-fn create_throw_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &ThrowStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_arg = enum_create_expr(env, map, &node.arg);
-  let return_value = unsafe { JAVA_CLASS_THROW_STMT.as_ref().unwrap() }
-    .construct(env, &java_arg, &java_span_ex);
-  delete_local_ref!(env, java_arg);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_tpl(map: &mut ByteToIndexMap, node: &Tpl) {
-  map.register_by_span(&node.span);
-  node.exprs.iter().for_each(|node| {
-    enum_register_expr(map, node);
-  });
-  node.quasis.iter().for_each(|node| {
-    register_tpl_element(map, node);
-  });
-}
-
-fn create_tpl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &Tpl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_exprs = list_new(env, node.exprs.len());
-  node.exprs.iter().for_each(|node| {
-    let java_node = enum_create_expr(env, map, node);
-    list_add(env, &java_exprs, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_quasis = list_new(env, node.quasis.len());
-  node.quasis.iter().for_each(|node| {
-    let java_node = create_tpl_element(env, map, node);
-    list_add(env, &java_quasis, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_TPL.as_ref().unwrap() }
-    .construct(env, &java_exprs, &java_quasis, &java_span_ex);
-  delete_local_ref!(env, java_exprs);
-  delete_local_ref!(env, java_quasis);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_tpl_element(map: &mut ByteToIndexMap, node: &TplElement) {
-  map.register_by_span(&node.span);
-}
-
-fn create_tpl_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TplElement) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let tail = node.tail;
-  let optional_cooked = node.cooked.as_ref().map(|node| node.to_string());
-  let raw = node.raw.as_str();
-  let return_value = unsafe { JAVA_CLASS_TPL_ELEMENT.as_ref().unwrap() }
-    .construct(env, tail, &optional_cooked, raw, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_try_stmt(map: &mut ByteToIndexMap, node: &TryStmt) {
-  map.register_by_span(&node.span);
-  register_block_stmt(map, &node.block);
-  node.handler.as_ref().map(|node| register_catch_clause(map, node));
-  node.finalizer.as_ref().map(|node| register_block_stmt(map, node));
-}
-
-fn create_try_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TryStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_block = create_block_stmt(env, map, &node.block);
-  let java_optional_handler = node.handler.as_ref().map(|node| create_catch_clause(env, map, node));
-  let java_optional_finalizer = node.finalizer.as_ref().map(|node| create_block_stmt(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TRY_STMT.as_ref().unwrap() }
-    .construct(env, &java_block, &java_optional_handler, &java_optional_finalizer, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_handler);
-  delete_local_optional_ref!(env, java_optional_finalizer);
-  delete_local_ref!(env, java_block);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_array_type(map: &mut ByteToIndexMap, node: &TsArrayType) {
-  map.register_by_span(&node.span);
-  enum_register_ts_type(map, &node.elem_type);
-}
-
-fn create_ts_array_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsArrayType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_elem_type = enum_create_ts_type(env, map, &node.elem_type);
-  let return_value = unsafe { JAVA_CLASS_TS_ARRAY_TYPE.as_ref().unwrap() }
-    .construct(env, &java_elem_type, &java_span_ex);
-  delete_local_ref!(env, java_elem_type);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_as_expr(map: &mut ByteToIndexMap, node: &TsAsExpr) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-  enum_register_ts_type(map, &node.type_ann);
-}
-
-fn create_ts_as_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsAsExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-  let return_value = unsafe { JAVA_CLASS_TS_AS_EXPR.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_type_ann, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_type_ann);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_call_signature_decl(map: &mut ByteToIndexMap, node: &TsCallSignatureDecl) {
-  map.register_by_span(&node.span);
-  node.params.iter().for_each(|node| {
-    enum_register_ts_fn_param(map, node);
-  });
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-  node.type_params.as_ref().map(|node| register_ts_type_param_decl(map, node));
-}
-
-fn create_ts_call_signature_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsCallSignatureDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_params = list_new(env, node.params.len());
-  node.params.iter().for_each(|node| {
-    let java_node = enum_create_ts_fn_param(env, map, node);
-    list_add(env, &java_params, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_decl(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_CALL_SIGNATURE_DECL.as_ref().unwrap() }
-    .construct(env, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_optional_ref!(env, java_optional_type_params);
-  delete_local_ref!(env, java_params);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_conditional_type(map: &mut ByteToIndexMap, node: &TsConditionalType) {
-  map.register_by_span(&node.span);
-  enum_register_ts_type(map, &node.check_type);
-  enum_register_ts_type(map, &node.extends_type);
-  enum_register_ts_type(map, &node.true_type);
-  enum_register_ts_type(map, &node.false_type);
-}
-
-fn create_ts_conditional_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsConditionalType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_check_type = enum_create_ts_type(env, map, &node.check_type);
-  let java_extends_type = enum_create_ts_type(env, map, &node.extends_type);
-  let java_true_type = enum_create_ts_type(env, map, &node.true_type);
-  let java_false_type = enum_create_ts_type(env, map, &node.false_type);
-  let return_value = unsafe { JAVA_CLASS_TS_CONDITIONAL_TYPE.as_ref().unwrap() }
-    .construct(env, &java_check_type, &java_extends_type, &java_true_type, &java_false_type, &java_span_ex);
-  delete_local_ref!(env, java_check_type);
-  delete_local_ref!(env, java_extends_type);
-  delete_local_ref!(env, java_true_type);
-  delete_local_ref!(env, java_false_type);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_const_assertion(map: &mut ByteToIndexMap, node: &TsConstAssertion) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-}
-
-fn create_ts_const_assertion<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsConstAssertion) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let return_value = unsafe { JAVA_CLASS_TS_CONST_ASSERTION.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_construct_signature_decl(map: &mut ByteToIndexMap, node: &TsConstructSignatureDecl) {
-  map.register_by_span(&node.span);
-  node.params.iter().for_each(|node| {
-    enum_register_ts_fn_param(map, node);
-  });
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-  node.type_params.as_ref().map(|node| register_ts_type_param_decl(map, node));
-}
-
-fn create_ts_construct_signature_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsConstructSignatureDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_params = list_new(env, node.params.len());
-  node.params.iter().for_each(|node| {
-    let java_node = enum_create_ts_fn_param(env, map, node);
-    list_add(env, &java_params, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_decl(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_CONSTRUCT_SIGNATURE_DECL.as_ref().unwrap() }
-    .construct(env, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_optional_ref!(env, java_optional_type_params);
-  delete_local_ref!(env, java_params);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_constructor_type(map: &mut ByteToIndexMap, node: &TsConstructorType) {
-  map.register_by_span(&node.span);
-  node.params.iter().for_each(|node| {
-    enum_register_ts_fn_param(map, node);
-  });
-  node.type_params.as_ref().map(|node| register_ts_type_param_decl(map, node));
-  register_ts_type_ann(map, &node.type_ann);
-}
-
-fn create_ts_constructor_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsConstructorType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_params = list_new(env, node.params.len());
-  node.params.iter().for_each(|node| {
-    let java_node = enum_create_ts_fn_param(env, map, node);
-    list_add(env, &java_params, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_decl(env, map, node));
-  let java_type_ann = create_ts_type_ann(env, map, &node.type_ann);
-  let is_abstract = node.is_abstract;
-  let return_value = unsafe { JAVA_CLASS_TS_CONSTRUCTOR_TYPE.as_ref().unwrap() }
-    .construct(env, &java_params, &java_optional_type_params, &java_type_ann, is_abstract, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_params);
-  delete_local_ref!(env, java_params);
-  delete_local_ref!(env, java_type_ann);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_enum_decl(map: &mut ByteToIndexMap, node: &TsEnumDecl) {
-  map.register_by_span(&node.span);
-  register_ident(map, &node.id);
-  node.members.iter().for_each(|node| {
-    register_ts_enum_member(map, node);
-  });
-}
-
-fn create_ts_enum_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsEnumDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let declare = node.declare;
-  let is_const = node.is_const;
-  let java_id = create_ident(env, map, &node.id);
-  let java_members = list_new(env, node.members.len());
-  node.members.iter().for_each(|node| {
-    let java_node = create_ts_enum_member(env, map, node);
-    list_add(env, &java_members, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_TS_ENUM_DECL.as_ref().unwrap() }
-    .construct(env, declare, is_const, &java_id, &java_members, &java_span_ex);
-  delete_local_ref!(env, java_id);
-  delete_local_ref!(env, java_members);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_enum_member(map: &mut ByteToIndexMap, node: &TsEnumMember) {
-  map.register_by_span(&node.span);
-  enum_register_ts_enum_member_id(map, &node.id);
-  node.init.as_ref().map(|node| enum_register_expr(map, node));
-}
-
-fn create_ts_enum_member<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsEnumMember) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_id = enum_create_ts_enum_member_id(env, map, &node.id);
-  let java_optional_init = node.init.as_ref().map(|node| enum_create_expr(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_ENUM_MEMBER.as_ref().unwrap() }
-    .construct(env, &java_id, &java_optional_init, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_init);
-  delete_local_ref!(env, java_id);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_export_assignment(map: &mut ByteToIndexMap, node: &TsExportAssignment) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-}
-
-fn create_ts_export_assignment<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsExportAssignment) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let return_value = unsafe { JAVA_CLASS_TS_EXPORT_ASSIGNMENT.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_expr_with_type_args(map: &mut ByteToIndexMap, node: &TsExprWithTypeArgs) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-  node.type_args.as_ref().map(|node| register_ts_type_param_instantiation(map, node));
-}
-
-fn create_ts_expr_with_type_args<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsExprWithTypeArgs) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let java_optional_type_args = node.type_args.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_EXPR_WITH_TYPE_ARGS.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_optional_type_args, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_args);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_external_module_ref(map: &mut ByteToIndexMap, node: &TsExternalModuleRef) {
-  map.register_by_span(&node.span);
-  register_str(map, &node.expr);
-}
-
-fn create_ts_external_module_ref<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsExternalModuleRef) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = create_str(env, map, &node.expr);
-  let return_value = unsafe { JAVA_CLASS_TS_EXTERNAL_MODULE_REF.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_fn_type(map: &mut ByteToIndexMap, node: &TsFnType) {
-  map.register_by_span(&node.span);
-  node.params.iter().for_each(|node| {
-    enum_register_ts_fn_param(map, node);
-  });
-  node.type_params.as_ref().map(|node| register_ts_type_param_decl(map, node));
-  register_ts_type_ann(map, &node.type_ann);
-}
-
-fn create_ts_fn_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsFnType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_params = list_new(env, node.params.len());
-  node.params.iter().for_each(|node| {
-    let java_node = enum_create_ts_fn_param(env, map, node);
-    list_add(env, &java_params, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_decl(env, map, node));
-  let java_type_ann = create_ts_type_ann(env, map, &node.type_ann);
-  let return_value = unsafe { JAVA_CLASS_TS_FN_TYPE.as_ref().unwrap() }
-    .construct(env, &java_params, &java_optional_type_params, &java_type_ann, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_params);
-  delete_local_ref!(env, java_params);
-  delete_local_ref!(env, java_type_ann);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_getter_signature(map: &mut ByteToIndexMap, node: &TsGetterSignature) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.key);
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-}
-
-fn create_ts_getter_signature<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsGetterSignature) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let readonly = node.readonly;
-  let java_key = enum_create_expr(env, map, &node.key);
-  let computed = node.computed;
-  let optional = node.optional;
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_GETTER_SIGNATURE.as_ref().unwrap() }
-    .construct(env, readonly, &java_key, computed, optional, &java_optional_type_ann, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_import_equals_decl(map: &mut ByteToIndexMap, node: &TsImportEqualsDecl) {
-  map.register_by_span(&node.span);
-  register_ident(map, &node.id);
-  enum_register_ts_module_ref(map, &node.module_ref);
-}
-
-fn create_ts_import_equals_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsImportEqualsDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let is_export = node.is_export;
-  let is_type_only = node.is_type_only;
-  let java_id = create_ident(env, map, &node.id);
-  let java_module_ref = enum_create_ts_module_ref(env, map, &node.module_ref);
-  let return_value = unsafe { JAVA_CLASS_TS_IMPORT_EQUALS_DECL.as_ref().unwrap() }
-    .construct(env, is_export, is_type_only, &java_id, &java_module_ref, &java_span_ex);
-  delete_local_ref!(env, java_id);
-  delete_local_ref!(env, java_module_ref);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_import_type(map: &mut ByteToIndexMap, node: &TsImportType) {
-  map.register_by_span(&node.span);
-  register_str(map, &node.arg);
-  node.qualifier.as_ref().map(|node| enum_register_ts_entity_name(map, node));
-  node.type_args.as_ref().map(|node| register_ts_type_param_instantiation(map, node));
-}
-
-fn create_ts_import_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsImportType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_arg = create_str(env, map, &node.arg);
-  let java_optional_qualifier = node.qualifier.as_ref().map(|node| enum_create_ts_entity_name(env, map, node));
-  let java_optional_type_args = node.type_args.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_IMPORT_TYPE.as_ref().unwrap() }
-    .construct(env, &java_arg, &java_optional_qualifier, &java_optional_type_args, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_qualifier);
-  delete_local_optional_ref!(env, java_optional_type_args);
-  delete_local_ref!(env, java_arg);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_index_signature(map: &mut ByteToIndexMap, node: &TsIndexSignature) {
-  map.register_by_span(&node.span);
-  node.params.iter().for_each(|node| {
-    enum_register_ts_fn_param(map, node);
-  });
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-}
-
-fn create_ts_index_signature<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsIndexSignature) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_params = list_new(env, node.params.len());
-  node.params.iter().for_each(|node| {
-    let java_node = enum_create_ts_fn_param(env, map, node);
-    list_add(env, &java_params, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let readonly = node.readonly;
-  let is_static = node.is_static;
-  let return_value = unsafe { JAVA_CLASS_TS_INDEX_SIGNATURE.as_ref().unwrap() }
-    .construct(env, &java_params, &java_optional_type_ann, readonly, is_static, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_ref!(env, java_params);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_indexed_access_type(map: &mut ByteToIndexMap, node: &TsIndexedAccessType) {
-  map.register_by_span(&node.span);
-  enum_register_ts_type(map, &node.obj_type);
-  enum_register_ts_type(map, &node.index_type);
-}
-
-fn create_ts_indexed_access_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsIndexedAccessType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let readonly = node.readonly;
-  let java_obj_type = enum_create_ts_type(env, map, &node.obj_type);
-  let java_index_type = enum_create_ts_type(env, map, &node.index_type);
-  let return_value = unsafe { JAVA_CLASS_TS_INDEXED_ACCESS_TYPE.as_ref().unwrap() }
-    .construct(env, readonly, &java_obj_type, &java_index_type, &java_span_ex);
-  delete_local_ref!(env, java_obj_type);
-  delete_local_ref!(env, java_index_type);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_infer_type(map: &mut ByteToIndexMap, node: &TsInferType) {
-  map.register_by_span(&node.span);
-  register_ts_type_param(map, &node.type_param);
-}
-
-fn create_ts_infer_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsInferType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_type_param = create_ts_type_param(env, map, &node.type_param);
-  let return_value = unsafe { JAVA_CLASS_TS_INFER_TYPE.as_ref().unwrap() }
-    .construct(env, &java_type_param, &java_span_ex);
-  delete_local_ref!(env, java_type_param);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_instantiation(map: &mut ByteToIndexMap, node: &TsInstantiation) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-  register_ts_type_param_instantiation(map, &node.type_args);
-}
-
-fn create_ts_instantiation<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsInstantiation) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let java_type_args = create_ts_type_param_instantiation(env, map, &node.type_args);
-  let return_value = unsafe { JAVA_CLASS_TS_INSTANTIATION.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_type_args, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_type_args);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_interface_body(map: &mut ByteToIndexMap, node: &TsInterfaceBody) {
-  map.register_by_span(&node.span);
-  node.body.iter().for_each(|node| {
-    enum_register_ts_type_element(map, node);
-  });
-}
-
-fn create_ts_interface_body<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsInterfaceBody) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_body = list_new(env, node.body.len());
-  node.body.iter().for_each(|node| {
-    let java_node = enum_create_ts_type_element(env, map, node);
-    list_add(env, &java_body, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_TS_INTERFACE_BODY.as_ref().unwrap() }
-    .construct(env, &java_body, &java_span_ex);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_interface_decl(map: &mut ByteToIndexMap, node: &TsInterfaceDecl) {
-  map.register_by_span(&node.span);
-  register_ident(map, &node.id);
-  node.type_params.as_ref().map(|node| register_ts_type_param_decl(map, node));
-  node.extends.iter().for_each(|node| {
-    register_ts_expr_with_type_args(map, node);
-  });
-  register_ts_interface_body(map, &node.body);
-}
-
-fn create_ts_interface_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsInterfaceDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_id = create_ident(env, map, &node.id);
-  let declare = node.declare;
-  let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_decl(env, map, node));
-  let java_extends = list_new(env, node.extends.len());
-  node.extends.iter().for_each(|node| {
-    let java_node = create_ts_expr_with_type_args(env, map, node);
-    list_add(env, &java_extends, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_body = create_ts_interface_body(env, map, &node.body);
-  let return_value = unsafe { JAVA_CLASS_TS_INTERFACE_DECL.as_ref().unwrap() }
-    .construct(env, &java_id, declare, &java_optional_type_params, &java_extends, &java_body, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_params);
-  delete_local_ref!(env, java_id);
-  delete_local_ref!(env, java_extends);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_intersection_type(map: &mut ByteToIndexMap, node: &TsIntersectionType) {
-  map.register_by_span(&node.span);
-  node.types.iter().for_each(|node| {
-    enum_register_ts_type(map, node);
-  });
-}
-
-fn create_ts_intersection_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsIntersectionType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_types = list_new(env, node.types.len());
-  node.types.iter().for_each(|node| {
-    let java_node = enum_create_ts_type(env, map, node);
-    list_add(env, &java_types, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_TS_INTERSECTION_TYPE.as_ref().unwrap() }
-    .construct(env, &java_types, &java_span_ex);
-  delete_local_ref!(env, java_types);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_keyword_type(map: &mut ByteToIndexMap, node: &TsKeywordType) {
-  map.register_by_span(&node.span);
-}
-
-fn create_ts_keyword_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsKeywordType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_kind = node.kind.to_java(env);
-  let return_value = unsafe { JAVA_CLASS_TS_KEYWORD_TYPE.as_ref().unwrap() }
-    .construct(env, &java_kind, &java_span_ex);
-  delete_local_ref!(env, java_kind);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_lit_type(map: &mut ByteToIndexMap, node: &TsLitType) {
-  map.register_by_span(&node.span);
-  enum_register_ts_lit(map, &node.lit);
-}
-
-fn create_ts_lit_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsLitType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_lit = enum_create_ts_lit(env, map, &node.lit);
-  let return_value = unsafe { JAVA_CLASS_TS_LIT_TYPE.as_ref().unwrap() }
-    .construct(env, &java_lit, &java_span_ex);
-  delete_local_ref!(env, java_lit);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_mapped_type(map: &mut ByteToIndexMap, node: &TsMappedType) {
-  map.register_by_span(&node.span);
-  register_ts_type_param(map, &node.type_param);
-  node.name_type.as_ref().map(|node| enum_register_ts_type(map, node));
-  node.type_ann.as_ref().map(|node| enum_register_ts_type(map, node));
-}
-
-fn create_ts_mapped_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsMappedType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_optional_readonly = node.readonly.as_ref().map(|node| node.to_java(env));
-  let java_type_param = create_ts_type_param(env, map, &node.type_param);
-  let java_optional_name_type = node.name_type.as_ref().map(|node| enum_create_ts_type(env, map, node));
-  let java_optional_optional = node.optional.as_ref().map(|node| node.to_java(env));
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| enum_create_ts_type(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_MAPPED_TYPE.as_ref().unwrap() }
-    .construct(env, &java_optional_readonly, &java_type_param, &java_optional_name_type, &java_optional_optional, &java_optional_type_ann, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_readonly);
-  delete_local_optional_ref!(env, java_optional_name_type);
-  delete_local_optional_ref!(env, java_optional_optional);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_ref!(env, java_type_param);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_method_signature(map: &mut ByteToIndexMap, node: &TsMethodSignature) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.key);
-  node.params.iter().for_each(|node| {
-    enum_register_ts_fn_param(map, node);
-  });
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-  node.type_params.as_ref().map(|node| register_ts_type_param_decl(map, node));
-}
-
-fn create_ts_method_signature<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsMethodSignature) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let readonly = node.readonly;
-  let java_key = enum_create_expr(env, map, &node.key);
-  let computed = node.computed;
-  let optional = node.optional;
-  let java_params = list_new(env, node.params.len());
-  node.params.iter().for_each(|node| {
-    let java_node = enum_create_ts_fn_param(env, map, node);
-    list_add(env, &java_params, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_decl(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_METHOD_SIGNATURE.as_ref().unwrap() }
-    .construct(env, readonly, &java_key, computed, optional, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_optional_ref!(env, java_optional_type_params);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_params);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_module_block(map: &mut ByteToIndexMap, node: &TsModuleBlock) {
-  map.register_by_span(&node.span);
-  node.body.iter().for_each(|node| {
-    enum_register_module_item(map, node);
-  });
-}
-
-fn create_ts_module_block<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsModuleBlock) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_body = list_new(env, node.body.len());
-  node.body.iter().for_each(|node| {
-    let java_node = enum_create_module_item(env, map, node);
-    list_add(env, &java_body, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_TS_MODULE_BLOCK.as_ref().unwrap() }
-    .construct(env, &java_body, &java_span_ex);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_module_decl(map: &mut ByteToIndexMap, node: &TsModuleDecl) {
-  map.register_by_span(&node.span);
-  enum_register_ts_module_name(map, &node.id);
-  node.body.as_ref().map(|node| enum_register_ts_namespace_body(map, node));
-}
-
-fn create_ts_module_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsModuleDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let declare = node.declare;
-  let global = node.global;
-  let java_id = enum_create_ts_module_name(env, map, &node.id);
-  let java_optional_body = node.body.as_ref().map(|node| enum_create_ts_namespace_body(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_MODULE_DECL.as_ref().unwrap() }
-    .construct(env, declare, global, &java_id, &java_optional_body, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_body);
-  delete_local_ref!(env, java_id);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_namespace_decl(map: &mut ByteToIndexMap, node: &TsNamespaceDecl) {
-  map.register_by_span(&node.span);
-  register_ident(map, &node.id);
-  enum_register_ts_namespace_body(map, &node.body);
-}
-
-fn create_ts_namespace_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsNamespaceDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let declare = node.declare;
-  let global = node.global;
-  let java_id = create_ident(env, map, &node.id);
-  let java_body = enum_create_ts_namespace_body(env, map, &node.body);
-  let return_value = unsafe { JAVA_CLASS_TS_NAMESPACE_DECL.as_ref().unwrap() }
-    .construct(env, declare, global, &java_id, &java_body, &java_span_ex);
-  delete_local_ref!(env, java_id);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_namespace_export_decl(map: &mut ByteToIndexMap, node: &TsNamespaceExportDecl) {
-  map.register_by_span(&node.span);
-  register_ident(map, &node.id);
-}
-
-fn create_ts_namespace_export_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsNamespaceExportDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_id = create_ident(env, map, &node.id);
-  let return_value = unsafe { JAVA_CLASS_TS_NAMESPACE_EXPORT_DECL.as_ref().unwrap() }
-    .construct(env, &java_id, &java_span_ex);
-  delete_local_ref!(env, java_id);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_non_null_expr(map: &mut ByteToIndexMap, node: &TsNonNullExpr) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-}
-
-fn create_ts_non_null_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsNonNullExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let return_value = unsafe { JAVA_CLASS_TS_NON_NULL_EXPR.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_optional_type(map: &mut ByteToIndexMap, node: &TsOptionalType) {
-  map.register_by_span(&node.span);
-  enum_register_ts_type(map, &node.type_ann);
-}
-
-fn create_ts_optional_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsOptionalType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-  let return_value = unsafe { JAVA_CLASS_TS_OPTIONAL_TYPE.as_ref().unwrap() }
-    .construct(env, &java_type_ann, &java_span_ex);
-  delete_local_ref!(env, java_type_ann);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_param_prop(map: &mut ByteToIndexMap, node: &TsParamProp) {
-  map.register_by_span(&node.span);
-  node.decorators.iter().for_each(|node| {
-    register_decorator(map, node);
-  });
-  enum_register_ts_param_prop_param(map, &node.param);
-}
-
-fn create_ts_param_prop<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsParamProp) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_decorators = list_new(env, node.decorators.len());
-  node.decorators.iter().for_each(|node| {
-    let java_node = create_decorator(env, map, node);
-    list_add(env, &java_decorators, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_accessibility = node.accessibility.as_ref().map(|node| node.to_java(env));
-  let is_override = node.is_override;
-  let readonly = node.readonly;
-  let java_param = enum_create_ts_param_prop_param(env, map, &node.param);
-  let return_value = unsafe { JAVA_CLASS_TS_PARAM_PROP.as_ref().unwrap() }
-    .construct(env, &java_decorators, &java_optional_accessibility, is_override, readonly, &java_param, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_accessibility);
-  delete_local_ref!(env, java_decorators);
-  delete_local_ref!(env, java_param);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_parenthesized_type(map: &mut ByteToIndexMap, node: &TsParenthesizedType) {
-  map.register_by_span(&node.span);
-  enum_register_ts_type(map, &node.type_ann);
-}
-
-fn create_ts_parenthesized_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsParenthesizedType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-  let return_value = unsafe { JAVA_CLASS_TS_PARENTHESIZED_TYPE.as_ref().unwrap() }
-    .construct(env, &java_type_ann, &java_span_ex);
-  delete_local_ref!(env, java_type_ann);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_property_signature(map: &mut ByteToIndexMap, node: &TsPropertySignature) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.key);
-  node.init.as_ref().map(|node| enum_register_expr(map, node));
-  node.params.iter().for_each(|node| {
-    enum_register_ts_fn_param(map, node);
-  });
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-  node.type_params.as_ref().map(|node| register_ts_type_param_decl(map, node));
-}
-
-fn create_ts_property_signature<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsPropertySignature) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let readonly = node.readonly;
-  let java_key = enum_create_expr(env, map, &node.key);
-  let computed = node.computed;
-  let optional = node.optional;
-  let java_optional_init = node.init.as_ref().map(|node| enum_create_expr(env, map, node));
-  let java_params = list_new(env, node.params.len());
-  node.params.iter().for_each(|node| {
-    let java_node = enum_create_ts_fn_param(env, map, node);
-    list_add(env, &java_params, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_decl(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_PROPERTY_SIGNATURE.as_ref().unwrap() }
-    .construct(env, readonly, &java_key, computed, optional, &java_optional_init, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_init);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_optional_ref!(env, java_optional_type_params);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_params);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_qualified_name(map: &mut ByteToIndexMap, node: &TsQualifiedName) {
-  map.register_by_span(&node.span());
-  enum_register_ts_entity_name(map, &node.left);
-  register_ident(map, &node.right);
-}
-
-fn create_ts_qualified_name<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsQualifiedName) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span()).to_java(env);
-  let java_left = enum_create_ts_entity_name(env, map, &node.left);
-  let java_right = create_ident(env, map, &node.right);
-  let return_value = unsafe { JAVA_CLASS_TS_QUALIFIED_NAME.as_ref().unwrap() }
-    .construct(env, &java_left, &java_right, &java_span_ex);
-  delete_local_ref!(env, java_left);
-  delete_local_ref!(env, java_right);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_rest_type(map: &mut ByteToIndexMap, node: &TsRestType) {
-  map.register_by_span(&node.span);
-  enum_register_ts_type(map, &node.type_ann);
-}
-
-fn create_ts_rest_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsRestType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-  let return_value = unsafe { JAVA_CLASS_TS_REST_TYPE.as_ref().unwrap() }
-    .construct(env, &java_type_ann, &java_span_ex);
-  delete_local_ref!(env, java_type_ann);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_satisfies_expr(map: &mut ByteToIndexMap, node: &TsSatisfiesExpr) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-  enum_register_ts_type(map, &node.type_ann);
-}
-
-fn create_ts_satisfies_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsSatisfiesExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-  let return_value = unsafe { JAVA_CLASS_TS_SATISFIES_EXPR.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_type_ann, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_type_ann);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_setter_signature(map: &mut ByteToIndexMap, node: &TsSetterSignature) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.key);
-  enum_register_ts_fn_param(map, &node.param);
-}
-
-fn create_ts_setter_signature<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsSetterSignature) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let readonly = node.readonly;
-  let java_key = enum_create_expr(env, map, &node.key);
-  let computed = node.computed;
-  let optional = node.optional;
-  let java_param = enum_create_ts_fn_param(env, map, &node.param);
-  let return_value = unsafe { JAVA_CLASS_TS_SETTER_SIGNATURE.as_ref().unwrap() }
-    .construct(env, readonly, &java_key, computed, optional, &java_param, &java_span_ex);
-  delete_local_ref!(env, java_key);
-  delete_local_ref!(env, java_param);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_this_type(map: &mut ByteToIndexMap, node: &TsThisType) {
-  map.register_by_span(&node.span);
-}
-
-fn create_ts_this_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsThisType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let return_value = unsafe { JAVA_CLASS_TS_THIS_TYPE.as_ref().unwrap() }
-    .construct(env, &java_span_ex);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_tpl_lit_type(map: &mut ByteToIndexMap, node: &TsTplLitType) {
-  map.register_by_span(&node.span);
-  node.types.iter().for_each(|node| {
-    enum_register_ts_type(map, node);
-  });
-  node.quasis.iter().for_each(|node| {
-    register_tpl_element(map, node);
-  });
-}
-
-fn create_ts_tpl_lit_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTplLitType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_types = list_new(env, node.types.len());
-  node.types.iter().for_each(|node| {
-    let java_node = enum_create_ts_type(env, map, node);
-    list_add(env, &java_types, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let java_quasis = list_new(env, node.quasis.len());
-  node.quasis.iter().for_each(|node| {
-    let java_node = create_tpl_element(env, map, node);
-    list_add(env, &java_quasis, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_TS_TPL_LIT_TYPE.as_ref().unwrap() }
-    .construct(env, &java_types, &java_quasis, &java_span_ex);
-  delete_local_ref!(env, java_types);
-  delete_local_ref!(env, java_quasis);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_tuple_element(map: &mut ByteToIndexMap, node: &TsTupleElement) {
-  map.register_by_span(&node.span);
-  node.label.as_ref().map(|node| enum_register_pat(map, node));
-  enum_register_ts_type(map, &node.ty);
-}
-
-fn create_ts_tuple_element<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTupleElement) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_optional_label = node.label.as_ref().map(|node| enum_create_pat(env, map, node));
-  let java_ty = enum_create_ts_type(env, map, &node.ty);
-  let return_value = unsafe { JAVA_CLASS_TS_TUPLE_ELEMENT.as_ref().unwrap() }
-    .construct(env, &java_optional_label, &java_ty, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_label);
-  delete_local_ref!(env, java_ty);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_tuple_type(map: &mut ByteToIndexMap, node: &TsTupleType) {
-  map.register_by_span(&node.span);
-  node.elem_types.iter().for_each(|node| {
-    register_ts_tuple_element(map, node);
-  });
-}
-
-fn create_ts_tuple_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTupleType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_elem_types = list_new(env, node.elem_types.len());
-  node.elem_types.iter().for_each(|node| {
-    let java_node = create_ts_tuple_element(env, map, node);
-    list_add(env, &java_elem_types, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_TS_TUPLE_TYPE.as_ref().unwrap() }
-    .construct(env, &java_elem_types, &java_span_ex);
-  delete_local_ref!(env, java_elem_types);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_type_alias_decl(map: &mut ByteToIndexMap, node: &TsTypeAliasDecl) {
-  map.register_by_span(&node.span);
-  register_ident(map, &node.id);
-  node.type_params.as_ref().map(|node| register_ts_type_param_decl(map, node));
-  enum_register_ts_type(map, &node.type_ann);
-}
-
-fn create_ts_type_alias_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeAliasDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_id = create_ident(env, map, &node.id);
-  let declare = node.declare;
-  let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_decl(env, map, node));
-  let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-  let return_value = unsafe { JAVA_CLASS_TS_TYPE_ALIAS_DECL.as_ref().unwrap() }
-    .construct(env, &java_id, declare, &java_optional_type_params, &java_type_ann, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_params);
-  delete_local_ref!(env, java_id);
-  delete_local_ref!(env, java_type_ann);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_type_ann(map: &mut ByteToIndexMap, node: &TsTypeAnn) {
-  map.register_by_span(&node.span);
-  enum_register_ts_type(map, &node.type_ann);
-}
-
-fn create_ts_type_ann<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeAnn) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-  let return_value = unsafe { JAVA_CLASS_TS_TYPE_ANN.as_ref().unwrap() }
-    .construct(env, &java_type_ann, &java_span_ex);
-  delete_local_ref!(env, java_type_ann);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_type_assertion(map: &mut ByteToIndexMap, node: &TsTypeAssertion) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.expr);
-  enum_register_ts_type(map, &node.type_ann);
-}
-
-fn create_ts_type_assertion<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeAssertion) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr = enum_create_expr(env, map, &node.expr);
-  let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-  let return_value = unsafe { JAVA_CLASS_TS_TYPE_ASSERTION.as_ref().unwrap() }
-    .construct(env, &java_expr, &java_type_ann, &java_span_ex);
-  delete_local_ref!(env, java_expr);
-  delete_local_ref!(env, java_type_ann);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_type_lit(map: &mut ByteToIndexMap, node: &TsTypeLit) {
-  map.register_by_span(&node.span);
-  node.members.iter().for_each(|node| {
-    enum_register_ts_type_element(map, node);
-  });
-}
-
-fn create_ts_type_lit<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeLit) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_members = list_new(env, node.members.len());
-  node.members.iter().for_each(|node| {
-    let java_node = enum_create_ts_type_element(env, map, node);
-    list_add(env, &java_members, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_TS_TYPE_LIT.as_ref().unwrap() }
-    .construct(env, &java_members, &java_span_ex);
-  delete_local_ref!(env, java_members);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_type_operator(map: &mut ByteToIndexMap, node: &TsTypeOperator) {
-  map.register_by_span(&node.span);
-  enum_register_ts_type(map, &node.type_ann);
-}
-
-fn create_ts_type_operator<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeOperator) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_op = node.op.to_java(env);
-  let java_type_ann = enum_create_ts_type(env, map, &node.type_ann);
-  let return_value = unsafe { JAVA_CLASS_TS_TYPE_OPERATOR.as_ref().unwrap() }
-    .construct(env, &java_op, &java_type_ann, &java_span_ex);
-  delete_local_ref!(env, java_op);
-  delete_local_ref!(env, java_type_ann);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_type_param(map: &mut ByteToIndexMap, node: &TsTypeParam) {
-  map.register_by_span(&node.span);
-  register_ident(map, &node.name);
-  node.constraint.as_ref().map(|node| enum_register_ts_type(map, node));
-  node.default.as_ref().map(|node| enum_register_ts_type(map, node));
-}
-
-fn create_ts_type_param<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeParam) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_name = create_ident(env, map, &node.name);
-  let is_in = node.is_in;
-  let is_out = node.is_out;
-  let is_const = node.is_const;
-  let java_optional_constraint = node.constraint.as_ref().map(|node| enum_create_ts_type(env, map, node));
-  let java_optional_default = node.default.as_ref().map(|node| enum_create_ts_type(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_TYPE_PARAM.as_ref().unwrap() }
-    .construct(env, &java_name, is_in, is_out, is_const, &java_optional_constraint, &java_optional_default, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_constraint);
-  delete_local_optional_ref!(env, java_optional_default);
-  delete_local_ref!(env, java_name);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_type_param_decl(map: &mut ByteToIndexMap, node: &TsTypeParamDecl) {
-  map.register_by_span(&node.span);
-  node.params.iter().for_each(|node| {
-    register_ts_type_param(map, node);
-  });
-}
-
-fn create_ts_type_param_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeParamDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_params = list_new(env, node.params.len());
-  node.params.iter().for_each(|node| {
-    let java_node = create_ts_type_param(env, map, node);
-    list_add(env, &java_params, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_TS_TYPE_PARAM_DECL.as_ref().unwrap() }
-    .construct(env, &java_params, &java_span_ex);
-  delete_local_ref!(env, java_params);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_type_param_instantiation(map: &mut ByteToIndexMap, node: &TsTypeParamInstantiation) {
-  map.register_by_span(&node.span);
-  node.params.iter().for_each(|node| {
-    enum_register_ts_type(map, node);
-  });
-}
-
-fn create_ts_type_param_instantiation<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeParamInstantiation) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_params = list_new(env, node.params.len());
-  node.params.iter().for_each(|node| {
-    let java_node = enum_create_ts_type(env, map, node);
-    list_add(env, &java_params, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_TS_TYPE_PARAM_INSTANTIATION.as_ref().unwrap() }
-    .construct(env, &java_params, &java_span_ex);
-  delete_local_ref!(env, java_params);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_type_predicate(map: &mut ByteToIndexMap, node: &TsTypePredicate) {
-  map.register_by_span(&node.span);
-  enum_register_ts_this_type_or_ident(map, &node.param_name);
-  node.type_ann.as_ref().map(|node| register_ts_type_ann(map, node));
-}
-
-fn create_ts_type_predicate<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypePredicate) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let asserts = node.asserts;
-  let java_param_name = enum_create_ts_this_type_or_ident(env, map, &node.param_name);
-  let java_optional_type_ann = node.type_ann.as_ref().map(|node| create_ts_type_ann(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_TYPE_PREDICATE.as_ref().unwrap() }
-    .construct(env, asserts, &java_param_name, &java_optional_type_ann, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_ann);
-  delete_local_ref!(env, java_param_name);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_type_query(map: &mut ByteToIndexMap, node: &TsTypeQuery) {
-  map.register_by_span(&node.span);
-  enum_register_ts_type_query_expr(map, &node.expr_name);
-  node.type_args.as_ref().map(|node| register_ts_type_param_instantiation(map, node));
-}
-
-fn create_ts_type_query<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeQuery) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_expr_name = enum_create_ts_type_query_expr(env, map, &node.expr_name);
-  let java_optional_type_args = node.type_args.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_TYPE_QUERY.as_ref().unwrap() }
-    .construct(env, &java_expr_name, &java_optional_type_args, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_args);
-  delete_local_ref!(env, java_expr_name);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_type_ref(map: &mut ByteToIndexMap, node: &TsTypeRef) {
-  map.register_by_span(&node.span);
-  enum_register_ts_entity_name(map, &node.type_name);
-  node.type_params.as_ref().map(|node| register_ts_type_param_instantiation(map, node));
-}
-
-fn create_ts_type_ref<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsTypeRef) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_type_name = enum_create_ts_entity_name(env, map, &node.type_name);
-  let java_optional_type_params = node.type_params.as_ref().map(|node| create_ts_type_param_instantiation(env, map, node));
-  let return_value = unsafe { JAVA_CLASS_TS_TYPE_REF.as_ref().unwrap() }
-    .construct(env, &java_type_name, &java_optional_type_params, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_type_params);
-  delete_local_ref!(env, java_type_name);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_ts_union_type(map: &mut ByteToIndexMap, node: &TsUnionType) {
-  map.register_by_span(&node.span);
-  node.types.iter().for_each(|node| {
-    enum_register_ts_type(map, node);
-  });
-}
-
-fn create_ts_union_type<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &TsUnionType) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_types = list_new(env, node.types.len());
-  node.types.iter().for_each(|node| {
-    let java_node = enum_create_ts_type(env, map, node);
-    list_add(env, &java_types, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_TS_UNION_TYPE.as_ref().unwrap() }
-    .construct(env, &java_types, &java_span_ex);
-  delete_local_ref!(env, java_types);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_unary_expr(map: &mut ByteToIndexMap, node: &UnaryExpr) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.arg);
-}
-
-fn create_unary_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UnaryExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_op = node.op.to_java(env);
-  let java_arg = enum_create_expr(env, map, &node.arg);
-  let return_value = unsafe { JAVA_CLASS_UNARY_EXPR.as_ref().unwrap() }
-    .construct(env, &java_op, &java_arg, &java_span_ex);
-  delete_local_ref!(env, java_op);
-  delete_local_ref!(env, java_arg);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_update_expr(map: &mut ByteToIndexMap, node: &UpdateExpr) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.arg);
-}
-
-fn create_update_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UpdateExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_op = node.op.to_java(env);
-  let prefix = node.prefix;
-  let java_arg = enum_create_expr(env, map, &node.arg);
-  let return_value = unsafe { JAVA_CLASS_UPDATE_EXPR.as_ref().unwrap() }
-    .construct(env, &java_op, prefix, &java_arg, &java_span_ex);
-  delete_local_ref!(env, java_op);
-  delete_local_ref!(env, java_arg);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_using_decl(map: &mut ByteToIndexMap, node: &UsingDecl) {
-  map.register_by_span(&node.span);
-  node.decls.iter().for_each(|node| {
-    register_var_declarator(map, node);
-  });
-}
-
-fn create_using_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &UsingDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let is_await = node.is_await;
-  let java_decls = list_new(env, node.decls.len());
-  node.decls.iter().for_each(|node| {
-    let java_node = create_var_declarator(env, map, node);
-    list_add(env, &java_decls, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_USING_DECL.as_ref().unwrap() }
-    .construct(env, is_await, &java_decls, &java_span_ex);
-  delete_local_ref!(env, java_decls);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_var_decl(map: &mut ByteToIndexMap, node: &VarDecl) {
-  map.register_by_span(&node.span);
-  node.decls.iter().for_each(|node| {
-    register_var_declarator(map, node);
-  });
-}
-
-fn create_var_decl<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &VarDecl) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_kind = node.kind.to_java(env);
-  let declare = node.declare;
-  let java_decls = list_new(env, node.decls.len());
-  node.decls.iter().for_each(|node| {
-    let java_node = create_var_declarator(env, map, node);
-    list_add(env, &java_decls, &java_node);
-    delete_local_ref!(env, java_node);
-  });
-  let return_value = unsafe { JAVA_CLASS_VAR_DECL.as_ref().unwrap() }
-    .construct(env, &java_kind, declare, &java_decls, &java_span_ex);
-  delete_local_ref!(env, java_kind);
-  delete_local_ref!(env, java_decls);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_var_declarator(map: &mut ByteToIndexMap, node: &VarDeclarator) {
-  map.register_by_span(&node.span);
-  enum_register_pat(map, &node.name);
-  node.init.as_ref().map(|node| enum_register_expr(map, node));
-}
-
-fn create_var_declarator<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &VarDeclarator) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_name = enum_create_pat(env, map, &node.name);
-  let java_optional_init = node.init.as_ref().map(|node| enum_create_expr(env, map, node));
-  let definite = node.definite;
-  let return_value = unsafe { JAVA_CLASS_VAR_DECLARATOR.as_ref().unwrap() }
-    .construct(env, &java_name, &java_optional_init, definite, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_init);
-  delete_local_ref!(env, java_name);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_while_stmt(map: &mut ByteToIndexMap, node: &WhileStmt) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.test);
-  enum_register_stmt(map, &node.body);
-}
-
-fn create_while_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &WhileStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_test = enum_create_expr(env, map, &node.test);
-  let java_body = enum_create_stmt(env, map, &node.body);
-  let return_value = unsafe { JAVA_CLASS_WHILE_STMT.as_ref().unwrap() }
-    .construct(env, &java_test, &java_body, &java_span_ex);
-  delete_local_ref!(env, java_test);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_with_stmt(map: &mut ByteToIndexMap, node: &WithStmt) {
-  map.register_by_span(&node.span);
-  enum_register_expr(map, &node.obj);
-  enum_register_stmt(map, &node.body);
-}
-
-fn create_with_stmt<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &WithStmt) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_obj = enum_create_expr(env, map, &node.obj);
-  let java_body = enum_create_stmt(env, map, &node.body);
-  let return_value = unsafe { JAVA_CLASS_WITH_STMT.as_ref().unwrap() }
-    .construct(env, &java_obj, &java_body, &java_span_ex);
-  delete_local_ref!(env, java_obj);
-  delete_local_ref!(env, java_body);
-  delete_local_ref!(env, java_span_ex);
-  return_value
-}
-
-fn register_yield_expr(map: &mut ByteToIndexMap, node: &YieldExpr) {
-  map.register_by_span(&node.span);
-  node.arg.as_ref().map(|node| enum_register_expr(map, node));
-}
-
-fn create_yield_expr<'local, 'a>(env: &mut JNIEnv<'local>, map: &ByteToIndexMap, node: &YieldExpr) -> JObject<'a>
-where
-  'local: 'a,
-{
-  let java_span_ex = map.get_span_ex_by_span(&node.span).to_java(env);
-  let java_optional_arg = node.arg.as_ref().map(|node| enum_create_expr(env, map, node));
-  let delegate = node.delegate;
-  let return_value = unsafe { JAVA_CLASS_YIELD_EXPR.as_ref().unwrap() }
-    .construct(env, &java_optional_arg, delegate, &java_span_ex);
-  delete_local_optional_ref!(env, java_optional_arg);
-  delete_local_ref!(env, java_span_ex);
-  return_value
+    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_CALL_EXPR.as_ref().unwrap() }
+      .construct(env, &java_callee, &java_args, &java_optional_type_args, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_args);
+    delete_local_ref!(env, java_callee);
+    delete_local_ref!(env, java_args);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for CatchClause {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.param.as_ref().map(|node| node.register_with_map(map));
+    self.body.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for CatchClause {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_optional_param = self.param.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_body = self.body.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_CATCH_CLAUSE.as_ref().unwrap() }
+      .construct(env, &java_optional_param, &java_body, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_param);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Class {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.decorators.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.body.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.super_class.as_ref().map(|node| node.register_with_map(map));
+    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    self.super_type_params.as_ref().map(|node| node.register_with_map(map));
+    self.implements.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Class {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_decorators = list_new(env, self.decorators.len());
+    self.decorators.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_body = list_new(env, self.body.len());
+    self.body.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_body, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_super_class = self.super_class.as_ref().map(|node| node.to_java_with_map(env, map));
+    let is_abstract = self.is_abstract;
+    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_super_type_params = self.super_type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_implements = list_new(env, self.implements.len());
+    self.implements.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_implements, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_CLASS.as_ref().unwrap() }
+      .construct(env, &java_decorators, &java_body, &java_optional_super_class, is_abstract, &java_optional_type_params, &java_optional_super_type_params, &java_implements, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_super_class);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_optional_ref!(env, java_optional_super_type_params);
+    delete_local_ref!(env, java_decorators);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_implements);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ClassDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.ident.register_with_map(map);
+    self.class.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ClassDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_ident = self.ident.to_java_with_map(env, map);
+    let declare = self.declare;
+    let java_class = self.class.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_CLASS_DECL.as_ref().unwrap() }
+      .construct(env, &java_ident, declare, &java_class, &java_span_ex);
+    delete_local_ref!(env, java_ident);
+    delete_local_ref!(env, java_class);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ClassExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.ident.as_ref().map(|node| node.register_with_map(map));
+    self.class.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ClassExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_optional_ident = self.ident.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_class = self.class.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_CLASS_EXPR.as_ref().unwrap() }
+      .construct(env, &java_optional_ident, &java_class, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_ident);
+    delete_local_ref!(env, java_class);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ClassMethod {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.key.register_with_map(map);
+    self.function.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ClassMethod {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_key = self.key.to_java_with_map(env, map);
+    let java_function = self.function.to_java_with_map(env, map);
+    let java_kind = self.kind.to_java(env);
+    let is_static = self.is_static;
+    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    let is_abstract = self.is_abstract;
+    let is_optional = self.is_optional;
+    let is_override = self.is_override;
+    let return_value = unsafe { JAVA_CLASS_CLASS_METHOD.as_ref().unwrap() }
+      .construct(env, &java_key, &java_function, &java_kind, is_static, &java_optional_accessibility, is_abstract, is_optional, is_override, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_accessibility);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_function);
+    delete_local_ref!(env, java_kind);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ClassProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.key.register_with_map(map);
+    self.value.as_ref().map(|node| node.register_with_map(map));
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    self.decorators.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ClassProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_key = self.key.to_java_with_map(env, map);
+    let java_optional_value = self.value.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let is_static = self.is_static;
+    let java_decorators = list_new(env, self.decorators.len());
+    self.decorators.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    let is_abstract = self.is_abstract;
+    let is_optional = self.is_optional;
+    let is_override = self.is_override;
+    let readonly = self.readonly;
+    let declare = self.declare;
+    let definite = self.definite;
+    let return_value = unsafe { JAVA_CLASS_CLASS_PROP.as_ref().unwrap() }
+      .construct(env, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_abstract, is_optional, is_override, readonly, declare, definite, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_value);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_optional_ref!(env, java_optional_accessibility);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_decorators);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ComputedPropName {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ComputedPropName {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for CondExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.test.register_with_map(map);
+    self.cons.register_with_map(map);
+    self.alt.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for CondExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_test = self.test.to_java_with_map(env, map);
+    let java_cons = self.cons.to_java_with_map(env, map);
+    let java_alt = self.alt.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_COND_EXPR.as_ref().unwrap() }
+      .construct(env, &java_test, &java_cons, &java_alt, &java_span_ex);
+    delete_local_ref!(env, java_test);
+    delete_local_ref!(env, java_cons);
+    delete_local_ref!(env, java_alt);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Constructor {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.key.register_with_map(map);
+    self.params.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.body.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Constructor {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_key = self.key.to_java_with_map(env, map);
+    let java_params = list_new(env, self.params.len());
+    self.params.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_body = self.body.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    let is_optional = self.is_optional;
+    let return_value = unsafe { JAVA_CLASS_CONSTRUCTOR.as_ref().unwrap() }
+      .construct(env, &java_key, &java_params, &java_optional_body, &java_optional_accessibility, is_optional, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_body);
+    delete_local_optional_ref!(env, java_optional_accessibility);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ContinueStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.label.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ContinueStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_optional_label = self.label.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_CONTINUE_STMT.as_ref().unwrap() }
+      .construct(env, &java_optional_label, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_label);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for DebuggerStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for DebuggerStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let return_value = unsafe { JAVA_CLASS_DEBUGGER_STMT.as_ref().unwrap() }
+      .construct(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Decorator {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Decorator {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_DECORATOR.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for DoWhileStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.test.register_with_map(map);
+    self.body.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for DoWhileStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_test = self.test.to_java_with_map(env, map);
+    let java_body = self.body.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_DO_WHILE_STMT.as_ref().unwrap() }
+      .construct(env, &java_test, &java_body, &java_span_ex);
+    delete_local_ref!(env, java_test);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for EmptyStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for EmptyStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let return_value = unsafe { JAVA_CLASS_EMPTY_STMT.as_ref().unwrap() }
+      .construct(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ExportAll {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.src.register_with_map(map);
+    self.with.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ExportAll {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_src = self.src.to_java_with_map(env, map);
+    let type_only = self.type_only;
+    let java_optional_with = self.with.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_EXPORT_ALL.as_ref().unwrap() }
+      .construct(env, &java_src, type_only, &java_optional_with, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_with);
+    delete_local_ref!(env, java_src);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ExportDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.decl.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ExportDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_decl = self.decl.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_EXPORT_DECL.as_ref().unwrap() }
+      .construct(env, &java_decl, &java_span_ex);
+    delete_local_ref!(env, java_decl);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ExportDefaultDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.decl.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ExportDefaultDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_decl = self.decl.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_EXPORT_DEFAULT_DECL.as_ref().unwrap() }
+      .construct(env, &java_decl, &java_span_ex);
+    delete_local_ref!(env, java_decl);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ExportDefaultExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ExportDefaultExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_EXPORT_DEFAULT_EXPR.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ExportDefaultSpecifier {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.exported.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ExportDefaultSpecifier {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_exported = self.exported.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_EXPORT_DEFAULT_SPECIFIER.as_ref().unwrap() }
+      .construct(env, &java_exported, &java_span_ex);
+    delete_local_ref!(env, java_exported);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ExportNamedSpecifier {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.orig.register_with_map(map);
+    self.exported.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ExportNamedSpecifier {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_orig = self.orig.to_java_with_map(env, map);
+    let java_optional_exported = self.exported.as_ref().map(|node| node.to_java_with_map(env, map));
+    let is_type_only = self.is_type_only;
+    let return_value = unsafe { JAVA_CLASS_EXPORT_NAMED_SPECIFIER.as_ref().unwrap() }
+      .construct(env, &java_orig, &java_optional_exported, is_type_only, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_exported);
+    delete_local_ref!(env, java_orig);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ExportNamespaceSpecifier {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.name.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ExportNamespaceSpecifier {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_name = self.name.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_EXPORT_NAMESPACE_SPECIFIER.as_ref().unwrap() }
+      .construct(env, &java_name, &java_span_ex);
+    delete_local_ref!(env, java_name);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ExprOrSpread {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.expr.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ExprOrSpread {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_optional_spread = self.spread.as_ref().map(|node| map.get_span_ex_by_span(node).to_java(env));
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_EXPR_OR_SPREAD.as_ref().unwrap() }
+      .construct(env, &java_optional_spread, &java_expr, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_spread);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ExprStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ExprStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_EXPR_STMT.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for FnDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.ident.register_with_map(map);
+    self.function.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for FnDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_ident = self.ident.to_java_with_map(env, map);
+    let declare = self.declare;
+    let java_function = self.function.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_FN_DECL.as_ref().unwrap() }
+      .construct(env, &java_ident, declare, &java_function, &java_span_ex);
+    delete_local_ref!(env, java_ident);
+    delete_local_ref!(env, java_function);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for FnExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.ident.as_ref().map(|node| node.register_with_map(map));
+    self.function.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for FnExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_optional_ident = self.ident.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_function = self.function.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_FN_EXPR.as_ref().unwrap() }
+      .construct(env, &java_optional_ident, &java_function, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_ident);
+    delete_local_ref!(env, java_function);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ForInStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.left.register_with_map(map);
+    self.right.register_with_map(map);
+    self.body.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ForInStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_left = self.left.to_java_with_map(env, map);
+    let java_right = self.right.to_java_with_map(env, map);
+    let java_body = self.body.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_FOR_IN_STMT.as_ref().unwrap() }
+      .construct(env, &java_left, &java_right, &java_body, &java_span_ex);
+    delete_local_ref!(env, java_left);
+    delete_local_ref!(env, java_right);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ForOfStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.left.register_with_map(map);
+    self.right.register_with_map(map);
+    self.body.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ForOfStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let is_await = self.is_await;
+    let java_left = self.left.to_java_with_map(env, map);
+    let java_right = self.right.to_java_with_map(env, map);
+    let java_body = self.body.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_FOR_OF_STMT.as_ref().unwrap() }
+      .construct(env, is_await, &java_left, &java_right, &java_body, &java_span_ex);
+    delete_local_ref!(env, java_left);
+    delete_local_ref!(env, java_right);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ForStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.init.as_ref().map(|node| node.register_with_map(map));
+    self.test.as_ref().map(|node| node.register_with_map(map));
+    self.update.as_ref().map(|node| node.register_with_map(map));
+    self.body.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ForStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_optional_init = self.init.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_test = self.test.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_update = self.update.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_body = self.body.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_FOR_STMT.as_ref().unwrap() }
+      .construct(env, &java_optional_init, &java_optional_test, &java_optional_update, &java_body, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_init);
+    delete_local_optional_ref!(env, java_optional_test);
+    delete_local_optional_ref!(env, java_optional_update);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Function {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.params.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.decorators.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.body.as_ref().map(|node| node.register_with_map(map));
+    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    self.return_type.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Function {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_params = list_new(env, self.params.len());
+    self.params.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_decorators = list_new(env, self.decorators.len());
+    self.decorators.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_body = self.body.as_ref().map(|node| node.to_java_with_map(env, map));
+    let is_generator = self.is_generator;
+    let is_async = self.is_async;
+    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_return_type = self.return_type.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_FUNCTION.as_ref().unwrap() }
+      .construct(env, &java_params, &java_decorators, &java_optional_body, is_generator, is_async, &java_optional_type_params, &java_optional_return_type, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_body);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_optional_ref!(env, java_optional_return_type);
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_decorators);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for GetterProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.key.register_with_map(map);
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    self.body.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for GetterProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_key = self.key.to_java_with_map(env, map);
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_body = self.body.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_GETTER_PROP.as_ref().unwrap() }
+      .construct(env, &java_key, &java_optional_type_ann, &java_optional_body, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_optional_ref!(env, java_optional_body);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Ident {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Ident {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let sym = self.sym.as_str();
+    let optional = self.optional;
+    let return_value = unsafe { JAVA_CLASS_IDENT.as_ref().unwrap() }
+      .construct(env, sym, optional, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for IfStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.test.register_with_map(map);
+    self.cons.register_with_map(map);
+    self.alt.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for IfStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_test = self.test.to_java_with_map(env, map);
+    let java_cons = self.cons.to_java_with_map(env, map);
+    let java_optional_alt = self.alt.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_IF_STMT.as_ref().unwrap() }
+      .construct(env, &java_test, &java_cons, &java_optional_alt, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_alt);
+    delete_local_ref!(env, java_test);
+    delete_local_ref!(env, java_cons);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Import {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Import {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_phase = self.phase.to_java(env);
+    let return_value = unsafe { JAVA_CLASS_IMPORT.as_ref().unwrap() }
+      .construct(env, &java_phase, &java_span_ex);
+    delete_local_ref!(env, java_phase);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ImportDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.specifiers.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.src.register_with_map(map);
+    self.with.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ImportDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_specifiers = list_new(env, self.specifiers.len());
+    self.specifiers.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_specifiers, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_src = self.src.to_java_with_map(env, map);
+    let type_only = self.type_only;
+    let java_optional_with = self.with.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_phase = self.phase.to_java(env);
+    let return_value = unsafe { JAVA_CLASS_IMPORT_DECL.as_ref().unwrap() }
+      .construct(env, &java_specifiers, &java_src, type_only, &java_optional_with, &java_phase, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_with);
+    delete_local_ref!(env, java_specifiers);
+    delete_local_ref!(env, java_src);
+    delete_local_ref!(env, java_phase);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ImportDefaultSpecifier {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.local.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ImportDefaultSpecifier {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_local = self.local.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_IMPORT_DEFAULT_SPECIFIER.as_ref().unwrap() }
+      .construct(env, &java_local, &java_span_ex);
+    delete_local_ref!(env, java_local);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ImportNamedSpecifier {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.local.register_with_map(map);
+    self.imported.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ImportNamedSpecifier {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_local = self.local.to_java_with_map(env, map);
+    let java_optional_imported = self.imported.as_ref().map(|node| node.to_java_with_map(env, map));
+    let is_type_only = self.is_type_only;
+    let return_value = unsafe { JAVA_CLASS_IMPORT_NAMED_SPECIFIER.as_ref().unwrap() }
+      .construct(env, &java_local, &java_optional_imported, is_type_only, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_imported);
+    delete_local_ref!(env, java_local);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ImportStarAsSpecifier {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.local.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ImportStarAsSpecifier {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_local = self.local.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_IMPORT_STAR_AS_SPECIFIER.as_ref().unwrap() }
+      .construct(env, &java_local, &java_span_ex);
+    delete_local_ref!(env, java_local);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Invalid {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Invalid {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let return_value = unsafe { JAVA_CLASS_INVALID.as_ref().unwrap() }
+      .construct(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXAttr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.name.register_with_map(map);
+    self.value.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXAttr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_name = self.name.to_java_with_map(env, map);
+    let java_optional_value = self.value.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_JSX_ATTR.as_ref().unwrap() }
+      .construct(env, &java_name, &java_optional_value, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_value);
+    delete_local_ref!(env, java_name);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXClosingElement {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.name.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXClosingElement {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_name = self.name.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_JSX_CLOSING_ELEMENT.as_ref().unwrap() }
+      .construct(env, &java_name, &java_span_ex);
+    delete_local_ref!(env, java_name);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXClosingFragment {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXClosingFragment {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let return_value = unsafe { JAVA_CLASS_JSX_CLOSING_FRAGMENT.as_ref().unwrap() }
+      .construct(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXElement {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.opening.register_with_map(map);
+    self.children.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.closing.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXElement {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_opening = self.opening.to_java_with_map(env, map);
+    let java_children = list_new(env, self.children.len());
+    self.children.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_children, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_closing = self.closing.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_JSX_ELEMENT.as_ref().unwrap() }
+      .construct(env, &java_opening, &java_children, &java_optional_closing, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_closing);
+    delete_local_ref!(env, java_opening);
+    delete_local_ref!(env, java_children);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXEmptyExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXEmptyExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let return_value = unsafe { JAVA_CLASS_JSX_EMPTY_EXPR.as_ref().unwrap() }
+      .construct(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXExprContainer {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXExprContainer {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_JSX_EXPR_CONTAINER.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXFragment {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.opening.register_with_map(map);
+    self.children.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.closing.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXFragment {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_opening = self.opening.to_java_with_map(env, map);
+    let java_children = list_new(env, self.children.len());
+    self.children.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_children, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_closing = self.closing.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_JSX_FRAGMENT.as_ref().unwrap() }
+      .construct(env, &java_opening, &java_children, &java_closing, &java_span_ex);
+    delete_local_ref!(env, java_opening);
+    delete_local_ref!(env, java_children);
+    delete_local_ref!(env, java_closing);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXMemberExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.obj.register_with_map(map);
+    self.prop.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXMemberExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_obj = self.obj.to_java_with_map(env, map);
+    let java_prop = self.prop.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_JSX_MEMBER_EXPR.as_ref().unwrap() }
+      .construct(env, &java_obj, &java_prop, &java_span_ex);
+    delete_local_ref!(env, java_obj);
+    delete_local_ref!(env, java_prop);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXNamespacedName {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.ns.register_with_map(map);
+    self.name.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXNamespacedName {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_ns = self.ns.to_java_with_map(env, map);
+    let java_name = self.name.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_JSX_NAMESPACED_NAME.as_ref().unwrap() }
+      .construct(env, &java_ns, &java_name, &java_span_ex);
+    delete_local_ref!(env, java_ns);
+    delete_local_ref!(env, java_name);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXOpeningElement {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.name.register_with_map(map);
+    self.attrs.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.type_args.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXOpeningElement {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_name = self.name.to_java_with_map(env, map);
+    let java_attrs = list_new(env, self.attrs.len());
+    self.attrs.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_attrs, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let self_closing = self.self_closing;
+    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_JSX_OPENING_ELEMENT.as_ref().unwrap() }
+      .construct(env, &java_name, &java_attrs, self_closing, &java_optional_type_args, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_args);
+    delete_local_ref!(env, java_name);
+    delete_local_ref!(env, java_attrs);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXOpeningFragment {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXOpeningFragment {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let return_value = unsafe { JAVA_CLASS_JSX_OPENING_FRAGMENT.as_ref().unwrap() }
+      .construct(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXSpreadChild {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXSpreadChild {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_JSX_SPREAD_CHILD.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for JSXText {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for JSXText {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let value = self.value.as_str();
+    let raw = self.raw.as_str();
+    let return_value = unsafe { JAVA_CLASS_JSX_TEXT.as_ref().unwrap() }
+      .construct(env, value, raw, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for KeyValuePatProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.key.register_with_map(map);
+    self.value.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for KeyValuePatProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_key = self.key.to_java_with_map(env, map);
+    let java_value = self.value.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_KEY_VALUE_PAT_PROP.as_ref().unwrap() }
+      .construct(env, &java_key, &java_value, &java_span_ex);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_value);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for KeyValueProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.key.register_with_map(map);
+    self.value.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for KeyValueProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_key = self.key.to_java_with_map(env, map);
+    let java_value = self.value.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_KEY_VALUE_PROP.as_ref().unwrap() }
+      .construct(env, &java_key, &java_value, &java_span_ex);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_value);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for LabeledStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.label.register_with_map(map);
+    self.body.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for LabeledStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_label = self.label.to_java_with_map(env, map);
+    let java_body = self.body.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_LABELED_STMT.as_ref().unwrap() }
+      .construct(env, &java_label, &java_body, &java_span_ex);
+    delete_local_ref!(env, java_label);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for MemberExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.obj.register_with_map(map);
+    self.prop.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for MemberExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_obj = self.obj.to_java_with_map(env, map);
+    let java_prop = self.prop.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_MEMBER_EXPR.as_ref().unwrap() }
+      .construct(env, &java_obj, &java_prop, &java_span_ex);
+    delete_local_ref!(env, java_obj);
+    delete_local_ref!(env, java_prop);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for MetaPropExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for MetaPropExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_kind = self.kind.to_java(env);
+    let return_value = unsafe { JAVA_CLASS_META_PROP_EXPR.as_ref().unwrap() }
+      .construct(env, &java_kind, &java_span_ex);
+    delete_local_ref!(env, java_kind);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for MethodProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.key.register_with_map(map);
+    self.function.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for MethodProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_key = self.key.to_java_with_map(env, map);
+    let java_function = self.function.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_METHOD_PROP.as_ref().unwrap() }
+      .construct(env, &java_key, &java_function, &java_span_ex);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_function);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Module {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.body.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Module {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_body = list_new(env, self.body.len());
+    self.body.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_body, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let optional_shebang = self.shebang.as_ref().map(|node| node.to_string());
+    let return_value = unsafe { JAVA_CLASS_MODULE.as_ref().unwrap() }
+      .construct(env, &java_body, &optional_shebang, &java_span_ex);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for NamedExport {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.specifiers.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.src.as_ref().map(|node| node.register_with_map(map));
+    self.with.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for NamedExport {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_specifiers = list_new(env, self.specifiers.len());
+    self.specifiers.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_specifiers, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_src = self.src.as_ref().map(|node| node.to_java_with_map(env, map));
+    let type_only = self.type_only;
+    let java_optional_with = self.with.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_NAMED_EXPORT.as_ref().unwrap() }
+      .construct(env, &java_specifiers, &java_optional_src, type_only, &java_optional_with, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_src);
+    delete_local_optional_ref!(env, java_optional_with);
+    delete_local_ref!(env, java_specifiers);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for NewExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.callee.register_with_map(map);
+    self.args.as_ref().map(|nodes| nodes.iter().for_each(|node| node.register_with_map(map)));
+    self.type_args.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for NewExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_callee = self.callee.to_java_with_map(env, map);
+    let java_optional_args = self.args.as_ref().map(|nodes| {
+      let java_args = list_new(env, nodes.len());
+      nodes.iter().for_each(|node| {
+        let java_node = node.to_java_with_map(env, map);
+        list_add(env, &java_args, &java_node);
+        delete_local_ref!(env, java_node);
+      });
+      java_args
+    });
+    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_NEW_EXPR.as_ref().unwrap() }
+      .construct(env, &java_callee, &java_optional_args, &java_optional_type_args, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_args);
+    delete_local_optional_ref!(env, java_optional_type_args);
+    delete_local_ref!(env, java_callee);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Null {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Null {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let return_value = unsafe { JAVA_CLASS_NULL.as_ref().unwrap() }
+      .construct(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Number {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Number {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let value = self.value;
+    let optional_raw = self.raw.as_ref().map(|node| node.to_string());
+    let return_value = unsafe { JAVA_CLASS_NUMBER.as_ref().unwrap() }
+      .construct(env, value, &optional_raw, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ObjectLit {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.props.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ObjectLit {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_props = list_new(env, self.props.len());
+    self.props.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_props, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_OBJECT_LIT.as_ref().unwrap() }
+      .construct(env, &java_props, &java_span_ex);
+    delete_local_ref!(env, java_props);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ObjectPat {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.props.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ObjectPat {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_props = list_new(env, self.props.len());
+    self.props.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_props, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let optional = self.optional;
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_OBJECT_PAT.as_ref().unwrap() }
+      .construct(env, &java_props, optional, &java_optional_type_ann, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_ref!(env, java_props);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for OptCall {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.callee.register_with_map(map);
+    self.args.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.type_args.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for OptCall {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_callee = self.callee.to_java_with_map(env, map);
+    let java_args = list_new(env, self.args.len());
+    self.args.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_args, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_OPT_CALL.as_ref().unwrap() }
+      .construct(env, &java_callee, &java_args, &java_optional_type_args, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_args);
+    delete_local_ref!(env, java_callee);
+    delete_local_ref!(env, java_args);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for OptChainExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.base.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for OptChainExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let optional = self.optional;
+    let java_base = self.base.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_OPT_CHAIN_EXPR.as_ref().unwrap() }
+      .construct(env, optional, &java_base, &java_span_ex);
+    delete_local_ref!(env, java_base);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Param {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.decorators.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.pat.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Param {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_decorators = list_new(env, self.decorators.len());
+    self.decorators.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_pat = self.pat.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_PARAM.as_ref().unwrap() }
+      .construct(env, &java_decorators, &java_pat, &java_span_ex);
+    delete_local_ref!(env, java_decorators);
+    delete_local_ref!(env, java_pat);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ParenExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ParenExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_PAREN_EXPR.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for PrivateMethod {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.key.register_with_map(map);
+    self.function.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for PrivateMethod {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_key = self.key.to_java_with_map(env, map);
+    let java_function = self.function.to_java_with_map(env, map);
+    let java_kind = self.kind.to_java(env);
+    let is_static = self.is_static;
+    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    let is_abstract = self.is_abstract;
+    let is_optional = self.is_optional;
+    let is_override = self.is_override;
+    let return_value = unsafe { JAVA_CLASS_PRIVATE_METHOD.as_ref().unwrap() }
+      .construct(env, &java_key, &java_function, &java_kind, is_static, &java_optional_accessibility, is_abstract, is_optional, is_override, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_accessibility);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_function);
+    delete_local_ref!(env, java_kind);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for PrivateName {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.id.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for PrivateName {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_id = self.id.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap() }
+      .construct(env, &java_id, &java_span_ex);
+    delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for PrivateProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.key.register_with_map(map);
+    self.value.as_ref().map(|node| node.register_with_map(map));
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    self.decorators.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for PrivateProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_key = self.key.to_java_with_map(env, map);
+    let java_optional_value = self.value.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let is_static = self.is_static;
+    let java_decorators = list_new(env, self.decorators.len());
+    self.decorators.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    let is_optional = self.is_optional;
+    let is_override = self.is_override;
+    let readonly = self.readonly;
+    let definite = self.definite;
+    let return_value = unsafe { JAVA_CLASS_PRIVATE_PROP.as_ref().unwrap() }
+      .construct(env, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_optional, is_override, readonly, definite, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_value);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_optional_ref!(env, java_optional_accessibility);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_decorators);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Regex {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Regex {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let exp = self.exp.as_str();
+    let flags = self.flags.as_str();
+    let return_value = unsafe { JAVA_CLASS_REGEX.as_ref().unwrap() }
+      .construct(env, exp, flags, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for RestPat {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    map.register_by_span(&self.dot3_token);
+    self.arg.register_with_map(map);
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for RestPat {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_dot3_token = map.get_span_ex_by_span(&self.dot3_token).to_java(env);
+    let java_arg = self.arg.to_java_with_map(env, map);
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_REST_PAT.as_ref().unwrap() }
+      .construct(env, &java_dot3_token, &java_arg, &java_optional_type_ann, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_ref!(env, java_dot3_token);
+    delete_local_ref!(env, java_arg);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ReturnStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.arg.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ReturnStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_optional_arg = self.arg.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_RETURN_STMT.as_ref().unwrap() }
+      .construct(env, &java_optional_arg, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_arg);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Script {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.body.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Script {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_body = list_new(env, self.body.len());
+    self.body.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_body, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let optional_shebang = self.shebang.as_ref().map(|node| node.to_string());
+    let return_value = unsafe { JAVA_CLASS_SCRIPT.as_ref().unwrap() }
+      .construct(env, &java_body, &optional_shebang, &java_span_ex);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for SeqExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.exprs.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for SeqExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_exprs = list_new(env, self.exprs.len());
+    self.exprs.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_exprs, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_SEQ_EXPR.as_ref().unwrap() }
+      .construct(env, &java_exprs, &java_span_ex);
+    delete_local_ref!(env, java_exprs);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for SetterProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.key.register_with_map(map);
+    self.this_param.as_ref().map(|node| node.register_with_map(map));
+    self.param.register_with_map(map);
+    self.body.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for SetterProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_key = self.key.to_java_with_map(env, map);
+    let java_optional_this_param = self.this_param.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_param = self.param.to_java_with_map(env, map);
+    let java_optional_body = self.body.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_SETTER_PROP.as_ref().unwrap() }
+      .construct(env, &java_key, &java_optional_this_param, &java_param, &java_optional_body, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_this_param);
+    delete_local_optional_ref!(env, java_optional_body);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_param);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for SpreadElement {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    map.register_by_span(&self.dot3_token);
+    self.expr.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for SpreadElement {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_dot3_token = map.get_span_ex_by_span(&self.dot3_token).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_SPREAD_ELEMENT.as_ref().unwrap() }
+      .construct(env, &java_dot3_token, &java_expr, &java_span_ex);
+    delete_local_ref!(env, java_dot3_token);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for StaticBlock {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.body.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for StaticBlock {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_body = self.body.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_STATIC_BLOCK.as_ref().unwrap() }
+      .construct(env, &java_body, &java_span_ex);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Str {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Str {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let value = self.value.as_str();
+    let optional_raw = self.raw.as_ref().map(|node| node.to_string());
+    let return_value = unsafe { JAVA_CLASS_STR.as_ref().unwrap() }
+      .construct(env, value, &optional_raw, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Super {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Super {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let return_value = unsafe { JAVA_CLASS_SUPER.as_ref().unwrap() }
+      .construct(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for SuperPropExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.obj.register_with_map(map);
+    self.prop.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for SuperPropExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_obj = self.obj.to_java_with_map(env, map);
+    let java_prop = self.prop.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_SUPER_PROP_EXPR.as_ref().unwrap() }
+      .construct(env, &java_obj, &java_prop, &java_span_ex);
+    delete_local_ref!(env, java_obj);
+    delete_local_ref!(env, java_prop);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for SwitchCase {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.test.as_ref().map(|node| node.register_with_map(map));
+    self.cons.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for SwitchCase {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_optional_test = self.test.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_cons = list_new(env, self.cons.len());
+    self.cons.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_cons, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_SWITCH_CASE.as_ref().unwrap() }
+      .construct(env, &java_optional_test, &java_cons, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_test);
+    delete_local_ref!(env, java_cons);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for SwitchStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.discriminant.register_with_map(map);
+    self.cases.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for SwitchStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_discriminant = self.discriminant.to_java_with_map(env, map);
+    let java_cases = list_new(env, self.cases.len());
+    self.cases.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_cases, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_SWITCH_STMT.as_ref().unwrap() }
+      .construct(env, &java_discriminant, &java_cases, &java_span_ex);
+    delete_local_ref!(env, java_discriminant);
+    delete_local_ref!(env, java_cases);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TaggedTpl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.tag.register_with_map(map);
+    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    self.tpl.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TaggedTpl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_tag = self.tag.to_java_with_map(env, map);
+    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_tpl = self.tpl.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TAGGED_TPL.as_ref().unwrap() }
+      .construct(env, &java_tag, &java_optional_type_params, &java_tpl, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_tag);
+    delete_local_ref!(env, java_tpl);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ThisExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ThisExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let return_value = unsafe { JAVA_CLASS_THIS_EXPR.as_ref().unwrap() }
+      .construct(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for ThrowStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.arg.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for ThrowStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_arg = self.arg.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_THROW_STMT.as_ref().unwrap() }
+      .construct(env, &java_arg, &java_span_ex);
+    delete_local_ref!(env, java_arg);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for Tpl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.exprs.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.quasis.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for Tpl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_exprs = list_new(env, self.exprs.len());
+    self.exprs.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_exprs, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_quasis = list_new(env, self.quasis.len());
+    self.quasis.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_quasis, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_TPL.as_ref().unwrap() }
+      .construct(env, &java_exprs, &java_quasis, &java_span_ex);
+    delete_local_ref!(env, java_exprs);
+    delete_local_ref!(env, java_quasis);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TplElement {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TplElement {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let tail = self.tail;
+    let optional_cooked = self.cooked.as_ref().map(|node| node.to_string());
+    let raw = self.raw.as_str();
+    let return_value = unsafe { JAVA_CLASS_TPL_ELEMENT.as_ref().unwrap() }
+      .construct(env, tail, &optional_cooked, raw, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TryStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.block.register_with_map(map);
+    self.handler.as_ref().map(|node| node.register_with_map(map));
+    self.finalizer.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TryStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_block = self.block.to_java_with_map(env, map);
+    let java_optional_handler = self.handler.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_finalizer = self.finalizer.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TRY_STMT.as_ref().unwrap() }
+      .construct(env, &java_block, &java_optional_handler, &java_optional_finalizer, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_handler);
+    delete_local_optional_ref!(env, java_optional_finalizer);
+    delete_local_ref!(env, java_block);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsArrayType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.elem_type.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsArrayType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_elem_type = self.elem_type.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_ARRAY_TYPE.as_ref().unwrap() }
+      .construct(env, &java_elem_type, &java_span_ex);
+    delete_local_ref!(env, java_elem_type);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsAsExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+    self.type_ann.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsAsExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_AS_EXPR.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_type_ann, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsCallSignatureDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.params.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    self.type_params.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsCallSignatureDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_params = list_new(env, self.params.len());
+    self.params.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_CALL_SIGNATURE_DECL.as_ref().unwrap() }
+      .construct(env, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsConditionalType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.check_type.register_with_map(map);
+    self.extends_type.register_with_map(map);
+    self.true_type.register_with_map(map);
+    self.false_type.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsConditionalType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_check_type = self.check_type.to_java_with_map(env, map);
+    let java_extends_type = self.extends_type.to_java_with_map(env, map);
+    let java_true_type = self.true_type.to_java_with_map(env, map);
+    let java_false_type = self.false_type.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_CONDITIONAL_TYPE.as_ref().unwrap() }
+      .construct(env, &java_check_type, &java_extends_type, &java_true_type, &java_false_type, &java_span_ex);
+    delete_local_ref!(env, java_check_type);
+    delete_local_ref!(env, java_extends_type);
+    delete_local_ref!(env, java_true_type);
+    delete_local_ref!(env, java_false_type);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsConstAssertion {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsConstAssertion {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_CONST_ASSERTION.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsConstructSignatureDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.params.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    self.type_params.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsConstructSignatureDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_params = list_new(env, self.params.len());
+    self.params.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_CONSTRUCT_SIGNATURE_DECL.as_ref().unwrap() }
+      .construct(env, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsConstructorType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.params.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    self.type_ann.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsConstructorType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_params = list_new(env, self.params.len());
+    self.params.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let is_abstract = self.is_abstract;
+    let return_value = unsafe { JAVA_CLASS_TS_CONSTRUCTOR_TYPE.as_ref().unwrap() }
+      .construct(env, &java_params, &java_optional_type_params, &java_type_ann, is_abstract, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsEnumDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.id.register_with_map(map);
+    self.members.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsEnumDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let declare = self.declare;
+    let is_const = self.is_const;
+    let java_id = self.id.to_java_with_map(env, map);
+    let java_members = list_new(env, self.members.len());
+    self.members.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_members, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_TS_ENUM_DECL.as_ref().unwrap() }
+      .construct(env, declare, is_const, &java_id, &java_members, &java_span_ex);
+    delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_members);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsEnumMember {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.id.register_with_map(map);
+    self.init.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsEnumMember {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_id = self.id.to_java_with_map(env, map);
+    let java_optional_init = self.init.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_ENUM_MEMBER.as_ref().unwrap() }
+      .construct(env, &java_id, &java_optional_init, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_init);
+    delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsExportAssignment {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsExportAssignment {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_EXPORT_ASSIGNMENT.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsExprWithTypeArgs {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+    self.type_args.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsExprWithTypeArgs {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_EXPR_WITH_TYPE_ARGS.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_optional_type_args, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_args);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsExternalModuleRef {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsExternalModuleRef {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_EXTERNAL_MODULE_REF.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsFnType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.params.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    self.type_ann.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsFnType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_params = list_new(env, self.params.len());
+    self.params.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_FN_TYPE.as_ref().unwrap() }
+      .construct(env, &java_params, &java_optional_type_params, &java_type_ann, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsGetterSignature {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.key.register_with_map(map);
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsGetterSignature {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let readonly = self.readonly;
+    let java_key = self.key.to_java_with_map(env, map);
+    let computed = self.computed;
+    let optional = self.optional;
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_GETTER_SIGNATURE.as_ref().unwrap() }
+      .construct(env, readonly, &java_key, computed, optional, &java_optional_type_ann, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsImportEqualsDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.id.register_with_map(map);
+    self.module_ref.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsImportEqualsDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let is_export = self.is_export;
+    let is_type_only = self.is_type_only;
+    let java_id = self.id.to_java_with_map(env, map);
+    let java_module_ref = self.module_ref.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_IMPORT_EQUALS_DECL.as_ref().unwrap() }
+      .construct(env, is_export, is_type_only, &java_id, &java_module_ref, &java_span_ex);
+    delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_module_ref);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsImportType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.arg.register_with_map(map);
+    self.qualifier.as_ref().map(|node| node.register_with_map(map));
+    self.type_args.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsImportType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_arg = self.arg.to_java_with_map(env, map);
+    let java_optional_qualifier = self.qualifier.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_IMPORT_TYPE.as_ref().unwrap() }
+      .construct(env, &java_arg, &java_optional_qualifier, &java_optional_type_args, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_qualifier);
+    delete_local_optional_ref!(env, java_optional_type_args);
+    delete_local_ref!(env, java_arg);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsIndexSignature {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.params.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsIndexSignature {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_params = list_new(env, self.params.len());
+    self.params.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let readonly = self.readonly;
+    let is_static = self.is_static;
+    let return_value = unsafe { JAVA_CLASS_TS_INDEX_SIGNATURE.as_ref().unwrap() }
+      .construct(env, &java_params, &java_optional_type_ann, readonly, is_static, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsIndexedAccessType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.obj_type.register_with_map(map);
+    self.index_type.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsIndexedAccessType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let readonly = self.readonly;
+    let java_obj_type = self.obj_type.to_java_with_map(env, map);
+    let java_index_type = self.index_type.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_INDEXED_ACCESS_TYPE.as_ref().unwrap() }
+      .construct(env, readonly, &java_obj_type, &java_index_type, &java_span_ex);
+    delete_local_ref!(env, java_obj_type);
+    delete_local_ref!(env, java_index_type);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsInferType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.type_param.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsInferType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_type_param = self.type_param.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_INFER_TYPE.as_ref().unwrap() }
+      .construct(env, &java_type_param, &java_span_ex);
+    delete_local_ref!(env, java_type_param);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsInstantiation {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+    self.type_args.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsInstantiation {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_type_args = self.type_args.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_INSTANTIATION.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_type_args, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_type_args);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsInterfaceBody {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.body.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsInterfaceBody {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_body = list_new(env, self.body.len());
+    self.body.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_body, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_TS_INTERFACE_BODY.as_ref().unwrap() }
+      .construct(env, &java_body, &java_span_ex);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsInterfaceDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.id.register_with_map(map);
+    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    self.extends.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.body.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsInterfaceDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_id = self.id.to_java_with_map(env, map);
+    let declare = self.declare;
+    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_extends = list_new(env, self.extends.len());
+    self.extends.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_extends, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_body = self.body.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_INTERFACE_DECL.as_ref().unwrap() }
+      .construct(env, &java_id, declare, &java_optional_type_params, &java_extends, &java_body, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_extends);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsIntersectionType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.types.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsIntersectionType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_types = list_new(env, self.types.len());
+    self.types.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_types, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_TS_INTERSECTION_TYPE.as_ref().unwrap() }
+      .construct(env, &java_types, &java_span_ex);
+    delete_local_ref!(env, java_types);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsKeywordType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsKeywordType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_kind = self.kind.to_java(env);
+    let return_value = unsafe { JAVA_CLASS_TS_KEYWORD_TYPE.as_ref().unwrap() }
+      .construct(env, &java_kind, &java_span_ex);
+    delete_local_ref!(env, java_kind);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsLitType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.lit.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsLitType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_lit = self.lit.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_LIT_TYPE.as_ref().unwrap() }
+      .construct(env, &java_lit, &java_span_ex);
+    delete_local_ref!(env, java_lit);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsMappedType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.type_param.register_with_map(map);
+    self.name_type.as_ref().map(|node| node.register_with_map(map));
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsMappedType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_optional_readonly = self.readonly.as_ref().map(|node| node.to_java(env));
+    let java_type_param = self.type_param.to_java_with_map(env, map);
+    let java_optional_name_type = self.name_type.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_optional = self.optional.as_ref().map(|node| node.to_java(env));
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_MAPPED_TYPE.as_ref().unwrap() }
+      .construct(env, &java_optional_readonly, &java_type_param, &java_optional_name_type, &java_optional_optional, &java_optional_type_ann, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_readonly);
+    delete_local_optional_ref!(env, java_optional_name_type);
+    delete_local_optional_ref!(env, java_optional_optional);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_ref!(env, java_type_param);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsMethodSignature {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.key.register_with_map(map);
+    self.params.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    self.type_params.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsMethodSignature {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let readonly = self.readonly;
+    let java_key = self.key.to_java_with_map(env, map);
+    let computed = self.computed;
+    let optional = self.optional;
+    let java_params = list_new(env, self.params.len());
+    self.params.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_METHOD_SIGNATURE.as_ref().unwrap() }
+      .construct(env, readonly, &java_key, computed, optional, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsModuleBlock {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.body.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsModuleBlock {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_body = list_new(env, self.body.len());
+    self.body.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_body, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_TS_MODULE_BLOCK.as_ref().unwrap() }
+      .construct(env, &java_body, &java_span_ex);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsModuleDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.id.register_with_map(map);
+    self.body.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsModuleDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let declare = self.declare;
+    let global = self.global;
+    let java_id = self.id.to_java_with_map(env, map);
+    let java_optional_body = self.body.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_MODULE_DECL.as_ref().unwrap() }
+      .construct(env, declare, global, &java_id, &java_optional_body, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_body);
+    delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsNamespaceDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.id.register_with_map(map);
+    self.body.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsNamespaceDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let declare = self.declare;
+    let global = self.global;
+    let java_id = self.id.to_java_with_map(env, map);
+    let java_body = self.body.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_NAMESPACE_DECL.as_ref().unwrap() }
+      .construct(env, declare, global, &java_id, &java_body, &java_span_ex);
+    delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsNamespaceExportDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.id.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsNamespaceExportDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_id = self.id.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_NAMESPACE_EXPORT_DECL.as_ref().unwrap() }
+      .construct(env, &java_id, &java_span_ex);
+    delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsNonNullExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsNonNullExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_NON_NULL_EXPR.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsOptionalType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.type_ann.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsOptionalType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_OPTIONAL_TYPE.as_ref().unwrap() }
+      .construct(env, &java_type_ann, &java_span_ex);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsParamProp {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.decorators.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.param.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsParamProp {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_decorators = list_new(env, self.decorators.len());
+    self.decorators.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_decorators, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    let is_override = self.is_override;
+    let readonly = self.readonly;
+    let java_param = self.param.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_PARAM_PROP.as_ref().unwrap() }
+      .construct(env, &java_decorators, &java_optional_accessibility, is_override, readonly, &java_param, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_accessibility);
+    delete_local_ref!(env, java_decorators);
+    delete_local_ref!(env, java_param);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsParenthesizedType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.type_ann.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsParenthesizedType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_PARENTHESIZED_TYPE.as_ref().unwrap() }
+      .construct(env, &java_type_ann, &java_span_ex);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsPropertySignature {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.key.register_with_map(map);
+    self.init.as_ref().map(|node| node.register_with_map(map));
+    self.params.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+    self.type_params.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsPropertySignature {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let readonly = self.readonly;
+    let java_key = self.key.to_java_with_map(env, map);
+    let computed = self.computed;
+    let optional = self.optional;
+    let java_optional_init = self.init.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_params = list_new(env, self.params.len());
+    self.params.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_PROPERTY_SIGNATURE.as_ref().unwrap() }
+      .construct(env, readonly, &java_key, computed, optional, &java_optional_init, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_init);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsQualifiedName {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span());
+    self.left.register_with_map(map);
+    self.right.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsQualifiedName {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_left = self.left.to_java_with_map(env, map);
+    let java_right = self.right.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_QUALIFIED_NAME.as_ref().unwrap() }
+      .construct(env, &java_left, &java_right, &java_span_ex);
+    delete_local_ref!(env, java_left);
+    delete_local_ref!(env, java_right);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsRestType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.type_ann.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsRestType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_REST_TYPE.as_ref().unwrap() }
+      .construct(env, &java_type_ann, &java_span_ex);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsSatisfiesExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+    self.type_ann.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsSatisfiesExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_SATISFIES_EXPR.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_type_ann, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsSetterSignature {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.key.register_with_map(map);
+    self.param.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsSetterSignature {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let readonly = self.readonly;
+    let java_key = self.key.to_java_with_map(env, map);
+    let computed = self.computed;
+    let optional = self.optional;
+    let java_param = self.param.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_SETTER_SIGNATURE.as_ref().unwrap() }
+      .construct(env, readonly, &java_key, computed, optional, &java_param, &java_span_ex);
+    delete_local_ref!(env, java_key);
+    delete_local_ref!(env, java_param);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsThisType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsThisType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let return_value = unsafe { JAVA_CLASS_TS_THIS_TYPE.as_ref().unwrap() }
+      .construct(env, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTplLitType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.types.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+    self.quasis.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTplLitType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_types = list_new(env, self.types.len());
+    self.types.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_types, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let java_quasis = list_new(env, self.quasis.len());
+    self.quasis.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_quasis, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_TS_TPL_LIT_TYPE.as_ref().unwrap() }
+      .construct(env, &java_types, &java_quasis, &java_span_ex);
+    delete_local_ref!(env, java_types);
+    delete_local_ref!(env, java_quasis);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTupleElement {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.label.as_ref().map(|node| node.register_with_map(map));
+    self.ty.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTupleElement {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_optional_label = self.label.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_ty = self.ty.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_TUPLE_ELEMENT.as_ref().unwrap() }
+      .construct(env, &java_optional_label, &java_ty, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_label);
+    delete_local_ref!(env, java_ty);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTupleType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.elem_types.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTupleType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_elem_types = list_new(env, self.elem_types.len());
+    self.elem_types.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_elem_types, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_TS_TUPLE_TYPE.as_ref().unwrap() }
+      .construct(env, &java_elem_types, &java_span_ex);
+    delete_local_ref!(env, java_elem_types);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTypeAliasDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.id.register_with_map(map);
+    self.type_params.as_ref().map(|node| node.register_with_map(map));
+    self.type_ann.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTypeAliasDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_id = self.id.to_java_with_map(env, map);
+    let declare = self.declare;
+    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_TYPE_ALIAS_DECL.as_ref().unwrap() }
+      .construct(env, &java_id, declare, &java_optional_type_params, &java_type_ann, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTypeAnn {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.type_ann.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTypeAnn {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_TYPE_ANN.as_ref().unwrap() }
+      .construct(env, &java_type_ann, &java_span_ex);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTypeAssertion {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr.register_with_map(map);
+    self.type_ann.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTypeAssertion {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_TYPE_ASSERTION.as_ref().unwrap() }
+      .construct(env, &java_expr, &java_type_ann, &java_span_ex);
+    delete_local_ref!(env, java_expr);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTypeLit {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.members.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTypeLit {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_members = list_new(env, self.members.len());
+    self.members.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_members, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_TS_TYPE_LIT.as_ref().unwrap() }
+      .construct(env, &java_members, &java_span_ex);
+    delete_local_ref!(env, java_members);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTypeOperator {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.type_ann.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTypeOperator {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_op = self.op.to_java(env);
+    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_TS_TYPE_OPERATOR.as_ref().unwrap() }
+      .construct(env, &java_op, &java_type_ann, &java_span_ex);
+    delete_local_ref!(env, java_op);
+    delete_local_ref!(env, java_type_ann);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTypeParam {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.name.register_with_map(map);
+    self.constraint.as_ref().map(|node| node.register_with_map(map));
+    self.default.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTypeParam {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_name = self.name.to_java_with_map(env, map);
+    let is_in = self.is_in;
+    let is_out = self.is_out;
+    let is_const = self.is_const;
+    let java_optional_constraint = self.constraint.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_default = self.default.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_TYPE_PARAM.as_ref().unwrap() }
+      .construct(env, &java_name, is_in, is_out, is_const, &java_optional_constraint, &java_optional_default, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_constraint);
+    delete_local_optional_ref!(env, java_optional_default);
+    delete_local_ref!(env, java_name);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTypeParamDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.params.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTypeParamDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_params = list_new(env, self.params.len());
+    self.params.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_TS_TYPE_PARAM_DECL.as_ref().unwrap() }
+      .construct(env, &java_params, &java_span_ex);
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTypeParamInstantiation {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.params.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTypeParamInstantiation {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_params = list_new(env, self.params.len());
+    self.params.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_params, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_TS_TYPE_PARAM_INSTANTIATION.as_ref().unwrap() }
+      .construct(env, &java_params, &java_span_ex);
+    delete_local_ref!(env, java_params);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTypePredicate {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.param_name.register_with_map(map);
+    self.type_ann.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTypePredicate {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let asserts = self.asserts;
+    let java_param_name = self.param_name.to_java_with_map(env, map);
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_TYPE_PREDICATE.as_ref().unwrap() }
+      .construct(env, asserts, &java_param_name, &java_optional_type_ann, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_ref!(env, java_param_name);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTypeQuery {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.expr_name.register_with_map(map);
+    self.type_args.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTypeQuery {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_expr_name = self.expr_name.to_java_with_map(env, map);
+    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_TYPE_QUERY.as_ref().unwrap() }
+      .construct(env, &java_expr_name, &java_optional_type_args, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_args);
+    delete_local_ref!(env, java_expr_name);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsTypeRef {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.type_name.register_with_map(map);
+    self.type_params.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsTypeRef {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_type_name = self.type_name.to_java_with_map(env, map);
+    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_TS_TYPE_REF.as_ref().unwrap() }
+      .construct(env, &java_type_name, &java_optional_type_params, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_type_params);
+    delete_local_ref!(env, java_type_name);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for TsUnionType {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.types.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsUnionType {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_types = list_new(env, self.types.len());
+    self.types.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_types, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_TS_UNION_TYPE.as_ref().unwrap() }
+      .construct(env, &java_types, &java_span_ex);
+    delete_local_ref!(env, java_types);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for UnaryExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.arg.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for UnaryExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_op = self.op.to_java(env);
+    let java_arg = self.arg.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_UNARY_EXPR.as_ref().unwrap() }
+      .construct(env, &java_op, &java_arg, &java_span_ex);
+    delete_local_ref!(env, java_op);
+    delete_local_ref!(env, java_arg);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for UpdateExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.arg.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for UpdateExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_op = self.op.to_java(env);
+    let prefix = self.prefix;
+    let java_arg = self.arg.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_UPDATE_EXPR.as_ref().unwrap() }
+      .construct(env, &java_op, prefix, &java_arg, &java_span_ex);
+    delete_local_ref!(env, java_op);
+    delete_local_ref!(env, java_arg);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for UsingDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.decls.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for UsingDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let is_await = self.is_await;
+    let java_decls = list_new(env, self.decls.len());
+    self.decls.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_decls, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_USING_DECL.as_ref().unwrap() }
+      .construct(env, is_await, &java_decls, &java_span_ex);
+    delete_local_ref!(env, java_decls);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for VarDecl {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.decls.iter().for_each(|node| {
+      node.register_with_map(map);
+    });
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for VarDecl {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_kind = self.kind.to_java(env);
+    let declare = self.declare;
+    let java_decls = list_new(env, self.decls.len());
+    self.decls.iter().for_each(|node| {
+      let java_node = node.to_java_with_map(env, map);
+      list_add(env, &java_decls, &java_node);
+      delete_local_ref!(env, java_node);
+    });
+    let return_value = unsafe { JAVA_CLASS_VAR_DECL.as_ref().unwrap() }
+      .construct(env, &java_kind, declare, &java_decls, &java_span_ex);
+    delete_local_ref!(env, java_kind);
+    delete_local_ref!(env, java_decls);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for VarDeclarator {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.name.register_with_map(map);
+    self.init.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for VarDeclarator {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_name = self.name.to_java_with_map(env, map);
+    let java_optional_init = self.init.as_ref().map(|node| node.to_java_with_map(env, map));
+    let definite = self.definite;
+    let return_value = unsafe { JAVA_CLASS_VAR_DECLARATOR.as_ref().unwrap() }
+      .construct(env, &java_name, &java_optional_init, definite, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_init);
+    delete_local_ref!(env, java_name);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for WhileStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.test.register_with_map(map);
+    self.body.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for WhileStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_test = self.test.to_java_with_map(env, map);
+    let java_body = self.body.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_WHILE_STMT.as_ref().unwrap() }
+      .construct(env, &java_test, &java_body, &java_span_ex);
+    delete_local_ref!(env, java_test);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for WithStmt {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.obj.register_with_map(map);
+    self.body.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for WithStmt {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_obj = self.obj.to_java_with_map(env, map);
+    let java_body = self.body.to_java_with_map(env, map);
+    let return_value = unsafe { JAVA_CLASS_WITH_STMT.as_ref().unwrap() }
+      .construct(env, &java_obj, &java_body, &java_span_ex);
+    delete_local_ref!(env, java_obj);
+    delete_local_ref!(env, java_body);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for YieldExpr {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.arg.as_ref().map(|node| node.register_with_map(map));
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for YieldExpr {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_optional_arg = self.arg.as_ref().map(|node| node.to_java_with_map(env, map));
+    let delegate = self.delegate;
+    let return_value = unsafe { JAVA_CLASS_YIELD_EXPR.as_ref().unwrap() }
+      .construct(env, &java_optional_arg, delegate, &java_span_ex);
+    delete_local_optional_ref!(env, java_optional_arg);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
 }
 /* Node End */
