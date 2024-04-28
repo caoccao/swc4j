@@ -35,7 +35,5 @@ public @interface Jni2RustClass {
 
     String name() default "";
 
-    boolean open() default false;
-
     boolean span() default true;
 }

@@ -59,10 +59,6 @@ public class Jni2RustClassUtils<T> {
         return optionalJni2RustClass.map(Jni2RustClass::ignore).orElse(false);
     }
 
-    public boolean isOpen() {
-        return optionalJni2RustClass.map(Jni2RustClass::open).orElse(false);
-    }
-
     public boolean isSpan() {
         return optionalJni2RustClass.map(Jni2RustClass::span).orElse(true);
     }

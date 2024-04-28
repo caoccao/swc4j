@@ -32,7 +32,6 @@ import java.util.Optional;
  */
 @Jni2RustClass(
         getDefault = "Program::Script(Script::get_default())",
-        open = true,
         mappings = {
                 @Jni2RustEnumMapping(name = "Module", type = Swc4jAstModule.class),
                 @Jni2RustEnumMapping(name = "Script", type = Swc4jAstScript.class),
