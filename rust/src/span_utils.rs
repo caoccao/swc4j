@@ -61,6 +61,12 @@ impl ToJava for SpanEx {
   }
 }
 
+pub trait ToJavaWithMap<Map> {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ Map) -> JObject<'a>
+  where
+    'local: 'a;
+}
+
 #[derive(Debug)]
 pub struct ByteToIndexMap {
   map: BTreeMap<usize, SpanEx>,

@@ -19,7 +19,6 @@ package com.caoccao.javet.swc4j.comments;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleMap;
@@ -35,7 +34,7 @@ public class Swc4jComments {
     protected final Map<Integer, List<Swc4jComment>> leading;
     protected final Map<Integer, List<Swc4jComment>> trailing;
 
-    @Jni2RustMethod(mode = Jni2RustMethodMode.Manual)
+    @Jni2RustMethod
     public Swc4jComments(Map<Integer, List<Swc4jComment>> leading, Map<Integer, List<Swc4jComment>> trailing) {
         this.leading = SimpleMap.immutable(AssertionUtils.notNull(leading, "Leading"));
         this.trailing = SimpleMap.immutable(AssertionUtils.notNull(trailing, "Trailing"));

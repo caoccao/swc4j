@@ -19,7 +19,6 @@ package com.caoccao.javet.swc4j.comments;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethodMode;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
@@ -29,7 +28,7 @@ public class Swc4jComment {
     protected final Swc4jSpan span;
     protected final String text;
 
-    @Jni2RustMethod(mode = Jni2RustMethodMode.Manual)
+    @Jni2RustMethod
     public Swc4jComment(String text, Swc4jCommentKind kind, Swc4jSpan span) {
         this.kind = AssertionUtils.notNull(kind, "Kind");
         this.span = AssertionUtils.notNull(span, "Span");

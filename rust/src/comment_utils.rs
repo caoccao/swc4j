@@ -23,7 +23,66 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use crate::jni_utils::*;
-use crate::span_utils::ByteToIndexMap;
+use crate::span_utils::{ByteToIndexMap, ToJavaWithMap};
+
+impl ToJavaWithMap<ByteToIndexMap> for Comment {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let text = &self.text;
+    let java_kind = self.kind.to_java(env);
+    let java_span = map.get_span_ex_by_span(&self.span).to_java(env);
+    let return_value = unsafe { JAVA_COMMENT.as_ref().unwrap() }.construct(env, text, &java_kind, &java_span);
+    delete_local_ref!(env, java_kind);
+    delete_local_ref!(env, java_span);
+    return_value
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for MultiThreadedComments {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let leading = self.leading_map();
+    let trailing = self.trailing_map();
+    let java_leading = map_new(env, leading.len());
+    leading.iter().for_each(|(key, value)| {
+      let key_span_ex = map.get_span_ex_by_byte_pos(&key);
+      let java_position = integer_value_of(env, key_span_ex.start as i32);
+      let java_comments = list_new(env, value.len());
+      value.iter().for_each(|comment| {
+        let java_comment = comment.to_java_with_map(env, map);
+        list_add(env, &java_comments, &java_comment);
+        delete_local_ref!(env, java_comment);
+      });
+      let java_return_value = map_put(env, &java_leading, &java_position, &java_comments);
+      delete_local_ref!(env, java_position);
+      delete_local_ref!(env, java_comments);
+      delete_local_ref!(env, java_return_value);
+    });
+    let java_trailing = map_new(env, trailing.len());
+    trailing.iter().for_each(|(key, value)| {
+      let key_span_ex = map.get_span_ex_by_byte_pos(&key);
+      let java_position = integer_value_of(env, key_span_ex.start as i32);
+      let java_comments = list_new(env, value.len());
+      value.iter().for_each(|comment| {
+        let java_comment = comment.to_java_with_map(env, map);
+        list_add(env, &java_comments, &java_comment);
+        delete_local_ref!(env, java_comment);
+      });
+      let java_return_value = map_put(env, &java_trailing, &java_position, &java_comments);
+      delete_local_ref!(env, java_position);
+      delete_local_ref!(env, java_comments);
+      delete_local_ref!(env, java_return_value);
+    });
+    let return_value = unsafe { JAVA_COMMENTS.as_ref().unwrap() }.construct(env, &java_leading, &java_trailing);
+    delete_local_ref!(env, java_leading);
+    delete_local_ref!(env, java_trailing);
+    return_value
+  }
+}
 
 /* JavaSwc4jComment Begin */
 #[allow(dead_code)]
@@ -55,31 +114,33 @@ impl JavaSwc4jComment {
       method_construct,
     }
   }
-/* JavaSwc4jComment End */
 
-  pub fn construct<'local, 'a>(&self, env: &mut JNIEnv<'local>, comment: &Comment, map: &ByteToIndexMap) -> JObject<'a>
+  pub fn construct<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    text: &str,
+    kind: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let java_text = string_to_jstring!(env, &comment.text);
+    let java_text = string_to_jstring!(env, &text);
     let text = object_to_jvalue!(java_text);
-    let java_comment_kind = comment.kind.to_java(env);
-    let comment_kind = object_to_jvalue!(java_comment_kind);
-    let java_span_ex = map.get_span_ex_by_span(&comment.span).to_java(env);
-    let span_ex = object_to_jvalue!(java_span_ex);
+    let kind = object_to_jvalue!(kind);
+    let span = object_to_jvalue!(span);
     let return_value = call_as_construct!(
-      env,
-      &self.class,
-      self.method_construct,
-      &[text, comment_kind, span_ex],
-      "Swc4jComment"
-    );
+        env,
+        &self.class,
+        self.method_construct,
+        &[text, kind, span],
+        "Swc4jComment construct()"
+      );
     delete_local_ref!(env, java_text);
-    delete_local_ref!(env, java_comment_kind);
-    delete_local_ref!(env, java_span_ex);
     return_value
   }
 }
+/* JavaSwc4jComment End */
 
 /* JavaSwc4jComments Begin */
 #[allow(dead_code)]
@@ -111,63 +172,29 @@ impl JavaSwc4jComments {
       method_construct,
     }
   }
-/* JavaSwc4jComments End */
 
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    comments: &MultiThreadedComments,
-    map: &ByteToIndexMap,
+    leading: &JObject<'_>,
+    trailing: &JObject<'_>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let leading = comments.leading_map();
-    let trailing = comments.trailing_map();
-    let java_leading = map_new(env, leading.len());
-    leading.iter().for_each(|(key, value)| {
-      let key_span_ex = map.get_span_ex_by_byte_pos(&key);
-      let java_position = integer_value_of(env, key_span_ex.start as i32);
-      let java_comments = list_new(env, value.len());
-      value.iter().for_each(|comment| {
-        let java_comment = unsafe { JAVA_COMMENT.as_ref().unwrap() }.construct(env, comment, map);
-        list_add(env, &java_comments, &java_comment);
-        delete_local_ref!(env, java_comment);
-      });
-      let java_return_value = map_put(env, &java_leading, &java_position, &java_comments);
-      delete_local_ref!(env, java_position);
-      delete_local_ref!(env, java_comments);
-      delete_local_ref!(env, java_return_value);
-    });
-    let leading = object_to_jvalue!(&java_leading);
-    let java_trailing = map_new(env, trailing.len());
-    trailing.iter().for_each(|(key, value)| {
-      let key_span_ex = map.get_span_ex_by_byte_pos(&key);
-      let java_position = integer_value_of(env, key_span_ex.start as i32);
-      let java_comments = list_new(env, value.len());
-      value.iter().for_each(|comment| {
-        let java_comment = unsafe { JAVA_COMMENT.as_ref().unwrap() }.construct(env, comment, map);
-        list_add(env, &java_comments, &java_comment);
-        delete_local_ref!(env, java_comment);
-      });
-      let java_return_value = map_put(env, &java_trailing, &java_position, &java_comments);
-      delete_local_ref!(env, java_position);
-      delete_local_ref!(env, java_comments);
-      delete_local_ref!(env, java_return_value);
-    });
-    let trailing = object_to_jvalue!(&java_trailing);
+    let leading = object_to_jvalue!(leading);
+    let trailing = object_to_jvalue!(trailing);
     let return_value = call_as_construct!(
-      env,
-      &self.class,
-      self.method_construct,
-      &[leading, trailing],
-      "Swc4jComments"
-    );
-    delete_local_ref!(env, java_leading);
-    delete_local_ref!(env, java_trailing);
+        env,
+        &self.class,
+        self.method_construct,
+        &[leading, trailing],
+        "Swc4jComments construct()"
+      );
     return_value
   }
 }
+/* JavaSwc4jComments End */
 
 static mut JAVA_COMMENT: Option<JavaSwc4jComment> = None;
 static mut JAVA_COMMENTS: Option<JavaSwc4jComments> = None;
@@ -187,5 +214,5 @@ pub fn comments_new<'local, 'a>(
 where
   'local: 'a,
 {
-  unsafe { JAVA_COMMENTS.as_ref().unwrap() }.construct(env, comments, map)
+  comments.to_java_with_map(env, map)
 }
