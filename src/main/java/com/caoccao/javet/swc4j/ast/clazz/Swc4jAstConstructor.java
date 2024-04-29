@@ -115,8 +115,9 @@ public class Swc4jAstConstructor
         return this;
     }
 
-    public void setOptional(boolean optional) {
+    public Swc4jAstConstructor setOptional(boolean optional) {
         this.optional = optional;
+        return this;
     }
 
     @Override

@@ -148,6 +148,7 @@ public final class Swc4jAstStore {
                                             assertNotNull(
                                                     setterMethod,
                                                     setterMethodName + " is not found from " + clazz.getSimpleName());
+                                            assertEquals(clazz, setterMethod.getReturnType());
                                         }
                                     });
                         }
