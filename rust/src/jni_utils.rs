@@ -425,7 +425,7 @@ pub struct JavaOptional {
   #[allow(dead_code)]
   class: GlobalRef,
   method_get: JMethodID,
-  method_is_empty: JMethodID,
+  method_is_present: JMethodID,
 }
 unsafe impl Send for JavaOptional {}
 unsafe impl Sync for JavaOptional {}
@@ -440,12 +440,12 @@ impl JavaOptional {
       .get_method_id(&class, "get", "()Ljava/lang/Object;")
       .expect("Couldn't find method Optional.get");
     let method_is_empty = env
-      .get_method_id(&class, "isEmpty", "()Z")
-      .expect("Couldn't find method Optional.isEmpty");
+      .get_method_id(&class, "isPresent", "()Z")
+      .expect("Couldn't find method Optional.isPresent");
     JavaOptional {
       class,
       method_get,
-      method_is_empty,
+      method_is_present: method_is_empty,
     }
   }
 
@@ -456,8 +456,8 @@ impl JavaOptional {
     call_as_object!(env, obj, &self.method_get, &[], "get()")
   }
 
-  pub fn is_empty<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> bool {
-    call_as_boolean!(env, obj, &self.method_is_empty, &[], "isEmpty()")
+  pub fn is_present<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> bool {
+    call_as_boolean!(env, obj, &self.method_is_present, &[], "isPresent()")
   }
 }
 
@@ -552,6 +552,6 @@ where
   unsafe { JAVA_OPTIONAL.as_ref().unwrap() }.get(env, obj)
 }
 
-pub fn optional_is_empty<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> bool {
-  unsafe { JAVA_OPTIONAL.as_ref().unwrap() }.is_empty(env, obj)
+pub fn optional_is_present<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> bool {
+  unsafe { JAVA_OPTIONAL.as_ref().unwrap() }.is_present(env, obj)
 }

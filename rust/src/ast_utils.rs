@@ -114,13 +114,13 @@ impl FromJava for BigInt {
     let java_sign = java_class.get_sign(env, &obj);
     let sign = Sign::from_java(env, &java_sign);
     let java_optional_raw = java_class.get_raw(env, &obj);
-    let raw = if optional_is_empty(env, &java_optional_raw) {
-      None
-    } else {
+    let raw = if optional_is_present(env, &java_optional_raw) {
       let java_raw = optional_get(env, &java_optional_raw);
       let raw = jstring_to_string!(env, java_raw.as_raw());
       delete_local_ref!(env, java_raw);
       Some(raw)
+    } else {
+      None
     };
     let data: BigUint = raw.map_or_else(
       || Default::default(),
