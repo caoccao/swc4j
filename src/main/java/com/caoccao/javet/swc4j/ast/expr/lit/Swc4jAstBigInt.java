@@ -38,9 +38,11 @@ import java.util.Optional;
 public class Swc4jAstBigInt
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit {
+    @Jni2RustField(atom = true)
     protected Optional<String> raw;
     @Jni2RustField(ignore = true)
     protected Swc4jAstBigIntSign sign;
+    @Jni2RustField(atom = true)
     protected BigInteger value;
 
     @Jni2RustMethod

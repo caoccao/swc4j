@@ -23,6 +23,8 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Jni2RustField {
+    boolean atom() default false;
+
     boolean box() default false;
 
     boolean ignore() default false;

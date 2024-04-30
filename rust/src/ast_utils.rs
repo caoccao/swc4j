@@ -24,7 +24,7 @@ use crate::jni_utils::*;
 use crate::span_utils::{ByteToIndexMap, RegisterWithMap, ToJavaWithMap};
 
 use deno_ast::swc::ast::*;
-use deno_ast::swc::common::Spanned;
+use deno_ast::swc::common::{Spanned, DUMMY_SP};
 use num_bigint::{BigInt as BigIntValue, BigUint, Sign};
 
 use std::ptr::null_mut;
@@ -48,37 +48,18 @@ impl JavaISwc4jAst {
     let class = env
       .find_class("com/caoccao/javet/swc4j/ast/interfaces/ISwc4jAst")
       .expect("Couldn't find enum ISwc4jAst");
-    let class = env
-      .new_global_ref(class)
-      .expect("Couldn't globalize enum ISwc4jAst");
+    let class = env.new_global_ref(class).expect("Couldn't globalize enum ISwc4jAst");
     let method_get_type = env
-      .get_method_id(
-        &class,
-        "getType",
-        "()Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstType;",
-      )
+      .get_method_id(&class, "getType", "()Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstType;")
       .expect("Couldn't find method ISwc4jAst.getType");
-    JavaISwc4jAst {
-      class,
-      method_get_type,
-    }
+    JavaISwc4jAst { class, method_get_type }
   }
 
-  pub fn get_type<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> JObject<'a>
+  pub fn get_type<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
   where
     'local: 'a,
   {
-    let return_value = call_as_object!(
-        env,
-        obj,
-        self.method_get_type,
-        &[],
-        "List get_type()"
-      );
+    let return_value = call_as_object!(env, obj, self.method_get_type, &[], "List get_type()");
     return_value
   }
 }
@@ -122,11 +103,40 @@ impl FromJava for BigInt {
     } else {
       None
     };
-    let data: BigUint = raw.map_or_else(
-      || Default::default(),
-      |raw| BigUint::parse_bytes(&raw.as_bytes(), 10)
-    ).unwrap_or_else(|| Default::default());
-    BigInt::from(BigIntValue::from_biguint(sign, data))
+    let data: BigUint = raw
+      .as_ref()
+      .map_or_else(|| Default::default(), |raw| BigUint::parse_bytes(&raw.as_bytes(), 10))
+      .unwrap_or_else(|| Default::default());
+    delete_local_ref!(env, java_sign);
+    delete_local_ref!(env, java_optional_raw);
+    let value = BigIntValue::from_biguint(sign, data);
+    BigInt {
+      span: DUMMY_SP,
+      value : Box::new(value),
+      raw: raw.map(|raw| raw.into()),
+    }
+  }
+}
+
+impl FromJava for Str {
+  fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
+    let java_class = unsafe { JAVA_CLASS_STR.as_ref().unwrap() };
+    let value = java_class.get_value(env, obj);
+    let java_optional_raw = java_class.get_raw(env, obj);
+    let raw = if optional_is_present(env, &java_optional_raw) {
+      let java_raw = optional_get(env, &java_optional_raw);
+      let raw = jstring_to_string!(env, java_raw.as_raw());
+      delete_local_ref!(env, java_raw);
+      Some(raw)
+    } else {
+      None
+    };
+    delete_local_ref!(env, java_optional_raw);
+    Str {
+      span: DUMMY_SP,
+      value : value.into(),
+      raw: raw.map(|raw| raw.into()),
+    }
   }
 }
 
