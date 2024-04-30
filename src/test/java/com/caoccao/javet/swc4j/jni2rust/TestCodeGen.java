@@ -153,15 +153,6 @@ public class TestCodeGen {
                 .sorted(Map.Entry.comparingByKey())
                 .forEach(entry -> {
                     Class<?> clazz = entry.getValue();
-                    Constructor<?>[] constructors = clazz.getConstructors();
-                    assertEquals(1, constructors.length);
-                    Constructor<?> constructor = constructors[0];
-                    final Map<String, Integer> fieldOrderMap = new HashMap<>(constructor.getParameterCount());
-                    int fieldOrder = 0;
-                    for (Parameter parameter : constructor.getParameters()) {
-                        fieldOrderMap.put(parameter.getName(), fieldOrder);
-                        ++fieldOrder;
-                    }
                     Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
                     String className = clazz.getSimpleName();
                     String structName = jni2RustClassUtils.getName();
@@ -171,16 +162,14 @@ public class TestCodeGen {
                     declarationLines.add(String.format("static mut JAVA_CLASS_%s: Option<Java%s> = None;",
                             StringUtils.toSnakeCase(structName).toUpperCase(),
                             className));
-                    initLines.add(String.format("    JAVA_CLASS_%s = Some(Java%s::new(env));",
+                    initLines.add(String.format("  JAVA_CLASS_%s = Some(Java%s::new(env));",
                             StringUtils.toSnakeCase(structName).toUpperCase(),
                             className));
                     structCounter.incrementAndGet();
                 });
         lines.addAll(declarationLines);
-        lines.add("\npub fn init<'local>(env: &mut JNIEnv<'local>) {");
-        lines.add("  unsafe {");
+        lines.add("\nunsafe fn init_ast_classes<'local>(env: &mut JNIEnv<'local>) {");
         lines.addAll(initLines);
-        lines.add("  }");
         lines.add("}\n");
         assertTrue(structCounter.get() > 0);
         StringBuilder sb = new StringBuilder(fileContent.length());
@@ -204,8 +193,8 @@ public class TestCodeGen {
         assertTrue(rustFile.isFile());
         assertTrue(rustFile.canRead());
         assertTrue(rustFile.canWrite());
-        String startSign = "\n/* Node Begin */\n";
-        String endSign = "/* Node End */\n";
+        String startSign = "\n/* AST Begin */\n";
+        String endSign = "/* AST End */\n";
         byte[] originalBuffer = Files.readAllBytes(rustFilePath);
         String fileContent = new String(originalBuffer, StandardCharsets.UTF_8);
         final int startPosition = fileContent.indexOf(startSign) + startSign.length();
@@ -349,7 +338,6 @@ public class TestCodeGen {
                                                 assertTrue(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
                                                 Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
                                                 assertInstanceOf(Class.class, innerType2);
-                                                Class<?> innerClass2 = (Class<?>) innerType2;
                                                 String javaOptionalVar = String.format("java_optional_%s", StringUtils.toSnakeCase(fieldName));
                                                 args.add("&" + javaOptionalVar);
                                                 javaOptionalVars.add(javaOptionalVar);

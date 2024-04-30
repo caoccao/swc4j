@@ -412,16 +412,52 @@ impl JavaInteger {
     JavaInteger { class, method_value_of }
   }
 
-  pub fn value_of<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    i: i32,
-  ) -> JObject<'a>
+  pub fn value_of<'local, 'a>(&self, env: &mut JNIEnv<'local>, i: i32) -> JObject<'a>
   where
     'local: 'a,
   {
     let i = int_to_jvalue!(i);
     call_static_as_object!(env, &self.class, &self.method_value_of, &[i], "valueOf()")
+  }
+}
+
+pub struct JavaOptional {
+  #[allow(dead_code)]
+  class: GlobalRef,
+  method_get: JMethodID,
+  method_is_empty: JMethodID,
+}
+unsafe impl Send for JavaOptional {}
+unsafe impl Sync for JavaOptional {}
+
+impl JavaOptional {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("java/util/Optional")
+      .expect("Couldn't find class Optional");
+    let class = env.new_global_ref(class).expect("Couldn't globalize class Optional");
+    let method_get = env
+      .get_method_id(&class, "get", "()Ljava/lang/Object;")
+      .expect("Couldn't find method Optional.get");
+    let method_is_empty = env
+      .get_method_id(&class, "isEmpty", "()Z")
+      .expect("Couldn't find method Optional.isEmpty");
+    JavaOptional {
+      class,
+      method_get,
+      method_is_empty,
+    }
+  }
+
+  pub fn get<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    call_as_object!(env, obj, &self.method_get, &[], "get()")
+  }
+
+  pub fn is_empty<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> bool {
+    call_as_boolean!(env, obj, &self.method_is_empty, &[], "isEmpty()")
   }
 }
 
@@ -455,6 +491,7 @@ impl JavaURL {
 static mut JAVA_ARRAY_LIST: Option<JavaArrayList> = None;
 static mut JAVA_HASH_MAP: Option<JavaHashMap> = None;
 static mut JAVA_INTEGER: Option<JavaInteger> = None;
+static mut JAVA_OPTIONAL: Option<JavaOptional> = None;
 static mut JAVA_URL: Option<JavaURL> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
@@ -462,6 +499,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
     JAVA_ARRAY_LIST = Some(JavaArrayList::new(env));
     JAVA_HASH_MAP = Some(JavaHashMap::new(env));
     JAVA_INTEGER = Some(JavaInteger::new(env));
+    JAVA_OPTIONAL = Some(JavaOptional::new(env));
     JAVA_URL = Some(JavaURL::new(env));
   }
 }
@@ -505,4 +543,15 @@ where
 
 pub fn url_to_string<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> String {
   unsafe { JAVA_URL.as_ref().unwrap() }.to_string(env, obj)
+}
+
+pub fn optional_get<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+where
+  'local: 'a,
+{
+  unsafe { JAVA_OPTIONAL.as_ref().unwrap() }.get(env, obj)
+}
+
+pub fn optional_is_empty<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> bool {
+  unsafe { JAVA_OPTIONAL.as_ref().unwrap() }.is_empty(env, obj)
 }
