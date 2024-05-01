@@ -119,6 +119,32 @@ impl FromJava for BigInt {
   }
 }
 
+impl FromJava for Bool {
+  #[allow(unused_variables)]
+  fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
+    let java_class = unsafe { JAVA_CLASS_BOOL.as_ref().unwrap() };
+    let value = java_class.get_value(env, obj);
+    Bool {
+      span: DUMMY_SP,
+      value,
+    }
+  }
+}
+
+impl FromJava for JSXText {
+  #[allow(unused_variables)]
+  fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
+    let java_class = unsafe { JAVA_CLASS_JSX_TEXT.as_ref().unwrap() };
+    let value = java_class.get_value(env, obj);
+    let raw = java_class.get_raw(env, obj);
+    JSXText {
+      span: DUMMY_SP,
+      value: value.into(),
+      raw: raw.into(),
+    }
+  }
+}
+
 impl FromJava for Null {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
@@ -145,7 +171,7 @@ impl FromJava for Number {
     delete_local_ref!(env, java_optional_raw);
     Number {
       span: DUMMY_SP,
-      value: value,
+      value,
       raw: optional_raw.map(|raw| raw.into()),
     }
   }

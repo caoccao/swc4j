@@ -42,7 +42,7 @@ public class Swc4jAstBigInt
     protected Optional<String> raw;
     @Jni2RustField(ignore = true)
     protected Swc4jAstBigIntSign sign;
-    @Jni2RustField(atom = true)
+    @Jni2RustField(box = true)
     protected BigInteger value;
 
     @Jni2RustMethod

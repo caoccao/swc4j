@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstJsxElementChild;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
@@ -35,7 +36,9 @@ import java.util.List;
 public class Swc4jAstJsxText
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstJsxElementChild {
+    @Jni2RustField(atom = true)
     protected String raw;
+    @Jni2RustField(atom = true)
     protected String value;
 
     @Jni2RustMethod
