@@ -90,12 +90,13 @@ impl ToJavaWithMap<ByteToIndexMap> for BigInt {
 }
 
 impl FromJava for BigInt {
+  #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_BIG_INT.as_ref().unwrap() };
     let java_sign = java_class.get_sign(env, &obj);
     let sign = Sign::from_java(env, &java_sign);
     let java_optional_raw = java_class.get_raw(env, &obj);
-    let raw = if optional_is_present(env, &java_optional_raw) {
+    let optional_raw = if optional_is_present(env, &java_optional_raw) {
       let java_raw = optional_get(env, &java_optional_raw);
       let raw = jstring_to_string!(env, java_raw.as_raw());
       delete_local_ref!(env, java_raw);
@@ -103,7 +104,7 @@ impl FromJava for BigInt {
     } else {
       None
     };
-    let data: BigUint = raw
+    let data: BigUint = optional_raw
       .as_ref()
       .map_or_else(|| Default::default(), |raw| BigUint::parse_bytes(&raw.as_bytes(), 10))
       .unwrap_or_else(|| Default::default());
@@ -113,17 +114,64 @@ impl FromJava for BigInt {
     BigInt {
       span: DUMMY_SP,
       value : Box::new(value),
-      raw: raw.map(|raw| raw.into()),
+      raw: optional_raw.map(|raw| raw.into()),
+    }
+  }
+}
+
+impl FromJava for Null {
+  #[allow(unused_variables)]
+  fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
+    Null {
+      span: DUMMY_SP,
+    }
+  }
+}
+
+impl FromJava for Number {
+  #[allow(unused_variables)]
+  fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
+    let java_class = unsafe { JAVA_CLASS_NUMBER.as_ref().unwrap() };
+    let value = java_class.get_value(env, obj);
+    let java_optional_raw = java_class.get_raw(env, obj);
+    let optional_raw = if optional_is_present(env, &java_optional_raw) {
+      let java_raw = optional_get(env, &java_optional_raw);
+      let raw = jstring_to_string!(env, java_raw.as_raw());
+      delete_local_ref!(env, java_raw);
+      Some(raw)
+    } else {
+      None
+    };
+    delete_local_ref!(env, java_optional_raw);
+    Number {
+      span: DUMMY_SP,
+      value: value,
+      raw: optional_raw.map(|raw| raw.into()),
+    }
+  }
+}
+
+impl FromJava for Regex {
+  #[allow(unused_variables)]
+  fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
+    let java_class = unsafe { JAVA_CLASS_REGEX.as_ref().unwrap() };
+    let exp = java_class.get_exp(env, obj);
+    let flags = java_class.get_flags(env, obj);
+    Regex {
+      span: DUMMY_SP,
+      exp: exp.into(),
+      flags: flags.into(),
     }
   }
 }
 
 impl FromJava for Str {
+  #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_STR.as_ref().unwrap() };
     let value = java_class.get_value(env, obj);
     let java_optional_raw = java_class.get_raw(env, obj);
-    let raw = if optional_is_present(env, &java_optional_raw) {
+    let optional_raw = if optional_is_present(env, &java_optional_raw) {
       let java_raw = optional_get(env, &java_optional_raw);
       let raw = jstring_to_string!(env, java_raw.as_raw());
       delete_local_ref!(env, java_raw);
@@ -134,8 +182,8 @@ impl FromJava for Str {
     delete_local_ref!(env, java_optional_raw);
     Str {
       span: DUMMY_SP,
-      value : value.into(),
-      raw: raw.map(|raw| raw.into()),
+      value: value.into(),
+      raw: optional_raw.map(|raw| raw.into()),
     }
   }
 }

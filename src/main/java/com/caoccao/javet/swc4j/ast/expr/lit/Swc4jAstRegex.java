@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
@@ -34,7 +35,9 @@ import java.util.List;
 public class Swc4jAstRegex
         extends Swc4jAst
         implements ISwc4jAstLit {
+    @Jni2RustField(atom = true)
     protected String exp;
+    @Jni2RustField(atom = true)
     protected String flags;
 
     @Jni2RustMethod
