@@ -20,6 +20,7 @@ use jni::signature::{Primitive, ReturnType};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
+use crate::enums::AstType;
 use crate::jni_utils::*;
 use crate::span_utils::{ByteToIndexMap, RegisterWithMap, ToJavaWithMap};
 
@@ -59,8 +60,7 @@ impl JavaISwc4jAst {
   where
     'local: 'a,
   {
-    let return_value = call_as_object!(env, obj, self.method_get_type, &[], "List get_type()");
-    return_value
+    call_as_object!(env, obj, self.method_get_type, &[], "List get_type()")
   }
 }
 
@@ -141,6 +141,25 @@ impl FromJava for JSXText {
       span: DUMMY_SP,
       value: value.into(),
       raw: raw.into(),
+    }
+  }
+}
+
+impl FromJava for Lit {
+  #[allow(unused_variables)]
+  fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
+    let java_ast_type = unsafe { JAVA_CLASS_I_AST.as_ref().unwrap() }.get_type(env, obj);
+    let ast_type = AstType::from_java(env, &java_ast_type);
+    delete_local_ref!(env, java_ast_type);
+    match ast_type {
+      AstType::BigInt => Lit::BigInt(BigInt::from_java(env, obj)),
+      AstType::Bool => Lit::Bool(Bool::from_java(env, obj)),
+      AstType::JsxText => Lit::JSXText(JSXText::from_java(env, obj)),
+      AstType::Null => Lit::Null(Null::from_java(env, obj)),
+      AstType::Number => Lit::Num(Number::from_java(env, obj)),
+      AstType::Regex => Lit::Regex(Regex::from_java(env, obj)),
+      AstType::Str => Lit::Str(Str::from_java(env, obj)),
+      _ => panic!("Type {:?} is not supported by Lit", ast_type),
     }
   }
 }

@@ -360,6 +360,7 @@ impl IdentifiableEnum<AssignOp> for AssignOp {
   }
 }
 
+#[derive(Debug)]
 pub enum AstType {
   ArrayLit,
   ArrayPat,
