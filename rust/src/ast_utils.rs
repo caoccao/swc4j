@@ -25988,16 +25988,16 @@ impl FromJava for ArrayLit {
     let length = list_size(env, &java_elems);
     let elems = (0..length).map(|i| {
       let java_item = list_get(env, &java_elems, i);
-      let return_value = if optional_is_present(env, &java_item) {
+      let elems = if optional_is_present(env, &java_item) {
         let java_inner_item = optional_get(env, &java_item);
-        let return_value = ExprOrSpread::from_java(env, &java_inner_item);
+        let elems = ExprOrSpread::from_java(env, &java_inner_item);
         delete_local_ref!(env, java_inner_item);
-        Some(return_value)
+        Some(elems)
       } else {
         None
       };
       delete_local_ref!(env, java_item);
-      return_value
+      elems
     }).collect();
     ArrayLit {
       span: DUMMY_SP,
@@ -26049,16 +26049,16 @@ impl FromJava for ArrayPat {
     let length = list_size(env, &java_elems);
     let elems = (0..length).map(|i| {
       let java_item = list_get(env, &java_elems, i);
-      let return_value = if optional_is_present(env, &java_item) {
+      let elems = if optional_is_present(env, &java_item) {
         let java_inner_item = optional_get(env, &java_item);
-        let return_value = Pat::from_java(env, &java_inner_item);
+        let elems = Pat::from_java(env, &java_inner_item);
         delete_local_ref!(env, java_inner_item);
-        Some(return_value)
+        Some(elems)
       } else {
         None
       };
       delete_local_ref!(env, java_item);
-      return_value
+      elems
     }).collect();
     let optional = java_class.is_optional(env, jobj);
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
@@ -26128,9 +26128,9 @@ impl FromJava for ArrowExpr {
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
       let java_item = list_get(env, &java_params, i);
-      let return_value = Pat::from_java(env, &java_item);
+      let params = Pat::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      params
     }).collect();
     let java_body = java_class.get_body(env, jobj);
     let body = BlockStmtOrExpr::from_java(env, &java_body);
@@ -26428,9 +26428,9 @@ impl FromJava for AutoAccessor {
     let length = list_size(env, &java_decorators);
     let decorators = (0..length).map(|i| {
       let java_item = list_get(env, &java_decorators, i);
-      let return_value = Decorator::from_java(env, &java_item);
+      let decorators = Decorator::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      decorators
     }).collect();
     let java_optional_accessibility = java_class.get_accessibility(env, jobj);
     let accessibility = if optional_is_present(env, &java_optional_accessibility) {
@@ -26635,9 +26635,9 @@ impl FromJava for BlockStmt {
     let length = list_size(env, &java_stmts);
     let stmts = (0..length).map(|i| {
       let java_item = list_get(env, &java_stmts, i);
-      let return_value = Stmt::from_java(env, &java_item);
+      let stmts = Stmt::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      stmts
     }).collect();
     BlockStmt {
       span: DUMMY_SP,
@@ -26767,9 +26767,9 @@ impl FromJava for CallExpr {
     let length = list_size(env, &java_args);
     let args = (0..length).map(|i| {
       let java_item = list_get(env, &java_args, i);
-      let return_value = ExprOrSpread::from_java(env, &java_item);
+      let args = ExprOrSpread::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      args
     }).collect();
     let java_optional_type_args = java_class.get_type_args(env, jobj);
     let type_args = if optional_is_present(env, &java_optional_type_args) {
@@ -26907,17 +26907,17 @@ impl FromJava for Class {
     let length = list_size(env, &java_decorators);
     let decorators = (0..length).map(|i| {
       let java_item = list_get(env, &java_decorators, i);
-      let return_value = Decorator::from_java(env, &java_item);
+      let decorators = Decorator::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      decorators
     }).collect();
     let java_body = java_class.get_body(env, jobj);
     let length = list_size(env, &java_body);
     let body = (0..length).map(|i| {
       let java_item = list_get(env, &java_body, i);
-      let return_value = ClassMember::from_java(env, &java_item);
+      let body = ClassMember::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      body
     }).collect();
     let java_optional_super_class = java_class.get_super_class(env, jobj);
     let super_class = if optional_is_present(env, &java_optional_super_class) {
@@ -26954,9 +26954,9 @@ impl FromJava for Class {
     let length = list_size(env, &java_implements);
     let implements = (0..length).map(|i| {
       let java_item = list_get(env, &java_implements, i);
-      let return_value = TsExprWithTypeArgs::from_java(env, &java_item);
+      let implements = TsExprWithTypeArgs::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      implements
     }).collect();
     Class {
       span: DUMMY_SP,
@@ -27218,9 +27218,9 @@ impl FromJava for ClassProp {
     let length = list_size(env, &java_decorators);
     let decorators = (0..length).map(|i| {
       let java_item = list_get(env, &java_decorators, i);
-      let return_value = Decorator::from_java(env, &java_item);
+      let decorators = Decorator::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      decorators
     }).collect();
     let java_optional_accessibility = java_class.get_accessibility(env, jobj);
     let accessibility = if optional_is_present(env, &java_optional_accessibility) {
@@ -27391,9 +27391,9 @@ impl FromJava for Constructor {
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
       let java_item = list_get(env, &java_params, i);
-      let return_value = ParamOrTsParamProp::from_java(env, &java_item);
+      let params = ParamOrTsParamProp::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      params
     }).collect();
     let java_optional_body = java_class.get_body(env, jobj);
     let body = if optional_is_present(env, &java_optional_body) {
@@ -28304,17 +28304,17 @@ impl FromJava for Function {
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
       let java_item = list_get(env, &java_params, i);
-      let return_value = Param::from_java(env, &java_item);
+      let params = Param::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      params
     }).collect();
     let java_decorators = java_class.get_decorators(env, jobj);
     let length = list_size(env, &java_decorators);
     let decorators = (0..length).map(|i| {
       let java_item = list_get(env, &java_decorators, i);
-      let return_value = Decorator::from_java(env, &java_item);
+      let decorators = Decorator::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      decorators
     }).collect();
     let java_optional_body = java_class.get_body(env, jobj);
     let body = if optional_is_present(env, &java_optional_body) {
@@ -28598,9 +28598,9 @@ impl FromJava for ImportDecl {
     let length = list_size(env, &java_specifiers);
     let specifiers = (0..length).map(|i| {
       let java_item = list_get(env, &java_specifiers, i);
-      let return_value = ImportSpecifier::from_java(env, &java_item);
+      let specifiers = ImportSpecifier::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      specifiers
     }).collect();
     let java_src = java_class.get_src(env, jobj);
     let src = Str::from_java(env, &java_src);
@@ -28943,9 +28943,9 @@ impl FromJava for JSXElement {
     let length = list_size(env, &java_children);
     let children = (0..length).map(|i| {
       let java_item = list_get(env, &java_children, i);
-      let return_value = JSXElementChild::from_java(env, &java_item);
+      let children = JSXElementChild::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      children
     }).collect();
     let java_optional_closing = java_class.get_closing(env, jobj);
     let closing = if optional_is_present(env, &java_optional_closing) {
@@ -29076,9 +29076,9 @@ impl FromJava for JSXFragment {
     let length = list_size(env, &java_children);
     let children = (0..length).map(|i| {
       let java_item = list_get(env, &java_children, i);
-      let return_value = JSXElementChild::from_java(env, &java_item);
+      let children = JSXElementChild::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      children
     }).collect();
     let java_closing = java_class.get_closing(env, jobj);
     let closing = JSXClosingFragment::from_java(env, &java_closing);
@@ -29223,9 +29223,9 @@ impl FromJava for JSXOpeningElement {
     let length = list_size(env, &java_attrs);
     let attrs = (0..length).map(|i| {
       let java_item = list_get(env, &java_attrs, i);
-      let return_value = JSXAttrOrSpread::from_java(env, &java_item);
+      let attrs = JSXAttrOrSpread::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      attrs
     }).collect();
     let self_closing = java_class.is_self_closing(env, jobj);
     let java_optional_type_args = java_class.get_type_args(env, jobj);
@@ -29632,9 +29632,9 @@ impl FromJava for Module {
     let length = list_size(env, &java_body);
     let body = (0..length).map(|i| {
       let java_item = list_get(env, &java_body, i);
-      let return_value = ModuleItem::from_java(env, &java_item);
+      let body = ModuleItem::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      body
     }).collect();
     let java_optional_shebang = java_class.get_shebang(env, jobj);
     let shebang = if optional_is_present(env, &java_optional_shebang) {
@@ -29698,9 +29698,9 @@ impl FromJava for NamedExport {
     let length = list_size(env, &java_specifiers);
     let specifiers = (0..length).map(|i| {
       let java_item = list_get(env, &java_specifiers, i);
-      let return_value = ExportSpecifier::from_java(env, &java_item);
+      let specifiers = ExportSpecifier::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      specifiers
     }).collect();
     let java_optional_src = java_class.get_src(env, jobj);
     let src = if optional_is_present(env, &java_optional_src) {
@@ -29782,9 +29782,9 @@ impl FromJava for NewExpr {
       let length = list_size(env, &java_args);
       let args = (0..length).map(|i| {
         let java_item = list_get(env, &java_args, i);
-        let return_value = ExprOrSpread::from_java(env, &java_item);
+        let args = ExprOrSpread::from_java(env, &java_item);
         delete_local_ref!(env, java_item);
-        return_value
+        args
       }).collect();
       Some(args)
     } else {
@@ -29919,9 +29919,9 @@ impl FromJava for ObjectLit {
     let length = list_size(env, &java_props);
     let props = (0..length).map(|i| {
       let java_item = list_get(env, &java_props, i);
-      let return_value = PropOrSpread::from_java(env, &java_item);
+      let props = PropOrSpread::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      props
     }).collect();
     ObjectLit {
       span: DUMMY_SP,
@@ -29971,9 +29971,9 @@ impl FromJava for ObjectPat {
     let length = list_size(env, &java_props);
     let props = (0..length).map(|i| {
       let java_item = list_get(env, &java_props, i);
-      let return_value = ObjectPatProp::from_java(env, &java_item);
+      let props = ObjectPatProp::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      props
     }).collect();
     let optional = java_class.is_optional(env, jobj);
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
@@ -30041,9 +30041,9 @@ impl FromJava for OptCall {
     let length = list_size(env, &java_args);
     let args = (0..length).map(|i| {
       let java_item = list_get(env, &java_args, i);
-      let return_value = ExprOrSpread::from_java(env, &java_item);
+      let args = ExprOrSpread::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      args
     }).collect();
     let java_optional_type_args = java_class.get_type_args(env, jobj);
     let type_args = if optional_is_present(env, &java_optional_type_args) {
@@ -30143,9 +30143,9 @@ impl FromJava for Param {
     let length = list_size(env, &java_decorators);
     let decorators = (0..length).map(|i| {
       let java_item = list_get(env, &java_decorators, i);
-      let return_value = Decorator::from_java(env, &java_item);
+      let decorators = Decorator::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      decorators
     }).collect();
     let java_pat = java_class.get_pat(env, jobj);
     let pat = Pat::from_java(env, &java_pat);
@@ -30381,9 +30381,9 @@ impl FromJava for PrivateProp {
     let length = list_size(env, &java_decorators);
     let decorators = (0..length).map(|i| {
       let java_item = list_get(env, &java_decorators, i);
-      let return_value = Decorator::from_java(env, &java_item);
+      let decorators = Decorator::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      decorators
     }).collect();
     let java_optional_accessibility = java_class.get_accessibility(env, jobj);
     let accessibility = if optional_is_present(env, &java_optional_accessibility) {
@@ -30586,9 +30586,9 @@ impl FromJava for Script {
     let length = list_size(env, &java_body);
     let body = (0..length).map(|i| {
       let java_item = list_get(env, &java_body, i);
-      let return_value = Stmt::from_java(env, &java_item);
+      let body = Stmt::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      body
     }).collect();
     let java_optional_shebang = java_class.get_shebang(env, jobj);
     let shebang = if optional_is_present(env, &java_optional_shebang) {
@@ -30645,9 +30645,9 @@ impl FromJava for SeqExpr {
     let length = list_size(env, &java_exprs);
     let exprs = (0..length).map(|i| {
       let java_item = list_get(env, &java_exprs, i);
-      let return_value = Expr::from_java(env, &java_item);
+      let exprs = Expr::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      Box::new(return_value)
+      Box::new(exprs)
     }).collect();
     SeqExpr {
       span: DUMMY_SP,
@@ -30968,9 +30968,9 @@ impl FromJava for SwitchCase {
     let length = list_size(env, &java_cons);
     let cons = (0..length).map(|i| {
       let java_item = list_get(env, &java_cons, i);
-      let return_value = Stmt::from_java(env, &java_item);
+      let cons = Stmt::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      cons
     }).collect();
     SwitchCase {
       span: DUMMY_SP,
@@ -31023,9 +31023,9 @@ impl FromJava for SwitchStmt {
     let length = list_size(env, &java_cases);
     let cases = (0..length).map(|i| {
       let java_item = list_get(env, &java_cases, i);
-      let return_value = SwitchCase::from_java(env, &java_item);
+      let cases = SwitchCase::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      cases
     }).collect();
     SwitchStmt {
       span: DUMMY_SP,
@@ -31203,17 +31203,17 @@ impl FromJava for Tpl {
     let length = list_size(env, &java_exprs);
     let exprs = (0..length).map(|i| {
       let java_item = list_get(env, &java_exprs, i);
-      let return_value = Expr::from_java(env, &java_item);
+      let exprs = Expr::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      Box::new(return_value)
+      Box::new(exprs)
     }).collect();
     let java_quasis = java_class.get_quasis(env, jobj);
     let length = list_size(env, &java_quasis);
     let quasis = (0..length).map(|i| {
       let java_item = list_get(env, &java_quasis, i);
-      let return_value = TplElement::from_java(env, &java_item);
+      let quasis = TplElement::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      quasis
     }).collect();
     Tpl {
       span: DUMMY_SP,
@@ -31456,9 +31456,9 @@ impl FromJava for TsCallSignatureDecl {
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
       let java_item = list_get(env, &java_params, i);
-      let return_value = TsFnParam::from_java(env, &java_item);
+      let params = TsFnParam::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      params
     }).collect();
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = if optional_is_present(env, &java_optional_type_ann) {
@@ -31625,9 +31625,9 @@ impl FromJava for TsConstructSignatureDecl {
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
       let java_item = list_get(env, &java_params, i);
-      let return_value = TsFnParam::from_java(env, &java_item);
+      let params = TsFnParam::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      params
     }).collect();
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = if optional_is_present(env, &java_optional_type_ann) {
@@ -31702,9 +31702,9 @@ impl FromJava for TsConstructorType {
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
       let java_item = list_get(env, &java_params, i);
-      let return_value = TsFnParam::from_java(env, &java_item);
+      let params = TsFnParam::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      params
     }).collect();
     let java_optional_type_params = java_class.get_type_params(env, jobj);
     let type_params = if optional_is_present(env, &java_optional_type_params) {
@@ -31777,9 +31777,9 @@ impl FromJava for TsEnumDecl {
     let length = list_size(env, &java_members);
     let members = (0..length).map(|i| {
       let java_item = list_get(env, &java_members, i);
-      let return_value = TsEnumMember::from_java(env, &java_item);
+      let members = TsEnumMember::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      members
     }).collect();
     TsEnumDecl {
       span: DUMMY_SP,
@@ -32006,9 +32006,9 @@ impl FromJava for TsFnType {
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
       let java_item = list_get(env, &java_params, i);
-      let return_value = TsFnParam::from_java(env, &java_item);
+      let params = TsFnParam::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      params
     }).collect();
     let java_optional_type_params = java_class.get_type_params(env, jobj);
     let type_params = if optional_is_present(env, &java_optional_type_params) {
@@ -32246,9 +32246,9 @@ impl FromJava for TsIndexSignature {
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
       let java_item = list_get(env, &java_params, i);
-      let return_value = TsFnParam::from_java(env, &java_item);
+      let params = TsFnParam::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      params
     }).collect();
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = if optional_is_present(env, &java_optional_type_ann) {
@@ -32434,9 +32434,9 @@ impl FromJava for TsInterfaceBody {
     let length = list_size(env, &java_body);
     let body = (0..length).map(|i| {
       let java_item = list_get(env, &java_body, i);
-      let return_value = TsTypeElement::from_java(env, &java_item);
+      let body = TsTypeElement::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      body
     }).collect();
     TsInterfaceBody {
       span: DUMMY_SP,
@@ -32506,9 +32506,9 @@ impl FromJava for TsInterfaceDecl {
     let length = list_size(env, &java_extends);
     let extends = (0..length).map(|i| {
       let java_item = list_get(env, &java_extends, i);
-      let return_value = TsExprWithTypeArgs::from_java(env, &java_item);
+      let extends = TsExprWithTypeArgs::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      extends
     }).collect();
     let java_body = java_class.get_body(env, jobj);
     let body = TsInterfaceBody::from_java(env, &java_body);
@@ -32561,9 +32561,9 @@ impl FromJava for TsIntersectionType {
     let length = list_size(env, &java_types);
     let types = (0..length).map(|i| {
       let java_item = list_get(env, &java_types, i);
-      let return_value = TsType::from_java(env, &java_item);
+      let types = TsType::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      Box::new(return_value)
+      Box::new(types)
     }).collect();
     TsIntersectionType {
       span: DUMMY_SP,
@@ -32788,9 +32788,9 @@ impl FromJava for TsMethodSignature {
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
       let java_item = list_get(env, &java_params, i);
-      let return_value = TsFnParam::from_java(env, &java_item);
+      let params = TsFnParam::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      params
     }).collect();
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = if optional_is_present(env, &java_optional_type_ann) {
@@ -32862,9 +32862,9 @@ impl FromJava for TsModuleBlock {
     let length = list_size(env, &java_body);
     let body = (0..length).map(|i| {
       let java_item = list_get(env, &java_body, i);
-      let return_value = ModuleItem::from_java(env, &java_item);
+      let body = ModuleItem::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      body
     }).collect();
     TsModuleBlock {
       span: DUMMY_SP,
@@ -33130,9 +33130,9 @@ impl FromJava for TsParamProp {
     let length = list_size(env, &java_decorators);
     let decorators = (0..length).map(|i| {
       let java_item = list_get(env, &java_decorators, i);
-      let return_value = Decorator::from_java(env, &java_item);
+      let decorators = Decorator::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      decorators
     }).collect();
     let java_optional_accessibility = java_class.get_accessibility(env, jobj);
     let accessibility = if optional_is_present(env, &java_optional_accessibility) {
@@ -33264,9 +33264,9 @@ impl FromJava for TsPropertySignature {
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
       let java_item = list_get(env, &java_params, i);
-      let return_value = TsFnParam::from_java(env, &java_item);
+      let params = TsFnParam::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      params
     }).collect();
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = if optional_is_present(env, &java_optional_type_ann) {
@@ -33550,17 +33550,17 @@ impl FromJava for TsTplLitType {
     let length = list_size(env, &java_types);
     let types = (0..length).map(|i| {
       let java_item = list_get(env, &java_types, i);
-      let return_value = TsType::from_java(env, &java_item);
+      let types = TsType::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      Box::new(return_value)
+      Box::new(types)
     }).collect();
     let java_quasis = java_class.get_quasis(env, jobj);
     let length = list_size(env, &java_quasis);
     let quasis = (0..length).map(|i| {
       let java_item = list_get(env, &java_quasis, i);
-      let return_value = TplElement::from_java(env, &java_item);
+      let quasis = TplElement::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      quasis
     }).collect();
     TsTplLitType {
       span: DUMMY_SP,
@@ -33657,9 +33657,9 @@ impl FromJava for TsTupleType {
     let length = list_size(env, &java_elem_types);
     let elem_types = (0..length).map(|i| {
       let java_item = list_get(env, &java_elem_types, i);
-      let return_value = TsTupleElement::from_java(env, &java_item);
+      let elem_types = TsTupleElement::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      elem_types
     }).collect();
     TsTupleType {
       span: DUMMY_SP,
@@ -33844,9 +33844,9 @@ impl FromJava for TsTypeLit {
     let length = list_size(env, &java_members);
     let members = (0..length).map(|i| {
       let java_item = list_get(env, &java_members, i);
-      let return_value = TsTypeElement::from_java(env, &java_item);
+      let members = TsTypeElement::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      members
     }).collect();
     TsTypeLit {
       span: DUMMY_SP,
@@ -34007,9 +34007,9 @@ impl FromJava for TsTypeParamDecl {
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
       let java_item = list_get(env, &java_params, i);
-      let return_value = TsTypeParam::from_java(env, &java_item);
+      let params = TsTypeParam::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      params
     }).collect();
     TsTypeParamDecl {
       span: DUMMY_SP,
@@ -34055,9 +34055,9 @@ impl FromJava for TsTypeParamInstantiation {
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
       let java_item = list_get(env, &java_params, i);
-      let return_value = TsType::from_java(env, &java_item);
+      let params = TsType::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      Box::new(return_value)
+      Box::new(params)
     }).collect();
     TsTypeParamInstantiation {
       span: DUMMY_SP,
@@ -34256,9 +34256,9 @@ impl FromJava for TsUnionType {
     let length = list_size(env, &java_types);
     let types = (0..length).map(|i| {
       let java_item = list_get(env, &java_types, i);
-      let return_value = TsType::from_java(env, &java_item);
+      let types = TsType::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      Box::new(return_value)
+      Box::new(types)
     }).collect();
     TsUnionType {
       span: DUMMY_SP,
@@ -34393,9 +34393,9 @@ impl FromJava for UsingDecl {
     let length = list_size(env, &java_decls);
     let decls = (0..length).map(|i| {
       let java_item = list_get(env, &java_decls, i);
-      let return_value = VarDeclarator::from_java(env, &java_item);
+      let decls = VarDeclarator::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      decls
     }).collect();
     UsingDecl {
       span: DUMMY_SP,
@@ -34449,9 +34449,9 @@ impl FromJava for VarDecl {
     let length = list_size(env, &java_decls);
     let decls = (0..length).map(|i| {
       let java_item = list_get(env, &java_decls, i);
-      let return_value = VarDeclarator::from_java(env, &java_item);
+      let decls = VarDeclarator::from_java(env, &java_item);
       delete_local_ref!(env, java_item);
-      return_value
+      decls
     }).collect();
     VarDecl {
       span: DUMMY_SP,

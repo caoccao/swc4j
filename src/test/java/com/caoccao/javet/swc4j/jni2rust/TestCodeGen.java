@@ -288,20 +288,21 @@ public class TestCodeGen {
                                 Jni2RustFieldUtils jni2RustFieldUtils = new Jni2RustFieldUtils(field);
                                 String fieldName = jni2RustFieldUtils.getName();
                                 Class<?> fieldType = field.getType();
+                                String arg = StringUtils.toSnakeCase(fieldName);
                                 if (Optional.class.isAssignableFrom(fieldType)) {
                                     if (field.getGenericType() instanceof ParameterizedType) {
                                         Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                                         if (innerType instanceof Class) {
                                             if (ISwc4jAst.class.isAssignableFrom((Class<?>) innerType)) {
                                                 lines.add(String.format("    self.%s.as_ref().map(|node| node.register_with_map(map));",
-                                                        StringUtils.toSnakeCase(fieldName)));
+                                                        arg));
                                             }
                                         } else if (innerType instanceof ParameterizedType) {
                                             assertTrue(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
                                             Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
                                             assertInstanceOf(Class.class, innerType2);
                                             lines.add(String.format("    self.%s.as_ref().map(|nodes| nodes.iter().for_each(|node| node.register_with_map(map)));",
-                                                    StringUtils.toSnakeCase(fieldName)));
+                                                    arg));
                                         } else {
                                             fail(field.getGenericType().getTypeName() + " is not expected");
                                         }
@@ -310,8 +311,7 @@ public class TestCodeGen {
                                     }
                                 } else if (List.class.isAssignableFrom(fieldType)) {
                                     if (field.getGenericType() instanceof ParameterizedType) {
-                                        lines.add(String.format("    self.%s.iter().for_each(|node| {",
-                                                StringUtils.toSnakeCase(fieldName)));
+                                        lines.add(String.format("    self.%s.iter().for_each(|node| {", arg));
                                         Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                                         if (innerType instanceof Class) {
                                             lines.add("      node.register_with_map(map);");
@@ -328,11 +328,9 @@ public class TestCodeGen {
                                         fail(field.getGenericType().getTypeName() + " is not expected");
                                     }
                                 } else if (ISwc4jAst.class.isAssignableFrom(fieldType)) {
-                                    lines.add(String.format("    self.%s.register_with_map(map);",
-                                            StringUtils.toSnakeCase(fieldName)));
+                                    lines.add(String.format("    self.%s.register_with_map(map);", arg));
                                 } else if (Swc4jSpan.class.isAssignableFrom(fieldType)) {
-                                    lines.add(String.format("    map.register_by_span(&self.%s);",
-                                            StringUtils.toSnakeCase(fieldName)));
+                                    lines.add(String.format("    map.register_by_span(&self.%s);", arg));
                                 }
                             });
                     lines.add("  }");
@@ -357,38 +355,39 @@ public class TestCodeGen {
                                     Jni2RustFieldUtils jni2RustFieldUtils = new Jni2RustFieldUtils(field);
                                     String fieldName = jni2RustFieldUtils.getName();
                                     Class<?> fieldType = field.getType();
+                                    String arg = StringUtils.toSnakeCase(fieldName);
                                     if (Optional.class.isAssignableFrom(fieldType)) {
                                         if (field.getGenericType() instanceof ParameterizedType) {
                                             Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                                             if (innerType instanceof Class) {
                                                 Class<?> innerClass = (Class<?>) innerType;
                                                 if (ISwc4jAst.class.isAssignableFrom(innerClass)) {
-                                                    String javaOptionalVar = String.format("java_optional_%s", StringUtils.toSnakeCase(fieldName));
+                                                    String javaOptionalVar = String.format("java_optional_%s", arg);
                                                     args.add("&" + javaOptionalVar);
                                                     javaOptionalVars.add(javaOptionalVar);
                                                     lines.add(String.format("    let %s = self.%s.as_ref().map(|node| node.to_java_with_map(env, map));",
                                                             javaOptionalVar,
-                                                            StringUtils.toSnakeCase(fieldName)));
+                                                            arg));
                                                 } else if (Swc4jSpan.class.isAssignableFrom(innerClass)) {
-                                                    String javaOptionalVar = String.format("java_optional_%s", StringUtils.toSnakeCase(fieldName));
+                                                    String javaOptionalVar = String.format("java_optional_%s", arg);
                                                     args.add("&" + javaOptionalVar);
                                                     javaOptionalVars.add(javaOptionalVar);
                                                     lines.add(String.format("    let %s = self.%s.as_ref().map(|node| map.get_span_ex_by_span(node).to_java(env));",
                                                             javaOptionalVar,
-                                                            StringUtils.toSnakeCase(fieldName)));
+                                                            arg));
                                                 } else if (innerClass == String.class) {
-                                                    String optionalVar = String.format("optional_%s", StringUtils.toSnakeCase(fieldName));
+                                                    String optionalVar = String.format("optional_%s", arg);
                                                     args.add("&" + optionalVar);
                                                     lines.add(String.format("    let %s = self.%s.as_ref().map(|node| node.to_string());",
                                                             optionalVar,
-                                                            StringUtils.toSnakeCase(fieldName)));
+                                                            arg));
                                                 } else if (innerClass.isEnum()) {
-                                                    String javaOptionalVar = String.format("java_optional_%s", StringUtils.toSnakeCase(fieldName));
+                                                    String javaOptionalVar = String.format("java_optional_%s", arg);
                                                     args.add("&" + javaOptionalVar);
                                                     javaOptionalVars.add(javaOptionalVar);
                                                     lines.add(String.format("    let %s = self.%s.as_ref().map(|node| node.to_java(env));",
                                                             javaOptionalVar,
-                                                            StringUtils.toSnakeCase(fieldName)));
+                                                            arg));
                                                 } else {
                                                     fail(field.getGenericType().getTypeName() + " is not expected");
                                                 }
@@ -396,22 +395,22 @@ public class TestCodeGen {
                                                 assertTrue(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
                                                 Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
                                                 assertInstanceOf(Class.class, innerType2);
-                                                String javaOptionalVar = String.format("java_optional_%s", StringUtils.toSnakeCase(fieldName));
+                                                String javaOptionalVar = String.format("java_optional_%s", arg);
                                                 args.add("&" + javaOptionalVar);
                                                 javaOptionalVars.add(javaOptionalVar);
                                                 lines.add(String.format("    let %s = self.%s.as_ref().map(|nodes| {",
                                                         javaOptionalVar,
-                                                        StringUtils.toSnakeCase(fieldName)));
+                                                        arg));
                                                 lines.add(String.format("      let java_%s = list_new(env, nodes.len());",
-                                                        StringUtils.toSnakeCase(fieldName)));
+                                                        arg));
                                                 lines.add("      nodes.iter().for_each(|node| {");
                                                 lines.add("        let java_node = node.to_java_with_map(env, map);");
                                                 lines.add(String.format("        list_add(env, &java_%s, &java_node);",
-                                                        StringUtils.toSnakeCase(fieldName)));
+                                                        arg));
                                                 lines.add("        delete_local_ref!(env, java_node);");
                                                 lines.add("      });");
                                                 lines.add(String.format("      java_%s",
-                                                        StringUtils.toSnakeCase(fieldName)));
+                                                        arg));
                                                 lines.add("    });");
                                             } else {
                                                 fail(field.getGenericType().getTypeName() + " is not expected");
@@ -421,14 +420,14 @@ public class TestCodeGen {
                                         }
                                     } else if (List.class.isAssignableFrom(fieldType)) {
                                         if (field.getGenericType() instanceof ParameterizedType) {
-                                            String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
+                                            String javaVar = String.format("java_%s", arg);
                                             args.add("&" + javaVar);
                                             javaVars.add(javaVar);
                                             lines.add(String.format("    let %s = list_new(env, self.%s.len());",
                                                     javaVar,
-                                                    StringUtils.toSnakeCase(fieldName)));
+                                                    arg));
                                             lines.add(String.format("    self.%s.iter().for_each(|node| {",
-                                                    StringUtils.toSnakeCase(fieldName)));
+                                                    arg));
                                             Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                                             if (innerType instanceof Class) {
                                                 Class<?> innerClass = (Class<?>) innerType;
@@ -456,34 +455,32 @@ public class TestCodeGen {
                                             fail(field.getGenericType().getTypeName() + " is not expected");
                                         }
                                     } else if (ISwc4jAst.class.isAssignableFrom(fieldType)) {
-                                        String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
+                                        String javaVar = String.format("java_%s", arg);
                                         args.add("&" + javaVar);
                                         javaVars.add(javaVar);
                                         lines.add(String.format("    let %s = self.%s.to_java_with_map(env, map);",
                                                 javaVar,
-                                                StringUtils.toSnakeCase(fieldName)));
+                                                arg));
                                     } else if (Swc4jSpan.class.isAssignableFrom(fieldType)) {
-                                        String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
+                                        String javaVar = String.format("java_%s", arg);
                                         args.add("&" + javaVar);
                                         javaVars.add(javaVar);
                                         lines.add(String.format("    let %s = map.get_span_ex_by_span(&self.%s).to_java(env);",
                                                 javaVar,
-                                                StringUtils.toSnakeCase(fieldName)));
+                                                arg));
                                     } else if (fieldType.isPrimitive()) {
-                                        String arg = StringUtils.toSnakeCase(fieldName);
                                         args.add(arg);
                                         lines.add(String.format("    let %s = self.%s;", arg, arg));
                                     } else if (fieldType == String.class) {
-                                        String arg = StringUtils.toSnakeCase(fieldName);
                                         args.add(arg);
                                         lines.add(String.format("    let %s = self.%s.as_str();", arg, arg));
                                     } else if (fieldType.isEnum()) {
-                                        String javaVar = String.format("java_%s", StringUtils.toSnakeCase(fieldName));
+                                        String javaVar = String.format("java_%s", arg);
                                         args.add("&" + javaVar);
                                         javaVars.add(javaVar);
                                         lines.add(String.format("    let %s = self.%s.to_java(env);",
                                                 javaVar,
-                                                StringUtils.toSnakeCase(fieldName)));
+                                                arg));
                                     } else {
                                         fail(field.getGenericType().getTypeName() + " is not expected");
                                     }
@@ -593,10 +590,11 @@ public class TestCodeGen {
                                                 arg));
                                         processLines.add(String.format("        let java_item = list_get(env, &%s, i);",
                                                 javaVar));
-                                        processLines.add(String.format("        let return_value = %s::from_java(env, &java_item);",
+                                        processLines.add(String.format("        let %s = %s::from_java(env, &java_item);",
+                                                arg,
                                                 new Jni2RustClassUtils<>(innerClass).getName()));
                                         processLines.add("        delete_local_ref!(env, java_item);");
-                                        processLines.add("        return_value");
+                                        processLines.add(String.format("        %s", arg));
                                         processLines.add("      }).collect();");
                                         processLines.add(String.format("      Some(%s)", jni2RustFieldUtils.getComponentInitCode(arg)));
                                         initLines.add(String.format("      %s: %s,",
@@ -628,7 +626,8 @@ public class TestCodeGen {
                                     if (innerType instanceof Class) {
                                         Class<?> innerClass = (Class<?>) innerType;
                                         if (ISwc4jAst.class.isAssignableFrom(innerClass)) {
-                                            processLines.add(String.format("      let return_value = %s::from_java(env, &java_item);",
+                                            processLines.add(String.format("      let %s = %s::from_java(env, &java_item);",
+                                                    arg,
                                                     new Jni2RustClassUtils<>(innerClass).getName()));
                                         } else {
                                             fail(innerClass.getName() + " is not expected");
@@ -638,12 +637,14 @@ public class TestCodeGen {
                                         Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
                                         assertInstanceOf(Class.class, innerType2);
                                         Class<?> innerClass = (Class<?>) innerType2;
-                                        processLines.add("      let return_value = if optional_is_present(env, &java_item) {");
+                                        processLines.add(String.format("      let %s = if optional_is_present(env, &java_item) {",
+                                                arg));
                                         processLines.add("        let java_inner_item = optional_get(env, &java_item);");
-                                        processLines.add(String.format("        let return_value = %s::from_java(env, &java_inner_item);",
+                                        processLines.add(String.format("        let %s = %s::from_java(env, &java_inner_item);",
+                                                arg,
                                                 new Jni2RustClassUtils<>(innerClass).getName()));
                                         processLines.add("        delete_local_ref!(env, java_inner_item);");
-                                        processLines.add("        Some(return_value)");
+                                        processLines.add(String.format("        Some(%s)", arg));
                                         processLines.add("      } else {");
                                         processLines.add("        None");
                                         processLines.add("      };");
@@ -652,7 +653,7 @@ public class TestCodeGen {
                                     }
                                     processLines.add("      delete_local_ref!(env, java_item);");
                                     processLines.add(String.format("      %s",
-                                            jni2RustFieldUtils.getComponentInitCode("return_value")));
+                                            jni2RustFieldUtils.getComponentInitCode(arg)));
                                     processLines.add("    }).collect();");
                                     initLines.add(String.format("      %s: %s,", arg, arg));
                                 } else {
