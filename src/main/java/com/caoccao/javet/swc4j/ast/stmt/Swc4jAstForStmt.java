@@ -39,7 +39,9 @@ public class Swc4jAstForStmt
     @Jni2RustField(box = true)
     protected ISwc4jAstStmt body;
     protected Optional<ISwc4jAstVarDeclOrExpr> init;
+    @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> test;
+    @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> update;
 
     @Jni2RustMethod

@@ -27,6 +27,10 @@ public @interface Jni2RustField {
 
     boolean box() default false;
 
+    boolean componentAtom() default false;
+
+    boolean componentBox() default false;
+
     boolean ignore() default false;
 
     String name() default "";

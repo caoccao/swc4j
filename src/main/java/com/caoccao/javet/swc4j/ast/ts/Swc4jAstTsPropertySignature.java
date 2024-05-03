@@ -38,12 +38,15 @@ public class Swc4jAstTsPropertySignature
         implements ISwc4jAstTsTypeElement {
     protected final List<ISwc4jAstTsFnParam> params;
     protected boolean computed;
+    @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> init;
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr key;
     protected boolean optional;
     protected boolean readonly;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod

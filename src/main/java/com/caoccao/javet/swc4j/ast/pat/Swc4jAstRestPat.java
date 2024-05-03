@@ -40,6 +40,7 @@ public class Swc4jAstRestPat
     @Jni2RustField(box = true)
     protected ISwc4jAstPat arg;
     protected Swc4jSpan dot3Token;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     @Jni2RustMethod

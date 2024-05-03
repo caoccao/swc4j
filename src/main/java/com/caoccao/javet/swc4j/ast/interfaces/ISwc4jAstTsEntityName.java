@@ -25,7 +25,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
         getDefault = "TsEntityName::Ident(Ident::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstIdent.class),
-                @Jni2RustEnumMapping(name = "TsQualifiedName", type = Swc4jAstTsQualifiedName.class),
+                @Jni2RustEnumMapping(name = "TsQualifiedName", type = Swc4jAstTsQualifiedName.class, box = true),
         }
 )
 public interface ISwc4jAstTsEntityName

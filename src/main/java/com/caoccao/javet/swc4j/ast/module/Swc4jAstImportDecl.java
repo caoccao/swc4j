@@ -43,6 +43,7 @@ public class Swc4jAstImportDecl
     @Jni2RustField(box = true)
     protected Swc4jAstStr src;
     protected boolean typeOnly;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstObjectLit> with;
 
     @Jni2RustMethod

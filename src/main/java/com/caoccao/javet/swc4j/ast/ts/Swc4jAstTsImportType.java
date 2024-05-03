@@ -25,10 +25,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsEntityName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsTypeQueryExpr;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -42,6 +39,7 @@ public class Swc4jAstTsImportType
         implements ISwc4jAstTsType, ISwc4jAstTsTypeQueryExpr {
     protected Swc4jAstStr arg;
     protected Optional<ISwc4jAstTsEntityName> qualifier;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
     @Jni2RustMethod

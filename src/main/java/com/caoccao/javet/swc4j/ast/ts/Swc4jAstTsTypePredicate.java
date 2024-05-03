@@ -23,10 +23,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsThisTypeOrIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -40,6 +37,7 @@ public class Swc4jAstTsTypePredicate
         implements ISwc4jAstTsType {
     protected boolean asserts;
     protected ISwc4jAstTsThisTypeOrIdent paramName;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     @Jni2RustMethod

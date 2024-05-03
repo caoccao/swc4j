@@ -40,6 +40,7 @@ public class Swc4jAstTsIndexSignature
     @Jni2RustField(name = "is_static")
     protected boolean _static;
     protected boolean readonly;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     @Jni2RustMethod

@@ -41,7 +41,7 @@ public class Jni2RustClassUtils<T> {
     }
 
     public String getName() {
-        return getName(clazz.getSimpleName().substring(clazz.isInterface() ? 9 : 8));
+        return getName(getRawName());
     }
 
     public String getName(String defaultName) {
@@ -49,6 +49,10 @@ public class Jni2RustClassUtils<T> {
                 .map(Jni2RustClass::name)
                 .filter(StringUtils::isNotEmpty)
                 .orElse(defaultName);
+    }
+
+    public String getRawName() {
+        return clazz.getSimpleName().substring(clazz.isInterface() ? 9 : 8);
     }
 
     public boolean isCustomCreation() {

@@ -24,7 +24,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
         name = "JSXExpr",
         getDefault = "JSXExpr::Expr(Box::new(Expr::get_default()))",
         mappings = {
-                @Jni2RustEnumMapping(name = "Expr", type = ISwc4jAstExpr.class),
+                @Jni2RustEnumMapping(name = "Expr", type = ISwc4jAstExpr.class, box = true),
                 @Jni2RustEnumMapping(name = "JSXEmptyExpr", type = Swc4jAstJsxEmptyExpr.class),
         }
 )

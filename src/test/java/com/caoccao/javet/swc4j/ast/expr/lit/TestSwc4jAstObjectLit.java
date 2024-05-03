@@ -103,7 +103,7 @@ public class TestSwc4jAstObjectLit extends BaseTestSuiteSwc4jAst {
         assertEquals("c", ident.getSym());
         Swc4jAstBool b = assertAst(
                 keyValueProp, keyValueProp.getValue().as(Swc4jAstBool.class), Swc4jAstType.Bool, 15, 19);
-        assertTrue(b.getValue());
+        assertTrue(b.isValue());
         assertSpan(code, script);
     }
 }

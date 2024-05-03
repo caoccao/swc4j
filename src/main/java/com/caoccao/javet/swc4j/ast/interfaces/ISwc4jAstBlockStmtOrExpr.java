@@ -23,7 +23,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "BlockStmt", type = Swc4jAstBlockStmt.class),
-                @Jni2RustEnumMapping(name = "Expr", type = ISwc4jAstExpr.class),
+                @Jni2RustEnumMapping(name = "Expr", type = ISwc4jAstExpr.class, box = true),
         }
 )
 public interface ISwc4jAstBlockStmtOrExpr extends ISwc4jAst {

@@ -25,6 +25,8 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Jni2RustEnumMapping {
+    boolean box() default false;
+
     String name();
 
     Class<? extends ISwc4jAst> type();

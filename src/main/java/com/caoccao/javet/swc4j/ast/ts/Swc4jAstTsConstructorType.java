@@ -40,6 +40,7 @@ public class Swc4jAstTsConstructorType
     protected boolean _abstract;
     @Jni2RustField(box = true)
     protected Swc4jAstTsTypeAnn typeAnn;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod

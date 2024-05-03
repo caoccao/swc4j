@@ -293,6 +293,8 @@ pub struct JavaArrayList {
   class: GlobalRef,
   method_construct: JMethodID,
   method_add: JMethodID,
+  method_get: JMethodID,
+  method_size: JMethodID,
 }
 unsafe impl Send for JavaArrayList {}
 unsafe impl Sync for JavaArrayList {}
@@ -309,10 +311,18 @@ impl JavaArrayList {
     let method_add = env
       .get_method_id(&class, "add", "(Ljava/lang/Object;)Z")
       .expect("Couldn't find method ArrayList.add");
+    let method_get = env
+      .get_method_id(&class, "get", "(I)Ljava/lang/Object;")
+      .expect("Couldn't find method ArrayList.get");
+    let method_size = env
+      .get_method_id(&class, "size", "()I")
+      .expect("Couldn't find method ArrayList.size");
     JavaArrayList {
       class,
       method_construct,
       method_add,
+      method_get,
+      method_size,
     }
   }
 
@@ -333,6 +343,18 @@ impl JavaArrayList {
   pub fn add<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> bool {
     let element = object_to_jvalue!(element);
     call_as_boolean!(env, obj, &self.method_add, &[element], "add()")
+  }
+
+  pub fn get<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>, index: usize) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let index = int_to_jvalue!(index);
+    call_as_object!(env, obj, &self.method_get, &[index], "get()")
+  }
+
+  pub fn size<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> usize {
+    call_as_int!(env, obj, &self.method_size, &[], "size()") as usize
   }
 }
 
@@ -511,8 +533,15 @@ where
   unsafe { JAVA_INTEGER.as_ref().unwrap() }.value_of(env, i)
 }
 
-pub fn list_add<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> bool {
+pub fn list_add<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> bool {
   unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.add(env, obj, element)
+}
+
+pub fn list_get<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, index: usize) -> JObject<'a>
+where
+  'local: 'a,
+{
+  unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.get(env, obj, index)
 }
 
 pub fn list_new<'local, 'a>(env: &mut JNIEnv<'local>, initial_capacity: usize) -> JObject<'a>
@@ -520,6 +549,10 @@ where
   'local: 'a,
 {
   unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.construct(env, initial_capacity)
+}
+
+pub fn list_size<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> usize {
+  unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.size(env, obj)
 }
 
 pub fn map_new<'local, 'a>(env: &mut JNIEnv<'local>, initial_capacity: usize) -> JObject<'a>

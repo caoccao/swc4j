@@ -33,7 +33,7 @@ public class Swc4jAstStr
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstModuleExportName, ISwc4jAstPropName, ISwc4jAstTsModuleName, ISwc4jAstTsLit,
         ISwc4jAstTsEnumMemberId {
-    @Jni2RustField(atom = true)
+    @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
     @Jni2RustField(atom = true)
     protected String value;

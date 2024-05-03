@@ -45,7 +45,9 @@ public class Swc4jAstArrowExpr
     protected ISwc4jAstBlockStmtOrExpr body;
     @Jni2RustField(name = "is_generator")
     protected boolean generator;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> returnType;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod

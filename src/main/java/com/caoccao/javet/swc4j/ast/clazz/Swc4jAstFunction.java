@@ -42,7 +42,9 @@ public class Swc4jAstFunction
     protected Optional<Swc4jAstBlockStmt> body;
     @Jni2RustField(name = "is_generator")
     protected boolean generator;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> returnType;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod

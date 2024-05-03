@@ -25,6 +25,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstTplElement;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
@@ -38,6 +39,7 @@ public class Swc4jAstTsTplLitType
         extends Swc4jAst
         implements ISwc4jAstTsLit {
     protected final List<Swc4jAstTplElement> quasis;
+    @Jni2RustField(componentBox = true)
     protected final List<ISwc4jAstTsType> types;
 
     @Jni2RustMethod

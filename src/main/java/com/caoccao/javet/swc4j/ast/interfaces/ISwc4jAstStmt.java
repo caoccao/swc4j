@@ -38,7 +38,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
                 @Jni2RustEnumMapping(name = "Return", type = Swc4jAstReturnStmt.class),
                 @Jni2RustEnumMapping(name = "Switch", type = Swc4jAstSwitchStmt.class),
                 @Jni2RustEnumMapping(name = "Throw", type = Swc4jAstThrowStmt.class),
-                @Jni2RustEnumMapping(name = "Try", type = Swc4jAstTryStmt.class),
+                @Jni2RustEnumMapping(name = "Try", type = Swc4jAstTryStmt.class, box = true),
                 @Jni2RustEnumMapping(name = "While", type = Swc4jAstWhileStmt.class),
                 @Jni2RustEnumMapping(name = "With", type = Swc4jAstWithStmt.class),
         }

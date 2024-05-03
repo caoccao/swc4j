@@ -23,10 +23,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -38,9 +35,11 @@ import java.util.Optional;
 public class Swc4jAstTsMappedType
         extends Swc4jAst
         implements ISwc4jAstTsType {
+    @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstTsType> nameType;
     protected Optional<Swc4jAstTruePlusMinus> optional;
     protected Optional<Swc4jAstTruePlusMinus> readonly;
+    @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstTsType> typeAnn;
     protected Swc4jAstTsTypeParam typeParam;
 

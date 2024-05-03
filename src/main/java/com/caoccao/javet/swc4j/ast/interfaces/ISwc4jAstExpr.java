@@ -37,7 +37,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
                 @Jni2RustEnumMapping(name = "Fn", type = Swc4jAstFnExpr.class),
                 @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstIdent.class),
                 @Jni2RustEnumMapping(name = "Invalid", type = Swc4jAstInvalid.class),
-                @Jni2RustEnumMapping(name = "JSXElement", type = Swc4jAstJsxElement.class),
+                @Jni2RustEnumMapping(name = "JSXElement", type = Swc4jAstJsxElement.class, box = true),
                 @Jni2RustEnumMapping(name = "JSXEmpty", type = Swc4jAstJsxEmptyExpr.class),
                 @Jni2RustEnumMapping(name = "JSXFragment", type = Swc4jAstJsxFragment.class),
                 @Jni2RustEnumMapping(name = "JSXMember", type = Swc4jAstJsxMemberExpr.class),

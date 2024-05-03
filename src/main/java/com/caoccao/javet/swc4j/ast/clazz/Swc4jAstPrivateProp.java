@@ -48,7 +48,9 @@ public class Swc4jAstPrivateProp
     @Jni2RustField(name = "is_optional")
     protected boolean optional;
     protected boolean readonly;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
+    @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> value;
 
 

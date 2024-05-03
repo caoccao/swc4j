@@ -26,7 +26,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
         name = "JSXAttrValue",
         getDefault = "JSXAttrValue::Lit(Lit::get_default())",
         mappings = {
-                @Jni2RustEnumMapping(name = "JSXElement", type = Swc4jAstJsxElement.class),
+                @Jni2RustEnumMapping(name = "JSXElement", type = Swc4jAstJsxElement.class, box = true),
                 @Jni2RustEnumMapping(name = "JSXExprContainer", type = Swc4jAstJsxExprContainer.class),
                 @Jni2RustEnumMapping(name = "JSXFragment", type = Swc4jAstJsxFragment.class),
                 @Jni2RustEnumMapping(name = "Lit", type = ISwc4jAstLit.class),

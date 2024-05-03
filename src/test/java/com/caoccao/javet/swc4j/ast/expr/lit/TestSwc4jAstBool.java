@@ -36,7 +36,7 @@ public class TestSwc4jAstBool extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 4);
         Swc4jAstBool bool = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstBool.class), Swc4jAstType.Bool, 0, 4);
-        assertTrue(bool.getValue());
+        assertTrue(bool.isValue());
         assertSpan(code, script);
     }
 }

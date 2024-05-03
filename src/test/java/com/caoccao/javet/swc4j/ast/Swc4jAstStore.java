@@ -140,6 +140,9 @@ public final class Swc4jAstStore {
                                         assertNotNull(
                                                 getterMethod,
                                                 getterMethodName + " is not found from " + clazz.getSimpleName());
+                                        assertTrue(
+                                                getterMethod.isAnnotationPresent(Jni2RustMethod.class),
+                                                getterMethodName + " is not exported from " + clazz.getSimpleName());
                                         String setterMethodName = "set" +
                                                 fieldName.substring(0, 1).toUpperCase() +
                                                 fieldName.substring(1);

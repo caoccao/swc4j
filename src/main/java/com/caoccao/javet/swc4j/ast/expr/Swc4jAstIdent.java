@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
@@ -37,6 +38,7 @@ public class Swc4jAstIdent
         ISwc4jAstSuperProp, ISwc4jAstJsxAttrName, ISwc4jAstTsThisTypeOrIdent, ISwc4jAstTsEnumMemberId {
     protected static final String QUESTION_MARK = "?";
     protected boolean optional;
+    @Jni2RustField(atom = true)
     protected String sym;
 
     @Jni2RustMethod

@@ -22,10 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -39,6 +36,7 @@ public class Swc4jAstObjectPat
         implements ISwc4jAstPat, ISwc4jAstAssignTargetPat, ISwc4jAstTsFnParam, ISwc4jAstSimpleAssignTarget {
     protected final List<ISwc4jAstObjectPatProp> props;
     protected boolean optional;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     @Jni2RustMethod

@@ -24,7 +24,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
         mappings = {
                 @Jni2RustEnumMapping(name = "Array", type = Swc4jAstArrayPat.class),
                 @Jni2RustEnumMapping(name = "Assign", type = Swc4jAstAssignPat.class),
-                @Jni2RustEnumMapping(name = "Expr", type = ISwc4jAstExpr.class),
+                @Jni2RustEnumMapping(name = "Expr", type = ISwc4jAstExpr.class, box = true),
                 @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstBindingIdent.class),
                 @Jni2RustEnumMapping(name = "Invalid", type = Swc4jAstInvalid.class),
                 @Jni2RustEnumMapping(name = "Object", type = Swc4jAstObjectPat.class),

@@ -25,10 +25,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExportSpecifier;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustParam;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -41,8 +38,10 @@ public class Swc4jAstNamedExport
         extends Swc4jAst
         implements ISwc4jAstModuleDecl {
     protected final List<ISwc4jAstExportSpecifier> specifiers;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstStr> src;
     protected boolean typeOnly;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstObjectLit> with;
 
     @Jni2RustMethod

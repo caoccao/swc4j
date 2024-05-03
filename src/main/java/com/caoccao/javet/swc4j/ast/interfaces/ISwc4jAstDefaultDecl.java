@@ -27,7 +27,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
         mappings = {
                 @Jni2RustEnumMapping(name = "Class", type = Swc4jAstClassExpr.class),
                 @Jni2RustEnumMapping(name = "Fn", type = Swc4jAstFnExpr.class),
-                @Jni2RustEnumMapping(name = "TsInterfaceDecl", type = Swc4jAstTsInterfaceDecl.class),
+                @Jni2RustEnumMapping(name = "TsInterfaceDecl", type = Swc4jAstTsInterfaceDecl.class, box = true),
         }
 )
 public interface ISwc4jAstDefaultDecl extends ISwc4jAst {

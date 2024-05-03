@@ -38,6 +38,7 @@ public class Swc4jAstTsFnType
     protected final List<ISwc4jAstTsFnParam> params;
     @Jni2RustField(box = true)
     protected Swc4jAstTsTypeAnn typeAnn;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod

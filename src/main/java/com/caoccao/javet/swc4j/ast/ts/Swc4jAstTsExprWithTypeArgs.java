@@ -35,6 +35,7 @@ public class Swc4jAstTsExprWithTypeArgs
         extends Swc4jAst {
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr expr;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
     @Jni2RustMethod

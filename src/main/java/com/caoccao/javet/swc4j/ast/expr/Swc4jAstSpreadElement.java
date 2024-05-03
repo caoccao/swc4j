@@ -58,10 +58,12 @@ public class Swc4jAstSpreadElement
         return SimpleList.of(expr);
     }
 
+    @Jni2RustMethod
     public Swc4jSpan getDot3Token() {
         return dot3Token;
     }
 
+    @Jni2RustMethod
     public ISwc4jAstExpr getExpr() {
         return expr;
     }

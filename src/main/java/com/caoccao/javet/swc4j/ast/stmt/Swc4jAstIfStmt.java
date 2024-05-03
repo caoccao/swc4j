@@ -35,6 +35,7 @@ import java.util.Optional;
 public class Swc4jAstIfStmt
         extends Swc4jAst
         implements ISwc4jAstStmt {
+    @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstStmt> alt;
     @Jni2RustField(box = true)
     protected ISwc4jAstStmt cons;

@@ -24,12 +24,12 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
         mappings = {
                 @Jni2RustEnumMapping(name = "Class", type = Swc4jAstClassDecl.class),
                 @Jni2RustEnumMapping(name = "Fn", type = Swc4jAstFnDecl.class),
-                @Jni2RustEnumMapping(name = "TsEnum", type = Swc4jAstTsEnumDecl.class),
-                @Jni2RustEnumMapping(name = "TsInterface", type = Swc4jAstTsInterfaceDecl.class),
-                @Jni2RustEnumMapping(name = "TsModule", type = Swc4jAstTsModuleDecl.class),
-                @Jni2RustEnumMapping(name = "TsTypeAlias", type = Swc4jAstTsTypeAliasDecl.class),
-                @Jni2RustEnumMapping(name = "Using", type = Swc4jAstUsingDecl.class),
-                @Jni2RustEnumMapping(name = "Var", type = Swc4jAstVarDecl.class),
+                @Jni2RustEnumMapping(name = "TsEnum", type = Swc4jAstTsEnumDecl.class, box = true),
+                @Jni2RustEnumMapping(name = "TsInterface", type = Swc4jAstTsInterfaceDecl.class, box = true),
+                @Jni2RustEnumMapping(name = "TsModule", type = Swc4jAstTsModuleDecl.class, box = true),
+                @Jni2RustEnumMapping(name = "TsTypeAlias", type = Swc4jAstTsTypeAliasDecl.class, box = true),
+                @Jni2RustEnumMapping(name = "Using", type = Swc4jAstUsingDecl.class, box = true),
+                @Jni2RustEnumMapping(name = "Var", type = Swc4jAstVarDecl.class, box = true),
         }
 )
 public interface ISwc4jAstDecl extends ISwc4jAstStmt {

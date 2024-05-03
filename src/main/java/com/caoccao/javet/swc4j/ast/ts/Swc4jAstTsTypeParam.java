@@ -36,7 +36,9 @@ public class Swc4jAstTsTypeParam
         extends Swc4jAst {
     @Jni2RustField(name = "is_const")
     protected boolean _const;
+    @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstTsType> _default;
+    @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstTsType> constraint;
     @Jni2RustField(name = "is_in")
     protected boolean in;

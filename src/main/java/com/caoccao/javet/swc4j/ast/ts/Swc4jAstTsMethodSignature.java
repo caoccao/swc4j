@@ -42,7 +42,9 @@ public class Swc4jAstTsMethodSignature
     protected ISwc4jAstExpr key;
     protected boolean optional;
     protected boolean readonly;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod

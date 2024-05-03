@@ -55,7 +55,7 @@ public class Swc4jAstBool
     }
 
     @Jni2RustMethod
-    public boolean getValue() {
+    public boolean isValue() {
         return value;
     }
 

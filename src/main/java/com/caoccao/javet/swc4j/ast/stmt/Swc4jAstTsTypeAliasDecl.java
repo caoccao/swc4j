@@ -41,6 +41,7 @@ public class Swc4jAstTsTypeAliasDecl
     protected Swc4jAstIdent id;
     @Jni2RustField(box = true)
     protected ISwc4jAstTsType typeAnn;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod

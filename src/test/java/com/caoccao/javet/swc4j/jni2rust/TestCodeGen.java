@@ -28,10 +28,7 @@ import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.tokens.Swc4jTokenFactory;
-import com.caoccao.javet.swc4j.utils.ArrayUtils;
-import com.caoccao.javet.swc4j.utils.OSUtils;
-import com.caoccao.javet.swc4j.utils.ReflectionUtils;
-import com.caoccao.javet.swc4j.utils.StringUtils;
+import com.caoccao.javet.swc4j.utils.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -43,6 +40,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,53 +64,85 @@ public class TestCodeGen {
         assertTrue(startPosition > 0, "Start position is invalid");
         assertTrue(endPosition > startPosition, "End position is invalid");
         final AtomicInteger enumCounter = new AtomicInteger();
-        List<String> lines = new ArrayList<>();
+        final List<String> lines = new ArrayList<>();
         Swc4jAstStore.getInstance().getEnumMap().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
-                .filter(entry -> entry.getValue().isInterface())
-                .filter(entry -> entry.getValue().isAnnotationPresent(Jni2RustClass.class))
-                .filter(entry -> ArrayUtils.isNotEmpty(new Jni2RustClassUtils<>(entry.getValue()).getMappings()))
-                .forEach(entry -> {
-                    Class<?> clazz = entry.getValue();
+                .map(Map.Entry::getValue)
+                .filter(Class::isInterface)
+                .filter(clazz -> clazz.isAnnotationPresent(Jni2RustClass.class))
+                .filter(clazz -> ArrayUtils.isNotEmpty(new Jni2RustClassUtils<>(clazz).getMappings()))
+                .forEach(clazz -> {
                     Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
                     String enumName = jni2RustClassUtils.getName();
-                    // Span
-                    lines.add(String.format("impl RegisterWithMap<ByteToIndexMap> for %s {", enumName));
-                    lines.add("  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {");
-                    lines.add("    match self {");
+                    final List<String> registrationLines = new ArrayList<>();
+                    final List<String> toJavaLines = new ArrayList<>();
+                    final List<String> fromJavaLines = new ArrayList<>();
+                    registrationLines.add(String.format("impl RegisterWithMap<ByteToIndexMap> for %s {", enumName));
+                    registrationLines.add("  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {");
+                    registrationLines.add("    match self {");
+                    toJavaLines.add(String.format("impl ToJavaWithMap<ByteToIndexMap> for %s {", enumName));
+                    toJavaLines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>");
+                    toJavaLines.add("  where");
+                    toJavaLines.add("    'local: 'a,");
+                    toJavaLines.add("  {");
+                    toJavaLines.add("    match self {");
+                    fromJavaLines.add(String.format("impl FromJava for %s {", enumName));
+                    fromJavaLines.add("  #[allow(unused_variables)]");
+                    fromJavaLines.add("  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {");
+                    fromJavaLines.add("    let return_value = ");
+                    final AtomicInteger mappingCounter = new AtomicInteger();
                     Stream.of(jni2RustClassUtils.getMappings())
                             .sorted(Comparator.comparing(Jni2RustEnumMapping::name))
                             .forEach(mapping -> {
                                 assertTrue(
                                         clazz.isAssignableFrom(mapping.type()),
                                         mapping.type().getSimpleName() + " should implement " + clazz.getSimpleName());
-                                lines.add(String.format("      %s::%s(node) => node.register_with_map(map),",
+                                Jni2RustClassUtils<?> mappingJni2RustClassUtils = new Jni2RustClassUtils<>(mapping.type());
+                                registrationLines.add(String.format("      %s::%s(node) => node.register_with_map(map),",
                                         enumName,
                                         mapping.name()));
-                            });
-                    lines.add("    }");
-                    lines.add("  }");
-                    lines.add("}\n");
-                    // AST
-                    lines.add(String.format("impl ToJavaWithMap<ByteToIndexMap> for %s {", enumName));
-                    lines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>");
-                    lines.add("  where");
-                    lines.add("    'local: 'a,");
-                    lines.add("  {");
-                    lines.add("    match self {");
-                    Stream.of(jni2RustClassUtils.getMappings())
-                            .sorted(Comparator.comparing(Jni2RustEnumMapping::name))
-                            .forEach(mapping -> {
-                                assertTrue(
-                                        clazz.isAssignableFrom(mapping.type()),
-                                        mapping.type().getSimpleName() + " should implement " + clazz.getSimpleName());
-                                lines.add(String.format("      %s::%s(node) => node.to_java_with_map(env, map),",
+                                toJavaLines.add(String.format("      %s::%s(node) => node.to_java_with_map(env, map),",
                                         enumName,
                                         mapping.name()));
+                                String rawMappingName = mappingJni2RustClassUtils.getRawName();
+                                String mappingTypeName = mappingJni2RustClassUtils.getName();
+                                String prefix = "";
+                                if (mappingCounter.getAndIncrement() > 0) {
+                                    prefix = "} else ";
+                                }
+                                fromJavaLines.add(String.format("      %sif env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_%s.as_ref().unwrap()}.class)).unwrap_or(false) {",
+                                        prefix,
+                                        StringUtils.toSnakeCase(rawMappingName).toUpperCase()));
+                                if (mapping.box()) {
+                                    fromJavaLines.add(String.format("        %s::%s(Box::new(%s::from_java(env, jobj)))",
+                                            enumName,
+                                            mapping.name(),
+                                            mappingTypeName));
+                                } else {
+                                    fromJavaLines.add(String.format("        %s::%s(%s::from_java(env, jobj))",
+                                            enumName,
+                                            mapping.name(),
+                                            mappingTypeName));
+                                }
                             });
-                    lines.add("    }");
-                    lines.add("  }");
-                    lines.add("}\n");
+                    fromJavaLines.add("      } else {");
+                    fromJavaLines.add("        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);");
+                    fromJavaLines.add("        let ast_type = AstType::from_java(env, &java_ast_type);");
+                    fromJavaLines.add("        delete_local_ref!(env, java_ast_type);");
+                    fromJavaLines.add(String.format("        panic!(\"Type {:?} is not supported by %s\", ast_type);", enumName));
+                    fromJavaLines.add("      };");
+                    fromJavaLines.add("    return_value");
+                    registrationLines.add("    }");
+                    registrationLines.add("  }");
+                    registrationLines.add("}\n");
+                    lines.addAll(registrationLines);
+                    toJavaLines.add("    }");
+                    toJavaLines.add("  }");
+                    toJavaLines.add("}\n");
+                    lines.addAll(toJavaLines);
+                    fromJavaLines.add("  }");
+                    fromJavaLines.add("}\n");
+                    lines.addAll(fromJavaLines);
                     enumCounter.incrementAndGet();
                 });
         assertTrue(enumCounter.get() > 0);
@@ -129,7 +159,7 @@ public class TestCodeGen {
     }
 
     @Test
-    public void testStructJNI() throws IOException {
+    public void testJNI() throws IOException {
         Path rustFilePath = new File(OSUtils.WORKING_DIRECTORY).toPath()
                 .resolve(Jni2RustFilePath.AstUtils.getFilePath());
         File rustFile = rustFilePath.toFile();
@@ -145,14 +175,38 @@ public class TestCodeGen {
         final int endPosition = fileContent.indexOf(endSign);
         assertTrue(startPosition > 0, "Start position is invalid");
         assertTrue(endPosition > startPosition, "End position is invalid");
+        final AtomicInteger enumCounter = new AtomicInteger();
         final AtomicInteger structCounter = new AtomicInteger();
-        List<String> lines = new ArrayList<>();
-        List<String> declarationLines = new ArrayList<>();
-        List<String> initLines = new ArrayList<>();
+        final List<String> lines = new ArrayList<>();
+        final List<String> declarationLines = new ArrayList<>();
+        final List<String> initLines = new ArrayList<>();
+        final List<Class<?>> enumClasses = SimpleList.of(ISwc4jAst.class);
+        Swc4jAstStore.getInstance().getEnumMap().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(Map.Entry::getValue)
+                .filter(Class::isInterface)
+                .filter(clazz -> clazz.isAnnotationPresent(Jni2RustClass.class))
+                .filter(clazz -> ArrayUtils.isNotEmpty(new Jni2RustClassUtils<>(clazz).getMappings()))
+                .forEach(enumClasses::add);
+        enumClasses.forEach(clazz -> {
+            Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
+            String className = clazz.getSimpleName();
+            String enumName = jni2RustClassUtils.getName();
+            Jni2Rust<?> jni2Rust = new Jni2Rust<>(clazz);
+            lines.addAll(jni2Rust.getLines());
+            lines.add("");
+            declarationLines.add(String.format("static mut JAVA_CLASS_%s: Option<Java%s> = None;",
+                    StringUtils.toSnakeCase(enumName).toUpperCase(),
+                    className));
+            initLines.add(String.format("    JAVA_CLASS_%s = Some(Java%s::new(env));",
+                    StringUtils.toSnakeCase(enumName).toUpperCase(),
+                    className));
+            enumCounter.incrementAndGet();
+        });
         Swc4jAstStore.getInstance().getStructMap().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
-                .forEach(entry -> {
-                    Class<?> clazz = entry.getValue();
+                .map(Map.Entry::getValue)
+                .forEach(clazz -> {
                     Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
                     String className = clazz.getSimpleName();
                     String structName = jni2RustClassUtils.getName();
@@ -162,16 +216,18 @@ public class TestCodeGen {
                     declarationLines.add(String.format("static mut JAVA_CLASS_%s: Option<Java%s> = None;",
                             StringUtils.toSnakeCase(structName).toUpperCase(),
                             className));
-                    initLines.add(String.format("  JAVA_CLASS_%s = Some(Java%s::new(env));",
+                    initLines.add(String.format("    JAVA_CLASS_%s = Some(Java%s::new(env));",
                             StringUtils.toSnakeCase(structName).toUpperCase(),
                             className));
                     structCounter.incrementAndGet();
                 });
-        lines.addAll(declarationLines);
-        lines.add("\nunsafe fn init_ast_classes<'local>(env: &mut JNIEnv<'local>) {");
-        lines.addAll(initLines);
-        lines.add("}\n");
         assertTrue(structCounter.get() > 0);
+        lines.addAll(declarationLines);
+        lines.add("\npub fn init<'local>(env: &mut JNIEnv<'local>) {");
+        lines.add("  unsafe {");
+        lines.addAll(initLines);
+        lines.add("  }");
+        lines.add("}\n");
         StringBuilder sb = new StringBuilder(fileContent.length());
         sb.append(fileContent, 0, startPosition);
         String code = StringUtils.join("\n", lines);
@@ -205,8 +261,8 @@ public class TestCodeGen {
         List<String> lines = new ArrayList<>();
         Swc4jAstStore.getInstance().getStructMap().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
-                .forEach(entry -> {
-                    Class<?> clazz = entry.getValue();
+                .map(Map.Entry::getValue)
+                .forEach(clazz -> {
                     Constructor<?>[] constructors = clazz.getConstructors();
                     assertEquals(1, constructors.length);
                     Constructor<?> constructor = constructors[0];
@@ -217,10 +273,11 @@ public class TestCodeGen {
                         ++fieldOrder;
                     }
                     Jni2RustClassUtils<?> jni2RustClassUtils = new Jni2RustClassUtils<>(clazz);
-                    String enumName = jni2RustClassUtils.getName();
+                    String className = jni2RustClassUtils.getName();
+                    String rawName = jni2RustClassUtils.getRawName();
                     String spanCall = jni2RustClassUtils.isSpan() ? "" : "()";
-                    // Span
-                    lines.add(String.format("impl RegisterWithMap<ByteToIndexMap> for %s {", enumName));
+                    // Registration
+                    lines.add(String.format("impl RegisterWithMap<ByteToIndexMap> for %s {", className));
                     lines.add("  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {");
                     lines.add(String.format("    map.register_by_span(&self.span%s);", spanCall));
                     ReflectionUtils.getDeclaredFields(clazz).values().stream()
@@ -282,10 +339,11 @@ public class TestCodeGen {
                     lines.add("}\n");
                     // AST
                     if (!jni2RustClassUtils.isCustomCreation()) {
-                        List<String> args = new ArrayList<>();
-                        List<String> javaVars = new ArrayList<>();
-                        List<String> javaOptionalVars = new ArrayList<>();
-                        lines.add(String.format("impl ToJavaWithMap<ByteToIndexMap> for %s {", enumName));
+                        // ToJava
+                        final List<String> args = new ArrayList<>();
+                        final List<String> javaVars = new ArrayList<>();
+                        final List<String> javaOptionalVars = new ArrayList<>();
+                        lines.add(String.format("impl ToJavaWithMap<ByteToIndexMap> for %s {", className));
                         lines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>");
                         lines.add("  where");
                         lines.add("    'local: 'a,");
@@ -439,6 +497,211 @@ public class TestCodeGen {
                         javaOptionalVars.forEach(javaOptionalVar -> lines.add(String.format("    delete_local_optional_ref!(env, %s);", javaOptionalVar)));
                         javaVars.forEach(javaVar -> lines.add(String.format("    delete_local_ref!(env, %s);", javaVar)));
                         lines.add("    return_value");
+                        lines.add("  }");
+                        lines.add("}\n");
+                        // FromJava
+                        lines.add(String.format("impl FromJava for %s {", className));
+                        lines.add("  #[allow(unused_variables)]");
+                        lines.add("  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {");
+                        List<Field> fields = ReflectionUtils.getDeclaredFields(clazz).values().stream()
+                                .filter(field -> !Modifier.isStatic(field.getModifiers()))
+                                .filter(field -> !new Jni2RustFieldUtils(field).isIgnore())
+                                .sorted(Comparator.comparingInt(field -> fieldOrderMap.getOrDefault(field.getName(), Integer.MAX_VALUE)))
+                                .collect(Collectors.toList());
+                        final List<String> processLines = new ArrayList<>();
+                        final List<String> initLines = new ArrayList<>();
+                        if (jni2RustClassUtils.isSpan()) {
+                            initLines.add("      span: DUMMY_SP,");
+                        }
+                        if (!fields.isEmpty()) {
+                            lines.add(String.format("    let java_class = unsafe { JAVA_CLASS_%s.as_ref().unwrap() };",
+                                    StringUtils.toSnakeCase(rawName).toUpperCase()));
+                        }
+                        fields.forEach(field -> {
+                            Jni2RustFieldUtils jni2RustFieldUtils = new Jni2RustFieldUtils(field);
+                            String fieldName = jni2RustFieldUtils.getName();
+                            Class<?> fieldType = field.getType();
+                            String getterName = field.getName();
+                            if (getterName.startsWith("_")) {
+                                getterName = getterName.substring(1);
+                            }
+                            getterName = (fieldType == boolean.class ? "is" : "get") + "_" + StringUtils.toSnakeCase(getterName);
+                            String arg = StringUtils.toSnakeCase(fieldName);
+                            String javaVar = String.format("java_%s", arg);
+                            if (Optional.class.isAssignableFrom(fieldType)) {
+                                String javaOptionalVar = String.format("java_optional_%s", arg);
+                                if (field.getGenericType() instanceof ParameterizedType) {
+                                    Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                                    processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
+                                            javaOptionalVar,
+                                            getterName));
+                                    processLines.add(String.format("    let %s = if optional_is_present(env, &%s) {",
+                                            arg,
+                                            javaOptionalVar));
+                                    if (innerType instanceof Class) {
+                                        Class<?> innerClass = (Class<?>) innerType;
+                                        if (ISwc4jAst.class.isAssignableFrom(innerClass) || innerClass.isEnum()) {
+                                            processLines.add(String.format("      let %s = optional_get(env, &%s);",
+                                                    javaVar,
+                                                    javaOptionalVar));
+                                            processLines.add(String.format("      let %s = %s::from_java(env, &%s);",
+                                                    arg,
+                                                    new Jni2RustClassUtils<>(innerClass).getName(),
+                                                    javaVar));
+                                            processLines.add(String.format("      delete_local_ref!(env, %s);",
+                                                    javaVar));
+                                            processLines.add(String.format("      Some(%s)",
+                                                    jni2RustFieldUtils.getComponentInitCode(arg)));
+                                            initLines.add(String.format("      %s: %s.map(|%s| %s),",
+                                                    arg,
+                                                    arg,
+                                                    arg,
+                                                    jni2RustFieldUtils.getTypeInitCode(arg)));
+                                        } else if (Swc4jSpan.class.isAssignableFrom(innerClass)) {
+                                            processLines.add("      Some(DUMMY_SP)");
+                                            initLines.add(String.format("      %s: %s,",
+                                                    arg,
+                                                    arg));
+                                        } else if (innerClass == String.class) {
+                                            processLines.add(String.format("      let %s = optional_get(env, &%s);",
+                                                    javaVar,
+                                                    javaOptionalVar));
+                                            processLines.add(String.format("      let %s = jstring_to_string!(env, %s.as_raw());",
+                                                    arg,
+                                                    javaVar));
+                                            processLines.add(String.format("      delete_local_ref!(env, %s);",
+                                                    javaVar));
+                                            processLines.add(String.format("      Some(%s)",
+                                                    jni2RustFieldUtils.getComponentInitCode(arg)));
+                                            initLines.add(String.format("      %s: %s,",
+                                                    arg,
+                                                    arg));
+                                        } else {
+                                            fail(field.getGenericType().getTypeName() + " is not expected");
+                                        }
+                                    } else if (innerType instanceof ParameterizedType) {
+                                        assertTrue(List.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
+                                        Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
+                                        assertInstanceOf(Class.class, innerType2);
+                                        Class<?> innerClass = (Class<?>) innerType2;
+                                        processLines.add(String.format("      let %s = optional_get(env, &%s);",
+                                                javaVar,
+                                                javaOptionalVar));
+                                        processLines.add(String.format("      let length = list_size(env, &%s);",
+                                                javaVar));
+                                        processLines.add(String.format("      let %s = (0..length).map(|i| {",
+                                                arg));
+                                        processLines.add(String.format("        let java_item = list_get(env, &%s, i);",
+                                                javaVar));
+                                        processLines.add(String.format("        let return_value = %s::from_java(env, &java_item);",
+                                                new Jni2RustClassUtils<>(innerClass).getName()));
+                                        processLines.add("        delete_local_ref!(env, java_item);");
+                                        processLines.add("        return_value");
+                                        processLines.add("      }).collect();");
+                                        processLines.add(String.format("      Some(%s)", jni2RustFieldUtils.getComponentInitCode(arg)));
+                                        initLines.add(String.format("      %s: %s,",
+                                                arg,
+                                                jni2RustFieldUtils.getTypeInitCode(arg)));
+                                    } else {
+                                        fail(field.getGenericType().getTypeName() + " is not expected");
+                                    }
+                                    processLines.add("    } else {");
+                                    processLines.add("      None");
+                                    processLines.add("    };");
+                                    processLines.add(String.format("    delete_local_ref!(env, %s);",
+                                            javaOptionalVar));
+                                } else {
+                                    fail(field.getGenericType().getTypeName() + " is not expected");
+                                }
+                            } else if (List.class.isAssignableFrom(fieldType)) {
+                                if (field.getGenericType() instanceof ParameterizedType) {
+                                    processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
+                                            javaVar,
+                                            getterName));
+                                    processLines.add(String.format("    let length = list_size(env, &%s);",
+                                            javaVar));
+                                    processLines.add(String.format("    let %s = (0..length).map(|i| {",
+                                            arg));
+                                    processLines.add(String.format("      let java_item = list_get(env, &%s, i);",
+                                            javaVar));
+                                    Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                                    if (innerType instanceof Class) {
+                                        Class<?> innerClass = (Class<?>) innerType;
+                                        if (ISwc4jAst.class.isAssignableFrom(innerClass)) {
+                                            processLines.add(String.format("      let return_value = %s::from_java(env, &java_item);",
+                                                    new Jni2RustClassUtils<>(innerClass).getName()));
+                                        } else {
+                                            fail(innerClass.getName() + " is not expected");
+                                        }
+                                    } else if (innerType instanceof ParameterizedType) {
+                                        assertTrue(Optional.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
+                                        Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
+                                        assertInstanceOf(Class.class, innerType2);
+                                        Class<?> innerClass = (Class<?>) innerType2;
+                                        processLines.add("      let return_value = if optional_is_present(env, &java_item) {");
+                                        processLines.add("        let java_inner_item = optional_get(env, &java_item);");
+                                        processLines.add(String.format("        let return_value = %s::from_java(env, &java_inner_item);",
+                                                new Jni2RustClassUtils<>(innerClass).getName()));
+                                        processLines.add("        delete_local_ref!(env, java_inner_item);");
+                                        processLines.add("        Some(return_value)");
+                                        processLines.add("      } else {");
+                                        processLines.add("        None");
+                                        processLines.add("      };");
+                                    } else {
+                                        fail(innerType.getTypeName() + " is not expected");
+                                    }
+                                    processLines.add("      delete_local_ref!(env, java_item);");
+                                    processLines.add(String.format("      %s",
+                                            jni2RustFieldUtils.getComponentInitCode("return_value")));
+                                    processLines.add("    }).collect();");
+                                    initLines.add(String.format("      %s: %s,", arg, arg));
+                                } else {
+                                    fail(field.getGenericType().getTypeName() + " is not expected");
+                                }
+                            } else if (ISwc4jAst.class.isAssignableFrom(fieldType)) {
+                                processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
+                                        javaVar,
+                                        getterName));
+                                processLines.add(String.format("    let %s = %s::from_java(env, &%s);",
+                                        arg,
+                                        new Jni2RustClassUtils<>(fieldType).getName(),
+                                        javaVar));
+                                processLines.add(String.format("    delete_local_ref!(env, %s);", javaVar));
+                                initLines.add(String.format("      %s: %s,",
+                                        arg,
+                                        jni2RustFieldUtils.getTypeInitCode(arg)));
+                            } else if (Swc4jSpan.class.isAssignableFrom(fieldType)) {
+                                processLines.add(String.format("    let %s = DUMMY_SP;", arg));
+                                initLines.add(String.format("      %s: %s,",
+                                        arg,
+                                        jni2RustFieldUtils.getTypeInitCode(arg)));
+                            } else if (fieldType.isPrimitive() || fieldType == String.class) {
+                                processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
+                                        arg,
+                                        getterName));
+                                initLines.add(String.format("      %s: %s,",
+                                        arg,
+                                        jni2RustFieldUtils.getTypeInitCode(arg)));
+                            } else if (fieldType.isEnum()) {
+                                processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
+                                        javaVar,
+                                        getterName));
+                                processLines.add(String.format("    let %s = %s::from_java(env, &%s);",
+                                        arg,
+                                        new Jni2RustClassUtils<>(fieldType).getName(),
+                                        javaVar));
+                                processLines.add(String.format("    delete_local_ref!(env, %s);", javaVar));
+                                initLines.add(String.format("      %s: %s,",
+                                        arg,
+                                        jni2RustFieldUtils.getTypeInitCode(arg)));
+                            } else {
+                                fail(field.getGenericType().getTypeName() + " is not expected");
+                            }
+                        });
+                        lines.addAll(processLines);
+                        lines.add(String.format("    %s {", className));
+                        lines.addAll(initLines);
+                        lines.add("    }");
                         lines.add("  }");
                         lines.add("}\n");
                     }

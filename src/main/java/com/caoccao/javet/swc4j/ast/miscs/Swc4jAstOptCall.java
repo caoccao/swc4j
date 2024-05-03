@@ -40,6 +40,7 @@ public class Swc4jAstOptCall
     protected final List<Swc4jAstExprOrSpread> args;
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr callee;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
     @Jni2RustMethod

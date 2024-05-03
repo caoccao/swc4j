@@ -29,7 +29,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
                 @Jni2RustEnumMapping(name = "ExportNamed", type = Swc4jAstNamedExport.class),
                 @Jni2RustEnumMapping(name = "Import", type = Swc4jAstImportDecl.class),
                 @Jni2RustEnumMapping(name = "TsExportAssignment", type = Swc4jAstTsExportAssignment.class),
-                @Jni2RustEnumMapping(name = "TsImportEquals", type = Swc4jAstTsImportEqualsDecl.class),
+                @Jni2RustEnumMapping(name = "TsImportEquals", type = Swc4jAstTsImportEqualsDecl.class, box = true),
                 @Jni2RustEnumMapping(name = "TsNamespaceExport", type = Swc4jAstTsNamespaceExportDecl.class),
         }
 )

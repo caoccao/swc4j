@@ -46,7 +46,9 @@ public class Swc4jAstAutoAccessor
     protected Optional<Swc4jAstAccessibility> accessibility;
     protected boolean definite;
     protected ISwc4jAstKey key;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
+    @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> value;
 
     @Jni2RustMethod

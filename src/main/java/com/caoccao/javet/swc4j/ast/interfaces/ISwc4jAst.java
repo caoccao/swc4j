@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.interfaces;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
@@ -73,6 +74,7 @@ public interface ISwc4jAst {
      * @return the type
      * @since 0.2.0
      */
+    @Jni2RustMethod
     Swc4jAstType getType();
 
     /**

@@ -290,6 +290,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
     JAVA_CLASS_PARSE_MODE = Some(JavaParseMode::new(env));
     JAVA_CLASS_SOURCE_MAP_OPTION = Some(JavaSourceMapOption::new(env));
     JAVA_CLASS_TOKEN_TYPE = Some(JavaTokenType::new(env));
+    JAVA_CLASS_TRUE_PLUS_MINUS = Some(JavaTruePlusMinus::new(env));
     JAVA_CLASS_TS_KEYWORD_TYPE_KIND = Some(JavaTsKeywordTypeKind::new(env));
     JAVA_CLASS_TS_TYPE_OPERATOR_OP = Some(JavaTsTypeOperatorOp::new(env));
     JAVA_CLASS_UNARY_OP = Some(JavaUnaryOp::new(env));

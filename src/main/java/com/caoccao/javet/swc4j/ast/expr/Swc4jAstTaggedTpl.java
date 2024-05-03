@@ -39,6 +39,7 @@ public class Swc4jAstTaggedTpl
     protected ISwc4jAstExpr tag;
     @Jni2RustField(box = true)
     protected Swc4jAstTpl tpl;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeParams;
 
     @Jni2RustMethod

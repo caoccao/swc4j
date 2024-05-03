@@ -75,7 +75,7 @@ public class TestSwc4jAstArrayLit extends BaseTestSuiteSwc4jAst {
                 arrayLit, arrayLit.getElems().get(2).get(), Swc4jAstType.ExprOrSpread, 7, 11);
         Swc4jAstBool b = assertAst(
                 exprOrSpread, exprOrSpread.getExpr().as(Swc4jAstBool.class), Swc4jAstType.Bool, 7, 11);
-        assertTrue(b.getValue());
+        assertTrue(b.isValue());
         assertSpan(code, script);
     }
 

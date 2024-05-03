@@ -43,8 +43,11 @@ public class Swc4jAstClass
     protected final List<Swc4jAstDecorator> decorators;
     @Jni2RustField(name = "is_abstract")
     protected boolean _abstract;
+    @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> superClass;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> superTypeParams;
+    @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod

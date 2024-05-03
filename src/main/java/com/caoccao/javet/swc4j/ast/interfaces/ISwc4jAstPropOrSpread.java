@@ -22,7 +22,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
         mappings = {
-                @Jni2RustEnumMapping(name = "Prop", type = ISwc4jAstProp.class),
+                @Jni2RustEnumMapping(name = "Prop", type = ISwc4jAstProp.class, box = true),
                 @Jni2RustEnumMapping(name = "Spread", type = Swc4jAstSpreadElement.class),
         }
 )

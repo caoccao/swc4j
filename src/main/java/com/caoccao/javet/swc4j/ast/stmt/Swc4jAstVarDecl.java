@@ -65,6 +65,7 @@ public class Swc4jAstVarDecl
         return decls;
     }
 
+    @Jni2RustMethod
     public Swc4jAstVarDeclKind getKind() {
         return kind;
     }

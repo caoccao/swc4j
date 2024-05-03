@@ -34,7 +34,7 @@ import java.util.Optional;
 public class Swc4jAstNumber
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit {
-    @Jni2RustField(atom = true)
+    @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
     protected double value;
 

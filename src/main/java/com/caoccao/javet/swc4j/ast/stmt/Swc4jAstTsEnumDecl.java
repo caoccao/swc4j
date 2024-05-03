@@ -63,10 +63,12 @@ public class Swc4jAstTsEnumDecl
         return childNodes;
     }
 
+    @Jni2RustMethod
     public Swc4jAstIdent getId() {
         return id;
     }
 
+    @Jni2RustMethod
     public List<Swc4jAstTsEnumMember> getMembers() {
         return members;
     }
@@ -76,10 +78,12 @@ public class Swc4jAstTsEnumDecl
         return Swc4jAstType.TsEnumDecl;
     }
 
+    @Jni2RustMethod
     public boolean isConst() {
         return _const;
     }
 
+    @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
     }

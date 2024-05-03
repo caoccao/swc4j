@@ -23,7 +23,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
         mappings = {
-                @Jni2RustEnumMapping(name = "Expr", type = ISwc4jAstExpr.class),
+                @Jni2RustEnumMapping(name = "Expr", type = ISwc4jAstExpr.class, box = true),
                 @Jni2RustEnumMapping(name = "Import", type = Swc4jAstImport.class),
                 @Jni2RustEnumMapping(name = "Super", type = Swc4jAstSuper.class),
         }
