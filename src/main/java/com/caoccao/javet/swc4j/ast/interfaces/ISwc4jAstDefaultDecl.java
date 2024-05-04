@@ -23,7 +23,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
-        getDefault = "DefaultDecl::Class(ClassExpr::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "Class", type = Swc4jAstClassExpr.class),
                 @Jni2RustEnumMapping(name = "Fn", type = Swc4jAstFnExpr.class),

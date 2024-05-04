@@ -23,7 +23,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
-        getDefault = "ExportSpecifier::Default(ExportDefaultSpecifier::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "Default", type = Swc4jAstExportDefaultSpecifier.class),
                 @Jni2RustEnumMapping(name = "Named", type = Swc4jAstExportNamedSpecifier.class),

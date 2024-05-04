@@ -24,7 +24,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
-        getDefault = "TsFnParam::Ident(BindingIdent::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "Array", type = Swc4jAstArrayPat.class),
                 @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstBindingIdent.class),

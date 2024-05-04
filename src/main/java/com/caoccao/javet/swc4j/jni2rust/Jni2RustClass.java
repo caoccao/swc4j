@@ -27,8 +27,6 @@ public @interface Jni2RustClass {
 
     Jni2RustFilePath filePath() default Jni2RustFilePath.None;
 
-    String getDefault() default "";
-
     boolean ignore() default false;
 
     Jni2RustEnumMapping[] mappings() default {};

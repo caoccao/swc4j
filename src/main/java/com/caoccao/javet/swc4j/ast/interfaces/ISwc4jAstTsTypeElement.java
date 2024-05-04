@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
-        getDefault = "TsTypeElement::TsConstructSignatureDecl(TsConstructSignatureDecl::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "TsCallSignatureDecl", type = Swc4jAstTsCallSignatureDecl.class),
                 @Jni2RustEnumMapping(name = "TsConstructSignatureDecl", type = Swc4jAstTsConstructSignatureDecl.class),

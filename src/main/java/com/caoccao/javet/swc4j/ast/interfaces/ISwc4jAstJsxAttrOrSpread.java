@@ -23,7 +23,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
         name = "JSXAttrOrSpread",
-        getDefault = "JSXAttrOrSpread::JSXAttr(JSXAttr::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "JSXAttr", type = Swc4jAstJsxAttr.class),
                 @Jni2RustEnumMapping(name = "SpreadElement", type = Swc4jAstSpreadElement.class),

@@ -22,7 +22,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
-        getDefault = "TsNamespaceBody::TsModuleBlock(TsModuleBlock::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "TsModuleBlock", type = Swc4jAstTsModuleBlock.class),
                 @Jni2RustEnumMapping(name = "TsNamespaceDecl", type = Swc4jAstTsNamespaceDecl.class),

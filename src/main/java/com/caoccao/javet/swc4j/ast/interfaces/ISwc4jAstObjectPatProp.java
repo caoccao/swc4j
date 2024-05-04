@@ -23,7 +23,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
-        getDefault = "ObjectPatProp::Rest(RestPat::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "Assign", type = Swc4jAstAssignPatProp.class),
                 @Jni2RustEnumMapping(name = "KeyValue", type = Swc4jAstKeyValuePatProp.class),

@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
-        getDefault = "TsModuleRef::TsEntityName(TsEntityName::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "TsEntityName", type = ISwc4jAstTsEntityName.class),
                 @Jni2RustEnumMapping(name = "TsExternalModuleRef", type = Swc4jAstTsExternalModuleRef.class),

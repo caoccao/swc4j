@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
-        getDefault = "TsType::TsThisType(TsThisType::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "TsArrayType", type = Swc4jAstTsArrayType.class),
                 @Jni2RustEnumMapping(name = "TsConditionalType", type = Swc4jAstTsConditionalType.class),

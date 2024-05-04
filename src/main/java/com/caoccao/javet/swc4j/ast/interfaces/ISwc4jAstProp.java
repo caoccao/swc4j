@@ -22,7 +22,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
-        getDefault = "Prop::Shorthand(Ident::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "Assign", type = Swc4jAstAssignProp.class),
                 @Jni2RustEnumMapping(name = "Getter", type = Swc4jAstGetterProp.class),

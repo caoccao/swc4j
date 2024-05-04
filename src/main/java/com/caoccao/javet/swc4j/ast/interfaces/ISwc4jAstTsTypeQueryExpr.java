@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
-        getDefault = "TsTypeQueryExpr::Import(TsImportType::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "Import", type = Swc4jAstTsImportType.class),
                 @Jni2RustEnumMapping(name = "TsEntityName", type = ISwc4jAstTsEntityName.class),

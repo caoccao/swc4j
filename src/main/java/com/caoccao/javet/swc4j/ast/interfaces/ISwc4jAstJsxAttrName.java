@@ -23,7 +23,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
         name = "JSXAttrName",
-        getDefault = "JSXAttrName::Ident(Ident::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstIdent.class),
                 @Jni2RustEnumMapping(name = "JSXNamespacedName", type = Swc4jAstJsxNamespacedName.class),

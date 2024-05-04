@@ -22,7 +22,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
-        getDefault = "ParamOrTsParamProp::Param(Param::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "Param", type = Swc4jAstParam.class),
                 @Jni2RustEnumMapping(name = "TsParamProp", type = Swc4jAstTsParamProp.class),

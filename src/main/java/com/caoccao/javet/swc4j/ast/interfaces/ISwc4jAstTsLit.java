@@ -25,7 +25,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
-        getDefault = "TsLit::Bool(Bool::get_default())",
         mappings = {
                 @Jni2RustEnumMapping(name = "BigInt", type = Swc4jAstBigInt.class),
                 @Jni2RustEnumMapping(name = "Bool", type = Swc4jAstBool.class),
