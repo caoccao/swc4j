@@ -38,6 +38,7 @@ import java.util.Optional;
 public class Swc4jAstBigInt
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit {
+    public static final String BIG_INT_SUFFIX = "n";
     @Jni2RustField(atom = true)
     protected Optional<String> raw;
     @Jni2RustField(ignore = true)
@@ -82,7 +83,9 @@ public class Swc4jAstBigInt
 
     public Swc4jAstBigInt setRaw(String raw) {
         this.raw = Optional.ofNullable(raw);
-        value = StringUtils.isEmpty(raw) ? BigInteger.ZERO : new BigInteger(raw.substring(0, raw.length() - 1));
+        value = StringUtils.isEmpty(raw)
+                ? BigInteger.ZERO
+                : new BigInteger(raw.substring(0, raw.length() - BIG_INT_SUFFIX.length()));
         return this;
     }
 
@@ -93,7 +96,7 @@ public class Swc4jAstBigInt
 
     public Swc4jAstBigInt setValue(BigInteger value) {
         this.value = AssertionUtils.notNull(value, "Value");
-        raw = Optional.of(value.toString());
+        raw = Optional.of(value.toString() + BIG_INT_SUFFIX);
         return this;
     }
 
