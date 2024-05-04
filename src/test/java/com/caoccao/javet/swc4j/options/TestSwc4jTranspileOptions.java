@@ -195,9 +195,10 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
         String expectedCode = "function add(a, b) {\n" +
                 "  return a + b;\n" +
                 "}\n";
-        URL specifier = new URL("file://abc.ts");
+        String filePath = "file:///abc.ts";
+        URL specifier = new URL(filePath);
         String[] expectedProperties = new String[]{
-                "version", "sources", "sourcesContent", specifier + "/", "names", "mappings"};
+                "version", "sources", "sourcesContent", filePath, "names", "mappings"};
         Swc4jTranspileOutput output = swc4j.transpile(code, tsModuleTranspileOptions
                 .setParseMode(parseMode)
                 .setSpecifier(specifier)
@@ -217,7 +218,7 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
     public void testWrongMediaType() {
         String code = "function add(a:number, b:number) { return a+b; }";
         assertEquals(
-                "Expected ',', got ':' at file://main.js/:1:15\n" +
+                "Expected ',', got ':' at file:///main.js:1:15\n" +
                         "\n" +
                         "  function add(a:number, b:number) { return a+b; }\n" +
                         "                ~",

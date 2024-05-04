@@ -41,7 +41,7 @@ public class Tutorial02TranspileJsx {
                 "}\n" +
                 "export default App;";
         // Prepare a script name.
-        URL specifier = new URL("file://abc.ts");
+        URL specifier = new URL("file:///abc.ts");
         // Prepare an option with script name and media type.
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
                 .setSpecifier(specifier)

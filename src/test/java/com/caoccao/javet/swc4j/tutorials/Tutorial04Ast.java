@@ -51,7 +51,7 @@ public class Tutorial04Ast {
                 "\n" +
                 "export { EmailValidator };";
         // Prepare a script name.
-        URL specifier = new URL("file://abc.ts");
+        URL specifier = new URL("file:///abc.ts");
         // Prepare an option with script name and media type.
         Swc4jParseOptions options = new Swc4jParseOptions()
                 .setSpecifier(specifier)

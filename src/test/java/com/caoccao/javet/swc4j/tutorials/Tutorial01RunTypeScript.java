@@ -36,7 +36,7 @@ public class Tutorial01RunTypeScript {
         // Prepare a simple TypeScript code snippet.
         String code = "function add(a:number, b:number) { return a+b; }";
         // Prepare a script name.
-        URL specifier = new URL("file://abc.ts");
+        URL specifier = new URL("file:///abc.ts");
         // Prepare an option with script name and media type.
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
                 .setSpecifier(specifier)

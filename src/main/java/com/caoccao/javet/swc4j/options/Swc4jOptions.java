@@ -40,7 +40,7 @@ public abstract class Swc4jOptions {
 
     static {
         try {
-            DEFAULT_SPECIFIER = new URL("file://main.js");
+            DEFAULT_SPECIFIER = new URL("file:///main.js");
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

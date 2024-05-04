@@ -105,7 +105,7 @@ public class TestSwc4jTransformOptions extends BaseTestSuite {
     public void testWrongMediaType() {
         String code = "function add(a:number, b:number) { return a+b; }";
         assertEquals(
-                "Expected ',', got ':' at file://main.js/:1:15\n" +
+                "Expected ',', got ':' at file:///main.js:1:15\n" +
                         "\n" +
                         "  function add(a:number, b:number) { return a+b; }\n" +
                         "                ~",

@@ -26,7 +26,7 @@ String code = "import { Validator } from './Validator';\n" +
         "\n" +
         "export { EmailValidator };";
 // Prepare a script name.
-URL specifier = new URL("file://abc.ts");
+URL specifier = new URL("file:///abc.ts");
 // Prepare an option with script name and media type.
 // Minify is turned on by default.
 Swc4jTransformOptions options = new Swc4jTransformOptions()
@@ -65,7 +65,7 @@ import{Validator}from"./Validator";class EmailValidator implements Validator{isV
 {
     "version": 3,
     "sources": [
-        "file://abc.ts/"
+        "file:///abc.ts"
     ],
     "sourcesContent": [
         "import { Validator } from './Validator';\n\nclass EmailValidator implements Validator {\n    isValid(s: string): boolean {\n        // This is a regex for email validation.\n        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n        return emailRegex.test(s);\n    }\n}\n\nexport { EmailValidator };"

@@ -1164,7 +1164,7 @@ pub struct ParseOptions {
 impl ParseOptions {
   pub fn get_specifier(&self) -> ModuleSpecifier {
     ModuleSpecifier::parse(self.specifier.as_str())
-      .unwrap_or_else(|_| ModuleSpecifier::parse(&"file://main.ts").unwrap())
+      .unwrap_or_else(|_| ModuleSpecifier::parse(&"file:///main.js").unwrap())
   }
 }
 
@@ -1249,7 +1249,7 @@ pub struct TransformOptions {
 impl TransformOptions {
   pub fn get_specifier(&self) -> ModuleSpecifier {
     ModuleSpecifier::parse(self.specifier.as_str())
-      .unwrap_or_else(|_| ModuleSpecifier::parse(&"file://main.ts").unwrap())
+      .unwrap_or_else(|_| ModuleSpecifier::parse(&"file:///main.js").unwrap())
   }
 }
 
@@ -1375,7 +1375,7 @@ pub struct TranspileOptions {
 impl TranspileOptions {
   pub fn get_specifier(&self) -> ModuleSpecifier {
     ModuleSpecifier::parse(self.specifier.as_str())
-      .unwrap_or_else(|_| ModuleSpecifier::parse(&"file://main.ts").unwrap())
+      .unwrap_or_else(|_| ModuleSpecifier::parse(&"file:///main.js").unwrap())
   }
 }
 
