@@ -70,7 +70,13 @@ impl FromJava for BigInt {
     };
     let data: BigUint = optional_raw
       .as_ref()
-      .map_or_else(|| Default::default(), |raw| BigUint::parse_bytes(&raw.as_bytes(), 10))
+      .map_or_else(|| Default::default(), |raw| {
+        let mut raw = raw.to_owned();
+        while raw.ends_with("n") {
+          raw.truncate(raw.len() - 1);
+        }
+        BigUint::parse_bytes(&raw.as_bytes(), 10)
+      })
       .unwrap_or_else(|| Default::default());
     delete_local_ref!(env, java_optional_raw);
     let value = BigIntValue::from_biguint(sign, data);
