@@ -25984,6 +25984,7 @@ impl FromJava for ArrayLit {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ARRAY_LIT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_elems = java_class.get_elems(env, jobj);
     let length = list_size(env, &java_elems);
     let elems = (0..length).map(|i| {
@@ -26000,8 +26001,8 @@ impl FromJava for ArrayLit {
       elems
     }).collect();
     ArrayLit {
-      span: DUMMY_SP,
-      elems: elems,
+      span,
+      elems,
     }
   }
 }
@@ -26045,6 +26046,7 @@ impl FromJava for ArrayPat {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ARRAY_PAT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_elems = java_class.get_elems(env, jobj);
     let length = list_size(env, &java_elems);
     let elems = (0..length).map(|i| {
@@ -26066,16 +26068,17 @@ impl FromJava for ArrayPat {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     ArrayPat {
-      span: DUMMY_SP,
-      elems: elems,
-      optional: optional,
-      type_ann: type_ann.map(|type_ann| type_ann),
+      span,
+      elems,
+      optional,
+      type_ann,
     }
   }
 }
@@ -26124,6 +26127,7 @@ impl FromJava for ArrowExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ARROW_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
@@ -26135,6 +26139,7 @@ impl FromJava for ArrowExpr {
     let java_body = java_class.get_body(env, jobj);
     let body = BlockStmtOrExpr::from_java(env, &java_body);
     delete_local_ref!(env, java_body);
+    let body = Box::new(body);
     let is_async = java_class.is_async(env, jobj);
     let is_generator = java_class.is_generator(env, jobj);
     let java_optional_type_params = java_class.get_type_params(env, jobj);
@@ -26142,29 +26147,31 @@ impl FromJava for ArrowExpr {
       let java_type_params = optional_get(env, &java_optional_type_params);
       let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
       delete_local_ref!(env, java_type_params);
-      Some(Box::new(type_params))
+      Some(type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
+    let type_params = type_params.map(|type_params| Box::new(type_params));
     let java_optional_return_type = java_class.get_return_type(env, jobj);
     let return_type = if optional_is_present(env, &java_optional_return_type) {
       let java_return_type = optional_get(env, &java_optional_return_type);
       let return_type = TsTypeAnn::from_java(env, &java_return_type);
       delete_local_ref!(env, java_return_type);
-      Some(Box::new(return_type))
+      Some(return_type)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_return_type);
+    let return_type = return_type.map(|return_type| Box::new(return_type));
     ArrowExpr {
-      span: DUMMY_SP,
-      params: params,
-      body: Box::new(body),
-      is_async: is_async,
-      is_generator: is_generator,
-      type_params: type_params.map(|type_params| type_params),
-      return_type: return_type.map(|return_type| return_type),
+      span,
+      params,
+      body,
+      is_async,
+      is_generator,
+      type_params,
+      return_type,
     }
   }
 }
@@ -26200,6 +26207,7 @@ impl FromJava for AssignExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ASSIGN_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_op = java_class.get_op(env, jobj);
     let op = AssignOp::from_java(env, &java_op);
     delete_local_ref!(env, java_op);
@@ -26209,11 +26217,12 @@ impl FromJava for AssignExpr {
     let java_right = java_class.get_right(env, jobj);
     let right = Expr::from_java(env, &java_right);
     delete_local_ref!(env, java_right);
+    let right = Box::new(right);
     AssignExpr {
-      span: DUMMY_SP,
-      op: op,
-      left: left,
-      right: Box::new(right),
+      span,
+      op,
+      left,
+      right,
     }
   }
 }
@@ -26247,16 +26256,19 @@ impl FromJava for AssignPat {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ASSIGN_PAT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_left = java_class.get_left(env, jobj);
     let left = Pat::from_java(env, &java_left);
     delete_local_ref!(env, java_left);
+    let left = Box::new(left);
     let java_right = java_class.get_right(env, jobj);
     let right = Expr::from_java(env, &java_right);
     delete_local_ref!(env, java_right);
+    let right = Box::new(right);
     AssignPat {
-      span: DUMMY_SP,
-      left: Box::new(left),
-      right: Box::new(right),
+      span,
+      left,
+      right,
     }
   }
 }
@@ -26290,6 +26302,7 @@ impl FromJava for AssignPatProp {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ASSIGN_PAT_PROP.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
     let key = BindingIdent::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
@@ -26298,15 +26311,16 @@ impl FromJava for AssignPatProp {
       let java_value = optional_get(env, &java_optional_value);
       let value = Expr::from_java(env, &java_value);
       delete_local_ref!(env, java_value);
-      Some(Box::new(value))
+      Some(value)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_value);
+    let value = value.map(|value| Box::new(value));
     AssignPatProp {
-      span: DUMMY_SP,
-      key: key,
-      value: value.map(|value| value),
+      span,
+      key,
+      value,
     }
   }
 }
@@ -26346,9 +26360,10 @@ impl FromJava for AssignProp {
     let java_value = java_class.get_value(env, jobj);
     let value = Expr::from_java(env, &java_value);
     delete_local_ref!(env, java_value);
+    let value = Box::new(value);
     AssignProp {
-      key: key,
-      value: Box::new(value),
+      key,
+      value,
     }
   }
 }
@@ -26400,6 +26415,7 @@ impl FromJava for AutoAccessor {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_AUTO_ACCESSOR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
     let key = Key::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
@@ -26408,21 +26424,23 @@ impl FromJava for AutoAccessor {
       let java_value = optional_get(env, &java_optional_value);
       let value = Expr::from_java(env, &java_value);
       delete_local_ref!(env, java_value);
-      Some(Box::new(value))
+      Some(value)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_value);
+    let value = value.map(|value| Box::new(value));
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = if optional_is_present(env, &java_optional_type_ann) {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     let is_static = java_class.is_static(env, jobj);
     let java_decorators = java_class.get_decorators(env, jobj);
     let length = list_size(env, &java_decorators);
@@ -26445,15 +26463,15 @@ impl FromJava for AutoAccessor {
     let is_override = java_class.is_override(env, jobj);
     let definite = java_class.is_definite(env, jobj);
     AutoAccessor {
-      span: DUMMY_SP,
-      key: key,
-      value: value.map(|value| value),
-      type_ann: type_ann.map(|type_ann| type_ann),
-      is_static: is_static,
-      decorators: decorators,
-      accessibility: accessibility.map(|accessibility| accessibility),
-      is_override: is_override,
-      definite: definite,
+      span,
+      key,
+      value,
+      type_ann,
+      is_static,
+      decorators,
+      accessibility,
+      is_override,
+      definite,
     }
   }
 }
@@ -26484,12 +26502,14 @@ impl FromJava for AwaitExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_AWAIT_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_arg = java_class.get_arg(env, jobj);
     let arg = Expr::from_java(env, &java_arg);
     delete_local_ref!(env, java_arg);
+    let arg = Box::new(arg);
     AwaitExpr {
-      span: DUMMY_SP,
-      arg: Box::new(arg),
+      span,
+      arg,
     }
   }
 }
@@ -26531,20 +26551,23 @@ impl FromJava for BinExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_BIN_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_op = java_class.get_op(env, jobj);
     let op = BinaryOp::from_java(env, &java_op);
     delete_local_ref!(env, java_op);
     let java_left = java_class.get_left(env, jobj);
     let left = Expr::from_java(env, &java_left);
     delete_local_ref!(env, java_left);
+    let left = Box::new(left);
     let java_right = java_class.get_right(env, jobj);
     let right = Expr::from_java(env, &java_right);
     delete_local_ref!(env, java_right);
+    let right = Box::new(right);
     BinExpr {
-      span: DUMMY_SP,
-      op: op,
-      left: Box::new(left),
-      right: Box::new(right),
+      span,
+      op,
+      left,
+      right,
     }
   }
 }
@@ -26586,14 +26609,15 @@ impl FromJava for BindingIdent {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     BindingIdent {
-      id: id,
-      type_ann: type_ann.map(|type_ann| type_ann),
+      id,
+      type_ann,
     }
   }
 }
@@ -26631,6 +26655,7 @@ impl FromJava for BlockStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_BLOCK_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_stmts = java_class.get_stmts(env, jobj);
     let length = list_size(env, &java_stmts);
     let stmts = (0..length).map(|i| {
@@ -26640,8 +26665,8 @@ impl FromJava for BlockStmt {
       stmts
     }).collect();
     BlockStmt {
-      span: DUMMY_SP,
-      stmts: stmts,
+      span,
+      stmts,
     }
   }
 }
@@ -26670,10 +26695,11 @@ impl FromJava for Bool {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_BOOL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let value = java_class.is_value(env, jobj);
     Bool {
-      span: DUMMY_SP,
-      value: value,
+      span,
+      value,
     }
   }
 }
@@ -26704,6 +26730,7 @@ impl FromJava for BreakStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_BREAK_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_optional_label = java_class.get_label(env, jobj);
     let label = if optional_is_present(env, &java_optional_label) {
       let java_label = optional_get(env, &java_optional_label);
@@ -26715,8 +26742,8 @@ impl FromJava for BreakStmt {
     };
     delete_local_ref!(env, java_optional_label);
     BreakStmt {
-      span: DUMMY_SP,
-      label: label.map(|label| label),
+      span,
+      label,
     }
   }
 }
@@ -26760,6 +26787,7 @@ impl FromJava for CallExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CALL_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_callee = java_class.get_callee(env, jobj);
     let callee = Callee::from_java(env, &java_callee);
     delete_local_ref!(env, java_callee);
@@ -26776,16 +26804,17 @@ impl FromJava for CallExpr {
       let java_type_args = optional_get(env, &java_optional_type_args);
       let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
       delete_local_ref!(env, java_type_args);
-      Some(Box::new(type_args))
+      Some(type_args)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
+    let type_args = type_args.map(|type_args| Box::new(type_args));
     CallExpr {
-      span: DUMMY_SP,
-      callee: callee,
-      args: args,
-      type_args: type_args.map(|type_args| type_args),
+      span,
+      callee,
+      args,
+      type_args,
     }
   }
 }
@@ -26819,6 +26848,7 @@ impl FromJava for CatchClause {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CATCH_CLAUSE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_optional_param = java_class.get_param(env, jobj);
     let param = if optional_is_present(env, &java_optional_param) {
       let java_param = optional_get(env, &java_optional_param);
@@ -26833,9 +26863,9 @@ impl FromJava for CatchClause {
     let body = BlockStmt::from_java(env, &java_body);
     delete_local_ref!(env, java_body);
     CatchClause {
-      span: DUMMY_SP,
-      param: param.map(|param| param),
-      body: body,
+      span,
+      param,
+      body,
     }
   }
 }
@@ -26903,6 +26933,7 @@ impl FromJava for Class {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CLASS.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_decorators = java_class.get_decorators(env, jobj);
     let length = list_size(env, &java_decorators);
     let decorators = (0..length).map(|i| {
@@ -26924,32 +26955,35 @@ impl FromJava for Class {
       let java_super_class = optional_get(env, &java_optional_super_class);
       let super_class = Expr::from_java(env, &java_super_class);
       delete_local_ref!(env, java_super_class);
-      Some(Box::new(super_class))
+      Some(super_class)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_super_class);
+    let super_class = super_class.map(|super_class| Box::new(super_class));
     let is_abstract = java_class.is_abstract(env, jobj);
     let java_optional_type_params = java_class.get_type_params(env, jobj);
     let type_params = if optional_is_present(env, &java_optional_type_params) {
       let java_type_params = optional_get(env, &java_optional_type_params);
       let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
       delete_local_ref!(env, java_type_params);
-      Some(Box::new(type_params))
+      Some(type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
+    let type_params = type_params.map(|type_params| Box::new(type_params));
     let java_optional_super_type_params = java_class.get_super_type_params(env, jobj);
     let super_type_params = if optional_is_present(env, &java_optional_super_type_params) {
       let java_super_type_params = optional_get(env, &java_optional_super_type_params);
       let super_type_params = TsTypeParamInstantiation::from_java(env, &java_super_type_params);
       delete_local_ref!(env, java_super_type_params);
-      Some(Box::new(super_type_params))
+      Some(super_type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_super_type_params);
+    let super_type_params = super_type_params.map(|super_type_params| Box::new(super_type_params));
     let java_implements = java_class.get_implements(env, jobj);
     let length = list_size(env, &java_implements);
     let implements = (0..length).map(|i| {
@@ -26959,14 +26993,14 @@ impl FromJava for Class {
       implements
     }).collect();
     Class {
-      span: DUMMY_SP,
-      decorators: decorators,
-      body: body,
-      super_class: super_class.map(|super_class| super_class),
-      is_abstract: is_abstract,
-      type_params: type_params.map(|type_params| type_params),
-      super_type_params: super_type_params.map(|super_type_params| super_type_params),
-      implements: implements,
+      span,
+      decorators,
+      body,
+      super_class,
+      is_abstract,
+      type_params,
+      super_type_params,
+      implements,
     }
   }
 }
@@ -27008,10 +27042,11 @@ impl FromJava for ClassDecl {
     let java_class = java_class.get_clazz(env, jobj);
     let class = Class::from_java(env, &java_class);
     delete_local_ref!(env, java_class);
+    let class = Box::new(class);
     ClassDecl {
-      ident: ident,
-      declare: declare,
-      class: Box::new(class),
+      ident,
+      declare,
+      class,
     }
   }
 }
@@ -27058,9 +27093,10 @@ impl FromJava for ClassExpr {
     let java_class = java_class.get_clazz(env, jobj);
     let class = Class::from_java(env, &java_class);
     delete_local_ref!(env, java_class);
+    let class = Box::new(class);
     ClassExpr {
-      ident: ident.map(|ident| ident),
-      class: Box::new(class),
+      ident,
+      class,
     }
   }
 }
@@ -27102,12 +27138,14 @@ impl FromJava for ClassMethod {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CLASS_METHOD.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
     let key = PropName::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
     let java_function = java_class.get_function(env, jobj);
     let function = Function::from_java(env, &java_function);
     delete_local_ref!(env, java_function);
+    let function = Box::new(function);
     let java_kind = java_class.get_kind(env, jobj);
     let kind = MethodKind::from_java(env, &java_kind);
     delete_local_ref!(env, java_kind);
@@ -27126,15 +27164,15 @@ impl FromJava for ClassMethod {
     let is_optional = java_class.is_optional(env, jobj);
     let is_override = java_class.is_override(env, jobj);
     ClassMethod {
-      span: DUMMY_SP,
-      key: key,
-      function: Box::new(function),
-      kind: kind,
-      is_static: is_static,
-      accessibility: accessibility.map(|accessibility| accessibility),
-      is_abstract: is_abstract,
-      is_optional: is_optional,
-      is_override: is_override,
+      span,
+      key,
+      function,
+      kind,
+      is_static,
+      accessibility,
+      is_abstract,
+      is_optional,
+      is_override,
     }
   }
 }
@@ -27190,6 +27228,7 @@ impl FromJava for ClassProp {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CLASS_PROP.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
     let key = PropName::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
@@ -27198,21 +27237,23 @@ impl FromJava for ClassProp {
       let java_value = optional_get(env, &java_optional_value);
       let value = Expr::from_java(env, &java_value);
       delete_local_ref!(env, java_value);
-      Some(Box::new(value))
+      Some(value)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_value);
+    let value = value.map(|value| Box::new(value));
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = if optional_is_present(env, &java_optional_type_ann) {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     let is_static = java_class.is_static(env, jobj);
     let java_decorators = java_class.get_decorators(env, jobj);
     let length = list_size(env, &java_decorators);
@@ -27239,19 +27280,19 @@ impl FromJava for ClassProp {
     let declare = java_class.is_declare(env, jobj);
     let definite = java_class.is_definite(env, jobj);
     ClassProp {
-      span: DUMMY_SP,
-      key: key,
-      value: value.map(|value| value),
-      type_ann: type_ann.map(|type_ann| type_ann),
-      is_static: is_static,
-      decorators: decorators,
-      accessibility: accessibility.map(|accessibility| accessibility),
-      is_abstract: is_abstract,
-      is_optional: is_optional,
-      is_override: is_override,
-      readonly: readonly,
-      declare: declare,
-      definite: definite,
+      span,
+      key,
+      value,
+      type_ann,
+      is_static,
+      decorators,
+      accessibility,
+      is_abstract,
+      is_optional,
+      is_override,
+      readonly,
+      declare,
+      definite,
     }
   }
 }
@@ -27282,12 +27323,14 @@ impl FromJava for ComputedPropName {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     ComputedPropName {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
+      span,
+      expr,
     }
   }
 }
@@ -27324,20 +27367,24 @@ impl FromJava for CondExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_COND_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_test = java_class.get_test(env, jobj);
     let test = Expr::from_java(env, &java_test);
     delete_local_ref!(env, java_test);
+    let test = Box::new(test);
     let java_cons = java_class.get_cons(env, jobj);
     let cons = Expr::from_java(env, &java_cons);
     delete_local_ref!(env, java_cons);
+    let cons = Box::new(cons);
     let java_alt = java_class.get_alt(env, jobj);
     let alt = Expr::from_java(env, &java_alt);
     delete_local_ref!(env, java_alt);
+    let alt = Box::new(alt);
     CondExpr {
-      span: DUMMY_SP,
-      test: Box::new(test),
-      cons: Box::new(cons),
-      alt: Box::new(alt),
+      span,
+      test,
+      cons,
+      alt,
     }
   }
 }
@@ -27384,6 +27431,7 @@ impl FromJava for Constructor {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CONSTRUCTOR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
     let key = PropName::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
@@ -27417,12 +27465,12 @@ impl FromJava for Constructor {
     delete_local_ref!(env, java_optional_accessibility);
     let is_optional = java_class.is_optional(env, jobj);
     Constructor {
-      span: DUMMY_SP,
-      key: key,
-      params: params,
-      body: body.map(|body| body),
-      accessibility: accessibility.map(|accessibility| accessibility),
-      is_optional: is_optional,
+      span,
+      key,
+      params,
+      body,
+      accessibility,
+      is_optional,
     }
   }
 }
@@ -27453,6 +27501,7 @@ impl FromJava for ContinueStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CONTINUE_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_optional_label = java_class.get_label(env, jobj);
     let label = if optional_is_present(env, &java_optional_label) {
       let java_label = optional_get(env, &java_optional_label);
@@ -27464,8 +27513,8 @@ impl FromJava for ContinueStmt {
     };
     delete_local_ref!(env, java_optional_label);
     ContinueStmt {
-      span: DUMMY_SP,
-      label: label.map(|label| label),
+      span,
+      label,
     }
   }
 }
@@ -27492,8 +27541,9 @@ impl ToJavaWithMap<ByteToIndexMap> for DebuggerStmt {
 impl FromJava for DebuggerStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+    let span = DUMMY_SP;
     DebuggerStmt {
-      span: DUMMY_SP,
+      span,
     }
   }
 }
@@ -27524,12 +27574,14 @@ impl FromJava for Decorator {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_DECORATOR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     Decorator {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
+      span,
+      expr,
     }
   }
 }
@@ -27563,16 +27615,19 @@ impl FromJava for DoWhileStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_DO_WHILE_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_test = java_class.get_test(env, jobj);
     let test = Expr::from_java(env, &java_test);
     delete_local_ref!(env, java_test);
+    let test = Box::new(test);
     let java_body = java_class.get_body(env, jobj);
     let body = Stmt::from_java(env, &java_body);
     delete_local_ref!(env, java_body);
+    let body = Box::new(body);
     DoWhileStmt {
-      span: DUMMY_SP,
-      test: Box::new(test),
-      body: Box::new(body),
+      span,
+      test,
+      body,
     }
   }
 }
@@ -27599,8 +27654,9 @@ impl ToJavaWithMap<ByteToIndexMap> for EmptyStmt {
 impl FromJava for EmptyStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+    let span = DUMMY_SP;
     EmptyStmt {
-      span: DUMMY_SP,
+      span,
     }
   }
 }
@@ -27635,25 +27691,28 @@ impl FromJava for ExportAll {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPORT_ALL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_src = java_class.get_src(env, jobj);
     let src = Str::from_java(env, &java_src);
     delete_local_ref!(env, java_src);
+    let src = Box::new(src);
     let type_only = java_class.is_type_only(env, jobj);
     let java_optional_with = java_class.get_with(env, jobj);
     let with = if optional_is_present(env, &java_optional_with) {
       let java_with = optional_get(env, &java_optional_with);
       let with = ObjectLit::from_java(env, &java_with);
       delete_local_ref!(env, java_with);
-      Some(Box::new(with))
+      Some(with)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_with);
+    let with = with.map(|with| Box::new(with));
     ExportAll {
-      span: DUMMY_SP,
-      src: Box::new(src),
-      type_only: type_only,
-      with: with.map(|with| with),
+      span,
+      src,
+      type_only,
+      with,
     }
   }
 }
@@ -27684,12 +27743,13 @@ impl FromJava for ExportDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPORT_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_decl = java_class.get_decl(env, jobj);
     let decl = Decl::from_java(env, &java_decl);
     delete_local_ref!(env, java_decl);
     ExportDecl {
-      span: DUMMY_SP,
-      decl: decl,
+      span,
+      decl,
     }
   }
 }
@@ -27720,12 +27780,13 @@ impl FromJava for ExportDefaultDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPORT_DEFAULT_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_decl = java_class.get_decl(env, jobj);
     let decl = DefaultDecl::from_java(env, &java_decl);
     delete_local_ref!(env, java_decl);
     ExportDefaultDecl {
-      span: DUMMY_SP,
-      decl: decl,
+      span,
+      decl,
     }
   }
 }
@@ -27756,12 +27817,14 @@ impl FromJava for ExportDefaultExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPORT_DEFAULT_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     ExportDefaultExpr {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
+      span,
+      expr,
     }
   }
 }
@@ -27796,7 +27859,7 @@ impl FromJava for ExportDefaultSpecifier {
     let exported = Ident::from_java(env, &java_exported);
     delete_local_ref!(env, java_exported);
     ExportDefaultSpecifier {
-      exported: exported,
+      exported,
     }
   }
 }
@@ -27831,6 +27894,7 @@ impl FromJava for ExportNamedSpecifier {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPORT_NAMED_SPECIFIER.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_orig = java_class.get_orig(env, jobj);
     let orig = ModuleExportName::from_java(env, &java_orig);
     delete_local_ref!(env, java_orig);
@@ -27846,10 +27910,10 @@ impl FromJava for ExportNamedSpecifier {
     delete_local_ref!(env, java_optional_exported);
     let is_type_only = java_class.is_type_only(env, jobj);
     ExportNamedSpecifier {
-      span: DUMMY_SP,
-      orig: orig,
-      exported: exported.map(|exported| exported),
-      is_type_only: is_type_only,
+      span,
+      orig,
+      exported,
+      is_type_only,
     }
   }
 }
@@ -27880,12 +27944,13 @@ impl FromJava for ExportNamespaceSpecifier {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPORT_NAMESPACE_SPECIFIER.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_name = java_class.get_name(env, jobj);
     let name = ModuleExportName::from_java(env, &java_name);
     delete_local_ref!(env, java_name);
     ExportNamespaceSpecifier {
-      span: DUMMY_SP,
-      name: name,
+      span,
+      name,
     }
   }
 }
@@ -27928,9 +27993,10 @@ impl FromJava for ExprOrSpread {
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     ExprOrSpread {
-      spread: spread,
-      expr: Box::new(expr),
+      spread,
+      expr,
     }
   }
 }
@@ -27961,12 +28027,14 @@ impl FromJava for ExprStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPR_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     ExprStmt {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
+      span,
+      expr,
     }
   }
 }
@@ -28008,10 +28076,11 @@ impl FromJava for FnDecl {
     let java_function = java_class.get_function(env, jobj);
     let function = Function::from_java(env, &java_function);
     delete_local_ref!(env, java_function);
+    let function = Box::new(function);
     FnDecl {
-      ident: ident,
-      declare: declare,
-      function: Box::new(function),
+      ident,
+      declare,
+      function,
     }
   }
 }
@@ -28058,9 +28127,10 @@ impl FromJava for FnExpr {
     let java_function = java_class.get_function(env, jobj);
     let function = Function::from_java(env, &java_function);
     delete_local_ref!(env, java_function);
+    let function = Box::new(function);
     FnExpr {
-      ident: ident.map(|ident| ident),
-      function: Box::new(function),
+      ident,
+      function,
     }
   }
 }
@@ -28097,20 +28167,23 @@ impl FromJava for ForInStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_FOR_IN_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_left = java_class.get_left(env, jobj);
     let left = ForHead::from_java(env, &java_left);
     delete_local_ref!(env, java_left);
     let java_right = java_class.get_right(env, jobj);
     let right = Expr::from_java(env, &java_right);
     delete_local_ref!(env, java_right);
+    let right = Box::new(right);
     let java_body = java_class.get_body(env, jobj);
     let body = Stmt::from_java(env, &java_body);
     delete_local_ref!(env, java_body);
+    let body = Box::new(body);
     ForInStmt {
-      span: DUMMY_SP,
-      left: left,
-      right: Box::new(right),
-      body: Box::new(body),
+      span,
+      left,
+      right,
+      body,
     }
   }
 }
@@ -28148,6 +28221,7 @@ impl FromJava for ForOfStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_FOR_OF_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let is_await = java_class.is_await(env, jobj);
     let java_left = java_class.get_left(env, jobj);
     let left = ForHead::from_java(env, &java_left);
@@ -28155,15 +28229,17 @@ impl FromJava for ForOfStmt {
     let java_right = java_class.get_right(env, jobj);
     let right = Expr::from_java(env, &java_right);
     delete_local_ref!(env, java_right);
+    let right = Box::new(right);
     let java_body = java_class.get_body(env, jobj);
     let body = Stmt::from_java(env, &java_body);
     delete_local_ref!(env, java_body);
+    let body = Box::new(body);
     ForOfStmt {
-      span: DUMMY_SP,
-      is_await: is_await,
-      left: left,
-      right: Box::new(right),
-      body: Box::new(body),
+      span,
+      is_await,
+      left,
+      right,
+      body,
     }
   }
 }
@@ -28203,6 +28279,7 @@ impl FromJava for ForStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_FOR_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_optional_init = java_class.get_init(env, jobj);
     let init = if optional_is_present(env, &java_optional_init) {
       let java_init = optional_get(env, &java_optional_init);
@@ -28218,30 +28295,33 @@ impl FromJava for ForStmt {
       let java_test = optional_get(env, &java_optional_test);
       let test = Expr::from_java(env, &java_test);
       delete_local_ref!(env, java_test);
-      Some(Box::new(test))
+      Some(test)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_test);
+    let test = test.map(|test| Box::new(test));
     let java_optional_update = java_class.get_update(env, jobj);
     let update = if optional_is_present(env, &java_optional_update) {
       let java_update = optional_get(env, &java_optional_update);
       let update = Expr::from_java(env, &java_update);
       delete_local_ref!(env, java_update);
-      Some(Box::new(update))
+      Some(update)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_update);
+    let update = update.map(|update| Box::new(update));
     let java_body = java_class.get_body(env, jobj);
     let body = Stmt::from_java(env, &java_body);
     delete_local_ref!(env, java_body);
+    let body = Box::new(body);
     ForStmt {
-      span: DUMMY_SP,
-      init: init.map(|init| init),
-      test: test.map(|test| test),
-      update: update.map(|update| update),
-      body: Box::new(body),
+      span,
+      init,
+      test,
+      update,
+      body,
     }
   }
 }
@@ -28300,6 +28380,7 @@ impl FromJava for Function {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_FUNCTION.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
@@ -28333,30 +28414,32 @@ impl FromJava for Function {
       let java_type_params = optional_get(env, &java_optional_type_params);
       let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
       delete_local_ref!(env, java_type_params);
-      Some(Box::new(type_params))
+      Some(type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
+    let type_params = type_params.map(|type_params| Box::new(type_params));
     let java_optional_return_type = java_class.get_return_type(env, jobj);
     let return_type = if optional_is_present(env, &java_optional_return_type) {
       let java_return_type = optional_get(env, &java_optional_return_type);
       let return_type = TsTypeAnn::from_java(env, &java_return_type);
       delete_local_ref!(env, java_return_type);
-      Some(Box::new(return_type))
+      Some(return_type)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_return_type);
+    let return_type = return_type.map(|return_type| Box::new(return_type));
     Function {
-      span: DUMMY_SP,
-      params: params,
-      decorators: decorators,
-      body: body.map(|body| body),
-      is_generator: is_generator,
-      is_async: is_async,
-      type_params: type_params.map(|type_params| type_params),
-      return_type: return_type.map(|return_type| return_type),
+      span,
+      params,
+      decorators,
+      body,
+      is_generator,
+      is_async,
+      type_params,
+      return_type,
     }
   }
 }
@@ -28393,6 +28476,7 @@ impl FromJava for GetterProp {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_GETTER_PROP.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
     let key = PropName::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
@@ -28401,11 +28485,12 @@ impl FromJava for GetterProp {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     let java_optional_body = java_class.get_body(env, jobj);
     let body = if optional_is_present(env, &java_optional_body) {
       let java_body = optional_get(env, &java_optional_body);
@@ -28417,10 +28502,10 @@ impl FromJava for GetterProp {
     };
     delete_local_ref!(env, java_optional_body);
     GetterProp {
-      span: DUMMY_SP,
-      key: key,
-      type_ann: type_ann.map(|type_ann| type_ann),
-      body: body.map(|body| body),
+      span,
+      key,
+      type_ann,
+      body,
     }
   }
 }
@@ -28450,12 +28535,14 @@ impl FromJava for Ident {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IDENT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let sym = java_class.get_sym(env, jobj);
+    let sym = sym.into();
     let optional = java_class.is_optional(env, jobj);
     Ident {
-      span: DUMMY_SP,
-      sym: sym.into(),
-      optional: optional,
+      span,
+      sym,
+      optional,
     }
   }
 }
@@ -28492,27 +28579,31 @@ impl FromJava for IfStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IF_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_test = java_class.get_test(env, jobj);
     let test = Expr::from_java(env, &java_test);
     delete_local_ref!(env, java_test);
+    let test = Box::new(test);
     let java_cons = java_class.get_cons(env, jobj);
     let cons = Stmt::from_java(env, &java_cons);
     delete_local_ref!(env, java_cons);
+    let cons = Box::new(cons);
     let java_optional_alt = java_class.get_alt(env, jobj);
     let alt = if optional_is_present(env, &java_optional_alt) {
       let java_alt = optional_get(env, &java_optional_alt);
       let alt = Stmt::from_java(env, &java_alt);
       delete_local_ref!(env, java_alt);
-      Some(Box::new(alt))
+      Some(alt)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_alt);
+    let alt = alt.map(|alt| Box::new(alt));
     IfStmt {
-      span: DUMMY_SP,
-      test: Box::new(test),
-      cons: Box::new(cons),
-      alt: alt.map(|alt| alt),
+      span,
+      test,
+      cons,
+      alt,
     }
   }
 }
@@ -28542,12 +28633,13 @@ impl FromJava for Import {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IMPORT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_phase = java_class.get_phase(env, jobj);
     let phase = ImportPhase::from_java(env, &java_phase);
     delete_local_ref!(env, java_phase);
     Import {
-      span: DUMMY_SP,
-      phase: phase,
+      span,
+      phase,
     }
   }
 }
@@ -28594,6 +28686,7 @@ impl FromJava for ImportDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IMPORT_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_specifiers = java_class.get_specifiers(env, jobj);
     let length = list_size(env, &java_specifiers);
     let specifiers = (0..length).map(|i| {
@@ -28605,27 +28698,29 @@ impl FromJava for ImportDecl {
     let java_src = java_class.get_src(env, jobj);
     let src = Str::from_java(env, &java_src);
     delete_local_ref!(env, java_src);
+    let src = Box::new(src);
     let type_only = java_class.is_type_only(env, jobj);
     let java_optional_with = java_class.get_with(env, jobj);
     let with = if optional_is_present(env, &java_optional_with) {
       let java_with = optional_get(env, &java_optional_with);
       let with = ObjectLit::from_java(env, &java_with);
       delete_local_ref!(env, java_with);
-      Some(Box::new(with))
+      Some(with)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_with);
+    let with = with.map(|with| Box::new(with));
     let java_phase = java_class.get_phase(env, jobj);
     let phase = ImportPhase::from_java(env, &java_phase);
     delete_local_ref!(env, java_phase);
     ImportDecl {
-      span: DUMMY_SP,
-      specifiers: specifiers,
-      src: Box::new(src),
-      type_only: type_only,
-      with: with.map(|with| with),
-      phase: phase,
+      span,
+      specifiers,
+      src,
+      type_only,
+      with,
+      phase,
     }
   }
 }
@@ -28656,12 +28751,13 @@ impl FromJava for ImportDefaultSpecifier {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IMPORT_DEFAULT_SPECIFIER.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_local = java_class.get_local(env, jobj);
     let local = Ident::from_java(env, &java_local);
     delete_local_ref!(env, java_local);
     ImportDefaultSpecifier {
-      span: DUMMY_SP,
-      local: local,
+      span,
+      local,
     }
   }
 }
@@ -28696,6 +28792,7 @@ impl FromJava for ImportNamedSpecifier {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IMPORT_NAMED_SPECIFIER.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_local = java_class.get_local(env, jobj);
     let local = Ident::from_java(env, &java_local);
     delete_local_ref!(env, java_local);
@@ -28711,10 +28808,10 @@ impl FromJava for ImportNamedSpecifier {
     delete_local_ref!(env, java_optional_imported);
     let is_type_only = java_class.is_type_only(env, jobj);
     ImportNamedSpecifier {
-      span: DUMMY_SP,
-      local: local,
-      imported: imported.map(|imported| imported),
-      is_type_only: is_type_only,
+      span,
+      local,
+      imported,
+      is_type_only,
     }
   }
 }
@@ -28745,12 +28842,13 @@ impl FromJava for ImportStarAsSpecifier {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IMPORT_STAR_AS_SPECIFIER.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_local = java_class.get_local(env, jobj);
     let local = Ident::from_java(env, &java_local);
     delete_local_ref!(env, java_local);
     ImportStarAsSpecifier {
-      span: DUMMY_SP,
-      local: local,
+      span,
+      local,
     }
   }
 }
@@ -28777,8 +28875,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Invalid {
 impl FromJava for Invalid {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+    let span = DUMMY_SP;
     Invalid {
-      span: DUMMY_SP,
+      span,
     }
   }
 }
@@ -28812,6 +28911,7 @@ impl FromJava for JSXAttr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_ATTR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_name = java_class.get_name(env, jobj);
     let name = JSXAttrName::from_java(env, &java_name);
     delete_local_ref!(env, java_name);
@@ -28826,9 +28926,9 @@ impl FromJava for JSXAttr {
     };
     delete_local_ref!(env, java_optional_value);
     JSXAttr {
-      span: DUMMY_SP,
-      name: name,
-      value: value.map(|value| value),
+      span,
+      name,
+      value,
     }
   }
 }
@@ -28859,12 +28959,13 @@ impl FromJava for JSXClosingElement {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_CLOSING_ELEMENT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_name = java_class.get_name(env, jobj);
     let name = JSXElementName::from_java(env, &java_name);
     delete_local_ref!(env, java_name);
     JSXClosingElement {
-      span: DUMMY_SP,
-      name: name,
+      span,
+      name,
     }
   }
 }
@@ -28891,8 +28992,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXClosingFragment {
 impl FromJava for JSXClosingFragment {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+    let span = DUMMY_SP;
     JSXClosingFragment {
-      span: DUMMY_SP,
+      span,
     }
   }
 }
@@ -28936,6 +29038,7 @@ impl FromJava for JSXElement {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_ELEMENT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_opening = java_class.get_opening(env, jobj);
     let opening = JSXOpeningElement::from_java(env, &java_opening);
     delete_local_ref!(env, java_opening);
@@ -28958,10 +29061,10 @@ impl FromJava for JSXElement {
     };
     delete_local_ref!(env, java_optional_closing);
     JSXElement {
-      span: DUMMY_SP,
-      opening: opening,
-      children: children,
-      closing: closing.map(|closing| closing),
+      span,
+      opening,
+      children,
+      closing,
     }
   }
 }
@@ -28988,8 +29091,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXEmptyExpr {
 impl FromJava for JSXEmptyExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+    let span = DUMMY_SP;
     JSXEmptyExpr {
-      span: DUMMY_SP,
+      span,
     }
   }
 }
@@ -29020,12 +29124,13 @@ impl FromJava for JSXExprContainer {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_EXPR_CONTAINER.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = JSXExpr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
     JSXExprContainer {
-      span: DUMMY_SP,
-      expr: expr,
+      span,
+      expr,
     }
   }
 }
@@ -29069,6 +29174,7 @@ impl FromJava for JSXFragment {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_FRAGMENT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_opening = java_class.get_opening(env, jobj);
     let opening = JSXOpeningFragment::from_java(env, &java_opening);
     delete_local_ref!(env, java_opening);
@@ -29084,10 +29190,10 @@ impl FromJava for JSXFragment {
     let closing = JSXClosingFragment::from_java(env, &java_closing);
     delete_local_ref!(env, java_closing);
     JSXFragment {
-      span: DUMMY_SP,
-      opening: opening,
-      children: children,
-      closing: closing,
+      span,
+      opening,
+      children,
+      closing,
     }
   }
 }
@@ -29128,8 +29234,8 @@ impl FromJava for JSXMemberExpr {
     let prop = Ident::from_java(env, &java_prop);
     delete_local_ref!(env, java_prop);
     JSXMemberExpr {
-      obj: obj,
-      prop: prop,
+      obj,
+      prop,
     }
   }
 }
@@ -29170,8 +29276,8 @@ impl FromJava for JSXNamespacedName {
     let name = Ident::from_java(env, &java_name);
     delete_local_ref!(env, java_name);
     JSXNamespacedName {
-      ns: ns,
-      name: name,
+      ns,
+      name,
     }
   }
 }
@@ -29216,6 +29322,7 @@ impl FromJava for JSXOpeningElement {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_OPENING_ELEMENT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_name = java_class.get_name(env, jobj);
     let name = JSXElementName::from_java(env, &java_name);
     delete_local_ref!(env, java_name);
@@ -29233,17 +29340,18 @@ impl FromJava for JSXOpeningElement {
       let java_type_args = optional_get(env, &java_optional_type_args);
       let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
       delete_local_ref!(env, java_type_args);
-      Some(Box::new(type_args))
+      Some(type_args)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
+    let type_args = type_args.map(|type_args| Box::new(type_args));
     JSXOpeningElement {
-      span: DUMMY_SP,
-      name: name,
-      attrs: attrs,
-      self_closing: self_closing,
-      type_args: type_args.map(|type_args| type_args),
+      span,
+      name,
+      attrs,
+      self_closing,
+      type_args,
     }
   }
 }
@@ -29270,8 +29378,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXOpeningFragment {
 impl FromJava for JSXOpeningFragment {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+    let span = DUMMY_SP;
     JSXOpeningFragment {
-      span: DUMMY_SP,
+      span,
     }
   }
 }
@@ -29302,12 +29411,14 @@ impl FromJava for JSXSpreadChild {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_SPREAD_CHILD.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     JSXSpreadChild {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
+      span,
+      expr,
     }
   }
 }
@@ -29337,12 +29448,15 @@ impl FromJava for JSXText {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_TEXT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let value = java_class.get_value(env, jobj);
+    let value = value.into();
     let raw = java_class.get_raw(env, jobj);
+    let raw = raw.into();
     JSXText {
-      span: DUMMY_SP,
-      value: value.into(),
-      raw: raw.into(),
+      span,
+      value,
+      raw,
     }
   }
 }
@@ -29382,9 +29496,10 @@ impl FromJava for KeyValuePatProp {
     let java_value = java_class.get_value(env, jobj);
     let value = Pat::from_java(env, &java_value);
     delete_local_ref!(env, java_value);
+    let value = Box::new(value);
     KeyValuePatProp {
-      key: key,
-      value: Box::new(value),
+      key,
+      value,
     }
   }
 }
@@ -29424,9 +29539,10 @@ impl FromJava for KeyValueProp {
     let java_value = java_class.get_value(env, jobj);
     let value = Expr::from_java(env, &java_value);
     delete_local_ref!(env, java_value);
+    let value = Box::new(value);
     KeyValueProp {
-      key: key,
-      value: Box::new(value),
+      key,
+      value,
     }
   }
 }
@@ -29460,16 +29576,18 @@ impl FromJava for LabeledStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_LABELED_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_label = java_class.get_label(env, jobj);
     let label = Ident::from_java(env, &java_label);
     delete_local_ref!(env, java_label);
     let java_body = java_class.get_body(env, jobj);
     let body = Stmt::from_java(env, &java_body);
     delete_local_ref!(env, java_body);
+    let body = Box::new(body);
     LabeledStmt {
-      span: DUMMY_SP,
-      label: label,
-      body: Box::new(body),
+      span,
+      label,
+      body,
     }
   }
 }
@@ -29503,16 +29621,18 @@ impl FromJava for MemberExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_MEMBER_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_obj = java_class.get_obj(env, jobj);
     let obj = Expr::from_java(env, &java_obj);
     delete_local_ref!(env, java_obj);
+    let obj = Box::new(obj);
     let java_prop = java_class.get_prop(env, jobj);
     let prop = MemberProp::from_java(env, &java_prop);
     delete_local_ref!(env, java_prop);
     MemberExpr {
-      span: DUMMY_SP,
-      obj: Box::new(obj),
-      prop: prop,
+      span,
+      obj,
+      prop,
     }
   }
 }
@@ -29542,12 +29662,13 @@ impl FromJava for MetaPropExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_META_PROP_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_kind = java_class.get_kind(env, jobj);
     let kind = MetaPropKind::from_java(env, &java_kind);
     delete_local_ref!(env, java_kind);
     MetaPropExpr {
-      span: DUMMY_SP,
-      kind: kind,
+      span,
+      kind,
     }
   }
 }
@@ -29587,9 +29708,10 @@ impl FromJava for MethodProp {
     let java_function = java_class.get_function(env, jobj);
     let function = Function::from_java(env, &java_function);
     delete_local_ref!(env, java_function);
+    let function = Box::new(function);
     MethodProp {
-      key: key,
-      function: Box::new(function),
+      key,
+      function,
     }
   }
 }
@@ -29628,6 +29750,7 @@ impl FromJava for Module {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_MODULE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_body = java_class.get_body(env, jobj);
     let length = list_size(env, &java_body);
     let body = (0..length).map(|i| {
@@ -29641,15 +29764,16 @@ impl FromJava for Module {
       let java_shebang = optional_get(env, &java_optional_shebang);
       let shebang = jstring_to_string!(env, java_shebang.as_raw());
       delete_local_ref!(env, java_shebang);
-      Some(shebang.into())
+      Some(shebang)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_shebang);
+    let shebang = shebang.map(|shebang| shebang.into());
     Module {
-      span: DUMMY_SP,
-      body: body,
-      shebang: shebang,
+      span,
+      body,
+      shebang,
     }
   }
 }
@@ -29694,6 +29818,7 @@ impl FromJava for NamedExport {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_NAMED_EXPORT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_specifiers = java_class.get_specifiers(env, jobj);
     let length = list_size(env, &java_specifiers);
     let specifiers = (0..length).map(|i| {
@@ -29707,28 +29832,30 @@ impl FromJava for NamedExport {
       let java_src = optional_get(env, &java_optional_src);
       let src = Str::from_java(env, &java_src);
       delete_local_ref!(env, java_src);
-      Some(Box::new(src))
+      Some(src)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_src);
+    let src = src.map(|src| Box::new(src));
     let type_only = java_class.is_type_only(env, jobj);
     let java_optional_with = java_class.get_with(env, jobj);
     let with = if optional_is_present(env, &java_optional_with) {
       let java_with = optional_get(env, &java_optional_with);
       let with = ObjectLit::from_java(env, &java_with);
       delete_local_ref!(env, java_with);
-      Some(Box::new(with))
+      Some(with)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_with);
+    let with = with.map(|with| Box::new(with));
     NamedExport {
-      span: DUMMY_SP,
-      specifiers: specifiers,
-      src: src.map(|src| src),
-      type_only: type_only,
-      with: with.map(|with| with),
+      span,
+      specifiers,
+      src,
+      type_only,
+      with,
     }
   }
 }
@@ -29773,9 +29900,11 @@ impl FromJava for NewExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_NEW_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_callee = java_class.get_callee(env, jobj);
     let callee = Expr::from_java(env, &java_callee);
     delete_local_ref!(env, java_callee);
+    let callee = Box::new(callee);
     let java_optional_args = java_class.get_args(env, jobj);
     let args = if optional_is_present(env, &java_optional_args) {
       let java_args = optional_get(env, &java_optional_args);
@@ -29796,16 +29925,17 @@ impl FromJava for NewExpr {
       let java_type_args = optional_get(env, &java_optional_type_args);
       let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
       delete_local_ref!(env, java_type_args);
-      Some(Box::new(type_args))
+      Some(type_args)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
+    let type_args = type_args.map(|type_args| Box::new(type_args));
     NewExpr {
-      span: DUMMY_SP,
-      callee: Box::new(callee),
-      args: args,
-      type_args: type_args.map(|type_args| type_args),
+      span,
+      callee,
+      args,
+      type_args,
     }
   }
 }
@@ -29832,8 +29962,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Null {
 impl FromJava for Null {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+    let span = DUMMY_SP;
     Null {
-      span: DUMMY_SP,
+      span,
     }
   }
 }
@@ -29863,21 +29994,23 @@ impl FromJava for Number {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_NUMBER.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let value = java_class.get_value(env, jobj);
     let java_optional_raw = java_class.get_raw(env, jobj);
     let raw = if optional_is_present(env, &java_optional_raw) {
       let java_raw = optional_get(env, &java_optional_raw);
       let raw = jstring_to_string!(env, java_raw.as_raw());
       delete_local_ref!(env, java_raw);
-      Some(raw.into())
+      Some(raw)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_raw);
+    let raw = raw.map(|raw| raw.into());
     Number {
-      span: DUMMY_SP,
-      value: value,
-      raw: raw,
+      span,
+      value,
+      raw,
     }
   }
 }
@@ -29915,6 +30048,7 @@ impl FromJava for ObjectLit {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_OBJECT_LIT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_props = java_class.get_props(env, jobj);
     let length = list_size(env, &java_props);
     let props = (0..length).map(|i| {
@@ -29924,8 +30058,8 @@ impl FromJava for ObjectLit {
       props
     }).collect();
     ObjectLit {
-      span: DUMMY_SP,
-      props: props,
+      span,
+      props,
     }
   }
 }
@@ -29967,6 +30101,7 @@ impl FromJava for ObjectPat {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_OBJECT_PAT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_props = java_class.get_props(env, jobj);
     let length = list_size(env, &java_props);
     let props = (0..length).map(|i| {
@@ -29981,16 +30116,17 @@ impl FromJava for ObjectPat {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     ObjectPat {
-      span: DUMMY_SP,
-      props: props,
-      optional: optional,
-      type_ann: type_ann.map(|type_ann| type_ann),
+      span,
+      props,
+      optional,
+      type_ann,
     }
   }
 }
@@ -30034,9 +30170,11 @@ impl FromJava for OptCall {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_OPT_CALL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_callee = java_class.get_callee(env, jobj);
     let callee = Expr::from_java(env, &java_callee);
     delete_local_ref!(env, java_callee);
+    let callee = Box::new(callee);
     let java_args = java_class.get_args(env, jobj);
     let length = list_size(env, &java_args);
     let args = (0..length).map(|i| {
@@ -30050,16 +30188,17 @@ impl FromJava for OptCall {
       let java_type_args = optional_get(env, &java_optional_type_args);
       let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
       delete_local_ref!(env, java_type_args);
-      Some(Box::new(type_args))
+      Some(type_args)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
+    let type_args = type_args.map(|type_args| Box::new(type_args));
     OptCall {
-      span: DUMMY_SP,
-      callee: Box::new(callee),
-      args: args,
-      type_args: type_args.map(|type_args| type_args),
+      span,
+      callee,
+      args,
+      type_args,
     }
   }
 }
@@ -30091,14 +30230,16 @@ impl FromJava for OptChainExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_OPT_CHAIN_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let optional = java_class.is_optional(env, jobj);
     let java_base = java_class.get_base(env, jobj);
     let base = OptChainBase::from_java(env, &java_base);
     delete_local_ref!(env, java_base);
+    let base = Box::new(base);
     OptChainExpr {
-      span: DUMMY_SP,
-      optional: optional,
-      base: Box::new(base),
+      span,
+      optional,
+      base,
     }
   }
 }
@@ -30139,6 +30280,7 @@ impl FromJava for Param {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_PARAM.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_decorators = java_class.get_decorators(env, jobj);
     let length = list_size(env, &java_decorators);
     let decorators = (0..length).map(|i| {
@@ -30151,9 +30293,9 @@ impl FromJava for Param {
     let pat = Pat::from_java(env, &java_pat);
     delete_local_ref!(env, java_pat);
     Param {
-      span: DUMMY_SP,
-      decorators: decorators,
-      pat: pat,
+      span,
+      decorators,
+      pat,
     }
   }
 }
@@ -30184,12 +30326,14 @@ impl FromJava for ParenExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_PAREN_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     ParenExpr {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
+      span,
+      expr,
     }
   }
 }
@@ -30231,12 +30375,14 @@ impl FromJava for PrivateMethod {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_PRIVATE_METHOD.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
     let key = PrivateName::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
     let java_function = java_class.get_function(env, jobj);
     let function = Function::from_java(env, &java_function);
     delete_local_ref!(env, java_function);
+    let function = Box::new(function);
     let java_kind = java_class.get_kind(env, jobj);
     let kind = MethodKind::from_java(env, &java_kind);
     delete_local_ref!(env, java_kind);
@@ -30255,15 +30401,15 @@ impl FromJava for PrivateMethod {
     let is_optional = java_class.is_optional(env, jobj);
     let is_override = java_class.is_override(env, jobj);
     PrivateMethod {
-      span: DUMMY_SP,
-      key: key,
-      function: Box::new(function),
-      kind: kind,
-      is_static: is_static,
-      accessibility: accessibility.map(|accessibility| accessibility),
-      is_abstract: is_abstract,
-      is_optional: is_optional,
-      is_override: is_override,
+      span,
+      key,
+      function,
+      kind,
+      is_static,
+      accessibility,
+      is_abstract,
+      is_optional,
+      is_override,
     }
   }
 }
@@ -30294,12 +30440,13 @@ impl FromJava for PrivateName {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_id = java_class.get_id(env, jobj);
     let id = Ident::from_java(env, &java_id);
     delete_local_ref!(env, java_id);
     PrivateName {
-      span: DUMMY_SP,
-      id: id,
+      span,
+      id,
     }
   }
 }
@@ -30353,6 +30500,7 @@ impl FromJava for PrivateProp {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_PRIVATE_PROP.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
     let key = PrivateName::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
@@ -30361,21 +30509,23 @@ impl FromJava for PrivateProp {
       let java_value = optional_get(env, &java_optional_value);
       let value = Expr::from_java(env, &java_value);
       delete_local_ref!(env, java_value);
-      Some(Box::new(value))
+      Some(value)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_value);
+    let value = value.map(|value| Box::new(value));
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = if optional_is_present(env, &java_optional_type_ann) {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     let is_static = java_class.is_static(env, jobj);
     let java_decorators = java_class.get_decorators(env, jobj);
     let length = list_size(env, &java_decorators);
@@ -30400,17 +30550,17 @@ impl FromJava for PrivateProp {
     let readonly = java_class.is_readonly(env, jobj);
     let definite = java_class.is_definite(env, jobj);
     PrivateProp {
-      span: DUMMY_SP,
-      key: key,
-      value: value.map(|value| value),
-      type_ann: type_ann.map(|type_ann| type_ann),
-      is_static: is_static,
-      decorators: decorators,
-      accessibility: accessibility.map(|accessibility| accessibility),
-      is_optional: is_optional,
-      is_override: is_override,
-      readonly: readonly,
-      definite: definite,
+      span,
+      key,
+      value,
+      type_ann,
+      is_static,
+      decorators,
+      accessibility,
+      is_optional,
+      is_override,
+      readonly,
+      definite,
     }
   }
 }
@@ -30440,12 +30590,15 @@ impl FromJava for Regex {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_REGEX.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let exp = java_class.get_exp(env, jobj);
+    let exp = exp.into();
     let flags = java_class.get_flags(env, jobj);
+    let flags = flags.into();
     Regex {
-      span: DUMMY_SP,
-      exp: exp.into(),
-      flags: flags.into(),
+      span,
+      exp,
+      flags,
     }
   }
 }
@@ -30482,25 +30635,28 @@ impl FromJava for RestPat {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_REST_PAT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let dot3_token = DUMMY_SP;
     let java_arg = java_class.get_arg(env, jobj);
     let arg = Pat::from_java(env, &java_arg);
     delete_local_ref!(env, java_arg);
+    let arg = Box::new(arg);
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = if optional_is_present(env, &java_optional_type_ann) {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     RestPat {
-      span: DUMMY_SP,
-      dot3_token: dot3_token,
-      arg: Box::new(arg),
-      type_ann: type_ann.map(|type_ann| type_ann),
+      span,
+      dot3_token,
+      arg,
+      type_ann,
     }
   }
 }
@@ -30531,19 +30687,21 @@ impl FromJava for ReturnStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_RETURN_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_optional_arg = java_class.get_arg(env, jobj);
     let arg = if optional_is_present(env, &java_optional_arg) {
       let java_arg = optional_get(env, &java_optional_arg);
       let arg = Expr::from_java(env, &java_arg);
       delete_local_ref!(env, java_arg);
-      Some(Box::new(arg))
+      Some(arg)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_arg);
+    let arg = arg.map(|arg| Box::new(arg));
     ReturnStmt {
-      span: DUMMY_SP,
-      arg: arg.map(|arg| arg),
+      span,
+      arg,
     }
   }
 }
@@ -30582,6 +30740,7 @@ impl FromJava for Script {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_SCRIPT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_body = java_class.get_body(env, jobj);
     let length = list_size(env, &java_body);
     let body = (0..length).map(|i| {
@@ -30595,15 +30754,16 @@ impl FromJava for Script {
       let java_shebang = optional_get(env, &java_optional_shebang);
       let shebang = jstring_to_string!(env, java_shebang.as_raw());
       delete_local_ref!(env, java_shebang);
-      Some(shebang.into())
+      Some(shebang)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_shebang);
+    let shebang = shebang.map(|shebang| shebang.into());
     Script {
-      span: DUMMY_SP,
-      body: body,
-      shebang: shebang,
+      span,
+      body,
+      shebang,
     }
   }
 }
@@ -30641,6 +30801,7 @@ impl FromJava for SeqExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_SEQ_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_exprs = java_class.get_exprs(env, jobj);
     let length = list_size(env, &java_exprs);
     let exprs = (0..length).map(|i| {
@@ -30650,8 +30811,8 @@ impl FromJava for SeqExpr {
       Box::new(exprs)
     }).collect();
     SeqExpr {
-      span: DUMMY_SP,
-      exprs: exprs,
+      span,
+      exprs,
     }
   }
 }
@@ -30691,6 +30852,7 @@ impl FromJava for SetterProp {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_SETTER_PROP.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
     let key = PropName::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
@@ -30707,6 +30869,7 @@ impl FromJava for SetterProp {
     let java_param = java_class.get_param(env, jobj);
     let param = Pat::from_java(env, &java_param);
     delete_local_ref!(env, java_param);
+    let param = Box::new(param);
     let java_optional_body = java_class.get_body(env, jobj);
     let body = if optional_is_present(env, &java_optional_body) {
       let java_body = optional_get(env, &java_optional_body);
@@ -30718,11 +30881,11 @@ impl FromJava for SetterProp {
     };
     delete_local_ref!(env, java_optional_body);
     SetterProp {
-      span: DUMMY_SP,
-      key: key,
-      this_param: this_param.map(|this_param| this_param),
-      param: Box::new(param),
-      body: body.map(|body| body),
+      span,
+      key,
+      this_param,
+      param,
+      body,
     }
   }
 }
@@ -30760,9 +30923,10 @@ impl FromJava for SpreadElement {
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     SpreadElement {
-      dot3_token: dot3_token,
-      expr: Box::new(expr),
+      dot3_token,
+      expr,
     }
   }
 }
@@ -30793,12 +30957,13 @@ impl FromJava for StaticBlock {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_STATIC_BLOCK.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_body = java_class.get_body(env, jobj);
     let body = BlockStmt::from_java(env, &java_body);
     delete_local_ref!(env, java_body);
     StaticBlock {
-      span: DUMMY_SP,
-      body: body,
+      span,
+      body,
     }
   }
 }
@@ -30828,21 +30993,24 @@ impl FromJava for Str {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_STR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let value = java_class.get_value(env, jobj);
+    let value = value.into();
     let java_optional_raw = java_class.get_raw(env, jobj);
     let raw = if optional_is_present(env, &java_optional_raw) {
       let java_raw = optional_get(env, &java_optional_raw);
       let raw = jstring_to_string!(env, java_raw.as_raw());
       delete_local_ref!(env, java_raw);
-      Some(raw.into())
+      Some(raw)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_raw);
+    let raw = raw.map(|raw| raw.into());
     Str {
-      span: DUMMY_SP,
-      value: value.into(),
-      raw: raw,
+      span,
+      value,
+      raw,
     }
   }
 }
@@ -30869,8 +31037,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Super {
 impl FromJava for Super {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+    let span = DUMMY_SP;
     Super {
-      span: DUMMY_SP,
+      span,
     }
   }
 }
@@ -30904,6 +31073,7 @@ impl FromJava for SuperPropExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_SUPER_PROP_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_obj = java_class.get_obj(env, jobj);
     let obj = Super::from_java(env, &java_obj);
     delete_local_ref!(env, java_obj);
@@ -30911,9 +31081,9 @@ impl FromJava for SuperPropExpr {
     let prop = SuperProp::from_java(env, &java_prop);
     delete_local_ref!(env, java_prop);
     SuperPropExpr {
-      span: DUMMY_SP,
-      obj: obj,
-      prop: prop,
+      span,
+      obj,
+      prop,
     }
   }
 }
@@ -30954,16 +31124,18 @@ impl FromJava for SwitchCase {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_SWITCH_CASE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_optional_test = java_class.get_test(env, jobj);
     let test = if optional_is_present(env, &java_optional_test) {
       let java_test = optional_get(env, &java_optional_test);
       let test = Expr::from_java(env, &java_test);
       delete_local_ref!(env, java_test);
-      Some(Box::new(test))
+      Some(test)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_test);
+    let test = test.map(|test| Box::new(test));
     let java_cons = java_class.get_cons(env, jobj);
     let length = list_size(env, &java_cons);
     let cons = (0..length).map(|i| {
@@ -30973,9 +31145,9 @@ impl FromJava for SwitchCase {
       cons
     }).collect();
     SwitchCase {
-      span: DUMMY_SP,
-      test: test.map(|test| test),
-      cons: cons,
+      span,
+      test,
+      cons,
     }
   }
 }
@@ -31016,9 +31188,11 @@ impl FromJava for SwitchStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_SWITCH_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_discriminant = java_class.get_discriminant(env, jobj);
     let discriminant = Expr::from_java(env, &java_discriminant);
     delete_local_ref!(env, java_discriminant);
+    let discriminant = Box::new(discriminant);
     let java_cases = java_class.get_cases(env, jobj);
     let length = list_size(env, &java_cases);
     let cases = (0..length).map(|i| {
@@ -31028,9 +31202,9 @@ impl FromJava for SwitchStmt {
       cases
     }).collect();
     SwitchStmt {
-      span: DUMMY_SP,
-      discriminant: Box::new(discriminant),
-      cases: cases,
+      span,
+      discriminant,
+      cases,
     }
   }
 }
@@ -31067,27 +31241,31 @@ impl FromJava for TaggedTpl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TAGGED_TPL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_tag = java_class.get_tag(env, jobj);
     let tag = Expr::from_java(env, &java_tag);
     delete_local_ref!(env, java_tag);
+    let tag = Box::new(tag);
     let java_optional_type_params = java_class.get_type_params(env, jobj);
     let type_params = if optional_is_present(env, &java_optional_type_params) {
       let java_type_params = optional_get(env, &java_optional_type_params);
       let type_params = TsTypeParamInstantiation::from_java(env, &java_type_params);
       delete_local_ref!(env, java_type_params);
-      Some(Box::new(type_params))
+      Some(type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
+    let type_params = type_params.map(|type_params| Box::new(type_params));
     let java_tpl = java_class.get_tpl(env, jobj);
     let tpl = Tpl::from_java(env, &java_tpl);
     delete_local_ref!(env, java_tpl);
+    let tpl = Box::new(tpl);
     TaggedTpl {
-      span: DUMMY_SP,
-      tag: Box::new(tag),
-      type_params: type_params.map(|type_params| type_params),
-      tpl: Box::new(tpl),
+      span,
+      tag,
+      type_params,
+      tpl,
     }
   }
 }
@@ -31114,8 +31292,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ThisExpr {
 impl FromJava for ThisExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+    let span = DUMMY_SP;
     ThisExpr {
-      span: DUMMY_SP,
+      span,
     }
   }
 }
@@ -31146,12 +31325,14 @@ impl FromJava for ThrowStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_THROW_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_arg = java_class.get_arg(env, jobj);
     let arg = Expr::from_java(env, &java_arg);
     delete_local_ref!(env, java_arg);
+    let arg = Box::new(arg);
     ThrowStmt {
-      span: DUMMY_SP,
-      arg: Box::new(arg),
+      span,
+      arg,
     }
   }
 }
@@ -31199,6 +31380,7 @@ impl FromJava for Tpl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TPL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_exprs = java_class.get_exprs(env, jobj);
     let length = list_size(env, &java_exprs);
     let exprs = (0..length).map(|i| {
@@ -31216,9 +31398,9 @@ impl FromJava for Tpl {
       quasis
     }).collect();
     Tpl {
-      span: DUMMY_SP,
-      exprs: exprs,
-      quasis: quasis,
+      span,
+      exprs,
+      quasis,
     }
   }
 }
@@ -31249,23 +31431,26 @@ impl FromJava for TplElement {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TPL_ELEMENT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let tail = java_class.is_tail(env, jobj);
     let java_optional_cooked = java_class.get_cooked(env, jobj);
     let cooked = if optional_is_present(env, &java_optional_cooked) {
       let java_cooked = optional_get(env, &java_optional_cooked);
       let cooked = jstring_to_string!(env, java_cooked.as_raw());
       delete_local_ref!(env, java_cooked);
-      Some(cooked.into())
+      Some(cooked)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_cooked);
+    let cooked = cooked.map(|cooked| cooked.into());
     let raw = java_class.get_raw(env, jobj);
+    let raw = raw.into();
     TplElement {
-      span: DUMMY_SP,
-      tail: tail,
-      cooked: cooked,
-      raw: raw.into(),
+      span,
+      tail,
+      cooked,
+      raw,
     }
   }
 }
@@ -31302,6 +31487,7 @@ impl FromJava for TryStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TRY_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_block = java_class.get_block(env, jobj);
     let block = BlockStmt::from_java(env, &java_block);
     delete_local_ref!(env, java_block);
@@ -31326,10 +31512,10 @@ impl FromJava for TryStmt {
     };
     delete_local_ref!(env, java_optional_finalizer);
     TryStmt {
-      span: DUMMY_SP,
-      block: block,
-      handler: handler.map(|handler| handler),
-      finalizer: finalizer.map(|finalizer| finalizer),
+      span,
+      block,
+      handler,
+      finalizer,
     }
   }
 }
@@ -31360,12 +31546,14 @@ impl FromJava for TsArrayType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_ARRAY_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_elem_type = java_class.get_elem_type(env, jobj);
     let elem_type = TsType::from_java(env, &java_elem_type);
     delete_local_ref!(env, java_elem_type);
+    let elem_type = Box::new(elem_type);
     TsArrayType {
-      span: DUMMY_SP,
-      elem_type: Box::new(elem_type),
+      span,
+      elem_type,
     }
   }
 }
@@ -31399,16 +31587,19 @@ impl FromJava for TsAsExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_AS_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     let java_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = TsType::from_java(env, &java_type_ann);
     delete_local_ref!(env, java_type_ann);
+    let type_ann = Box::new(type_ann);
     TsAsExpr {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
-      type_ann: Box::new(type_ann),
+      span,
+      expr,
+      type_ann,
     }
   }
 }
@@ -31452,6 +31643,7 @@ impl FromJava for TsCallSignatureDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_CALL_SIGNATURE_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
@@ -31465,26 +31657,28 @@ impl FromJava for TsCallSignatureDecl {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     let java_optional_type_params = java_class.get_type_params(env, jobj);
     let type_params = if optional_is_present(env, &java_optional_type_params) {
       let java_type_params = optional_get(env, &java_optional_type_params);
       let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
       delete_local_ref!(env, java_type_params);
-      Some(Box::new(type_params))
+      Some(type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
+    let type_params = type_params.map(|type_params| Box::new(type_params));
     TsCallSignatureDecl {
-      span: DUMMY_SP,
-      params: params,
-      type_ann: type_ann.map(|type_ann| type_ann),
-      type_params: type_params.map(|type_params| type_params),
+      span,
+      params,
+      type_ann,
+      type_params,
     }
   }
 }
@@ -31524,24 +31718,29 @@ impl FromJava for TsConditionalType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_CONDITIONAL_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_check_type = java_class.get_check_type(env, jobj);
     let check_type = TsType::from_java(env, &java_check_type);
     delete_local_ref!(env, java_check_type);
+    let check_type = Box::new(check_type);
     let java_extends_type = java_class.get_extends_type(env, jobj);
     let extends_type = TsType::from_java(env, &java_extends_type);
     delete_local_ref!(env, java_extends_type);
+    let extends_type = Box::new(extends_type);
     let java_true_type = java_class.get_true_type(env, jobj);
     let true_type = TsType::from_java(env, &java_true_type);
     delete_local_ref!(env, java_true_type);
+    let true_type = Box::new(true_type);
     let java_false_type = java_class.get_false_type(env, jobj);
     let false_type = TsType::from_java(env, &java_false_type);
     delete_local_ref!(env, java_false_type);
+    let false_type = Box::new(false_type);
     TsConditionalType {
-      span: DUMMY_SP,
-      check_type: Box::new(check_type),
-      extends_type: Box::new(extends_type),
-      true_type: Box::new(true_type),
-      false_type: Box::new(false_type),
+      span,
+      check_type,
+      extends_type,
+      true_type,
+      false_type,
     }
   }
 }
@@ -31572,12 +31771,14 @@ impl FromJava for TsConstAssertion {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_CONST_ASSERTION.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     TsConstAssertion {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
+      span,
+      expr,
     }
   }
 }
@@ -31621,6 +31822,7 @@ impl FromJava for TsConstructSignatureDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_CONSTRUCT_SIGNATURE_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
@@ -31634,26 +31836,28 @@ impl FromJava for TsConstructSignatureDecl {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     let java_optional_type_params = java_class.get_type_params(env, jobj);
     let type_params = if optional_is_present(env, &java_optional_type_params) {
       let java_type_params = optional_get(env, &java_optional_type_params);
       let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
       delete_local_ref!(env, java_type_params);
-      Some(Box::new(type_params))
+      Some(type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
+    let type_params = type_params.map(|type_params| Box::new(type_params));
     TsConstructSignatureDecl {
-      span: DUMMY_SP,
-      params: params,
-      type_ann: type_ann.map(|type_ann| type_ann),
-      type_params: type_params.map(|type_params| type_params),
+      span,
+      params,
+      type_ann,
+      type_params,
     }
   }
 }
@@ -31698,6 +31902,7 @@ impl FromJava for TsConstructorType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_CONSTRUCTOR_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
@@ -31711,21 +31916,23 @@ impl FromJava for TsConstructorType {
       let java_type_params = optional_get(env, &java_optional_type_params);
       let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
       delete_local_ref!(env, java_type_params);
-      Some(Box::new(type_params))
+      Some(type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
+    let type_params = type_params.map(|type_params| Box::new(type_params));
     let java_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
     delete_local_ref!(env, java_type_ann);
+    let type_ann = Box::new(type_ann);
     let is_abstract = java_class.is_abstract(env, jobj);
     TsConstructorType {
-      span: DUMMY_SP,
-      params: params,
-      type_params: type_params.map(|type_params| type_params),
-      type_ann: Box::new(type_ann),
-      is_abstract: is_abstract,
+      span,
+      params,
+      type_params,
+      type_ann,
+      is_abstract,
     }
   }
 }
@@ -31768,6 +31975,7 @@ impl FromJava for TsEnumDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_ENUM_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let declare = java_class.is_declare(env, jobj);
     let is_const = java_class.is_const(env, jobj);
     let java_id = java_class.get_id(env, jobj);
@@ -31782,11 +31990,11 @@ impl FromJava for TsEnumDecl {
       members
     }).collect();
     TsEnumDecl {
-      span: DUMMY_SP,
-      declare: declare,
-      is_const: is_const,
-      id: id,
-      members: members,
+      span,
+      declare,
+      is_const,
+      id,
+      members,
     }
   }
 }
@@ -31820,6 +32028,7 @@ impl FromJava for TsEnumMember {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_ENUM_MEMBER.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_id = java_class.get_id(env, jobj);
     let id = TsEnumMemberId::from_java(env, &java_id);
     delete_local_ref!(env, java_id);
@@ -31828,15 +32037,16 @@ impl FromJava for TsEnumMember {
       let java_init = optional_get(env, &java_optional_init);
       let init = Expr::from_java(env, &java_init);
       delete_local_ref!(env, java_init);
-      Some(Box::new(init))
+      Some(init)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_init);
+    let init = init.map(|init| Box::new(init));
     TsEnumMember {
-      span: DUMMY_SP,
-      id: id,
-      init: init.map(|init| init),
+      span,
+      id,
+      init,
     }
   }
 }
@@ -31867,12 +32077,14 @@ impl FromJava for TsExportAssignment {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_EXPORT_ASSIGNMENT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     TsExportAssignment {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
+      span,
+      expr,
     }
   }
 }
@@ -31906,23 +32118,26 @@ impl FromJava for TsExprWithTypeArgs {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_EXPR_WITH_TYPE_ARGS.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     let java_optional_type_args = java_class.get_type_args(env, jobj);
     let type_args = if optional_is_present(env, &java_optional_type_args) {
       let java_type_args = optional_get(env, &java_optional_type_args);
       let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
       delete_local_ref!(env, java_type_args);
-      Some(Box::new(type_args))
+      Some(type_args)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
+    let type_args = type_args.map(|type_args| Box::new(type_args));
     TsExprWithTypeArgs {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
-      type_args: type_args.map(|type_args| type_args),
+      span,
+      expr,
+      type_args,
     }
   }
 }
@@ -31953,12 +32168,13 @@ impl FromJava for TsExternalModuleRef {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_EXTERNAL_MODULE_REF.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Str::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
     TsExternalModuleRef {
-      span: DUMMY_SP,
-      expr: expr,
+      span,
+      expr,
     }
   }
 }
@@ -32002,6 +32218,7 @@ impl FromJava for TsFnType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_FN_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
@@ -32015,19 +32232,21 @@ impl FromJava for TsFnType {
       let java_type_params = optional_get(env, &java_optional_type_params);
       let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
       delete_local_ref!(env, java_type_params);
-      Some(Box::new(type_params))
+      Some(type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
+    let type_params = type_params.map(|type_params| Box::new(type_params));
     let java_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
     delete_local_ref!(env, java_type_ann);
+    let type_ann = Box::new(type_ann);
     TsFnType {
-      span: DUMMY_SP,
-      params: params,
-      type_params: type_params.map(|type_params| type_params),
-      type_ann: Box::new(type_ann),
+      span,
+      params,
+      type_params,
+      type_ann,
     }
   }
 }
@@ -32064,10 +32283,12 @@ impl FromJava for TsGetterSignature {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_GETTER_SIGNATURE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let readonly = java_class.is_readonly(env, jobj);
     let java_key = java_class.get_key(env, jobj);
     let key = Expr::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
+    let key = Box::new(key);
     let computed = java_class.is_computed(env, jobj);
     let optional = java_class.is_optional(env, jobj);
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
@@ -32075,18 +32296,19 @@ impl FromJava for TsGetterSignature {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     TsGetterSignature {
-      span: DUMMY_SP,
-      readonly: readonly,
-      key: Box::new(key),
-      computed: computed,
-      optional: optional,
-      type_ann: type_ann.map(|type_ann| type_ann),
+      span,
+      readonly,
+      key,
+      computed,
+      optional,
+      type_ann,
     }
   }
 }
@@ -32122,6 +32344,7 @@ impl FromJava for TsImportEqualsDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_IMPORT_EQUALS_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let is_export = java_class.is_export(env, jobj);
     let is_type_only = java_class.is_type_only(env, jobj);
     let java_id = java_class.get_id(env, jobj);
@@ -32131,11 +32354,11 @@ impl FromJava for TsImportEqualsDecl {
     let module_ref = TsModuleRef::from_java(env, &java_module_ref);
     delete_local_ref!(env, java_module_ref);
     TsImportEqualsDecl {
-      span: DUMMY_SP,
-      is_export: is_export,
-      is_type_only: is_type_only,
-      id: id,
-      module_ref: module_ref,
+      span,
+      is_export,
+      is_type_only,
+      id,
+      module_ref,
     }
   }
 }
@@ -32172,6 +32395,7 @@ impl FromJava for TsImportType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_IMPORT_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_arg = java_class.get_arg(env, jobj);
     let arg = Str::from_java(env, &java_arg);
     delete_local_ref!(env, java_arg);
@@ -32190,16 +32414,17 @@ impl FromJava for TsImportType {
       let java_type_args = optional_get(env, &java_optional_type_args);
       let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
       delete_local_ref!(env, java_type_args);
-      Some(Box::new(type_args))
+      Some(type_args)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
+    let type_args = type_args.map(|type_args| Box::new(type_args));
     TsImportType {
-      span: DUMMY_SP,
-      arg: arg,
-      qualifier: qualifier.map(|qualifier| qualifier),
-      type_args: type_args.map(|type_args| type_args),
+      span,
+      arg,
+      qualifier,
+      type_args,
     }
   }
 }
@@ -32242,6 +32467,7 @@ impl FromJava for TsIndexSignature {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INDEX_SIGNATURE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
@@ -32255,19 +32481,20 @@ impl FromJava for TsIndexSignature {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     let readonly = java_class.is_readonly(env, jobj);
     let is_static = java_class.is_static(env, jobj);
     TsIndexSignature {
-      span: DUMMY_SP,
-      params: params,
-      type_ann: type_ann.map(|type_ann| type_ann),
-      readonly: readonly,
-      is_static: is_static,
+      span,
+      params,
+      type_ann,
+      readonly,
+      is_static,
     }
   }
 }
@@ -32302,18 +32529,21 @@ impl FromJava for TsIndexedAccessType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INDEXED_ACCESS_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let readonly = java_class.is_readonly(env, jobj);
     let java_obj_type = java_class.get_obj_type(env, jobj);
     let obj_type = TsType::from_java(env, &java_obj_type);
     delete_local_ref!(env, java_obj_type);
+    let obj_type = Box::new(obj_type);
     let java_index_type = java_class.get_index_type(env, jobj);
     let index_type = TsType::from_java(env, &java_index_type);
     delete_local_ref!(env, java_index_type);
+    let index_type = Box::new(index_type);
     TsIndexedAccessType {
-      span: DUMMY_SP,
-      readonly: readonly,
-      obj_type: Box::new(obj_type),
-      index_type: Box::new(index_type),
+      span,
+      readonly,
+      obj_type,
+      index_type,
     }
   }
 }
@@ -32344,12 +32574,13 @@ impl FromJava for TsInferType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INFER_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_type_param = java_class.get_type_param(env, jobj);
     let type_param = TsTypeParam::from_java(env, &java_type_param);
     delete_local_ref!(env, java_type_param);
     TsInferType {
-      span: DUMMY_SP,
-      type_param: type_param,
+      span,
+      type_param,
     }
   }
 }
@@ -32383,16 +32614,19 @@ impl FromJava for TsInstantiation {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INSTANTIATION.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     let java_type_args = java_class.get_type_args(env, jobj);
     let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
     delete_local_ref!(env, java_type_args);
+    let type_args = Box::new(type_args);
     TsInstantiation {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
-      type_args: Box::new(type_args),
+      span,
+      expr,
+      type_args,
     }
   }
 }
@@ -32430,6 +32664,7 @@ impl FromJava for TsInterfaceBody {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INTERFACE_BODY.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_body = java_class.get_body(env, jobj);
     let length = list_size(env, &java_body);
     let body = (0..length).map(|i| {
@@ -32439,8 +32674,8 @@ impl FromJava for TsInterfaceBody {
       body
     }).collect();
     TsInterfaceBody {
-      span: DUMMY_SP,
-      body: body,
+      span,
+      body,
     }
   }
 }
@@ -32488,6 +32723,7 @@ impl FromJava for TsInterfaceDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INTERFACE_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_id = java_class.get_id(env, jobj);
     let id = Ident::from_java(env, &java_id);
     delete_local_ref!(env, java_id);
@@ -32497,11 +32733,12 @@ impl FromJava for TsInterfaceDecl {
       let java_type_params = optional_get(env, &java_optional_type_params);
       let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
       delete_local_ref!(env, java_type_params);
-      Some(Box::new(type_params))
+      Some(type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
+    let type_params = type_params.map(|type_params| Box::new(type_params));
     let java_extends = java_class.get_extends(env, jobj);
     let length = list_size(env, &java_extends);
     let extends = (0..length).map(|i| {
@@ -32514,12 +32751,12 @@ impl FromJava for TsInterfaceDecl {
     let body = TsInterfaceBody::from_java(env, &java_body);
     delete_local_ref!(env, java_body);
     TsInterfaceDecl {
-      span: DUMMY_SP,
-      id: id,
-      declare: declare,
-      type_params: type_params.map(|type_params| type_params),
-      extends: extends,
-      body: body,
+      span,
+      id,
+      declare,
+      type_params,
+      extends,
+      body,
     }
   }
 }
@@ -32557,6 +32794,7 @@ impl FromJava for TsIntersectionType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INTERSECTION_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_types = java_class.get_types(env, jobj);
     let length = list_size(env, &java_types);
     let types = (0..length).map(|i| {
@@ -32566,8 +32804,8 @@ impl FromJava for TsIntersectionType {
       Box::new(types)
     }).collect();
     TsIntersectionType {
-      span: DUMMY_SP,
-      types: types,
+      span,
+      types,
     }
   }
 }
@@ -32597,12 +32835,13 @@ impl FromJava for TsKeywordType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_KEYWORD_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_kind = java_class.get_kind(env, jobj);
     let kind = TsKeywordTypeKind::from_java(env, &java_kind);
     delete_local_ref!(env, java_kind);
     TsKeywordType {
-      span: DUMMY_SP,
-      kind: kind,
+      span,
+      kind,
     }
   }
 }
@@ -32633,12 +32872,13 @@ impl FromJava for TsLitType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_LIT_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_lit = java_class.get_lit(env, jobj);
     let lit = TsLit::from_java(env, &java_lit);
     delete_local_ref!(env, java_lit);
     TsLitType {
-      span: DUMMY_SP,
-      lit: lit,
+      span,
+      lit,
     }
   }
 }
@@ -32679,6 +32919,7 @@ impl FromJava for TsMappedType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_MAPPED_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_optional_readonly = java_class.get_readonly(env, jobj);
     let readonly = if optional_is_present(env, &java_optional_readonly) {
       let java_readonly = optional_get(env, &java_optional_readonly);
@@ -32697,11 +32938,12 @@ impl FromJava for TsMappedType {
       let java_name_type = optional_get(env, &java_optional_name_type);
       let name_type = TsType::from_java(env, &java_name_type);
       delete_local_ref!(env, java_name_type);
-      Some(Box::new(name_type))
+      Some(name_type)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_name_type);
+    let name_type = name_type.map(|name_type| Box::new(name_type));
     let java_optional_optional = java_class.get_optional(env, jobj);
     let optional = if optional_is_present(env, &java_optional_optional) {
       let java_optional = optional_get(env, &java_optional_optional);
@@ -32717,18 +32959,19 @@ impl FromJava for TsMappedType {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsType::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     TsMappedType {
-      span: DUMMY_SP,
-      readonly: readonly.map(|readonly| readonly),
-      type_param: type_param,
-      name_type: name_type.map(|name_type| name_type),
-      optional: optional.map(|optional| optional),
-      type_ann: type_ann.map(|type_ann| type_ann),
+      span,
+      readonly,
+      type_param,
+      name_type,
+      optional,
+      type_ann,
     }
   }
 }
@@ -32778,10 +33021,12 @@ impl FromJava for TsMethodSignature {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_METHOD_SIGNATURE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let readonly = java_class.is_readonly(env, jobj);
     let java_key = java_class.get_key(env, jobj);
     let key = Expr::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
+    let key = Box::new(key);
     let computed = java_class.is_computed(env, jobj);
     let optional = java_class.is_optional(env, jobj);
     let java_params = java_class.get_params(env, jobj);
@@ -32797,30 +33042,32 @@ impl FromJava for TsMethodSignature {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     let java_optional_type_params = java_class.get_type_params(env, jobj);
     let type_params = if optional_is_present(env, &java_optional_type_params) {
       let java_type_params = optional_get(env, &java_optional_type_params);
       let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
       delete_local_ref!(env, java_type_params);
-      Some(Box::new(type_params))
+      Some(type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
+    let type_params = type_params.map(|type_params| Box::new(type_params));
     TsMethodSignature {
-      span: DUMMY_SP,
-      readonly: readonly,
-      key: Box::new(key),
-      computed: computed,
-      optional: optional,
-      params: params,
-      type_ann: type_ann.map(|type_ann| type_ann),
-      type_params: type_params.map(|type_params| type_params),
+      span,
+      readonly,
+      key,
+      computed,
+      optional,
+      params,
+      type_ann,
+      type_params,
     }
   }
 }
@@ -32858,6 +33105,7 @@ impl FromJava for TsModuleBlock {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_MODULE_BLOCK.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_body = java_class.get_body(env, jobj);
     let length = list_size(env, &java_body);
     let body = (0..length).map(|i| {
@@ -32867,8 +33115,8 @@ impl FromJava for TsModuleBlock {
       body
     }).collect();
     TsModuleBlock {
-      span: DUMMY_SP,
-      body: body,
+      span,
+      body,
     }
   }
 }
@@ -32904,6 +33152,7 @@ impl FromJava for TsModuleDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_MODULE_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let declare = java_class.is_declare(env, jobj);
     let global = java_class.is_global(env, jobj);
     let java_id = java_class.get_id(env, jobj);
@@ -32920,11 +33169,11 @@ impl FromJava for TsModuleDecl {
     };
     delete_local_ref!(env, java_optional_body);
     TsModuleDecl {
-      span: DUMMY_SP,
-      declare: declare,
-      global: global,
-      id: id,
-      body: body.map(|body| body),
+      span,
+      declare,
+      global,
+      id,
+      body,
     }
   }
 }
@@ -32960,6 +33209,7 @@ impl FromJava for TsNamespaceDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_NAMESPACE_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let declare = java_class.is_declare(env, jobj);
     let global = java_class.is_global(env, jobj);
     let java_id = java_class.get_id(env, jobj);
@@ -32968,12 +33218,13 @@ impl FromJava for TsNamespaceDecl {
     let java_body = java_class.get_body(env, jobj);
     let body = TsNamespaceBody::from_java(env, &java_body);
     delete_local_ref!(env, java_body);
+    let body = Box::new(body);
     TsNamespaceDecl {
-      span: DUMMY_SP,
-      declare: declare,
-      global: global,
-      id: id,
-      body: Box::new(body),
+      span,
+      declare,
+      global,
+      id,
+      body,
     }
   }
 }
@@ -33004,12 +33255,13 @@ impl FromJava for TsNamespaceExportDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_NAMESPACE_EXPORT_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_id = java_class.get_id(env, jobj);
     let id = Ident::from_java(env, &java_id);
     delete_local_ref!(env, java_id);
     TsNamespaceExportDecl {
-      span: DUMMY_SP,
-      id: id,
+      span,
+      id,
     }
   }
 }
@@ -33040,12 +33292,14 @@ impl FromJava for TsNonNullExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_NON_NULL_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     TsNonNullExpr {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
+      span,
+      expr,
     }
   }
 }
@@ -33076,12 +33330,14 @@ impl FromJava for TsOptionalType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_OPTIONAL_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = TsType::from_java(env, &java_type_ann);
     delete_local_ref!(env, java_type_ann);
+    let type_ann = Box::new(type_ann);
     TsOptionalType {
-      span: DUMMY_SP,
-      type_ann: Box::new(type_ann),
+      span,
+      type_ann,
     }
   }
 }
@@ -33126,6 +33382,7 @@ impl FromJava for TsParamProp {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_PARAM_PROP.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_decorators = java_class.get_decorators(env, jobj);
     let length = list_size(env, &java_decorators);
     let decorators = (0..length).map(|i| {
@@ -33150,12 +33407,12 @@ impl FromJava for TsParamProp {
     let param = TsParamPropParam::from_java(env, &java_param);
     delete_local_ref!(env, java_param);
     TsParamProp {
-      span: DUMMY_SP,
-      decorators: decorators,
-      accessibility: accessibility.map(|accessibility| accessibility),
-      is_override: is_override,
-      readonly: readonly,
-      param: param,
+      span,
+      decorators,
+      accessibility,
+      is_override,
+      readonly,
+      param,
     }
   }
 }
@@ -33186,12 +33443,14 @@ impl FromJava for TsParenthesizedType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_PARENTHESIZED_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = TsType::from_java(env, &java_type_ann);
     delete_local_ref!(env, java_type_ann);
+    let type_ann = Box::new(type_ann);
     TsParenthesizedType {
-      span: DUMMY_SP,
-      type_ann: Box::new(type_ann),
+      span,
+      type_ann,
     }
   }
 }
@@ -33244,10 +33503,12 @@ impl FromJava for TsPropertySignature {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_PROPERTY_SIGNATURE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let readonly = java_class.is_readonly(env, jobj);
     let java_key = java_class.get_key(env, jobj);
     let key = Expr::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
+    let key = Box::new(key);
     let computed = java_class.is_computed(env, jobj);
     let optional = java_class.is_optional(env, jobj);
     let java_optional_init = java_class.get_init(env, jobj);
@@ -33255,11 +33516,12 @@ impl FromJava for TsPropertySignature {
       let java_init = optional_get(env, &java_optional_init);
       let init = Expr::from_java(env, &java_init);
       delete_local_ref!(env, java_init);
-      Some(Box::new(init))
+      Some(init)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_init);
+    let init = init.map(|init| Box::new(init));
     let java_params = java_class.get_params(env, jobj);
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
@@ -33273,31 +33535,33 @@ impl FromJava for TsPropertySignature {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     let java_optional_type_params = java_class.get_type_params(env, jobj);
     let type_params = if optional_is_present(env, &java_optional_type_params) {
       let java_type_params = optional_get(env, &java_optional_type_params);
       let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
       delete_local_ref!(env, java_type_params);
-      Some(Box::new(type_params))
+      Some(type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
+    let type_params = type_params.map(|type_params| Box::new(type_params));
     TsPropertySignature {
-      span: DUMMY_SP,
-      readonly: readonly,
-      key: Box::new(key),
-      computed: computed,
-      optional: optional,
-      init: init.map(|init| init),
-      params: params,
-      type_ann: type_ann.map(|type_ann| type_ann),
-      type_params: type_params.map(|type_params| type_params),
+      span,
+      readonly,
+      key,
+      computed,
+      optional,
+      init,
+      params,
+      type_ann,
+      type_params,
     }
   }
 }
@@ -33338,8 +33602,8 @@ impl FromJava for TsQualifiedName {
     let right = Ident::from_java(env, &java_right);
     delete_local_ref!(env, java_right);
     TsQualifiedName {
-      left: left,
-      right: right,
+      left,
+      right,
     }
   }
 }
@@ -33370,12 +33634,14 @@ impl FromJava for TsRestType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_REST_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = TsType::from_java(env, &java_type_ann);
     delete_local_ref!(env, java_type_ann);
+    let type_ann = Box::new(type_ann);
     TsRestType {
-      span: DUMMY_SP,
-      type_ann: Box::new(type_ann),
+      span,
+      type_ann,
     }
   }
 }
@@ -33409,16 +33675,19 @@ impl FromJava for TsSatisfiesExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_SATISFIES_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     let java_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = TsType::from_java(env, &java_type_ann);
     delete_local_ref!(env, java_type_ann);
+    let type_ann = Box::new(type_ann);
     TsSatisfiesExpr {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
-      type_ann: Box::new(type_ann),
+      span,
+      expr,
+      type_ann,
     }
   }
 }
@@ -33455,22 +33724,24 @@ impl FromJava for TsSetterSignature {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_SETTER_SIGNATURE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let readonly = java_class.is_readonly(env, jobj);
     let java_key = java_class.get_key(env, jobj);
     let key = Expr::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
+    let key = Box::new(key);
     let computed = java_class.is_computed(env, jobj);
     let optional = java_class.is_optional(env, jobj);
     let java_param = java_class.get_param(env, jobj);
     let param = TsFnParam::from_java(env, &java_param);
     delete_local_ref!(env, java_param);
     TsSetterSignature {
-      span: DUMMY_SP,
-      readonly: readonly,
-      key: Box::new(key),
-      computed: computed,
-      optional: optional,
-      param: param,
+      span,
+      readonly,
+      key,
+      computed,
+      optional,
+      param,
     }
   }
 }
@@ -33497,8 +33768,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsThisType {
 impl FromJava for TsThisType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+    let span = DUMMY_SP;
     TsThisType {
-      span: DUMMY_SP,
+      span,
     }
   }
 }
@@ -33546,6 +33818,7 @@ impl FromJava for TsTplLitType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TPL_LIT_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_types = java_class.get_types(env, jobj);
     let length = list_size(env, &java_types);
     let types = (0..length).map(|i| {
@@ -33563,9 +33836,9 @@ impl FromJava for TsTplLitType {
       quasis
     }).collect();
     TsTplLitType {
-      span: DUMMY_SP,
-      types: types,
-      quasis: quasis,
+      span,
+      types,
+      quasis,
     }
   }
 }
@@ -33599,6 +33872,7 @@ impl FromJava for TsTupleElement {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TUPLE_ELEMENT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_optional_label = java_class.get_label(env, jobj);
     let label = if optional_is_present(env, &java_optional_label) {
       let java_label = optional_get(env, &java_optional_label);
@@ -33612,10 +33886,11 @@ impl FromJava for TsTupleElement {
     let java_ty = java_class.get_ty(env, jobj);
     let ty = TsType::from_java(env, &java_ty);
     delete_local_ref!(env, java_ty);
+    let ty = Box::new(ty);
     TsTupleElement {
-      span: DUMMY_SP,
-      label: label.map(|label| label),
-      ty: Box::new(ty),
+      span,
+      label,
+      ty,
     }
   }
 }
@@ -33653,6 +33928,7 @@ impl FromJava for TsTupleType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TUPLE_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_elem_types = java_class.get_elem_types(env, jobj);
     let length = list_size(env, &java_elem_types);
     let elem_types = (0..length).map(|i| {
@@ -33662,8 +33938,8 @@ impl FromJava for TsTupleType {
       elem_types
     }).collect();
     TsTupleType {
-      span: DUMMY_SP,
-      elem_types: elem_types,
+      span,
+      elem_types,
     }
   }
 }
@@ -33701,6 +33977,7 @@ impl FromJava for TsTypeAliasDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_ALIAS_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_id = java_class.get_id(env, jobj);
     let id = Ident::from_java(env, &java_id);
     delete_local_ref!(env, java_id);
@@ -33710,20 +33987,22 @@ impl FromJava for TsTypeAliasDecl {
       let java_type_params = optional_get(env, &java_optional_type_params);
       let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
       delete_local_ref!(env, java_type_params);
-      Some(Box::new(type_params))
+      Some(type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
+    let type_params = type_params.map(|type_params| Box::new(type_params));
     let java_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = TsType::from_java(env, &java_type_ann);
     delete_local_ref!(env, java_type_ann);
+    let type_ann = Box::new(type_ann);
     TsTypeAliasDecl {
-      span: DUMMY_SP,
-      id: id,
-      declare: declare,
-      type_params: type_params.map(|type_params| type_params),
-      type_ann: Box::new(type_ann),
+      span,
+      id,
+      declare,
+      type_params,
+      type_ann,
     }
   }
 }
@@ -33754,12 +34033,14 @@ impl FromJava for TsTypeAnn {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_ANN.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = TsType::from_java(env, &java_type_ann);
     delete_local_ref!(env, java_type_ann);
+    let type_ann = Box::new(type_ann);
     TsTypeAnn {
-      span: DUMMY_SP,
-      type_ann: Box::new(type_ann),
+      span,
+      type_ann,
     }
   }
 }
@@ -33793,16 +34074,19 @@ impl FromJava for TsTypeAssertion {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_ASSERTION.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
     let expr = Expr::from_java(env, &java_expr);
     delete_local_ref!(env, java_expr);
+    let expr = Box::new(expr);
     let java_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = TsType::from_java(env, &java_type_ann);
     delete_local_ref!(env, java_type_ann);
+    let type_ann = Box::new(type_ann);
     TsTypeAssertion {
-      span: DUMMY_SP,
-      expr: Box::new(expr),
-      type_ann: Box::new(type_ann),
+      span,
+      expr,
+      type_ann,
     }
   }
 }
@@ -33840,6 +34124,7 @@ impl FromJava for TsTypeLit {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_LIT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_members = java_class.get_members(env, jobj);
     let length = list_size(env, &java_members);
     let members = (0..length).map(|i| {
@@ -33849,8 +34134,8 @@ impl FromJava for TsTypeLit {
       members
     }).collect();
     TsTypeLit {
-      span: DUMMY_SP,
-      members: members,
+      span,
+      members,
     }
   }
 }
@@ -33883,16 +34168,18 @@ impl FromJava for TsTypeOperator {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_OPERATOR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_op = java_class.get_op(env, jobj);
     let op = TsTypeOperatorOp::from_java(env, &java_op);
     delete_local_ref!(env, java_op);
     let java_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = TsType::from_java(env, &java_type_ann);
     delete_local_ref!(env, java_type_ann);
+    let type_ann = Box::new(type_ann);
     TsTypeOperator {
-      span: DUMMY_SP,
-      op: op,
-      type_ann: Box::new(type_ann),
+      span,
+      op,
+      type_ann,
     }
   }
 }
@@ -33932,6 +34219,7 @@ impl FromJava for TsTypeParam {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_PARAM.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_name = java_class.get_name(env, jobj);
     let name = Ident::from_java(env, &java_name);
     delete_local_ref!(env, java_name);
@@ -33943,29 +34231,31 @@ impl FromJava for TsTypeParam {
       let java_constraint = optional_get(env, &java_optional_constraint);
       let constraint = TsType::from_java(env, &java_constraint);
       delete_local_ref!(env, java_constraint);
-      Some(Box::new(constraint))
+      Some(constraint)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_constraint);
+    let constraint = constraint.map(|constraint| Box::new(constraint));
     let java_optional_default = java_class.get_default(env, jobj);
     let default = if optional_is_present(env, &java_optional_default) {
       let java_default = optional_get(env, &java_optional_default);
       let default = TsType::from_java(env, &java_default);
       delete_local_ref!(env, java_default);
-      Some(Box::new(default))
+      Some(default)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_default);
+    let default = default.map(|default| Box::new(default));
     TsTypeParam {
-      span: DUMMY_SP,
-      name: name,
-      is_in: is_in,
-      is_out: is_out,
-      is_const: is_const,
-      constraint: constraint.map(|constraint| constraint),
-      default: default.map(|default| default),
+      span,
+      name,
+      is_in,
+      is_out,
+      is_const,
+      constraint,
+      default,
     }
   }
 }
@@ -34003,6 +34293,7 @@ impl FromJava for TsTypeParamDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_PARAM_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
@@ -34012,8 +34303,8 @@ impl FromJava for TsTypeParamDecl {
       params
     }).collect();
     TsTypeParamDecl {
-      span: DUMMY_SP,
-      params: params,
+      span,
+      params,
     }
   }
 }
@@ -34051,6 +34342,7 @@ impl FromJava for TsTypeParamInstantiation {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_PARAM_INSTANTIATION.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
@@ -34060,8 +34352,8 @@ impl FromJava for TsTypeParamInstantiation {
       Box::new(params)
     }).collect();
     TsTypeParamInstantiation {
-      span: DUMMY_SP,
-      params: params,
+      span,
+      params,
     }
   }
 }
@@ -34096,6 +34388,7 @@ impl FromJava for TsTypePredicate {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_PREDICATE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let asserts = java_class.is_asserts(env, jobj);
     let java_param_name = java_class.get_param_name(env, jobj);
     let param_name = TsThisTypeOrIdent::from_java(env, &java_param_name);
@@ -34105,16 +34398,17 @@ impl FromJava for TsTypePredicate {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
       let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
       delete_local_ref!(env, java_type_ann);
-      Some(Box::new(type_ann))
+      Some(type_ann)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_ann);
+    let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     TsTypePredicate {
-      span: DUMMY_SP,
-      asserts: asserts,
-      param_name: param_name,
-      type_ann: type_ann.map(|type_ann| type_ann),
+      span,
+      asserts,
+      param_name,
+      type_ann,
     }
   }
 }
@@ -34148,6 +34442,7 @@ impl FromJava for TsTypeQuery {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_QUERY.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_expr_name = java_class.get_expr_name(env, jobj);
     let expr_name = TsTypeQueryExpr::from_java(env, &java_expr_name);
     delete_local_ref!(env, java_expr_name);
@@ -34156,15 +34451,16 @@ impl FromJava for TsTypeQuery {
       let java_type_args = optional_get(env, &java_optional_type_args);
       let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
       delete_local_ref!(env, java_type_args);
-      Some(Box::new(type_args))
+      Some(type_args)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_args);
+    let type_args = type_args.map(|type_args| Box::new(type_args));
     TsTypeQuery {
-      span: DUMMY_SP,
-      expr_name: expr_name,
-      type_args: type_args.map(|type_args| type_args),
+      span,
+      expr_name,
+      type_args,
     }
   }
 }
@@ -34198,6 +34494,7 @@ impl FromJava for TsTypeRef {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_REF.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_type_name = java_class.get_type_name(env, jobj);
     let type_name = TsEntityName::from_java(env, &java_type_name);
     delete_local_ref!(env, java_type_name);
@@ -34206,15 +34503,16 @@ impl FromJava for TsTypeRef {
       let java_type_params = optional_get(env, &java_optional_type_params);
       let type_params = TsTypeParamInstantiation::from_java(env, &java_type_params);
       delete_local_ref!(env, java_type_params);
-      Some(Box::new(type_params))
+      Some(type_params)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_type_params);
+    let type_params = type_params.map(|type_params| Box::new(type_params));
     TsTypeRef {
-      span: DUMMY_SP,
-      type_name: type_name,
-      type_params: type_params.map(|type_params| type_params),
+      span,
+      type_name,
+      type_params,
     }
   }
 }
@@ -34252,6 +34550,7 @@ impl FromJava for TsUnionType {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_UNION_TYPE.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_types = java_class.get_types(env, jobj);
     let length = list_size(env, &java_types);
     let types = (0..length).map(|i| {
@@ -34261,8 +34560,8 @@ impl FromJava for TsUnionType {
       Box::new(types)
     }).collect();
     TsUnionType {
-      span: DUMMY_SP,
-      types: types,
+      span,
+      types,
     }
   }
 }
@@ -34295,16 +34594,18 @@ impl FromJava for UnaryExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_UNARY_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_op = java_class.get_op(env, jobj);
     let op = UnaryOp::from_java(env, &java_op);
     delete_local_ref!(env, java_op);
     let java_arg = java_class.get_arg(env, jobj);
     let arg = Expr::from_java(env, &java_arg);
     delete_local_ref!(env, java_arg);
+    let arg = Box::new(arg);
     UnaryExpr {
-      span: DUMMY_SP,
-      op: op,
-      arg: Box::new(arg),
+      span,
+      op,
+      arg,
     }
   }
 }
@@ -34338,6 +34639,7 @@ impl FromJava for UpdateExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_UPDATE_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_op = java_class.get_op(env, jobj);
     let op = UpdateOp::from_java(env, &java_op);
     delete_local_ref!(env, java_op);
@@ -34345,11 +34647,12 @@ impl FromJava for UpdateExpr {
     let java_arg = java_class.get_arg(env, jobj);
     let arg = Expr::from_java(env, &java_arg);
     delete_local_ref!(env, java_arg);
+    let arg = Box::new(arg);
     UpdateExpr {
-      span: DUMMY_SP,
-      op: op,
-      prefix: prefix,
-      arg: Box::new(arg),
+      span,
+      op,
+      prefix,
+      arg,
     }
   }
 }
@@ -34388,6 +34691,7 @@ impl FromJava for UsingDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_USING_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let is_await = java_class.is_await(env, jobj);
     let java_decls = java_class.get_decls(env, jobj);
     let length = list_size(env, &java_decls);
@@ -34398,9 +34702,9 @@ impl FromJava for UsingDecl {
       decls
     }).collect();
     UsingDecl {
-      span: DUMMY_SP,
-      is_await: is_await,
-      decls: decls,
+      span,
+      is_await,
+      decls,
     }
   }
 }
@@ -34441,6 +34745,7 @@ impl FromJava for VarDecl {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_VAR_DECL.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_kind = java_class.get_kind(env, jobj);
     let kind = VarDeclKind::from_java(env, &java_kind);
     delete_local_ref!(env, java_kind);
@@ -34454,10 +34759,10 @@ impl FromJava for VarDecl {
       decls
     }).collect();
     VarDecl {
-      span: DUMMY_SP,
-      kind: kind,
-      declare: declare,
-      decls: decls,
+      span,
+      kind,
+      declare,
+      decls,
     }
   }
 }
@@ -34492,6 +34797,7 @@ impl FromJava for VarDeclarator {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_VAR_DECLARATOR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_name = java_class.get_name(env, jobj);
     let name = Pat::from_java(env, &java_name);
     delete_local_ref!(env, java_name);
@@ -34500,17 +34806,18 @@ impl FromJava for VarDeclarator {
       let java_init = optional_get(env, &java_optional_init);
       let init = Expr::from_java(env, &java_init);
       delete_local_ref!(env, java_init);
-      Some(Box::new(init))
+      Some(init)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_init);
+    let init = init.map(|init| Box::new(init));
     let definite = java_class.is_definite(env, jobj);
     VarDeclarator {
-      span: DUMMY_SP,
-      name: name,
-      init: init.map(|init| init),
-      definite: definite,
+      span,
+      name,
+      init,
+      definite,
     }
   }
 }
@@ -34544,16 +34851,19 @@ impl FromJava for WhileStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_WHILE_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_test = java_class.get_test(env, jobj);
     let test = Expr::from_java(env, &java_test);
     delete_local_ref!(env, java_test);
+    let test = Box::new(test);
     let java_body = java_class.get_body(env, jobj);
     let body = Stmt::from_java(env, &java_body);
     delete_local_ref!(env, java_body);
+    let body = Box::new(body);
     WhileStmt {
-      span: DUMMY_SP,
-      test: Box::new(test),
-      body: Box::new(body),
+      span,
+      test,
+      body,
     }
   }
 }
@@ -34587,16 +34897,19 @@ impl FromJava for WithStmt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_WITH_STMT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_obj = java_class.get_obj(env, jobj);
     let obj = Expr::from_java(env, &java_obj);
     delete_local_ref!(env, java_obj);
+    let obj = Box::new(obj);
     let java_body = java_class.get_body(env, jobj);
     let body = Stmt::from_java(env, &java_body);
     delete_local_ref!(env, java_body);
+    let body = Box::new(body);
     WithStmt {
-      span: DUMMY_SP,
-      obj: Box::new(obj),
-      body: Box::new(body),
+      span,
+      obj,
+      body,
     }
   }
 }
@@ -34628,21 +34941,23 @@ impl FromJava for YieldExpr {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_YIELD_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_optional_arg = java_class.get_arg(env, jobj);
     let arg = if optional_is_present(env, &java_optional_arg) {
       let java_arg = optional_get(env, &java_optional_arg);
       let arg = Expr::from_java(env, &java_arg);
       delete_local_ref!(env, java_arg);
-      Some(Box::new(arg))
+      Some(arg)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_arg);
+    let arg = arg.map(|arg| Box::new(arg));
     let delegate = java_class.is_delegate(env, jobj);
     YieldExpr {
-      span: DUMMY_SP,
-      arg: arg.map(|arg| arg),
-      delegate: delegate,
+      span,
+      arg,
+      delegate,
     }
   }
 }

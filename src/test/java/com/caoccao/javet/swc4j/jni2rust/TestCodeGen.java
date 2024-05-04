@@ -507,12 +507,13 @@ public class TestCodeGen {
                                 .collect(Collectors.toList());
                         final List<String> processLines = new ArrayList<>();
                         final List<String> initLines = new ArrayList<>();
-                        if (jni2RustClassUtils.isSpan()) {
-                            initLines.add("      span: DUMMY_SP,");
-                        }
                         if (!fields.isEmpty()) {
                             lines.add(String.format("    let java_class = unsafe { JAVA_CLASS_%s.as_ref().unwrap() };",
                                     StringUtils.toSnakeCase(rawName).toUpperCase()));
+                        }
+                        if (jni2RustClassUtils.isSpan()) {
+                            processLines.add("    let span = DUMMY_SP;");
+                            initLines.add("      span,");
                         }
                         fields.forEach(field -> {
                             Jni2RustFieldUtils jni2RustFieldUtils = new Jni2RustFieldUtils(field);
@@ -547,18 +548,9 @@ public class TestCodeGen {
                                                     javaVar));
                                             processLines.add(String.format("      delete_local_ref!(env, %s);",
                                                     javaVar));
-                                            processLines.add(String.format("      Some(%s)",
-                                                    jni2RustFieldUtils.getComponentInitCode(arg)));
-                                            initLines.add(String.format("      %s: %s.map(|%s| %s),",
-                                                    arg,
-                                                    arg,
-                                                    arg,
-                                                    jni2RustFieldUtils.getTypeInitCode(arg)));
+                                            processLines.add(String.format("      Some(%s)", arg));
                                         } else if (Swc4jSpan.class.isAssignableFrom(innerClass)) {
                                             processLines.add("      Some(DUMMY_SP)");
-                                            initLines.add(String.format("      %s: %s,",
-                                                    arg,
-                                                    arg));
                                         } else if (innerClass == String.class) {
                                             processLines.add(String.format("      let %s = optional_get(env, &%s);",
                                                     javaVar,
@@ -568,11 +560,7 @@ public class TestCodeGen {
                                                     javaVar));
                                             processLines.add(String.format("      delete_local_ref!(env, %s);",
                                                     javaVar));
-                                            processLines.add(String.format("      Some(%s)",
-                                                    jni2RustFieldUtils.getComponentInitCode(arg)));
-                                            initLines.add(String.format("      %s: %s,",
-                                                    arg,
-                                                    arg));
+                                            processLines.add(String.format("      Some(%s)", arg));
                                         } else {
                                             fail(field.getGenericType().getTypeName() + " is not expected");
                                         }
@@ -596,10 +584,7 @@ public class TestCodeGen {
                                         processLines.add("        delete_local_ref!(env, java_item);");
                                         processLines.add(String.format("        %s", arg));
                                         processLines.add("      }).collect();");
-                                        processLines.add(String.format("      Some(%s)", jni2RustFieldUtils.getComponentInitCode(arg)));
-                                        initLines.add(String.format("      %s: %s,",
-                                                arg,
-                                                jni2RustFieldUtils.getTypeInitCode(arg)));
+                                        processLines.add(String.format("      Some(%s)", arg));
                                     } else {
                                         fail(field.getGenericType().getTypeName() + " is not expected");
                                     }
@@ -610,6 +595,18 @@ public class TestCodeGen {
                                             javaOptionalVar));
                                 } else {
                                     fail(field.getGenericType().getTypeName() + " is not expected");
+                                }
+                                if (jni2RustFieldUtils.isComponentBox()) {
+                                    if (jni2RustFieldUtils.isComponentAtom()) {
+                                        processLines.add(String.format("    let %s = %s.map(|%s| Box::new(%s.into()));",
+                                                arg, arg, arg, arg));
+                                    } else {
+                                        processLines.add(String.format("    let %s = %s.map(|%s| Box::new(%s));",
+                                                arg, arg, arg, arg));
+                                    }
+                                } else if (jni2RustFieldUtils.isComponentAtom()) {
+                                    processLines.add(String.format("    let %s = %s.map(|%s| %s.into());",
+                                            arg, arg, arg, arg));
                                 }
                             } else if (List.class.isAssignableFrom(fieldType)) {
                                 if (field.getGenericType() instanceof ParameterizedType) {
@@ -652,10 +649,18 @@ public class TestCodeGen {
                                         fail(innerType.getTypeName() + " is not expected");
                                     }
                                     processLines.add("      delete_local_ref!(env, java_item);");
-                                    processLines.add(String.format("      %s",
-                                            jni2RustFieldUtils.getComponentInitCode(arg)));
+                                    if (jni2RustFieldUtils.isComponentBox()) {
+                                        if (jni2RustFieldUtils.isComponentAtom()) {
+                                            processLines.add(String.format("      Box::new(%s.into())", arg));
+                                        } else {
+                                            processLines.add(String.format("      Box::new(%s)", arg));
+                                        }
+                                    } else if (jni2RustFieldUtils.isComponentAtom()) {
+                                        processLines.add(String.format("      %s.into()", arg));
+                                    } else {
+                                        processLines.add(String.format("      %s", arg));
+                                    }
                                     processLines.add("    }).collect();");
-                                    initLines.add(String.format("      %s: %s,", arg, arg));
                                 } else {
                                     fail(field.getGenericType().getTypeName() + " is not expected");
                                 }
@@ -668,21 +673,12 @@ public class TestCodeGen {
                                         new Jni2RustClassUtils<>(fieldType).getName(),
                                         javaVar));
                                 processLines.add(String.format("    delete_local_ref!(env, %s);", javaVar));
-                                initLines.add(String.format("      %s: %s,",
-                                        arg,
-                                        jni2RustFieldUtils.getTypeInitCode(arg)));
                             } else if (Swc4jSpan.class.isAssignableFrom(fieldType)) {
                                 processLines.add(String.format("    let %s = DUMMY_SP;", arg));
-                                initLines.add(String.format("      %s: %s,",
-                                        arg,
-                                        jni2RustFieldUtils.getTypeInitCode(arg)));
                             } else if (fieldType.isPrimitive() || fieldType == String.class) {
                                 processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
                                         arg,
                                         getterName));
-                                initLines.add(String.format("      %s: %s,",
-                                        arg,
-                                        jni2RustFieldUtils.getTypeInitCode(arg)));
                             } else if (fieldType.isEnum()) {
                                 processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
                                         javaVar,
@@ -692,12 +688,19 @@ public class TestCodeGen {
                                         new Jni2RustClassUtils<>(fieldType).getName(),
                                         javaVar));
                                 processLines.add(String.format("    delete_local_ref!(env, %s);", javaVar));
-                                initLines.add(String.format("      %s: %s,",
-                                        arg,
-                                        jni2RustFieldUtils.getTypeInitCode(arg)));
                             } else {
                                 fail(field.getGenericType().getTypeName() + " is not expected");
                             }
+                            if (jni2RustFieldUtils.isBox()) {
+                                if (jni2RustFieldUtils.isAtom()) {
+                                    processLines.add(String.format("    let %s = Box::new(%s.into());", arg, arg));
+                                } else {
+                                    processLines.add(String.format("    let %s = Box::new(%s);", arg, arg));
+                                }
+                            } else if (jni2RustFieldUtils.isAtom()) {
+                                processLines.add(String.format("    let %s = %s.into();", arg, arg));
+                            }
+                            initLines.add(String.format("      %s,", arg));
                         });
                         lines.addAll(processLines);
                         lines.add(String.format("    %s {", className));

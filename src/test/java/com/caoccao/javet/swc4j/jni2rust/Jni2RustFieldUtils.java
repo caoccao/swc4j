@@ -31,31 +31,11 @@ public class Jni2RustFieldUtils {
         optionalJni2RustField = Optional.ofNullable(AnnotationUtils.getAnnotation(field, Jni2RustField.class));
     }
 
-    public String getComponentInitCode(String name) {
-        if (isComponentAtom()) {
-            name = name + ".into()";
-        }
-        if (isComponentBox()) {
-            name = "Box::new(" + name + ")";
-        }
-        return name;
-    }
-
     public String getName() {
         return optionalJni2RustField
                 .map(Jni2RustField::name)
                 .filter(StringUtils::isNotEmpty)
                 .orElse(field.getName());
-    }
-
-    public String getTypeInitCode(String name) {
-        if (isAtom()) {
-            name = name + ".into()";
-        }
-        if (isBox()) {
-            name = "Box::new(" + name + ")";
-        }
-        return name;
     }
 
     public boolean isAtom() {
