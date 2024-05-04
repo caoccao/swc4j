@@ -55,8 +55,10 @@ impl FromJava for BigInt {
   #[allow(unused_variables)]
   fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_BIG_INT.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_sign = java_class.get_sign(env, &obj);
     let sign = Sign::from_java(env, &java_sign);
+    delete_local_ref!(env, java_sign);
     let java_optional_raw = java_class.get_raw(env, &obj);
     let optional_raw = if optional_is_present(env, &java_optional_raw) {
       let java_raw = optional_get(env, &java_optional_raw);
@@ -70,13 +72,14 @@ impl FromJava for BigInt {
       .as_ref()
       .map_or_else(|| Default::default(), |raw| BigUint::parse_bytes(&raw.as_bytes(), 10))
       .unwrap_or_else(|| Default::default());
-    delete_local_ref!(env, java_sign);
     delete_local_ref!(env, java_optional_raw);
     let value = BigIntValue::from_biguint(sign, data);
+    let value = Box::new(value);
+    let raw = optional_raw.map(|raw| raw.into());
     BigInt {
-      span: DUMMY_SP,
-      value : Box::new(value),
-      raw: optional_raw.map(|raw| raw.into()),
+      span,
+      value,
+      raw,
     }
   }
 }

@@ -53,7 +53,6 @@ public class Swc4jAstBigInt
         super(span);
         setRaw(raw);
         setSign(sign);
-        this.value = StringUtils.isEmpty(raw) ? BigInteger.ZERO : new BigInteger(raw.substring(0, raw.length() - 1));
     }
 
     @Override
@@ -83,6 +82,7 @@ public class Swc4jAstBigInt
 
     public Swc4jAstBigInt setRaw(String raw) {
         this.raw = Optional.ofNullable(raw);
+        value = StringUtils.isEmpty(raw) ? BigInteger.ZERO : new BigInteger(raw.substring(0, raw.length() - 1));
         return this;
     }
 
@@ -93,6 +93,7 @@ public class Swc4jAstBigInt
 
     public Swc4jAstBigInt setValue(BigInteger value) {
         this.value = AssertionUtils.notNull(value, "Value");
+        raw = Optional.of(value.toString());
         return this;
     }
 
