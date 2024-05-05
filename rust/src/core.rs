@@ -26,6 +26,14 @@ use crate::{enums, options, outputs};
 
 const VERSION: &'static str = "0.6.0";
 
+fn parse_by_mode(parse_params: ParseParams, parse_mode: enums::ParseMode) -> Result<ParsedSource, ParseDiagnostic> {
+  match parse_mode {
+    enums::ParseMode::Module => parse_module(parse_params),
+    enums::ParseMode::Script => parse_script(parse_params),
+    _ => parse_program(parse_params),
+  }
+}
+
 pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<outputs::ParseOutput, String> {
   let parse_params = ParseParams {
     specifier: options.get_specifier(),
@@ -35,12 +43,7 @@ pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<out
     maybe_syntax: None,
     scope_analysis: options.scope_analysis,
   };
-  let result = match options.parse_mode {
-    enums::ParseMode::Module => parse_module(parse_params),
-    enums::ParseMode::Script => parse_script(parse_params),
-    _ => parse_program(parse_params),
-  };
-  match result {
+  match parse_by_mode(parse_params, options.parse_mode) {
     Ok(parsed_source) => Ok(outputs::ParseOutput::new(&options, &parsed_source)),
     Err(e) => Err(e.to_string()),
   }
@@ -55,12 +58,7 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
     maybe_syntax: None,
     scope_analysis: false,
   };
-  let result = match options.parse_mode {
-    enums::ParseMode::Module => parse_module(parse_params),
-    enums::ParseMode::Script => parse_script(parse_params),
-    _ => parse_program(parse_params),
-  };
-  match result {
+  match parse_by_mode(parse_params, options.parse_mode) {
     Ok(parsed_source) => {
       let source_map = Lrc::new(SourceMap::new(FilePathMapping::empty()));
       source_map.new_source_file(FileName::Url(options.get_specifier()), code.to_owned());
@@ -146,12 +144,7 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
     maybe_syntax: None,
     scope_analysis: options.scope_analysis,
   };
-  let result = match options.parse_mode {
-    enums::ParseMode::Module => parse_module(parse_params),
-    enums::ParseMode::Script => parse_script(parse_params),
-    _ => parse_program(parse_params),
-  };
-  match result {
+  match parse_by_mode(parse_params, options.parse_mode) {
     Ok(parsed_source) => {
       let transpile_options = TranspileOptions {
         emit_metadata: options.emit_metadata,
