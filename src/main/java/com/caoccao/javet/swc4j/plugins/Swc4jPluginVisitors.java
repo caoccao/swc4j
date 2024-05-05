@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.plugins;
+package com.caoccao.javet.swc4j.plugins;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -22,25 +22,25 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
 
-public class Swc4jAstPluginVisitors implements ISwc4jAstPlugin {
+public class Swc4jPluginVisitors implements ISwc4jPlugin {
     protected final List<ISwc4jAstVisitor> visitors;
 
-    public Swc4jAstPluginVisitors(List<ISwc4jAstVisitor> visitors) {
+    public Swc4jPluginVisitors(List<ISwc4jAstVisitor> visitors) {
         this.visitors = AssertionUtils.notNull(visitors, "Visitors");
     }
 
     @Override
-    public Swc4jAstPluginResponse process(ISwc4jAstProgram<?> program) {
+    public Swc4jPluginResponse process(ISwc4jAstProgram<?> program) {
         for (ISwc4jAstVisitor visitor : visitors) {
             switch (program.visit(visitor)) {
                 case Error:
-                    return Swc4jAstPluginResponse.Error;
+                    return Swc4jPluginResponse.Error;
                 case OkAndBreak:
-                    return Swc4jAstPluginResponse.OkAndBreak;
+                    return Swc4jPluginResponse.OkAndBreak;
                 default:
                     break;
             }
         }
-        return Swc4jAstPluginResponse.OkAndContinue;
+        return Swc4jPluginResponse.OkAndContinue;
     }
 }

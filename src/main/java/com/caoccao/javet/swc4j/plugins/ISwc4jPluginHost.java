@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.plugins;
+package com.caoccao.javet.swc4j.plugins;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
+import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 
-public interface ISwc4jAstPlugin {
-    Swc4jAstPluginResponse process(ISwc4jAstProgram<?> program);
+@Jni2RustClass(filePath = Jni2RustFilePath.PluginUtils)
+public interface ISwc4jPluginHost {
+    @Jni2RustMethod
+    boolean process(ISwc4jAstProgram<?> program);
 }

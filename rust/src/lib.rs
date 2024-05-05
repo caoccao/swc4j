@@ -32,6 +32,7 @@ pub mod error;
 pub mod jni_utils;
 pub mod options;
 pub mod outputs;
+pub mod plugin_utils;
 pub mod span_utils;
 pub mod token_utils;
 
@@ -48,6 +49,7 @@ pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
   jni_utils::init(&mut env);
   options::init(&mut env);
   outputs::init(&mut env);
+  plugin_utils::init(&mut env);
   span_utils::init(&mut env);
   token_utils::init(&mut env);
   JNI_VERSION_1_8

@@ -158,7 +158,11 @@ public class Jni2Rust<T> {
                             lines.add("  ) -> String");
                         }
                     } else {
-                        lines.add("  ) -> JObject<'a>");
+                        if (jni2RustMethodUtils.isOptional()) {
+                            lines.add("  ) -> Option<JObject<'a>>");
+                        } else {
+                            lines.add("  ) -> JObject<'a>");
+                        }
                         lines.add("  where");
                         lines.add("    'local: 'a,");
                     }
@@ -223,7 +227,9 @@ public class Jni2Rust<T> {
                     lines.add(String.format("        &[%s],", StringUtils.join(", ", parameterNames)));
                     lines.add(String.format("        \"%s %s()\"", returnTypeName, methodName));
                     lines.add("      );");
-                    if (isString) {
+                    if (isPrimitive) {
+                        // Do nothing
+                    } else if (isString) {
                         lines.add("    let java_return_value = return_value;");
                         if (jni2RustMethodUtils.isOptional()) {
                             lines.add("    let return_value = jstring_to_optional_string!(env, java_return_value.as_raw());");
@@ -231,6 +237,14 @@ public class Jni2Rust<T> {
                             lines.add("    let return_value = jstring_to_string!(env, java_return_value.as_raw());");
                         }
                         lines.add("    delete_local_ref!(env, java_return_value);");
+                    } else {
+                        if (jni2RustMethodUtils.isOptional()) {
+                            lines.add("    let return_value = if return_value.is_null() {");
+                            lines.add("      None");
+                            lines.add("    } else {");
+                            lines.add("      Some(return_value)");
+                            lines.add("    };");
+                        }
                     }
                     // post-call
                     for (Parameter parameter : executable.getParameters()) {

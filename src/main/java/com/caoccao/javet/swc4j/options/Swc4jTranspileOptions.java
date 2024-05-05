@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.net.URL;
@@ -110,6 +111,12 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     protected boolean keepComments;
     /**
+     * The Plugin host.
+     *
+     * @since 0.6.0
+     */
+    protected ISwc4jPluginHost pluginHost;
+    /**
      * Should JSX be precompiled into static strings that need to be concatenated
      * with dynamic content. Defaults to `false`, mutually exclusive with
      * `transform_jsx`.
@@ -166,6 +173,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
         setJsxImportSource(null);
         setInlineSources(true);
         setKeepComments(false);
+        setPluginHost(null);
         setPrecompileJsx(false);
         setSourceMap(Swc4jSourceMapOption.Inline);
         setTransformJsx(true);
@@ -215,6 +223,17 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     @Jni2RustMethod(optional = true)
     public String getJsxImportSource() {
         return jsxImportSource;
+    }
+
+    /**
+     * Gets plugin host.
+     *
+     * @return the plugin host
+     * @since 0.6.0
+     */
+    @Jni2RustMethod(optional = true)
+    public ISwc4jPluginHost getPluginHost() {
+        return pluginHost;
     }
 
     /**
@@ -485,6 +504,18 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     public Swc4jTranspileOptions setParseMode(Swc4jParseMode parseMode) {
         super.setParseMode(parseMode);
+        return this;
+    }
+
+    /**
+     * Sets plugin host.
+     *
+     * @param pluginHost the plugin host
+     * @return the self
+     * @since 0.6.0
+     */
+    public Swc4jTranspileOptions setPluginHost(ISwc4jPluginHost pluginHost) {
+        this.pluginHost = pluginHost;
         return this;
     }
 

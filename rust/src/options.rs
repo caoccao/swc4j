@@ -23,6 +23,7 @@ use deno_ast::ModuleSpecifier;
 
 use crate::enums::*;
 use crate::jni_utils::*;
+use crate::plugin_utils::PluginHost;
 
 /* JavaSwc4jParseOptions Begin */
 #[allow(dead_code)]
@@ -548,6 +549,7 @@ struct JavaSwc4jTranspileOptions {
   method_get_jsx_import_source: JMethodID,
   method_get_media_type: JMethodID,
   method_get_parse_mode: JMethodID,
+  method_get_plugin_host: JMethodID,
   method_get_source_map: JMethodID,
   method_get_specifier: JMethodID,
   method_is_capture_ast: JMethodID,
@@ -619,6 +621,13 @@ impl JavaSwc4jTranspileOptions {
         "()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getParseMode");
+    let method_get_plugin_host = env
+      .get_method_id(
+        &class,
+        "getPluginHost",
+        "()Lcom/caoccao/javet/swc4j/plugins/ISwc4jPluginHost;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getPluginHost");
     let method_get_source_map = env
       .get_method_id(
         &class,
@@ -739,6 +748,7 @@ impl JavaSwc4jTranspileOptions {
       method_get_jsx_import_source,
       method_get_media_type,
       method_get_parse_mode,
+      method_get_plugin_host,
       method_get_source_map,
       method_get_specifier,
       method_is_capture_ast,
@@ -866,6 +876,29 @@ impl JavaSwc4jTranspileOptions {
         &[],
         "Swc4jParseMode get_parse_mode()"
       );
+    return_value
+  }
+
+  pub fn get_plugin_host<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Option<JObject<'a>>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_plugin_host,
+        &[],
+        "ISwc4jPluginHost get_plugin_host()"
+      );
+    let return_value = if return_value.is_null() {
+      None
+    } else {
+      Some(return_value)
+    };
     return_value
   }
 
@@ -1350,6 +1383,8 @@ pub struct TranspileOptions {
   pub media_type: MediaType,
   /// Should the code to be parsed as Module or Script,
   pub parse_mode: ParseMode,
+  /// AST plugin host.
+  pub plugin_host: Option<PluginHost>,
   /// Should JSX be precompiled into static strings that need to be concatenated
   /// with dynamic content. Defaults to `false`, mutually exclusive with
   /// `transform_jsx`.
@@ -1396,6 +1431,7 @@ impl Default for TranspileOptions {
       keep_comments: false,
       media_type: MediaType::TypeScript,
       parse_mode: ParseMode::Module,
+      plugin_host: None,
       precompile_jsx: false,
       scope_analysis: false,
       source_map: SourceMapOption::Inline,
@@ -1428,6 +1464,13 @@ impl FromJava for TranspileOptions {
     let media_type = MediaType::from_java(env, &java_media_type);
     let java_parse_mode = java_transpile_options.get_parse_mode(env, obj);
     let parse_mode = ParseMode::from_java(env, &java_parse_mode);
+    let java_optional_plugin_host = java_transpile_options.get_plugin_host(env, obj);
+    let plugin_host = java_optional_plugin_host.map(|host| {
+      let host = env
+        .new_global_ref(host)
+        .expect("Failed to create global reference for plugin host");
+      PluginHost::new(host)
+    });
     let precompile_jsx = java_transpile_options.is_precompile_jsx(env, obj);
     let scope_analysis = java_transpile_options.is_scope_analysis(env, obj);
     let java_source_map = java_transpile_options.get_source_map(env, obj);
@@ -1457,6 +1500,7 @@ impl FromJava for TranspileOptions {
       keep_comments,
       media_type,
       parse_mode,
+      plugin_host,
       precompile_jsx,
       scope_analysis,
       source_map,

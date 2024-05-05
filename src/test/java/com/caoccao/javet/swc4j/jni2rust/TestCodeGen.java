@@ -26,6 +26,8 @@ import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
+import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
+import com.caoccao.javet.swc4j.plugins.Swc4jPluginHost;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.tokens.Swc4jTokenFactory;
 import com.caoccao.javet.swc4j.utils.*;
@@ -745,6 +747,12 @@ public class TestCodeGen {
     @Test
     public void testSwc4jParseOutput() throws IOException {
         Jni2Rust<Swc4jParseOutput> jni2Rust = new Jni2Rust<>(Swc4jParseOutput.class);
+        jni2Rust.updateFile();
+    }
+
+    @Test
+    public void testSwc4jPluginHost() throws IOException {
+        Jni2Rust<ISwc4jPluginHost> jni2Rust = new Jni2Rust<>(ISwc4jPluginHost.class);
         jni2Rust.updateFile();
     }
 

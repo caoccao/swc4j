@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.plugins;
+package com.caoccao.javet.swc4j.plugins;
 
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 
-@Jni2RustClass(ignore = true)
-public enum Swc4jAstPluginResponse {
-    Error,
-    OkAndBreak,
-    OkAndContinue,
+public interface ISwc4jPlugin {
+    Swc4jPluginResponse process(ISwc4jAstProgram<?> program);
 }

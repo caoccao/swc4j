@@ -62,13 +62,13 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
     Ok(parsed_source) => {
       let source_map = Lrc::new(SourceMap::new(FilePathMapping::empty()));
       source_map.new_source_file(FileName::Url(options.get_specifier()), code.to_owned());
-      let mut minified_buffer = vec![];
-      let mut minified_source_map_buffer = vec![];
+      let mut buffer = vec![];
+      let mut source_map_buffer = vec![];
       let mut writer = Box::new(JsWriter::new(
         source_map.clone(),
         "\n",
-        &mut minified_buffer,
-        Some(&mut minified_source_map_buffer),
+        &mut buffer,
+        Some(&mut source_map_buffer),
       ));
       writer.set_indent_str("  "); // two spaces
       let config = Config::default()
@@ -93,7 +93,7 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
         Program::Script(script) => emitter.emit_script(script),
       };
       match result {
-        Ok(_) => match String::from_utf8(minified_buffer.to_vec()) {
+        Ok(_) => match String::from_utf8(buffer.to_vec()) {
           Ok(mut code) => {
             let source_map: Option<String> = if options.source_map != SourceMapOption::None {
               let mut buffer = Vec::new();
@@ -101,7 +101,7 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
                 inline_sources: options.inline_sources,
               };
               match source_map
-                .build_source_map_with_config(&minified_source_map_buffer, None, source_map_config)
+                .build_source_map_with_config(&source_map_buffer, None, source_map_config)
                 .to_writer(&mut buffer)
               {
                 Ok(_) => {

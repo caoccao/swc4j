@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024. caoccao.com Sam Cao
+ * Copyright (c) 2024-2024. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.plugins;
+package com.caoccao.javet.swc4j.plugins;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
 
-public class Swc4jAstPluginHost implements ISwc4jAstPluginHost {
-    protected final List<ISwc4jAstPlugin> plugins;
+public class Swc4jPluginHost implements ISwc4jPluginHost {
+    protected final List<ISwc4jPlugin> plugins;
 
-    public Swc4jAstPluginHost(List<ISwc4jAstPlugin> plugins) {
+    public Swc4jPluginHost(List<ISwc4jPlugin> plugins) {
         this.plugins = AssertionUtils.notNull(plugins, "Plugins");
     }
 
     @Override
-    public void process(ISwc4jAstProgram<?> program) {
-        for (ISwc4jAstPlugin plugin : plugins) {
-            if (plugin.process(program) != Swc4jAstPluginResponse.OkAndContinue) {
-                break;
+    public boolean process(ISwc4jAstProgram<?> program) {
+        for (ISwc4jPlugin plugin : plugins) {
+            if (plugin.process(program) != Swc4jPluginResponse.OkAndContinue) {
+                return false;
             }
         }
+        return true;
     }
 }
