@@ -18,11 +18,11 @@ package com.caoccao.javet.swc4j.tutorials;
 
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstRegex;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
+import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.comments.Swc4jComment;
 import com.caoccao.javet.swc4j.comments.Swc4jComments;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;

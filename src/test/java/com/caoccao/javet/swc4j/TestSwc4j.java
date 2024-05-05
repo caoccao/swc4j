@@ -16,28 +16,9 @@
 
 package com.caoccao.javet.swc4j;
 
-import com.caoccao.javet.swc4j.comments.Swc4jComment;
-import com.caoccao.javet.swc4j.comments.Swc4jCommentKind;
-import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
-import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
-import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
-import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
-import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
-import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
-import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
-import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
-import com.caoccao.javet.swc4j.tokens.Swc4jToken;
-import com.caoccao.javet.swc4j.tokens.Swc4jTokenType;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4j extends BaseTestSuite {
     @Test
