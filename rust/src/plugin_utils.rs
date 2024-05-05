@@ -27,13 +27,9 @@ pub struct PluginHost {
   host: GlobalRef,
 }
 
-impl<'a> PluginHost {
+impl PluginHost {
   pub fn new(host: GlobalRef) -> Self {
     PluginHost { host }
-  }
-
-  pub fn process() -> bool {
-    false
   }
 }
 

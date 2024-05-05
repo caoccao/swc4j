@@ -1114,6 +1114,7 @@ impl IdentifiableEnum<MethodKind> for MethodKind {
 #[derive(Default, Debug, Copy, Clone)]
 pub enum ParseMode {
   #[default]
+  Program,
   Module,
   Script,
 }
@@ -1121,15 +1122,17 @@ pub enum ParseMode {
 impl IdentifiableEnum<ParseMode> for ParseMode {
   fn get_id(&self) -> i32 {
     match self {
-      ParseMode::Module => 0,
-      ParseMode::Script => 1,
+      ParseMode::Program => 0,
+      ParseMode::Module => 1,
+      ParseMode::Script => 2,
     }
   }
   fn parse_by_id(id: i32) -> ParseMode {
     match id {
-      0 => ParseMode::Module,
-      1 => ParseMode::Script,
-      _ => ParseMode::Module,
+      0 => ParseMode::Program,
+      1 => ParseMode::Module,
+      2 => ParseMode::Script,
+      _ => ParseMode::Program,
     }
   }
 }

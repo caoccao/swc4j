@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.net.URL;
@@ -90,7 +91,6 @@ public class Swc4jTransformOptions extends Swc4jOptions {
      * @since 0.5.0
      */
     protected Swc4jEsVersion target;
-
     /**
      * Instantiates a new Swc4j transform options.
      *
@@ -271,6 +271,12 @@ public class Swc4jTransformOptions extends Swc4jOptions {
     @Override
     public Swc4jTransformOptions setParseMode(Swc4jParseMode parseMode) {
         super.setParseMode(parseMode);
+        return this;
+    }
+
+    @Override
+    public Swc4jTransformOptions setPluginHost(ISwc4jPluginHost pluginHost) {
+        super.setPluginHost(pluginHost);
         return this;
     }
 

@@ -36,8 +36,9 @@ pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<out
     scope_analysis: options.scope_analysis,
   };
   let result = match options.parse_mode {
+    enums::ParseMode::Module => parse_module(parse_params),
     enums::ParseMode::Script => parse_script(parse_params),
-    _ => parse_module(parse_params),
+    _ => parse_program(parse_params),
   };
   match result {
     Ok(parsed_source) => Ok(outputs::ParseOutput::new(&options, &parsed_source)),
@@ -55,8 +56,9 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
     scope_analysis: false,
   };
   let result = match options.parse_mode {
+    enums::ParseMode::Module => parse_module(parse_params),
     enums::ParseMode::Script => parse_script(parse_params),
-    _ => parse_module(parse_params),
+    _ => parse_program(parse_params),
   };
   match result {
     Ok(parsed_source) => {
@@ -145,8 +147,9 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
     scope_analysis: options.scope_analysis,
   };
   let result = match options.parse_mode {
+    enums::ParseMode::Module => parse_module(parse_params),
     enums::ParseMode::Script => parse_script(parse_params),
-    _ => parse_module(parse_params),
+    _ => parse_program(parse_params),
   };
   match result {
     Ok(parsed_source) => {

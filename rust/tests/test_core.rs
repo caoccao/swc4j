@@ -61,7 +61,7 @@ fn test_parse_typescript_with_capture_tokens() {
   let output = core::parse(code.to_owned(), options);
   assert!(output.is_ok());
   let output = output.unwrap();
-  assert!(matches!(output.parse_mode, ParseMode::Module));
+  assert!(matches!(output.parse_mode, ParseMode::Script));
   assert!(output.tokens.is_some());
   let tokens = output.tokens.unwrap();
   /*
@@ -113,7 +113,7 @@ fn test_parse_typescript_with_default_options() {
   let output = core::parse(code.to_owned(), options);
   assert!(output.is_ok());
   let output = output.unwrap();
-  assert!(matches!(output.parse_mode, ParseMode::Module));
+  assert!(matches!(output.parse_mode, ParseMode::Script));
   assert!(output.tokens.is_none());
 }
 
@@ -187,7 +187,7 @@ fn test_transform_with_default_options() {
   assert!(output.is_ok());
   let output = output.unwrap();
   assert_eq!(MediaType::TypeScript, output.media_type);
-  assert!(matches!(output.parse_mode, ParseMode::Module));
+  assert!(matches!(output.parse_mode, ParseMode::Script));
   let output_code = output.code;
   assert_eq!(expected_code, &output_code[0..expected_code.len()]);
   assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));
@@ -264,7 +264,7 @@ fn test_transpile_type_script_with_inline_source_map() {
   let output = core::transpile(code.to_owned(), options);
   assert!(output.is_ok());
   let output = output.unwrap();
-  assert!(matches!(output.parse_output.parse_mode, ParseMode::Module));
+  assert!(matches!(output.parse_output.parse_mode, ParseMode::Script));
   let output_code = output.code;
   assert_eq!(expected_code, &output_code[0..expected_code.len()]);
   assert!(output_code[expected_code.len()..].starts_with(expected_source_map_prefix));

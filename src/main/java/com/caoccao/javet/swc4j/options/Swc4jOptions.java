@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.options;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.net.MalformedURLException;
@@ -58,6 +59,12 @@ public abstract class Swc4jOptions {
      */
     protected Swc4jParseMode parseMode;
     /**
+     * The Plugin host.
+     *
+     * @since 0.6.0
+     */
+    protected ISwc4jPluginHost pluginHost;
+    /**
      * Specifier of the source text.
      *
      * @since 0.5.0
@@ -71,7 +78,8 @@ public abstract class Swc4jOptions {
      */
     public Swc4jOptions() {
         setMediaType(Swc4jMediaType.TypeScript);
-        setParseMode(Swc4jParseMode.Module);
+        setParseMode(Swc4jParseMode.Program);
+        setPluginHost(null);
         setSpecifier(DEFAULT_SPECIFIER);
     }
 
@@ -95,6 +103,17 @@ public abstract class Swc4jOptions {
     @Jni2RustMethod
     public Swc4jParseMode getParseMode() {
         return parseMode;
+    }
+
+    /**
+     * Gets plugin host.
+     *
+     * @return the plugin host
+     * @since 0.6.0
+     */
+    @Jni2RustMethod(optional = true)
+    public ISwc4jPluginHost getPluginHost() {
+        return pluginHost;
     }
 
     /**
@@ -129,6 +148,18 @@ public abstract class Swc4jOptions {
      */
     public Swc4jOptions setParseMode(Swc4jParseMode parseMode) {
         this.parseMode = AssertionUtils.notNull(parseMode, "Parse mode");
+        return this;
+    }
+
+    /**
+     * Sets plugin host.
+     *
+     * @param pluginHost the plugin host
+     * @return the self
+     * @since 0.6.0
+     */
+    public Swc4jOptions setPluginHost(ISwc4jPluginHost pluginHost) {
+        this.pluginHost = pluginHost;
         return this;
     }
 

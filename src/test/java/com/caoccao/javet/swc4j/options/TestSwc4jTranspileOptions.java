@@ -206,7 +206,11 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
                 .setSourceMap(Swc4jSourceMapOption.Separate));
         assertNotNull(output);
         assertEquals(expectedCode, output.getCode());
-        assertEquals(parseMode, output.getParseMode());
+        Swc4jParseMode expectedParseMode = parseMode;
+        if (expectedParseMode == Swc4jParseMode.Program) {
+            expectedParseMode = Swc4jParseMode.Script;
+        }
+        assertEquals(expectedParseMode, output.getParseMode());
         assertNotNull(output.getSourceMap());
         Stream.of(expectedProperties).forEach(p -> assertTrue(
                 output.getSourceMap().contains("\"" + p + "\""),

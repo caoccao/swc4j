@@ -111,12 +111,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     protected boolean keepComments;
     /**
-     * The Plugin host.
-     *
-     * @since 0.6.0
-     */
-    protected ISwc4jPluginHost pluginHost;
-    /**
      * Should JSX be precompiled into static strings that need to be concatenated
      * with dynamic content. Defaults to `false`, mutually exclusive with
      * `transform_jsx`.
@@ -173,7 +167,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
         setJsxImportSource(null);
         setInlineSources(true);
         setKeepComments(false);
-        setPluginHost(null);
         setPrecompileJsx(false);
         setSourceMap(Swc4jSourceMapOption.Inline);
         setTransformJsx(true);
@@ -223,17 +216,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     @Jni2RustMethod(optional = true)
     public String getJsxImportSource() {
         return jsxImportSource;
-    }
-
-    /**
-     * Gets plugin host.
-     *
-     * @return the plugin host
-     * @since 0.6.0
-     */
-    @Jni2RustMethod(optional = true)
-    public ISwc4jPluginHost getPluginHost() {
-        return pluginHost;
     }
 
     /**
@@ -507,15 +489,9 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
         return this;
     }
 
-    /**
-     * Sets plugin host.
-     *
-     * @param pluginHost the plugin host
-     * @return the self
-     * @since 0.6.0
-     */
+    @Override
     public Swc4jTranspileOptions setPluginHost(ISwc4jPluginHost pluginHost) {
-        this.pluginHost = pluginHost;
+        super.setPluginHost(pluginHost);
         return this;
     }
 

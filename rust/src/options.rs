@@ -31,6 +31,7 @@ struct JavaSwc4jParseOptions {
   class: GlobalRef,
   method_get_media_type: JMethodID,
   method_get_parse_mode: JMethodID,
+  method_get_plugin_host: JMethodID,
   method_get_specifier: JMethodID,
   method_is_capture_ast: JMethodID,
   method_is_capture_comments: JMethodID,
@@ -63,6 +64,13 @@ impl JavaSwc4jParseOptions {
         "()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;",
       )
       .expect("Couldn't find method Swc4jParseOptions.getParseMode");
+    let method_get_plugin_host = env
+      .get_method_id(
+        &class,
+        "getPluginHost",
+        "()Lcom/caoccao/javet/swc4j/plugins/ISwc4jPluginHost;",
+      )
+      .expect("Couldn't find method Swc4jParseOptions.getPluginHost");
     let method_get_specifier = env
       .get_method_id(
         &class,
@@ -102,6 +110,7 @@ impl JavaSwc4jParseOptions {
       class,
       method_get_media_type,
       method_get_parse_mode,
+      method_get_plugin_host,
       method_get_specifier,
       method_is_capture_ast,
       method_is_capture_comments,
@@ -143,6 +152,29 @@ impl JavaSwc4jParseOptions {
         &[],
         "Swc4jParseMode get_parse_mode()"
       );
+    return_value
+  }
+
+  pub fn get_plugin_host<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Option<JObject<'a>>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_plugin_host,
+        &[],
+        "ISwc4jPluginHost get_plugin_host()"
+      );
+    let return_value = if return_value.is_null() {
+      None
+    } else {
+      Some(return_value)
+    };
     return_value
   }
 
@@ -236,6 +268,7 @@ struct JavaSwc4jTransformOptions {
   class: GlobalRef,
   method_get_media_type: JMethodID,
   method_get_parse_mode: JMethodID,
+  method_get_plugin_host: JMethodID,
   method_get_source_map: JMethodID,
   method_get_specifier: JMethodID,
   method_get_target: JMethodID,
@@ -272,6 +305,13 @@ impl JavaSwc4jTransformOptions {
         "()Lcom/caoccao/javet/swc4j/enums/Swc4jParseMode;",
       )
       .expect("Couldn't find method Swc4jTransformOptions.getParseMode");
+    let method_get_plugin_host = env
+      .get_method_id(
+        &class,
+        "getPluginHost",
+        "()Lcom/caoccao/javet/swc4j/plugins/ISwc4jPluginHost;",
+      )
+      .expect("Couldn't find method Swc4jTransformOptions.getPluginHost");
     let method_get_source_map = env
       .get_method_id(
         &class,
@@ -339,6 +379,7 @@ impl JavaSwc4jTransformOptions {
       class,
       method_get_media_type,
       method_get_parse_mode,
+      method_get_plugin_host,
       method_get_source_map,
       method_get_specifier,
       method_get_target,
@@ -384,6 +425,29 @@ impl JavaSwc4jTransformOptions {
         &[],
         "Swc4jParseMode get_parse_mode()"
       );
+    return_value
+  }
+
+  pub fn get_plugin_host<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Option<JObject<'a>>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_plugin_host,
+        &[],
+        "ISwc4jPluginHost get_plugin_host()"
+      );
+    let return_value = if return_value.is_null() {
+      None
+    } else {
+      Some(return_value)
+    };
     return_value
   }
 
@@ -1188,6 +1252,8 @@ pub struct ParseOptions {
   pub media_type: MediaType,
   /// Should the code to be parsed as Module or Script.
   pub parse_mode: ParseMode,
+  /// AST plugin host.
+  pub plugin_host: Option<PluginHost>,
   /// Whether to apply swc's scope analysis.
   pub scope_analysis: bool,
   /// Specifier of the source text.
@@ -1208,7 +1274,8 @@ impl Default for ParseOptions {
       capture_comments: false,
       capture_tokens: false,
       media_type: MediaType::TypeScript,
-      parse_mode: ParseMode::Module,
+      parse_mode: ParseMode::Program,
+      plugin_host: None,
       scope_analysis: false,
       specifier: "file:///main.js".to_owned(),
     }
@@ -1226,6 +1293,13 @@ impl FromJava for ParseOptions {
     let scope_analysis = java_parse_options.is_scope_analysis(env, obj);
     let specifier = java_parse_options.get_specifier(env, obj);
     let specifier = url_to_string(env, &specifier);
+    let java_optional_plugin_host = java_parse_options.get_plugin_host(env, obj);
+    let plugin_host = java_optional_plugin_host.map(|host| {
+      let host = env
+        .new_global_ref(host)
+        .expect("Failed to create global reference for plugin host");
+      PluginHost::new(host)
+    });
     let java_parse_mode = java_parse_options.get_parse_mode(env, obj);
     let parse_mode = ParseMode::from_java(env, &java_parse_mode);
     delete_local_ref!(env, java_media_type);
@@ -1236,6 +1310,7 @@ impl FromJava for ParseOptions {
       capture_tokens,
       media_type,
       parse_mode,
+      plugin_host,
       scope_analysis,
       specifier,
     }
@@ -1263,6 +1338,8 @@ pub struct TransformOptions {
   pub omit_last_semi: bool,
   /// Should the code to be parsed as Module or Script.
   pub parse_mode: ParseMode,
+  /// AST plugin host.
+  pub plugin_host: Option<PluginHost>,
   /// How and if source maps should be generated.
   pub source_map: SourceMapOption,
   /// Specifier of the source text.
@@ -1296,7 +1373,8 @@ impl Default for TransformOptions {
       media_type: MediaType::TypeScript,
       minify: true,
       omit_last_semi: false,
-      parse_mode: ParseMode::Module,
+      parse_mode: ParseMode::Program,
+      plugin_host: None,
       source_map: SourceMapOption::Inline,
       specifier: "file:///main.js".to_owned(),
       target: EsVersion::latest(),
@@ -1319,6 +1397,13 @@ impl FromJava for TransformOptions {
     let source_map = SourceMapOption::from_java(env, &java_source_map);
     let java_parse_mode = java_transform_options.get_parse_mode(env, obj);
     let parse_mode = ParseMode::from_java(env, &java_parse_mode);
+    let java_optional_plugin_host = java_transform_options.get_plugin_host(env, obj);
+    let plugin_host = java_optional_plugin_host.map(|host| {
+      let host = env
+        .new_global_ref(host)
+        .expect("Failed to create global reference for plugin host");
+      PluginHost::new(host)
+    });
     let specifier = java_transform_options.get_specifier(env, obj);
     let specifier = url_to_string(env, &specifier);
     let java_target = java_transform_options.get_target(env, obj);
@@ -1336,6 +1421,7 @@ impl FromJava for TransformOptions {
       minify,
       omit_last_semi,
       parse_mode,
+      plugin_host,
       source_map,
       specifier,
       target,
@@ -1430,7 +1516,7 @@ impl Default for TranspileOptions {
       jsx_import_source: None,
       keep_comments: false,
       media_type: MediaType::TypeScript,
-      parse_mode: ParseMode::Module,
+      parse_mode: ParseMode::Program,
       plugin_host: None,
       precompile_jsx: false,
       scope_analysis: false,

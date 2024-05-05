@@ -28,8 +28,10 @@ import java.util.stream.Stream;
  * @since 0.1.0
  */
 public enum Swc4jParseMode implements ISwc4jEnumId {
-    Module(0),
-    Script(1);
+    Program(0),
+    Module(1),
+    Script(2),
+    ;
 
     private static final int LENGTH = values().length;
     private static final Swc4jParseMode[] TYPES = new Swc4jParseMode[LENGTH];
@@ -52,7 +54,7 @@ public enum Swc4jParseMode implements ISwc4jEnumId {
      * @since 0.1.0
      */
     public static Swc4jParseMode parse(int id) {
-        return id >= 0 && id < LENGTH ? TYPES[id] : Module;
+        return id >= 0 && id < LENGTH ? TYPES[id] : Program;
     }
 
     @Override

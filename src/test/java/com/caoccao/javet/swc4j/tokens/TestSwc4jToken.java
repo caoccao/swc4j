@@ -80,7 +80,7 @@ public class TestSwc4jToken extends BaseTestSuite {
         String code = "function add加法(a變量:number, b變量:number) { return a變量+b變量; }";
         Swc4jParseOutput output = swc4j.parse(code, options);
         assertNotNull(output);
-        assertEquals(Swc4jParseMode.Module, output.getParseMode());
+        assertEquals(Swc4jParseMode.Script, output.getParseMode());
         List<Swc4jToken> tokens = output.getTokens();
         assertNotNull(tokens);
         assertEquals(18, tokens.size());

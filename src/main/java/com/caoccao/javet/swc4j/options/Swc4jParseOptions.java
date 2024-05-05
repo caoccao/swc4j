@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 
 import java.net.URL;
 
@@ -158,6 +159,12 @@ public class Swc4jParseOptions extends Swc4jOptions {
     @Override
     public Swc4jParseOptions setParseMode(Swc4jParseMode parseMode) {
         super.setParseMode(parseMode);
+        return this;
+    }
+
+    @Override
+    public Swc4jParseOptions setPluginHost(ISwc4jPluginHost pluginHost) {
+        super.setPluginHost(pluginHost);
         return this;
     }
 
