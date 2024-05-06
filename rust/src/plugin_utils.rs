@@ -20,7 +20,10 @@ use jni::signature::{Primitive, ReturnType};
 use jni::sys::jvalue;
 use jni::JNIEnv;
 
+use deno_ast::swc::ast::{Module, Program, Script};
+
 use crate::jni_utils::*;
+use crate::span_utils::{ByteToIndexMap, RegisterWithMap, ToJavaWithMap};
 
 #[derive(Debug)]
 pub struct PluginHost<'local> {
@@ -33,6 +36,60 @@ impl<'local> PluginHost<'local> {
     PluginHost {
       env: unsafe { env.unsafe_clone() },
       host,
+    }
+  }
+
+  pub fn process_module(&mut self, s: &str, module: Module) -> Module {
+    let java_class = unsafe { JAVA_CLASS_I_PLUGIN_HOST.as_ref().unwrap() };
+    let mut map = ByteToIndexMap::new();
+    module.register_with_map(&mut map);
+    map.update_by_str(s);
+    let java_module = module.to_java_with_map(&mut self.env, &map);
+    let module = if java_class.process(&mut self.env, &self.host, &java_module) {
+      Module::from_java(&mut self.env, &java_module)
+    } else {
+      module
+    };
+    delete_local_ref!(self.env, java_module);
+    module
+  }
+
+  pub fn process_program(&mut self, s: &str, program: Program) -> Program {
+    let java_class = unsafe { JAVA_CLASS_I_PLUGIN_HOST.as_ref().unwrap() };
+    let mut map = ByteToIndexMap::new();
+    program.register_with_map(&mut map);
+    map.update_by_str(s);
+    let java_program = program.to_java_with_map(&mut self.env, &map);
+    let program = if java_class.process(&mut self.env, &self.host, &java_program) {
+      Program::from_java(&mut self.env, &java_program)
+    } else {
+      program
+    };
+    delete_local_ref!(self.env, java_program);
+    program
+  }
+
+  pub fn process_script(&mut self, s: &str, script: Script) -> Script {
+    let java_class = unsafe { JAVA_CLASS_I_PLUGIN_HOST.as_ref().unwrap() };
+    let mut map = ByteToIndexMap::new();
+    script.register_with_map(&mut map);
+    map.update_by_str(s);
+    let java_script = script.to_java_with_map(&mut self.env, &map);
+    let script = if java_class.process(&mut self.env, &self.host, &java_script) {
+      Script::from_java(&mut self.env, &java_script)
+    } else {
+      script
+    };
+    delete_local_ref!(self.env, java_script);
+    script
+  }
+}
+
+impl<'local> Clone for PluginHost<'local> {
+  fn clone(&self) -> Self {
+    PluginHost {
+      env: unsafe { self.env.unsafe_clone() },
+      host: self.host.clone(),
     }
   }
 }

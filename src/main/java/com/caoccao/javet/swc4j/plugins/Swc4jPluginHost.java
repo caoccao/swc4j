@@ -18,14 +18,29 @@ package com.caoccao.javet.swc4j.plugins;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.Collections;
 import java.util.List;
 
 public class Swc4jPluginHost implements ISwc4jPluginHost {
     protected final List<ISwc4jPlugin> plugins;
 
+    public Swc4jPluginHost() {
+        this(SimpleList.of());
+    }
+
     public Swc4jPluginHost(List<ISwc4jPlugin> plugins) {
         this.plugins = AssertionUtils.notNull(plugins, "Plugins");
+    }
+
+    public Swc4jPluginHost add(ISwc4jPlugin... plugins) {
+        Collections.addAll(this.plugins, plugins);
+        return this;
+    }
+
+    public List<ISwc4jPlugin> getPlugins() {
+        return plugins;
     }
 
     @Override
@@ -36,5 +51,10 @@ public class Swc4jPluginHost implements ISwc4jPluginHost {
             }
         }
         return true;
+    }
+
+    public Swc4jPluginHost remove(ISwc4jPlugin... plugins) {
+        this.plugins.removeAll(SimpleList.of(plugins));
+        return this;
     }
 }

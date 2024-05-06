@@ -128,7 +128,7 @@ macro_rules! call_static_as_object {
 pub(crate) use call_static_as_object;
 
 macro_rules! delete_local_optional_ref {
-  ($env: ident, $name: expr) => {
+  ($env: expr, $name: expr) => {
     $name.map(|j| match $env.delete_local_ref(j) {
       Ok(_) => {}
       Err(err) => panic!("Couldn't delete local {} because {}", stringify!($name), err),
@@ -138,7 +138,7 @@ macro_rules! delete_local_optional_ref {
 pub(crate) use delete_local_optional_ref;
 
 macro_rules! delete_local_ref {
-  ($env: ident, $name: expr) => {
+  ($env: expr, $name: expr) => {
     match $env.delete_local_ref($name) {
       Ok(_) => {}
       Err(err) => panic!("Couldn't delete local {} because {}", stringify!($name), err),

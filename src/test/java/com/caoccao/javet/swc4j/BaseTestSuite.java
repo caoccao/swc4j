@@ -30,12 +30,18 @@ public abstract class BaseTestSuite {
     protected Swc4jParseOptions jsModuleParseOptions;
     protected Swc4jTransformOptions jsModuleTransformOptions;
     protected Swc4jTranspileOptions jsModuleTranspileOptions;
+    protected Swc4jParseOptions jsProgramParseOptions;
+    protected Swc4jTransformOptions jsProgramTransformOptions;
+    protected Swc4jTranspileOptions jsProgramTranspileOptions;
     protected Swc4jParseOptions jsScriptParseOptions;
     protected Swc4jTransformOptions jsScriptTransformOptions;
     protected Swc4jTranspileOptions jsScriptTranspileOptions;
     protected Swc4jParseOptions jsxModuleParseOptions;
     protected Swc4jTransformOptions jsxModuleTransformOptions;
     protected Swc4jTranspileOptions jsxModuleTranspileOptions;
+    protected Swc4jParseOptions jsxProgramParseOptions;
+    protected Swc4jTransformOptions jsxProgramTransformOptions;
+    protected Swc4jTranspileOptions jsxProgramTranspileOptions;
     protected Swc4jParseOptions jsxScriptParseOptions;
     protected Swc4jTransformOptions jsxScriptTransformOptions;
     protected Swc4jTranspileOptions jsxScriptTranspileOptions;
@@ -44,6 +50,9 @@ public abstract class BaseTestSuite {
     protected Swc4jParseOptions tsModuleParseOptions;
     protected Swc4jTransformOptions tsModuleTransformOptions;
     protected Swc4jTranspileOptions tsModuleTranspileOptions;
+    protected Swc4jParseOptions tsProgramParseOptions;
+    protected Swc4jTransformOptions tsProgramTransformOptions;
+    protected Swc4jTranspileOptions tsProgramTranspileOptions;
     protected Swc4jParseOptions tsScriptParseOptions;
     protected Swc4jTransformOptions tsScriptTransformOptions;
     protected Swc4jTranspileOptions tsScriptTranspileOptions;
@@ -58,18 +67,27 @@ public abstract class BaseTestSuite {
         jsModuleParseOptions = new Swc4jParseOptions();
         jsModuleTransformOptions = new Swc4jTransformOptions();
         jsModuleTranspileOptions = new Swc4jTranspileOptions();
+        jsProgramParseOptions = new Swc4jParseOptions();
+        jsProgramTransformOptions = new Swc4jTransformOptions();
+        jsProgramTranspileOptions = new Swc4jTranspileOptions();
         jsScriptParseOptions = new Swc4jParseOptions();
         jsScriptTransformOptions = new Swc4jTransformOptions();
         jsScriptTranspileOptions = new Swc4jTranspileOptions();
         jsxModuleParseOptions = new Swc4jParseOptions();
         jsxModuleTransformOptions = new Swc4jTransformOptions();
         jsxModuleTranspileOptions = new Swc4jTranspileOptions();
+        jsxProgramParseOptions = new Swc4jParseOptions();
+        jsxProgramTransformOptions = new Swc4jTransformOptions();
+        jsxProgramTranspileOptions = new Swc4jTranspileOptions();
         jsxScriptParseOptions = new Swc4jParseOptions();
         jsxScriptTransformOptions = new Swc4jTransformOptions();
         jsxScriptTranspileOptions = new Swc4jTranspileOptions();
         tsModuleParseOptions = new Swc4jParseOptions();
         tsModuleTransformOptions = new Swc4jTransformOptions();
         tsModuleTranspileOptions = new Swc4jTranspileOptions();
+        tsProgramParseOptions = new Swc4jParseOptions();
+        tsProgramTransformOptions = new Swc4jTransformOptions();
+        tsProgramTranspileOptions = new Swc4jTranspileOptions();
         tsScriptParseOptions = new Swc4jParseOptions();
         tsScriptTransformOptions = new Swc4jTransformOptions();
         tsScriptTranspileOptions = new Swc4jTranspileOptions();
@@ -77,6 +95,9 @@ public abstract class BaseTestSuite {
                 jsModuleParseOptions,
                 jsModuleTransformOptions,
                 jsModuleTranspileOptions,
+                jsProgramParseOptions,
+                jsProgramTransformOptions,
+                jsProgramTranspileOptions,
                 jsScriptParseOptions,
                 jsScriptTransformOptions,
                 jsScriptTranspileOptions
@@ -85,6 +106,9 @@ public abstract class BaseTestSuite {
                 jsxModuleParseOptions,
                 jsxModuleTransformOptions,
                 jsxModuleTranspileOptions,
+                jsxProgramParseOptions,
+                jsxProgramTransformOptions,
+                jsxProgramTranspileOptions,
                 jsxScriptParseOptions,
                 jsxScriptTransformOptions,
                 jsxScriptTranspileOptions
@@ -93,6 +117,9 @@ public abstract class BaseTestSuite {
                 tsModuleParseOptions,
                 tsModuleTransformOptions,
                 tsModuleTranspileOptions,
+                tsProgramParseOptions,
+                tsProgramTransformOptions,
+                tsProgramTranspileOptions,
                 tsScriptParseOptions,
                 tsScriptTransformOptions,
                 tsScriptTranspileOptions
@@ -108,6 +135,17 @@ public abstract class BaseTestSuite {
                 tsModuleTransformOptions,
                 tsModuleTranspileOptions
         ).forEach(options -> options.setParseMode(Swc4jParseMode.Module));
+        SimpleList.of(
+                jsProgramParseOptions,
+                jsProgramTransformOptions,
+                jsProgramTranspileOptions,
+                jsxProgramParseOptions,
+                jsxProgramTransformOptions,
+                jsxProgramTranspileOptions,
+                tsProgramParseOptions,
+                tsProgramTransformOptions,
+                tsProgramTranspileOptions
+        ).forEach(options -> options.setParseMode(Swc4jParseMode.Program));
         SimpleList.of(
                 jsScriptParseOptions,
                 jsScriptTransformOptions,

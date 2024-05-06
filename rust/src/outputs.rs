@@ -308,25 +308,7 @@ impl ParseOutput {
         map.register_by_span(&token_and_span.span);
       })
     });
-    // Fill the values
-    let mut utf8_byte_length: usize = 0;
-    let chars = self.source_text.chars();
-    let mut char_count = 0u32;
-    let mut line = 1u32;
-    let mut column = 1u32;
-    chars.for_each(|c| {
-      map.update(&utf8_byte_length, char_count, line, column);
-      utf8_byte_length += c.len_utf8();
-      char_count += 1;
-      column = if c == '\n' {
-        line += 1;
-        1
-      } else {
-        column + 1
-      }
-    });
-    column = 1;
-    map.update(&utf8_byte_length, char_count, line, column);
+    map.update_by_str(self.source_text.as_str());
     map
   }
 }

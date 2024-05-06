@@ -120,6 +120,26 @@ impl ByteToIndexMap {
       v.column = column;
     });
   }
+
+  pub fn update_by_str(&mut self, s: &str) {
+    let mut utf8_byte_length: usize = 0;
+    let mut char_count = 0u32;
+    let mut line = 1u32;
+    let mut column = 1u32;
+    s.chars().for_each(|c| {
+      self.update(&utf8_byte_length, char_count, line, column);
+      utf8_byte_length += c.len_utf8();
+      char_count += 1;
+      column = if c == '\n' {
+        line += 1;
+        1
+      } else {
+        column + 1
+      }
+    });
+    column = 1;
+    self.update(&utf8_byte_length, char_count, line, column);
+  }
 }
 
 /* JavaSwc4jSpan Begin */
