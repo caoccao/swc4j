@@ -81,8 +81,8 @@ macro_rules! declare_identifiable_enum {
 
     static mut $static_name: Option<$struct_name> = None;
 
-    impl FromJava for $enum_name {
-      fn from_java<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'a>) -> $enum_name {
+    impl<'local> FromJava<'local> for $enum_name {
+      fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> $enum_name {
         let id = call_as_int!(
           env,
           obj.as_ref(),

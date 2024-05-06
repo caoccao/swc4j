@@ -23,13 +23,17 @@ use jni::JNIEnv;
 use crate::jni_utils::*;
 
 #[derive(Debug)]
-pub struct PluginHost {
+pub struct PluginHost<'local> {
+  env: JNIEnv<'local>,
   host: GlobalRef,
 }
 
-impl PluginHost {
-  pub fn new(host: GlobalRef) -> Self {
-    PluginHost { host }
+impl<'local> PluginHost<'local> {
+  pub fn new(env: &mut JNIEnv<'local>, host: GlobalRef) -> Self {
+    PluginHost {
+      env: unsafe { env.unsafe_clone() },
+      host,
+    }
   }
 }
 

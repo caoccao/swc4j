@@ -51,9 +51,9 @@ impl ToJavaWithMap<ByteToIndexMap> for BigInt {
   }
 }
 
-impl FromJava for BigInt {
+impl<'local> FromJava<'local> for BigInt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_BIG_INT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_sign = java_class.get_sign(env, &obj);
@@ -23463,9 +23463,9 @@ impl ToJavaWithMap<ByteToIndexMap> for AssignTarget {
   }
 }
 
-impl FromJava for AssignTarget {
+impl<'local> FromJava<'local> for AssignTarget {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ASSIGN_TARGET_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
         AssignTarget::Pat(AssignTargetPat::from_java(env, jobj))
@@ -23504,9 +23504,9 @@ impl ToJavaWithMap<ByteToIndexMap> for AssignTargetPat {
   }
 }
 
-impl FromJava for AssignTargetPat {
+impl<'local> FromJava<'local> for AssignTargetPat {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ARRAY_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
         AssignTargetPat::Array(ArrayPat::from_java(env, jobj))
@@ -23545,9 +23545,9 @@ impl ToJavaWithMap<ByteToIndexMap> for BlockStmtOrExpr {
   }
 }
 
-impl FromJava for BlockStmtOrExpr {
+impl<'local> FromJava<'local> for BlockStmtOrExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BLOCK_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
         BlockStmtOrExpr::BlockStmt(BlockStmt::from_java(env, jobj))
@@ -23586,9 +23586,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Callee {
   }
 }
 
-impl FromJava for Callee {
+impl<'local> FromJava<'local> for Callee {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
         Callee::Expr(Box::new(Expr::from_java(env, jobj)))
@@ -23641,9 +23641,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ClassMember {
   }
 }
 
-impl FromJava for ClassMember {
+impl<'local> FromJava<'local> for ClassMember {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_AUTO_ACCESSOR.as_ref().unwrap()}.class)).unwrap_or(false) {
         ClassMember::AutoAccessor(AutoAccessor::from_java(env, jobj))
@@ -23706,9 +23706,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Decl {
   }
 }
 
-impl FromJava for Decl {
+impl<'local> FromJava<'local> for Decl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_CLASS_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
         Decl::Class(ClassDecl::from_java(env, jobj))
@@ -23759,9 +23759,9 @@ impl ToJavaWithMap<ByteToIndexMap> for DefaultDecl {
   }
 }
 
-impl FromJava for DefaultDecl {
+impl<'local> FromJava<'local> for DefaultDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_CLASS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
         DefaultDecl::Class(ClassExpr::from_java(env, jobj))
@@ -23802,9 +23802,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ExportSpecifier {
   }
 }
 
-impl FromJava for ExportSpecifier {
+impl<'local> FromJava<'local> for ExportSpecifier {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPORT_DEFAULT_SPECIFIER.as_ref().unwrap()}.class)).unwrap_or(false) {
         ExportSpecifier::Default(ExportDefaultSpecifier::from_java(env, jobj))
@@ -23915,9 +23915,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Expr {
   }
 }
 
-impl FromJava for Expr {
+impl<'local> FromJava<'local> for Expr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ARRAY_LIT.as_ref().unwrap()}.class)).unwrap_or(false) {
         Expr::Array(ArrayLit::from_java(env, jobj))
@@ -24028,9 +24028,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ForHead {
   }
 }
 
-impl FromJava for ForHead {
+impl<'local> FromJava<'local> for ForHead {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
         ForHead::Pat(Box::new(Pat::from_java(env, jobj)))
@@ -24071,9 +24071,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ImportSpecifier {
   }
 }
 
-impl FromJava for ImportSpecifier {
+impl<'local> FromJava<'local> for ImportSpecifier {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IMPORT_DEFAULT_SPECIFIER.as_ref().unwrap()}.class)).unwrap_or(false) {
         ImportSpecifier::Default(ImportDefaultSpecifier::from_java(env, jobj))
@@ -24112,9 +24112,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXAttrName {
   }
 }
 
-impl FromJava for JSXAttrName {
+impl<'local> FromJava<'local> for JSXAttrName {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
         JSXAttrName::Ident(Ident::from_java(env, jobj))
@@ -24151,9 +24151,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXAttrOrSpread {
   }
 }
 
-impl FromJava for JSXAttrOrSpread {
+impl<'local> FromJava<'local> for JSXAttrOrSpread {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_ATTR.as_ref().unwrap()}.class)).unwrap_or(false) {
         JSXAttrOrSpread::JSXAttr(JSXAttr::from_java(env, jobj))
@@ -24194,9 +24194,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXAttrValue {
   }
 }
 
-impl FromJava for JSXAttrValue {
+impl<'local> FromJava<'local> for JSXAttrValue {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_ELEMENT.as_ref().unwrap()}.class)).unwrap_or(false) {
         JSXAttrValue::JSXElement(Box::new(JSXElement::from_java(env, jobj)))
@@ -24243,9 +24243,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXElementChild {
   }
 }
 
-impl FromJava for JSXElementChild {
+impl<'local> FromJava<'local> for JSXElementChild {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_ELEMENT.as_ref().unwrap()}.class)).unwrap_or(false) {
         JSXElementChild::JSXElement(Box::new(JSXElement::from_java(env, jobj)))
@@ -24290,9 +24290,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXElementName {
   }
 }
 
-impl FromJava for JSXElementName {
+impl<'local> FromJava<'local> for JSXElementName {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
         JSXElementName::Ident(Ident::from_java(env, jobj))
@@ -24331,9 +24331,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXExpr {
   }
 }
 
-impl FromJava for JSXExpr {
+impl<'local> FromJava<'local> for JSXExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
         JSXExpr::Expr(Box::new(Expr::from_java(env, jobj)))
@@ -24370,9 +24370,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXObject {
   }
 }
 
-impl FromJava for JSXObject {
+impl<'local> FromJava<'local> for JSXObject {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
         JSXObject::Ident(Ident::from_java(env, jobj))
@@ -24409,9 +24409,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Key {
   }
 }
 
-impl FromJava for Key {
+impl<'local> FromJava<'local> for Key {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
         Key::Private(PrivateName::from_java(env, jobj))
@@ -24458,9 +24458,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Lit {
   }
 }
 
-impl FromJava for Lit {
+impl<'local> FromJava<'local> for Lit {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BIG_INT.as_ref().unwrap()}.class)).unwrap_or(false) {
         Lit::BigInt(BigInt::from_java(env, jobj))
@@ -24509,9 +24509,9 @@ impl ToJavaWithMap<ByteToIndexMap> for MemberProp {
   }
 }
 
-impl FromJava for MemberProp {
+impl<'local> FromJava<'local> for MemberProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
         MemberProp::Computed(ComputedPropName::from_java(env, jobj))
@@ -24564,9 +24564,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ModuleDecl {
   }
 }
 
-impl FromJava for ModuleDecl {
+impl<'local> FromJava<'local> for ModuleDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPORT_ALL.as_ref().unwrap()}.class)).unwrap_or(false) {
         ModuleDecl::ExportAll(ExportAll::from_java(env, jobj))
@@ -24617,9 +24617,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ModuleExportName {
   }
 }
 
-impl FromJava for ModuleExportName {
+impl<'local> FromJava<'local> for ModuleExportName {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
         ModuleExportName::Ident(Ident::from_java(env, jobj))
@@ -24656,9 +24656,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ModuleItem {
   }
 }
 
-impl FromJava for ModuleItem {
+impl<'local> FromJava<'local> for ModuleItem {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_MODULE_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
         ModuleItem::ModuleDecl(ModuleDecl::from_java(env, jobj))
@@ -24697,9 +24697,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ObjectPatProp {
   }
 }
 
-impl FromJava for ObjectPatProp {
+impl<'local> FromJava<'local> for ObjectPatProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ASSIGN_PAT_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
         ObjectPatProp::Assign(AssignPatProp::from_java(env, jobj))
@@ -24738,9 +24738,9 @@ impl ToJavaWithMap<ByteToIndexMap> for OptChainBase {
   }
 }
 
-impl FromJava for OptChainBase {
+impl<'local> FromJava<'local> for OptChainBase {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_OPT_CALL.as_ref().unwrap()}.class)).unwrap_or(false) {
         OptChainBase::Call(OptCall::from_java(env, jobj))
@@ -24777,9 +24777,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ParamOrTsParamProp {
   }
 }
 
-impl FromJava for ParamOrTsParamProp {
+impl<'local> FromJava<'local> for ParamOrTsParamProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PARAM.as_ref().unwrap()}.class)).unwrap_or(false) {
         ParamOrTsParamProp::Param(Param::from_java(env, jobj))
@@ -24826,9 +24826,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Pat {
   }
 }
 
-impl FromJava for Pat {
+impl<'local> FromJava<'local> for Pat {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ARRAY_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
         Pat::Array(ArrayPat::from_java(env, jobj))
@@ -24875,9 +24875,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Program {
   }
 }
 
-impl FromJava for Program {
+impl<'local> FromJava<'local> for Program {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_MODULE.as_ref().unwrap()}.class)).unwrap_or(false) {
         Program::Module(Module::from_java(env, jobj))
@@ -24922,9 +24922,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Prop {
   }
 }
 
-impl FromJava for Prop {
+impl<'local> FromJava<'local> for Prop {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ASSIGN_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
         Prop::Assign(AssignProp::from_java(env, jobj))
@@ -24975,9 +24975,9 @@ impl ToJavaWithMap<ByteToIndexMap> for PropName {
   }
 }
 
-impl FromJava for PropName {
+impl<'local> FromJava<'local> for PropName {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BIG_INT.as_ref().unwrap()}.class)).unwrap_or(false) {
         PropName::BigInt(BigInt::from_java(env, jobj))
@@ -25020,9 +25020,9 @@ impl ToJavaWithMap<ByteToIndexMap> for PropOrSpread {
   }
 }
 
-impl FromJava for PropOrSpread {
+impl<'local> FromJava<'local> for PropOrSpread {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
         PropOrSpread::Prop(Box::new(Prop::from_java(env, jobj)))
@@ -25077,9 +25077,9 @@ impl ToJavaWithMap<ByteToIndexMap> for SimpleAssignTarget {
   }
 }
 
-impl FromJava for SimpleAssignTarget {
+impl<'local> FromJava<'local> for SimpleAssignTarget {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BINDING_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
         SimpleAssignTarget::Ident(BindingIdent::from_java(env, jobj))
@@ -25168,9 +25168,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Stmt {
   }
 }
 
-impl FromJava for Stmt {
+impl<'local> FromJava<'local> for Stmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BLOCK_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
         Stmt::Block(BlockStmt::from_java(env, jobj))
@@ -25241,9 +25241,9 @@ impl ToJavaWithMap<ByteToIndexMap> for SuperProp {
   }
 }
 
-impl FromJava for SuperProp {
+impl<'local> FromJava<'local> for SuperProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
         SuperProp::Computed(ComputedPropName::from_java(env, jobj))
@@ -25280,9 +25280,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsEntityName {
   }
 }
 
-impl FromJava for TsEntityName {
+impl<'local> FromJava<'local> for TsEntityName {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsEntityName::Ident(Ident::from_java(env, jobj))
@@ -25319,9 +25319,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsEnumMemberId {
   }
 }
 
-impl FromJava for TsEnumMemberId {
+impl<'local> FromJava<'local> for TsEnumMemberId {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsEnumMemberId::Ident(Ident::from_java(env, jobj))
@@ -25358,9 +25358,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsFnOrConstructorType {
   }
 }
 
-impl FromJava for TsFnOrConstructorType {
+impl<'local> FromJava<'local> for TsFnOrConstructorType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_CONSTRUCTOR_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsFnOrConstructorType::TsConstructorType(TsConstructorType::from_java(env, jobj))
@@ -25401,9 +25401,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsFnParam {
   }
 }
 
-impl FromJava for TsFnParam {
+impl<'local> FromJava<'local> for TsFnParam {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ARRAY_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsFnParam::Array(ArrayPat::from_java(env, jobj))
@@ -25450,9 +25450,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsLit {
   }
 }
 
-impl FromJava for TsLit {
+impl<'local> FromJava<'local> for TsLit {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BIG_INT.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsLit::BigInt(BigInt::from_java(env, jobj))
@@ -25495,9 +25495,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsModuleName {
   }
 }
 
-impl FromJava for TsModuleName {
+impl<'local> FromJava<'local> for TsModuleName {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsModuleName::Ident(Ident::from_java(env, jobj))
@@ -25534,9 +25534,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsModuleRef {
   }
 }
 
-impl FromJava for TsModuleRef {
+impl<'local> FromJava<'local> for TsModuleRef {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_ENTITY_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsModuleRef::TsEntityName(TsEntityName::from_java(env, jobj))
@@ -25573,9 +25573,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsNamespaceBody {
   }
 }
 
-impl FromJava for TsNamespaceBody {
+impl<'local> FromJava<'local> for TsNamespaceBody {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_MODULE_BLOCK.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsNamespaceBody::TsModuleBlock(TsModuleBlock::from_java(env, jobj))
@@ -25612,9 +25612,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsParamPropParam {
   }
 }
 
-impl FromJava for TsParamPropParam {
+impl<'local> FromJava<'local> for TsParamPropParam {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ASSIGN_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsParamPropParam::Assign(AssignPat::from_java(env, jobj))
@@ -25651,9 +25651,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsThisTypeOrIdent {
   }
 }
 
-impl FromJava for TsThisTypeOrIdent {
+impl<'local> FromJava<'local> for TsThisTypeOrIdent {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsThisTypeOrIdent::Ident(Ident::from_java(env, jobj))
@@ -25726,9 +25726,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsType {
   }
 }
 
-impl FromJava for TsType {
+impl<'local> FromJava<'local> for TsType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_ARRAY_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsType::TsArrayType(TsArrayType::from_java(env, jobj))
@@ -25811,9 +25811,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeElement {
   }
 }
 
-impl FromJava for TsTypeElement {
+impl<'local> FromJava<'local> for TsTypeElement {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_CALL_SIGNATURE_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsTypeElement::TsCallSignatureDecl(TsCallSignatureDecl::from_java(env, jobj))
@@ -25860,9 +25860,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeQueryExpr {
   }
 }
 
-impl FromJava for TsTypeQueryExpr {
+impl<'local> FromJava<'local> for TsTypeQueryExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_IMPORT_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsTypeQueryExpr::Import(TsImportType::from_java(env, jobj))
@@ -25899,9 +25899,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsUnionOrIntersectionType {
   }
 }
 
-impl FromJava for TsUnionOrIntersectionType {
+impl<'local> FromJava<'local> for TsUnionOrIntersectionType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_INTERSECTION_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
         TsUnionOrIntersectionType::TsIntersectionType(TsIntersectionType::from_java(env, jobj))
@@ -25938,9 +25938,9 @@ impl ToJavaWithMap<ByteToIndexMap> for VarDeclOrExpr {
   }
 }
 
-impl FromJava for VarDeclOrExpr {
+impl<'local> FromJava<'local> for VarDeclOrExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
         VarDeclOrExpr::Expr(Box::new(Expr::from_java(env, jobj)))
@@ -25989,9 +25989,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ArrayLit {
   }
 }
 
-impl FromJava for ArrayLit {
+impl<'local> FromJava<'local> for ArrayLit {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ARRAY_LIT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_elems = java_class.get_elems(env, jobj);
@@ -26051,9 +26051,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ArrayPat {
   }
 }
 
-impl FromJava for ArrayPat {
+impl<'local> FromJava<'local> for ArrayPat {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ARRAY_PAT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_elems = java_class.get_elems(env, jobj);
@@ -26132,9 +26132,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ArrowExpr {
   }
 }
 
-impl FromJava for ArrowExpr {
+impl<'local> FromJava<'local> for ArrowExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ARROW_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
@@ -26212,9 +26212,9 @@ impl ToJavaWithMap<ByteToIndexMap> for AssignExpr {
   }
 }
 
-impl FromJava for AssignExpr {
+impl<'local> FromJava<'local> for AssignExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ASSIGN_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_op = java_class.get_op(env, jobj);
@@ -26261,9 +26261,9 @@ impl ToJavaWithMap<ByteToIndexMap> for AssignPat {
   }
 }
 
-impl FromJava for AssignPat {
+impl<'local> FromJava<'local> for AssignPat {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ASSIGN_PAT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_left = java_class.get_left(env, jobj);
@@ -26307,9 +26307,9 @@ impl ToJavaWithMap<ByteToIndexMap> for AssignPatProp {
   }
 }
 
-impl FromJava for AssignPatProp {
+impl<'local> FromJava<'local> for AssignPatProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ASSIGN_PAT_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
@@ -26359,9 +26359,9 @@ impl ToJavaWithMap<ByteToIndexMap> for AssignProp {
   }
 }
 
-impl FromJava for AssignProp {
+impl<'local> FromJava<'local> for AssignProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ASSIGN_PROP.as_ref().unwrap() };
     let java_key = java_class.get_key(env, jobj);
     let key = Ident::from_java(env, &java_key);
@@ -26420,9 +26420,9 @@ impl ToJavaWithMap<ByteToIndexMap> for AutoAccessor {
   }
 }
 
-impl FromJava for AutoAccessor {
+impl<'local> FromJava<'local> for AutoAccessor {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_AUTO_ACCESSOR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
@@ -26507,9 +26507,9 @@ impl ToJavaWithMap<ByteToIndexMap> for AwaitExpr {
   }
 }
 
-impl FromJava for AwaitExpr {
+impl<'local> FromJava<'local> for AwaitExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_AWAIT_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_arg = java_class.get_arg(env, jobj);
@@ -26556,9 +26556,9 @@ impl ToJavaWithMap<ByteToIndexMap> for BinExpr {
   }
 }
 
-impl FromJava for BinExpr {
+impl<'local> FromJava<'local> for BinExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_BIN_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_op = java_class.get_op(env, jobj);
@@ -26606,9 +26606,9 @@ impl ToJavaWithMap<ByteToIndexMap> for BindingIdent {
   }
 }
 
-impl FromJava for BindingIdent {
+impl<'local> FromJava<'local> for BindingIdent {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_BINDING_IDENT.as_ref().unwrap() };
     let java_id = java_class.get_id(env, jobj);
     let id = Ident::from_java(env, &java_id);
@@ -26660,9 +26660,9 @@ impl ToJavaWithMap<ByteToIndexMap> for BlockStmt {
   }
 }
 
-impl FromJava for BlockStmt {
+impl<'local> FromJava<'local> for BlockStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_BLOCK_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_stmts = java_class.get_stmts(env, jobj);
@@ -26700,9 +26700,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Bool {
   }
 }
 
-impl FromJava for Bool {
+impl<'local> FromJava<'local> for Bool {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_BOOL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let value = java_class.is_value(env, jobj);
@@ -26735,9 +26735,9 @@ impl ToJavaWithMap<ByteToIndexMap> for BreakStmt {
   }
 }
 
-impl FromJava for BreakStmt {
+impl<'local> FromJava<'local> for BreakStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_BREAK_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_optional_label = java_class.get_label(env, jobj);
@@ -26792,9 +26792,9 @@ impl ToJavaWithMap<ByteToIndexMap> for CallExpr {
   }
 }
 
-impl FromJava for CallExpr {
+impl<'local> FromJava<'local> for CallExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CALL_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_callee = java_class.get_callee(env, jobj);
@@ -26853,9 +26853,9 @@ impl ToJavaWithMap<ByteToIndexMap> for CatchClause {
   }
 }
 
-impl FromJava for CatchClause {
+impl<'local> FromJava<'local> for CatchClause {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CATCH_CLAUSE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_optional_param = java_class.get_param(env, jobj);
@@ -26938,9 +26938,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Class {
   }
 }
 
-impl FromJava for Class {
+impl<'local> FromJava<'local> for Class {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CLASS.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_decorators = java_class.get_decorators(env, jobj);
@@ -27040,9 +27040,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ClassDecl {
   }
 }
 
-impl FromJava for ClassDecl {
+impl<'local> FromJava<'local> for ClassDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CLASS_DECL.as_ref().unwrap() };
     let java_ident = java_class.get_ident(env, jobj);
     let ident = Ident::from_java(env, &java_ident);
@@ -27085,9 +27085,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ClassExpr {
   }
 }
 
-impl FromJava for ClassExpr {
+impl<'local> FromJava<'local> for ClassExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CLASS_EXPR.as_ref().unwrap() };
     let java_optional_ident = java_class.get_ident(env, jobj);
     let ident = if optional_is_present(env, &java_optional_ident) {
@@ -27143,9 +27143,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ClassMethod {
   }
 }
 
-impl FromJava for ClassMethod {
+impl<'local> FromJava<'local> for ClassMethod {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CLASS_METHOD.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
@@ -27233,9 +27233,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ClassProp {
   }
 }
 
-impl FromJava for ClassProp {
+impl<'local> FromJava<'local> for ClassProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CLASS_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
@@ -27328,9 +27328,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ComputedPropName {
   }
 }
 
-impl FromJava for ComputedPropName {
+impl<'local> FromJava<'local> for ComputedPropName {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -27372,9 +27372,9 @@ impl ToJavaWithMap<ByteToIndexMap> for CondExpr {
   }
 }
 
-impl FromJava for CondExpr {
+impl<'local> FromJava<'local> for CondExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_COND_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_test = java_class.get_test(env, jobj);
@@ -27436,9 +27436,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Constructor {
   }
 }
 
-impl FromJava for Constructor {
+impl<'local> FromJava<'local> for Constructor {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CONSTRUCTOR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
@@ -27506,9 +27506,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ContinueStmt {
   }
 }
 
-impl FromJava for ContinueStmt {
+impl<'local> FromJava<'local> for ContinueStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CONTINUE_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_optional_label = java_class.get_label(env, jobj);
@@ -27547,9 +27547,9 @@ impl ToJavaWithMap<ByteToIndexMap> for DebuggerStmt {
   }
 }
 
-impl FromJava for DebuggerStmt {
+impl<'local> FromJava<'local> for DebuggerStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let span = DUMMY_SP;
     DebuggerStmt {
       span,
@@ -27579,9 +27579,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Decorator {
   }
 }
 
-impl FromJava for Decorator {
+impl<'local> FromJava<'local> for Decorator {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_DECORATOR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -27620,9 +27620,9 @@ impl ToJavaWithMap<ByteToIndexMap> for DoWhileStmt {
   }
 }
 
-impl FromJava for DoWhileStmt {
+impl<'local> FromJava<'local> for DoWhileStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_DO_WHILE_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_test = java_class.get_test(env, jobj);
@@ -27660,9 +27660,9 @@ impl ToJavaWithMap<ByteToIndexMap> for EmptyStmt {
   }
 }
 
-impl FromJava for EmptyStmt {
+impl<'local> FromJava<'local> for EmptyStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let span = DUMMY_SP;
     EmptyStmt {
       span,
@@ -27696,9 +27696,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ExportAll {
   }
 }
 
-impl FromJava for ExportAll {
+impl<'local> FromJava<'local> for ExportAll {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPORT_ALL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_src = java_class.get_src(env, jobj);
@@ -27748,9 +27748,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ExportDecl {
   }
 }
 
-impl FromJava for ExportDecl {
+impl<'local> FromJava<'local> for ExportDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPORT_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_decl = java_class.get_decl(env, jobj);
@@ -27785,9 +27785,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ExportDefaultDecl {
   }
 }
 
-impl FromJava for ExportDefaultDecl {
+impl<'local> FromJava<'local> for ExportDefaultDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPORT_DEFAULT_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_decl = java_class.get_decl(env, jobj);
@@ -27822,9 +27822,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ExportDefaultExpr {
   }
 }
 
-impl FromJava for ExportDefaultExpr {
+impl<'local> FromJava<'local> for ExportDefaultExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPORT_DEFAULT_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -27860,9 +27860,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ExportDefaultSpecifier {
   }
 }
 
-impl FromJava for ExportDefaultSpecifier {
+impl<'local> FromJava<'local> for ExportDefaultSpecifier {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPORT_DEFAULT_SPECIFIER.as_ref().unwrap() };
     let java_exported = java_class.get_exported(env, jobj);
     let exported = Ident::from_java(env, &java_exported);
@@ -27899,9 +27899,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ExportNamedSpecifier {
   }
 }
 
-impl FromJava for ExportNamedSpecifier {
+impl<'local> FromJava<'local> for ExportNamedSpecifier {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPORT_NAMED_SPECIFIER.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_orig = java_class.get_orig(env, jobj);
@@ -27949,9 +27949,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ExportNamespaceSpecifier {
   }
 }
 
-impl FromJava for ExportNamespaceSpecifier {
+impl<'local> FromJava<'local> for ExportNamespaceSpecifier {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPORT_NAMESPACE_SPECIFIER.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_name = java_class.get_name(env, jobj);
@@ -27988,9 +27988,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ExprOrSpread {
   }
 }
 
-impl FromJava for ExprOrSpread {
+impl<'local> FromJava<'local> for ExprOrSpread {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPR_OR_SPREAD.as_ref().unwrap() };
     let java_optional_spread = java_class.get_spread(env, jobj);
     let spread = if optional_is_present(env, &java_optional_spread) {
@@ -28032,9 +28032,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ExprStmt {
   }
 }
 
-impl FromJava for ExprStmt {
+impl<'local> FromJava<'local> for ExprStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_EXPR_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -28074,9 +28074,9 @@ impl ToJavaWithMap<ByteToIndexMap> for FnDecl {
   }
 }
 
-impl FromJava for FnDecl {
+impl<'local> FromJava<'local> for FnDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_FN_DECL.as_ref().unwrap() };
     let java_ident = java_class.get_ident(env, jobj);
     let ident = Ident::from_java(env, &java_ident);
@@ -28119,9 +28119,9 @@ impl ToJavaWithMap<ByteToIndexMap> for FnExpr {
   }
 }
 
-impl FromJava for FnExpr {
+impl<'local> FromJava<'local> for FnExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_FN_EXPR.as_ref().unwrap() };
     let java_optional_ident = java_class.get_ident(env, jobj);
     let ident = if optional_is_present(env, &java_optional_ident) {
@@ -28172,9 +28172,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ForInStmt {
   }
 }
 
-impl FromJava for ForInStmt {
+impl<'local> FromJava<'local> for ForInStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_FOR_IN_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_left = java_class.get_left(env, jobj);
@@ -28226,9 +28226,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ForOfStmt {
   }
 }
 
-impl FromJava for ForOfStmt {
+impl<'local> FromJava<'local> for ForOfStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_FOR_OF_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let is_await = java_class.is_await(env, jobj);
@@ -28284,9 +28284,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ForStmt {
   }
 }
 
-impl FromJava for ForStmt {
+impl<'local> FromJava<'local> for ForStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_FOR_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_optional_init = java_class.get_init(env, jobj);
@@ -28385,9 +28385,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Function {
   }
 }
 
-impl FromJava for Function {
+impl<'local> FromJava<'local> for Function {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_FUNCTION.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
@@ -28481,9 +28481,9 @@ impl ToJavaWithMap<ByteToIndexMap> for GetterProp {
   }
 }
 
-impl FromJava for GetterProp {
+impl<'local> FromJava<'local> for GetterProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_GETTER_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
@@ -28540,9 +28540,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Ident {
   }
 }
 
-impl FromJava for Ident {
+impl<'local> FromJava<'local> for Ident {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IDENT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let sym = java_class.get_sym(env, jobj);
@@ -28584,9 +28584,9 @@ impl ToJavaWithMap<ByteToIndexMap> for IfStmt {
   }
 }
 
-impl FromJava for IfStmt {
+impl<'local> FromJava<'local> for IfStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IF_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_test = java_class.get_test(env, jobj);
@@ -28638,9 +28638,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Import {
   }
 }
 
-impl FromJava for Import {
+impl<'local> FromJava<'local> for Import {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IMPORT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_phase = java_class.get_phase(env, jobj);
@@ -28691,9 +28691,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ImportDecl {
   }
 }
 
-impl FromJava for ImportDecl {
+impl<'local> FromJava<'local> for ImportDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IMPORT_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_specifiers = java_class.get_specifiers(env, jobj);
@@ -28756,9 +28756,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ImportDefaultSpecifier {
   }
 }
 
-impl FromJava for ImportDefaultSpecifier {
+impl<'local> FromJava<'local> for ImportDefaultSpecifier {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IMPORT_DEFAULT_SPECIFIER.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_local = java_class.get_local(env, jobj);
@@ -28797,9 +28797,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ImportNamedSpecifier {
   }
 }
 
-impl FromJava for ImportNamedSpecifier {
+impl<'local> FromJava<'local> for ImportNamedSpecifier {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IMPORT_NAMED_SPECIFIER.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_local = java_class.get_local(env, jobj);
@@ -28847,9 +28847,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ImportStarAsSpecifier {
   }
 }
 
-impl FromJava for ImportStarAsSpecifier {
+impl<'local> FromJava<'local> for ImportStarAsSpecifier {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IMPORT_STAR_AS_SPECIFIER.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_local = java_class.get_local(env, jobj);
@@ -28881,9 +28881,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Invalid {
   }
 }
 
-impl FromJava for Invalid {
+impl<'local> FromJava<'local> for Invalid {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let span = DUMMY_SP;
     Invalid {
       span,
@@ -28916,9 +28916,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXAttr {
   }
 }
 
-impl FromJava for JSXAttr {
+impl<'local> FromJava<'local> for JSXAttr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_ATTR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_name = java_class.get_name(env, jobj);
@@ -28964,9 +28964,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXClosingElement {
   }
 }
 
-impl FromJava for JSXClosingElement {
+impl<'local> FromJava<'local> for JSXClosingElement {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_CLOSING_ELEMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_name = java_class.get_name(env, jobj);
@@ -28998,9 +28998,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXClosingFragment {
   }
 }
 
-impl FromJava for JSXClosingFragment {
+impl<'local> FromJava<'local> for JSXClosingFragment {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let span = DUMMY_SP;
     JSXClosingFragment {
       span,
@@ -29043,9 +29043,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXElement {
   }
 }
 
-impl FromJava for JSXElement {
+impl<'local> FromJava<'local> for JSXElement {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_ELEMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_opening = java_class.get_opening(env, jobj);
@@ -29097,9 +29097,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXEmptyExpr {
   }
 }
 
-impl FromJava for JSXEmptyExpr {
+impl<'local> FromJava<'local> for JSXEmptyExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let span = DUMMY_SP;
     JSXEmptyExpr {
       span,
@@ -29129,9 +29129,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXExprContainer {
   }
 }
 
-impl FromJava for JSXExprContainer {
+impl<'local> FromJava<'local> for JSXExprContainer {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_EXPR_CONTAINER.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -29179,9 +29179,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXFragment {
   }
 }
 
-impl FromJava for JSXFragment {
+impl<'local> FromJava<'local> for JSXFragment {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_FRAGMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_opening = java_class.get_opening(env, jobj);
@@ -29232,9 +29232,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXMemberExpr {
   }
 }
 
-impl FromJava for JSXMemberExpr {
+impl<'local> FromJava<'local> for JSXMemberExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_MEMBER_EXPR.as_ref().unwrap() };
     let java_obj = java_class.get_obj(env, jobj);
     let obj = JSXObject::from_java(env, &java_obj);
@@ -29274,9 +29274,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXNamespacedName {
   }
 }
 
-impl FromJava for JSXNamespacedName {
+impl<'local> FromJava<'local> for JSXNamespacedName {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_NAMESPACED_NAME.as_ref().unwrap() };
     let java_ns = java_class.get_ns(env, jobj);
     let ns = Ident::from_java(env, &java_ns);
@@ -29327,9 +29327,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXOpeningElement {
   }
 }
 
-impl FromJava for JSXOpeningElement {
+impl<'local> FromJava<'local> for JSXOpeningElement {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_OPENING_ELEMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_name = java_class.get_name(env, jobj);
@@ -29384,9 +29384,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXOpeningFragment {
   }
 }
 
-impl FromJava for JSXOpeningFragment {
+impl<'local> FromJava<'local> for JSXOpeningFragment {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let span = DUMMY_SP;
     JSXOpeningFragment {
       span,
@@ -29416,9 +29416,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXSpreadChild {
   }
 }
 
-impl FromJava for JSXSpreadChild {
+impl<'local> FromJava<'local> for JSXSpreadChild {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_SPREAD_CHILD.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -29453,9 +29453,9 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXText {
   }
 }
 
-impl FromJava for JSXText {
+impl<'local> FromJava<'local> for JSXText {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_TEXT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let value = java_class.get_value(env, jobj);
@@ -29495,9 +29495,9 @@ impl ToJavaWithMap<ByteToIndexMap> for KeyValuePatProp {
   }
 }
 
-impl FromJava for KeyValuePatProp {
+impl<'local> FromJava<'local> for KeyValuePatProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_KEY_VALUE_PAT_PROP.as_ref().unwrap() };
     let java_key = java_class.get_key(env, jobj);
     let key = PropName::from_java(env, &java_key);
@@ -29538,9 +29538,9 @@ impl ToJavaWithMap<ByteToIndexMap> for KeyValueProp {
   }
 }
 
-impl FromJava for KeyValueProp {
+impl<'local> FromJava<'local> for KeyValueProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_KEY_VALUE_PROP.as_ref().unwrap() };
     let java_key = java_class.get_key(env, jobj);
     let key = PropName::from_java(env, &java_key);
@@ -29581,9 +29581,9 @@ impl ToJavaWithMap<ByteToIndexMap> for LabeledStmt {
   }
 }
 
-impl FromJava for LabeledStmt {
+impl<'local> FromJava<'local> for LabeledStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_LABELED_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_label = java_class.get_label(env, jobj);
@@ -29626,9 +29626,9 @@ impl ToJavaWithMap<ByteToIndexMap> for MemberExpr {
   }
 }
 
-impl FromJava for MemberExpr {
+impl<'local> FromJava<'local> for MemberExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_MEMBER_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_obj = java_class.get_obj(env, jobj);
@@ -29667,9 +29667,9 @@ impl ToJavaWithMap<ByteToIndexMap> for MetaPropExpr {
   }
 }
 
-impl FromJava for MetaPropExpr {
+impl<'local> FromJava<'local> for MetaPropExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_META_PROP_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_kind = java_class.get_kind(env, jobj);
@@ -29707,9 +29707,9 @@ impl ToJavaWithMap<ByteToIndexMap> for MethodProp {
   }
 }
 
-impl FromJava for MethodProp {
+impl<'local> FromJava<'local> for MethodProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_METHOD_PROP.as_ref().unwrap() };
     let java_key = java_class.get_key(env, jobj);
     let key = PropName::from_java(env, &java_key);
@@ -29755,9 +29755,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Module {
   }
 }
 
-impl FromJava for Module {
+impl<'local> FromJava<'local> for Module {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_MODULE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_body = java_class.get_body(env, jobj);
@@ -29823,9 +29823,9 @@ impl ToJavaWithMap<ByteToIndexMap> for NamedExport {
   }
 }
 
-impl FromJava for NamedExport {
+impl<'local> FromJava<'local> for NamedExport {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_NAMED_EXPORT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_specifiers = java_class.get_specifiers(env, jobj);
@@ -29905,9 +29905,9 @@ impl ToJavaWithMap<ByteToIndexMap> for NewExpr {
   }
 }
 
-impl FromJava for NewExpr {
+impl<'local> FromJava<'local> for NewExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_NEW_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_callee = java_class.get_callee(env, jobj);
@@ -29968,9 +29968,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Null {
   }
 }
 
-impl FromJava for Null {
+impl<'local> FromJava<'local> for Null {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let span = DUMMY_SP;
     Null {
       span,
@@ -29999,9 +29999,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Number {
   }
 }
 
-impl FromJava for Number {
+impl<'local> FromJava<'local> for Number {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_NUMBER.as_ref().unwrap() };
     let span = DUMMY_SP;
     let value = java_class.get_value(env, jobj);
@@ -30053,9 +30053,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ObjectLit {
   }
 }
 
-impl FromJava for ObjectLit {
+impl<'local> FromJava<'local> for ObjectLit {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_OBJECT_LIT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_props = java_class.get_props(env, jobj);
@@ -30106,9 +30106,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ObjectPat {
   }
 }
 
-impl FromJava for ObjectPat {
+impl<'local> FromJava<'local> for ObjectPat {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_OBJECT_PAT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_props = java_class.get_props(env, jobj);
@@ -30175,9 +30175,9 @@ impl ToJavaWithMap<ByteToIndexMap> for OptCall {
   }
 }
 
-impl FromJava for OptCall {
+impl<'local> FromJava<'local> for OptCall {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_OPT_CALL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_callee = java_class.get_callee(env, jobj);
@@ -30235,9 +30235,9 @@ impl ToJavaWithMap<ByteToIndexMap> for OptChainExpr {
   }
 }
 
-impl FromJava for OptChainExpr {
+impl<'local> FromJava<'local> for OptChainExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_OPT_CHAIN_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let optional = java_class.is_optional(env, jobj);
@@ -30285,9 +30285,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Param {
   }
 }
 
-impl FromJava for Param {
+impl<'local> FromJava<'local> for Param {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_PARAM.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_decorators = java_class.get_decorators(env, jobj);
@@ -30331,9 +30331,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ParenExpr {
   }
 }
 
-impl FromJava for ParenExpr {
+impl<'local> FromJava<'local> for ParenExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_PAREN_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -30380,9 +30380,9 @@ impl ToJavaWithMap<ByteToIndexMap> for PrivateMethod {
   }
 }
 
-impl FromJava for PrivateMethod {
+impl<'local> FromJava<'local> for PrivateMethod {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_PRIVATE_METHOD.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
@@ -30445,9 +30445,9 @@ impl ToJavaWithMap<ByteToIndexMap> for PrivateName {
   }
 }
 
-impl FromJava for PrivateName {
+impl<'local> FromJava<'local> for PrivateName {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_id = java_class.get_id(env, jobj);
@@ -30505,9 +30505,9 @@ impl ToJavaWithMap<ByteToIndexMap> for PrivateProp {
   }
 }
 
-impl FromJava for PrivateProp {
+impl<'local> FromJava<'local> for PrivateProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_PRIVATE_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
@@ -30595,9 +30595,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Regex {
   }
 }
 
-impl FromJava for Regex {
+impl<'local> FromJava<'local> for Regex {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_REGEX.as_ref().unwrap() };
     let span = DUMMY_SP;
     let exp = java_class.get_exp(env, jobj);
@@ -30640,9 +30640,9 @@ impl ToJavaWithMap<ByteToIndexMap> for RestPat {
   }
 }
 
-impl FromJava for RestPat {
+impl<'local> FromJava<'local> for RestPat {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_REST_PAT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let dot3_token = DUMMY_SP;
@@ -30692,9 +30692,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ReturnStmt {
   }
 }
 
-impl FromJava for ReturnStmt {
+impl<'local> FromJava<'local> for ReturnStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_RETURN_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_optional_arg = java_class.get_arg(env, jobj);
@@ -30745,9 +30745,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Script {
   }
 }
 
-impl FromJava for Script {
+impl<'local> FromJava<'local> for Script {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_SCRIPT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_body = java_class.get_body(env, jobj);
@@ -30806,9 +30806,9 @@ impl ToJavaWithMap<ByteToIndexMap> for SeqExpr {
   }
 }
 
-impl FromJava for SeqExpr {
+impl<'local> FromJava<'local> for SeqExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_SEQ_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_exprs = java_class.get_exprs(env, jobj);
@@ -30857,9 +30857,9 @@ impl ToJavaWithMap<ByteToIndexMap> for SetterProp {
   }
 }
 
-impl FromJava for SetterProp {
+impl<'local> FromJava<'local> for SetterProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_SETTER_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
@@ -30924,9 +30924,9 @@ impl ToJavaWithMap<ByteToIndexMap> for SpreadElement {
   }
 }
 
-impl FromJava for SpreadElement {
+impl<'local> FromJava<'local> for SpreadElement {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_SPREAD_ELEMENT.as_ref().unwrap() };
     let dot3_token = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -30962,9 +30962,9 @@ impl ToJavaWithMap<ByteToIndexMap> for StaticBlock {
   }
 }
 
-impl FromJava for StaticBlock {
+impl<'local> FromJava<'local> for StaticBlock {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_STATIC_BLOCK.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_body = java_class.get_body(env, jobj);
@@ -30998,9 +30998,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Str {
   }
 }
 
-impl FromJava for Str {
+impl<'local> FromJava<'local> for Str {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_STR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let value = java_class.get_value(env, jobj);
@@ -31043,9 +31043,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Super {
   }
 }
 
-impl FromJava for Super {
+impl<'local> FromJava<'local> for Super {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let span = DUMMY_SP;
     Super {
       span,
@@ -31078,9 +31078,9 @@ impl ToJavaWithMap<ByteToIndexMap> for SuperPropExpr {
   }
 }
 
-impl FromJava for SuperPropExpr {
+impl<'local> FromJava<'local> for SuperPropExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_SUPER_PROP_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_obj = java_class.get_obj(env, jobj);
@@ -31129,9 +31129,9 @@ impl ToJavaWithMap<ByteToIndexMap> for SwitchCase {
   }
 }
 
-impl FromJava for SwitchCase {
+impl<'local> FromJava<'local> for SwitchCase {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_SWITCH_CASE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_optional_test = java_class.get_test(env, jobj);
@@ -31193,9 +31193,9 @@ impl ToJavaWithMap<ByteToIndexMap> for SwitchStmt {
   }
 }
 
-impl FromJava for SwitchStmt {
+impl<'local> FromJava<'local> for SwitchStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_SWITCH_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_discriminant = java_class.get_discriminant(env, jobj);
@@ -31246,9 +31246,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TaggedTpl {
   }
 }
 
-impl FromJava for TaggedTpl {
+impl<'local> FromJava<'local> for TaggedTpl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TAGGED_TPL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_tag = java_class.get_tag(env, jobj);
@@ -31298,9 +31298,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ThisExpr {
   }
 }
 
-impl FromJava for ThisExpr {
+impl<'local> FromJava<'local> for ThisExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let span = DUMMY_SP;
     ThisExpr {
       span,
@@ -31330,9 +31330,9 @@ impl ToJavaWithMap<ByteToIndexMap> for ThrowStmt {
   }
 }
 
-impl FromJava for ThrowStmt {
+impl<'local> FromJava<'local> for ThrowStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_THROW_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_arg = java_class.get_arg(env, jobj);
@@ -31385,9 +31385,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Tpl {
   }
 }
 
-impl FromJava for Tpl {
+impl<'local> FromJava<'local> for Tpl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TPL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_exprs = java_class.get_exprs(env, jobj);
@@ -31436,9 +31436,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TplElement {
   }
 }
 
-impl FromJava for TplElement {
+impl<'local> FromJava<'local> for TplElement {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TPL_ELEMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let tail = java_class.is_tail(env, jobj);
@@ -31492,9 +31492,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TryStmt {
   }
 }
 
-impl FromJava for TryStmt {
+impl<'local> FromJava<'local> for TryStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TRY_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_block = java_class.get_block(env, jobj);
@@ -31551,9 +31551,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsArrayType {
   }
 }
 
-impl FromJava for TsArrayType {
+impl<'local> FromJava<'local> for TsArrayType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_ARRAY_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_elem_type = java_class.get_elem_type(env, jobj);
@@ -31592,9 +31592,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsAsExpr {
   }
 }
 
-impl FromJava for TsAsExpr {
+impl<'local> FromJava<'local> for TsAsExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_AS_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -31648,9 +31648,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsCallSignatureDecl {
   }
 }
 
-impl FromJava for TsCallSignatureDecl {
+impl<'local> FromJava<'local> for TsCallSignatureDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_CALL_SIGNATURE_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
@@ -31723,9 +31723,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsConditionalType {
   }
 }
 
-impl FromJava for TsConditionalType {
+impl<'local> FromJava<'local> for TsConditionalType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_CONDITIONAL_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_check_type = java_class.get_check_type(env, jobj);
@@ -31776,9 +31776,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsConstAssertion {
   }
 }
 
-impl FromJava for TsConstAssertion {
+impl<'local> FromJava<'local> for TsConstAssertion {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_CONST_ASSERTION.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -31827,9 +31827,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsConstructSignatureDecl {
   }
 }
 
-impl FromJava for TsConstructSignatureDecl {
+impl<'local> FromJava<'local> for TsConstructSignatureDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_CONSTRUCT_SIGNATURE_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
@@ -31907,9 +31907,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsConstructorType {
   }
 }
 
-impl FromJava for TsConstructorType {
+impl<'local> FromJava<'local> for TsConstructorType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_CONSTRUCTOR_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
@@ -31980,9 +31980,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsEnumDecl {
   }
 }
 
-impl FromJava for TsEnumDecl {
+impl<'local> FromJava<'local> for TsEnumDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_ENUM_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let declare = java_class.is_declare(env, jobj);
@@ -32033,9 +32033,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsEnumMember {
   }
 }
 
-impl FromJava for TsEnumMember {
+impl<'local> FromJava<'local> for TsEnumMember {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_ENUM_MEMBER.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_id = java_class.get_id(env, jobj);
@@ -32082,9 +32082,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsExportAssignment {
   }
 }
 
-impl FromJava for TsExportAssignment {
+impl<'local> FromJava<'local> for TsExportAssignment {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_EXPORT_ASSIGNMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -32123,9 +32123,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsExprWithTypeArgs {
   }
 }
 
-impl FromJava for TsExprWithTypeArgs {
+impl<'local> FromJava<'local> for TsExprWithTypeArgs {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_EXPR_WITH_TYPE_ARGS.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -32173,9 +32173,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsExternalModuleRef {
   }
 }
 
-impl FromJava for TsExternalModuleRef {
+impl<'local> FromJava<'local> for TsExternalModuleRef {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_EXTERNAL_MODULE_REF.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -32223,9 +32223,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsFnType {
   }
 }
 
-impl FromJava for TsFnType {
+impl<'local> FromJava<'local> for TsFnType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_FN_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
@@ -32288,9 +32288,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsGetterSignature {
   }
 }
 
-impl FromJava for TsGetterSignature {
+impl<'local> FromJava<'local> for TsGetterSignature {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_GETTER_SIGNATURE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let readonly = java_class.is_readonly(env, jobj);
@@ -32349,9 +32349,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsImportEqualsDecl {
   }
 }
 
-impl FromJava for TsImportEqualsDecl {
+impl<'local> FromJava<'local> for TsImportEqualsDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_IMPORT_EQUALS_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let is_export = java_class.is_export(env, jobj);
@@ -32400,9 +32400,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsImportType {
   }
 }
 
-impl FromJava for TsImportType {
+impl<'local> FromJava<'local> for TsImportType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_IMPORT_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_arg = java_class.get_arg(env, jobj);
@@ -32472,9 +32472,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsIndexSignature {
   }
 }
 
-impl FromJava for TsIndexSignature {
+impl<'local> FromJava<'local> for TsIndexSignature {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INDEX_SIGNATURE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
@@ -32534,9 +32534,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsIndexedAccessType {
   }
 }
 
-impl FromJava for TsIndexedAccessType {
+impl<'local> FromJava<'local> for TsIndexedAccessType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INDEXED_ACCESS_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let readonly = java_class.is_readonly(env, jobj);
@@ -32579,9 +32579,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsInferType {
   }
 }
 
-impl FromJava for TsInferType {
+impl<'local> FromJava<'local> for TsInferType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INFER_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_type_param = java_class.get_type_param(env, jobj);
@@ -32619,9 +32619,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsInstantiation {
   }
 }
 
-impl FromJava for TsInstantiation {
+impl<'local> FromJava<'local> for TsInstantiation {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INSTANTIATION.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -32669,9 +32669,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsInterfaceBody {
   }
 }
 
-impl FromJava for TsInterfaceBody {
+impl<'local> FromJava<'local> for TsInterfaceBody {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INTERFACE_BODY.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_body = java_class.get_body(env, jobj);
@@ -32728,9 +32728,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsInterfaceDecl {
   }
 }
 
-impl FromJava for TsInterfaceDecl {
+impl<'local> FromJava<'local> for TsInterfaceDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INTERFACE_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_id = java_class.get_id(env, jobj);
@@ -32799,9 +32799,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsIntersectionType {
   }
 }
 
-impl FromJava for TsIntersectionType {
+impl<'local> FromJava<'local> for TsIntersectionType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_INTERSECTION_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_types = java_class.get_types(env, jobj);
@@ -32840,9 +32840,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsKeywordType {
   }
 }
 
-impl FromJava for TsKeywordType {
+impl<'local> FromJava<'local> for TsKeywordType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_KEYWORD_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_kind = java_class.get_kind(env, jobj);
@@ -32877,9 +32877,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsLitType {
   }
 }
 
-impl FromJava for TsLitType {
+impl<'local> FromJava<'local> for TsLitType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_LIT_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_lit = java_class.get_lit(env, jobj);
@@ -32924,9 +32924,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsMappedType {
   }
 }
 
-impl FromJava for TsMappedType {
+impl<'local> FromJava<'local> for TsMappedType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_MAPPED_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_optional_readonly = java_class.get_readonly(env, jobj);
@@ -33026,9 +33026,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsMethodSignature {
   }
 }
 
-impl FromJava for TsMethodSignature {
+impl<'local> FromJava<'local> for TsMethodSignature {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_METHOD_SIGNATURE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let readonly = java_class.is_readonly(env, jobj);
@@ -33110,9 +33110,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsModuleBlock {
   }
 }
 
-impl FromJava for TsModuleBlock {
+impl<'local> FromJava<'local> for TsModuleBlock {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_MODULE_BLOCK.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_body = java_class.get_body(env, jobj);
@@ -33157,9 +33157,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsModuleDecl {
   }
 }
 
-impl FromJava for TsModuleDecl {
+impl<'local> FromJava<'local> for TsModuleDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_MODULE_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let declare = java_class.is_declare(env, jobj);
@@ -33214,9 +33214,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsNamespaceDecl {
   }
 }
 
-impl FromJava for TsNamespaceDecl {
+impl<'local> FromJava<'local> for TsNamespaceDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_NAMESPACE_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let declare = java_class.is_declare(env, jobj);
@@ -33260,9 +33260,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsNamespaceExportDecl {
   }
 }
 
-impl FromJava for TsNamespaceExportDecl {
+impl<'local> FromJava<'local> for TsNamespaceExportDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_NAMESPACE_EXPORT_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_id = java_class.get_id(env, jobj);
@@ -33297,9 +33297,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsNonNullExpr {
   }
 }
 
-impl FromJava for TsNonNullExpr {
+impl<'local> FromJava<'local> for TsNonNullExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_NON_NULL_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -33335,9 +33335,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsOptionalType {
   }
 }
 
-impl FromJava for TsOptionalType {
+impl<'local> FromJava<'local> for TsOptionalType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_OPTIONAL_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_type_ann = java_class.get_type_ann(env, jobj);
@@ -33387,9 +33387,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsParamProp {
   }
 }
 
-impl FromJava for TsParamProp {
+impl<'local> FromJava<'local> for TsParamProp {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_PARAM_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_decorators = java_class.get_decorators(env, jobj);
@@ -33448,9 +33448,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsParenthesizedType {
   }
 }
 
-impl FromJava for TsParenthesizedType {
+impl<'local> FromJava<'local> for TsParenthesizedType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_PARENTHESIZED_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_type_ann = java_class.get_type_ann(env, jobj);
@@ -33508,9 +33508,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsPropertySignature {
   }
 }
 
-impl FromJava for TsPropertySignature {
+impl<'local> FromJava<'local> for TsPropertySignature {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_PROPERTY_SIGNATURE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let readonly = java_class.is_readonly(env, jobj);
@@ -33600,9 +33600,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsQualifiedName {
   }
 }
 
-impl FromJava for TsQualifiedName {
+impl<'local> FromJava<'local> for TsQualifiedName {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_QUALIFIED_NAME.as_ref().unwrap() };
     let java_left = java_class.get_left(env, jobj);
     let left = TsEntityName::from_java(env, &java_left);
@@ -33639,9 +33639,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsRestType {
   }
 }
 
-impl FromJava for TsRestType {
+impl<'local> FromJava<'local> for TsRestType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_REST_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_type_ann = java_class.get_type_ann(env, jobj);
@@ -33680,9 +33680,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsSatisfiesExpr {
   }
 }
 
-impl FromJava for TsSatisfiesExpr {
+impl<'local> FromJava<'local> for TsSatisfiesExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_SATISFIES_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -33729,9 +33729,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsSetterSignature {
   }
 }
 
-impl FromJava for TsSetterSignature {
+impl<'local> FromJava<'local> for TsSetterSignature {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_SETTER_SIGNATURE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let readonly = java_class.is_readonly(env, jobj);
@@ -33774,9 +33774,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsThisType {
   }
 }
 
-impl FromJava for TsThisType {
+impl<'local> FromJava<'local> for TsThisType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let span = DUMMY_SP;
     TsThisType {
       span,
@@ -33823,9 +33823,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTplLitType {
   }
 }
 
-impl FromJava for TsTplLitType {
+impl<'local> FromJava<'local> for TsTplLitType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TPL_LIT_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_types = java_class.get_types(env, jobj);
@@ -33877,9 +33877,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTupleElement {
   }
 }
 
-impl FromJava for TsTupleElement {
+impl<'local> FromJava<'local> for TsTupleElement {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TUPLE_ELEMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_optional_label = java_class.get_label(env, jobj);
@@ -33933,9 +33933,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTupleType {
   }
 }
 
-impl FromJava for TsTupleType {
+impl<'local> FromJava<'local> for TsTupleType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TUPLE_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_elem_types = java_class.get_elem_types(env, jobj);
@@ -33982,9 +33982,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeAliasDecl {
   }
 }
 
-impl FromJava for TsTypeAliasDecl {
+impl<'local> FromJava<'local> for TsTypeAliasDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_ALIAS_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_id = java_class.get_id(env, jobj);
@@ -34038,9 +34038,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeAnn {
   }
 }
 
-impl FromJava for TsTypeAnn {
+impl<'local> FromJava<'local> for TsTypeAnn {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_ANN.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_type_ann = java_class.get_type_ann(env, jobj);
@@ -34079,9 +34079,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeAssertion {
   }
 }
 
-impl FromJava for TsTypeAssertion {
+impl<'local> FromJava<'local> for TsTypeAssertion {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_ASSERTION.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr = java_class.get_expr(env, jobj);
@@ -34129,9 +34129,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeLit {
   }
 }
 
-impl FromJava for TsTypeLit {
+impl<'local> FromJava<'local> for TsTypeLit {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_LIT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_members = java_class.get_members(env, jobj);
@@ -34173,9 +34173,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeOperator {
   }
 }
 
-impl FromJava for TsTypeOperator {
+impl<'local> FromJava<'local> for TsTypeOperator {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_OPERATOR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_op = java_class.get_op(env, jobj);
@@ -34224,9 +34224,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeParam {
   }
 }
 
-impl FromJava for TsTypeParam {
+impl<'local> FromJava<'local> for TsTypeParam {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_PARAM.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_name = java_class.get_name(env, jobj);
@@ -34298,9 +34298,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeParamDecl {
   }
 }
 
-impl FromJava for TsTypeParamDecl {
+impl<'local> FromJava<'local> for TsTypeParamDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_PARAM_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
@@ -34347,9 +34347,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeParamInstantiation {
   }
 }
 
-impl FromJava for TsTypeParamInstantiation {
+impl<'local> FromJava<'local> for TsTypeParamInstantiation {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_PARAM_INSTANTIATION.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_params = java_class.get_params(env, jobj);
@@ -34393,9 +34393,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypePredicate {
   }
 }
 
-impl FromJava for TsTypePredicate {
+impl<'local> FromJava<'local> for TsTypePredicate {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_PREDICATE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let asserts = java_class.is_asserts(env, jobj);
@@ -34447,9 +34447,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeQuery {
   }
 }
 
-impl FromJava for TsTypeQuery {
+impl<'local> FromJava<'local> for TsTypeQuery {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_QUERY.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_expr_name = java_class.get_expr_name(env, jobj);
@@ -34499,9 +34499,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeRef {
   }
 }
 
-impl FromJava for TsTypeRef {
+impl<'local> FromJava<'local> for TsTypeRef {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_REF.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_type_name = java_class.get_type_name(env, jobj);
@@ -34555,9 +34555,9 @@ impl ToJavaWithMap<ByteToIndexMap> for TsUnionType {
   }
 }
 
-impl FromJava for TsUnionType {
+impl<'local> FromJava<'local> for TsUnionType {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_UNION_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_types = java_class.get_types(env, jobj);
@@ -34599,9 +34599,9 @@ impl ToJavaWithMap<ByteToIndexMap> for UnaryExpr {
   }
 }
 
-impl FromJava for UnaryExpr {
+impl<'local> FromJava<'local> for UnaryExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_UNARY_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_op = java_class.get_op(env, jobj);
@@ -34644,9 +34644,9 @@ impl ToJavaWithMap<ByteToIndexMap> for UpdateExpr {
   }
 }
 
-impl FromJava for UpdateExpr {
+impl<'local> FromJava<'local> for UpdateExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_UPDATE_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_op = java_class.get_op(env, jobj);
@@ -34696,9 +34696,9 @@ impl ToJavaWithMap<ByteToIndexMap> for UsingDecl {
   }
 }
 
-impl FromJava for UsingDecl {
+impl<'local> FromJava<'local> for UsingDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_USING_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let is_await = java_class.is_await(env, jobj);
@@ -34750,9 +34750,9 @@ impl ToJavaWithMap<ByteToIndexMap> for VarDecl {
   }
 }
 
-impl FromJava for VarDecl {
+impl<'local> FromJava<'local> for VarDecl {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_VAR_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_kind = java_class.get_kind(env, jobj);
@@ -34802,9 +34802,9 @@ impl ToJavaWithMap<ByteToIndexMap> for VarDeclarator {
   }
 }
 
-impl FromJava for VarDeclarator {
+impl<'local> FromJava<'local> for VarDeclarator {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_VAR_DECLARATOR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_name = java_class.get_name(env, jobj);
@@ -34856,9 +34856,9 @@ impl ToJavaWithMap<ByteToIndexMap> for WhileStmt {
   }
 }
 
-impl FromJava for WhileStmt {
+impl<'local> FromJava<'local> for WhileStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_WHILE_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_test = java_class.get_test(env, jobj);
@@ -34902,9 +34902,9 @@ impl ToJavaWithMap<ByteToIndexMap> for WithStmt {
   }
 }
 
-impl FromJava for WithStmt {
+impl<'local> FromJava<'local> for WithStmt {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_WITH_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_obj = java_class.get_obj(env, jobj);
@@ -34946,9 +34946,9 @@ impl ToJavaWithMap<ByteToIndexMap> for YieldExpr {
   }
 }
 
-impl FromJava for YieldExpr {
+impl<'local> FromJava<'local> for YieldExpr {
   #[allow(unused_variables)]
-  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_YIELD_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
     let java_optional_arg = java_class.get_arg(env, jobj);

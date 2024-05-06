@@ -88,9 +88,9 @@ public class TestCodeGen {
                     toJavaLines.add("    'local: 'a,");
                     toJavaLines.add("  {");
                     toJavaLines.add("    match self {");
-                    fromJavaLines.add(String.format("impl FromJava for %s {", enumName));
+                    fromJavaLines.add(String.format("impl<'local> FromJava<'local> for %s {", enumName));
                     fromJavaLines.add("  #[allow(unused_variables)]");
-                    fromJavaLines.add("  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {");
+                    fromJavaLines.add("  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {");
                     fromJavaLines.add("    let return_value = ");
                     final AtomicInteger mappingCounter = new AtomicInteger();
                     Stream.of(jni2RustClassUtils.getMappings())
@@ -499,9 +499,9 @@ public class TestCodeGen {
                         lines.add("  }");
                         lines.add("}\n");
                         // FromJava
-                        lines.add(String.format("impl FromJava for %s {", className));
+                        lines.add(String.format("impl<'local> FromJava<'local> for %s {", className));
                         lines.add("  #[allow(unused_variables)]");
-                        lines.add("  fn from_java<'local>(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {");
+                        lines.add("  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {");
                         List<Field> fields = ReflectionUtils.getDeclaredFields(clazz).values().stream()
                                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
                                 .filter(field -> !new Jni2RustFieldUtils(field).isIgnore())

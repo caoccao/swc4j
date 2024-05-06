@@ -1241,7 +1241,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 }
 
 #[derive(Debug)]
-pub struct ParseOptions {
+pub struct ParseOptions<'a> {
   /// Whether to capture ast or not.
   pub capture_ast: bool,
   /// Whether to capture comments or not.
@@ -1253,21 +1253,21 @@ pub struct ParseOptions {
   /// Should the code to be parsed as Module or Script.
   pub parse_mode: ParseMode,
   /// AST plugin host.
-  pub plugin_host: Option<PluginHost>,
+  pub plugin_host: Option<PluginHost<'a>>,
   /// Whether to apply swc's scope analysis.
   pub scope_analysis: bool,
   /// Specifier of the source text.
   pub specifier: String,
 }
 
-impl ParseOptions {
+impl<'a> ParseOptions<'a> {
   pub fn get_specifier(&self) -> ModuleSpecifier {
     ModuleSpecifier::parse(self.specifier.as_str())
       .unwrap_or_else(|_| ModuleSpecifier::parse(&"file:///main.js").unwrap())
   }
 }
 
-impl Default for ParseOptions {
+impl<'a> Default for ParseOptions<'a> {
   fn default() -> Self {
     ParseOptions {
       capture_ast: false,
@@ -1282,8 +1282,8 @@ impl Default for ParseOptions {
   }
 }
 
-impl FromJava for ParseOptions {
-  fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> ParseOptions {
+impl<'local> FromJava<'local> for ParseOptions<'local> {
+  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> ParseOptions<'local> {
     let java_parse_options = unsafe { JAVA_PARSE_OPTIONS.as_ref().unwrap() };
     let capture_ast = java_parse_options.is_capture_ast(env, obj);
     let capture_comments = java_parse_options.is_capture_comments(env, obj);
@@ -1298,7 +1298,7 @@ impl FromJava for ParseOptions {
       let host = env
         .new_global_ref(host)
         .expect("Failed to create global reference for plugin host");
-      PluginHost::new(host)
+      PluginHost::new(env, host)
     });
     let java_parse_mode = java_parse_options.get_parse_mode(env, obj);
     let parse_mode = ParseMode::from_java(env, &java_parse_mode);
@@ -1318,7 +1318,7 @@ impl FromJava for ParseOptions {
 }
 
 #[derive(Debug)]
-pub struct TransformOptions {
+pub struct TransformOptions<'a> {
   /// Forces the code generator to use only ascii characters.
   ///
   /// This is useful for environments that do not support unicode.
@@ -1339,7 +1339,7 @@ pub struct TransformOptions {
   /// Should the code to be parsed as Module or Script.
   pub parse_mode: ParseMode,
   /// AST plugin host.
-  pub plugin_host: Option<PluginHost>,
+  pub plugin_host: Option<PluginHost<'a>>,
   /// How and if source maps should be generated.
   pub source_map: SourceMapOption,
   /// Specifier of the source text.
@@ -1356,14 +1356,14 @@ pub struct TransformOptions {
   pub target: EsVersion,
 }
 
-impl TransformOptions {
+impl<'a> TransformOptions<'a> {
   pub fn get_specifier(&self) -> ModuleSpecifier {
     ModuleSpecifier::parse(self.specifier.as_str())
       .unwrap_or_else(|_| ModuleSpecifier::parse(&"file:///main.js").unwrap())
   }
 }
 
-impl Default for TransformOptions {
+impl<'a> Default for TransformOptions<'a> {
   fn default() -> Self {
     TransformOptions {
       ascii_only: false,
@@ -1382,8 +1382,8 @@ impl Default for TransformOptions {
   }
 }
 
-impl FromJava for TransformOptions {
-  fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> TransformOptions {
+impl<'local> FromJava<'local> for TransformOptions<'local> {
+  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> TransformOptions<'local> {
     let java_transform_options = unsafe { JAVA_TRANSFORM_OPTIONS.as_ref().unwrap() };
     let ascii_only = java_transform_options.is_ascii_only(env, obj);
     let emit_assert_for_import_attributes = java_transform_options.is_emit_assert_for_import_attributes(env, obj);
@@ -1402,7 +1402,7 @@ impl FromJava for TransformOptions {
       let host = env
         .new_global_ref(host)
         .expect("Failed to create global reference for plugin host");
-      PluginHost::new(host)
+      PluginHost::new(env, host)
     });
     let specifier = java_transform_options.get_specifier(env, obj);
     let specifier = url_to_string(env, &specifier);
@@ -1430,7 +1430,7 @@ impl FromJava for TransformOptions {
 }
 
 #[derive(Debug)]
-pub struct TranspileOptions {
+pub struct TranspileOptions<'a> {
   /// Whether to capture ast or not.
   pub capture_ast: bool,
   /// Whether to capture comments or not.
@@ -1470,7 +1470,7 @@ pub struct TranspileOptions {
   /// Should the code to be parsed as Module or Script,
   pub parse_mode: ParseMode,
   /// AST plugin host.
-  pub plugin_host: Option<PluginHost>,
+  pub plugin_host: Option<PluginHost<'a>>,
   /// Should JSX be precompiled into static strings that need to be concatenated
   /// with dynamic content. Defaults to `false`, mutually exclusive with
   /// `transform_jsx`.
@@ -1493,14 +1493,14 @@ pub struct TranspileOptions {
   pub var_decl_imports: bool,
 }
 
-impl TranspileOptions {
+impl<'a> TranspileOptions<'a> {
   pub fn get_specifier(&self) -> ModuleSpecifier {
     ModuleSpecifier::parse(self.specifier.as_str())
       .unwrap_or_else(|_| ModuleSpecifier::parse(&"file:///main.js").unwrap())
   }
 }
 
-impl Default for TranspileOptions {
+impl<'a> Default for TranspileOptions<'a> {
   fn default() -> Self {
     TranspileOptions {
       capture_ast: false,
@@ -1530,8 +1530,8 @@ impl Default for TranspileOptions {
   }
 }
 
-impl FromJava for TranspileOptions {
-  fn from_java<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> TranspileOptions {
+impl<'local> FromJava<'local> for TranspileOptions<'local> {
+  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> TranspileOptions<'local> {
     let java_transpile_options = unsafe { JAVA_TRANSPILE_OPTIONS.as_ref().unwrap() };
     let capture_ast = java_transpile_options.is_capture_ast(env, obj);
     let capture_comments = java_transpile_options.is_capture_comments(env, obj);
@@ -1555,7 +1555,7 @@ impl FromJava for TranspileOptions {
       let host = env
         .new_global_ref(host)
         .expect("Failed to create global reference for plugin host");
-      PluginHost::new(host)
+      PluginHost::new(env, host)
     });
     let precompile_jsx = java_transpile_options.is_precompile_jsx(env, obj);
     let scope_analysis = java_transpile_options.is_scope_analysis(env, obj);
