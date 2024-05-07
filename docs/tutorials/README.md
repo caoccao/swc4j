@@ -5,3 +5,4 @@
 * [Tutorial 03: Tokens](tutorial_03_tokens.md)
 * [Tutorial 04: AST](tutorial_04_ast.md)
 * [Tutorial 05: Minify](tutorial_05_minify.md)
+* [Tutorial 06: Plugin](tutorial_06_plugin.md)

@@ -12,6 +12,9 @@
 
 * Linux + MacOS + Windows
 * JavaScript, TypeScript, JSX, TSX, etc.
+* AST
+  * Plugin
+  * Visitor
 * Parse
   * AST
   * Comments

@@ -34,7 +34,7 @@ Swc4jTransformOptions options = new Swc4jTransformOptions()
         .setMediaType(Swc4jMediaType.TypeScript)
         .setParseMode(Swc4jParseMode.Module)
         .setSourceMap(Swc4jSourceMapOption.Separate);
-// Parse the code.
+// Transform the code.
 Swc4jTransformOutput output = swc4j.transform(code, options);
 // Print the minified code.
 System.out.println("/*********************************************");
@@ -84,7 +84,7 @@ Sometimes the comments are expected to be preserved in the minified code. Yes, t
 ```java
 // Turn on keep comments.
 options.setKeepComments(true);
-// Parse the code again.
+// Transform the code again.
 output = swc4j.transform(code, options);
 // Print the minified code.
 System.out.println("/*********************************************");

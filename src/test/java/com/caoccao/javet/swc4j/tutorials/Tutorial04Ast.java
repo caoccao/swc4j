@@ -81,7 +81,7 @@ public class Tutorial04Ast {
         output.getProgram().visit(new Visitor(output.getComments()));
     }
 
-    public static class Visitor extends Swc4jAstVisitor {
+    static class Visitor extends Swc4jAstVisitor {
         private final Swc4jComments comments;
 
         public Visitor() {

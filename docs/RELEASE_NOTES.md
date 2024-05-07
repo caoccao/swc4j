@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.6.0
+
+* Supported plugins
+
 ## 0.5.0
 
 * Supported `transform()`
