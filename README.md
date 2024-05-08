@@ -1,6 +1,6 @@
 # swc4j
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.caoccao.javet/swc4j?style=for-the-badge)](https://central.sonatype.com/search?q=g:com.caoccao.javet.swc4j) [![Discord](https://img.shields.io/discord/870518906115211305?label=join%20our%20Discord&style=for-the-badge)](https://discord.gg/R4vvKU96gw)
+[![Maven Central](https://img.shields.io/maven-central/v/com.caoccao.javet/swc4j?style=for-the-badge)](https://central.sonatype.com/artifact/com.caoccao.javet/swc4j) [![Discord](https://img.shields.io/discord/870518906115211305?label=join%20our%20Discord&style=for-the-badge)](https://discord.gg/R4vvKU96gw)
 
 [![swc4j Build](https://github.com/caoccao/swc4j/actions/workflows/swc4j_build.yml/badge.svg)](https://github.com/caoccao/swc4j/actions/workflows/swc4j_build.yml)
 
