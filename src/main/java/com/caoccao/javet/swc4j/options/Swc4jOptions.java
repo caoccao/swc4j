@@ -54,6 +54,7 @@ public abstract class Swc4jOptions {
     protected Swc4jMediaType mediaType;
     /**
      * Should the code to be parsed as Module or Script.
+     * Default is Program that lets SWC to determine the actual parse mode.
      *
      * @since 0.5.0
      */

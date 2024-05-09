@@ -38,6 +38,27 @@ public final class StringUtils {
     }
 
     /**
+     * Is blank.
+     *
+     * @param str the str
+     * @return true : blank, false : not blank
+     * @since 0.7.0
+     */
+    public static boolean isBlank(String str) {
+        if (!isEmpty(str)) {
+            final int length = str.length();
+            for (int i = 0; i < length; i++) {
+                char c = str.charAt(i);
+                if (c == ' ' || c == '\t' || c == '\r' || c == '\n') {
+                    continue;
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Is empty.
      *
      * @param str the str

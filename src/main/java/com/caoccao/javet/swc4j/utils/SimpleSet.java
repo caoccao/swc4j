@@ -30,6 +30,42 @@ public final class SimpleSet {
     }
 
     /**
+     * Immutable set.
+     *
+     * @param <T> the type parameter
+     * @param set the set
+     * @return the set
+     * @since 0.7.0
+     */
+    public static <T> Set<T> immutable(Set<T> set) {
+        return Collections.unmodifiableSet(set);
+    }
+
+    /**
+     * Immutable of set.
+     *
+     * @param <T> the type parameter
+     * @return the set
+     * @since 0.7.0
+     */
+    public static <T> Set<T> immutableOf() {
+        return immutable(of());
+    }
+
+    /**
+     * Immutable of set.
+     *
+     * @param <T>     the type parameter
+     * @param objects the objects
+     * @return the set
+     * @since 0.7.0
+     */
+    @SafeVarargs
+    public static <T> Set<T> immutableOf(T... objects) {
+        return immutable(of(objects));
+    }
+
+    /**
      * Of set.
      *
      * @param <T> the type parameter
