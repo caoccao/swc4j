@@ -24,7 +24,7 @@ use deno_ast::*;
 
 use crate::{enums, options, outputs, plugin_utils};
 
-const VERSION: &'static str = "0.6.0";
+const VERSION: &'static str = "0.7.0";
 
 fn parse_by_mode(
   parse_params: ParseParams,
