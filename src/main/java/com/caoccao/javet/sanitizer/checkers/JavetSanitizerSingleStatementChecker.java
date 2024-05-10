@@ -20,38 +20,38 @@ package com.caoccao.javet.sanitizer.checkers;
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
 import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstArrowExpr;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 
 /**
- * The type Javet sanitizer anonymous function checker.
+ * The type Javet sanitizer single statement checker.
  *
  * @since 0.7.0
  */
-public class JavetSanitizerAnonymousFunctionChecker extends BaseJavetSanitizerChecker {
+public class JavetSanitizerSingleStatementChecker extends BaseJavetSanitizerChecker {
     /**
-     * Instantiates a new Javet sanitizer anonymous function checker.
+     * Instantiates a new Javet sanitizer single statement checker.
      *
      * @since 0.7.0
      */
-    public JavetSanitizerAnonymousFunctionChecker() {
+    public JavetSanitizerSingleStatementChecker() {
         this(JavetSanitizerOptions.Default);
     }
 
     /**
-     * Instantiates a new Javet sanitizer anonymous function checker.
+     * Instantiates a new Javet sanitizer single statement checker.
      *
      * @param options the options
      * @since 0.7.0
      */
-    public JavetSanitizerAnonymousFunctionChecker(JavetSanitizerOptions options) {
+    public JavetSanitizerSingleStatementChecker(JavetSanitizerOptions options) {
         super(options);
     }
 
     @Override
     public void check(String codeString) throws JavetSanitizerException {
         super.check(codeString);
-        String expectedNode = Swc4jAstType.getName(Swc4jAstArrowExpr.class);
+        String expectedNode = Swc4jAstType.getName(ISwc4jAstStmt.class);
         if (program.getShebang().isPresent()) {
             throw JavetSanitizerException.invalidNode(getName(), expectedNode, program.getShebang().get()).setNode(program);
         }
@@ -61,12 +61,14 @@ public class JavetSanitizerAnonymousFunctionChecker extends BaseJavetSanitizerCh
         if (program.getBody().size() > 1) {
             throw JavetSanitizerException.nodeCountTooLarge(1, program.getBody().size()).setNode(program);
         }
-        Swc4jAstExprStmt exprStmt = expectNode(program.getBody().get(0), Swc4jAstType.ExprStmt);
-        expectNode(exprStmt.getExpr(), Swc4jAstType.ArrowExpr);
+        ISwc4jAst node = program.getBody().get(0);
+        if (!(node instanceof ISwc4jAstStmt)) {
+            throw JavetSanitizerException.invalidNode(getName(), expectedNode, Swc4jAstType.getName(node.getClass())).setNode(program);
+        }
     }
 
     @Override
     public String getName() {
-        return "Anonymous Function";
+        return "Single Statement";
     }
 }

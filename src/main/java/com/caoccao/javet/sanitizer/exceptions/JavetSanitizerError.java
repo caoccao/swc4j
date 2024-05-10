@@ -34,7 +34,7 @@ public enum JavetSanitizerError {
     IdentifierNotAllowed(100, "Identifier ${identifier} is not allowed."),
     KeywordNotAllowed(101, "Keyword ${keyword} is not allowed."),
 
-    InvalidNode(200, "AST node ${actualNode} is unexpected. Expecting ${expectedNode} in ${nodeName}."),
+    InvalidNode(200, "AST node ${actualNode} is unexpected. Expecting AST node ${expectedNode} in ${nodeName}."),
     NodeCountMismatch(220, "AST node count ${actualCount} mismatches the expected AST node count ${expectedCount}."),
     NodeCountTooSmall(221, "AST node count ${actualCount} is less than the minimal AST node count ${minCount}."),
     NodeCountTooLarge(222, "AST node count ${actualCount} is greater than the maximal AST node count ${maxCount}."),

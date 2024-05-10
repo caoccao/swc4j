@@ -25,10 +25,10 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 @SuppressWarnings("ThrowableNotThrown")
-public class TestJavetSanitizerAnonymousFunctionChecker extends BaseTestSuiteCheckers {
+public class TestJavetSanitizerSingleStatementChecker extends BaseTestSuiteCheckers {
     @BeforeEach
     public void beforeEach() {
-        checker = new JavetSanitizerAnonymousFunctionChecker();
+        checker = new JavetSanitizerSingleStatementChecker();
     }
 
     @Test
@@ -39,50 +39,45 @@ public class TestJavetSanitizerAnonymousFunctionChecker extends BaseTestSuiteChe
                         JavetSanitizerError.EmptyCodeString,
                         JavetSanitizerError.EmptyCodeString.getFormat()));
         assertException(
-                "function() {}",
+                "a?.b.?.c", // SWC bug
                 JavetSanitizerError.ParsingError,
-                "Expected ident at file:///main.js:1:9\n" +
+                "Expected ident at file:///main.js:1:6\n" +
                         "\n" +
-                        "  function() {}\n" +
-                        "          ~");
+                        "  a?.b.?.c\n" +
+                        "       ~");
         assertException(
-                "function(a, b) {}",
+                "1 +",
                 JavetSanitizerError.ParsingError,
-                "Expected ident at file:///main.js:1:9\n" +
+                "Expression expected at file:///main.js:1:3\n" +
                         "\n" +
-                        "  function(a, b) {}\n" +
-                        "          ~");
+                        "  1 +\n" +
+                        "    ~");
         assertException(
-                "function a() {}",
-                JavetSanitizerError.InvalidNode,
-                "AST node FnDecl is unexpected. Expecting AST node ExprStmt in Anonymous Function.",
-                0, 15, 1, 1);
+                "{ a: 1, b: 2 }",
+                JavetSanitizerError.ParsingError,
+                "Expected ';', '}' or <eof> at file:///main.js:1:10\n" +
+                        "\n" +
+                        "  { a: 1, b: 2 }\n" +
+                        "           ~");
         assertException(
-                "const a;",
-                JavetSanitizerError.InvalidNode,
-                "AST node VarDecl is unexpected. Expecting AST node ExprStmt in Anonymous Function.",
-                0, 8, 1, 1);
-        assertException(
-                "(() => {})()",
-                JavetSanitizerError.InvalidNode,
-                "AST node CallExpr is unexpected. Expecting AST node ArrowExpr in Anonymous Function.",
-                0, 12, 1, 1);
-        assertException(
-                "#!/bin/node\n() => {}",
-                JavetSanitizerError.InvalidNode,
-                "AST node /bin/node is unexpected. Expecting AST node Arrow Expression in Anonymous Function.",
-                0, 20, 1, 1);
-        assertException(
-                "() => {}; const a;",
+                ";;;",
                 JavetSanitizerError.NodeCountTooLarge,
-                "AST node count 2 is greater than the maximal AST node count 1.",
+                "AST node count 3 is greater than the maximal AST node count 1.",
+                0, 3, 1, 1);
+        assertException(
+                "import a from 'a';",
+                JavetSanitizerError.InvalidNode,
+                "AST node Import Declaration is unexpected. Expecting AST node Statement in Single Statement.",
                 0, 18, 1, 1);
     }
 
     @Test
     public void testValidCases() throws JavetSanitizerException {
         List<String> statements = SimpleList.of(
-                "() => 1", "() => {}", "(a, b) => { a + b; }");
+                "() => 1", "() => {}", "(a, b) => {}",
+                "function a() {}", "{ a; b; }",
+                "1", "'a'", "1 + 1", "a == b", "[1,2,3]", "x = { a: 1, b: 2, c: 3 }",
+                "a?.b", "a?.['b']", "a?.b()");
         for (String statement : statements) {
             checker.check(statement);
         }
