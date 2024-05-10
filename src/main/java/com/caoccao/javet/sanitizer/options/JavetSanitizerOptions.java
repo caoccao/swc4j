@@ -21,11 +21,13 @@ import com.caoccao.javet.sanitizer.visitors.IJavetSanitizerVisitor;
 import com.caoccao.javet.sanitizer.visitors.JavetSanitizerVisitor;
 import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
+import com.caoccao.javet.swc4j.options.Swc4jOptions;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 import com.caoccao.javet.swc4j.utils.SimpleMap;
 import com.caoccao.javet.swc4j.utils.SimpleSet;
 
+import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
 
@@ -246,6 +248,7 @@ public class JavetSanitizerOptions {
     private Set<String> reservedIdentifierSet;
     private Set<String> reservedMutableIdentifierSet;
     private boolean sealed;
+    private URL specifier;
     private List<String> toBeDeletedIdentifierList;
     private List<String> toBeFrozenIdentifierList;
     private IJavetSanitizerVisitor visitor;
@@ -276,6 +279,7 @@ public class JavetSanitizerOptions {
         reservedIdentifierMatcher = identifier -> false;
         reservedIdentifierSet = new HashSet<>(DEFAULT_RESERVED_IDENTIFIER_SET);
         reservedMutableIdentifierSet = new HashSet<>(DEFAULT_RESERVED_MUTABLE_IDENTIFIER_SET);
+        specifier = Swc4jOptions.DEFAULT_SPECIFIER;
         toBeDeletedIdentifierList = new ArrayList<>(DEFAULT_TO_BE_DELETED_OBJECT_LIST);
         toBeFrozenIdentifierList = new ArrayList<>(DEFAULT_TO_BE_FROZEN_OBJECT_LIST);
         sealed = false;
@@ -391,6 +395,16 @@ public class JavetSanitizerOptions {
      */
     public Set<String> getReservedMutableIdentifierSet() {
         return reservedMutableIdentifierSet;
+    }
+
+    /**
+     * Gets specifier.
+     *
+     * @return the specifier
+     * @since 0.7.0
+     */
+    public URL getSpecifier() {
+        return specifier;
     }
 
     /**
@@ -723,6 +737,19 @@ public class JavetSanitizerOptions {
     }
 
     /**
+     * Sets specifier.
+     *
+     * @param specifier the specifier
+     * @since 0.7.0
+     */
+    public JavetSanitizerOptions setSpecifier(URL specifier) {
+        if (!sealed) {
+            this.specifier = AssertionUtils.notNull(specifier, "Specifier");
+        }
+        return this;
+    }
+
+    /**
      * Sets visitor constructor.
      *
      * @param visitorConstructor the visitor constructor
@@ -768,6 +795,7 @@ public class JavetSanitizerOptions {
         options.reservedIdentifierSet.addAll(reservedIdentifierSet);
         options.reservedMutableIdentifierSet.clear();
         options.reservedMutableIdentifierSet.addAll(reservedMutableIdentifierSet);
+        options.specifier = specifier;
         options.toBeDeletedIdentifierList.clear();
         options.toBeDeletedIdentifierList.addAll(toBeDeletedIdentifierList);
         options.toBeFrozenIdentifierList.clear();

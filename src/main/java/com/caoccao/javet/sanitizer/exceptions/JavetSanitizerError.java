@@ -27,18 +27,17 @@ import java.util.Map;
  */
 public enum JavetSanitizerError {
     UnknownError(1, "Unknown error: ${message}"),
-    EmptyCodeString(2, "The JavaScript code is empty."),
+    EmptyCodeString(2, "The code string is empty."),
     VisitorNotFound(3, "Visitor ${name} is not found."),
     ParsingError(4, "${message}"),
 
     IdentifierNotAllowed(100, "Identifier ${identifier} is not allowed."),
     KeywordNotAllowed(101, "Keyword ${keyword} is not allowed."),
 
-    InvalidToken(200, "Token ${actualToken} is invalid. Expecting ${expectedToken}."),
-    ArgumentCountMismatch(210, "Argument count ${actualCount} mismatches the expected argument count ${expectedCount}."),
-    SyntaxCountMismatch(220, "Syntax count ${actualCount} mismatches the expected syntax count ${expectedCount}."),
-    SyntaxCountTooSmall(221, "Syntax count ${actualCount} is less than the minimal syntax count ${minCount}."),
-    SyntaxCountTooLarger(222, "Syntax count ${actualCount} is greater than the maximal syntax count ${maxCount}."),
+    InvalidNode(200, "AST node ${actualNode} is unexpected. Expecting ${expectedNode} in ${nodeName}."),
+    NodeCountMismatch(220, "AST node count ${actualCount} mismatches the expected AST node count ${expectedCount}."),
+    NodeCountTooSmall(221, "AST node count ${actualCount} is less than the minimal AST node count ${minCount}."),
+    NodeCountTooLarge(222, "AST node count ${actualCount} is greater than the maximal AST node count ${maxCount}."),
 
     FunctionNotFound(300, "Function ${name} is not found."),
     ;

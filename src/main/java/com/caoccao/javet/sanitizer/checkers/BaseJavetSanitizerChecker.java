@@ -19,6 +19,7 @@ package com.caoccao.javet.sanitizer.checkers;
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
 import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
 import com.caoccao.javet.swc4j.Swc4j;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -79,6 +80,7 @@ public abstract class BaseJavetSanitizerChecker implements IJavetSanitizerChecke
         Swc4jParseOptions parseOptions = new Swc4jParseOptions()
                 .setMediaType(options.getMediaType())
                 .setParseMode(options.getParseMode())
+                .setSpecifier(options.getSpecifier())
                 .setCaptureAst(true);
         try {
             Swc4jParseOutput output = swc4j.parse(codeString, parseOptions);
@@ -87,6 +89,19 @@ public abstract class BaseJavetSanitizerChecker implements IJavetSanitizerChecke
             throw JavetSanitizerException.parsingError(e);
         }
     }
+
+    @SuppressWarnings("unchecked")
+    protected <T extends ISwc4jAst> T expectNode(ISwc4jAst node, Swc4jAstType expectedType) throws JavetSanitizerException {
+        if (node.getType() != expectedType) {
+            throw JavetSanitizerException.invalidNode(
+                    getName(),
+                    expectedType.name(),
+                    node.getType().name()).setNode(node);
+        }
+        return (T) node.as(expectedType.getAstClass());
+    }
+
+    public abstract String getName();
 
     @Override
     public JavetSanitizerOptions getOptions() {

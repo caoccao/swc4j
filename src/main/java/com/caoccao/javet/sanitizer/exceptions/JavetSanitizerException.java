@@ -52,20 +52,6 @@ public final class JavetSanitizerException extends Exception {
     }
 
     /**
-     * Argument count mismatch javet sanitizer exception.
-     *
-     * @param expectedCount the expected count
-     * @param actualCount   the actual count
-     * @return the javet sanitizer exception
-     * @since 0.7.0
-     */
-    public static JavetSanitizerException argumentCountMismatch(int expectedCount, int actualCount) {
-        return new JavetSanitizerException(
-                JavetSanitizerError.ArgumentCountMismatch,
-                SimpleMap.of("actualCount", actualCount, "expectedCount", expectedCount));
-    }
-
-    /**
      * Empty code string javet sanitizer exception.
      *
      * @return the javet sanitizer exception
@@ -102,6 +88,23 @@ public final class JavetSanitizerException extends Exception {
     }
 
     /**
+     * Invalid node javet sanitizer exception.
+     *
+     * @param nodeName     the node name
+     * @param expectedNode the expected node
+     * @param actualNode   the actual node
+     * @return the javet sanitizer exception
+     * @since 0.7.0
+     */
+    public static JavetSanitizerException invalidNode(String nodeName, String expectedNode, String actualNode) {
+        return new JavetSanitizerException(
+                JavetSanitizerError.InvalidNode,
+                SimpleMap.of("nodeName", nodeName,
+                        "actualNode", actualNode,
+                        "expectedNode", expectedNode));
+    }
+
+    /**
      * Keyword not allowed javet sanitizer exception.
      *
      * @param keyword the keyword
@@ -112,6 +115,46 @@ public final class JavetSanitizerException extends Exception {
         return new JavetSanitizerException(
                 JavetSanitizerError.KeywordNotAllowed,
                 SimpleMap.of("keyword", keyword));
+    }
+
+    /**
+     * Node count mismatch javet sanitizer exception.
+     *
+     * @param expectedCount the expected count
+     * @param actualCount   the actual count
+     * @return the javet sanitizer exception
+     * @since 0.7.0
+     */
+    public static JavetSanitizerException nodeCountMismatch(int expectedCount, int actualCount) {
+        return new JavetSanitizerException(
+                JavetSanitizerError.NodeCountMismatch,
+                SimpleMap.of("actualCount", actualCount, "expectedCount", expectedCount));
+    }
+
+    /**
+     * Node count too large javet sanitizer exception.
+     *
+     * @param maxCount    the max count
+     * @param actualCount the actual count
+     * @return the javet sanitizer exception
+     */
+    public static JavetSanitizerException nodeCountTooLarge(int maxCount, int actualCount) {
+        return new JavetSanitizerException(
+                JavetSanitizerError.NodeCountTooLarge,
+                SimpleMap.of("actualCount", actualCount, "maxCount", maxCount));
+    }
+
+    /**
+     * Node count too small javet sanitizer exception.
+     *
+     * @param minCount    the min count
+     * @param actualCount the actual count
+     * @return the javet sanitizer exception
+     */
+    public static JavetSanitizerException nodeCountTooSmall(int minCount, int actualCount) {
+        return new JavetSanitizerException(
+                JavetSanitizerError.NodeCountTooSmall,
+                SimpleMap.of("actualCount", actualCount, "minCount", minCount));
     }
 
     /**
@@ -126,62 +169,6 @@ public final class JavetSanitizerException extends Exception {
                 JavetSanitizerError.ParsingError,
                 SimpleMap.of("message", e.getMessage()),
                 e);
-    }
-
-    /**
-     * Syntax count mismatch javet sanitizer exception.
-     *
-     * @param expectedCount the expected count
-     * @param actualCount   the actual count
-     * @return the javet sanitizer exception
-     * @since 0.7.0
-     */
-    public static JavetSanitizerException syntaxCountMismatch(int expectedCount, int actualCount) {
-        return new JavetSanitizerException(
-                JavetSanitizerError.SyntaxCountMismatch,
-                SimpleMap.of("actualCount", actualCount, "expectedCount", expectedCount));
-    }
-
-    /**
-     * Syntax count too large javet sanitizer exception.
-     *
-     * @param maxCount    the max count
-     * @param actualCount the actual count
-     * @return the javet sanitizer exception
-     * @since 0.7.0
-     */
-    public static JavetSanitizerException syntaxCountTooLarge(int maxCount, int actualCount) {
-        return new JavetSanitizerException(
-                JavetSanitizerError.SyntaxCountTooLarger,
-                SimpleMap.of("actualCount", actualCount, "maxCount", maxCount));
-    }
-
-    /**
-     * Syntax count too small javet sanitizer exception.
-     *
-     * @param minCount    the min count
-     * @param actualCount the actual count
-     * @return the javet sanitizer exception
-     * @since 0.7.0
-     */
-    public static JavetSanitizerException syntaxCountTooSmall(int minCount, int actualCount) {
-        return new JavetSanitizerException(
-                JavetSanitizerError.SyntaxCountTooSmall,
-                SimpleMap.of("actualCount", actualCount, "minCount", minCount));
-    }
-
-    /**
-     * Token mismatch javet sanitizer exception.
-     *
-     * @param expectedToken the expected token
-     * @param actualToken   the actual token
-     * @return the javet sanitizer exception
-     * @since 0.7.0
-     */
-    public static JavetSanitizerException tokenMismatch(String expectedToken, String actualToken) {
-        return new JavetSanitizerException(
-                JavetSanitizerError.InvalidToken,
-                SimpleMap.of("expectedToken", expectedToken, "actualToken", actualToken));
     }
 
     /**

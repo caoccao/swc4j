@@ -16,18 +16,68 @@
 
 package com.caoccao.javet.sanitizer.checkers;
 
+import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerError;
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class TestJavetSanitizerAnonymousFunctionChecker {
+@SuppressWarnings("ThrowableNotThrown")
+public class TestJavetSanitizerAnonymousFunctionChecker extends BaseTestSuiteCheckers {
+    @BeforeEach
+    public void beforeEach() {
+        checker = new JavetSanitizerAnonymousFunctionChecker();
+    }
+
+    @Test
+    public void testInvalidCases() {
+        assertException(
+                "function() {}",
+                JavetSanitizerError.ParsingError,
+                "Expected ident at file:///main.js:1:9\n" +
+                        "\n" +
+                        "  function() {}\n" +
+                        "          ~");
+        assertException(
+                "function(a, b) {}",
+                JavetSanitizerError.ParsingError,
+                "Expected ident at file:///main.js:1:9\n" +
+                        "\n" +
+                        "  function(a, b) {}\n" +
+                        "          ~");
+        SimpleList.of("", "   ", null).forEach(code ->
+                assertException(
+                        code,
+                        JavetSanitizerError.EmptyCodeString,
+                        JavetSanitizerError.EmptyCodeString.getFormat()));
+        assertException(
+                "function a() {}",
+                JavetSanitizerError.InvalidNode,
+                "AST node FnDecl is unexpected. Expecting ExprStmt in Anonymous Function.",
+                0, 15, 1, 1);
+        assertException(
+                "const a;",
+                JavetSanitizerError.InvalidNode,
+                "AST node VarDecl is unexpected. Expecting ExprStmt in Anonymous Function.",
+                0, 8, 1, 1);
+        assertException(
+                "(() => {})()",
+                JavetSanitizerError.InvalidNode,
+                "AST node CallExpr is unexpected. Expecting ArrowExpr in Anonymous Function.",
+                0, 12, 1, 1);
+        assertException(
+                "() => {}; const a;",
+                JavetSanitizerError.NodeCountTooLarge,
+                "AST node count 2 is greater than the maximal AST node count 1.",
+                0, 18, 1, 1);
+    }
+
     @Test
     public void testValidCases() throws JavetSanitizerException {
         List<String> statements = SimpleList.of(
                 "() => 1", "() => {}", "(a, b) => { a + b; }");
-        JavetSanitizerAnonymousFunctionChecker checker = new JavetSanitizerAnonymousFunctionChecker();
         for (String statement : statements) {
             checker.check(statement);
         }
