@@ -39,7 +39,7 @@ public class TestJavetSanitizerSingleStatementChecker extends BaseTestSuiteCheck
                         JavetSanitizerError.EmptyCodeString,
                         JavetSanitizerError.EmptyCodeString.getFormat()));
         assertException(
-                "a?.b.?.c", // SWC bug
+                "a?.b.?.c",
                 JavetSanitizerError.ParsingError,
                 "Expected ident at file:///main.js:1:6\n" +
                         "\n" +
@@ -62,22 +62,30 @@ public class TestJavetSanitizerSingleStatementChecker extends BaseTestSuiteCheck
         assertException(
                 ";;;",
                 JavetSanitizerError.NodeCountTooLarge,
-                "AST node count 3 is greater than the maximal AST node count 1.",
-                0, 3, 1, 1);
+                "AST node count 3 is greater than the maximal AST node count 1.\n" +
+                        "Source: ;;;\n" +
+                        "Line: 1\n" +
+                        "Column: 1\n" +
+                        "Start: 0\n" +
+                        "End: 3");
         assertException(
                 "import a from 'a';",
                 JavetSanitizerError.InvalidNode,
-                "AST node Import Declaration is unexpected. Expecting AST node Statement in Single Statement.",
-                0, 18, 1, 1);
+                "AST node Import Declaration is unexpected. Expecting AST node Statement in Single Statement.\n" +
+                        "Source: import a from 'a';\n" +
+                        "Line: 1\n" +
+                        "Column: 1\n" +
+                        "Start: 0\n" +
+                        "End: 18");
     }
 
     @Test
     public void testValidCases() throws JavetSanitizerException {
         List<String> statements = SimpleList.of(
                 "() => 1", "() => {}", "(a, b) => {}",
-                "function a() {}", "{ a; b; }",
+                "function a() {}", "{ a; b; }", "const a;",
                 "1", "'a'", "1 + 1", "a == b", "[1,2,3]", "x = { a: 1, b: 2, c: 3 }",
-                "a?.b", "a?.['b']", "a?.b()");
+                "a?.b", "a?.b?.c?.d", "a?.['b']", "a?.b()");
         for (String statement : statements) {
             checker.check(statement);
         }

@@ -18,7 +18,9 @@ package com.caoccao.javet.sanitizer.exceptions;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
+import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.SimpleMap;
+import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.util.Map;
 import java.util.Objects;
@@ -29,8 +31,10 @@ import java.util.Objects;
  * @since 0.7.0
  */
 public final class JavetSanitizerException extends Exception {
+    private static final int MAX_SOURCE_LENGTH = 80;
     private final JavetSanitizerError error;
     private final Map<String, Object> parameters;
+    private String codeString;
     private ISwc4jAst node;
 
     private JavetSanitizerException(JavetSanitizerError error) {
@@ -39,6 +43,7 @@ public final class JavetSanitizerException extends Exception {
 
     private JavetSanitizerException(JavetSanitizerError error, Map<String, Object> parameters) {
         super(Objects.requireNonNull(error).getMessage(Objects.requireNonNull(parameters)));
+        codeString = null;
         node = null;
         this.error = error;
         this.parameters = parameters;
@@ -46,6 +51,7 @@ public final class JavetSanitizerException extends Exception {
 
     private JavetSanitizerException(JavetSanitizerError error, Map<String, Object> parameters, Throwable cause) {
         super(Objects.requireNonNull(error).getMessage(Objects.requireNonNull(parameters)), cause);
+        codeString = null;
         node = null;
         this.error = error;
         this.parameters = parameters;
@@ -201,6 +207,43 @@ public final class JavetSanitizerException extends Exception {
     }
 
     /**
+     * Gets code string.
+     *
+     * @return the code string
+     * @since 0.7.0
+     */
+    public String getCodeString() {
+        return codeString;
+    }
+
+    /**
+     * Gets detailed message.
+     *
+     * @return the detailed message
+     * @since 0.7.0
+     */
+    public String getDetailedMessage() {
+        String detailedMessage = getMessage();
+        if (node != null) {
+            Swc4jSpan span = node.getSpan();
+            if (StringUtils.isNotEmpty(codeString) && codeString.length() >= span.getEnd()) {
+                int start = span.getStart();
+                int end = Math.min(start + MAX_SOURCE_LENGTH, span.getEnd());
+                String source = codeString.substring(start, end);
+                source = source.replace("\r", "\\r");
+                source = source.replace("\n", "\\n");
+                detailedMessage += "\nSource: " + source;
+            }
+            detailedMessage = detailedMessage
+                    + "\nLine: " + span.getLine()
+                    + "\nColumn: " + span.getColumn()
+                    + "\nStart: " + span.getStart()
+                    + "\nEnd: " + span.getEnd();
+        }
+        return detailedMessage;
+    }
+
+    /**
      * Gets error.
      *
      * @return the error
@@ -228,6 +271,18 @@ public final class JavetSanitizerException extends Exception {
      */
     public Map<String, Object> getParameters() {
         return parameters;
+    }
+
+    /**
+     * Sets code string.
+     *
+     * @param codeString the code string
+     * @return the self
+     * @since 0.7.0
+     */
+    public JavetSanitizerException setCodeString(String codeString) {
+        this.codeString = codeString;
+        return this;
     }
 
     /**

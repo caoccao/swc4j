@@ -19,7 +19,8 @@ package com.caoccao.javet.sanitizer.checkers;
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerError;
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BaseTestSuiteCheckers {
     protected IJavetSanitizerChecker checker;
@@ -33,24 +34,7 @@ public class BaseTestSuiteCheckers {
                 () -> checker.check(code),
                 "Failed to throw exception for [" + code + "]");
         assertEquals(expectedError.getCode(), exception.getError().getCode());
-        assertEquals(expectedErrorMessage, exception.getMessage());
-        return exception;
-    }
-
-    protected JavetSanitizerException assertException(
-            String code,
-            JavetSanitizerError expectedError,
-            String expectedErrorMessage,
-            int start,
-            int end,
-            int line,
-            int column) {
-        JavetSanitizerException exception = assertException(code, expectedError, expectedErrorMessage);
-        assertNotNull(exception.getNode());
-        assertEquals(start, exception.getNode().getSpan().getStart());
-        assertEquals(end, exception.getNode().getSpan().getEnd());
-        assertEquals(line, exception.getNode().getSpan().getLine());
-        assertEquals(column, exception.getNode().getSpan().getColumn());
+        assertEquals(expectedErrorMessage, exception.getDetailedMessage());
         return exception;
     }
 }
