@@ -71,7 +71,7 @@ public class TestJavetSanitizerSingleStatementChecker extends BaseTestSuiteCheck
         assertException(
                 "import a from 'a';",
                 JavetSanitizerError.InvalidNode,
-                "AST node Import Declaration is unexpected. Expecting AST node Statement in Single Statement.\n" +
+                "Import Declaration is unexpected. Expecting Statement in Single Statement.\n" +
                         "Source: import a from 'a';\n" +
                         "Line: 1\n" +
                         "Column: 1\n" +

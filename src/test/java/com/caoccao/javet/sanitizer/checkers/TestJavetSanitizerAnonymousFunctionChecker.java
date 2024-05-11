@@ -55,7 +55,7 @@ public class TestJavetSanitizerAnonymousFunctionChecker extends BaseTestSuiteChe
         assertException(
                 "function a() {}",
                 JavetSanitizerError.InvalidNode,
-                "AST node FnDecl is unexpected. Expecting AST node ExprStmt in Anonymous Function.\n" +
+                "FnDecl is unexpected. Expecting ExprStmt in Anonymous Function.\n" +
                         "Line: 1\n" +
                         "Column: 1\n" +
                         "Start: 0\n" +
@@ -63,7 +63,7 @@ public class TestJavetSanitizerAnonymousFunctionChecker extends BaseTestSuiteChe
         assertException(
                 "const a;",
                 JavetSanitizerError.InvalidNode,
-                "AST node VarDecl is unexpected. Expecting AST node ExprStmt in Anonymous Function.\n" +
+                "VarDecl is unexpected. Expecting ExprStmt in Anonymous Function.\n" +
                         "Line: 1\n" +
                         "Column: 1\n" +
                         "Start: 0\n" +
@@ -71,7 +71,7 @@ public class TestJavetSanitizerAnonymousFunctionChecker extends BaseTestSuiteChe
         assertException(
                 "(() => {})()",
                 JavetSanitizerError.InvalidNode,
-                "AST node CallExpr is unexpected. Expecting AST node ArrowExpr in Anonymous Function.\n" +
+                "CallExpr is unexpected. Expecting ArrowExpr in Anonymous Function.\n" +
                         "Line: 1\n" +
                         "Column: 1\n" +
                         "Start: 0\n" +
@@ -79,7 +79,7 @@ public class TestJavetSanitizerAnonymousFunctionChecker extends BaseTestSuiteChe
         assertException(
                 "#!/bin/node\n() => {}",
                 JavetSanitizerError.InvalidNode,
-                "AST node /bin/node is unexpected. Expecting AST node Arrow Expression in Anonymous Function.\n" +
+                "/bin/node is unexpected. Expecting Arrow Expression in Anonymous Function.\n" +
                         "Source: #!/bin/node\\n() => {}\n" +
                         "Line: 1\n" +
                         "Column: 1\n" +
