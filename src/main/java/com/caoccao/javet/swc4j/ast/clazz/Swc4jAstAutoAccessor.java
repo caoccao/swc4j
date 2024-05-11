@@ -39,6 +39,8 @@ public class Swc4jAstAutoAccessor
         extends Swc4jAst
         implements ISwc4jAstClassMember {
     protected final List<Swc4jAstDecorator> decorators;
+    @Jni2RustField(name = "is_abstract")
+    protected boolean _abstract;
     @Jni2RustField(name = "is_override")
     protected boolean _override;
     @Jni2RustField(name = "is_static")
@@ -59,10 +61,12 @@ public class Swc4jAstAutoAccessor
             @Jni2RustParam(name = "is_static") boolean _static,
             List<Swc4jAstDecorator> decorators,
             @Jni2RustParam(optional = true) Swc4jAstAccessibility accessibility,
+            @Jni2RustParam(name = "is_abstract") boolean _abstract,
             @Jni2RustParam(name = "is_override") boolean _override,
             boolean definite,
             Swc4jSpan span) {
         super(span);
+        setAbstract(_abstract);
         setAccessibility(accessibility);
         setDefinite(definite);
         setKey(key);
@@ -114,6 +118,11 @@ public class Swc4jAstAutoAccessor
     }
 
     @Jni2RustMethod
+    public boolean isAbstract() {
+        return _abstract;
+    }
+
+    @Jni2RustMethod
     public boolean isDefinite() {
         return definite;
     }
@@ -126,6 +135,11 @@ public class Swc4jAstAutoAccessor
     @Jni2RustMethod
     public boolean isStatic() {
         return _static;
+    }
+
+    public Swc4jAstAutoAccessor setAbstract(boolean _abstract) {
+        this._abstract = _abstract;
+        return this;
     }
 
     public Swc4jAstAutoAccessor setAccessibility(Swc4jAstAccessibility accessibility) {

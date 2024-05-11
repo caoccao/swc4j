@@ -72,10 +72,9 @@ public class TestSwc4jAstBindingIdent extends BaseTestSuiteSwc4jAst {
         Swc4jAstAssignPat assignPat = assertAst(
                 param, param.getPat().as(Swc4jAstAssignPat.class), Swc4jAstType.AssignPat, 11, 24);
         Swc4jAstBindingIdent bindingIdent = assertAst(
-                assignPat, assignPat.getLeft().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 11, 20);
-        // TODO There is a bug that the span of Ident is the same with the BindingIdent.
+                assignPat, assignPat.getLeft().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 11, 12);
         ident = assertAst(
-                bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 11, 20);
+                bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 11, 12);
         assertEquals("a", ident.getSym());
         assertTrue(bindingIdent.getTypeAnn().isPresent());
         assertAst(bindingIdent, bindingIdent.getTypeAnn().get(), Swc4jAstType.TsTypeAnn, 12, 20);

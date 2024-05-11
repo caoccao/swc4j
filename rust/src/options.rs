@@ -614,6 +614,7 @@ struct JavaSwc4jTranspileOptions {
   method_get_media_type: JMethodID,
   method_get_parse_mode: JMethodID,
   method_get_plugin_host: JMethodID,
+  method_get_precompile_jsx_skip_elements: JMethodID,
   method_get_source_map: JMethodID,
   method_get_specifier: JMethodID,
   method_is_capture_ast: JMethodID,
@@ -692,6 +693,13 @@ impl JavaSwc4jTranspileOptions {
         "()Lcom/caoccao/javet/swc4j/plugins/ISwc4jPluginHost;",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getPluginHost");
+    let method_get_precompile_jsx_skip_elements = env
+      .get_method_id(
+        &class,
+        "getPrecompileJsxSkipElements",
+        "()Ljava/util/List;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getPrecompileJsxSkipElements");
     let method_get_source_map = env
       .get_method_id(
         &class,
@@ -813,6 +821,7 @@ impl JavaSwc4jTranspileOptions {
       method_get_media_type,
       method_get_parse_mode,
       method_get_plugin_host,
+      method_get_precompile_jsx_skip_elements,
       method_get_source_map,
       method_get_specifier,
       method_is_capture_ast,
@@ -957,6 +966,29 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_plugin_host,
         &[],
         "ISwc4jPluginHost get_plugin_host()"
+      );
+    let return_value = if return_value.is_null() {
+      None
+    } else {
+      Some(return_value)
+    };
+    return_value
+  }
+
+  pub fn get_precompile_jsx_skip_elements<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Option<JObject<'a>>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_precompile_jsx_skip_elements,
+        &[],
+        "List get_precompile_jsx_skip_elements()"
       );
     let return_value = if return_value.is_null() {
       None
@@ -1475,6 +1507,9 @@ pub struct TranspileOptions<'a> {
   /// with dynamic content. Defaults to `false`, mutually exclusive with
   /// `transform_jsx`.
   pub precompile_jsx: bool,
+  /// List of elements that should not be precompiled when the JSX precompile
+  /// transform is used.
+  pub precompile_jsx_skip_elements: Option<Vec<String>>,
   /// Whether to apply swc's scope analysis.
   pub scope_analysis: bool,
   /// How and if source maps should be generated.
@@ -1519,6 +1554,7 @@ impl<'a> Default for TranspileOptions<'a> {
       parse_mode: ParseMode::Program,
       plugin_host: None,
       precompile_jsx: false,
+      precompile_jsx_skip_elements: None,
       scope_analysis: false,
       source_map: SourceMapOption::Inline,
       specifier: "file:///main.js".to_owned(),
@@ -1539,6 +1575,7 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
     let emit_metadata = java_transpile_options.is_emit_metadata(env, obj);
     let java_imports_not_used_as_values = java_transpile_options.get_imports_not_used_as_values(env, obj);
     let imports_not_used_as_values = ImportsNotUsedAsValues::from_java(env, &java_imports_not_used_as_values);
+    delete_local_ref!(env, java_imports_not_used_as_values);
     let inline_sources = java_transpile_options.is_inline_sources(env, obj);
     let jsx_automatic = java_transpile_options.is_jsx_automatic(env, obj);
     let jsx_development = java_transpile_options.is_jsx_development(env, obj);
@@ -1548,16 +1585,32 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
     let keep_comments = java_transpile_options.is_keep_comments(env, obj);
     let java_media_type = java_transpile_options.get_media_type(env, obj);
     let media_type = MediaType::from_java(env, &java_media_type);
+    delete_local_ref!(env, java_media_type);
     let java_parse_mode = java_transpile_options.get_parse_mode(env, obj);
     let parse_mode = ParseMode::from_java(env, &java_parse_mode);
+    delete_local_ref!(env, java_parse_mode);
     let java_optional_plugin_host = java_transpile_options.get_plugin_host(env, obj);
-    let plugin_host = java_optional_plugin_host.map(|host| {
+    let plugin_host = java_optional_plugin_host.as_ref().map(|host| {
       let host = env
         .new_global_ref(host)
         .expect("Failed to create global reference for plugin host");
       PluginHost::new(env, host)
     });
+    delete_local_optional_ref!(env, java_optional_plugin_host);
     let precompile_jsx = java_transpile_options.is_precompile_jsx(env, obj);
+    let java_optional_precompile_jsx_skip_elements = java_transpile_options.get_precompile_jsx_skip_elements(env, obj);
+    let precompile_jsx_skip_elements = java_optional_precompile_jsx_skip_elements.as_ref().map(|elements| {
+      let length = list_size(env, &elements);
+      (0..length)
+        .map(|i| {
+          let java_item = list_get(env, &elements, i);
+          let element = jstring_to_string!(env, java_item.as_raw());
+          delete_local_ref!(env, java_item);
+          element
+        })
+        .collect()
+    });
+    delete_local_optional_ref!(env, java_optional_precompile_jsx_skip_elements);
     let scope_analysis = java_transpile_options.is_scope_analysis(env, obj);
     let java_source_map = java_transpile_options.get_source_map(env, obj);
     let source_map = SourceMapOption::from_java(env, &java_source_map);
@@ -1567,9 +1620,6 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
     let var_decl_imports = java_transpile_options.is_var_decl_imports(env, obj);
     let use_decorators_proposal = java_transpile_options.is_use_decorators_proposal(env, obj);
     let use_ts_decorators = java_transpile_options.is_use_ts_decorators(env, obj);
-    delete_local_ref!(env, java_imports_not_used_as_values);
-    delete_local_ref!(env, java_media_type);
-    delete_local_ref!(env, java_parse_mode);
     delete_local_ref!(env, java_source_map);
     TranspileOptions {
       capture_ast,
@@ -1588,6 +1638,7 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
       parse_mode,
       plugin_host,
       precompile_jsx,
+      precompile_jsx_skip_elements,
       scope_analysis,
       source_map,
       specifier,

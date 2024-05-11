@@ -27,6 +27,7 @@ import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.net.URL;
+import java.util.List;
 
 /**
  * The type Swc4j transpile options.
@@ -119,6 +120,12 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     protected boolean precompileJsx;
     /**
+     * List of elements that should not be precompiled when the JSX precompile transform is used.
+     *
+     * @since 0.7.0
+     */
+    protected List<String> precompileJsxSkipElements;
+    /**
      * How and if source maps should be generated.
      *
      * @since 0.1.0
@@ -168,6 +175,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
         setInlineSources(true);
         setKeepComments(false);
         setPrecompileJsx(false);
+        setPrecompileJsxSkipElements(null);
         setSourceMap(Swc4jSourceMapOption.Inline);
         setTransformJsx(true);
         setVarDeclImports(false);
@@ -216,6 +224,17 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     @Jni2RustMethod(optional = true)
     public String getJsxImportSource() {
         return jsxImportSource;
+    }
+
+    /**
+     * Gets precompile jsx skip elements.
+     *
+     * @return the precompile jsx skip elements
+     * @since 0.7.0
+     */
+    @Jni2RustMethod(optional = true)
+    public List<String> getPrecompileJsxSkipElements() {
+        return precompileJsxSkipElements;
     }
 
     /**
@@ -504,6 +523,18 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     public Swc4jTranspileOptions setPrecompileJsx(boolean precompileJsx) {
         this.precompileJsx = precompileJsx;
+        return this;
+    }
+
+    /**
+     * Sets precompile jsx skip elements.
+     *
+     * @param precompileJsxSkipElements the precompile jsx skip elements
+     * @return the self
+     * @since 0.7.0
+     */
+    public Swc4jTranspileOptions setPrecompileJsxSkipElements(List<String> precompileJsxSkipElements) {
+        this.precompileJsxSkipElements = precompileJsxSkipElements;
         return this;
     }
 

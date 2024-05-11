@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.7.0
+
+* Upgraded deno_ast to v0.38.1
+* Added anonymous function checker
+* Added single statement checker
+
 ## 0.6.0
 
 * Supported plugins

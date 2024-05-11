@@ -175,6 +175,7 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
         jsx_fragment_factory: options.jsx_fragment_factory.to_owned(),
         jsx_import_source: options.jsx_import_source.to_owned(),
         precompile_jsx: options.precompile_jsx,
+        precompile_jsx_skip_elements: options.precompile_jsx_skip_elements.to_owned(),
         transform_jsx: options.transform_jsx,
         var_decl_imports: options.var_decl_imports,
         use_decorators_proposal: options.use_decorators_proposal,
@@ -184,6 +185,7 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
         inline_sources: options.inline_sources,
         keep_comments: options.keep_comments,
         source_map: options.source_map,
+        source_map_file: None,
       };
       match parsed_source.clone().transpile(&transpile_options, &emit_options) {
         Ok(transpile_result) => Ok(outputs::TranspileOutput::new(

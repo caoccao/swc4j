@@ -3494,6 +3494,7 @@ struct JavaSwc4jAstAutoAccessor {
   method_get_key: JMethodID,
   method_get_type_ann: JMethodID,
   method_get_value: JMethodID,
+  method_is_abstract: JMethodID,
   method_is_definite: JMethodID,
   method_is_override: JMethodID,
   method_is_static: JMethodID,
@@ -3514,7 +3515,7 @@ impl JavaSwc4jAstAutoAccessor {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstAccessibility;ZZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstKey;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstAccessibility;ZZZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstAutoAccessor::new");
     let method_get_accessibility = env
@@ -3552,6 +3553,13 @@ impl JavaSwc4jAstAutoAccessor {
         "()Ljava/util/Optional;",
       )
       .expect("Couldn't find method Swc4jAstAutoAccessor.getValue");
+    let method_is_abstract = env
+      .get_method_id(
+        &class,
+        "isAbstract",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstAutoAccessor.isAbstract");
     let method_is_definite = env
       .get_method_id(
         &class,
@@ -3581,6 +3589,7 @@ impl JavaSwc4jAstAutoAccessor {
       method_get_key,
       method_get_type_ann,
       method_get_value,
+      method_is_abstract,
       method_is_definite,
       method_is_override,
       method_is_static,
@@ -3596,6 +3605,7 @@ impl JavaSwc4jAstAutoAccessor {
     is_static: bool,
     decorators: &JObject<'_>,
     accessibility: &Option<JObject>,
+    is_abstract: bool,
     is_override: bool,
     definite: bool,
     span: &JObject<'_>,
@@ -3609,6 +3619,7 @@ impl JavaSwc4jAstAutoAccessor {
     let is_static = boolean_to_jvalue!(is_static);
     let decorators = object_to_jvalue!(decorators);
     let accessibility = optional_object_to_jvalue!(accessibility);
+    let is_abstract = boolean_to_jvalue!(is_abstract);
     let is_override = boolean_to_jvalue!(is_override);
     let definite = boolean_to_jvalue!(definite);
     let span = object_to_jvalue!(span);
@@ -3616,7 +3627,7 @@ impl JavaSwc4jAstAutoAccessor {
         env,
         &self.class,
         self.method_construct,
-        &[key, value, type_ann, is_static, decorators, accessibility, is_override, definite, span],
+        &[key, value, type_ann, is_static, decorators, accessibility, is_abstract, is_override, definite, span],
         "Swc4jAstAutoAccessor construct()"
       );
     return_value
@@ -3708,6 +3719,22 @@ impl JavaSwc4jAstAutoAccessor {
         self.method_get_value,
         &[],
         "Optional get_value()"
+      );
+    return_value
+  }
+
+  pub fn is_abstract<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> bool
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_abstract,
+        &[],
+        "boolean is_abstract()"
       );
     return_value
   }
@@ -26406,10 +26433,11 @@ impl ToJavaWithMap<ByteToIndexMap> for AutoAccessor {
       delete_local_ref!(env, java_node);
     });
     let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    let is_abstract = self.is_abstract;
     let is_override = self.is_override;
     let definite = self.definite;
     let return_value = unsafe { JAVA_CLASS_AUTO_ACCESSOR.as_ref().unwrap() }
-      .construct(env, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_override, definite, &java_span_ex);
+      .construct(env, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_abstract, is_override, definite, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_value);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_accessibility);
@@ -26469,6 +26497,7 @@ impl<'local> FromJava<'local> for AutoAccessor {
       None
     };
     delete_local_ref!(env, java_optional_accessibility);
+    let is_abstract = java_class.is_abstract(env, jobj);
     let is_override = java_class.is_override(env, jobj);
     let definite = java_class.is_definite(env, jobj);
     AutoAccessor {
@@ -26479,6 +26508,7 @@ impl<'local> FromJava<'local> for AutoAccessor {
       is_static,
       decorators,
       accessibility,
+      is_abstract,
       is_override,
       definite,
     }
