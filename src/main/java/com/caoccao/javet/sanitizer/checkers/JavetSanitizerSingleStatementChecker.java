@@ -20,7 +20,6 @@ package com.caoccao.javet.sanitizer.checkers;
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
 import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 
 /**
@@ -51,24 +50,10 @@ public class JavetSanitizerSingleStatementChecker extends BaseJavetSanitizerChec
     @Override
     public void check(String codeString) throws JavetSanitizerException {
         super.check(codeString);
-        String expectedNode = Swc4jAstType.getName(ISwc4jAstStmt.class);
-        if (program.getShebang().isPresent()) {
-            throw JavetSanitizerException.invalidNode(getName(), expectedNode, program.getShebang().get())
-                    .setCodeString(codeString).setNode(program);
-        }
-        if (program.getBody().isEmpty()) {
-            throw JavetSanitizerException.nodeCountTooSmall(1, program.getBody().size())
-                    .setCodeString(codeString).setNode(program);
-        }
-        if (program.getBody().size() > 1) {
-            throw JavetSanitizerException.nodeCountTooLarge(1, program.getBody().size())
-                    .setCodeString(codeString).setNode(program);
-        }
-        ISwc4jAst node = program.getBody().get(0);
-        if (!(node instanceof ISwc4jAstStmt)) {
-            throw JavetSanitizerException.invalidNode(getName(), expectedNode, Swc4jAstType.getName(node.getClass()))
-                    .setCodeString(codeString).setNode(program);
-        }
+        validateNoShebang(Swc4jAstType.getName(ISwc4jAstStmt.class));
+        validateBodyNotEmpty();
+        validateBodySize(1);
+        validateNode(program.getBody().get(0), ISwc4jAstStmt.class);
     }
 
     @Override

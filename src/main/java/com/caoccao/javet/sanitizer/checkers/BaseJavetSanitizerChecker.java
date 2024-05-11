@@ -33,6 +33,7 @@ import com.caoccao.javet.swc4j.utils.StringUtils;
  *
  * @since 0.7.0
  */
+@SuppressWarnings("unchecked")
 public abstract class BaseJavetSanitizerChecker implements IJavetSanitizerChecker {
     /**
      * The constant swc4j.
@@ -40,6 +41,12 @@ public abstract class BaseJavetSanitizerChecker implements IJavetSanitizerChecke
      * @since 0.7.0
      */
     protected static final Swc4j swc4j = new Swc4j();
+    /**
+     * The Code string.
+     *
+     * @since 0.7.0
+     */
+    protected String codeString;
     /**
      * The Option.
      *
@@ -76,7 +83,8 @@ public abstract class BaseJavetSanitizerChecker implements IJavetSanitizerChecke
     @Override
     public void check(String codeString) throws JavetSanitizerException {
         reset();
-        validateBlank(codeString);
+        this.codeString = codeString;
+        validateBlank();
         Swc4jParseOptions parseOptions = new Swc4jParseOptions()
                 .setMediaType(options.getMediaType())
                 .setParseMode(options.getParseMode())
@@ -90,17 +98,22 @@ public abstract class BaseJavetSanitizerChecker implements IJavetSanitizerChecke
         }
     }
 
-    @SuppressWarnings("unchecked")
-    protected <T extends ISwc4jAst> T expectNode(ISwc4jAst node, Swc4jAstType expectedType) throws JavetSanitizerException {
-        if (node.getType() != expectedType) {
-            throw JavetSanitizerException.invalidNode(
-                    getName(),
-                    expectedType.name(),
-                    node.getType().name()).setNode(node);
-        }
-        return (T) node.as(expectedType.getAstClass());
+    /**
+     * Gets code string.
+     *
+     * @return the code string
+     * @since 0.7.0
+     */
+    public String getCodeString() {
+        return codeString;
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     * @since 0.7.0
+     */
     public abstract String getName();
 
     @Override
@@ -120,19 +133,102 @@ public abstract class BaseJavetSanitizerChecker implements IJavetSanitizerChecke
      * @since 0.7.0
      */
     protected void reset() {
+        codeString = null;
         program = null;
     }
 
     /**
      * Validate blank.
      *
-     * @param codeString the code string
      * @throws JavetSanitizerException the javet sanitizer exception
      * @since 0.7.0
      */
-    protected void validateBlank(String codeString) throws JavetSanitizerException {
+    protected void validateBlank() throws JavetSanitizerException {
         if (StringUtils.isBlank(codeString)) {
-            throw JavetSanitizerException.emptyCodeString();
+            throw JavetSanitizerException.emptyCodeString().setCodeString(codeString);
         }
+    }
+
+    /**
+     * Validate body not empty.
+     *
+     * @throws JavetSanitizerException the javet sanitizer exception
+     * @since 0.7.0
+     */
+    protected void validateBodyNotEmpty() throws JavetSanitizerException {
+        if (program.getBody().isEmpty()) {
+            throw JavetSanitizerException.nodeCountTooSmall(1, program.getBody().size())
+                    .setCodeString(codeString).setNode(program);
+        }
+    }
+
+    /**
+     * Validate body size.
+     *
+     * @param maxSize the max size
+     * @throws JavetSanitizerException the javet sanitizer exception
+     * @since 0.7.0
+     */
+    protected void validateBodySize(int maxSize) throws JavetSanitizerException {
+        if (program.getBody().size() > maxSize) {
+            throw JavetSanitizerException.nodeCountTooLarge(maxSize, program.getBody().size())
+                    .setCodeString(codeString).setNode(program);
+        }
+    }
+
+    /**
+     * Validate no shebang.
+     *
+     * @param expectedNode the expected node
+     * @throws JavetSanitizerException the javet sanitizer exception
+     * @since 0.7.0
+     */
+    protected void validateNoShebang(String expectedNode) throws JavetSanitizerException {
+        if (program.getShebang().isPresent()) {
+            throw JavetSanitizerException.invalidNode(getName(), expectedNode, program.getShebang().get())
+                    .setCodeString(codeString).setNode(program);
+        }
+    }
+
+    /**
+     * Validate node.
+     *
+     * @param <T>          the type parameter
+     * @param node         the node
+     * @param expectedType the expected type
+     * @return the node
+     * @throws JavetSanitizerException the javet sanitizer exception
+     * @since 0.7.0
+     */
+    protected <T extends ISwc4jAst> T validateNode(ISwc4jAst node, Swc4jAstType expectedType) throws JavetSanitizerException {
+        if (node.getType() != expectedType) {
+            throw JavetSanitizerException.invalidNode(
+                            getName(),
+                            Swc4jAstType.getName(expectedType.getAstClass()),
+                            Swc4jAstType.getName(node.getType().getAstClass()))
+                    .setCodeString(codeString).setNode(node);
+        }
+        return (T) node.as(expectedType.getAstClass());
+    }
+
+    /**
+     * Validate node.
+     *
+     * @param <T>           the type parameter
+     * @param node          the node
+     * @param expectedClass the expected class
+     * @return the node
+     * @throws JavetSanitizerException the javet sanitizer exception
+     * @since 0.7.0
+     */
+    protected <T extends ISwc4jAst> T validateNode(ISwc4jAst node, Class<? extends ISwc4jAst> expectedClass) throws JavetSanitizerException {
+        if (!expectedClass.isAssignableFrom(node.getClass())) {
+            throw JavetSanitizerException.invalidNode(
+                            getName(),
+                            Swc4jAstType.getName(expectedClass),
+                            Swc4jAstType.getName(node.getType().getAstClass()))
+                    .setCodeString(codeString).setNode(node);
+        }
+        return (T) node.as(expectedClass);
     }
 }

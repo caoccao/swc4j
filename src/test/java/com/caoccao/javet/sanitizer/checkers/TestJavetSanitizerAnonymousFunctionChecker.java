@@ -55,7 +55,8 @@ public class TestJavetSanitizerAnonymousFunctionChecker extends BaseTestSuiteChe
         assertException(
                 "function a() {}",
                 JavetSanitizerError.InvalidNode,
-                "FnDecl is unexpected. Expecting ExprStmt in Anonymous Function.\n" +
+                "Function Declaration is unexpected. Expecting Expression Statement in Anonymous Function.\n" +
+                        "Source: function a() {}\n" +
                         "Line: 1\n" +
                         "Column: 1\n" +
                         "Start: 0\n" +
@@ -63,7 +64,8 @@ public class TestJavetSanitizerAnonymousFunctionChecker extends BaseTestSuiteChe
         assertException(
                 "const a;",
                 JavetSanitizerError.InvalidNode,
-                "VarDecl is unexpected. Expecting ExprStmt in Anonymous Function.\n" +
+                "Var Declaration is unexpected. Expecting Expression Statement in Anonymous Function.\n" +
+                        "Source: const a;\n" +
                         "Line: 1\n" +
                         "Column: 1\n" +
                         "Start: 0\n" +
@@ -71,7 +73,8 @@ public class TestJavetSanitizerAnonymousFunctionChecker extends BaseTestSuiteChe
         assertException(
                 "(() => {})()",
                 JavetSanitizerError.InvalidNode,
-                "CallExpr is unexpected. Expecting ArrowExpr in Anonymous Function.\n" +
+                "Call Expression is unexpected. Expecting Arrow Expression in Anonymous Function.\n" +
+                        "Source: (() => {})()\n" +
                         "Line: 1\n" +
                         "Column: 1\n" +
                         "Start: 0\n" +

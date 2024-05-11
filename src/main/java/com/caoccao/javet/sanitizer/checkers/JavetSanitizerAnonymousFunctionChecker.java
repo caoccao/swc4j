@@ -51,21 +51,11 @@ public class JavetSanitizerAnonymousFunctionChecker extends BaseJavetSanitizerCh
     @Override
     public void check(String codeString) throws JavetSanitizerException {
         super.check(codeString);
-        String expectedNode = Swc4jAstType.getName(Swc4jAstArrowExpr.class);
-        if (program.getShebang().isPresent()) {
-            throw JavetSanitizerException.invalidNode(getName(), expectedNode, program.getShebang().get())
-                    .setCodeString(codeString).setNode(program);
-        }
-        if (program.getBody().isEmpty()) {
-            throw JavetSanitizerException.nodeCountTooSmall(1, program.getBody().size())
-                    .setCodeString(codeString).setNode(program);
-        }
-        if (program.getBody().size() > 1) {
-            throw JavetSanitizerException.nodeCountTooLarge(1, program.getBody().size())
-                    .setCodeString(codeString).setNode(program);
-        }
-        Swc4jAstExprStmt exprStmt = expectNode(program.getBody().get(0), Swc4jAstType.ExprStmt);
-        expectNode(exprStmt.getExpr(), Swc4jAstType.ArrowExpr);
+        validateNoShebang(Swc4jAstType.getName(Swc4jAstArrowExpr.class));
+        validateBodyNotEmpty();
+        validateBodySize(1);
+        Swc4jAstExprStmt exprStmt = validateNode(program.getBody().get(0), Swc4jAstType.ExprStmt);
+        validateNode(exprStmt.getExpr(), Swc4jAstType.ArrowExpr);
     }
 
     @Override
