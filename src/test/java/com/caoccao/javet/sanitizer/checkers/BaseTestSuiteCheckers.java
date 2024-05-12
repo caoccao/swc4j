@@ -57,6 +57,13 @@ public class BaseTestSuiteCheckers {
             "const a = new XMLHttpRequest();", "XMLHttpRequest",
             "const a = new WebAssembly();", "WebAssembly",
             "const a = window;", "window",
+            "let Object = 1", "Object",
+            "Object.a = 1", "Object",
+            "let [ Object ] = [ 1 ]", "Object",
+            // SWC bug
+            // "{ Object } = { Object: 1 }", "Object",
+            "class Object {}", "Object",
+            "function Object() {}", "Object",
             "class $abc {}", "$abc",
             "function $abc() {}", "$abc");
 
@@ -78,11 +85,20 @@ public class BaseTestSuiteCheckers {
                 JavetSanitizerException.class,
                 () -> checker.check(code),
                 "Failed to throw exception for [" + code + "]");
-        assertEquals(expectedError.getCode(), exception.getError().getCode());
+        assertEquals(
+                expectedError.getCode(),
+                exception.getError().getCode(),
+                "Error code mismatches for " + code);
         if (detailed) {
-            assertEquals(expectedErrorMessage, exception.getDetailedMessage());
+            assertEquals(
+                    expectedErrorMessage,
+                    exception.getDetailedMessage(),
+                    "Detailed error message mismatches for " + code);
         } else {
-            assertEquals(expectedErrorMessage, exception.getMessage());
+            assertEquals(
+                    expectedErrorMessage,
+                    exception.getMessage(),
+                    "Error message mismatches for " + code);
         }
         return exception;
     }

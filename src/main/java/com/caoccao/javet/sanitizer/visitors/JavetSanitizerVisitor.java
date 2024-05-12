@@ -92,6 +92,12 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
     }
 
     @Override
+    public Swc4jAstVisitorResponse visitClassDecl(Swc4jAstClassDecl node) {
+        validateBuiltInObject(options, node);
+        return super.visitClassDecl(node);
+    }
+
+    @Override
     public Swc4jAstVisitorResponse visitDebuggerStmt(Swc4jAstDebuggerStmt node) {
         if (!options.isKeywordDebuggerEnabled()) {
             raiseError(JavetSanitizerException.keywordNotAllowed(DEBUGGER), node);
@@ -153,6 +159,12 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
             raiseError(JavetSanitizerException.keywordNotAllowed(EXPORT), node);
         }
         return super.visitExportNamespaceSpecifier(node);
+    }
+
+    @Override
+    public Swc4jAstVisitorResponse visitFnDecl(Swc4jAstFnDecl node) {
+        validateBuiltInObject(options, node);
+        return super.visitFnDecl(node);
     }
 
     @Override
@@ -255,6 +267,12 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
             raiseError(JavetSanitizerException.keywordNotAllowed(VAR), node);
         }
         return super.visitVarDecl(node);
+    }
+
+    @Override
+    public Swc4jAstVisitorResponse visitVarDeclarator(Swc4jAstVarDeclarator node) {
+        validateBuiltInObject(options, node);
+        return super.visitVarDeclarator(node);
     }
 
     @Override

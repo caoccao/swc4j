@@ -24,8 +24,13 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropOrSpread;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstArrayPat;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstFnDecl;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
 
 import java.util.Optional;
 
@@ -49,8 +54,15 @@ public final class JavetSanitizerBuiltInObjectMatcher implements IJavetSanitizer
     @Override
     public ISwc4jAst matches(JavetSanitizerOptions options, ISwc4jAst node) {
         switch (node.getType()) {
-            case AssignExpr:
+            case AssignExpr: // Entry
                 return matches(options, node.as(Swc4jAstAssignExpr.class).getLeft());
+            case ArrayPat:
+                for (Optional<ISwc4jAstPat> elem : node.as(Swc4jAstArrayPat.class).getElems()) {
+                    if (elem.isPresent()) {
+                        return matches(options, elem.get().as(ISwc4jAstPat.class));
+                    }
+                }
+                break;
             case ArrayLit:
                 for (Optional<Swc4jAstExprOrSpread> optionalExprOrSpread : node.as(Swc4jAstArrayLit.class).getElems()) {
                     if (optionalExprOrSpread.isPresent()) {
@@ -63,10 +75,25 @@ public final class JavetSanitizerBuiltInObjectMatcher implements IJavetSanitizer
                 break;
             case BindingIdent:
                 return matches(options, node.as(Swc4jAstBindingIdent.class).getId());
+            case ClassDecl: // Entry
+                return matches(options, node.as(Swc4jAstClassDecl.class).getIdent());
             case ExprOrSpread:
                 return matches(options, node.as(Swc4jAstExprOrSpread.class).getExpr());
+            case FnDecl: // Entry
+                return matches(options, node.as(Swc4jAstFnDecl.class).getIdent());
             case Ident:
-                if (options.getBuiltInObjectSet().contains(node.as(Swc4jAstIdent.class).getSym())) {
+                String identifier = node.as(Swc4jAstIdent.class).getSym();
+                if (options.getReservedIdentifierMatcher().apply(identifier)) {
+                    if (node.getParent() instanceof Swc4jAstFnDecl) {
+                        if (!options.getReservedFunctionIdentifierSet().contains(identifier)) {
+                            return node;
+                        }
+                    } else if (options.getReservedIdentifierSet().contains(identifier)) {
+                        break;
+                    } else if (!options.getReservedMutableIdentifierSet().contains(identifier)) {
+                        return node;
+                    }
+                } else if (options.getBuiltInObjectSet().contains(identifier)) {
                     return node;
                 }
                 break;
@@ -80,7 +107,8 @@ public final class JavetSanitizerBuiltInObjectMatcher implements IJavetSanitizer
                     }
                 }
                 break;
-            // TODO
+            case VarDeclarator: // Entry
+                return matches(options, node.as(Swc4jAstVarDeclarator.class).getName());
             default:
                 break;
         }

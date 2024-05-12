@@ -32,7 +32,7 @@ public class TestJavetSanitizerIdentifierMatcher {
         identifiers.forEach(identifier -> {
             assertFalse(
                     JavetSanitizerIdentifierMatcher.getInstance().matches(JavetSanitizerOptions.Default, identifier),
-                    identifier + " should pass.");
+                    identifier + " should not match.");
         });
     }
 
@@ -41,6 +41,6 @@ public class TestJavetSanitizerIdentifierMatcher {
         JavetSanitizerOptions.Default.getDisallowedIdentifierSet().forEach(identifier ->
                 assertTrue(
                         JavetSanitizerIdentifierMatcher.getInstance().matches(JavetSanitizerOptions.Default, identifier),
-                        identifier + " should pass."));
+                        identifier + " should match."));
     }
 }

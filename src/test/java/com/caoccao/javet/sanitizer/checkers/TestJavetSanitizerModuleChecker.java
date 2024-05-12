@@ -119,6 +119,23 @@ public class TestJavetSanitizerModuleChecker extends BaseTestSuiteCheckers {
     }
 
     @Test
+    public void testReservedIdentifiers() {
+        JavetSanitizerOptions options = JavetSanitizerOptions.Default.toClone()
+                .setReservedIdentifierMatcher(name -> name.startsWith("$"));
+        options.getReservedIdentifierSet().add("$a");
+        checker.setOptions(options.seal());
+        assertException(
+                "const $a = 1; const $b = 1;",
+                JavetSanitizerError.IdentifierNotAllowed,
+                "Identifier $b is not allowed.\n" +
+                        "Source: $b\n" +
+                        "Line: 1\n" +
+                        "Column: 21\n" +
+                        "Start: 20\n" +
+                        "End: 22");
+    }
+
+    @Test
     public void testValidCases() throws JavetSanitizerException {
         List<String> statements = SimpleList.of(
                 "() => 1", "() => {}", "(a, b) => {}",
