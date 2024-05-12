@@ -14,36 +14,30 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.stmt;
+package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class TestSwc4jAstUsingDecl extends BaseTestSuiteSwc4jAst {
+public class TestSwc4jAstAwaitExpr extends BaseTestSuiteSwc4jAst {
     @Test
-    public void testUsingInTypeScript() throws Swc4jCoreException {
-        String code = "using a";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
+    public void test() throws Swc4jCoreException {
+        String code = "await a;";
+        Swc4jParseOutput output = swc4j.parse(code, jsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
-        Swc4jAstUsingDecl usingDecl = assertAst(
-                script, script.getBody().get(0).as(Swc4jAstUsingDecl.class), Swc4jAstType.UsingDecl, 0, 7);
-        assertFalse(usingDecl.isAwait());
-        Swc4jAstVarDeclarator varDeclarator = assertAst(
-                usingDecl, usingDecl.getDecls().get(0), Swc4jAstType.VarDeclarator, 6, 7);
-        Swc4jAstBindingIdent bindingIdent = assertAst(
-                varDeclarator, varDeclarator.getName().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 6, 7);
+        Swc4jAstExprStmt exprStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 8);
+        Swc4jAstAwaitExpr awaitExpr = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstAwaitExpr.class), Swc4jAstType.AwaitExpr, 0, 7);
         Swc4jAstIdent ident = assertAst(
-                bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 6, 7);
+                awaitExpr, awaitExpr.getArg().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 6, 7);
         assertEquals("a", ident.getSym());
-        assertSpan(code, script);
     }
 }

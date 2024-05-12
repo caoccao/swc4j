@@ -37,15 +37,15 @@ public class Swc4jAstUsingDecl
         implements ISwc4jAstDecl, ISwc4jAstVarDeclOrExpr, ISwc4jAstForHead {
     protected final List<Swc4jAstVarDeclarator> decls;
     @Jni2RustField(name = "is_await")
-    protected boolean await;
+    protected boolean _await;
 
     @Jni2RustMethod
     public Swc4jAstUsingDecl(
-            @Jni2RustParam(name = "is_await") boolean await,
+            @Jni2RustParam(name = "is_await") boolean _await,
             List<Swc4jAstVarDeclarator> decls,
             Swc4jSpan span) {
         super(span);
-        setAwait(await);
+        setAwait(_await);
         this.decls = AssertionUtils.notNull(decls, "Decls");
         updateParent();
     }
@@ -67,11 +67,11 @@ public class Swc4jAstUsingDecl
 
     @Jni2RustMethod
     public boolean isAwait() {
-        return await;
+        return _await;
     }
 
-    public Swc4jAstUsingDecl setAwait(boolean await) {
-        this.await = await;
+    public Swc4jAstUsingDecl setAwait(boolean _await) {
+        this._await = _await;
         return this;
     }
 

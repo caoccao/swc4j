@@ -21,6 +21,7 @@ import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
 import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstImportDecl;
+import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestJavetSanitizerModuleChecker extends BaseTestSuiteCheckers {
     @BeforeEach
     public void beforeEach() {
-        checker = new JavetSanitizerModuleChecker();
+        checker = new JavetSanitizerModuleChecker(JavetSanitizerOptions.Default.toClone()
+                .setMediaType(Swc4jMediaType.TypeScript)
+                .seal());
     }
 
     @Test
@@ -43,6 +46,51 @@ public class TestJavetSanitizerModuleChecker extends BaseTestSuiteCheckers {
                         code,
                         JavetSanitizerError.EmptyCodeString,
                         JavetSanitizerError.EmptyCodeString.getFormat()));
+        assertException(
+                "async () => {};",
+                JavetSanitizerError.KeywordNotAllowed,
+                "Keyword async is not allowed.\n" +
+                        "Source: async () => {}\n" +
+                        "Line: 1\n" +
+                        "Column: 1\n" +
+                        "Start: 0\n" +
+                        "End: 14");
+        assertException(
+                "async function a() {};",
+                JavetSanitizerError.KeywordNotAllowed,
+                "Keyword async is not allowed.\n" +
+                        "Source: async function a() {}\n" +
+                        "Line: 1\n" +
+                        "Column: 1\n" +
+                        "Start: 0\n" +
+                        "End: 21");
+        assertException(
+                "await a;",
+                JavetSanitizerError.KeywordNotAllowed,
+                "Keyword await is not allowed.\n" +
+                        "Source: await a\n" +
+                        "Line: 1\n" +
+                        "Column: 1\n" +
+                        "Start: 0\n" +
+                        "End: 7");
+        assertException(
+                "for await (const a of b) {}",
+                JavetSanitizerError.KeywordNotAllowed,
+                "Keyword await is not allowed.\n" +
+                        "Source: for await (const a of b) {}\n" +
+                        "Line: 1\n" +
+                        "Column: 1\n" +
+                        "Start: 0\n" +
+                        "End: 27");
+        assertException(
+                "await using a = b;",
+                JavetSanitizerError.KeywordNotAllowed,
+                "Keyword await is not allowed.\n" +
+                        "Source: await using a = b\n" +
+                        "Line: 1\n" +
+                        "Column: 1\n" +
+                        "Start: 0\n" +
+                        "End: 17");
         assertException(
                 "import a from 'a'; a;",
                 JavetSanitizerError.KeywordNotAllowed,

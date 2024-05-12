@@ -22,10 +22,7 @@ import com.caoccao.javet.sanitizer.matchers.JavetSanitizerIdentifierMatcher;
 import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstVarDeclKind;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstArrowExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstYieldExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.module.*;
 import com.caoccao.javet.swc4j.ast.stmt.*;
@@ -89,6 +86,14 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
     public Swc4jAstVisitorResponse visitAssignExpr(Swc4jAstAssignExpr node) {
         validateBuiltInObject(options, node);
         return super.visitAssignExpr(node);
+    }
+
+    @Override
+    public Swc4jAstVisitorResponse visitAwaitExpr(Swc4jAstAwaitExpr node) {
+        if (!options.isKeywordAwaitEnabled()) {
+            raiseError(JavetSanitizerException.keywordNotAllowed(AWAIT), node);
+        }
+        return super.visitAwaitExpr(node);
     }
 
     @Override
