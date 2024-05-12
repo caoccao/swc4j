@@ -88,8 +88,8 @@ public final class JavetSanitizerBuiltInObjectMatcher implements IJavetSanitizer
                         if (!options.getReservedFunctionIdentifierSet().contains(identifier)) {
                             return node;
                         }
-                    } else if (options.getReservedIdentifierSet().contains(identifier)) {
-                        break;
+                    } else if (!options.getReservedIdentifierSet().contains(identifier)) {
+                        return node;
                     } else if (!options.getReservedMutableIdentifierSet().contains(identifier)) {
                         return node;
                     }

@@ -125,14 +125,32 @@ public class TestJavetSanitizerModuleChecker extends BaseTestSuiteCheckers {
         options.getReservedIdentifierSet().add("$a");
         checker.setOptions(options.seal());
         assertException(
-                "const $a = 1; const $b = 1;",
+                "$a; const $b = 1;",
                 JavetSanitizerError.IdentifierNotAllowed,
                 "Identifier $b is not allowed.\n" +
                         "Source: $b\n" +
                         "Line: 1\n" +
-                        "Column: 21\n" +
-                        "Start: 20\n" +
-                        "End: 22");
+                        "Column: 11\n" +
+                        "Start: 10\n" +
+                        "End: 12");
+        assertException(
+                "$b;",
+                JavetSanitizerError.IdentifierNotAllowed,
+                "Identifier $b is not allowed.\n" +
+                        "Source: $b\n" +
+                        "Line: 1\n" +
+                        "Column: 1\n" +
+                        "Start: 0\n" +
+                        "End: 2");
+        assertException(
+                "const $a = 1;",
+                JavetSanitizerError.IdentifierNotAllowed,
+                "Identifier $a is not allowed.\n" +
+                        "Source: $a\n" +
+                        "Line: 1\n" +
+                        "Column: 7\n" +
+                        "Start: 6\n" +
+                        "End: 8");
     }
 
     @Test
