@@ -18,6 +18,7 @@ package com.caoccao.javet.sanitizer.checkers;
 
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
 import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
+import com.caoccao.javet.sanitizer.visitors.IJavetSanitizerVisitor;
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
@@ -93,6 +94,18 @@ public abstract class BaseJavetSanitizerChecker implements IJavetSanitizerChecke
         try {
             Swc4jParseOutput output = swc4j.parse(codeString, parseOptions);
             program = output.getProgram();
+            IJavetSanitizerVisitor visitor = options.getVisitor();
+            if (visitor != null) {
+                try {
+                    program.visit(visitor);
+                } catch (Throwable t) {
+                    if (visitor.getException() != null) {
+                        throw visitor.getException().setCodeString(codeString);
+                    } else {
+                        throw JavetSanitizerException.unknownError(t.getMessage(), t);
+                    }
+                }
+            }
         } catch (Swc4jCoreException e) {
             throw JavetSanitizerException.parsingError(e);
         }

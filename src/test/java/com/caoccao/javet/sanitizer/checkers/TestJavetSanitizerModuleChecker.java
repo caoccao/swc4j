@@ -18,7 +18,6 @@ package com.caoccao.javet.sanitizer.checkers;
 
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerError;
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
-import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,13 +25,10 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 @SuppressWarnings("ThrowableNotThrown")
-public class TestJavetSanitizerStatementListChecker extends BaseTestSuiteCheckers {
+public class TestJavetSanitizerModuleChecker extends BaseTestSuiteCheckers {
     @BeforeEach
     public void beforeEach() {
-        checker = new JavetSanitizerStatementListChecker(JavetSanitizerOptions.Default.toClone()
-                .setKeywordExportEnabled(true)
-                .setKeywordImportEnabled(true)
-                .seal());
+        checker = new JavetSanitizerModuleChecker();
     }
 
     @Test
@@ -44,8 +40,8 @@ public class TestJavetSanitizerStatementListChecker extends BaseTestSuiteChecker
                         JavetSanitizerError.EmptyCodeString.getFormat()));
         assertException(
                 "import a from 'a'; a;",
-                JavetSanitizerError.InvalidNode,
-                "Import Declaration is unexpected. Expecting Statement in Statement List.\n" +
+                JavetSanitizerError.KeywordNotAllowed,
+                "Keyword import is not allowed.\n" +
                         "Source: import a from 'a';\n" +
                         "Line: 1\n" +
                         "Column: 1\n" +
@@ -53,22 +49,22 @@ public class TestJavetSanitizerStatementListChecker extends BaseTestSuiteChecker
                         "End: 18");
         assertException(
                 "a; import b from 'b';",
-                JavetSanitizerError.InvalidNode,
-                "Import Declaration is unexpected. Expecting Statement in Statement List.\n" +
+                JavetSanitizerError.KeywordNotAllowed,
+                "Keyword import is not allowed.\n" +
                         "Source: import b from 'b';\n" +
                         "Line: 1\n" +
                         "Column: 4\n" +
                         "Start: 3\n" +
                         "End: 21");
         assertException(
-                "export const a = {};",
-                JavetSanitizerError.InvalidNode,
-                "Export Declaration is unexpected. Expecting Statement in Statement List.\n" +
-                        "Source: export const a = {};\n" +
+                "a; export const b = a;",
+                JavetSanitizerError.KeywordNotAllowed,
+                "Keyword export is not allowed.\n" +
+                        "Source: export const b = a;\n" +
                         "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 20");
+                        "Column: 4\n" +
+                        "Start: 3\n" +
+                        "End: 22");
     }
 
     @Test

@@ -16,7 +16,9 @@
 
 package com.caoccao.javet.sanitizer.visitors;
 
+import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 
 public interface IJavetSanitizerVisitor extends ISwc4jAstVisitor {
+    JavetSanitizerException getException();
 }

@@ -18,6 +18,7 @@ package com.caoccao.javet.sanitizer.checkers;
 
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerError;
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
+import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,10 @@ import java.util.List;
 public class TestJavetSanitizerSingleStatementChecker extends BaseTestSuiteCheckers {
     @BeforeEach
     public void beforeEach() {
-        checker = new JavetSanitizerSingleStatementChecker();
+        checker = new JavetSanitizerSingleStatementChecker(JavetSanitizerOptions.Default.toClone()
+                .setKeywordExportEnabled(true)
+                .setKeywordImportEnabled(true)
+                .seal());
     }
 
     @Test
@@ -77,6 +81,15 @@ public class TestJavetSanitizerSingleStatementChecker extends BaseTestSuiteCheck
                         "Column: 1\n" +
                         "Start: 0\n" +
                         "End: 18");
+        assertException(
+                "export const a = {};",
+                JavetSanitizerError.InvalidNode,
+                "Export Declaration is unexpected. Expecting Statement in Single Statement.\n" +
+                        "Source: export const a = {};\n" +
+                        "Line: 1\n" +
+                        "Column: 1\n" +
+                        "Start: 0\n" +
+                        "End: 20");
     }
 
     @Test

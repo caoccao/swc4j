@@ -49,6 +49,7 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
         this.options = AssertionUtils.notNull(options, "options");
     }
 
+    @Override
     public JavetSanitizerException getException() {
         return exception;
     }
