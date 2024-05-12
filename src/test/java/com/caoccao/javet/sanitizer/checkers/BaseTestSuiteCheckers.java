@@ -59,9 +59,11 @@ public class BaseTestSuiteCheckers {
             "const a = window;", "window",
             "let Object = 1", "Object",
             "Object.a = 1", "Object",
+            "Object?.a = 1", "Object",
             "let [ Object ] = [ 1 ]", "Object",
             // SWC bug
             // "{ Object } = { Object: 1 }", "Object",
+            "let { Object } = { Object: 1 }", "Object",
             "class Object {}", "Object",
             "function Object() {}", "Object",
             "class $abc {}", "$abc",

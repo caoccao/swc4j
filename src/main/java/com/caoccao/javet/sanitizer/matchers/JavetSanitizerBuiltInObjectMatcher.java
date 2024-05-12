@@ -17,17 +17,14 @@
 package com.caoccao.javet.sanitizer.matchers;
 
 import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstObjectPatProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropOrSpread;
-import com.caoccao.javet.swc4j.ast.pat.Swc4jAstArrayPat;
-import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.ast.pat.*;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstFnDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
@@ -56,6 +53,8 @@ public final class JavetSanitizerBuiltInObjectMatcher implements IJavetSanitizer
         switch (node.getType()) {
             case AssignExpr: // Entry
                 return matches(options, node.as(Swc4jAstAssignExpr.class).getLeft());
+            case AssignPatProp:
+                return matches(options, node.as(Swc4jAstAssignPatProp.class).getKey());
             case ArrayPat:
                 for (Optional<ISwc4jAstPat> elem : node.as(Swc4jAstArrayPat.class).getElems()) {
                     if (elem.isPresent()) {
@@ -97,6 +96,8 @@ public final class JavetSanitizerBuiltInObjectMatcher implements IJavetSanitizer
                     return node;
                 }
                 break;
+            case KeyValuePatProp:
+                return matches(options, node.as(Swc4jAstKeyValuePatProp.class).getKey());
             case MemberExpr:
                 return matches(options, node.as(Swc4jAstMemberExpr.class).getObj());
             case ObjectLit:
@@ -107,6 +108,16 @@ public final class JavetSanitizerBuiltInObjectMatcher implements IJavetSanitizer
                     }
                 }
                 break;
+            case ObjectPat:
+                for (ISwc4jAstObjectPatProp objectPatProp : node.as(Swc4jAstObjectPat.class).getProps()) {
+                    ISwc4jAst matchedNode = matches(options, objectPatProp);
+                    if (matchedNode != null) {
+                        return matchedNode;
+                    }
+                }
+                break;
+            case OptChainExpr:
+                return matches(options, node.as(Swc4jAstOptChainExpr.class).getBase());
             case VarDeclarator: // Entry
                 return matches(options, node.as(Swc4jAstVarDeclarator.class).getName());
             default:
