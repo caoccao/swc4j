@@ -17,11 +17,15 @@
 package com.caoccao.javet.sanitizer.checkers;
 
 
+import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
 import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
 import com.caoccao.javet.swc4j.ast.module.*;
 import com.caoccao.javet.swc4j.utils.SimpleSet;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -53,6 +57,19 @@ public abstract class BaseJavetSanitizerModuleChecker extends BaseJavetSanitizer
             Swc4jAstTsImportEqualsDecl.class);
 
     /**
+     * The Export nodes.
+     *
+     * @since 0.7.0
+     */
+    protected final List<ISwc4jAstModuleDecl> exportNodes;
+    /**
+     * The Import nodes.
+     *
+     * @since 0.7.0
+     */
+    protected final List<ISwc4jAstModuleDecl> importNodes;
+
+    /**
      * Instantiates a new Base javet sanitizer module checker.
      *
      * @since 0.7.0
@@ -69,5 +86,77 @@ public abstract class BaseJavetSanitizerModuleChecker extends BaseJavetSanitizer
      */
     public BaseJavetSanitizerModuleChecker(JavetSanitizerOptions options) {
         super(options);
+        exportNodes = new ArrayList<>();
+        importNodes = new ArrayList<>();
+    }
+
+    /**
+     * Check node.
+     *
+     * @param node the node
+     * @throws JavetSanitizerException the javet sanitizer exception
+     * @since 0.7.0
+     */
+    protected abstract void checkNode(ISwc4jAst node) throws JavetSanitizerException;
+
+    /**
+     * Gets export nodes.
+     *
+     * @return the export nodes
+     * @since 0.7.0
+     */
+    public List<ISwc4jAstModuleDecl> getExportNodes() {
+        return exportNodes;
+    }
+
+    /**
+     * Gets import nodes.
+     *
+     * @return the import nodes
+     * @since 0.7.0
+     */
+    public List<ISwc4jAstModuleDecl> getImportNodes() {
+        return importNodes;
+    }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        exportNodes.clear();
+        importNodes.clear();
+    }
+
+    /**
+     * Validate export node.
+     *
+     * @param node the node
+     * @throws JavetSanitizerException the javet sanitizer exception
+     * @since 0.7.0
+     */
+    protected void validateExportNode(ISwc4jAstModuleDecl node) throws JavetSanitizerException {
+        if (EXPORT_CLASSES.contains(node.getClass())) {
+            if (options.isKeywordExportEnabled()) {
+                exportNodes.add(node);
+            } else {
+                checkNode(node);
+            }
+        }
+    }
+
+    /**
+     * Validate import node.
+     *
+     * @param node the node
+     * @throws JavetSanitizerException the javet sanitizer exception
+     * @since 0.7.0
+     */
+    protected void validateImportNode(ISwc4jAstModuleDecl node) throws JavetSanitizerException {
+        if (IMPORT_CLASSES.contains(node.getClass())) {
+            if (options.isKeywordImportEnabled()) {
+                importNodes.add(node);
+            } else {
+                checkNode(node);
+            }
+        }
     }
 }

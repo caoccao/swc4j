@@ -77,8 +77,9 @@ public abstract class BaseJavetSanitizerChecker implements IJavetSanitizerChecke
      * @since 0.7.0
      */
     public BaseJavetSanitizerChecker(JavetSanitizerOptions options) {
-        this.options = AssertionUtils.notNull(options, "Options");
-        reset();
+        codeString = null;
+        program = null;
+        setOptions(options);
     }
 
     @Override
@@ -148,6 +149,11 @@ public abstract class BaseJavetSanitizerChecker implements IJavetSanitizerChecke
     protected void reset() {
         codeString = null;
         program = null;
+    }
+
+    @Override
+    public void setOptions(JavetSanitizerOptions options) {
+        this.options = AssertionUtils.notNull(options, "Options");
     }
 
     /**

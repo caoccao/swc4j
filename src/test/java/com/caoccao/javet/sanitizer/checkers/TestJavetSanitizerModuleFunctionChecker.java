@@ -18,17 +18,24 @@ package com.caoccao.javet.sanitizer.checkers;
 
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerError;
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
+import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstImportDecl;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @SuppressWarnings("ThrowableNotThrown")
 public class TestJavetSanitizerModuleFunctionChecker extends BaseTestSuiteCheckers {
     @BeforeEach
     public void beforeEach() {
-        checker = new JavetSanitizerModuleFunctionChecker();
+        JavetSanitizerOptions options = JavetSanitizerOptions.Default.toClone();
+        options.getReservedFunctionIdentifierSet().clear();
+        checker = new JavetSanitizerModuleFunctionChecker(options.seal());
     }
 
     @Test
@@ -92,6 +99,68 @@ public class TestJavetSanitizerModuleFunctionChecker extends BaseTestSuiteChecke
                         "Column: 1\n" +
                         "Start: 16\n" +
                         "End: 24");
+    }
+
+    @Test
+    public void testModules() {
+        JavetSanitizerModuleFunctionChecker moduleFunctionChecker = (JavetSanitizerModuleFunctionChecker) checker;
+        JavetSanitizerOptions options = JavetSanitizerOptions.Default.toClone()
+                .setKeywordExportEnabled(true)
+                .setKeywordImportEnabled(true);
+        checker.setOptions(options.seal());
+        {
+            String code = "function main() {}";
+            try {
+                checker.check(code);
+                assertTrue(moduleFunctionChecker.getExportNodes().isEmpty());
+                assertTrue(moduleFunctionChecker.getImportNodes().isEmpty());
+            } catch (JavetSanitizerException e) {
+                fail(e);
+            }
+        }
+        {
+            String code = "import a from 'a';\nfunction main() {}\nexport const b = a;";
+            try {
+                checker.check(code);
+                assertEquals(1, moduleFunctionChecker.getExportNodes().size());
+                assertEquals(1, moduleFunctionChecker.getImportNodes().size());
+                assertInstanceOf(Swc4jAstExportDecl.class, moduleFunctionChecker.getExportNodes().get(0));
+                assertInstanceOf(Swc4jAstImportDecl.class, moduleFunctionChecker.getImportNodes().get(0));
+            } catch (JavetSanitizerException e) {
+                fail(e);
+            }
+        }
+    }
+
+    @Test
+    public void testReservedFunctions() {
+        JavetSanitizerOptions options = JavetSanitizerOptions.Default.toClone()
+                .setReservedIdentifierMatcher(name -> name.startsWith("$"))
+                .setKeywordImportEnabled(true);
+        checker.setOptions(options.seal());
+        JavetSanitizerModuleFunctionChecker moduleFunctionChecker = (JavetSanitizerModuleFunctionChecker) checker;
+        {
+            String code = "function b() {}";
+            assertEquals(
+                    "Function main is not found.",
+                    assertThrows(
+                            JavetSanitizerException.class,
+                            () -> checker.check(code),
+                            "Failed to throw exception for [" + code + "]").getMessage());
+            assertEquals(1, moduleFunctionChecker.getFunctionMap().size());
+            assertTrue(moduleFunctionChecker.getFunctionMap().containsKey("b"));
+        }
+        {
+            String code = "function main() {} function b() {}";
+            try {
+                checker.check(code);
+                assertEquals(2, moduleFunctionChecker.getFunctionMap().size());
+                assertTrue(moduleFunctionChecker.getFunctionMap().containsKey("main"));
+                assertTrue(moduleFunctionChecker.getFunctionMap().containsKey("b"));
+            } catch (JavetSanitizerException e) {
+                fail(e);
+            }
+        }
     }
 
     @Test

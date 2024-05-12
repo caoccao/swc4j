@@ -52,4 +52,12 @@ public interface IJavetSanitizerChecker {
      * @since 0.7.0
      */
     <AST extends ISwc4jAst> ISwc4jAstProgram<AST> getProgram();
+
+    /**
+     * Set options.
+     *
+     * @param options the options
+     * @since 0.7.0
+     */
+    void setOptions(JavetSanitizerOptions options);
 }

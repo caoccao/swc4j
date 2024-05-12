@@ -18,11 +18,16 @@ package com.caoccao.javet.sanitizer.checkers;
 
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerError;
 import com.caoccao.javet.sanitizer.exceptions.JavetSanitizerException;
+import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
+import com.caoccao.javet.swc4j.ast.module.Swc4jAstImportDecl;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("ThrowableNotThrown")
 public class TestJavetSanitizerModuleChecker extends BaseTestSuiteCheckers {
@@ -65,6 +70,52 @@ public class TestJavetSanitizerModuleChecker extends BaseTestSuiteCheckers {
                         "Column: 4\n" +
                         "Start: 3\n" +
                         "End: 22");
+    }
+
+    @Test
+    public void testInvalidIdentifiers() {
+        JavetSanitizerOptions options = JavetSanitizerOptions.Default.toClone()
+                .setReservedIdentifierMatcher(identifier -> identifier.startsWith("$"));
+        checker.setOptions(options.seal());
+        invalidIdentifierCodeStringMap.forEach((key, value) -> {
+            String statement = "function main() { " + key + " }";
+            assertException(
+                    statement,
+                    JavetSanitizerError.IdentifierNotAllowed,
+                    "Identifier " + value + " is not allowed.",
+                    false);
+        });
+    }
+
+    @Test
+    public void testModules() {
+        JavetSanitizerModuleChecker moduleChecker = (JavetSanitizerModuleChecker) checker;
+        JavetSanitizerOptions options = JavetSanitizerOptions.Default.toClone()
+                .setKeywordExportEnabled(true)
+                .setKeywordImportEnabled(true);
+        checker.setOptions(options.seal());
+        {
+            String code = ";;";
+            try {
+                checker.check(code);
+                assertTrue(moduleChecker.getExportNodes().isEmpty());
+                assertTrue(moduleChecker.getImportNodes().isEmpty());
+            } catch (JavetSanitizerException e) {
+                fail(e);
+            }
+        }
+        {
+            String code = "import a from 'a';\nexport const b = a;";
+            try {
+                checker.check(code);
+                assertEquals(1, moduleChecker.getExportNodes().size());
+                assertEquals(1, moduleChecker.getImportNodes().size());
+                assertInstanceOf(Swc4jAstExportDecl.class, moduleChecker.getExportNodes().get(0));
+                assertInstanceOf(Swc4jAstImportDecl.class, moduleChecker.getImportNodes().get(0));
+            } catch (JavetSanitizerException e) {
+                fail(e);
+            }
+        }
     }
 
     @Test

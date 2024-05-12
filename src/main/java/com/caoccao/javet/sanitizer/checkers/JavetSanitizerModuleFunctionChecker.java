@@ -24,12 +24,22 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstFnDecl;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * The type Javet sanitizer module function checker.
  *
  * @since 0.7.0
  */
 public class JavetSanitizerModuleFunctionChecker extends BaseJavetSanitizerModuleChecker {
+    /**
+     * The Function map.
+     *
+     * @since 0.7.0
+     */
+    protected final Map<String, Swc4jAstFnDecl> functionMap;
+
     /**
      * Instantiates a new Javet sanitizer module function checker.
      *
@@ -47,6 +57,7 @@ public class JavetSanitizerModuleFunctionChecker extends BaseJavetSanitizerModul
      */
     public JavetSanitizerModuleFunctionChecker(JavetSanitizerOptions options) {
         super(options);
+        functionMap = new LinkedHashMap<>();
     }
 
     @Override
@@ -56,24 +67,53 @@ public class JavetSanitizerModuleFunctionChecker extends BaseJavetSanitizerModul
         validateBodyNotEmpty();
         for (ISwc4jAst node : program.getBody()) {
             if (node instanceof ISwc4jAstModuleDecl) {
-                if (!options.isKeywordExportEnabled() && EXPORT_CLASSES.contains(node.getClass())) {
-                    checkNode(node);
-                }
-                if (!options.isKeywordImportEnabled() && IMPORT_CLASSES.contains(node.getClass())) {
-                    checkNode(node);
-                }
+                validateExportNode(node.as(ISwc4jAstModuleDecl.class));
+                validateImportNode(node.as(ISwc4jAstModuleDecl.class));
             } else {
                 checkNode(node);
+                Swc4jAstFnDecl fnDecl = node.as(Swc4jAstFnDecl.class);
+                functionMap.put(fnDecl.getIdent().getSym(), fnDecl);
             }
         }
+        validateReservedFunctions();
     }
 
     protected void checkNode(ISwc4jAst node) throws JavetSanitizerException {
         validateNode(node, Swc4jAstFnDecl.class);
     }
 
+    /**
+     * Gets function map.
+     *
+     * @return the function map
+     * @since 0.7.0
+     */
+    public Map<String, Swc4jAstFnDecl> getFunctionMap() {
+        return functionMap;
+    }
+
     @Override
     public String getName() {
         return "Module Function";
+    }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        functionMap.clear();
+    }
+
+    /**
+     * Validate reserved functions.
+     *
+     * @throws JavetSanitizerException the javet sanitizer exception
+     * @since 0.7.0
+     */
+    protected void validateReservedFunctions() throws JavetSanitizerException {
+        for (String functionIdentifier : options.getReservedFunctionIdentifierSet()) {
+            if (!functionMap.containsKey(functionIdentifier)) {
+                throw JavetSanitizerException.functionNotFound(functionIdentifier);
+            }
+        }
     }
 }

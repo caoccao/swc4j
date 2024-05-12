@@ -56,12 +56,8 @@ public class JavetSanitizerModuleChecker extends BaseJavetSanitizerModuleChecker
         validateBodyNotEmpty();
         for (ISwc4jAst node : program.getBody()) {
             if (node instanceof ISwc4jAstModuleDecl) {
-                if (!options.isKeywordExportEnabled() && EXPORT_CLASSES.contains(node.getClass())) {
-                    checkNode(node);
-                }
-                if (!options.isKeywordImportEnabled() && IMPORT_CLASSES.contains(node.getClass())) {
-                    checkNode(node);
-                }
+                validateExportNode(node.as(ISwc4jAstModuleDecl.class));
+                validateImportNode(node.as(ISwc4jAstModuleDecl.class));
             } else {
                 checkNode(node);
             }
