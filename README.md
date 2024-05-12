@@ -28,8 +28,11 @@
   * JSX → JS
   * TSX → JS
   * Source Map
+* Sanitizer
 
 ## Quick Start
+
+### Dependency
 
 * Add the following dependency to your project or download a snapshot build from the [Actions](https://github.com/caoccao/swc4j/actions).
 
@@ -52,7 +55,9 @@ implementation("com.caoccao.javet:swc4j:0.6.0")
 implementation 'com.caoccao.javet:swc4j:0.6.0'
 ```
 
-* Run the following Java code.
+### Transpile
+
+* Run the following Java code to transpile TypeScript to JavaScript.
 
 ```java
 // Prepare a simple TypeScript code snippet.
@@ -69,13 +74,50 @@ Swc4jTranspileOutput output = new Swc4j().transpile(code, options);
 System.out.println(output.getCode());
 ```
 
-* The transpiled code and inline source map are as follows.
+* The transpiled JavaScript code and inline source map are as follows.
 
 ```js
 function add(a, b) {
   return a + b;
 }
 //# sourceMappingURL=data:application/json;base64,...
+```
+
+### Sanitize
+
+* Run the following Java code to sanitize the JavaScript code.
+
+```java
+JavetSanitizerStatementListChecker checker = new JavetSanitizerStatementListChecker();
+
+// 1. Check if keyword const can be used.
+String codeString = "const a = 1;";
+checker.check(codeString);
+System.out.println("1. " + codeString + " // Valid.");
+
+// 2. Check if keyword var can be used.
+codeString = "var a = 1;";
+try {
+    checker.check(codeString);
+} catch (JavetSanitizerException e) {
+    System.out.println("2. " + codeString + " // Invalid: " + e.getMessage());
+}
+
+// 3. Check if Object is mutable.
+codeString = "Object = {};";
+try {
+    checker.check(codeString);
+} catch (JavetSanitizerException e) {
+    System.out.println("3. " + codeString + " // Invalid: " + e.getMessage());
+}
+```
+
+* The output is as follows.
+
+```js
+1. const a = 1; // Valid.
+2. var a = 1; // Invalid: Keyword var is not allowed.
+3. Object = {}; // Invalid: Identifier Object is not allowed.
 ```
 
 ## Docs

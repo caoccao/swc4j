@@ -97,6 +97,7 @@ public class TestJavetSanitizerSingleStatementChecker extends BaseTestSuiteCheck
         List<String> statements = SimpleList.of(
                 "() => 1", "() => {}", "(a, b) => {}",
                 "function a() {}", "{ a; b; }", "const a;",
+                "const a = Object;",
                 "1", "'a'", "1 + 1", "a == b", "[1,2,3]", "x = { a: 1, b: 2, c: 3 }",
                 "a?.b", "a?.b?.c?.d", "a?.['b']", "a?.b()");
         for (String statement : statements) {

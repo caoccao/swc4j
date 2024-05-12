@@ -24,15 +24,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestJavetSanitizerFridge {
     @Test
     public void testGenerate() {
-        JavetSanitizerOptions option = JavetSanitizerOptions.Default.toClone();
-        option.getToBeDeletedIdentifierList().clear();
-        option.getToBeDeletedIdentifierList().add("eval");
-        option.getToBeDeletedIdentifierList().add("Function");
-        option.getToBeFrozenIdentifierList().clear();
-        option.getToBeFrozenIdentifierList().add("Object");
-        option.getToBeFrozenIdentifierList().add("Array");
-        option.seal();
-        String codeString = JavetSanitizerFridge.generate(option);
+        JavetSanitizerOptions options = JavetSanitizerOptions.Default.toClone();
+        options.getToBeDeletedIdentifierList().clear();
+        options.getToBeDeletedIdentifierList().add("eval");
+        options.getToBeDeletedIdentifierList().add("Function");
+        options.getToBeFrozenIdentifierList().clear();
+        options.getToBeFrozenIdentifierList().add("Object");
+        options.getToBeFrozenIdentifierList().add("Array");
+        options.seal();
+        String codeString = JavetSanitizerFridge.generate(options);
         assertEquals(
                 "/***** Delete 2 object(s). *****/\n" +
                         "\n" +
