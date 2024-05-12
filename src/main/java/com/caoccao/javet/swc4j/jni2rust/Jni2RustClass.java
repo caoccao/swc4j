@@ -23,7 +23,9 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Jni2RustClass {
-    boolean customCreation() default false;
+    boolean customFromJava() default false;
+
+    boolean customToJava() default false;
 
     Jni2RustFilePath filePath() default Jni2RustFilePath.None;
 

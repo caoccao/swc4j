@@ -31,7 +31,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import java.util.List;
 import java.util.Optional;
 
-@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false, customToJava = true)
 public class Swc4jAstBindingIdent
         extends Swc4jAst
         implements ISwc4jAstPat, ISwc4jAstTsFnParam, ISwc4jAstTsParamPropParam, ISwc4jAstSimpleAssignTarget {

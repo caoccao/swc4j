@@ -25,7 +25,7 @@ use crate::jni_utils::*;
 use crate::span_utils::{ByteToIndexMap, RegisterWithMap, ToJavaWithMap};
 
 use deno_ast::swc::ast::*;
-use deno_ast::swc::common::{Spanned, DUMMY_SP};
+use deno_ast::swc::common::{Span, Spanned, DUMMY_SP};
 use num_bigint::{BigInt as BigIntValue, BigUint, Sign};
 
 use std::ptr::null_mut;
@@ -70,23 +70,52 @@ impl<'local> FromJava<'local> for BigInt {
     };
     let data: BigUint = optional_raw
       .as_ref()
-      .map_or_else(|| Default::default(), |raw| {
-        let mut raw = raw.to_owned();
-        while raw.ends_with("n") {
-          raw.truncate(raw.len() - 1);
-        }
-        BigUint::parse_bytes(&raw.as_bytes(), 10)
-      })
+      .map_or_else(
+        || Default::default(),
+        |raw| {
+          let mut raw = raw.to_owned();
+          while raw.ends_with("n") {
+            raw.truncate(raw.len() - 1);
+          }
+          BigUint::parse_bytes(&raw.as_bytes(), 10)
+        },
+      )
       .unwrap_or_else(|| Default::default());
     delete_local_ref!(env, java_optional_raw);
     let value = BigIntValue::from_biguint(sign, data);
     let value = Box::new(value);
     let raw = optional_raw.map(|raw| raw.into());
-    BigInt {
-      span,
-      value,
-      raw,
-    }
+    BigInt { span, value, raw }
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for BindingIdent {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let span = if let Some(type_ann) = self.type_ann.as_ref() {
+      Span {
+        lo: self.id.span.lo,
+        hi: type_ann.as_ref().span.hi,
+        ctxt: self.id.span.ctxt,
+      }
+    } else {
+      self.span()
+    };
+    let java_span_ex = map.get_span_ex_by_span(&span).to_java(env);
+    let java_id = self.id.to_java_with_map(env, map);
+    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let return_value = unsafe { JAVA_CLASS_BINDING_IDENT.as_ref().unwrap() }.construct(
+      env,
+      &java_id,
+      &java_optional_type_ann,
+      &java_span_ex,
+    );
+    delete_local_optional_ref!(env, java_optional_type_ann);
+    delete_local_ref!(env, java_id);
+    delete_local_ref!(env, java_span_ex);
+    return_value
   }
 }
 
@@ -26616,23 +26645,6 @@ impl RegisterWithMap<ByteToIndexMap> for BindingIdent {
     map.register_by_span(&self.span());
     self.id.register_with_map(map);
     self.type_ann.as_ref().map(|node| node.register_with_map(map));
-  }
-}
-
-impl ToJavaWithMap<ByteToIndexMap> for BindingIdent {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
-    let java_id = self.id.to_java_with_map(env, map);
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
-    let return_value = unsafe { JAVA_CLASS_BINDING_IDENT.as_ref().unwrap() }
-      .construct(env, &java_id, &java_optional_type_ann, &java_span_ex);
-    delete_local_optional_ref!(env, java_optional_type_ann);
-    delete_local_ref!(env, java_id);
-    delete_local_ref!(env, java_span_ex);
-    return_value
   }
 }
 

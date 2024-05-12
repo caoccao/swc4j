@@ -34,7 +34,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 
-@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, customCreation = true)
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, customFromJava = true, customToJava = true)
 public class Swc4jAstBigInt
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit {

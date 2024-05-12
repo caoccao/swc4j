@@ -46,7 +46,7 @@ public class TestSwc4jAstBindingIdent extends BaseTestSuiteSwc4jAst {
         Swc4jAstVarDeclarator varDeclarator = assertAst(
                 varDecl, varDecl.getDecls().get(0), Swc4jAstType.VarDeclarator, 6, 15);
         Swc4jAstBindingIdent bindingIdent = assertAst(
-                varDeclarator, varDeclarator.getName().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 6, 7);
+                varDeclarator, varDeclarator.getName().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 6, 15);
         Swc4jAstIdent ident = assertAst(
                 bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 6, 7);
         assertEquals("a", ident.getSym());
@@ -72,7 +72,7 @@ public class TestSwc4jAstBindingIdent extends BaseTestSuiteSwc4jAst {
         Swc4jAstAssignPat assignPat = assertAst(
                 param, param.getPat().as(Swc4jAstAssignPat.class), Swc4jAstType.AssignPat, 11, 24);
         Swc4jAstBindingIdent bindingIdent = assertAst(
-                assignPat, assignPat.getLeft().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 11, 12);
+                assignPat, assignPat.getLeft().as(Swc4jAstBindingIdent.class), Swc4jAstType.BindingIdent, 11, 20);
         ident = assertAst(
                 bindingIdent, bindingIdent.getId(), Swc4jAstType.Ident, 11, 12);
         assertEquals("a", ident.getSym());

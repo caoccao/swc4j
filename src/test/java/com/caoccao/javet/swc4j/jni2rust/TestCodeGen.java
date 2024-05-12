@@ -27,7 +27,6 @@ import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
-import com.caoccao.javet.swc4j.plugins.Swc4jPluginHost;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.tokens.Swc4jTokenFactory;
 import com.caoccao.javet.swc4j.utils.*;
@@ -338,8 +337,7 @@ public class TestCodeGen {
                     lines.add("  }");
                     lines.add("}\n");
                     // AST
-                    if (!jni2RustClassUtils.isCustomCreation()) {
-                        // ToJava
+                    if (!jni2RustClassUtils.isCustomToJava()) {
                         final List<String> args = new ArrayList<>();
                         final List<String> javaVars = new ArrayList<>();
                         final List<String> javaOptionalVars = new ArrayList<>();
@@ -498,7 +496,8 @@ public class TestCodeGen {
                         lines.add("    return_value");
                         lines.add("  }");
                         lines.add("}\n");
-                        // FromJava
+                    }
+                    if (!jni2RustClassUtils.isCustomFromJava()) {
                         lines.add(String.format("impl<'local> FromJava<'local> for %s {", className));
                         lines.add("  #[allow(unused_variables)]");
                         lines.add("  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {");

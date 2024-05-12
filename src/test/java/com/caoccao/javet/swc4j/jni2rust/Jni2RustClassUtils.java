@@ -55,8 +55,12 @@ public class Jni2RustClassUtils<T> {
         return clazz.getSimpleName().substring(clazz.isInterface() ? 9 : 8);
     }
 
-    public boolean isCustomCreation() {
-        return optionalJni2RustClass.map(Jni2RustClass::customCreation).orElse(false);
+    public boolean isCustomFromJava() {
+        return optionalJni2RustClass.map(Jni2RustClass::customFromJava).orElse(false);
+    }
+
+    public boolean isCustomToJava() {
+        return optionalJni2RustClass.map(Jni2RustClass::customToJava).orElse(false);
     }
 
     public boolean isIgnore() {
