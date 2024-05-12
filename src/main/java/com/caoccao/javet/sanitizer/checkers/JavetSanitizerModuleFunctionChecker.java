@@ -22,37 +22,37 @@ import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstFnDecl;
 
 /**
- * The type Javet sanitizer statement list checker.
+ * The type Javet sanitizer module function checker.
  *
  * @since 0.7.0
  */
-public class JavetSanitizerModuleChecker extends BaseJavetSanitizerModuleChecker {
+public class JavetSanitizerModuleFunctionChecker extends BaseJavetSanitizerModuleChecker {
     /**
-     * Instantiates a new Javet sanitizer statement list checker.
+     * Instantiates a new Javet sanitizer module function checker.
      *
      * @since 0.7.0
      */
-    public JavetSanitizerModuleChecker() {
+    public JavetSanitizerModuleFunctionChecker() {
         this(JavetSanitizerOptions.Default);
     }
 
     /**
-     * Instantiates a new Javet sanitizer statement list checker.
+     * Instantiates a new Javet sanitizer module function checker.
      *
      * @param options the options
      * @since 0.7.0
      */
-    public JavetSanitizerModuleChecker(JavetSanitizerOptions options) {
+    public JavetSanitizerModuleFunctionChecker(JavetSanitizerOptions options) {
         super(options);
     }
 
     @Override
     public void check(String codeString) throws JavetSanitizerException {
         super.check(codeString);
-        validateNoShebang(Swc4jAstType.getName(ISwc4jAstStmt.class));
+        validateNoShebang(Swc4jAstType.getName(Swc4jAstFnDecl.class));
         validateBodyNotEmpty();
         for (ISwc4jAst node : program.getBody()) {
             if (node instanceof ISwc4jAstModuleDecl) {
@@ -69,11 +69,11 @@ public class JavetSanitizerModuleChecker extends BaseJavetSanitizerModuleChecker
     }
 
     protected void checkNode(ISwc4jAst node) throws JavetSanitizerException {
-        validateNode(node, ISwc4jAstStmt.class);
+        validateNode(node, Swc4jAstFnDecl.class);
     }
 
     @Override
     public String getName() {
-        return "Module";
+        return "Module Function";
     }
 }
