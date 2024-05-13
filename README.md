@@ -12,11 +12,10 @@
 
 * Linux + MacOS + Windows
 * JavaScript, TypeScript, JSX, TSX, etc.
-* AST
-  * Plugin
-  * Visitor
-* Parse
+* [Parse](docs/parse.md)
   * AST
+    * Visitor
+    * Plugin
   * Comments
   * Tokens
 * Transform
