@@ -1,244 +1,53 @@
 digraph {
   rankdir="LR"
-  Pat -> ArrayPat
-  Pat -> AssignPat
-  Pat -> Expr
-  Pat -> BindingIdent
-  Pat -> Invalid
-  Pat -> ObjectPat
-  Pat -> RestPat
-  Expr -> ArrayLit
-  Expr -> ArrowExpr
-  Expr -> AssignExpr
-  Expr -> AwaitExpr
-  Expr -> BinExpr
-  Expr -> CallExpr
-  Expr -> ClassExpr
-  Expr -> CondExpr
-  Expr -> FnExpr
-  Expr -> Ident
-  Expr -> Invalid
-  Expr -> JSXElement
-  Expr -> JSXEmptyExpr
-  Expr -> JSXFragment
-  Expr -> JSXMemberExpr
-  Expr -> JSXNamespacedName
-  Expr -> Lit
-  Expr -> MemberExpr
-  Expr -> MetaPropExpr
-  Expr -> NewExpr
-  Expr -> ObjectLit
-  Expr -> OptChainExpr
-  Expr -> ParenExpr
-  Expr -> PrivateName
-  Expr -> SeqExpr
-  Expr -> SuperPropExpr
-  Expr -> TaggedTpl
-  Expr -> ThisExpr
-  Expr -> Tpl
-  Expr -> TsAsExpr
-  Expr -> TsConstAssertion
-  Expr -> TsInstantiation
-  Expr -> TsNonNullExpr
-  Expr -> TsSatisfiesExpr
-  Expr -> TsTypeAssertion
-  Expr -> UnaryExpr
-  Expr -> UpdateExpr
-  Expr -> YieldExpr
-  Lit -> BigInt
-  Lit -> Bool
-  Lit -> JSXText
-  Lit -> Null
-  Lit -> Number
-  Lit -> Regex
-  Lit -> Str
-  JSXObject -> Ident
-  JSXObject -> JSXMemberExpr
-  ImportSpecifier -> ImportDefaultSpecifier
-  ImportSpecifier -> ImportNamedSpecifier
-  ImportSpecifier -> ImportStarAsSpecifier
-  TsEnumMemberId -> Ident
-  TsEnumMemberId -> Str
-  JSXAttrValue -> JSXElement
-  JSXAttrValue -> JSXExprContainer
-  JSXAttrValue -> JSXFragment
-  JSXAttrValue -> Lit
-  Program -> Module
-  Program -> Script
-  Prop -> AssignProp
-  Prop -> GetterProp
-  Prop -> KeyValueProp
-  Prop -> MethodProp
-  Prop -> SetterProp
-  Prop -> Ident
-  TsType -> TsArrayType
-  TsType -> TsConditionalType
-  TsType -> TsFnOrConstructorType
-  TsType -> TsImportType
-  TsType -> TsIndexedAccessType
-  TsType -> TsInferType
-  TsType -> TsKeywordType
-  TsType -> TsLitType
-  TsType -> TsMappedType
-  TsType -> TsOptionalType
-  TsType -> TsParenthesizedType
-  TsType -> TsRestType
-  TsType -> TsThisType
-  TsType -> TsTupleType
-  TsType -> TsTypeLit
-  TsType -> TsTypeOperator
-  TsType -> TsTypePredicate
-  TsType -> TsTypeQuery
-  TsType -> TsTypeRef
-  TsType -> TsUnionOrIntersectionType
-  TsFnOrConstructorType -> TsConstructorType
-  TsFnOrConstructorType -> TsFnType
-  TsUnionOrIntersectionType -> TsIntersectionType
-  TsUnionOrIntersectionType -> TsUnionType
-  TsTypeElement -> TsCallSignatureDecl
-  TsTypeElement -> TsConstructSignatureDecl
-  TsTypeElement -> TsGetterSignature
-  TsTypeElement -> TsIndexSignature
-  TsTypeElement -> TsMethodSignature
-  TsTypeElement -> TsPropertySignature
-  TsTypeElement -> TsSetterSignature
-  TsLit -> BigInt
-  TsLit -> Bool
-  TsLit -> Number
-  TsLit -> Str
-  TsLit -> TsTplLitType
-  TsThisTypeOrIdent -> Ident
-  TsThisTypeOrIdent -> TsThisType
-  VarDeclOrExpr -> Expr
-  VarDeclOrExpr -> VarDecl
-  TsTypeQueryExpr -> TsImportType
-  TsTypeQueryExpr -> TsEntityName
-  TsEntityName -> Ident
-  TsEntityName -> TsQualifiedName
-  PropName -> BigInt
-  PropName -> ComputedPropName
-  PropName -> Ident
-  PropName -> Number
-  PropName -> Str
-  JSXElementName -> Ident
-  JSXElementName -> JSXMemberExpr
-  JSXElementName -> JSXNamespacedName
-  ModuleDecl -> ExportAll
-  ModuleDecl -> ExportDecl
-  ModuleDecl -> ExportDefaultDecl
-  ModuleDecl -> ExportDefaultExpr
-  ModuleDecl -> NamedExport
-  ModuleDecl -> ImportDecl
-  ModuleDecl -> TsExportAssignment
-  ModuleDecl -> TsImportEqualsDecl
-  ModuleDecl -> TsNamespaceExportDecl
-  DefaultDecl -> ClassExpr
-  DefaultDecl -> FnExpr
-  DefaultDecl -> TsInterfaceDecl
-  Key -> PrivateName
-  Key -> PropName
-  Callee -> Expr
-  Callee -> Import
-  Callee -> Super
-  JSXExpr -> Expr
-  JSXExpr -> JSXEmptyExpr
-  JSXElementChild -> JSXElement
-  JSXElementChild -> JSXExprContainer
-  JSXElementChild -> JSXFragment
-  JSXElementChild -> JSXSpreadChild
-  JSXElementChild -> JSXText
-  TsParamPropParam -> AssignPat
-  TsParamPropParam -> BindingIdent
-  SuperProp -> ComputedPropName
-  SuperProp -> Ident
-  ExportSpecifier -> ExportDefaultSpecifier
-  ExportSpecifier -> ExportNamedSpecifier
-  ExportSpecifier -> ExportNamespaceSpecifier
-  Stmt -> BlockStmt
-  Stmt -> BreakStmt
-  Stmt -> ContinueStmt
-  Stmt -> DebuggerStmt
-  Stmt -> Decl
-  Stmt -> DoWhileStmt
-  Stmt -> EmptyStmt
-  Stmt -> ExprStmt
-  Stmt -> ForStmt
-  Stmt -> ForInStmt
-  Stmt -> ForOfStmt
-  Stmt -> IfStmt
-  Stmt -> LabeledStmt
-  Stmt -> ReturnStmt
-  Stmt -> SwitchStmt
-  Stmt -> ThrowStmt
-  Stmt -> TryStmt
-  Stmt -> WhileStmt
-  Stmt -> WithStmt
-  Decl -> ClassDecl
-  Decl -> FnDecl
-  Decl -> TsEnumDecl
-  Decl -> TsInterfaceDecl
-  Decl -> TsModuleDecl
-  Decl -> TsTypeAliasDecl
-  Decl -> UsingDecl
-  Decl -> VarDecl
-  AssignTarget -> SimpleAssignTarget
-  AssignTarget -> AssignTargetPat
-  SimpleAssignTarget -> BindingIdent
-  SimpleAssignTarget -> Invalid
-  SimpleAssignTarget -> MemberExpr
-  SimpleAssignTarget -> OptChainExpr
-  SimpleAssignTarget -> ParenExpr
-  SimpleAssignTarget -> SuperPropExpr
-  SimpleAssignTarget -> TsAsExpr
-  SimpleAssignTarget -> TsInstantiation
-  SimpleAssignTarget -> TsNonNullExpr
-  SimpleAssignTarget -> TsSatisfiesExpr
-  SimpleAssignTarget -> TsTypeAssertion
-  AssignTargetPat -> ArrayPat
-  AssignTargetPat -> Invalid
-  AssignTargetPat -> ObjectPat
-  ModuleItem -> ModuleDecl
-  ModuleItem -> Stmt
-  BlockStmtOrExpr -> BlockStmt
-  BlockStmtOrExpr -> Expr
-  ObjectPatProp -> AssignPatProp
-  ObjectPatProp -> KeyValuePatProp
-  ObjectPatProp -> RestPat
-  TsFnParam -> ArrayPat
-  TsFnParam -> BindingIdent
-  TsFnParam -> ObjectPat
-  TsFnParam -> RestPat
-  TsModuleRef -> TsEntityName
-  TsModuleRef -> TsExternalModuleRef
-  JSXAttrName -> Ident
-  JSXAttrName -> JSXNamespacedName
-  TsModuleName -> Ident
-  TsModuleName -> Str
-  MemberProp -> ComputedPropName
-  MemberProp -> Ident
-  MemberProp -> PrivateName
-  TsNamespaceBody -> TsModuleBlock
-  TsNamespaceBody -> TsNamespaceDecl
-  ClassMember -> AutoAccessor
-  ClassMember -> ClassProp
-  ClassMember -> Constructor
-  ClassMember -> EmptyStmt
-  ClassMember -> ClassMethod
-  ClassMember -> PrivateMethod
-  ClassMember -> PrivateProp
-  ClassMember -> StaticBlock
-  ClassMember -> TsIndexSignature
-  JSXAttrOrSpread -> JSXAttr
-  JSXAttrOrSpread -> SpreadElement
-  ForHead -> Pat
-  ForHead -> UsingDecl
-  ForHead -> VarDecl
-  ModuleExportName -> Ident
-  ModuleExportName -> Str
-  PropOrSpread -> Prop
-  PropOrSpread -> SpreadElement
-  ParamOrTsParamProp -> Param
-  ParamOrTsParamProp -> TsParamProp
-  OptChainBase -> OptCall
-  OptChainBase -> MemberExpr
+  AssignTarget -> { SimpleAssignTarget AssignTargetPat }
+  SimpleAssignTarget -> { BindingIdent Invalid MemberExpr OptChainExpr ParenExpr SuperPropExpr TsAsExpr TsInstantiation TsNonNullExpr TsSatisfiesExpr TsTypeAssertion }
+  AssignTargetPat -> { ArrayPat Invalid ObjectPat }
+  BlockStmtOrExpr -> { BlockStmt Expr }
+  Expr -> { ArrayLit ArrowExpr AssignExpr AwaitExpr BinExpr CallExpr ClassExpr CondExpr FnExpr Ident Invalid JSXElement JSXEmptyExpr JSXFragment JSXMemberExpr JSXNamespacedName Lit MemberExpr MetaPropExpr NewExpr ObjectLit OptChainExpr ParenExpr PrivateName SeqExpr SuperPropExpr TaggedTpl ThisExpr Tpl TsAsExpr TsConstAssertion TsInstantiation TsNonNullExpr TsSatisfiesExpr TsTypeAssertion UnaryExpr UpdateExpr YieldExpr }
+  Lit -> { BigInt Bool JSXText Null Number Regex Str }
+  Callee -> { Expr Import Super }
+  ClassMember -> { AutoAccessor ClassProp Constructor EmptyStmt ClassMethod PrivateMethod PrivateProp StaticBlock TsIndexSignature }
+  Decl -> { ClassDecl FnDecl TsEnumDecl TsInterfaceDecl TsModuleDecl TsTypeAliasDecl UsingDecl VarDecl }
+  DefaultDecl -> { ClassExpr FnExpr TsInterfaceDecl }
+  ExportSpecifier -> { ExportDefaultSpecifier ExportNamedSpecifier ExportNamespaceSpecifier }
+  ForHead -> { Pat UsingDecl VarDecl }
+  Pat -> { ArrayPat AssignPat Expr BindingIdent Invalid ObjectPat RestPat }
+  ImportSpecifier -> { ImportDefaultSpecifier ImportNamedSpecifier ImportStarAsSpecifier }
+  JSXAttrName -> { Ident JSXNamespacedName }
+  JSXAttrOrSpread -> { JSXAttr SpreadElement }
+  JSXAttrValue -> { JSXElement JSXExprContainer JSXFragment Lit }
+  JSXElementChild -> { JSXElement JSXExprContainer JSXFragment JSXSpreadChild JSXText }
+  JSXElementName -> { Ident JSXMemberExpr JSXNamespacedName }
+  JSXExpr -> { Expr JSXEmptyExpr }
+  JSXObject -> { Ident JSXMemberExpr }
+  Key -> { PrivateName PropName }
+  PropName -> { BigInt ComputedPropName Ident Number Str }
+  MemberProp -> { ComputedPropName Ident PrivateName }
+  ModuleDecl -> { ExportAll ExportDecl ExportDefaultDecl ExportDefaultExpr NamedExport ImportDecl TsExportAssignment TsImportEqualsDecl TsNamespaceExportDecl }
+  ModuleExportName -> { Ident Str }
+  ModuleItem -> { ModuleDecl Stmt }
+  Stmt -> { BlockStmt BreakStmt ContinueStmt DebuggerStmt Decl DoWhileStmt EmptyStmt ExprStmt ForStmt ForInStmt ForOfStmt IfStmt LabeledStmt ReturnStmt SwitchStmt ThrowStmt TryStmt WhileStmt WithStmt }
+  ObjectPatProp -> { AssignPatProp KeyValuePatProp RestPat }
+  OptChainBase -> { OptCall MemberExpr }
+  ParamOrTsParamProp -> { Param TsParamProp }
+  Program -> { Module Script }
+  Prop -> { AssignProp GetterProp KeyValueProp MethodProp SetterProp Ident }
+  PropOrSpread -> { Prop SpreadElement }
+  SuperProp -> { ComputedPropName Ident }
+  TsEntityName -> { Ident TsQualifiedName }
+  TsEnumMemberId -> { Ident Str }
+  TsFnOrConstructorType -> { TsConstructorType TsFnType }
+  TsFnParam -> { ArrayPat BindingIdent ObjectPat RestPat }
+  TsLit -> { BigInt Bool Number Str TsTplLitType }
+  TsModuleName -> { Ident Str }
+  TsModuleRef -> { TsEntityName TsExternalModuleRef }
+  TsNamespaceBody -> { TsModuleBlock TsNamespaceDecl }
+  TsParamPropParam -> { AssignPat BindingIdent }
+  TsThisTypeOrIdent -> { Ident TsThisType }
+  TsType -> { TsArrayType TsConditionalType TsFnOrConstructorType TsImportType TsIndexedAccessType TsInferType TsKeywordType TsLitType TsMappedType TsOptionalType TsParenthesizedType TsRestType TsThisType TsTupleType TsTypeLit TsTypeOperator TsTypePredicate TsTypeQuery TsTypeRef TsUnionOrIntersectionType }
+  TsUnionOrIntersectionType -> { TsIntersectionType TsUnionType }
+  TsTypeElement -> { TsCallSignatureDecl TsConstructSignatureDecl TsGetterSignature TsIndexSignature TsMethodSignature TsPropertySignature TsSetterSignature }
+  TsTypeQueryExpr -> { TsImportType TsEntityName }
+  VarDeclOrExpr -> { Expr VarDecl }
 }

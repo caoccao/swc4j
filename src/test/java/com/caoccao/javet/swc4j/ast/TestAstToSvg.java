@@ -30,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -42,7 +43,9 @@ public class TestAstToSvg {
          * 2. Execute: dot -Tsvg ast.dot > ast.svg
          */
         AstToSvg astToSvg = new AstToSvg();
-        Swc4jAstStore.getInstance().getEnumMap().values().stream()
+        Swc4jAstStore.getInstance().getEnumMap().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(Map.Entry::getValue)
                 .filter(Class::isInterface)
                 .forEach(type -> {
                     assertTrue(ISwc4jAst.class.isAssignableFrom(type));
@@ -86,12 +89,15 @@ public class TestAstToSvg {
                 String name = jni2RustClassUtils.getName();
                 if (type.isInterface()) {
                     assertTrue(type.isAnnotationPresent(Jni2RustClass.class));
-                    for (Jni2RustEnumMapping mapping : jni2RustClassUtils.getMappings()) {
-                        lines.add(String.format("  %s -> %s", name, new Jni2RustClassUtils<>(mapping.type()).getName()));
-                    }
-                    for (Jni2RustEnumMapping mapping : jni2RustClassUtils.getMappings()) {
-                        process(mapping.type());
-                    }
+                    String targets = Arrays.stream(jni2RustClassUtils.getMappings())
+                            .map(Jni2RustEnumMapping::type)
+                            .map(Jni2RustClassUtils::new)
+                            .map(Jni2RustClassUtils::getName)
+                            .collect(Collectors.joining(" "));
+                    lines.add(String.format("  %s -> { %s }", name, targets));
+                    Arrays.stream(jni2RustClassUtils.getMappings())
+                            .map(Jni2RustEnumMapping::type)
+                            .forEach(this::process);
                 }
             }
         }
