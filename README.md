@@ -13,7 +13,7 @@
 * Linux + MacOS + Windows
 * JavaScript, TypeScript, JSX, TSX, etc.
 * [Parse](docs/parse.md)
-  * AST
+  * [AST](docs/features/ast.md)
     * Visitor
     * Plugin
   * Comments
