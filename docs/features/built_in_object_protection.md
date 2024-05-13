@@ -167,3 +167,5 @@ WebAssembly
 worker_threads
 zlib
 ```
+
+Please refer to the [tutorial](../tutorials/tutorial_sanitizer_02_built_in_object.md) for more details.
