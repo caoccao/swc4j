@@ -2,9 +2,11 @@
 
 In a JavaScript module, it is recommended to export function only so that the module is tamper proof. The function restriction ensure the following.
 
-- There are no module wide statements other than function declarations.
-- There are some functions that must be declared.
-- To a particular function, the argument count can be also validated.
+* There are no module wide statements other than function declarations.
+* There are some functions that must be declared.
+* To a particular function, the argument count can be also validated.
+
+`JavetSanitizerModuleFunctionChecker` is the one that enforces this check.
 
 ## Valid Sample
 

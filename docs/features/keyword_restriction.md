@@ -1,6 +1,6 @@
 # Feature - Keyword Restriction
 
-JavaScript keywords can be restricted. The following example shows how to turn off the keyword restriction.
+The JavaScript keywords can be restricted. The following example shows how to turn off the keyword restriction.
 
 ```java
 JavetSanitizerOptions options = JavetSanitizerOptions.Default.toClone()
@@ -17,15 +17,15 @@ JavetSanitizerOptions options = JavetSanitizerOptions.Default.toClone()
 
 The default restricted keyword list is as follows:
 
-```js
-async
-await
-debugger
-export
-import
-var
-with
-yield
-```
+| Keyword  |
+|----------|
+| async    |
+| await    |
+| debugger |
+| export   |
+| import   |
+| var      |
+| with     |
+| yield    |
 
 Please refer to the [tutorial](../tutorials/tutorial_sanitizer_03_keyword_restriction.md) for more details.

@@ -4,7 +4,7 @@ There are a set of [functions](../features/function_restriction.md) that must be
 
 ## Sample Function - main()
 
-By default, `function main()` must be declared so that the script has a default entry function. If you check a script without `function main()` in `JavetSanitizerModuleChecker` with the default option, you will get an error. You may create your own option with a set of new functions and the same script will pass the check.
+By default, `function main()` must be declared so that the script has a default entry function. If you check a script without `function main()` in `JavetSanitizerModuleFunctionChecker` with the default option, you will get an error. You may create your own option with a set of new functions and the same script will pass the check.
 
 ```java
 String codeString = "function myMain() {}";

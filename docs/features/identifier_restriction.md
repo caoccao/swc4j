@@ -11,41 +11,41 @@ options.seal();
 
 The default disallowed identifier list is as follows:
 
-```js
-__proto__
-apply
-AsyncFunction
-AsyncGenerator
-AsyncGeneratorFunction
-bind
-call
-clearInterval
-clearTimeout
-defineProperties
-defineProperty
-eval
-Function
-Generator
-GeneratorFunction
-getPrototypeOf
-global
-globalThis
-Intl
-Promise
-prototype
-Proxy
-Reflect
-require
-setImmediate
-setInterval
-setPrototypeOf
-setTimeout
-Symbol
-uneval
-WebAssembly
-window
-XMLHttpRequest
-```
+| Identifier             |
+|------------------------|
+| __proto__              |
+| apply                  |
+| AsyncFunction          |
+| AsyncGenerator         |
+| AsyncGeneratorFunction |
+| bind                   |
+| call                   |
+| clearInterval          |
+| clearTimeout           |
+| defineProperties       |
+| defineProperty         |
+| eval                   |
+| Function               |
+| Generator              |
+| GeneratorFunction      |
+| getPrototypeOf         |
+| global                 |
+| globalThis             |
+| Intl                   |
+| Promise                |
+| prototype              |
+| Proxy                  |
+| Reflect                |
+| require                |
+| setImmediate           |
+| setInterval            |
+| setPrototypeOf         |
+| setTimeout             |
+| Symbol                 |
+| uneval                 |
+| WebAssembly            |
+| window                 |
+| XMLHttpRequest         |
 
 ## Why are global and globalThis disallowed?
 
