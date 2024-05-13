@@ -196,7 +196,7 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
 
     @Override
     public Swc4jAstVisitorResponse visitImport(Swc4jAstImport node) {
-        if (!options.isKeywordExportEnabled()) {
+        if (!options.isKeywordImportEnabled()) {
             raiseError(JavetSanitizerException.keywordNotAllowed(IMPORT), node);
         }
         return super.visitImport(node);
@@ -204,7 +204,7 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
 
     @Override
     public Swc4jAstVisitorResponse visitImportDecl(Swc4jAstImportDecl node) {
-        if (!options.isKeywordExportEnabled()) {
+        if (!options.isKeywordImportEnabled()) {
             raiseError(JavetSanitizerException.keywordNotAllowed(IMPORT), node);
         }
         return super.visitImportDecl(node);
@@ -212,7 +212,7 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
 
     @Override
     public Swc4jAstVisitorResponse visitImportDefaultSpecifier(Swc4jAstImportDefaultSpecifier node) {
-        if (!options.isKeywordExportEnabled()) {
+        if (!options.isKeywordImportEnabled()) {
             raiseError(JavetSanitizerException.keywordNotAllowed(IMPORT), node);
         }
         return super.visitImportDefaultSpecifier(node);
@@ -220,7 +220,7 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
 
     @Override
     public Swc4jAstVisitorResponse visitImportNamedSpecifier(Swc4jAstImportNamedSpecifier node) {
-        if (!options.isKeywordExportEnabled()) {
+        if (!options.isKeywordImportEnabled()) {
             raiseError(JavetSanitizerException.keywordNotAllowed(IMPORT), node);
         }
         return super.visitImportNamedSpecifier(node);
@@ -228,7 +228,7 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
 
     @Override
     public Swc4jAstVisitorResponse visitImportStarAsSpecifier(Swc4jAstImportStarAsSpecifier node) {
-        if (!options.isKeywordExportEnabled()) {
+        if (!options.isKeywordImportEnabled()) {
             raiseError(JavetSanitizerException.keywordNotAllowed(IMPORT), node);
         }
         return super.visitImportStarAsSpecifier(node);

@@ -28,7 +28,14 @@
   * JSX → JS
   * TSX → JS
   * Source Map
-* Sanitizer
+* [Sanitizer](docs/sanitizer.md)
+  * [Built-in Object Protection](docs/features/built_in_object_protection.md)
+  * [Keyword Restriction](docs/features/keyword_restriction.md)
+  * [Function Restriction](docs/features/function_restriction.md)
+  * [Identifier Restriction](docs/features/identifier_restriction.md)
+  * [Identifier Deletion](docs/features/identifier_deletion.md)
+  * [Identifier Freeze](docs/features/identifier_freeze.md)
+  * [Identifier Naming Convention](docs/features/identifier_naming_convention.md)
 
 ## Quick Start
 

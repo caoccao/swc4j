@@ -12,7 +12,7 @@ In this tutorial, we are going to learn the follows.
 
 ## What is Javet Sanitizer?
 
-Javet Sanitizer is a sanitizer framework for parsing and validating JavaScript code on JVM. It is built on top of swc4j.
+Javet Sanitizer is a sanitizer framework for parsing and validating JavaScript, TypeScript code on JVM. It is built on top of swc4j.
 
 Javet Sanitizer provides a set of rich checkers at AST level for [Javet](https://github.com/caoccao/Javet) so that applications can address and eliminate the potential threats before the JavaScript code is executed.
 

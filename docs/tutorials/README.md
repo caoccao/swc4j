@@ -12,3 +12,9 @@
 ## Sanitizer
 
 * [Tutorial Sanitizer 01: Quick Start](tutorial_sanitizer_01_quick_start.md)
+* [Tutorial Sanitizer 02: Built-in Objects](tutorial_sanitizer_02_built_in_object.md)
+* [Tutorial Sanitizer 03: Keyword Restriction](tutorial_sanitizer_03_keyword_restriction.md)
+* [Tutorial Sanitizer 04: Function Restriction](tutorial_sanitizer_04_function_restriction.md)
+* [Tutorial Sanitizer 05: Identifier Deletion](tutorial_sanitizer_05_identifier_deletion.md)
+* [Tutorial Sanitizer 06: Identifier Freeze](tutorial_sanitizer_06_identifier_freeze.md)
+* [Tutorial Sanitizer 07: Identifier Restriction](tutorial_sanitizer_07_identifier_restriction.md)
