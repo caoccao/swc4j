@@ -18,7 +18,7 @@
     * Plugin
   * Comments
   * Tokens
-* Transform
+* [Transform](docs/transform.md)
   * Minify
   * Multiple Target ES Version
   * Source Map

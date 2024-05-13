@@ -43,13 +43,13 @@ public class Swc4jTransformOptions extends Swc4jOptions {
      */
     protected boolean asciiOnly;
     /**
-     * The Emit assert for import attributes.
+     * Whether to emit assert for import attributes. Defaults to `false`.
      *
      * @since 0.5.0
      */
     protected boolean emitAssertForImportAttributes;
     /**
-     * Should the sources be inlined in the source map.  Defaults to `true`.
+     * Should the sources be inlined in the source map. Defaults to `true`.
      *
      * @since 0.5.0
      */
@@ -67,8 +67,7 @@ public class Swc4jTransformOptions extends Swc4jOptions {
      */
     protected boolean minify;
     /**
-     * If true, the code generator will emit the latest semicolon.
-     * Defaults to `false`.
+     * If true, the code generator will emit the latest semicolon. Defaults to `false`.
      *
      * @since 0.5.0
      */
@@ -82,10 +81,10 @@ public class Swc4jTransformOptions extends Swc4jOptions {
     /**
      * The target runtime environment.
      * <p>
-     * This defaults to [EsVersion::latest] because it preserves input as much as possible.
+     * This defaults to `EsVersion.Latest` because it preserves input as much as possible.
      * <p>
-     * Note: This does not verifies if output is valid for the target runtime.
-     * e.g. `const foo = 1;` with [EsVersion::Es3] will emitted as `const foo = 1` without verification.
+     * Note: This does not verify if output is valid for the target runtime.
+     * e.g. `const foo = 1;` with [EsVersion::Es3] will emit as `const foo = 1` without verification.
      * This is because it's not a concern of the code generator.
      *
      * @since 0.5.0

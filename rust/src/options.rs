@@ -1355,8 +1355,9 @@ pub struct TransformOptions<'a> {
   ///
   /// This is useful for environments that do not support unicode.
   pub ascii_only: bool,
+  /// Whether to emit assert for import attributes. Defaults to `false`.
   pub emit_assert_for_import_attributes: bool,
-  /// Should the sources be inlined in the source map.  Defaults to `true`.
+  /// Should the sources be inlined in the source map. Defaults to `true`.
   pub inline_sources: bool,
   /// Whether to keep comments in the output. Defaults to `false`.
   pub keep_comments: bool,
@@ -1381,8 +1382,8 @@ pub struct TransformOptions<'a> {
   /// This defaults to [EsVersion::latest] because it preserves input as much
   /// as possible.
   ///
-  /// Note: This does not verifies if output is valid for the target runtime.
-  /// e.g. `const foo = 1;` with [EsVersion::Es3] will emitted as `const foo =
+  /// Note: This does not verify if output is valid for the target runtime.
+  /// e.g. `const foo = 1;` with [EsVersion::Es3] will emit as `const foo =
   /// 1` without verification.
   /// This is because it's not a concern of the code generator.
   pub target: EsVersion,

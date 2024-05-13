@@ -1,13 +1,13 @@
 # Parse
 
-`parse()` parses the code, but does not transform or transpile the code. The following features are supported:
+`parse()` parses the code, but does not transform or transpile the code. It is a light-weight API for code analysis.
+
+## Features
 
 * Analyze the AST
 * Capture the comments, tokens and AST
 * Analyze the scope
 * Update the AST via plugins on-the-fly
-
-It is a light-weight API for code analysis.
 
 ## Options
 

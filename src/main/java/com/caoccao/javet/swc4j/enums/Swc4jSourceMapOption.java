@@ -27,7 +27,7 @@ import java.util.stream.Stream;
  */
 public enum Swc4jSourceMapOption implements ISwc4jEnumId {
     /**
-     * Source map should be inlined into the source (default)
+     * Source map should be inlined into the source. (Default)
      *
      * @since 0.3.0
      */
