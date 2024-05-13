@@ -22,7 +22,7 @@
   * Minify
   * Multiple Target ES Version
   * Source Map
-* Transpile
+* [Transpile](docs/transpile.md)
   * TS → JS
   * JSX → JS
   * TSX → JS

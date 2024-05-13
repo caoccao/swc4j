@@ -49,7 +49,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     public static final String DEFAULT_JSX_FRAGMENT_FACTORY = "React.Fragment";
     /**
-     * When emitting a legacy decorator, also emit experimental decorator meta data.
+     * When emitting a legacy decorator, whether also emit experimental decorator meta data.
      * Defaults to `false`.
      *
      * @since 0.1.0
@@ -71,7 +71,8 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     protected boolean inlineSources;
     /**
-     * `true` if the program should use an implicit JSX import source/the "new" JSX transforms.
+     * `true` if the program should use an implicit JSX import source/the `new` JSX transforms.
+     * Defaults to `false`.
      *
      * @since 0.1.0
      */

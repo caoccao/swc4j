@@ -1,6 +1,6 @@
 # Transform
 
-`transform()` transforms the code, but does not transform the code.
+`transform()` transforms the code, but does not transpile the code.
 
 ## Features
 
@@ -14,7 +14,7 @@
 
 ## Options
 
-The following options are shared with `parse().
+The following options are shared with [Parse](parse.md).
 
 * Media Type
 * Parse Mode
