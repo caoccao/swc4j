@@ -24,7 +24,10 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstArrowExpr;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 
 /**
- * The type Javet sanitizer anonymous function checker.
+ * Anonymous function checker provides the following basic checks to validate if a script is a valid anonymous function.
+ * 1. `shebang` must not exist.
+ * 2. `body` has only 1 node.
+ * 3. The only 1 node is an `ArrowExpr`.
  *
  * @since 0.7.0
  */

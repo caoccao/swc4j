@@ -990,7 +990,7 @@ dependencies = [
 
 [[package]]
 name = "swc4j"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "base64 0.22.1",
  "debug_print",

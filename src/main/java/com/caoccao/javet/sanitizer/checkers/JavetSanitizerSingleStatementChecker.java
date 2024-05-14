@@ -23,7 +23,10 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 
 /**
- * The type Javet sanitizer single statement checker.
+ * Single statement checker provides the following checks to validate if a script only contains one statement.
+ * 1. `shebang` must not exist.
+ * 2. `body` has only 1 node.
+ * 3. The only 1 node is an `Stmt`.
  *
  * @since 0.7.0
  */

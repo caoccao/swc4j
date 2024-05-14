@@ -16,6 +16,51 @@ It was formerly built on top of [antlr4](https://github.com/antlr/antlr4) and [g
 * [Identifier Freeze](features/identifier_freeze.md)
 * [Identifier Naming Convention](features/identifier_naming_convention.md)
 
+## Checkers
+
+### Anonymous Function Checker
+
+Anonymous function checker provides the following checks to validate if a script is a valid anonymous function.
+
+1. `shebang` must not exist.
+2. `body` has only 1 node.
+3. The only 1 node is an `ArrowExpr`.
+
+### Module Checker
+
+Module checker provides the following checks to validate if a script is a valid module.
+
+1. `shebang` must not exist.
+2. `body` is not empty.
+3. `export` is allowed or not per options.
+4. `import` is allowed or not per options.
+
+### Module Function Checker
+
+Module function checker provides the following checks to validate if a script is a valid module and only contains function declarations.
+
+1. `shebang` must not exist.
+2. `body` is not empty.
+3. `export` is allowed or not per options.
+4. `import` is allowed or not per options.
+5. Other nodes are all `FnDecl`.
+
+### Single Statement Checker
+
+Single statement checker provides the following checks to validate if a script only contains one statement.
+
+1. `shebang` must not exist.
+2. `body` has only 1 node.
+3. The only 1 node is an `Stmt`.
+
+### Statement List Checker
+
+Statement list checker provides the following checks to validate if a script has at least one statement.
+
+1. `shebang` must not exist.
+2. `body` has at least 1 node.
+3. The nodes are all `Stmt`.
+
 ## Error Codes
 
 | Error                | Code | Message                                                                                |

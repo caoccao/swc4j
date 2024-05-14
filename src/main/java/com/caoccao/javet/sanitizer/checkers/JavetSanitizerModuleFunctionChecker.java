@@ -28,7 +28,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * The type Javet sanitizer module function checker.
+ * Module function checker provides the following checks to validate
+ * if a script is a valid module and only contains function declarations.
+ * 1. `shebang` must not exist.
+ * 2. `body` is not empty.
+ * 3. `export` is allowed or not per options.
+ * 4. `import` is allowed or not per options.
+ * 5. Other nodes are all `FnDecl`.
  *
  * @since 0.7.0
  */

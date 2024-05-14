@@ -25,13 +25,17 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 
 /**
- * The type Javet sanitizer statement list checker.
+ * Module checker provides the following basic checks to validate if a script is a valid module.
+ * 1. `shebang` must not exist.
+ * 2. `body` is not empty.
+ * 3. `export` is allowed or not per options.
+ * 4. `import` is allowed or not per options.
  *
  * @since 0.7.0
  */
 public class JavetSanitizerModuleChecker extends BaseJavetSanitizerModuleChecker {
     /**
-     * Instantiates a new Javet sanitizer statement list checker.
+     * Instantiates a new Javet sanitizer module checker.
      *
      * @since 0.7.0
      */
@@ -40,7 +44,7 @@ public class JavetSanitizerModuleChecker extends BaseJavetSanitizerModuleChecker
     }
 
     /**
-     * Instantiates a new Javet sanitizer statement list checker.
+     * Instantiates a new Javet sanitizer module checker.
      *
      * @param options the options
      * @since 0.7.0

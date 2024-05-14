@@ -24,7 +24,10 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 
 /**
- * The type Javet sanitizer statement list checker.
+ * Statement list checker provides the following checks to validate if a script has at least one statement.
+ * 1. `shebang` must not exist.
+ * 2. `body` has at least 1 node.
+ * 3. The nodes are all `Stmt`.
  *
  * @since 0.7.0
  */
