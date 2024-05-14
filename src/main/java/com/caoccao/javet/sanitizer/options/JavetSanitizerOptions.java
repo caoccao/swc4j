@@ -252,7 +252,6 @@ public class JavetSanitizerOptions {
     private URL specifier;
     private List<String> toBeDeletedIdentifierList;
     private List<String> toBeFrozenIdentifierList;
-    private IJavetSanitizerVisitor visitor;
     private Function<JavetSanitizerOptions, IJavetSanitizerVisitor> visitorConstructor;
 
     /**
@@ -285,7 +284,6 @@ public class JavetSanitizerOptions {
         toBeDeletedIdentifierList = new ArrayList<>(DEFAULT_TO_BE_DELETED_OBJECT_LIST);
         toBeFrozenIdentifierList = new ArrayList<>(DEFAULT_TO_BE_FROZEN_OBJECT_LIST);
         sealed = false;
-        visitor = null;
         visitorConstructor = JavetSanitizerVisitor::new;
     }
 
@@ -437,14 +435,11 @@ public class JavetSanitizerOptions {
      * @since 0.7.0
      */
     public IJavetSanitizerVisitor getVisitor() throws JavetSanitizerException {
-        if (visitor == null) {
-            try {
-                visitor = visitorConstructor.apply(this);
-            } catch (Throwable t) {
-                throw JavetSanitizerException.visitorNotFound(visitorConstructor.toString(), t);
-            }
+        try {
+            return visitorConstructor.apply(this);
+        } catch (Throwable t) {
+            throw JavetSanitizerException.visitorNotFound(visitorConstructor.toString(), t);
         }
-        return visitor;
     }
 
     /**
