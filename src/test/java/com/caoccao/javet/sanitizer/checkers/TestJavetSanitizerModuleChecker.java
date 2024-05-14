@@ -202,6 +202,25 @@ public class TestJavetSanitizerModuleChecker extends BaseTestSuiteCheckers {
     }
 
     @Test
+    public void testShebang() throws JavetSanitizerException {
+        String codeString = "#!/bin/node\nconst a;";
+        assertException(
+                codeString,
+                JavetSanitizerError.InvalidNode,
+                "Shebang /bin/node is unexpected. Expecting Statement in Module.\n" +
+                        "Source: #!/bin/node\\nconst a;\n" +
+                        "Line: 1\n" +
+                        "Column: 1\n" +
+                        "Start: 0\n" +
+                        "End: 20");
+        JavetSanitizerOptions options = checker.getOptions().toClone()
+                .setShebangEnabled(true)
+                .seal();
+        checker.setOptions(options);
+        checker.check(codeString);
+    }
+
+    @Test
     public void testValidCases() throws JavetSanitizerException {
         List<String> statements = SimpleList.of(
                 "() => 1", "() => {}", "(a, b) => {}",

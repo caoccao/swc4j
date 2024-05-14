@@ -22,7 +22,7 @@ It was formerly built on top of [antlr4](https://github.com/antlr/antlr4) and [g
 
 Anonymous function checker provides the following checks to validate if a script is a valid anonymous function.
 
-1. `shebang` must not exist.
+1. Whether `shebang` exists or not per options.
 2. `body` has only 1 node.
 3. The only 1 node is an `ArrowExpr`.
 
@@ -30,7 +30,7 @@ Anonymous function checker provides the following checks to validate if a script
 
 Module checker provides the following checks to validate if a script is a valid module.
 
-1. `shebang` must not exist.
+1. Whether `shebang` exists or not per options.
 2. `body` is not empty.
 3. `export` is allowed or not per options.
 4. `import` is allowed or not per options.
@@ -39,7 +39,7 @@ Module checker provides the following checks to validate if a script is a valid 
 
 Module function checker provides the following checks to validate if a script is a valid module and only contains function declarations.
 
-1. `shebang` must not exist.
+1. Whether `shebang` exists or not per options.
 2. `body` is not empty.
 3. `export` is allowed or not per options.
 4. `import` is allowed or not per options.
@@ -49,7 +49,7 @@ Module function checker provides the following checks to validate if a script is
 
 Single statement checker provides the following checks to validate if a script only contains one statement.
 
-1. `shebang` must not exist.
+1. Whether `shebang` exists or not per options.
 2. `body` has only 1 node.
 3. The only 1 node is an `Stmt`.
 
@@ -57,7 +57,7 @@ Single statement checker provides the following checks to validate if a script o
 
 Statement list checker provides the following checks to validate if a script has at least one statement.
 
-1. `shebang` must not exist.
+1. Whether `shebang` exists or not per options.
 2. `body` has at least 1 node.
 3. The nodes are all `Stmt`.
 

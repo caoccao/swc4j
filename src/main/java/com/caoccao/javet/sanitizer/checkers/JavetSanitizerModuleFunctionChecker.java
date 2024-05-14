@@ -30,7 +30,7 @@ import java.util.Map;
 /**
  * Module function checker provides the following checks to validate
  * if a script is a valid module and only contains function declarations.
- * 1. `shebang` must not exist.
+ * 1. Whether `shebang` exists or not per options.
  * 2. `body` is not empty.
  * 3. `export` is allowed or not per options.
  * 4. `import` is allowed or not per options.
@@ -69,7 +69,7 @@ public class JavetSanitizerModuleFunctionChecker extends BaseJavetSanitizerModul
     @Override
     public void check(String codeString) throws JavetSanitizerException {
         super.check(codeString);
-        validateNoShebang(Swc4jAstType.getName(Swc4jAstFnDecl.class));
+        validateShebang(Swc4jAstFnDecl.class);
         validateBodyNotEmpty();
         for (ISwc4jAst node : program.getBody()) {
             if (node instanceof ISwc4jAstModuleDecl) {

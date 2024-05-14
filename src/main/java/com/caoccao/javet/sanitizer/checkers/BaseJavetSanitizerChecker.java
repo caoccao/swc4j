@@ -196,20 +196,6 @@ public abstract class BaseJavetSanitizerChecker implements IJavetSanitizerChecke
     }
 
     /**
-     * Validate no shebang.
-     *
-     * @param expectedNode the expected node
-     * @throws JavetSanitizerException the javet sanitizer exception
-     * @since 0.7.0
-     */
-    protected void validateNoShebang(String expectedNode) throws JavetSanitizerException {
-        if (program.getShebang().isPresent()) {
-            throw JavetSanitizerException.invalidNode(getName(), expectedNode, program.getShebang().get())
-                    .setCodeString(codeString).setNode(program);
-        }
-    }
-
-    /**
      * Validate node.
      *
      * @param <T>          the type parameter
@@ -249,5 +235,22 @@ public abstract class BaseJavetSanitizerChecker implements IJavetSanitizerChecke
                     .setCodeString(codeString).setNode(node);
         }
         return (T) node.as(expectedClass);
+    }
+
+    /**
+     * Validate shebang.
+     *
+     * @param expectedClass the expected class
+     * @throws JavetSanitizerException the javet sanitizer exception
+     * @since 0.7.0
+     */
+    protected void validateShebang(Class<? extends ISwc4jAst> expectedClass) throws JavetSanitizerException {
+        if (!options.isShebangEnabled() && program.getShebang().isPresent()) {
+            throw JavetSanitizerException.invalidNode(
+                            getName(),
+                            Swc4jAstType.getName(expectedClass),
+                            "Shebang " + program.getShebang().get())
+                    .setCodeString(codeString).setNode(program);
+        }
     }
 }

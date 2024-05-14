@@ -82,7 +82,7 @@ public class TestJavetSanitizerAnonymousFunctionChecker extends BaseTestSuiteChe
         assertException(
                 "#!/bin/node\n() => {}",
                 JavetSanitizerError.InvalidNode,
-                "/bin/node is unexpected. Expecting Arrow Expression in Anonymous Function.\n" +
+                "Shebang /bin/node is unexpected. Expecting Arrow Expression in Anonymous Function.\n" +
                         "Source: #!/bin/node\\n() => {}\n" +
                         "Line: 1\n" +
                         "Column: 1\n" +

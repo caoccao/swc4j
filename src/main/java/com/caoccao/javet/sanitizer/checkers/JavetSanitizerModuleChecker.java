@@ -26,7 +26,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 
 /**
  * Module checker provides the following basic checks to validate if a script is a valid module.
- * 1. `shebang` must not exist.
+ * 1. Whether `shebang` exists or not per options.
  * 2. `body` is not empty.
  * 3. `export` is allowed or not per options.
  * 4. `import` is allowed or not per options.
@@ -56,7 +56,7 @@ public class JavetSanitizerModuleChecker extends BaseJavetSanitizerModuleChecker
     @Override
     public void check(String codeString) throws JavetSanitizerException {
         super.check(codeString);
-        validateNoShebang(Swc4jAstType.getName(ISwc4jAstStmt.class));
+        validateShebang(ISwc4jAstStmt.class);
         validateBodyNotEmpty();
         for (ISwc4jAst node : program.getBody()) {
             if (node instanceof ISwc4jAstModuleDecl) {

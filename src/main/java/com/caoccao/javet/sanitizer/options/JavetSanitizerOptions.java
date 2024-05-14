@@ -248,6 +248,7 @@ public class JavetSanitizerOptions {
     private Set<String> reservedIdentifierSet;
     private Set<String> reservedMutableIdentifierSet;
     private boolean sealed;
+    private boolean shebangEnabled;
     private URL specifier;
     private List<String> toBeDeletedIdentifierList;
     private List<String> toBeFrozenIdentifierList;
@@ -279,6 +280,7 @@ public class JavetSanitizerOptions {
         reservedIdentifierMatcher = identifier -> false;
         reservedIdentifierSet = new HashSet<>(DEFAULT_RESERVED_IDENTIFIER_SET);
         reservedMutableIdentifierSet = new HashSet<>(DEFAULT_RESERVED_MUTABLE_IDENTIFIER_SET);
+        shebangEnabled = false;
         specifier = Swc4jOptions.DEFAULT_SPECIFIER;
         toBeDeletedIdentifierList = new ArrayList<>(DEFAULT_TO_BE_DELETED_OBJECT_LIST);
         toBeFrozenIdentifierList = new ArrayList<>(DEFAULT_TO_BE_FROZEN_OBJECT_LIST);
@@ -536,6 +538,16 @@ public class JavetSanitizerOptions {
     }
 
     /**
+     * Is shebang enabled.
+     *
+     * @return true : yes, false: no
+     * @since 0.8.0
+     */
+    public boolean isShebangEnabled() {
+        return shebangEnabled;
+    }
+
+    /**
      * Seal javet sanitizer option. After it is sealed, it will be immutable.
      *
      * @return the self
@@ -737,9 +749,23 @@ public class JavetSanitizerOptions {
     }
 
     /**
+     * Sets shebang enabled.
+     *
+     * @param shebangEnabled the shebang enabled
+     * @since 0.8.0
+     */
+    public JavetSanitizerOptions setShebangEnabled(boolean shebangEnabled) {
+        if (!sealed) {
+            this.shebangEnabled = shebangEnabled;
+        }
+        return this;
+    }
+
+    /**
      * Sets specifier.
      *
      * @param specifier the specifier
+     * @return the specifier
      * @since 0.7.0
      */
     public JavetSanitizerOptions setSpecifier(URL specifier) {
@@ -795,6 +821,7 @@ public class JavetSanitizerOptions {
         options.reservedIdentifierSet.addAll(reservedIdentifierSet);
         options.reservedMutableIdentifierSet.clear();
         options.reservedMutableIdentifierSet.addAll(reservedMutableIdentifierSet);
+        options.shebangEnabled = shebangEnabled;
         options.specifier = specifier;
         options.toBeDeletedIdentifierList.clear();
         options.toBeDeletedIdentifierList.addAll(toBeDeletedIdentifierList);

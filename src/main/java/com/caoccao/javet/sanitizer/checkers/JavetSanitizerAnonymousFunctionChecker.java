@@ -25,7 +25,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 
 /**
  * Anonymous function checker provides the following basic checks to validate if a script is a valid anonymous function.
- * 1. `shebang` must not exist.
+ * 1. Whether `shebang` exists or not per options.
  * 2. `body` has only 1 node.
  * 3. The only 1 node is an `ArrowExpr`.
  *
@@ -54,7 +54,7 @@ public class JavetSanitizerAnonymousFunctionChecker extends BaseJavetSanitizerCh
     @Override
     public void check(String codeString) throws JavetSanitizerException {
         super.check(codeString);
-        validateNoShebang(Swc4jAstType.getName(Swc4jAstArrowExpr.class));
+        validateShebang(Swc4jAstArrowExpr.class);
         validateBodyNotEmpty();
         validateBodySize(1);
         Swc4jAstExprStmt exprStmt = validateNode(program.getBody().get(0), Swc4jAstType.ExprStmt);

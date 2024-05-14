@@ -24,7 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 
 /**
  * Single statement checker provides the following checks to validate if a script only contains one statement.
- * 1. `shebang` must not exist.
+ * 1. Whether `shebang` exists or not per options.
  * 2. `body` has only 1 node.
  * 3. The only 1 node is an `Stmt`.
  *
@@ -53,7 +53,7 @@ public class JavetSanitizerSingleStatementChecker extends BaseJavetSanitizerChec
     @Override
     public void check(String codeString) throws JavetSanitizerException {
         super.check(codeString);
-        validateNoShebang(Swc4jAstType.getName(ISwc4jAstStmt.class));
+        validateShebang(ISwc4jAstStmt.class);
         validateBodyNotEmpty();
         validateBodySize(1);
         validateNode(program.getBody().get(0), ISwc4jAstStmt.class);

@@ -25,7 +25,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 
 /**
  * Statement list checker provides the following checks to validate if a script has at least one statement.
- * 1. `shebang` must not exist.
+ * 1. Whether `shebang` exists or not per options.
  * 2. `body` has at least 1 node.
  * 3. The nodes are all `Stmt`.
  *
@@ -54,7 +54,7 @@ public class JavetSanitizerStatementListChecker extends BaseJavetSanitizerChecke
     @Override
     public void check(String codeString) throws JavetSanitizerException {
         super.check(codeString);
-        validateNoShebang(Swc4jAstType.getName(ISwc4jAstStmt.class));
+        validateShebang(ISwc4jAstStmt.class);
         validateBodyNotEmpty();
         for (ISwc4jAst node : program.getBody()) {
             validateNode(node, ISwc4jAstStmt.class);
