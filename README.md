@@ -14,7 +14,7 @@
 * JavaScript, TypeScript, JSX, TSX, etc.
 * [Parse](docs/parse.md)
   * [AST](docs/features/ast.md)
-    * Visitor
+    * [Visitor](docs/features/ast_visitor.md)
     * Plugin
   * Comments
   * Tokens
@@ -129,7 +129,7 @@ try {
 ## Docs
 
 * [Tutorials](docs/tutorials/)
-* [Release Notes](docs/RELEASE_NOTES.md)
+* [Release Notes](docs/release_notes.md)
 
 ## Blog
 

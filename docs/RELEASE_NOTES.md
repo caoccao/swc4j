@@ -3,8 +3,12 @@
 ## 0.7.0
 
 * Upgraded deno_ast to v0.38.1
-* Added anonymous function checker
-* Added single statement checker
+* Added Sanitizer
+  * Added anonymous function checker
+  * Added module checker
+  * Added module function checker
+  * Added single statement checker
+  * Added statement list checker
 
 ## 0.6.0
 
