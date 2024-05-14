@@ -85,4 +85,3 @@ The following AST nodes are supported.
 |                          |                    | TsTypeQuery              |               |
 |                          |                    | TsTypeRef                |               |
 |                          |                    | TsUnionType              |               |
-

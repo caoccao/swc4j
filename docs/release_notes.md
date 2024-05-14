@@ -9,6 +9,7 @@
   * Added module function checker
   * Added single statement checker
   * Added statement list checker
+* Fix span for BindingIdent
 
 ## 0.6.0
 
