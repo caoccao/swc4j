@@ -78,6 +78,18 @@ public interface ISwc4jAst {
     Swc4jAstType getType();
 
     /**
+     * Replace the old node with the new node.
+     *
+     * @param oldNode the old node
+     * @param newNode the new node
+     * @return true : replaced, false : not replaced
+     * @since 0.8.0
+     */
+    default boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
+    /**
      * Sets parent.
      *
      * @param parent the parent

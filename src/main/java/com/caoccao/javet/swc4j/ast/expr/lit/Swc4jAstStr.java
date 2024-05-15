@@ -68,6 +68,11 @@ public class Swc4jAstStr
         return value;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
     public Swc4jAstStr setRaw(String raw) {
         this.raw = Optional.ofNullable(raw);
         return this;

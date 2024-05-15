@@ -137,6 +137,29 @@ public abstract class Swc4jAst implements ISwc4jAst {
                                         lines,
                                         String.format("%s[%d]", field.getName(), i),
                                         newIndent);
+                            } else if (o instanceof Optional) {
+                                Optional<?> optionalValue = (Optional<?>) o;
+                                if (optionalValue.isPresent()) {
+                                    value = optionalValue.get();
+                                    if (value instanceof Swc4jAst) {
+                                        ((Swc4jAst) value).toDebugString(
+                                                lines,
+                                                String.format("%s[%d]", field.getName(), i),
+                                                newIndent);
+                                    } else {
+                                        value = String.valueOf(value);
+                                        lines.add(String.format("%s%s[%d]? = %s",
+                                                StringUtils.repeat(INDENT_STRING, newIndent),
+                                                field.getName(),
+                                                i,
+                                                value));
+                                    }
+                                } else {
+                                    lines.add(String.format("%s%s[%d]? = null",
+                                            StringUtils.repeat(INDENT_STRING, newIndent),
+                                            field.getName(),
+                                            i));
+                                }
                             } else {
                                 value = String.valueOf(o);
                                 lines.add(String.format("%s%s[%d] = %s",
@@ -152,7 +175,26 @@ public abstract class Swc4jAst implements ISwc4jAst {
                         if (optionalValue.isPresent()) {
                             value = optionalValue.get();
                             if (value instanceof Swc4jAst) {
-                                ((Swc4jAst) value).toDebugString(lines, field.getName(), newIndent);
+                                ((Swc4jAst) value).toDebugString(lines, field.getName() + "?", newIndent);
+                            } else if (value instanceof List) {
+                                List<?> listValue = (List<?>) value;
+                                int i = 0;
+                                for (Object o : listValue) {
+                                    if (o instanceof Swc4jAst) {
+                                        ((Swc4jAst) o).toDebugString(
+                                                lines,
+                                                String.format("%s?[%d]", field.getName(), i),
+                                                newIndent);
+                                    } else {
+                                        value = String.valueOf(o);
+                                        lines.add(String.format("%s%s?[%d] = %s",
+                                                StringUtils.repeat(INDENT_STRING, newIndent),
+                                                field.getName(),
+                                                i,
+                                                value));
+                                    }
+                                    ++i;
+                                }
                             } else {
                                 lines.add(String.format("%s%s? = %s",
                                         StringUtils.repeat(INDENT_STRING, newIndent),
@@ -160,10 +202,9 @@ public abstract class Swc4jAst implements ISwc4jAst {
                                         value));
                             }
                         } else {
-                            lines.add(String.format("%s%s? = %s",
+                            lines.add(String.format("%s%s? = null",
                                     StringUtils.repeat(INDENT_STRING, newIndent),
-                                    field.getName(),
-                                    "null"));
+                                    field.getName()));
                         }
                     } else if (value instanceof Swc4jAst) {
                         ((Swc4jAst) value).toDebugString(lines, field.getName(), newIndent);

@@ -80,6 +80,11 @@ public class Swc4jAstNumber
         return ((Double) value).longValue();
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
     public Swc4jAstNumber setRaw(String raw) {
         this.raw = Optional.ofNullable(raw);
         return this;

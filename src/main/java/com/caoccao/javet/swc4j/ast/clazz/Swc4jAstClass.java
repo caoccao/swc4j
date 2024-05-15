@@ -66,9 +66,11 @@ public class Swc4jAstClass
         setSuperTypeParams(superTypeParams);
         setTypeParams(typeParams);
         this._implements = AssertionUtils.notNull(_implements, "Implements");
+        this._implements.forEach(node -> node.setParent(this));
         this.body = AssertionUtils.notNull(body, "Body");
+        this.body.forEach(node -> node.setParent(this));
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
-        updateParent();
+        this.decorators.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -122,6 +124,53 @@ public class Swc4jAstClass
         return _abstract;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!_implements.isEmpty() && newNode instanceof Swc4jAstTsExprWithTypeArgs) {
+            final int size = _implements.size();
+            for (int i = 0; i < size; i++) {
+                if (_implements.get(i) == oldNode) {
+                    _implements.set(i, (Swc4jAstTsExprWithTypeArgs) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (!body.isEmpty() && newNode instanceof ISwc4jAstClassMember) {
+            final int size = body.size();
+            for (int i = 0; i < size; i++) {
+                if (body.get(i) == oldNode) {
+                    body.set(i, (ISwc4jAstClassMember) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (!decorators.isEmpty() && newNode instanceof Swc4jAstDecorator) {
+            final int size = decorators.size();
+            for (int i = 0; i < size; i++) {
+                if (decorators.get(i) == oldNode) {
+                    decorators.set(i, (Swc4jAstDecorator) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (superClass.isPresent() && superClass.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+            setSuperClass((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (superTypeParams.isPresent() && superTypeParams.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamInstantiation)) {
+            setSuperTypeParams((Swc4jAstTsTypeParamInstantiation) newNode);
+            return true;
+        }
+        if (typeParams.isPresent() && typeParams.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamDecl)) {
+            setTypeParams((Swc4jAstTsTypeParamDecl) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstClass setAbstract(boolean _abstract) {
         this._abstract = _abstract;
         return this;
@@ -129,16 +178,19 @@ public class Swc4jAstClass
 
     public Swc4jAstClass setSuperClass(ISwc4jAstExpr superClass) {
         this.superClass = Optional.ofNullable(superClass);
+        this.superClass.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstClass setSuperTypeParams(Swc4jAstTsTypeParamInstantiation superTypeParams) {
         this.superTypeParams = Optional.ofNullable(superTypeParams);
+        this.superTypeParams.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstClass setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
+        this.typeParams.ifPresent(node -> node.setParent(this));
         return this;
     }
 

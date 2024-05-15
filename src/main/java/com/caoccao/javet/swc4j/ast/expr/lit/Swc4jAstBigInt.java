@@ -81,6 +81,11 @@ public class Swc4jAstBigInt
         return value;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
     public Swc4jAstBigInt setRaw(String raw) {
         this.raw = Optional.ofNullable(raw);
         value = StringUtils.isEmpty(raw)

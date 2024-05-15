@@ -45,7 +45,6 @@ public class Swc4jAstYieldExpr
         super(span);
         setArg(arg);
         setDelegate(delegate);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -70,8 +69,20 @@ public class Swc4jAstYieldExpr
         return delegate;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (arg.isPresent() && arg.get() == oldNode) {
+            if (newNode == null || newNode instanceof ISwc4jAstExpr) {
+                setArg((ISwc4jAstExpr) newNode);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Swc4jAstYieldExpr setArg(ISwc4jAstExpr arg) {
         this.arg = Optional.ofNullable(arg);
+        this.arg.ifPresent(node -> node.setParent(this));
         return this;
     }
 

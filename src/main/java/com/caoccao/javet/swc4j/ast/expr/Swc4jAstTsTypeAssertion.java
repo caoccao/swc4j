@@ -51,7 +51,6 @@ public class Swc4jAstTsTypeAssertion
         super(span);
         setExpr(expr);
         setTypeAnn(typeAnn);
-        updateParent();
     }
 
     @Override
@@ -74,13 +73,27 @@ public class Swc4jAstTsTypeAssertion
         return typeAnn;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (expr == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setExpr((ISwc4jAstExpr) newNode);
+            return true;
+        } else if (typeAnn == oldNode && newNode instanceof ISwc4jAstTsType) {
+            setTypeAnn((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsTypeAssertion setExpr(ISwc4jAstExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
+        this.expr.setParent(this);
         return this;
     }
 
     public Swc4jAstTsTypeAssertion setTypeAnn(ISwc4jAstTsType typeAnn) {
         this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
+        this.typeAnn.setParent(this);
         return this;
     }
 

@@ -49,7 +49,6 @@ public class Swc4jAstUnaryExpr
         super(span);
         setArg(arg);
         setOp(op);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -72,8 +71,18 @@ public class Swc4jAstUnaryExpr
         return Swc4jAstType.UnaryExpr;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (arg == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setArg((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstUnaryExpr setArg(ISwc4jAstExpr arg) {
         this.arg = AssertionUtils.notNull(arg, "Arg");
+        this.arg.setParent(this);
         return this;
     }
 

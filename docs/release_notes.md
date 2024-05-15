@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.8.0
+
+* Added `replaceNode()` to `ISwc4jAst`
+
 ## 0.7.0
 
 * Upgraded deno_ast to v0.38.1

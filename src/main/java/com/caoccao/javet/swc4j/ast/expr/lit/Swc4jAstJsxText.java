@@ -66,6 +66,11 @@ public class Swc4jAstJsxText
         return Swc4jAstType.JsxText;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
     @Jni2RustMethod
     public String getValue() {
         return value;

@@ -75,7 +75,7 @@ public class Tutorial06Plugin {
                     // Add the plugin host
                     .setPluginHost(pluginHost)
                     .setSourceMap(Swc4jSourceMapOption.None);
-            // Parse the code.
+            // Transpile the code.
             Swc4jTranspileOutput output = swc4j.transpile(code, options);
             // Print the transpiled code.
             System.out.println("/*********************************************");
@@ -93,7 +93,7 @@ public class Tutorial06Plugin {
                     // Add the plugin host
                     .setPluginHost(pluginHost)
                     .setSourceMap(Swc4jSourceMapOption.None);
-            // Parse the code.
+            // Transform the code.
             Swc4jTransformOutput output = swc4j.transform(code, options);
             // Print the minified code.
             System.out.println("/*********************************************");

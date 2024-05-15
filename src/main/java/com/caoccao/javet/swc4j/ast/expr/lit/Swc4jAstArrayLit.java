@@ -32,7 +32,6 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstArrayLit
@@ -45,10 +44,13 @@ public class Swc4jAstArrayLit
             List<Swc4jAstExprOrSpread> elems,
             Swc4jSpan span) {
         super(span);
-        this.elems = AssertionUtils.notNull(elems, "Elems").stream()
+        this.elems = SimpleList.of();
+        AssertionUtils.notNull(elems, "Elems").stream()
                 .map(Optional::ofNullable)
-                .collect(Collectors.toList());
-        updateParent();
+                .forEach(elem -> {
+                    elem.ifPresent(node -> node.setParent(this));
+                    this.elems.add(elem);
+                });
     }
 
     @Override
@@ -69,6 +71,23 @@ public class Swc4jAstArrayLit
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ArrayLit;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!elems.isEmpty() && (newNode == null || newNode instanceof Swc4jAstExprOrSpread)) {
+            final int size = elems.size();
+            for (int i = 0; i < size; i++) {
+                Optional<Swc4jAstExprOrSpread> optionalOldElem = elems.get(i);
+                if (optionalOldElem.isPresent() && optionalOldElem.get() == oldNode) {
+                    Optional<Swc4jAstExprOrSpread> optionalNewElem = Optional.ofNullable((Swc4jAstExprOrSpread) newNode);
+                    optionalNewElem.ifPresent(node -> node.setParent(this));
+                    elems.set(i, optionalNewElem);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

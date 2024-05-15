@@ -75,7 +75,7 @@ public class Swc4jAstAutoAccessor
         setTypeAnn(typeAnn);
         setValue(value);
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
-        updateParent();
+        this.decorators.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -137,6 +137,33 @@ public class Swc4jAstAutoAccessor
         return _static;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (key == oldNode && newNode instanceof ISwc4jAstKey) {
+            setKey((ISwc4jAstKey) newNode);
+            return true;
+        }
+        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+            setTypeAnn((Swc4jAstTsTypeAnn) newNode);
+            return true;
+        }
+        if (value.isPresent() && value.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+            setValue((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (!decorators.isEmpty() && newNode instanceof Swc4jAstDecorator) {
+            final int size = decorators.size();
+            for (int i = 0; i < size; i++) {
+                if (decorators.get(i) == oldNode) {
+                    decorators.set(i, (Swc4jAstDecorator) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public Swc4jAstAutoAccessor setAbstract(boolean _abstract) {
         this._abstract = _abstract;
         return this;
@@ -154,6 +181,7 @@ public class Swc4jAstAutoAccessor
 
     public Swc4jAstAutoAccessor setKey(ISwc4jAstKey key) {
         this.key = AssertionUtils.notNull(key, "Key");
+        this.key.setParent(this);
         return this;
     }
 
@@ -169,11 +197,13 @@ public class Swc4jAstAutoAccessor
 
     public Swc4jAstAutoAccessor setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
+        this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstAutoAccessor setValue(ISwc4jAstExpr value) {
         this.value = Optional.ofNullable(value);
+        this.value.ifPresent(node -> node.setParent(this));
         return this;
     }
 

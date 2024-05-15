@@ -44,7 +44,7 @@ public class Swc4jAstObjectLit
             Swc4jSpan span) {
         super(span);
         this.props = AssertionUtils.notNull(props, "Props");
-        updateParent();
+        props.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -60,6 +60,21 @@ public class Swc4jAstObjectLit
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.ObjectLit;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!props.isEmpty() && newNode instanceof ISwc4jAstPropOrSpread) {
+            final int size = props.size();
+            for (int i = 0; i < size; i++) {
+                if (props.get(i) == oldNode) {
+                    newNode.setParent(this);
+                    props.set(i, (ISwc4jAstPropOrSpread) newNode);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

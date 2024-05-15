@@ -70,6 +70,11 @@ public class Swc4jAstRegex
         return Swc4jAstType.Regex;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
     public Swc4jAstRegex setExp(String exp) {
         this.exp = AssertionUtils.notNull(exp, "Exp");
         return this;

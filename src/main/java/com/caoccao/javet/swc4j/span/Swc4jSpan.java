@@ -28,6 +28,12 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 @Jni2RustClass(filePath = Jni2RustFilePath.SpanUtils)
 public class Swc4jSpan {
     /**
+     * The constant DUMMY.
+     *
+     * @since 0.8.0
+     */
+    public static final Swc4jSpan DUMMY = new Swc4jSpan();
+    /**
      * The Column.
      *
      * @since 0.3.0

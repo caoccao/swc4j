@@ -44,6 +44,10 @@ public class Swc4jAstBool
         setValue(value);
     }
 
+    public static Swc4jAstBool create(boolean value) {
+        return new Swc4jAstBool(value, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;
@@ -57,6 +61,11 @@ public class Swc4jAstBool
     @Jni2RustMethod
     public boolean isValue() {
         return value;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
     }
 
     public Swc4jAstBool setValue(boolean value) {
