@@ -20,13 +20,34 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 
 public class Swc4jPluginHostJsFuckDecoder implements ISwc4jPluginHost {
+    protected int maxIteration;
+
+    public Swc4jPluginHostJsFuckDecoder() {
+        this(Integer.MAX_VALUE);
+    }
+
+    public Swc4jPluginHostJsFuckDecoder(int maxIteration) {
+        this.maxIteration = maxIteration;
+    }
+
+    public int getMaxIteration() {
+        return maxIteration;
+    }
+
     @Override
     public boolean process(ISwc4jAstProgram<?> program) {
         Swc4jPluginVisitorJsFuckDecoder jsFuckDecoder = new Swc4jPluginVisitorJsFuckDecoder();
-        do {
+        for (int i = 0; i < maxIteration; i++) {
             jsFuckDecoder.reset();
             program.visit(jsFuckDecoder);
-        } while (jsFuckDecoder.getCount() > 0);
+            if (jsFuckDecoder.getCount() == 0) {
+                break;
+            }
+        }
         return true;
+    }
+
+    public void setMaxIteration(int maxIteration) {
+        this.maxIteration = maxIteration;
     }
 }

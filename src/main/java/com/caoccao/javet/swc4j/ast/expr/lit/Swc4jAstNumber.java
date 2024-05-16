@@ -23,14 +23,23 @@ import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
+import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstNumber
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
+    protected static final Pattern PATTERN_ALL_ZEROS =
+            Pattern.compile("^0+$", Pattern.CASE_INSENSITIVE);
+    protected static final Pattern PATTERN_DECIMAL_ZEROS =
+            Pattern.compile("^(\\d+)\\.0*$", Pattern.CASE_INSENSITIVE);
+    protected static final Pattern PATTERN_SCIENTIFIC_NOTATION =
+            Pattern.compile("^(\\d+)\\.(\\d*)e([\\+\\-]?)(\\d+)$", Pattern.CASE_INSENSITIVE);
     @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
     protected double value;
@@ -50,11 +59,30 @@ public class Swc4jAstNumber
     }
 
     public static Swc4jAstNumber create(double value) {
-        return new Swc4jAstNumber(value, Double.toString(value), Swc4jSpan.DUMMY);
+        return new Swc4jAstNumber(value, getNormalizedNumberString(Double.toString(value)), Swc4jSpan.DUMMY);
     }
 
     public static Swc4jAstNumber create(double value, String raw) {
         return new Swc4jAstNumber(value, raw, Swc4jSpan.DUMMY);
+    }
+
+    protected static String getNormalizedNumberString(String raw) {
+        Matcher matcher = PATTERN_SCIENTIFIC_NOTATION.matcher(raw);
+        if (matcher.matches()) {
+            String sign = StringUtils.isEmpty(matcher.group(3)) ? "+" : matcher.group(3);
+            if (StringUtils.isEmpty(matcher.group(2))) {
+                return matcher.group(1) + "e" + sign + matcher.group(4);
+            } else if (PATTERN_ALL_ZEROS.matcher(matcher.group(2)).matches()) {
+                return matcher.group(1) + "e" + sign + matcher.group(4);
+            } else {
+                return matcher.group(1) + "." + matcher.group(2) + "e" + sign + matcher.group(4);
+            }
+        }
+        matcher = PATTERN_DECIMAL_ZEROS.matcher(raw);
+        if (matcher.matches()) {
+            return matcher.group(1);
+        }
+        return raw;
     }
 
     @Override
@@ -94,7 +122,7 @@ public class Swc4jAstNumber
 
     @Override
     public String asString() {
-        return toString();
+        return getNormalizedNumberString(Double.toString(value));
     }
 
     @Override

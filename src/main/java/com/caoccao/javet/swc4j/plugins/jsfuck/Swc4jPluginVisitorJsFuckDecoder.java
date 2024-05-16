@@ -31,12 +31,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
-    protected static final Pattern PATTERN_SCIENTIFIC_NOTATION =
-            Pattern.compile("^(\\d+)e(\\d+)$", Pattern.CASE_INSENSITIVE);
     protected int count;
 
     public Swc4jPluginVisitorJsFuckDecoder() {
@@ -60,21 +55,29 @@ public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
         Swc4jAstType rightType = right.getType();
         switch (node.getOp()) {
             case Add:
-                if ((leftType == Swc4jAstType.Bool || leftType == Swc4jAstType.Number) &&
-                        (rightType == Swc4jAstType.Bool || rightType == Swc4jAstType.Number)) {
-                    int value = left.as(ISwc4jAstCoercionPrimitive.class).asInt() + right.as(ISwc4jAstCoercionPrimitive.class).asInt();
+                if ((leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.Number) ||
+                        (leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.Bool) ||
+                        (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Bool) ||
+                        (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Number)) {
+                    double value = left.as(ISwc4jAstCoercionPrimitive.class).asDouble() + right.as(ISwc4jAstCoercionPrimitive.class).asDouble();
                     newNode = Swc4jAstNumber.create(value);
                 } else if ((leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.ArrayLit) ||
                         (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Bool) ||
                         (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.ArrayLit) ||
                         (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.ArrayLit) ||
                         (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Str) ||
-                        (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.ArrayLit) ||
-                        (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Number) ||
-                        (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Str) ||
-                        (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Str) ||
-                        (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Number)) {
+                        (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Str)) {
                     String value = left.as(ISwc4jAstCoercionPrimitive.class).asString() + right.as(ISwc4jAstCoercionPrimitive.class).asString();
+                    newNode = Swc4jAstStr.create(value);
+                } else if ((leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Number) ||
+                        (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Number)) {
+                    String value = left.as(ISwc4jAstCoercionPrimitive.class).asString()
+                            + right.as(Swc4jAstNumber.class).asString();
+                    newNode = Swc4jAstStr.create(value);
+                } else if ((leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Str) ||
+                        (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.ArrayLit)) {
+                    String value = left.as(Swc4jAstNumber.class).asString()
+                            + right.as(ISwc4jAstCoercionPrimitive.class).asString();
                     newNode = Swc4jAstStr.create(value);
                 }
                 break;
@@ -136,19 +139,14 @@ public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
                         break;
                     case Number: {
                         Swc4jAstNumber number = arg.as(Swc4jAstNumber.class);
-                        newNode = Swc4jAstNumber.create(number.getValue(), number.getRaw().orElse(null));
+                        newNode = Swc4jAstNumber.create(number.getValue());
                     }
                     break;
                     case Str: {
                         Swc4jAstStr str = arg.as(Swc4jAstStr.class);
                         try {
                             double value = Double.parseDouble(str.getValue());
-                            String raw = str.getValue();
-                            Matcher matcher = PATTERN_SCIENTIFIC_NOTATION.matcher(raw);
-                            if (matcher.matches()) {
-                                raw = matcher.group(1) + "e+" + matcher.group(2);
-                            }
-                            newNode = Swc4jAstNumber.create(value, raw);
+                            newNode = Swc4jAstNumber.create(value);
                         } catch (Throwable t) {
                             newNode = Swc4jAstNumber.create(Double.NaN);
                         }

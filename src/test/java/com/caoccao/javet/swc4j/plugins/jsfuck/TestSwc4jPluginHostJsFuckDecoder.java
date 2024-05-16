@@ -32,18 +32,20 @@ public class TestSwc4jPluginHostJsFuckDecoder extends BaseTestSuite {
     @Test
     public void test() throws Swc4jCoreException {
         Map<String, String> testCaseMap = new LinkedHashMap<>();
-        testCaseMap.put("\"a\";", "(![]+[])[+!+[]]");
-        testCaseMap.put("\"1+1\";", "[+!+[]]+(+(+!+[]+(!+[]+[])[!+[]+!+[]+!+[]]+[+!+[]]+[+[]]+[+[]])+[])[!+[]+!+[]]+[+!+[]]");
-        // TODO
-        // testCaseMap.put("\"1-1\";", "[+!+[]]+(+((+(+!+[]+[+!+[]]+(!![]+[])[!+[]+!+[]+!+[]]+[!+[]+!+[]]+[+[]])+[])[+!+[]]+[+[]+[+[]]+[+[]]+[+[]]+[+[]]+[+[]]+[+!+[]]])+[])[!+[]+!+[]]+[+!+[]]");
+        testCaseMap.put("(![]+[])[+!+[]]", "\"a\";");
+        testCaseMap.put("+'.0000001'", "1e-7;");
+        testCaseMap.put("+((11e20+[])[1]+[\"0000001\"])", "1e-7;");
+        testCaseMap.put("[+!+[]]+(+(+!+[]+(!+[]+[])[!+[]+!+[]+!+[]]+[+!+[]]+[+[]]+[+[]])+[])[!+[]+!+[]]+[+!+[]]", "\"1+1\";");
+        testCaseMap.put("(+((+(+!+[]+[+!+[]]+(!![]+[])[!+[]+!+[]+!+[]]+[!+[]+!+[]]+[+[]])+[])[+!+[]]+[+[]+[+[]]+[+[]]+[+[]]+[+[]]+[+[]]+[+!+[]]])+[])[!+[]+!+[]]", "\"-\";");
+        testCaseMap.put("[+!+[]]+(+((+(+!+[]+[+!+[]]+(!![]+[])[!+[]+!+[]+!+[]]+[!+[]+!+[]]+[+[]])+[])[+!+[]]+[+[]+[+[]]+[+[]]+[+[]]+[+[]]+[+[]]+[+!+[]]])+[])[!+[]+!+[]]+[+!+[]]", "\"1-1\";");
         ISwc4jPluginHost pluginHost = new Swc4jPluginHostJsFuckDecoder();
         jsScriptTransformOptions
                 .setPluginHost(pluginHost)
                 .setInlineSources(false)
                 .setSourceMap(Swc4jSourceMapOption.None);
         for (Map.Entry<String, String> entry : testCaseMap.entrySet()) {
-            Swc4jTransformOutput output = swc4j.transform(entry.getValue(), jsScriptTransformOptions);
-            assertEquals(entry.getKey(), output.getCode());
+            Swc4jTransformOutput output = swc4j.transform(entry.getKey(), jsScriptTransformOptions);
+            assertEquals(entry.getValue(), output.getCode(), entry.getKey());
         }
     }
 }
