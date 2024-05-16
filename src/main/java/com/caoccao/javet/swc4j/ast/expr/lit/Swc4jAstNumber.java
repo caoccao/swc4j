@@ -30,7 +30,7 @@ import java.util.Optional;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstNumber
         extends Swc4jAst
-        implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstPrimitiveCoercion {
+        implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
     @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
     protected double value;
@@ -51,6 +51,10 @@ public class Swc4jAstNumber
 
     public static Swc4jAstNumber create(double value) {
         return new Swc4jAstNumber(value, Double.toString(value), Swc4jSpan.DUMMY);
+    }
+
+    public static Swc4jAstNumber create(double value, String raw) {
+        return new Swc4jAstNumber(value, raw, Swc4jSpan.DUMMY);
     }
 
     @Override

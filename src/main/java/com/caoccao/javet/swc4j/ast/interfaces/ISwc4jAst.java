@@ -40,7 +40,7 @@ public interface ISwc4jAst {
      * @since 0.4.0
      */
     @SuppressWarnings("unchecked")
-    default <T extends ISwc4jAst> T as(Class<T> clazz) {
+    default <T> T as(Class<T> clazz) {
         return clazz.isAssignableFrom(getClass()) ? (T) this : null;
     }
 

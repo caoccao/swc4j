@@ -88,6 +88,13 @@ public class Swc4jAstExprOrSpread
     }
 
     @Override
+    public String toString() {
+        String str = spread.map(span -> "...").orElse("");
+        str += expr.toString();
+        return str;
+    }
+
+    @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
         switch (visitor.visitExprOrSpread(this)) {
             case Error:

@@ -20,7 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPrimitiveCoercion;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCoercionPrimitive;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -34,7 +34,7 @@ import java.util.List;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstBool
         extends Swc4jAst
-        implements ISwc4jAstLit, ISwc4jAstTsLit, ISwc4jAstPrimitiveCoercion {
+        implements ISwc4jAstLit, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
     protected boolean value;
 
     @Jni2RustMethod

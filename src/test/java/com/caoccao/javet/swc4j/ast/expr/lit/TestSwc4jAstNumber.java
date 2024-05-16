@@ -28,6 +28,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
     @Test
+    public void testCoercion() {
+        assertEquals("0", Swc4jAstNumber.create(0).getRaw().get());
+        assertEquals("1", Swc4jAstNumber.create(1).getRaw().get());
+        assertEquals("1.1", Swc4jAstNumber.create(1.1D).getRaw().get());
+        assertEquals(1, Swc4jAstNumber.create(1.1D).asInt());
+        assertEquals("NaN", Swc4jAstNumber.create(Double.NaN).getRaw().get());
+        assertEquals(0, Swc4jAstNumber.create(Double.NaN).asInt());
+    }
+
+    @Test
     public void testDouble() throws Swc4jCoreException {
         String code = "12.34";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);

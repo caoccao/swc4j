@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.interfaces;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
@@ -69,4 +70,11 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 public interface ISwc4jAstExpr
         extends ISwc4jAstVarDeclOrExpr, ISwc4jAstPat, ISwc4jAstJsxExpr, ISwc4jAstCallee, ISwc4jAstBlockStmtOrExpr,
         ISwc4jAstAssignTarget {
+    default ISwc4jAstExpr unParenExpr() {
+        ISwc4jAstExpr expr = this;
+        while (expr.getType() == Swc4jAstType.ParenExpr) {
+            expr = expr.as(Swc4jAstParenExpr.class).getExpr();
+        }
+        return expr;
+    }
 }

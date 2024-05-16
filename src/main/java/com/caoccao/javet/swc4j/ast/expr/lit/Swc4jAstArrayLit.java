@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCoercionPrimitive;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstArrayLit
         extends Swc4jAst
-        implements ISwc4jAstExpr {
+        implements ISwc4jAstExpr, ISwc4jAstCoercionPrimitive {
     protected final List<Optional<Swc4jAstExprOrSpread>> elems;
 
     @Jni2RustMethod
@@ -49,6 +50,56 @@ public class Swc4jAstArrayLit
                 .map(Optional::ofNullable)
                 .collect(Collectors.toList());
         this.elems.stream().filter(Optional::isPresent).map(Optional::get).forEach(node -> node.setParent(this));
+    }
+
+    @Override
+    public boolean asBoolean() {
+        return false;
+    }
+
+    @Override
+    public byte asByte() {
+        return Double.valueOf(asDouble()).byteValue();
+    }
+
+    @Override
+    public double asDouble() {
+        if (!elems.isEmpty()) {
+            if (elems.size() == 1) {
+                return elems.get(0)
+                        .map(Swc4jAstExprOrSpread::getExpr)
+                        .filter(n -> n.getType() == Swc4jAstType.Number)
+                        .map(n -> (Swc4jAstNumber) n)
+                        .map(Swc4jAstNumber::getValue)
+                        .orElse(Double.NaN);
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    public float asFloat() {
+        return Double.valueOf(asDouble()).floatValue();
+    }
+
+    @Override
+    public int asInt() {
+        return Double.valueOf(asDouble()).intValue();
+    }
+
+    @Override
+    public long asLong() {
+        return Double.valueOf(asDouble()).longValue();
+    }
+
+    @Override
+    public short asShort() {
+        return Double.valueOf(asDouble()).shortValue();
+    }
+
+    @Override
+    public String asString() {
+        return toString();
     }
 
     @Override
@@ -86,6 +137,15 @@ public class Swc4jAstArrayLit
             }
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return elems.stream()
+                .map(optionalElem -> optionalElem
+                        .map(Swc4jAstExprOrSpread::toString)
+                        .orElse(""))
+                .collect(Collectors.joining(","));
     }
 
     @Override

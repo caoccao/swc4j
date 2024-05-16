@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.interfaces;
+package com.caoccao.javet.swc4j.plugins.jsfuck;
 
-public interface ISwc4jAstPrimitiveCoercion {
-    boolean asBoolean();
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
+import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 
-    byte asByte();
-
-    double asDouble();
-
-    float asFloat();
-
-    int asInt();
-
-    long asLong();
-
-    short asShort();
-
-    String asString();
+public class Swc4jPluginHostJsFuckDecoder implements ISwc4jPluginHost {
+    @Override
+    public boolean process(ISwc4jAstProgram<?> program) {
+        Swc4jPluginVisitorJsFuckDecoder jsFuckDecoder = new Swc4jPluginVisitorJsFuckDecoder();
+        do {
+            jsFuckDecoder.reset();
+            program.visit(jsFuckDecoder);
+        } while (jsFuckDecoder.getCount() > 0);
+        return true;
+    }
 }
