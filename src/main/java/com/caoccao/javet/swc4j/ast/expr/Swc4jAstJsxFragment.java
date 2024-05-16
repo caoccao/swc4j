@@ -53,7 +53,7 @@ public class Swc4jAstJsxFragment
         setClosing(closing);
         setOpening(opening);
         this.children = AssertionUtils.notNull(children, "Children");
-        updateParent();
+        this.children.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -84,13 +84,38 @@ public class Swc4jAstJsxFragment
         return Swc4jAstType.JsxFragment;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!children.isEmpty() && newNode instanceof ISwc4jAstJsxElementChild) {
+            final int size = children.size();
+            for (int i = 0; i < size; i++) {
+                if (children.get(i) == oldNode) {
+                    children.set(i, (ISwc4jAstJsxElementChild) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (closing == oldNode && newNode instanceof Swc4jAstJsxClosingFragment) {
+            setClosing((Swc4jAstJsxClosingFragment) newNode);
+            return true;
+        }
+        if (opening == oldNode && newNode instanceof Swc4jAstJsxOpeningFragment) {
+            setOpening((Swc4jAstJsxOpeningFragment) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstJsxFragment setClosing(Swc4jAstJsxClosingFragment closing) {
         this.closing = AssertionUtils.notNull(closing, "Closing");
+        this.closing.setParent(this);
         return this;
     }
 
     public Swc4jAstJsxFragment setOpening(Swc4jAstJsxOpeningFragment opening) {
         this.opening = AssertionUtils.notNull(opening, "Opening");
+        this.opening.setParent(this);
         return this;
     }
 

@@ -19,11 +19,11 @@ package com.caoccao.javet.swc4j.ast.stmt;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstDecl;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
@@ -53,7 +53,6 @@ public class Swc4jAstClassDecl
         setClazz(clazz);
         setDeclare(declare);
         setIdent(ident);
-        updateParent();
     }
 
     @Override
@@ -81,8 +80,22 @@ public class Swc4jAstClassDecl
         return declare;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (clazz == oldNode && newNode instanceof Swc4jAstClass) {
+            setClazz((Swc4jAstClass) newNode);
+            return true;
+        }
+        if (ident == oldNode && newNode instanceof Swc4jAstIdent) {
+            setIdent((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstClassDecl setClazz(Swc4jAstClass clazz) {
         this.clazz = AssertionUtils.notNull(clazz, "Class");
+        this.clazz.setParent(this);
         return this;
     }
 
@@ -93,6 +106,7 @@ public class Swc4jAstClassDecl
 
     public Swc4jAstClassDecl setIdent(Swc4jAstIdent ident) {
         this.ident = AssertionUtils.notNull(ident, "Ident");
+        this.ident.setParent(this);
         return this;
     }
 

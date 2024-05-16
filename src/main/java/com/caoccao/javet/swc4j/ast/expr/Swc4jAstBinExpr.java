@@ -53,7 +53,6 @@ public class Swc4jAstBinExpr
         setLeft(left);
         setOp(op);
         setRight(right);
-        updateParent();
     }
 
     @Override
@@ -81,8 +80,22 @@ public class Swc4jAstBinExpr
         return Swc4jAstType.BinExpr;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (left == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setLeft((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (right == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setRight((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstBinExpr setLeft(ISwc4jAstExpr left) {
         this.left = AssertionUtils.notNull(left, "Left");
+        this.left.setParent(this);
         return this;
     }
 
@@ -93,6 +106,7 @@ public class Swc4jAstBinExpr
 
     public Swc4jAstBinExpr setRight(ISwc4jAstExpr right) {
         this.right = AssertionUtils.notNull(right, "Right");
+        this.right.setParent(this);
         return this;
     }
 

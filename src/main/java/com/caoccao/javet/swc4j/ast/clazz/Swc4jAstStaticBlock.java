@@ -44,7 +44,6 @@ public class Swc4jAstStaticBlock
             Swc4jSpan span) {
         super(span);
         setBody(body);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -62,8 +61,18 @@ public class Swc4jAstStaticBlock
         return Swc4jAstType.StaticBlock;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body == oldNode && newNode instanceof Swc4jAstBlockStmt) {
+            setBody((Swc4jAstBlockStmt) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstStaticBlock setBody(Swc4jAstBlockStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
+        this.body.setParent(this);
         return this;
     }
 

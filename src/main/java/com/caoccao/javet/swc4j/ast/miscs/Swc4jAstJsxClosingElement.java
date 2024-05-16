@@ -42,7 +42,6 @@ public class Swc4jAstJsxClosingElement
             Swc4jSpan span) {
         super(span);
         setName(name);
-        updateParent();
     }
 
     @Override
@@ -60,8 +59,18 @@ public class Swc4jAstJsxClosingElement
         return Swc4jAstType.JsxClosingElement;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (name == oldNode && newNode instanceof ISwc4jAstJsxElementName) {
+            setName((ISwc4jAstJsxElementName) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstJsxClosingElement setName(ISwc4jAstJsxElementName name) {
         this.name = AssertionUtils.notNull(name, "Name");
+        this.name.setParent(this);
         return this;
     }
 

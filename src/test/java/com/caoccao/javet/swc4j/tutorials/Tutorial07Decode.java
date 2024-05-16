@@ -17,6 +17,8 @@
 package com.caoccao.javet.swc4j.tutorials;
 
 import com.caoccao.javet.swc4j.Swc4j;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
@@ -32,7 +34,6 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jTransformOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
-import com.caoccao.javet.swc4j.span.Swc4jSpan;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -50,7 +51,6 @@ public class Tutorial07Decode {
         Swc4jTransformOptions options = new Swc4jTransformOptions()
                 .setSpecifier(specifier)
                 .setPluginHost(pluginHost)
-                .setMinify(false)
                 .setMediaType(Swc4jMediaType.JavaScript)
                 .setInlineSources(false)
                 .setSourceMap(Swc4jSourceMapOption.None);
@@ -66,14 +66,57 @@ public class Tutorial07Decode {
         @Override
         public boolean process(ISwc4jAstProgram<?> program) {
             JsFuckVisitor jsFuckVisitor = new JsFuckVisitor();
-            program.visit(jsFuckVisitor);
-            program.visit(jsFuckVisitor);
-            System.out.println(program.toDebugString());
+            do {
+                jsFuckVisitor.reset();
+                program.visit(jsFuckVisitor);
+            } while (jsFuckVisitor.getCount() > 0);
             return true;
         }
     }
 
     static class JsFuckVisitor extends Swc4jAstVisitor {
+        protected int count;
+
+        public JsFuckVisitor() {
+            count = 0;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public void reset() {
+            count = 0;
+        }
+
+        @Override
+        public Swc4jAstVisitorResponse visitBinExpr(Swc4jAstBinExpr node) {
+            ISwc4jAst newNode = null;
+            ISwc4jAstExpr left = node.getLeft();
+            ISwc4jAstExpr right = node.getRight();
+            switch (node.getOp()) {
+                case Add:
+                    if (left.getType() == Swc4jAstType.Bool && right.getType() == Swc4jAstType.Bool) {
+                        int value = ((Swc4jAstBool) left).asInt() + ((Swc4jAstBool) right).asInt();
+                        newNode = Swc4jAstNumber.create(value);
+                    } else if (left.getType() == Swc4jAstType.Bool && right.getType() == Swc4jAstType.Number) {
+                        int value = ((Swc4jAstBool) left).asInt() + ((Swc4jAstNumber) right).asInt();
+                        newNode = Swc4jAstNumber.create(value);
+                    } else if (left.getType() == Swc4jAstType.Number && right.getType() == Swc4jAstType.Bool) {
+                        int value = ((Swc4jAstNumber) left).asInt() + ((Swc4jAstBool) right).asInt();
+                        newNode = Swc4jAstNumber.create(value);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            if (newNode != null) {
+                ++count;
+                node.getParent().replaceNode(node, newNode);
+            }
+            return super.visitBinExpr(node);
+        }
+
         @Override
         public Swc4jAstVisitorResponse visitUnaryExpr(Swc4jAstUnaryExpr node) {
             ISwc4jAst newNode = null;
@@ -85,8 +128,7 @@ public class Tutorial07Decode {
                             newNode = Swc4jAstBool.create(false);
                             break;
                         case Number:
-                            Swc4jAstNumber number = (Swc4jAstNumber) arg;
-                            newNode = Swc4jAstBool.create(number.getValue() == 0);
+                            newNode = Swc4jAstBool.create(!((Swc4jAstNumber) arg).asBoolean());
                             break;
                         default:
                             break;
@@ -97,14 +139,19 @@ public class Tutorial07Decode {
                         case ArrayLit:
                             Swc4jAstArrayLit arrayLit = (Swc4jAstArrayLit) arg;
                             if (arrayLit.getElems().isEmpty()) {
-                                newNode = new Swc4jAstNumber(0, "0", Swc4jSpan.DUMMY);
+                                newNode = Swc4jAstNumber.create(0);
                             }
                             break;
-                        case Number:
-                            Swc4jAstNumber number = (Swc4jAstNumber) arg;
-                            int value = Double.valueOf(number.getValue()).intValue();
-                            newNode = new Swc4jAstNumber(value, Integer.toString(value), Swc4jSpan.DUMMY);
-                            break;
+                        case Number: {
+                            int value = ((Swc4jAstNumber) arg).asInt();
+                            newNode = Swc4jAstNumber.create(value);
+                        }
+                        break;
+                        case Bool: {
+                            int value = ((Swc4jAstBool) arg).asInt();
+                            newNode = Swc4jAstNumber.create(value);
+                        }
+                        break;
                         default:
                             break;
                     }
@@ -113,6 +160,7 @@ public class Tutorial07Decode {
                     break;
             }
             if (newNode != null) {
+                ++count;
                 node.getParent().replaceNode(node, newNode);
             }
             return super.visitUnaryExpr(node);

@@ -122,6 +122,8 @@ public final class Swc4jAstStore {
                                             .orElse(false),
                                     "Class " + clazz.getSimpleName() + " constructor is not annotated by Jni2RustMethod");
                             Map<String, Method> methodMap = Stream.of(clazz.getDeclaredMethods())
+                                    .filter(method -> !Modifier.isStatic(method.getModifiers()))
+                                    .filter(method -> !Modifier.isAbstract(method.getModifiers()))
                                     .collect(Collectors.toMap(Method::getName, Function.identity()));
                             ReflectionUtils.getDeclaredFields(clazz).values().stream()
                                     .filter(field -> !Modifier.isStatic(field.getModifiers()))

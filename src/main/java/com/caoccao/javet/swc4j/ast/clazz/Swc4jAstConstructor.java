@@ -59,7 +59,7 @@ public class Swc4jAstConstructor
         setKey(key);
         setOptional(optional);
         this.params = AssertionUtils.notNull(params, "Params");
-        updateParent();
+        this.params.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -100,6 +100,29 @@ public class Swc4jAstConstructor
         return optional;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body.isPresent() && body.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstBlockStmt)) {
+            setBody((Swc4jAstBlockStmt) newNode);
+            return true;
+        }
+        if (key == oldNode && newNode instanceof ISwc4jAstPropName) {
+            setKey((ISwc4jAstPropName) newNode);
+            return true;
+        }
+        if (!params.isEmpty() && newNode instanceof ISwc4jAstParamOrTsParamProp) {
+            final int size = params.size();
+            for (int i = 0; i < size; i++) {
+                if (params.get(i) == oldNode) {
+                    params.set(i, (ISwc4jAstParamOrTsParamProp) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public Swc4jAstConstructor setAccessibility(Swc4jAstAccessibility accessibility) {
         this.accessibility = Optional.ofNullable(accessibility);
         return this;
@@ -107,11 +130,13 @@ public class Swc4jAstConstructor
 
     public Swc4jAstConstructor setBody(Swc4jAstBlockStmt body) {
         this.body = Optional.ofNullable(body);
+        this.body.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstConstructor setKey(ISwc4jAstPropName key) {
         this.key = AssertionUtils.notNull(key, "Key");
+        this.key.setParent(this);
         return this;
     }
 

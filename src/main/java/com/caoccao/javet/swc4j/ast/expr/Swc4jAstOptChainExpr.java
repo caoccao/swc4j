@@ -50,7 +50,6 @@ public class Swc4jAstOptChainExpr
         super(span);
         setBase(base);
         setOptional(optional);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -73,8 +72,18 @@ public class Swc4jAstOptChainExpr
         return optional;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (base == oldNode && newNode instanceof ISwc4jAstOptChainBase) {
+            setBase((ISwc4jAstOptChainBase) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstOptChainExpr setBase(ISwc4jAstOptChainBase base) {
         this.base = AssertionUtils.notNull(base, "Base");
+        this.base.setParent(this);
         return this;
     }
 

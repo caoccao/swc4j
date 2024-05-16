@@ -56,7 +56,6 @@ public class Swc4jAstForStmt
         setInit(init);
         setTest(test);
         setUpdate(update);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -93,23 +92,48 @@ public class Swc4jAstForStmt
         return update;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body == oldNode && newNode instanceof ISwc4jAstStmt) {
+            setBody((ISwc4jAstStmt) newNode);
+            return true;
+        }
+        if (init.isPresent() && init.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstVarDeclOrExpr)) {
+            setInit((ISwc4jAstVarDeclOrExpr) newNode);
+            return true;
+        }
+        if (test.isPresent() && test.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+            setTest((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (update.isPresent() && update.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+            setUpdate((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstForStmt setBody(ISwc4jAstStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
+        this.body.setParent(this);
         return this;
     }
 
     public Swc4jAstForStmt setInit(ISwc4jAstVarDeclOrExpr init) {
         this.init = Optional.ofNullable(init);
+        this.init.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstForStmt setTest(ISwc4jAstExpr test) {
         this.test = Optional.ofNullable(test);
+        this.test.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstForStmt setUpdate(ISwc4jAstExpr update) {
         this.update = Optional.ofNullable(update);
+        this.update.ifPresent(node -> node.setParent(this));
         return this;
     }
 

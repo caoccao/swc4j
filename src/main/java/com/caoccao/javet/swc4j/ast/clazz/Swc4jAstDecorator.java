@@ -44,7 +44,6 @@ public class Swc4jAstDecorator
             Swc4jSpan span) {
         super(span);
         setExpr(expr);
-        updateParent();
     }
 
     @Override
@@ -62,8 +61,18 @@ public class Swc4jAstDecorator
         return Swc4jAstType.Decorator;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (expr == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setExpr((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstDecorator setExpr(ISwc4jAstExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
+        this.expr.setParent(this);
         return this;
     }
 

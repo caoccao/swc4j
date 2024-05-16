@@ -47,7 +47,6 @@ public class Swc4jAstAssignPatProp
         super(span);
         setKey(key);
         setValue(value);
-        updateParent();
     }
 
     @Override
@@ -72,13 +71,28 @@ public class Swc4jAstAssignPatProp
         return value;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (key == oldNode && newNode instanceof Swc4jAstBindingIdent) {
+            setKey((Swc4jAstBindingIdent) newNode);
+            return true;
+        }
+        if (value.isPresent() && value.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+            setValue((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstAssignPatProp setKey(Swc4jAstBindingIdent key) {
         this.key = AssertionUtils.notNull(key, "Key");
+        this.key.setParent(this);
         return this;
     }
 
     public Swc4jAstAssignPatProp setValue(ISwc4jAstExpr value) {
         this.value = Optional.ofNullable(value);
+        this.value.ifPresent(node -> node.setParent(this));
         return this;
     }
 

@@ -60,7 +60,7 @@ public class Swc4jAstImportDecl
         setTypeOnly(typeOnly);
         setWith(with);
         this.specifiers = AssertionUtils.notNull(specifiers, "Specifiers");
-        updateParent();
+        this.specifiers.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -101,6 +101,29 @@ public class Swc4jAstImportDecl
         return typeOnly;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!specifiers.isEmpty() && newNode instanceof ISwc4jAstImportSpecifier) {
+            final int size = specifiers.size();
+            for (int i = 0; i < size; i++) {
+                if (specifiers.get(i) == oldNode) {
+                    specifiers.set(i, (ISwc4jAstImportSpecifier) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (src == oldNode && newNode instanceof Swc4jAstStr) {
+            setSrc((Swc4jAstStr) newNode);
+            return true;
+        }
+        if (with.isPresent() && with.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstObjectLit)) {
+            setWith((Swc4jAstObjectLit) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstImportDecl setPhase(Swc4jAstImportPhase phase) {
         this.phase = AssertionUtils.notNull(phase, "Phase");
         return this;
@@ -108,6 +131,7 @@ public class Swc4jAstImportDecl
 
     public Swc4jAstImportDecl setSrc(Swc4jAstStr src) {
         this.src = AssertionUtils.notNull(src, "Src");
+        this.src.setParent(this);
         return this;
     }
 
@@ -118,6 +142,7 @@ public class Swc4jAstImportDecl
 
     public Swc4jAstImportDecl setWith(Swc4jAstObjectLit with) {
         this.with = Optional.ofNullable(with);
+        this.with.ifPresent(node -> node.setParent(this));
         return this;
     }
 

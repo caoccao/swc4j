@@ -46,7 +46,6 @@ public class Swc4jAstTsTupleElement
         super(span);
         setLabel(label);
         setTy(ty);
-        updateParent();
     }
 
     @Override
@@ -71,13 +70,28 @@ public class Swc4jAstTsTupleElement
         return Swc4jAstType.TsTupleElement;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (label.isPresent() && label.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstPat)) {
+            setLabel((ISwc4jAstPat) newNode);
+            return true;
+        }
+        if (ty == oldNode && newNode instanceof ISwc4jAstTsType) {
+            setTy((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsTupleElement setLabel(ISwc4jAstPat label) {
         this.label = Optional.ofNullable(label);
+        this.label.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstTsTupleElement setTy(ISwc4jAstTsType ty) {
         this.ty = AssertionUtils.notNull(ty, "Ty");
+        this.ty.setParent(this);
         return this;
     }
 

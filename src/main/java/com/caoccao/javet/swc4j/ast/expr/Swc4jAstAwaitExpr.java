@@ -45,7 +45,6 @@ public class Swc4jAstAwaitExpr
             Swc4jSpan span) {
         super(span);
         setArg(arg);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -63,8 +62,18 @@ public class Swc4jAstAwaitExpr
         return Swc4jAstType.AwaitExpr;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (arg == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setArg((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstAwaitExpr setArg(ISwc4jAstExpr arg) {
         this.arg = AssertionUtils.notNull(arg, "Arg");
+        this.arg.setParent(this);
         return this;
     }
 

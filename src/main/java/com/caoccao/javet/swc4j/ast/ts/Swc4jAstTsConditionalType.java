@@ -57,7 +57,6 @@ public class Swc4jAstTsConditionalType
         setExtendsType(extendsType);
         setFalseType(falseType);
         setTrueType(trueType);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -90,23 +89,48 @@ public class Swc4jAstTsConditionalType
         return Swc4jAstType.TsConditionalType;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (checkType == oldNode && newNode instanceof ISwc4jAstTsType) {
+            setCheckType((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        if (extendsType == oldNode && newNode instanceof ISwc4jAstTsType) {
+            setExtendsType((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        if (falseType == oldNode && newNode instanceof ISwc4jAstTsType) {
+            setFalseType((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        if (trueType == oldNode && newNode instanceof ISwc4jAstTsType) {
+            setTrueType((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsConditionalType setCheckType(ISwc4jAstTsType checkType) {
         this.checkType = AssertionUtils.notNull(checkType, "Check type");
+        this.checkType.setParent(this);
         return this;
     }
 
     public Swc4jAstTsConditionalType setExtendsType(ISwc4jAstTsType extendsType) {
         this.extendsType = AssertionUtils.notNull(extendsType, "Extends type");
+        this.extendsType.setParent(this);
         return this;
     }
 
     public Swc4jAstTsConditionalType setFalseType(ISwc4jAstTsType falseType) {
         this.falseType = AssertionUtils.notNull(falseType, "False type");
+        this.falseType.setParent(this);
         return this;
     }
 
     public Swc4jAstTsConditionalType setTrueType(ISwc4jAstTsType trueType) {
         this.trueType = AssertionUtils.notNull(trueType, "True type");
+        this.trueType.setParent(this);
         return this;
     }
 

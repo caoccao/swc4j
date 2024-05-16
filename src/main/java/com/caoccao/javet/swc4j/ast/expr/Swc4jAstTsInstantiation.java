@@ -51,7 +51,6 @@ public class Swc4jAstTsInstantiation
         super(span);
         setExpr(expr);
         setTypeArgs(typeArgs);
-        updateParent();
     }
 
     @Override
@@ -74,13 +73,28 @@ public class Swc4jAstTsInstantiation
         return typeArgs;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (expr == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setExpr((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (typeArgs == oldNode && newNode instanceof Swc4jAstTsTypeParamInstantiation) {
+            setTypeArgs((Swc4jAstTsTypeParamInstantiation) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsInstantiation setExpr(ISwc4jAstExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
+        this.expr.setParent(this);
         return this;
     }
 
     public Swc4jAstTsInstantiation setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
         this.typeArgs = AssertionUtils.notNull(typeArgs, "TypeArgs");
+        this.typeArgs.setParent(this);
         return this;
     }
 

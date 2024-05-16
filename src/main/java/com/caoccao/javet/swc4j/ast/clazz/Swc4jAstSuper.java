@@ -50,6 +50,11 @@ public class Swc4jAstSuper
     }
 
     @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
+    @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
         switch (visitor.visitSuper(this)) {
             case Error:

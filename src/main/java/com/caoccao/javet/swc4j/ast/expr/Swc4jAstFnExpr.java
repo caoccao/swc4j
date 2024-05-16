@@ -48,7 +48,6 @@ public class Swc4jAstFnExpr
         super(span);
         setFunction(function);
         setIdent(ident);
-        updateParent();
     }
 
     @Override
@@ -73,13 +72,28 @@ public class Swc4jAstFnExpr
         return Swc4jAstType.FnExpr;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (function == oldNode && newNode instanceof Swc4jAstFunction) {
+            setFunction((Swc4jAstFunction) newNode);
+            return true;
+        }
+        if (ident.isPresent() && ident.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstIdent)) {
+            setIdent((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstFnExpr setFunction(Swc4jAstFunction function) {
         this.function = AssertionUtils.notNull(function, "Function");
+        this.function.setParent(this);
         return this;
     }
 
     public Swc4jAstFnExpr setIdent(Swc4jAstIdent ident) {
         this.ident = Optional.ofNullable(ident);
+        this.ident.ifPresent(node -> node.setParent(this));
         return this;
     }
 

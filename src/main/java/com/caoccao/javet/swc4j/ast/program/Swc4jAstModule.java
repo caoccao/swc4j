@@ -70,7 +70,7 @@ public class Swc4jAstModule
         super(span);
         setShebang(shebang);
         this.body = AssertionUtils.notNull(body, "Body");
-        updateParent();
+        this.body.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -93,6 +93,21 @@ public class Swc4jAstModule
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.Module;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!body.isEmpty() && newNode instanceof ISwc4jAstModuleItem) {
+            final int size = body.size();
+            for (int i = 0; i < size; i++) {
+                if (body.get(i) == oldNode) {
+                    body.set(i, (ISwc4jAstModuleItem) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public Swc4jAstModule setShebang(String shebang) {

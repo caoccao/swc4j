@@ -60,6 +60,11 @@ public class Swc4jAstTsKeywordType
         return Swc4jAstType.TsKeywordType;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
     public Swc4jAstTsKeywordType setKind(Swc4jAstTsKeywordTypeKind kind) {
         this.kind = AssertionUtils.notNull(kind, "Kind");
         return this;

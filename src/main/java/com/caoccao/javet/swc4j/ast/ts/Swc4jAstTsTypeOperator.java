@@ -49,7 +49,6 @@ public class Swc4jAstTsTypeOperator
         super(span);
         setOp(op);
         setTypeAnn(typeAnn);
-        updateParent();
     }
 
     @Override
@@ -72,6 +71,15 @@ public class Swc4jAstTsTypeOperator
         return typeAnn;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (typeAnn == oldNode && newNode instanceof ISwc4jAstTsType) {
+            setTypeAnn((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsTypeOperator setOp(Swc4jAstTsTypeOperatorOp op) {
         this.op = AssertionUtils.notNull(op, "Op");
         return this;
@@ -79,6 +87,7 @@ public class Swc4jAstTsTypeOperator
 
     public Swc4jAstTsTypeOperator setTypeAnn(ISwc4jAstTsType typeAnn) {
         this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
+        this.typeAnn.setParent(this);
         return this;
     }
 

@@ -42,7 +42,7 @@ public class Swc4jAstTsInterfaceBody
             Swc4jSpan span) {
         super(span);
         this.body = AssertionUtils.notNull(body, "Body");
-        updateParent();
+        this.body.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -58,6 +58,21 @@ public class Swc4jAstTsInterfaceBody
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsInterfaceBody;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!body.isEmpty() && newNode instanceof ISwc4jAstTsTypeElement) {
+            final int size = body.size();
+            for (int i = 0; i < size; i++) {
+                if (body.get(i) == oldNode) {
+                    body.set(i, (ISwc4jAstTsTypeElement) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

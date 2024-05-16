@@ -49,8 +49,9 @@ public class Swc4jAstTsTplLitType
             Swc4jSpan span) {
         super(span);
         this.quasis = AssertionUtils.notNull(quasis, "Quasis");
+        this.quasis.forEach(node -> node.setParent(this));
         this.types = AssertionUtils.notNull(types, "Types");
-        updateParent();
+        this.types.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -73,6 +74,31 @@ public class Swc4jAstTsTplLitType
     @Jni2RustMethod
     public List<ISwc4jAstTsType> getTypes() {
         return types;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!quasis.isEmpty() && newNode instanceof Swc4jAstTplElement) {
+            final int size = quasis.size();
+            for (int i = 0; i < size; i++) {
+                if (quasis.get(i) == oldNode) {
+                    quasis.set(i, (Swc4jAstTplElement) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (!types.isEmpty() && newNode instanceof ISwc4jAstTsType) {
+            final int size = types.size();
+            for (int i = 0; i < size; i++) {
+                if (types.get(i) == oldNode) {
+                    types.set(i, (ISwc4jAstTsType) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

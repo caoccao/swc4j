@@ -52,7 +52,6 @@ public class Swc4jAstTryStmt
         setBlock(block);
         setFinalizer(finalizer);
         setHandler(handler);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -83,18 +82,38 @@ public class Swc4jAstTryStmt
         return Swc4jAstType.TryStmt;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (block == oldNode && newNode instanceof Swc4jAstBlockStmt) {
+            setBlock((Swc4jAstBlockStmt) newNode);
+            return true;
+        }
+        if (finalizer.isPresent() && finalizer.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstBlockStmt)) {
+            setFinalizer((Swc4jAstBlockStmt) newNode);
+            return true;
+        }
+        if (handler.isPresent() && handler.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstCatchClause)) {
+            setHandler((Swc4jAstCatchClause) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTryStmt setBlock(Swc4jAstBlockStmt block) {
         this.block = AssertionUtils.notNull(block, "Block");
+        this.block.setParent(this);
         return this;
     }
 
     public Swc4jAstTryStmt setFinalizer(Swc4jAstBlockStmt finalizer) {
         this.finalizer = Optional.ofNullable(finalizer);
+        this.finalizer.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstTryStmt setHandler(Swc4jAstCatchClause handler) {
         this.handler = Optional.ofNullable(handler);
+        this.handler.ifPresent(node -> node.setParent(this));
         return this;
     }
 

@@ -48,7 +48,6 @@ public class Swc4jAstCatchClause
         super(span);
         setBody(body);
         setParam(param);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -73,13 +72,28 @@ public class Swc4jAstCatchClause
         return Swc4jAstType.CatchClause;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body == oldNode && newNode instanceof Swc4jAstBlockStmt) {
+            setBody((Swc4jAstBlockStmt) newNode);
+            return true;
+        }
+        if (param.isPresent() && param.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstPat)) {
+            setParam((ISwc4jAstPat) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstCatchClause setBody(Swc4jAstBlockStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
+        this.body.setParent(this);
         return this;
     }
 
     public Swc4jAstCatchClause setParam(ISwc4jAstPat param) {
         this.param = Optional.ofNullable(param);
+        this.param.ifPresent(node -> node.setParent(this));
         return this;
     }
 

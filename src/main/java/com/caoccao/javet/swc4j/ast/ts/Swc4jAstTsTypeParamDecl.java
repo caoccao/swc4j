@@ -41,7 +41,7 @@ public class Swc4jAstTsTypeParamDecl
             Swc4jSpan span) {
         super(span);
         this.params = AssertionUtils.notNull(params, "Params");
-        updateParent();
+        this.params.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -57,6 +57,21 @@ public class Swc4jAstTsTypeParamDecl
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsTypeParamDecl;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!params.isEmpty() && newNode instanceof Swc4jAstTsTypeParam) {
+            final int size = params.size();
+            for (int i = 0; i < size; i++) {
+                if (params.get(i) == oldNode) {
+                    params.set(i, (Swc4jAstTsTypeParam) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

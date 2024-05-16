@@ -69,7 +69,7 @@ public class Swc4jAstTsPropertySignature
         setTypeAnn(typeAnn);
         setTypeParams(typeParams);
         this.params = AssertionUtils.notNull(params, "Params");
-        updateParent();
+        this.params.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -127,6 +127,37 @@ public class Swc4jAstTsPropertySignature
         return readonly;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (init.isPresent() && init.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+            setInit((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (key == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setKey((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (!params.isEmpty() && newNode instanceof ISwc4jAstTsFnParam) {
+            final int size = params.size();
+            for (int i = 0; i < size; i++) {
+                if (params.get(i) == oldNode) {
+                    params.set(i, (ISwc4jAstTsFnParam) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+            setTypeAnn((Swc4jAstTsTypeAnn) newNode);
+            return true;
+        }
+        if (typeParams.isPresent() && typeParams.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamDecl)) {
+            setTypeParams((Swc4jAstTsTypeParamDecl) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsPropertySignature setComputed(boolean computed) {
         this.computed = computed;
         return this;
@@ -134,11 +165,13 @@ public class Swc4jAstTsPropertySignature
 
     public Swc4jAstTsPropertySignature setInit(ISwc4jAstExpr init) {
         this.init = Optional.ofNullable(init);
+        this.init.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstTsPropertySignature setKey(ISwc4jAstExpr key) {
         this.key = AssertionUtils.notNull(key, "Key");
+        this.key.setParent(this);
         return this;
     }
 
@@ -154,11 +187,13 @@ public class Swc4jAstTsPropertySignature
 
     public Swc4jAstTsPropertySignature setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
+        this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstTsPropertySignature setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
+        this.typeParams.ifPresent(node -> node.setParent(this));
         return this;
     }
 

@@ -44,7 +44,6 @@ public class Swc4jAstTsExternalModuleRef
             Swc4jSpan span) {
         super(span);
         setExpr(expr);
-        updateParent();
     }
 
     @Override
@@ -62,8 +61,18 @@ public class Swc4jAstTsExternalModuleRef
         return Swc4jAstType.TsExternalModuleRef;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (expr == oldNode && newNode instanceof Swc4jAstStr) {
+            setExpr((Swc4jAstStr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsExternalModuleRef setExpr(Swc4jAstStr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
+        this.expr.setParent(this);
         return this;
     }
 

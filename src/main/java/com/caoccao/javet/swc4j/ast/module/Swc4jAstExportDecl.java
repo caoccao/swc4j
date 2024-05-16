@@ -44,7 +44,6 @@ public class Swc4jAstExportDecl
             Swc4jSpan span) {
         super(span);
         setDecl(decl);
-        updateParent();
     }
 
     @Override
@@ -62,8 +61,18 @@ public class Swc4jAstExportDecl
         return Swc4jAstType.ExportDecl;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (decl == oldNode && newNode instanceof ISwc4jAstDecl) {
+            setDecl((ISwc4jAstDecl) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstExportDecl setDecl(ISwc4jAstDecl decl) {
         this.decl = AssertionUtils.notNull(decl, "Decl");
+        this.decl.setParent(this);
         return this;
     }
 

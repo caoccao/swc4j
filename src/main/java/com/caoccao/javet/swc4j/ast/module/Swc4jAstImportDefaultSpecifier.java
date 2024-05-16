@@ -44,7 +44,6 @@ public class Swc4jAstImportDefaultSpecifier
             Swc4jSpan span) {
         super(span);
         setLocal(local);
-        updateParent();
     }
 
     @Override
@@ -62,8 +61,18 @@ public class Swc4jAstImportDefaultSpecifier
         return Swc4jAstType.ImportDefaultSpecifier;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (local == oldNode && newNode instanceof Swc4jAstIdent) {
+            setLocal((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstImportDefaultSpecifier setLocal(Swc4jAstIdent local) {
         this.local = AssertionUtils.notNull(local, "Local");
+        this.local.setParent(this);
         return this;
     }
 

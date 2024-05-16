@@ -18,11 +18,11 @@ package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstBlockStmtOrExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
@@ -44,7 +44,7 @@ public class Swc4jAstBlockStmt
             Swc4jSpan span) {
         super(span);
         this.stmts = AssertionUtils.notNull(stmts, "Stmts");
-        updateParent();
+        this.stmts.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -60,6 +60,21 @@ public class Swc4jAstBlockStmt
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.BlockStmt;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!stmts.isEmpty() && newNode instanceof ISwc4jAstStmt) {
+            final int size = stmts.size();
+            for (int i = 0; i < size; i++) {
+                if (stmts.get(i) == oldNode) {
+                    stmts.set(i, (ISwc4jAstStmt) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

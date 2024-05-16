@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.jni2rust.*;
@@ -71,7 +72,6 @@ public class Swc4jAstClassMethod
         setOptional(optional);
         setOverride(_override);
         setStatic(_static);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -124,6 +124,19 @@ public class Swc4jAstClassMethod
         return _static;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (function == oldNode && newNode instanceof Swc4jAstFunction) {
+            setFunction((Swc4jAstFunction) newNode);
+            return true;
+        }
+        if (key == oldNode && newNode instanceof ISwc4jAstPropName) {
+            setKey((ISwc4jAstPropName) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstClassMethod setAbstract(boolean _abstract) {
         this._abstract = _abstract;
         return this;
@@ -136,11 +149,13 @@ public class Swc4jAstClassMethod
 
     public Swc4jAstClassMethod setFunction(Swc4jAstFunction function) {
         this.function = AssertionUtils.notNull(function, "Function");
+        this.function.setParent(this);
         return this;
     }
 
     public Swc4jAstClassMethod setKey(ISwc4jAstPropName key) {
         this.key = AssertionUtils.notNull(key, "Key");
+        this.key.setParent(this);
         return this;
     }
 

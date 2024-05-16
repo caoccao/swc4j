@@ -49,7 +49,6 @@ public class Swc4jAstLabeledStmt
         super(span);
         setBody(body);
         setLabel(label);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -72,13 +71,28 @@ public class Swc4jAstLabeledStmt
         return Swc4jAstType.LabeledStmt;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body == oldNode && newNode instanceof ISwc4jAstStmt) {
+            setBody((ISwc4jAstStmt) newNode);
+            return true;
+        }
+        if (label == oldNode && newNode instanceof Swc4jAstIdent) {
+            setLabel((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstLabeledStmt setBody(ISwc4jAstStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
+        this.body.setParent(this);
         return this;
     }
 
     public Swc4jAstLabeledStmt setLabel(Swc4jAstIdent label) {
         this.label = AssertionUtils.notNull(label, "Label");
+        this.label.setParent(this);
         return this;
     }
 

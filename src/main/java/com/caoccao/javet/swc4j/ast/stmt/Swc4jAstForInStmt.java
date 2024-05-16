@@ -18,12 +18,12 @@ package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstForHead;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
@@ -54,7 +54,6 @@ public class Swc4jAstForInStmt
         setBody(body);
         setLeft(left);
         setRight(right);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -82,18 +81,38 @@ public class Swc4jAstForInStmt
         return Swc4jAstType.ForInStmt;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body == oldNode && newNode instanceof ISwc4jAstStmt) {
+            setBody((ISwc4jAstStmt) newNode);
+            return true;
+        }
+        if (left == oldNode && newNode instanceof ISwc4jAstForHead) {
+            setLeft((ISwc4jAstForHead) newNode);
+            return true;
+        }
+        if (right == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setRight((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstForInStmt setBody(ISwc4jAstStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
+        this.body.setParent(this);
         return this;
     }
 
     public Swc4jAstForInStmt setLeft(ISwc4jAstForHead left) {
         this.left = AssertionUtils.notNull(left, "Left");
+        this.left.setParent(this);
         return this;
     }
 
     public Swc4jAstForInStmt setRight(ISwc4jAstExpr right) {
         this.right = AssertionUtils.notNull(right, "Right");
+        this.right.setParent(this);
         return this;
     }
 

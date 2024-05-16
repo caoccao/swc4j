@@ -44,7 +44,6 @@ public class Swc4jAstExportNamespaceSpecifier
             Swc4jSpan span) {
         super(span);
         setName(name);
-        updateParent();
     }
 
     @Override
@@ -62,8 +61,18 @@ public class Swc4jAstExportNamespaceSpecifier
         return Swc4jAstType.ExportNamespaceSpecifier;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (name == oldNode && newNode instanceof ISwc4jAstModuleExportName) {
+            setName((ISwc4jAstModuleExportName) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstExportNamespaceSpecifier setName(ISwc4jAstModuleExportName name) {
         this.name = AssertionUtils.notNull(name, "Name");
+        this.name.setParent(this);
         return this;
     }
 

@@ -51,7 +51,6 @@ public class Swc4jAstVarDeclarator
         setDefinite(definite);
         setInit(init);
         setName(name);
-        updateParent();
     }
 
     @Override
@@ -81,6 +80,19 @@ public class Swc4jAstVarDeclarator
         return definite;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (init.isPresent() && init.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+            setInit((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (name == oldNode && newNode instanceof ISwc4jAstPat) {
+            setName((ISwc4jAstPat) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstVarDeclarator setDefinite(boolean definite) {
         this.definite = definite;
         return this;
@@ -88,11 +100,13 @@ public class Swc4jAstVarDeclarator
 
     public Swc4jAstVarDeclarator setInit(ISwc4jAstExpr init) {
         this.init = Optional.ofNullable(init);
+        this.init.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstVarDeclarator setName(ISwc4jAstPat name) {
         this.name = AssertionUtils.notNull(name, "Name");
+        this.name.setParent(this);
         return this;
     }
 

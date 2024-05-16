@@ -55,7 +55,6 @@ public class Swc4jAstForOfStmt
         setBody(body);
         setLeft(left);
         setRight(right);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -88,6 +87,23 @@ public class Swc4jAstForOfStmt
         return _await;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body == oldNode && newNode instanceof ISwc4jAstStmt) {
+            setBody((ISwc4jAstStmt) newNode);
+            return true;
+        }
+        if (left == oldNode && newNode instanceof ISwc4jAstForHead) {
+            setLeft((ISwc4jAstForHead) newNode);
+            return true;
+        }
+        if (right == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setRight((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstForOfStmt setAwait(boolean _await) {
         this._await = _await;
         return this;
@@ -95,16 +111,19 @@ public class Swc4jAstForOfStmt
 
     public Swc4jAstForOfStmt setBody(ISwc4jAstStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
+        this.body.setParent(this);
         return this;
     }
 
     public Swc4jAstForOfStmt setLeft(ISwc4jAstForHead left) {
         this.left = AssertionUtils.notNull(left, "Left");
+        this.left.setParent(this);
         return this;
     }
 
     public Swc4jAstForOfStmt setRight(ISwc4jAstExpr right) {
         this.right = AssertionUtils.notNull(right, "Right");
+        this.right.setParent(this);
         return this;
     }
 

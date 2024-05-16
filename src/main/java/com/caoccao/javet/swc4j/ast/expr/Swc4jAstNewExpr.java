@@ -51,7 +51,6 @@ public class Swc4jAstNewExpr
         setArgs(args);
         setCallee(callee);
         setTypeArgs(typeArgs);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -82,18 +81,45 @@ public class Swc4jAstNewExpr
         return typeArgs;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (args.isPresent() && !args.get().isEmpty() && newNode instanceof Swc4jAstExprOrSpread) {
+            List<Swc4jAstExprOrSpread> nodes = args.get();
+            final int size = nodes.size();
+            for (int i = 0; i < size; i++) {
+                if (nodes.get(i) == oldNode) {
+                    nodes.set(i, (Swc4jAstExprOrSpread) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (callee == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setCallee((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (typeArgs.isPresent() && typeArgs.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamInstantiation)) {
+            setTypeArgs((Swc4jAstTsTypeParamInstantiation) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstNewExpr setArgs(List<Swc4jAstExprOrSpread> args) {
         this.args = Optional.ofNullable(args).map(SimpleList::immutableCopyOf);
+        this.args.ifPresent(nodes -> nodes.forEach(node -> node.setParent(this)));
         return this;
     }
 
     public Swc4jAstNewExpr setCallee(ISwc4jAstExpr callee) {
         this.callee = AssertionUtils.notNull(callee, "Callee");
+        this.callee.setParent(this);
         return this;
     }
 
     public Swc4jAstNewExpr setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
         this.typeArgs = Optional.ofNullable(typeArgs);
+        this.typeArgs.ifPresent(nodes -> nodes.setParent(this));
         return this;
     }
 

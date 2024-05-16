@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.ts;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -43,7 +44,7 @@ public class Swc4jAstTsTupleType
             Swc4jSpan span) {
         super(span);
         this.elemTypes = AssertionUtils.notNull(elemTypes, "ElemTypes");
-        updateParent();
+        this.elemTypes.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -59,6 +60,21 @@ public class Swc4jAstTsTupleType
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsTupleType;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!elemTypes.isEmpty() && newNode instanceof Swc4jAstTsTupleElement) {
+            final int size = elemTypes.size();
+            for (int i = 0; i < size; i++) {
+                if (elemTypes.get(i) == oldNode) {
+                    elemTypes.set(i, (Swc4jAstTsTupleElement) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

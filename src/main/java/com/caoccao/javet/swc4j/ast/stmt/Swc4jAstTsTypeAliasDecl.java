@@ -56,7 +56,6 @@ public class Swc4jAstTsTypeAliasDecl
         setId(id);
         setTypeAnn(typeAnn);
         setTypeParams(typeParams);
-        updateParent();
     }
 
     @Override
@@ -91,6 +90,23 @@ public class Swc4jAstTsTypeAliasDecl
         return declare;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (id == oldNode && newNode instanceof Swc4jAstIdent) {
+            setId((Swc4jAstIdent) newNode);
+            return true;
+        }
+        if (typeAnn == oldNode && newNode instanceof ISwc4jAstTsType) {
+            setTypeAnn((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        if (typeParams.isPresent() && typeParams.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamDecl)) {
+            setTypeParams((Swc4jAstTsTypeParamDecl) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsTypeAliasDecl setDeclare(boolean declare) {
         this.declare = declare;
         return this;
@@ -98,16 +114,19 @@ public class Swc4jAstTsTypeAliasDecl
 
     public Swc4jAstTsTypeAliasDecl setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
+        this.id.setParent(this);
         return this;
     }
 
     public Swc4jAstTsTypeAliasDecl setTypeAnn(ISwc4jAstTsType typeAnn) {
         this.typeAnn = AssertionUtils.notNull(typeAnn, "TypeAnn");
+        this.typeAnn.setParent(this);
         return this;
     }
 
     public Swc4jAstTsTypeAliasDecl setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
+        this.typeParams.ifPresent(node -> node.setParent(this));
         return this;
     }
 

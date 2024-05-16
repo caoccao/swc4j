@@ -52,7 +52,7 @@ public class Swc4jAstVarDecl
         setDeclare(declare);
         setKind(kind);
         this.decls = AssertionUtils.notNull(decls, "Decls");
-        updateParent();
+        this.decls.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -78,6 +78,21 @@ public class Swc4jAstVarDecl
     @Jni2RustMethod
     public boolean isDeclare() {
         return declare;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!decls.isEmpty() && newNode instanceof Swc4jAstVarDeclarator) {
+            final int size = decls.size();
+            for (int i = 0; i < size; i++) {
+                if (decls.get(i) == oldNode) {
+                    decls.set(i, (Swc4jAstVarDeclarator) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public Swc4jAstVarDecl setDeclare(boolean declare) {

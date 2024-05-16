@@ -77,7 +77,8 @@ public class Swc4jAstAssignProp
         if (key == oldNode && newNode instanceof Swc4jAstIdent) {
             setKey((Swc4jAstIdent) newNode);
             return true;
-        } else if (value == oldNode && newNode instanceof ISwc4jAstExpr) {
+        }
+        if (value == oldNode && newNode instanceof ISwc4jAstExpr) {
             setValue((ISwc4jAstExpr) newNode);
             return true;
         }

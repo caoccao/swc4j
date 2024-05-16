@@ -49,7 +49,6 @@ public class Swc4jAstMethodProp
         super(span);
         setFunction(function);
         setKey(key);
-        updateParent();
     }
 
     @Override
@@ -72,13 +71,28 @@ public class Swc4jAstMethodProp
         return Swc4jAstType.MethodProp;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (function == oldNode && newNode instanceof Swc4jAstFunction) {
+            setFunction((Swc4jAstFunction) newNode);
+            return true;
+        }
+        if (key == oldNode && newNode instanceof ISwc4jAstPropName) {
+            setKey((ISwc4jAstPropName) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstMethodProp setFunction(Swc4jAstFunction function) {
         this.function = AssertionUtils.notNull(function, "Function");
+        this.function.setParent(this);
         return this;
     }
 
     public Swc4jAstMethodProp setKey(ISwc4jAstPropName key) {
         this.key = AssertionUtils.notNull(key, "Key");
+        this.key.setParent(this);
         return this;
     }
 

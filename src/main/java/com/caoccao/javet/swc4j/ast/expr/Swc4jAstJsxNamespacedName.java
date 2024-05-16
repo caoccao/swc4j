@@ -48,7 +48,6 @@ public class Swc4jAstJsxNamespacedName
         super(span);
         setName(name);
         setNs(ns);
-        updateParent();
     }
 
     @Override
@@ -71,13 +70,28 @@ public class Swc4jAstJsxNamespacedName
         return Swc4jAstType.JsxNamespacedName;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (name == oldNode && newNode instanceof Swc4jAstIdent) {
+            setName((Swc4jAstIdent) newNode);
+            return true;
+        }
+        if (ns == oldNode && newNode instanceof Swc4jAstIdent) {
+            setNs((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstJsxNamespacedName setName(Swc4jAstIdent name) {
         this.name = AssertionUtils.notNull(name, "Name");
+        this.name.setParent(this);
         return this;
     }
 
     public Swc4jAstJsxNamespacedName setNs(Swc4jAstIdent ns) {
         this.ns = AssertionUtils.notNull(ns, "Ns");
+        this.ns.setParent(this);
         return this;
     }
 

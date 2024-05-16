@@ -52,7 +52,6 @@ public class Swc4jAstTsIndexedAccessType
         setIndexType(indexType);
         setObjType(objType);
         setReadonly(readonly);
-        updateParent();
     }
 
     @Override
@@ -80,13 +79,28 @@ public class Swc4jAstTsIndexedAccessType
         return readonly;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (indexType == oldNode && newNode instanceof ISwc4jAstTsType) {
+            setIndexType((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        if (objType == oldNode && newNode instanceof ISwc4jAstTsType) {
+            setObjType((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsIndexedAccessType setIndexType(ISwc4jAstTsType indexType) {
         this.indexType = AssertionUtils.notNull(indexType, "IndexType");
+        this.indexType.setParent(this);
         return this;
     }
 
     public Swc4jAstTsIndexedAccessType setObjType(ISwc4jAstTsType objType) {
         this.objType = AssertionUtils.notNull(objType, "ObjType");
+        this.objType.setParent(this);
         return this;
     }
 

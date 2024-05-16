@@ -43,7 +43,6 @@ public class Swc4jAstTsInferType
             Swc4jSpan span) {
         super(span);
         setTypeParam(typeParam);
-        updateParent();
     }
 
     @Override
@@ -61,8 +60,18 @@ public class Swc4jAstTsInferType
         return typeParam;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (typeParam == oldNode && newNode instanceof Swc4jAstTsTypeParam) {
+            setTypeParam((Swc4jAstTsTypeParam) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsInferType setTypeParam(Swc4jAstTsTypeParam typeParam) {
         this.typeParam = AssertionUtils.notNull(typeParam, "TypeParam");
+        this.typeParam.setParent(this);
         return this;
     }
 

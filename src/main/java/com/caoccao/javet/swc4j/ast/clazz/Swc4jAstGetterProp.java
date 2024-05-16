@@ -52,7 +52,6 @@ public class Swc4jAstGetterProp
         setBody(body);
         setKey(key);
         setTypeAnn(typeAnn);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -83,18 +82,38 @@ public class Swc4jAstGetterProp
         return typeAnn;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body.isPresent() && body.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstBlockStmt)) {
+            setBody((Swc4jAstBlockStmt) newNode);
+            return true;
+        }
+        if (key == oldNode && newNode instanceof ISwc4jAstPropName) {
+            setKey((ISwc4jAstPropName) newNode);
+            return true;
+        }
+        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+            setTypeAnn((Swc4jAstTsTypeAnn) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstGetterProp setBody(Swc4jAstBlockStmt body) {
         this.body = Optional.ofNullable(body);
+        this.body.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstGetterProp setKey(ISwc4jAstPropName key) {
         this.key = AssertionUtils.notNull(key, "Key");
+        this.key.setParent(this);
         return this;
     }
 
     public Swc4jAstGetterProp setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
+        this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 

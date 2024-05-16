@@ -71,11 +71,9 @@ public class Swc4jAstYieldExpr
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (arg.isPresent() && arg.get() == oldNode) {
-            if (newNode == null || newNode instanceof ISwc4jAstExpr) {
-                setArg((ISwc4jAstExpr) newNode);
-                return true;
-            }
+        if (arg.isPresent() && arg.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+            setArg((ISwc4jAstExpr) newNode);
+            return true;
         }
         return false;
     }

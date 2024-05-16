@@ -47,7 +47,7 @@ public class Swc4jAstUsingDecl
         super(span);
         setAwait(_await);
         this.decls = AssertionUtils.notNull(decls, "Decls");
-        updateParent();
+        this.decls.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -68,6 +68,21 @@ public class Swc4jAstUsingDecl
     @Jni2RustMethod
     public boolean isAwait() {
         return _await;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!decls.isEmpty() && newNode instanceof Swc4jAstVarDeclarator) {
+            final int size = decls.size();
+            for (int i = 0; i < size; i++) {
+                if (decls.get(i) == oldNode) {
+                    decls.set(i, (Swc4jAstVarDeclarator) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public Swc4jAstUsingDecl setAwait(boolean _await) {

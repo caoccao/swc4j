@@ -53,7 +53,7 @@ public class Swc4jAstOptCall
         setCallee(callee);
         setTypeArgs(typeArgs);
         this.args = AssertionUtils.notNull(args, "Args");
-        updateParent();
+        this.args.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -84,13 +84,38 @@ public class Swc4jAstOptCall
         return typeArgs;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!args.isEmpty() && newNode instanceof Swc4jAstExprOrSpread) {
+            final int size = args.size();
+            for (int i = 0; i < size; i++) {
+                if (args.get(i) == oldNode) {
+                    args.set(i, (Swc4jAstExprOrSpread) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (callee == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setCallee((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (typeArgs.isPresent() && typeArgs.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamInstantiation)) {
+            setTypeArgs((Swc4jAstTsTypeParamInstantiation) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstOptCall setCallee(ISwc4jAstExpr callee) {
         this.callee = AssertionUtils.notNull(callee, "Callee");
+        this.callee.setParent(this);
         return this;
     }
 
     public Swc4jAstOptCall setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
         this.typeArgs = Optional.ofNullable(typeArgs);
+        this.typeArgs.ifPresent(node -> node.setParent(this));
         return this;
     }
 

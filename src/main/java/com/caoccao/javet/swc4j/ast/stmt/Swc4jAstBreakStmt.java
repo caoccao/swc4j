@@ -18,11 +18,11 @@ package com.caoccao.javet.swc4j.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
+import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
@@ -45,7 +45,6 @@ public class Swc4jAstBreakStmt
             Swc4jSpan span) {
         super(span);
         setLabel(label);
-        updateParent();
     }
 
     @Override
@@ -65,8 +64,18 @@ public class Swc4jAstBreakStmt
         return Swc4jAstType.BreakStmt;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (label.isPresent() && label.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstIdent)) {
+            setLabel((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstBreakStmt setLabel(Swc4jAstIdent label) {
         this.label = Optional.ofNullable(label);
+        this.label.ifPresent(node -> node.setParent(this));
         return this;
     }
 

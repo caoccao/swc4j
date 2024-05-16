@@ -32,6 +32,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstArrayLit
@@ -44,13 +45,10 @@ public class Swc4jAstArrayLit
             List<Swc4jAstExprOrSpread> elems,
             Swc4jSpan span) {
         super(span);
-        this.elems = SimpleList.of();
-        AssertionUtils.notNull(elems, "Elems").stream()
+        this.elems = AssertionUtils.notNull(elems, "Elems").stream()
                 .map(Optional::ofNullable)
-                .forEach(elem -> {
-                    elem.ifPresent(node -> node.setParent(this));
-                    this.elems.add(elem);
-                });
+                .collect(Collectors.toList());
+        this.elems.stream().filter(Optional::isPresent).map(Optional::get).forEach(node -> node.setParent(this));
     }
 
     @Override

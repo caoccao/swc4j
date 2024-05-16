@@ -45,9 +45,9 @@ public class Swc4jAstParam
             ISwc4jAstPat pat,
             Swc4jSpan span) {
         super(span);
-        this.decorators = AssertionUtils.notNull(decorators, "Decorators");
         setPat(pat);
-        updateParent();
+        this.decorators = AssertionUtils.notNull(decorators, "Decorators");
+        this.decorators.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -72,8 +72,28 @@ public class Swc4jAstParam
         return Swc4jAstType.Param;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (pat == oldNode && newNode instanceof ISwc4jAstPat) {
+            setPat((ISwc4jAstPat) newNode);
+            return true;
+        }
+        if (!decorators.isEmpty() && newNode instanceof Swc4jAstDecorator) {
+            final int size = decorators.size();
+            for (int i = 0; i < size; i++) {
+                if (decorators.get(i) == oldNode) {
+                    decorators.set(i, (Swc4jAstDecorator) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public Swc4jAstParam setPat(ISwc4jAstPat pat) {
         this.pat = AssertionUtils.notNull(pat, "Pat");
+        this.pat.setParent(this);
         return this;
     }
 

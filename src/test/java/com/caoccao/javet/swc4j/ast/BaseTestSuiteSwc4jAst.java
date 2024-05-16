@@ -64,9 +64,9 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
     protected void assertSpan(String code, ISwc4jAst node) {
         if (node != null) {
             if (node instanceof ISwc4jAstProgram) {
-                assertNull(node.getParent());
+                assertNull(node.getParent(), node.getClass().getSimpleName() + "'s parent shouldn be null");
             } else {
-                assertNotNull(node.getParent());
+                assertNotNull(node.getParent(), node.getClass().getSimpleName() + "'s parent shouldn't be null");
             }
             String text = null;
             switch (node.getType()) {

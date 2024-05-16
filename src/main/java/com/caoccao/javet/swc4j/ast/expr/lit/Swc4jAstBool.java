@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPrimitiveCoercion;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -33,7 +34,7 @@ import java.util.List;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstBool
         extends Swc4jAst
-        implements ISwc4jAstLit, ISwc4jAstTsLit {
+        implements ISwc4jAstLit, ISwc4jAstTsLit, ISwc4jAstPrimitiveCoercion {
     protected boolean value;
 
     @Jni2RustMethod
@@ -46,6 +47,46 @@ public class Swc4jAstBool
 
     public static Swc4jAstBool create(boolean value) {
         return new Swc4jAstBool(value, Swc4jSpan.DUMMY);
+    }
+
+    @Override
+    public boolean asBoolean() {
+        return value;
+    }
+
+    @Override
+    public byte asByte() {
+        return (byte) asInt();
+    }
+
+    @Override
+    public double asDouble() {
+        return asInt();
+    }
+
+    @Override
+    public float asFloat() {
+        return asInt();
+    }
+
+    @Override
+    public int asInt() {
+        return value ? 1 : 0;
+    }
+
+    @Override
+    public long asLong() {
+        return asInt();
+    }
+
+    @Override
+    public short asShort() {
+        return (short) asInt();
+    }
+
+    @Override
+    public String asString() {
+        return toString();
     }
 
     @Override

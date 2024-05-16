@@ -57,7 +57,6 @@ public class Swc4jAstTsGetterSignature
         setOptional(optional);
         setReadonly(readonly);
         setTypeAnn(typeAnn);
-        updateParent();
     }
 
     @Override
@@ -97,6 +96,19 @@ public class Swc4jAstTsGetterSignature
         return readonly;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (key == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setKey((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+            setTypeAnn((Swc4jAstTsTypeAnn) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsGetterSignature setComputed(boolean computed) {
         this.computed = computed;
         return this;
@@ -104,6 +116,7 @@ public class Swc4jAstTsGetterSignature
 
     public Swc4jAstTsGetterSignature setKey(ISwc4jAstExpr key) {
         this.key = AssertionUtils.notNull(key, "Key");
+        this.key.setParent(this);
         return this;
     }
 
@@ -119,6 +132,7 @@ public class Swc4jAstTsGetterSignature
 
     public Swc4jAstTsGetterSignature setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
+        this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 

@@ -60,6 +60,11 @@ public class Swc4jAstMetaPropExpr
         return Swc4jAstType.MetaPropExpr;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
     public Swc4jAstMetaPropExpr setKind(Swc4jAstMetaPropKind kind) {
         this.kind = AssertionUtils.notNull(kind, "Kind");
         return this;

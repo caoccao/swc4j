@@ -51,7 +51,6 @@ public class Swc4jAstImportNamedSpecifier
         setImported(imported);
         setLocal(local);
         setTypeOnly(typeOnly);
-        updateParent();
     }
 
     @Override
@@ -81,13 +80,28 @@ public class Swc4jAstImportNamedSpecifier
         return typeOnly;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (imported.isPresent() && imported.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstModuleExportName)) {
+            setImported((ISwc4jAstModuleExportName) newNode);
+            return true;
+        }
+        if (local == oldNode && newNode instanceof Swc4jAstIdent) {
+            setLocal((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstImportNamedSpecifier setImported(ISwc4jAstModuleExportName imported) {
         this.imported = Optional.ofNullable(imported);
+        this.imported.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstImportNamedSpecifier setLocal(Swc4jAstIdent local) {
         this.local = AssertionUtils.notNull(local, "Local");
+        this.local.setParent(this);
         return this;
     }
 

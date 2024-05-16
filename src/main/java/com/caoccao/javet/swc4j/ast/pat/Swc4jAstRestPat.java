@@ -53,7 +53,6 @@ public class Swc4jAstRestPat
         setArg(arg);
         setDot3Token(dot3Token);
         setTypeAnn(typeAnn);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -83,8 +82,22 @@ public class Swc4jAstRestPat
         return typeAnn;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (arg == oldNode && newNode instanceof ISwc4jAstPat) {
+            setArg((ISwc4jAstPat) newNode);
+            return true;
+        }
+        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+            setTypeAnn((Swc4jAstTsTypeAnn) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstRestPat setArg(ISwc4jAstPat arg) {
         this.arg = AssertionUtils.notNull(arg, "Expr");
+        this.arg.setParent(this);
         return this;
     }
 
@@ -95,6 +108,7 @@ public class Swc4jAstRestPat
 
     public Swc4jAstRestPat setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
+        this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 

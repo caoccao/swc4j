@@ -45,7 +45,6 @@ public class Swc4jAstTsParenthesizedType
             Swc4jSpan span) {
         super(span);
         setTypeAnn(typeAnn);
-        updateParent();
     }
 
     @Override
@@ -63,8 +62,18 @@ public class Swc4jAstTsParenthesizedType
         return typeAnn;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (typeAnn == oldNode && newNode instanceof ISwc4jAstTsType) {
+            setTypeAnn((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsParenthesizedType setTypeAnn(ISwc4jAstTsType typeAnn) {
         this.typeAnn = AssertionUtils.notNull(typeAnn, "Type ann");
+        this.typeAnn.setParent(this);
         return this;
     }
 

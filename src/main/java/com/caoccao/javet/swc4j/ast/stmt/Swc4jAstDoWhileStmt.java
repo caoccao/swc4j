@@ -50,7 +50,6 @@ public class Swc4jAstDoWhileStmt
         super(span);
         setBody(body);
         setTest(test);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -73,13 +72,28 @@ public class Swc4jAstDoWhileStmt
         return Swc4jAstType.DoWhileStmt;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body == oldNode && newNode instanceof ISwc4jAstStmt) {
+            setBody((ISwc4jAstStmt) newNode);
+            return true;
+        }
+        if (test == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setTest((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstDoWhileStmt setBody(ISwc4jAstStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
+        this.body.setParent(this);
         return this;
     }
 
     public Swc4jAstDoWhileStmt setTest(ISwc4jAstExpr test) {
         this.test = AssertionUtils.notNull(test, "Test");
+        this.test.setParent(this);
         return this;
     }
 

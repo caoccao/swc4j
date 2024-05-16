@@ -60,6 +60,11 @@ public class Swc4jAstImport
         return Swc4jAstType.Import;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
     public Swc4jAstImport setPhase(Swc4jAstImportPhase phase) {
         this.phase = AssertionUtils.notNull(phase, "Phase");
         return this;

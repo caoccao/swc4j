@@ -60,12 +60,13 @@ public class Swc4jAstFunction
         super(span);
         setAsync(_async);
         setBody(body);
-        this.decorators = AssertionUtils.notNull(decorators, "Decorators");
         setGenerator(generator);
-        this.params = AssertionUtils.notNull(params, "Params");
         setReturnType(returnType);
         setTypeParams(typeParams);
-        updateParent();
+        this.decorators = AssertionUtils.notNull(decorators, "Decorators");
+        this.decorators.forEach(node -> node.setParent(this));
+        this.params = AssertionUtils.notNull(params, "Params");
+        this.params.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -118,6 +119,43 @@ public class Swc4jAstFunction
         return generator;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body.isPresent() && body.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstBlockStmt)) {
+            setBody((Swc4jAstBlockStmt) newNode);
+            return true;
+        }
+        if (!decorators.isEmpty() && newNode instanceof Swc4jAstDecorator) {
+            final int size = decorators.size();
+            for (int i = 0; i < size; i++) {
+                if (decorators.get(i) == oldNode) {
+                    decorators.set(i, (Swc4jAstDecorator) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (!params.isEmpty() && newNode instanceof Swc4jAstParam) {
+            final int size = params.size();
+            for (int i = 0; i < size; i++) {
+                if (params.get(i) == oldNode) {
+                    params.set(i, (Swc4jAstParam) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (returnType.isPresent() && returnType.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+            setReturnType((Swc4jAstTsTypeAnn) newNode);
+            return true;
+        }
+        if (typeParams.isPresent() && typeParams.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamDecl)) {
+            setTypeParams((Swc4jAstTsTypeParamDecl) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstFunction setAsync(boolean _async) {
         this._async = _async;
         return this;
@@ -125,6 +163,7 @@ public class Swc4jAstFunction
 
     public Swc4jAstFunction setBody(Swc4jAstBlockStmt body) {
         this.body = Optional.ofNullable(body);
+        this.body.ifPresent(node -> node.setParent(this));
         return this;
     }
 
@@ -135,11 +174,13 @@ public class Swc4jAstFunction
 
     public Swc4jAstFunction setReturnType(Swc4jAstTsTypeAnn returnType) {
         this.returnType = Optional.ofNullable(returnType);
+        this.returnType.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstFunction setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
+        this.typeParams.ifPresent(node -> node.setParent(this));
         return this;
     }
 

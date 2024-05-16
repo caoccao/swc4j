@@ -52,7 +52,6 @@ public class Swc4jAstExportAll
         setSrc(src);
         setTypeOnly(typeOnly);
         setWith(with);
-        updateParent();
     }
 
     @Override
@@ -82,8 +81,22 @@ public class Swc4jAstExportAll
         return typeOnly;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (src == oldNode && newNode instanceof Swc4jAstStr) {
+            setSrc((Swc4jAstStr) newNode);
+            return true;
+        }
+        if (with.isPresent() && with.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstObjectLit)) {
+            setWith((Swc4jAstObjectLit) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstExportAll setSrc(Swc4jAstStr src) {
         this.src = AssertionUtils.notNull(src, "Src");
+        this.src.setParent(this);
         return this;
     }
 
@@ -94,6 +107,7 @@ public class Swc4jAstExportAll
 
     public Swc4jAstExportAll setWith(Swc4jAstObjectLit with) {
         this.with = Optional.ofNullable(with);
+        this.with.ifPresent(node -> node.setParent(this));
         return this;
     }
 

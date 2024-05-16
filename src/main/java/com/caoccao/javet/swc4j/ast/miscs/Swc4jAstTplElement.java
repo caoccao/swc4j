@@ -74,6 +74,11 @@ public class Swc4jAstTplElement
         return tail;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
     public Swc4jAstTplElement setCooked(String cooked) {
         this.cooked = Optional.ofNullable(cooked);
         return this;

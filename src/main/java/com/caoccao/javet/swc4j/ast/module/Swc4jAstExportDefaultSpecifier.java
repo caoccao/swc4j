@@ -45,7 +45,6 @@ public class Swc4jAstExportDefaultSpecifier
             Swc4jSpan span) {
         super(span);
         setExported(exported);
-        updateParent();
     }
 
     @Override
@@ -63,8 +62,18 @@ public class Swc4jAstExportDefaultSpecifier
         return Swc4jAstType.ExportDefaultSpecifier;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (exported == oldNode && newNode instanceof Swc4jAstIdent) {
+            setExported((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstExportDefaultSpecifier setExported(Swc4jAstIdent exported) {
         this.exported = AssertionUtils.notNull(exported, "Exported");
+        this.exported.setParent(this);
         return this;
     }
 

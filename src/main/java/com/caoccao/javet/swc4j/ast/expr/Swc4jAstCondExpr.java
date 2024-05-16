@@ -53,7 +53,6 @@ public class Swc4jAstCondExpr
         setAlt(alt);
         setCons(cons);
         setTest(test);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -81,18 +80,38 @@ public class Swc4jAstCondExpr
         return Swc4jAstType.CondExpr;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (alt == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setAlt((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (cons == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setCons((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (test == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setTest((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstCondExpr setAlt(ISwc4jAstExpr alt) {
         this.alt = AssertionUtils.notNull(alt, "Alt");
+        this.alt.setParent(this);
         return this;
     }
 
     public Swc4jAstCondExpr setCons(ISwc4jAstExpr cons) {
         this.cons = AssertionUtils.notNull(cons, "Cons");
+        this.cons.setParent(this);
         return this;
     }
 
     public Swc4jAstCondExpr setTest(ISwc4jAstExpr test) {
         this.test = AssertionUtils.notNull(test, "Test");
+        this.test.setParent(this);
         return this;
     }
 

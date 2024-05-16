@@ -70,7 +70,6 @@ public class Swc4jAstPrivateMethod
         setOptional(optional);
         setOverride(_override);
         setStatic(_static);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -123,6 +122,19 @@ public class Swc4jAstPrivateMethod
         return _static;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (function == oldNode && newNode instanceof Swc4jAstFunction) {
+            setFunction((Swc4jAstFunction) newNode);
+            return true;
+        }
+        if (key == oldNode && newNode instanceof Swc4jAstPrivateName) {
+            setKey((Swc4jAstPrivateName) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstPrivateMethod setAbstract(boolean _abstract) {
         this._abstract = _abstract;
         return this;
@@ -135,11 +147,13 @@ public class Swc4jAstPrivateMethod
 
     public Swc4jAstPrivateMethod setFunction(Swc4jAstFunction function) {
         this.function = AssertionUtils.notNull(function, "Function");
+        this.function.setParent(this);
         return this;
     }
 
     public Swc4jAstPrivateMethod setKey(Swc4jAstPrivateName key) {
         this.key = AssertionUtils.notNull(key, "Key");
+        this.key.setParent(this);
         return this;
     }
 

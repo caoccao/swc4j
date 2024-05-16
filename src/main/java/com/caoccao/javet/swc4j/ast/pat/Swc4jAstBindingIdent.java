@@ -47,7 +47,6 @@ public class Swc4jAstBindingIdent
         super(span);
         setId(id);
         setTypeAnn(typeAnn);
-        updateParent();
     }
 
     @Override
@@ -72,13 +71,28 @@ public class Swc4jAstBindingIdent
         return typeAnn;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (id == oldNode && newNode instanceof Swc4jAstIdent) {
+            setId((Swc4jAstIdent) newNode);
+            return true;
+        }
+        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+            setTypeAnn((Swc4jAstTsTypeAnn) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstBindingIdent setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
+        this.id.setParent(this);
         return this;
     }
 
     public Swc4jAstBindingIdent setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
+        this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 

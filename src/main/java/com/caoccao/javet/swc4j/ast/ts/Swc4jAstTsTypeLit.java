@@ -44,7 +44,7 @@ public class Swc4jAstTsTypeLit
             Swc4jSpan span) {
         super(span);
         this.members = AssertionUtils.notNull(members, "Members");
-        updateParent();
+        this.members.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -60,6 +60,21 @@ public class Swc4jAstTsTypeLit
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.TsTypeLit;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!members.isEmpty() && newNode instanceof ISwc4jAstTsTypeElement) {
+            final int size = members.size();
+            for (int i = 0; i < size; i++) {
+                if (members.get(i) == oldNode) {
+                    members.set(i, (ISwc4jAstTsTypeElement) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

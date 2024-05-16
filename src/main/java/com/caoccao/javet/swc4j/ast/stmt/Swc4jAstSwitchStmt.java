@@ -50,7 +50,7 @@ public class Swc4jAstSwitchStmt
         super(span);
         setDiscriminant(discriminant);
         this.cases = AssertionUtils.notNull(cases, "Cases");
-        updateParent();
+        this.cases.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -75,8 +75,28 @@ public class Swc4jAstSwitchStmt
         return Swc4jAstType.SwitchStmt;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!cases.isEmpty() && newNode instanceof Swc4jAstSwitchCase) {
+            final int size = cases.size();
+            for (int i = 0; i < size; i++) {
+                if (cases.get(i) == oldNode) {
+                    cases.set(i, (Swc4jAstSwitchCase) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (discriminant == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setDiscriminant((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstSwitchStmt setDiscriminant(ISwc4jAstExpr discriminant) {
         this.discriminant = AssertionUtils.notNull(discriminant, "Discriminant");
+        this.discriminant.setParent(this);
         return this;
     }
 

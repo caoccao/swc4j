@@ -52,7 +52,6 @@ public class Swc4jAstIfStmt
         setAlt(alt);
         setCons(cons);
         setTest(test);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -82,18 +81,38 @@ public class Swc4jAstIfStmt
         return Swc4jAstType.IfStmt;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (alt.isPresent() && alt.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstStmt)) {
+            setAlt((ISwc4jAstStmt) newNode);
+            return true;
+        }
+        if (cons == oldNode && newNode instanceof ISwc4jAstStmt) {
+            setCons((ISwc4jAstStmt) newNode);
+            return true;
+        }
+        if (test == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setTest((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstIfStmt setAlt(ISwc4jAstStmt alt) {
         this.alt = Optional.ofNullable(alt);
+        this.alt.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstIfStmt setCons(ISwc4jAstStmt cons) {
         this.cons = AssertionUtils.notNull(cons, "Body");
+        this.cons.setParent(this);
         return this;
     }
 
     public Swc4jAstIfStmt setTest(ISwc4jAstExpr test) {
         this.test = AssertionUtils.notNull(test, "Right");
+        this.test.setParent(this);
         return this;
     }
 

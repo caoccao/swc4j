@@ -55,7 +55,6 @@ public class Swc4jAstTsNamespaceDecl
         setDeclare(declare);
         setGlobal(global);
         setId(id);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -88,8 +87,22 @@ public class Swc4jAstTsNamespaceDecl
         return global;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body == oldNode && newNode instanceof ISwc4jAstTsNamespaceBody) {
+            setBody((ISwc4jAstTsNamespaceBody) newNode);
+            return true;
+        }
+        if (id == oldNode && newNode instanceof Swc4jAstIdent) {
+            setId((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsNamespaceDecl setBody(ISwc4jAstTsNamespaceBody body) {
         this.body = AssertionUtils.notNull(body, "Body");
+        this.body.setParent(this);
         return this;
     }
 
@@ -105,6 +118,7 @@ public class Swc4jAstTsNamespaceDecl
 
     public Swc4jAstTsNamespaceDecl setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
+        this.id.setParent(this);
         return this;
     }
 

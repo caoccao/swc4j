@@ -48,8 +48,9 @@ public class Swc4jAstTpl
             Swc4jSpan span) {
         super(span);
         this.exprs = AssertionUtils.notNull(exprs, "Exprs");
+        this.exprs.forEach(node -> node.setParent(this));
         this.quasis = AssertionUtils.notNull(quasis, "Quasis");
-        updateParent();
+        this.quasis.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -72,6 +73,31 @@ public class Swc4jAstTpl
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.Tpl;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!exprs.isEmpty() && newNode instanceof ISwc4jAstExpr) {
+            final int size = exprs.size();
+            for (int i = 0; i < size; i++) {
+                if (exprs.get(i) == oldNode) {
+                    exprs.set(i, (ISwc4jAstExpr) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (!quasis.isEmpty() && newNode instanceof Swc4jAstTplElement) {
+            final int size = quasis.size();
+            for (int i = 0; i < size; i++) {
+                if (quasis.get(i) == oldNode) {
+                    quasis.set(i, (Swc4jAstTplElement) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

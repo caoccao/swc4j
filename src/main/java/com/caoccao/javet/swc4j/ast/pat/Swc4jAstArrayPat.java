@@ -52,7 +52,7 @@ public class Swc4jAstArrayPat
         this.elems = AssertionUtils.notNull(elems, "Elems").stream()
                 .map(Optional::ofNullable)
                 .collect(Collectors.toList());
-        updateParent();
+        this.elems.stream().filter(Optional::isPresent).map(Optional::get).forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -86,6 +86,27 @@ public class Swc4jAstArrayPat
         return optional;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!elems.isEmpty() && (newNode == null || newNode instanceof ISwc4jAstPat)) {
+            final int size = elems.size();
+            for (int i = 0; i < size; i++) {
+                Optional<ISwc4jAstPat> optionalOldElem = elems.get(i);
+                if (optionalOldElem.isPresent() && optionalOldElem.get() == oldNode) {
+                    Optional<ISwc4jAstPat> optionalNewElem = Optional.ofNullable((ISwc4jAstPat) newNode);
+                    optionalNewElem.ifPresent(node -> node.setParent(this));
+                    elems.set(i, optionalNewElem);
+                    return true;
+                }
+            }
+        }
+        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+            setTypeAnn((Swc4jAstTsTypeAnn) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstArrayPat setOptional(boolean optional) {
         this.optional = optional;
         return this;
@@ -93,6 +114,7 @@ public class Swc4jAstArrayPat
 
     public Swc4jAstArrayPat setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
+        this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 

@@ -59,7 +59,6 @@ public class Swc4jAstTsSetterSignature
         setOptional(optional);
         setParam(param);
         setReadonly(readonly);
-        updateParent();
     }
 
     @Override
@@ -97,6 +96,19 @@ public class Swc4jAstTsSetterSignature
         return readonly;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (key == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setKey((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (param == oldNode && newNode instanceof ISwc4jAstTsFnParam) {
+            setParam((ISwc4jAstTsFnParam) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsSetterSignature setComputed(boolean computed) {
         this.computed = computed;
         return this;
@@ -104,6 +116,7 @@ public class Swc4jAstTsSetterSignature
 
     public Swc4jAstTsSetterSignature setKey(ISwc4jAstExpr key) {
         this.key = AssertionUtils.notNull(key, "Key");
+        this.key.setParent(this);
         return this;
     }
 
@@ -114,6 +127,7 @@ public class Swc4jAstTsSetterSignature
 
     public Swc4jAstTsSetterSignature setParam(ISwc4jAstTsFnParam param) {
         this.param = AssertionUtils.notNull(param, "Param");
+        this.param.setParent(this);
         return this;
     }
 

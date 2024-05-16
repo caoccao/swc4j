@@ -45,7 +45,6 @@ public class Swc4jAstExprOrSpread
         super(span);
         setExpr(expr);
         setSpread(spread);
-        updateParent();
     }
 
     @Override
@@ -68,8 +67,18 @@ public class Swc4jAstExprOrSpread
         return Swc4jAstType.ExprOrSpread;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (expr == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setExpr((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstExprOrSpread setExpr(ISwc4jAstExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
+        this.expr.setParent(this);
         return this;
     }
 

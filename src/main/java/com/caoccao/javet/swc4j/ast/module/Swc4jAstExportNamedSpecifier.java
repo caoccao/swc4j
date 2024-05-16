@@ -50,7 +50,6 @@ public class Swc4jAstExportNamedSpecifier
         setExported(exported);
         setOrig(orig);
         setTypeOnly(typeOnly);
-        updateParent();
     }
 
     @Override
@@ -80,13 +79,28 @@ public class Swc4jAstExportNamedSpecifier
         return typeOnly;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (exported.isPresent() && exported.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstModuleExportName)) {
+            setExported((ISwc4jAstModuleExportName) newNode);
+            return true;
+        }
+        if (orig == oldNode && newNode instanceof ISwc4jAstModuleExportName) {
+            setOrig((ISwc4jAstModuleExportName) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstExportNamedSpecifier setExported(ISwc4jAstModuleExportName exported) {
         this.exported = Optional.ofNullable(exported);
+        this.exported.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstExportNamedSpecifier setOrig(ISwc4jAstModuleExportName orig) {
         this.orig = AssertionUtils.notNull(orig, "Orig");
+        this.orig.setParent(this);
         return this;
     }
 

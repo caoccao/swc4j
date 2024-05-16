@@ -60,7 +60,7 @@ public class Swc4jAstTsInterfaceDecl
         setId(id);
         setTypeParams(typeParams);
         this._extends = AssertionUtils.notNull(_extends, "Extends");
-        updateParent();
+        this._extends.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -102,8 +102,36 @@ public class Swc4jAstTsInterfaceDecl
         return declare;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body == oldNode && newNode instanceof Swc4jAstTsInterfaceBody) {
+            setBody((Swc4jAstTsInterfaceBody) newNode);
+            return true;
+        }
+        if (!_extends.isEmpty() && newNode instanceof Swc4jAstTsExprWithTypeArgs) {
+            final int size = _extends.size();
+            for (int i = 0; i < size; i++) {
+                if (_extends.get(i) == oldNode) {
+                    _extends.set(i, (Swc4jAstTsExprWithTypeArgs) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (id == oldNode && newNode instanceof Swc4jAstIdent) {
+            setId((Swc4jAstIdent) newNode);
+            return true;
+        }
+        if (typeParams.isPresent() && typeParams.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamDecl)) {
+            setTypeParams((Swc4jAstTsTypeParamDecl) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsInterfaceDecl setBody(Swc4jAstTsInterfaceBody body) {
         this.body = AssertionUtils.notNull(body, "Body");
+        this.body.setParent(this);
         return this;
     }
 
@@ -114,11 +142,13 @@ public class Swc4jAstTsInterfaceDecl
 
     public Swc4jAstTsInterfaceDecl setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
+        this.id.setParent(this);
         return this;
     }
 
     public Swc4jAstTsInterfaceDecl setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
+        this.typeParams.ifPresent(node -> node.setParent(this));
         return this;
     }
 

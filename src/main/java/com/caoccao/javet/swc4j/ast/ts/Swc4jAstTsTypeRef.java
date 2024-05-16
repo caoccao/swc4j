@@ -47,7 +47,6 @@ public class Swc4jAstTsTypeRef
         super(span);
         setTypeName(typeName);
         setTypeParams(typeParams);
-        updateParent();
     }
 
     @Override
@@ -72,13 +71,28 @@ public class Swc4jAstTsTypeRef
         return typeParams;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (typeName == oldNode && newNode instanceof ISwc4jAstTsEntityName) {
+            setTypeName((ISwc4jAstTsEntityName) newNode);
+            return true;
+        }
+        if (typeParams.isPresent() && typeParams.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamInstantiation)) {
+            setTypeParams((Swc4jAstTsTypeParamInstantiation) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsTypeRef setTypeName(ISwc4jAstTsEntityName typeName) {
         this.typeName = AssertionUtils.notNull(typeName, "ExprName");
+        this.typeName.setParent(this);
         return this;
     }
 
     public Swc4jAstTsTypeRef setTypeParams(Swc4jAstTsTypeParamInstantiation typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
+        this.typeParams.ifPresent(node -> node.setParent(this));
         return this;
     }
 

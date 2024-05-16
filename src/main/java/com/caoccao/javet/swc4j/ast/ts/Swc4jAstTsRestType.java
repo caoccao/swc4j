@@ -45,7 +45,6 @@ public class Swc4jAstTsRestType
             Swc4jSpan span) {
         super(span);
         setTypeAnn(typeAnn);
-        updateParent();
     }
 
     @Override
@@ -63,8 +62,18 @@ public class Swc4jAstTsRestType
         return typeAnn;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (typeAnn == oldNode && newNode instanceof ISwc4jAstTsType) {
+            setTypeAnn((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsRestType setTypeAnn(ISwc4jAstTsType typeAnn) {
         this.typeAnn = AssertionUtils.notNull(typeAnn, "Type ann");
+        this.typeAnn.setParent(this);
         return this;
     }
 

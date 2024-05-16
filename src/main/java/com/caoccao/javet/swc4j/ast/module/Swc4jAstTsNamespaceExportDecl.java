@@ -44,7 +44,6 @@ public class Swc4jAstTsNamespaceExportDecl
             Swc4jSpan span) {
         super(span);
         setId(id);
-        updateParent();
     }
 
     @Override
@@ -62,8 +61,18 @@ public class Swc4jAstTsNamespaceExportDecl
         return Swc4jAstType.TsNamespaceExportDecl;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (id == oldNode && newNode instanceof Swc4jAstIdent) {
+            setId((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsNamespaceExportDecl setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
+        this.id.setParent(this);
         return this;
     }
 

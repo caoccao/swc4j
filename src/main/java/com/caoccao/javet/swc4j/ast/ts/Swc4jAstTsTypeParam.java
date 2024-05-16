@@ -62,7 +62,6 @@ public class Swc4jAstTsTypeParam
         setIn(in);
         setName(name);
         setOut(out);
-        updateParent();
     }
 
     @Override
@@ -108,6 +107,23 @@ public class Swc4jAstTsTypeParam
         return out;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (_default.isPresent() && _default.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstTsType)) {
+            setDefault((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        if (constraint.isPresent() && constraint.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstTsType)) {
+            setConstraint((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        if (name == oldNode && newNode instanceof Swc4jAstIdent) {
+            setName((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsTypeParam setConst(boolean _const) {
         this._const = _const;
         return this;
@@ -115,11 +131,13 @@ public class Swc4jAstTsTypeParam
 
     public Swc4jAstTsTypeParam setConstraint(ISwc4jAstTsType constraint) {
         this.constraint = Optional.ofNullable(constraint);
+        this.constraint.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstTsTypeParam setDefault(ISwc4jAstTsType _default) {
         this._default = Optional.ofNullable(_default);
+        this._default.ifPresent(node -> node.setParent(this));
         return this;
     }
 
@@ -130,6 +148,7 @@ public class Swc4jAstTsTypeParam
 
     public Swc4jAstTsTypeParam setName(Swc4jAstIdent name) {
         this.name = AssertionUtils.notNull(name, "Name");
+        this.name.setParent(this);
         return this;
     }
 

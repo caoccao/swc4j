@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.ast.program;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstDecorator;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
@@ -70,7 +71,7 @@ public class Swc4jAstScript
         super(span);
         setShebang(shebang);
         this.body = AssertionUtils.notNull(body, "Body");
-        updateParent();
+        this.body.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -93,6 +94,21 @@ public class Swc4jAstScript
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.Script;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!body.isEmpty() && newNode instanceof ISwc4jAstStmt) {
+            final int size = body.size();
+            for (int i = 0; i < size; i++) {
+                if (body.get(i) == oldNode) {
+                    body.set(i, (ISwc4jAstStmt) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public Swc4jAstScript setShebang(String shebang) {

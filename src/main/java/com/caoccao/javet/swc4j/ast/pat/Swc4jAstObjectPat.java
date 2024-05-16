@@ -49,7 +49,7 @@ public class Swc4jAstObjectPat
         setOptional(optional);
         setTypeAnn(typeAnn);
         this.props = AssertionUtils.notNull(props, "Props");
-        updateParent();
+        this.props.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -79,6 +79,25 @@ public class Swc4jAstObjectPat
         return optional;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!props.isEmpty() && newNode instanceof ISwc4jAstObjectPatProp) {
+            final int size = props.size();
+            for (int i = 0; i < size; i++) {
+                if (props.get(i) == oldNode) {
+                    props.set(i, (ISwc4jAstObjectPatProp) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+            setTypeAnn((Swc4jAstTsTypeAnn) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstObjectPat setOptional(boolean optional) {
         this.optional = optional;
         return this;
@@ -86,6 +105,7 @@ public class Swc4jAstObjectPat
 
     public Swc4jAstObjectPat setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
+        this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 

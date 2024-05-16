@@ -53,7 +53,6 @@ public class Swc4jAstFnDecl
         setDeclare(declare);
         setFunction(function);
         setIdent(ident);
-        updateParent();
     }
 
     @Override
@@ -81,6 +80,19 @@ public class Swc4jAstFnDecl
         return declare;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (function == oldNode && newNode instanceof Swc4jAstFunction) {
+            setFunction((Swc4jAstFunction) newNode);
+            return true;
+        }
+        if (ident == oldNode && newNode instanceof Swc4jAstIdent) {
+            setIdent((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstFnDecl setDeclare(boolean declare) {
         this.declare = declare;
         return this;
@@ -88,11 +100,13 @@ public class Swc4jAstFnDecl
 
     public Swc4jAstFnDecl setFunction(Swc4jAstFunction function) {
         this.function = AssertionUtils.notNull(function, "Function");
+        this.function.setParent(this);
         return this;
     }
 
     public Swc4jAstFnDecl setIdent(Swc4jAstIdent ident) {
         this.ident = AssertionUtils.notNull(ident, "Ident");
+        this.ident.setParent(this);
         return this;
     }
 

@@ -48,7 +48,6 @@ public class Swc4jAstJsxMemberExpr
         super(span);
         setObj(obj);
         setProp(prop);
-        updateParent();
     }
 
     @Override
@@ -71,13 +70,28 @@ public class Swc4jAstJsxMemberExpr
         return Swc4jAstType.JsxMemberExpr;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (obj == oldNode && newNode instanceof ISwc4jAstJsxObject) {
+            setObj((ISwc4jAstJsxObject) newNode);
+            return true;
+        }
+        if (prop == oldNode && newNode instanceof Swc4jAstIdent) {
+            setProp((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstJsxMemberExpr setObj(ISwc4jAstJsxObject obj) {
         this.obj = AssertionUtils.notNull(obj, "Obj");
+        this.obj.setParent(this);
         return this;
     }
 
     public Swc4jAstJsxMemberExpr setProp(Swc4jAstIdent prop) {
         this.prop = AssertionUtils.notNull(prop, "Prop");
+        this.prop.setParent(this);
         return this;
     }
 

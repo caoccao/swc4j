@@ -50,6 +50,11 @@ public class Swc4jAstThisExpr
     }
 
     @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
+    @Override
     public String toString() {
         return "this";
     }

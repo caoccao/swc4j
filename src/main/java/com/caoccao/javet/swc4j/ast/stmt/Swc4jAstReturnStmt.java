@@ -43,7 +43,6 @@ public class Swc4jAstReturnStmt
             Swc4jSpan span) {
         super(span);
         setArg(arg);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -63,8 +62,18 @@ public class Swc4jAstReturnStmt
         return Swc4jAstType.ReturnStmt;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (arg.isPresent() && arg.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+            setArg((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstReturnStmt setArg(ISwc4jAstExpr arg) {
         this.arg = Optional.ofNullable(arg);
+        this.arg.ifPresent(node -> node.setParent(this));
         return this;
     }
 

@@ -51,6 +51,11 @@ public class Swc4jAstTsThisType
     }
 
     @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
+    @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
         switch (visitor.visitTsThisType(this)) {
             case Error:

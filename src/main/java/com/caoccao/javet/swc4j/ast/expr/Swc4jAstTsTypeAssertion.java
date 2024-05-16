@@ -78,7 +78,8 @@ public class Swc4jAstTsTypeAssertion
         if (expr == oldNode && newNode instanceof ISwc4jAstExpr) {
             setExpr((ISwc4jAstExpr) newNode);
             return true;
-        } else if (typeAnn == oldNode && newNode instanceof ISwc4jAstTsType) {
+        }
+        if (typeAnn == oldNode && newNode instanceof ISwc4jAstTsType) {
             setTypeAnn((ISwc4jAstTsType) newNode);
             return true;
         }

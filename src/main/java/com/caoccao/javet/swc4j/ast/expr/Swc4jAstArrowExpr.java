@@ -66,7 +66,7 @@ public class Swc4jAstArrowExpr
         setReturnType(returnType);
         setTypeParams(typeParams);
         this.params = AssertionUtils.notNull(params, "Params");
-        updateParent();
+        this.params.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -113,6 +113,33 @@ public class Swc4jAstArrowExpr
         return generator;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body == oldNode && newNode instanceof ISwc4jAstBlockStmtOrExpr) {
+            setBody((ISwc4jAstBlockStmtOrExpr) newNode);
+            return true;
+        }
+        if (!params.isEmpty() && newNode instanceof ISwc4jAstPat) {
+            final int size = params.size();
+            for (int i = 0; i < size; i++) {
+                if (params.get(i) == oldNode) {
+                    params.set(i, (ISwc4jAstPat) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (returnType.isPresent() && returnType.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+            setReturnType((Swc4jAstTsTypeAnn) newNode);
+            return true;
+        }
+        if (typeParams.isPresent() && typeParams.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamDecl)) {
+            setTypeParams((Swc4jAstTsTypeParamDecl) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstArrowExpr setAsync(boolean _async) {
         this._async = _async;
         return this;
@@ -120,6 +147,7 @@ public class Swc4jAstArrowExpr
 
     public Swc4jAstArrowExpr setBody(ISwc4jAstBlockStmtOrExpr body) {
         this.body = AssertionUtils.notNull(body, "Body");
+        this.body.setParent(this);
         return this;
     }
 
@@ -130,11 +158,13 @@ public class Swc4jAstArrowExpr
 
     public Swc4jAstArrowExpr setReturnType(Swc4jAstTsTypeAnn returnType) {
         this.returnType = Optional.ofNullable(returnType);
+        this.returnType.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstArrowExpr setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
+        this.typeParams.ifPresent(node -> node.setParent(this));
         return this;
     }
 

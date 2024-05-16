@@ -46,7 +46,7 @@ public class Swc4jAstSwitchCase
         super(span);
         setTest(test);
         this.cons = AssertionUtils.notNull(cons, "Cons");
-        updateParent();
+        this.cons.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -71,8 +71,28 @@ public class Swc4jAstSwitchCase
         return Swc4jAstType.SwitchCase;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!cons.isEmpty() && newNode instanceof ISwc4jAstStmt) {
+            final int size = cons.size();
+            for (int i = 0; i < size; i++) {
+                if (cons.get(i) == oldNode) {
+                    cons.set(i, (ISwc4jAstStmt) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (test.isPresent() && test.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+            setTest((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstSwitchCase setTest(ISwc4jAstExpr test) {
         this.test = Optional.ofNullable(test);
+        this.test.ifPresent(node -> node.setParent(this));
         return this;
     }
 

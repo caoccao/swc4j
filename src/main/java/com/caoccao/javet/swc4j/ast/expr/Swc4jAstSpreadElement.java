@@ -50,7 +50,6 @@ public class Swc4jAstSpreadElement
         super(span);
         setDot3Token(dot3Token);
         setExpr(expr);
-        updateParent();
     }
 
     @Override
@@ -73,6 +72,15 @@ public class Swc4jAstSpreadElement
         return Swc4jAstType.SpreadElement;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (expr == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setExpr((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstSpreadElement setDot3Token(Swc4jSpan dot3Token) {
         this.dot3Token = AssertionUtils.notNull(dot3Token, "Dot3 token");
         return this;
@@ -80,6 +88,7 @@ public class Swc4jAstSpreadElement
 
     public Swc4jAstSpreadElement setExpr(ISwc4jAstExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
+        this.expr.setParent(this);
         return this;
     }
 

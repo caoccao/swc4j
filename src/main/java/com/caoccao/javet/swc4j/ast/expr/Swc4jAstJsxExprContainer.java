@@ -42,7 +42,6 @@ public class Swc4jAstJsxExprContainer
             Swc4jSpan span) {
         super(span);
         setExpr(expr);
-        updateParent();
     }
 
     @Override
@@ -60,8 +59,18 @@ public class Swc4jAstJsxExprContainer
         return Swc4jAstType.JsxExprContainer;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (expr == oldNode && newNode instanceof ISwc4jAstJsxExpr) {
+            setExpr((ISwc4jAstJsxExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstJsxExprContainer setExpr(ISwc4jAstJsxExpr expr) {
         this.expr = AssertionUtils.notNull(expr, "Expr");
+        this.expr.setParent(this);
         return this;
     }
 

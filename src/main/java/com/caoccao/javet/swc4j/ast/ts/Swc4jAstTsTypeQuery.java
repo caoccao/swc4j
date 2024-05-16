@@ -47,7 +47,6 @@ public class Swc4jAstTsTypeQuery
         super(span);
         setExprName(exprName);
         setTypeArgs(typeArgs);
-        updateParent();
     }
 
     @Override
@@ -72,13 +71,28 @@ public class Swc4jAstTsTypeQuery
         return typeArgs;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (exprName == oldNode && newNode instanceof ISwc4jAstTsTypeQueryExpr) {
+            setExprName((ISwc4jAstTsTypeQueryExpr) newNode);
+            return true;
+        }
+        if (typeArgs.isPresent() && typeArgs.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamInstantiation)) {
+            setTypeArgs((Swc4jAstTsTypeParamInstantiation) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsTypeQuery setExprName(ISwc4jAstTsTypeQueryExpr exprName) {
         this.exprName = AssertionUtils.notNull(exprName, "Expr name");
+        this.exprName.setParent(this);
         return this;
     }
 
     public Swc4jAstTsTypeQuery setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
         this.typeArgs = Optional.ofNullable(typeArgs);
+        this.typeArgs.ifPresent(node -> node.setParent(this));
         return this;
     }
 

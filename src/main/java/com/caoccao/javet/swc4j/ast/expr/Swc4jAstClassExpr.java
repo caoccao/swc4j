@@ -48,7 +48,6 @@ public class Swc4jAstClassExpr
         super(span);
         setClazz(clazz);
         setIdent(ident);
-        updateParent();
     }
 
     @Override
@@ -73,13 +72,28 @@ public class Swc4jAstClassExpr
         return Swc4jAstType.ClassExpr;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (clazz == oldNode && newNode instanceof Swc4jAstClass) {
+            setClazz((Swc4jAstClass) newNode);
+            return true;
+        }
+        if (ident.isPresent() && ident.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstIdent)) {
+            setIdent((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstClassExpr setClazz(Swc4jAstClass clazz) {
         this.clazz = AssertionUtils.notNull(clazz, "Class");
+        this.clazz.setParent(this);
         return this;
     }
 
     public Swc4jAstClassExpr setIdent(Swc4jAstIdent ident) {
         this.ident = Optional.ofNullable(ident);
+        this.ident.ifPresent(node -> node.setParent(this));
         return this;
     }
 

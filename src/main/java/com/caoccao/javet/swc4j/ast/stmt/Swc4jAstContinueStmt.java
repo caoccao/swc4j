@@ -45,7 +45,6 @@ public class Swc4jAstContinueStmt
             Swc4jSpan span) {
         super(span);
         setLabel(label);
-        updateParent();
     }
 
     @Override
@@ -65,8 +64,18 @@ public class Swc4jAstContinueStmt
         return Swc4jAstType.ContinueStmt;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (label.isPresent() && label.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstIdent)) {
+            setLabel((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstContinueStmt setLabel(Swc4jAstIdent label) {
         this.label = Optional.ofNullable(label);
+        this.label.ifPresent(node -> node.setParent(this));
         return this;
     }
 

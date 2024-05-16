@@ -45,7 +45,6 @@ public class Swc4jAstTsArrayType
             Swc4jSpan span) {
         super(span);
         setElemType(elemType);
-        updateParent();
     }
 
     @Override
@@ -63,8 +62,18 @@ public class Swc4jAstTsArrayType
         return Swc4jAstType.TsArrayType;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (elemType == oldNode && newNode instanceof ISwc4jAstTsType) {
+            setElemType((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsArrayType setElemType(ISwc4jAstTsType elemType) {
         this.elemType = AssertionUtils.notNull(elemType, "Elem type");
+        this.elemType.setParent(this);
         return this;
     }
 

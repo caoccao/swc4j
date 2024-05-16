@@ -51,7 +51,6 @@ public class Swc4jAstAssignPat
         super(span);
         setLeft(left);
         setRight(right);
-        updateParent();
     }
 
     @Override
@@ -74,13 +73,28 @@ public class Swc4jAstAssignPat
         return Swc4jAstType.AssignPat;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (left == oldNode && newNode instanceof ISwc4jAstPat) {
+            setLeft((ISwc4jAstPat) newNode);
+            return true;
+        }
+        if (right == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setRight((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstAssignPat setLeft(ISwc4jAstPat left) {
         this.left = AssertionUtils.notNull(left, "Left");
+        this.left.setParent(this);
         return this;
     }
 
     public Swc4jAstAssignPat setRight(ISwc4jAstExpr right) {
         this.right = AssertionUtils.notNull(right, "Right");
+        this.right.setParent(this);
         return this;
     }
 

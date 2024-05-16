@@ -50,7 +50,6 @@ public class Swc4jAstKeyValueProp
         super(span);
         setKey(key);
         setValue(value);
-        updateParent();
     }
 
     @Override
@@ -73,13 +72,28 @@ public class Swc4jAstKeyValueProp
         return value;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (key == oldNode && newNode instanceof ISwc4jAstPropName) {
+            setKey((ISwc4jAstPropName) newNode);
+            return true;
+        }
+        if (value == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setValue((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstKeyValueProp setKey(ISwc4jAstPropName key) {
         this.key = AssertionUtils.notNull(key, "Key");
+        this.key.setParent(this);
         return this;
     }
 
     public Swc4jAstKeyValueProp setValue(ISwc4jAstExpr value) {
         this.value = AssertionUtils.notNull(value, "Value");
+        this.value.setParent(this);
         return this;
     }
 

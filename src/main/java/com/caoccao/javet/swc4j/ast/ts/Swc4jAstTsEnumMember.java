@@ -46,7 +46,6 @@ public class Swc4jAstTsEnumMember
         super(span);
         setId(id);
         setInit(init);
-        updateParent();
     }
 
     @Override
@@ -71,13 +70,28 @@ public class Swc4jAstTsEnumMember
         return Swc4jAstType.TsEnumMember;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (id == oldNode && newNode instanceof ISwc4jAstTsEnumMemberId) {
+            setId((ISwc4jAstTsEnumMemberId) newNode);
+            return true;
+        }
+        if (init.isPresent() && init.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+            setInit((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsEnumMember setId(ISwc4jAstTsEnumMemberId id) {
         this.id = AssertionUtils.notNull(id, "Id");
+        this.id.setParent(this);
         return this;
     }
 
     public Swc4jAstTsEnumMember setInit(ISwc4jAstExpr init) {
         this.init = Optional.ofNullable(init);
+        this.init.ifPresent(node -> node.setParent(this));
         return this;
     }
 

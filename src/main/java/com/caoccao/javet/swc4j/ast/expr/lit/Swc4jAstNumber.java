@@ -18,10 +18,7 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.jni2rust.*;
@@ -33,7 +30,7 @@ import java.util.Optional;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstNumber
         extends Swc4jAst
-        implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit {
+        implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstPrimitiveCoercion {
     @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
     protected double value;
@@ -46,6 +43,54 @@ public class Swc4jAstNumber
         super(span);
         setRaw(raw);
         setValue(value);
+    }
+
+    public static Swc4jAstNumber create(int value) {
+        return new Swc4jAstNumber(value, Integer.toString(value), Swc4jSpan.DUMMY);
+    }
+
+    public static Swc4jAstNumber create(double value) {
+        return new Swc4jAstNumber(value, Double.toString(value), Swc4jSpan.DUMMY);
+    }
+
+    @Override
+    public boolean asBoolean() {
+        return value != 0;
+    }
+
+    @Override
+    public byte asByte() {
+        return ((Double) value).byteValue();
+    }
+
+    @Override
+    public double asDouble() {
+        return value;
+    }
+
+    @Override
+    public float asFloat() {
+        return ((Double) value).floatValue();
+    }
+
+    @Override
+    public int asInt() {
+        return ((Double) value).intValue();
+    }
+
+    @Override
+    public long asLong() {
+        return ((Double) value).longValue();
+    }
+
+    @Override
+    public short asShort() {
+        return ((Double) value).shortValue();
+    }
+
+    @Override
+    public String asString() {
+        return toString();
     }
 
     @Override
@@ -68,18 +113,6 @@ public class Swc4jAstNumber
         return value;
     }
 
-    public float getValueAsFloat() {
-        return ((Double) value).floatValue();
-    }
-
-    public int getValueAsInt() {
-        return ((Double) value).intValue();
-    }
-
-    public long getValueAsLong() {
-        return ((Double) value).longValue();
-    }
-
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
         return false;
@@ -97,7 +130,7 @@ public class Swc4jAstNumber
 
     @Override
     public String toString() {
-        return raw.orElse(null);
+        return raw.orElse(Double.toString(value));
     }
 
     @Override

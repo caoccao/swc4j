@@ -47,7 +47,6 @@ public class Swc4jAstTsQualifiedName
         super(span);
         setLeft(left);
         setRight(right);
-        updateParent();
     }
 
     @Override
@@ -70,13 +69,28 @@ public class Swc4jAstTsQualifiedName
         return Swc4jAstType.TsQualifiedName;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (left == oldNode && newNode instanceof ISwc4jAstTsEntityName) {
+            setLeft((ISwc4jAstTsEntityName) newNode);
+            return true;
+        }
+        if (right == oldNode && newNode instanceof Swc4jAstIdent) {
+            setRight((Swc4jAstIdent) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsQualifiedName setLeft(ISwc4jAstTsEntityName left) {
         this.left = AssertionUtils.notNull(left, "Left");
+        this.left.setParent(this);
         return this;
     }
 
     public Swc4jAstTsQualifiedName setRight(Swc4jAstIdent right) {
         this.right = AssertionUtils.notNull(right, "Right");
+        this.right.setParent(this);
         return this;
     }
 

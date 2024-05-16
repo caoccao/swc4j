@@ -53,7 +53,7 @@ public class Swc4jAstJsxOpeningElement
         setSelfClosing(selfClosing);
         setTypeArgs(typeArgs);
         this.attrs = AssertionUtils.notNull(attrs, "Attrs");
-        updateParent();
+        this.attrs.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -89,8 +89,32 @@ public class Swc4jAstJsxOpeningElement
         return selfClosing;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!attrs.isEmpty() && newNode instanceof ISwc4jAstJsxAttrOrSpread) {
+            final int size = attrs.size();
+            for (int i = 0; i < size; i++) {
+                if (attrs.get(i) == oldNode) {
+                    attrs.set(i, (ISwc4jAstJsxAttrOrSpread) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (name == oldNode && newNode instanceof ISwc4jAstJsxElementName) {
+            setName((ISwc4jAstJsxElementName) newNode);
+            return true;
+        }
+        if (typeArgs.isPresent() && typeArgs.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamInstantiation)) {
+            setTypeArgs((Swc4jAstTsTypeParamInstantiation) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstJsxOpeningElement setName(ISwc4jAstJsxElementName name) {
         this.name = AssertionUtils.notNull(name, "Name");
+        this.name.setParent(this);
         return this;
     }
 
@@ -101,6 +125,7 @@ public class Swc4jAstJsxOpeningElement
 
     public Swc4jAstJsxOpeningElement setTypeArgs(Swc4jAstTsTypeParamInstantiation typeArgs) {
         this.typeArgs = Optional.ofNullable(typeArgs);
+        this.typeArgs.ifPresent(node -> node.setParent(this));
         return this;
     }
 

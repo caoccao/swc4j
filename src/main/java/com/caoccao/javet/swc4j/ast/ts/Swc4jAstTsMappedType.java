@@ -57,7 +57,6 @@ public class Swc4jAstTsMappedType
         setReadonly(readonly);
         setTypeAnn(typeAnn);
         setTypeParam(typeParam);
-        updateParent();
     }
 
     @Override
@@ -98,8 +97,26 @@ public class Swc4jAstTsMappedType
         return typeParam;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (nameType.isPresent() && nameType.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstTsType)) {
+            setNameType((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstTsType)) {
+            setTypeAnn((ISwc4jAstTsType) newNode);
+            return true;
+        }
+        if (typeParam == oldNode && newNode instanceof Swc4jAstTsTypeParam) {
+            setTypeParam((Swc4jAstTsTypeParam) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsMappedType setNameType(ISwc4jAstTsType nameType) {
         this.nameType = Optional.ofNullable(nameType);
+        this.nameType.ifPresent(node -> node.setParent(this));
         return this;
     }
 
@@ -115,11 +132,13 @@ public class Swc4jAstTsMappedType
 
     public Swc4jAstTsMappedType setTypeAnn(ISwc4jAstTsType typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
+        this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstTsMappedType setTypeParam(Swc4jAstTsTypeParam typeParam) {
         this.typeParam = AssertionUtils.notNull(typeParam, "TypeParam");
+        this.typeParam.setParent(this);
         return this;
     }
 

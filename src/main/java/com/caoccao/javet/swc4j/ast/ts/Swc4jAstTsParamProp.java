@@ -20,9 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstDecorator;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsParamPropParam;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.jni2rust.*;
@@ -58,7 +56,7 @@ public class Swc4jAstTsParamProp
         setParam(param);
         setReadonly(readonly);
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
-        updateParent();
+        this.decorators.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -88,6 +86,25 @@ public class Swc4jAstTsParamProp
         return Swc4jAstType.TsParamProp;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!decorators.isEmpty() && newNode instanceof Swc4jAstDecorator) {
+            final int size = decorators.size();
+            for (int i = 0; i < size; i++) {
+                if (decorators.get(i) == oldNode) {
+                    decorators.set(i, (Swc4jAstDecorator) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (param == oldNode && newNode instanceof ISwc4jAstTsParamPropParam) {
+            setParam((ISwc4jAstTsParamPropParam) newNode);
+            return true;
+        }
+        return false;
+    }
+
     @Jni2RustMethod
     public boolean isOverride() {
         return _override;
@@ -110,6 +127,7 @@ public class Swc4jAstTsParamProp
 
     public Swc4jAstTsParamProp setParam(ISwc4jAstTsParamPropParam param) {
         this.param = AssertionUtils.notNull(param, "Param");
+        this.param.setParent(this);
         return this;
     }
 

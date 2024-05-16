@@ -50,7 +50,7 @@ public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 5);
         Swc4jAstNumber number = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstNumber.class), Swc4jAstType.Number, 0, 5);
-        assertEquals(12345, number.getValueAsInt());
+        assertEquals(12345, number.asInt());
         assertEquals("12345", number.getRaw().get());
         assertSpan(code, script);
     }

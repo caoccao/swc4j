@@ -57,7 +57,6 @@ public class Swc4jAstTsImportEqualsDecl
         setId(id);
         setModuleRef(moduleRef);
         setTypeOnly(typeOnly);
-        updateParent();
     }
 
     @Override
@@ -90,6 +89,19 @@ public class Swc4jAstTsImportEqualsDecl
         return typeOnly;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (id == oldNode && newNode instanceof Swc4jAstIdent) {
+            setId((Swc4jAstIdent) newNode);
+            return true;
+        }
+        if (moduleRef == oldNode && newNode instanceof ISwc4jAstTsModuleRef) {
+            setModuleRef((ISwc4jAstTsModuleRef) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsImportEqualsDecl setExport(boolean export) {
         this.export = export;
         return this;
@@ -97,11 +109,13 @@ public class Swc4jAstTsImportEqualsDecl
 
     public Swc4jAstTsImportEqualsDecl setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
+        this.id.setParent(this);
         return this;
     }
 
     public Swc4jAstTsImportEqualsDecl setModuleRef(ISwc4jAstTsModuleRef moduleRef) {
         this.moduleRef = AssertionUtils.notNull(moduleRef, "Module ref");
+        this.moduleRef.setParent(this);
         return this;
     }
 

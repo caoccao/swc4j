@@ -78,7 +78,7 @@ public class Swc4jAstPrivateProp
         setTypeAnn(typeAnn);
         setValue(value);
         this.decorators = AssertionUtils.notNull(decorators, "Decorators");
-        updateParent();
+        this.decorators.forEach(node -> node.setParent(this));
     }
 
     @Jni2RustMethod
@@ -145,6 +145,33 @@ public class Swc4jAstPrivateProp
         return _static;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!decorators.isEmpty() && newNode instanceof Swc4jAstDecorator) {
+            final int size = decorators.size();
+            for (int i = 0; i < size; i++) {
+                if (decorators.get(i) == oldNode) {
+                    decorators.set(i, (Swc4jAstDecorator) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (key == oldNode && newNode instanceof Swc4jAstPrivateName) {
+            setKey((Swc4jAstPrivateName) newNode);
+            return true;
+        }
+        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+            setTypeAnn((Swc4jAstTsTypeAnn) newNode);
+            return true;
+        }
+        if (value.isPresent() && value.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+            setValue((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstPrivateProp setAccessibility(Swc4jAstAccessibility accessibility) {
         this.accessibility = Optional.ofNullable(accessibility);
         return this;
@@ -157,6 +184,7 @@ public class Swc4jAstPrivateProp
 
     public Swc4jAstPrivateProp setKey(Swc4jAstPrivateName key) {
         this.key = AssertionUtils.notNull(key, "Key");
+        this.key.setParent(this);
         return this;
     }
 
@@ -182,11 +210,13 @@ public class Swc4jAstPrivateProp
 
     public Swc4jAstPrivateProp setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
+        this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 
     public Swc4jAstPrivateProp setValue(ISwc4jAstExpr value) {
         this.value = Optional.ofNullable(value);
+        this.value.ifPresent(node -> node.setParent(this));
         return this;
     }
 

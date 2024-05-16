@@ -53,7 +53,7 @@ public class Swc4jAstTsEnumDecl
         setDeclare(declare);
         setId(id);
         this.members = AssertionUtils.notNull(members, "Type ann");
-        updateParent();
+        this.members.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -88,6 +88,25 @@ public class Swc4jAstTsEnumDecl
         return declare;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (id == oldNode && newNode instanceof Swc4jAstIdent) {
+            setId((Swc4jAstIdent) newNode);
+            return true;
+        }
+        if (!members.isEmpty() && newNode instanceof Swc4jAstTsEnumMember) {
+            final int size = members.size();
+            for (int i = 0; i < size; i++) {
+                if (members.get(i) == oldNode) {
+                    members.set(i, (Swc4jAstTsEnumMember) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public Swc4jAstTsEnumDecl setConst(boolean _const) {
         this._const = _const;
         return this;
@@ -100,6 +119,7 @@ public class Swc4jAstTsEnumDecl
 
     public Swc4jAstTsEnumDecl setId(Swc4jAstIdent id) {
         this.id = AssertionUtils.notNull(id, "Id");
+        this.id.setParent(this);
         return this;
     }
 

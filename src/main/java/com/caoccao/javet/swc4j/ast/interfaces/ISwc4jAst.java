@@ -85,9 +85,7 @@ public interface ISwc4jAst {
      * @return true : replaced, false : not replaced
      * @since 0.8.0
      */
-    default boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        return false;
-    }
+    boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode);
 
     /**
      * Sets parent.

@@ -56,7 +56,6 @@ public class Swc4jAstTsModuleDecl
         setDeclare(declare);
         setGlobal(global);
         setId(id);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -91,8 +90,22 @@ public class Swc4jAstTsModuleDecl
         return global;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body.isPresent() && body.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstTsNamespaceBody)) {
+            setBody((ISwc4jAstTsNamespaceBody) newNode);
+            return true;
+        }
+        if (id == oldNode && newNode instanceof ISwc4jAstTsModuleName) {
+            setId((ISwc4jAstTsModuleName) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsModuleDecl setBody(ISwc4jAstTsNamespaceBody body) {
         this.body = Optional.ofNullable(body);
+        this.body.ifPresent(node -> node.setParent(this));
         return this;
     }
 
@@ -108,6 +121,7 @@ public class Swc4jAstTsModuleDecl
 
     public Swc4jAstTsModuleDecl setId(ISwc4jAstTsModuleName id) {
         this.id = AssertionUtils.notNull(id, "Id");
+        this.id.setParent(this);
         return this;
     }
 

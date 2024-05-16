@@ -55,7 +55,7 @@ public class Swc4jAstTsIndexSignature
         setStatic(_static);
         setTypeAnn(typeAnn);
         this.params = AssertionUtils.notNull(params, "Params");
-        updateParent();
+        this.params.forEach(node -> node.setParent(this));
     }
 
     @Override
@@ -90,6 +90,25 @@ public class Swc4jAstTsIndexSignature
         return _static;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (!params.isEmpty() && newNode instanceof ISwc4jAstTsFnParam) {
+            final int size = params.size();
+            for (int i = 0; i < size; i++) {
+                if (params.get(i) == oldNode) {
+                    params.set(i, (ISwc4jAstTsFnParam) newNode);
+                    newNode.setParent(this);
+                    return true;
+                }
+            }
+        }
+        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+            setTypeAnn((Swc4jAstTsTypeAnn) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsIndexSignature setReadonly(boolean readonly) {
         this.readonly = readonly;
         return this;
@@ -102,6 +121,7 @@ public class Swc4jAstTsIndexSignature
 
     public Swc4jAstTsIndexSignature setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
+        this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 

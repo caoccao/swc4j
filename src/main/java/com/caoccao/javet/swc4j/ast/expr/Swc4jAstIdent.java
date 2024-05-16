@@ -71,6 +71,11 @@ public class Swc4jAstIdent
         return optional;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
+    }
+
     public Swc4jAstIdent setOptional(boolean optional) {
         this.optional = optional;
         return this;

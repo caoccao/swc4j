@@ -50,7 +50,6 @@ public class Swc4jAstJsxAttr
         super(span);
         setName(name);
         setValue(value);
-        updateParent();
     }
 
     @Override
@@ -75,13 +74,28 @@ public class Swc4jAstJsxAttr
         return value;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (name == oldNode && newNode instanceof ISwc4jAstJsxAttrName) {
+            setName((ISwc4jAstJsxAttrName) newNode);
+            return true;
+        }
+        if (value.isPresent() && value.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstJsxAttrValue)) {
+            setValue((ISwc4jAstJsxAttrValue) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstJsxAttr setName(ISwc4jAstJsxAttrName name) {
         this.name = AssertionUtils.notNull(name, "Name");
+        this.name.setParent(this);
         return this;
     }
 
     public Swc4jAstJsxAttr setValue(ISwc4jAstJsxAttrValue value) {
         this.value = Optional.ofNullable(value);
+        this.value.ifPresent(node -> node.setParent(this));
         return this;
     }
 

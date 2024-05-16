@@ -50,7 +50,6 @@ public class Swc4jAstWithStmt
         super(span);
         setBody(body);
         setObj(obj);
-        updateParent();
     }
 
     @Jni2RustMethod
@@ -73,13 +72,28 @@ public class Swc4jAstWithStmt
         return Swc4jAstType.WithStmt;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (body == oldNode && newNode instanceof ISwc4jAstStmt) {
+            setBody((ISwc4jAstStmt) newNode);
+            return true;
+        }
+        if (obj == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setObj((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstWithStmt setBody(ISwc4jAstStmt body) {
         this.body = AssertionUtils.notNull(body, "Body");
+        this.body.setParent(this);
         return this;
     }
 
     public Swc4jAstWithStmt setObj(ISwc4jAstExpr obj) {
         this.obj = AssertionUtils.notNull(obj, "Obj");
+        this.obj.setParent(this);
         return this;
     }
 

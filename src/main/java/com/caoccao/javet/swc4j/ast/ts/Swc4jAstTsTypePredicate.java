@@ -50,7 +50,6 @@ public class Swc4jAstTsTypePredicate
         setAsserts(asserts);
         setParamName(paramName);
         setTypeAnn(typeAnn);
-        updateParent();
     }
 
     @Override
@@ -80,6 +79,19 @@ public class Swc4jAstTsTypePredicate
         return asserts;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (paramName == oldNode && newNode instanceof ISwc4jAstTsThisTypeOrIdent) {
+            setParamName((ISwc4jAstTsThisTypeOrIdent) newNode);
+            return true;
+        }
+        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+            setTypeAnn((Swc4jAstTsTypeAnn) newNode);
+            return true;
+        }
+        return false;
+    }
+
     public Swc4jAstTsTypePredicate setAsserts(boolean asserts) {
         this.asserts = asserts;
         return this;
@@ -87,11 +99,13 @@ public class Swc4jAstTsTypePredicate
 
     public Swc4jAstTsTypePredicate setParamName(ISwc4jAstTsThisTypeOrIdent paramName) {
         this.paramName = AssertionUtils.notNull(paramName, "Param name");
+        this.paramName.setParent(this);
         return this;
     }
 
     public Swc4jAstTsTypePredicate setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
+        this.typeAnn.ifPresent(node -> node.setParent(this));
         return this;
     }
 

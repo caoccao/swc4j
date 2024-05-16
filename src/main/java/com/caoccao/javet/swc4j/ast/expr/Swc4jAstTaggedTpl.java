@@ -20,6 +20,8 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -52,7 +54,6 @@ public class Swc4jAstTaggedTpl
         setTag(tag);
         setTpl(tpl);
         setTypeParams(typeParams);
-        updateParent();
     }
 
     @Override
@@ -77,6 +78,23 @@ public class Swc4jAstTaggedTpl
         return Swc4jAstType.TaggedTpl;
     }
 
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        if (tag == oldNode && newNode instanceof ISwc4jAstExpr) {
+            setTag((ISwc4jAstExpr) newNode);
+            return true;
+        }
+        if (tpl == oldNode && newNode instanceof Swc4jAstTpl) {
+            setTpl((Swc4jAstTpl) newNode);
+            return true;
+        }
+        if (typeParams.isPresent() && typeParams.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamInstantiation)) {
+            setTypeParams((Swc4jAstTsTypeParamInstantiation) newNode);
+            return true;
+        }
+        return false;
+    }
+
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeParams() {
         return typeParams;
@@ -84,16 +102,19 @@ public class Swc4jAstTaggedTpl
 
     public Swc4jAstTaggedTpl setTag(ISwc4jAstExpr tag) {
         this.tag = AssertionUtils.notNull(tag, "Tag");
+        this.tag.setParent(this);
         return this;
     }
 
     public Swc4jAstTaggedTpl setTpl(Swc4jAstTpl tpl) {
-        this.tpl = tpl;
+        this.tpl = AssertionUtils.notNull(tpl, "Tag");
+        this.tpl.setParent(this);
         return this;
     }
 
     public Swc4jAstTaggedTpl setTypeParams(Swc4jAstTsTypeParamInstantiation typeParams) {
         this.typeParams = Optional.ofNullable(typeParams);
+        this.typeParams.ifPresent(node -> node.setParent(this));
         return this;
     }
 
