@@ -59,24 +59,20 @@ public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
                         (leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.Bool) ||
                         (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Bool) ||
                         (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Number)) {
-                    double value = left.as(ISwc4jAstCoercionPrimitive.class).asDouble() + right.as(ISwc4jAstCoercionPrimitive.class).asDouble();
+                    double value = left.as(ISwc4jAstCoercionPrimitive.class).asDouble()
+                            + right.as(ISwc4jAstCoercionPrimitive.class).asDouble();
                     newNode = Swc4jAstNumber.create(value);
                 } else if ((leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.ArrayLit) ||
                         (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Bool) ||
                         (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.ArrayLit) ||
                         (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.ArrayLit) ||
                         (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Str) ||
-                        (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Str)) {
-                    String value = left.as(ISwc4jAstCoercionPrimitive.class).asString() + right.as(ISwc4jAstCoercionPrimitive.class).asString();
-                    newNode = Swc4jAstStr.create(value);
-                } else if ((leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Number) ||
-                        (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Number)) {
-                    String value = left.as(ISwc4jAstCoercionPrimitive.class).asString()
-                            + right.as(Swc4jAstNumber.class).asString();
-                    newNode = Swc4jAstStr.create(value);
-                } else if ((leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Str) ||
+                        (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Str) ||
+                        (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Number) ||
+                        (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Number) ||
+                        (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Str) ||
                         (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.ArrayLit)) {
-                    String value = left.as(Swc4jAstNumber.class).asString()
+                    String value = left.as(ISwc4jAstCoercionPrimitive.class).asString()
                             + right.as(ISwc4jAstCoercionPrimitive.class).asString();
                     newNode = Swc4jAstStr.create(value);
                 }
