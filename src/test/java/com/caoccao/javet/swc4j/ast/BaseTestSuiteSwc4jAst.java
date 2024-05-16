@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast;
 
 import com.caoccao.javet.swc4j.BaseTestSuite;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstCounterVisitor;
@@ -81,10 +82,12 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
                 case Number:
                 case Null:
                 case Regex:
-                case Str:
                 case ThisExpr:
                 case TsKeywordType:
                     text = node.toString();
+                    break;
+                case Str:
+                    text = node.as(Swc4jAstStr.class).getRawString();
                     break;
                 default:
                     break;
