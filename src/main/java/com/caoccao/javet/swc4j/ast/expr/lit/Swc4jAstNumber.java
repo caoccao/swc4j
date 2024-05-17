@@ -34,6 +34,8 @@ import java.util.regex.Pattern;
 public class Swc4jAstNumber
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
+    public static final String INFINITY = "Infinity";
+    protected static final int MAX_EXPONENT = 308;
     protected static final Pattern PATTERN_DECIMAL_ZEROS =
             Pattern.compile("^(\\d+)\\.0*$", Pattern.CASE_INSENSITIVE);
     protected static final Pattern PATTERN_SCIENTIFIC_NOTATION_WITHOUT_FRACTION =
@@ -76,9 +78,6 @@ public class Swc4jAstNumber
             while (fraction.endsWith("0")) {
                 fraction = fraction.substring(0, fraction.length() - 1);
             }
-            while (integer.startsWith("0")) {
-                integer = integer.substring(1);
-            }
             if (integer.length() > 1) {
                 additionalExponent += integer.length() - 1;
                 fraction = integer.substring(1) + fraction;
@@ -88,6 +87,9 @@ public class Swc4jAstNumber
                 fraction = "." + fraction;
             }
             long exponent = Long.parseLong(matcher.group(4)) + additionalExponent;
+            if (exponent > MAX_EXPONENT) {
+                return INFINITY;
+            }
             return integer + fraction + "e" + sign + exponent;
         }
         matcher = PATTERN_SCIENTIFIC_NOTATION_WITHOUT_FRACTION.matcher(raw);
@@ -96,9 +98,6 @@ public class Swc4jAstNumber
             String integer = matcher.group(1);
             String fraction = "";
             int additionalExponent = 0;
-            while (integer.startsWith("0")) {
-                integer = integer.substring(1);
-            }
             while (integer.endsWith("0")) {
                 ++additionalExponent;
                 integer = integer.substring(0, integer.length() - 1);
@@ -109,6 +108,9 @@ public class Swc4jAstNumber
                 integer = integer.substring(0, 1);
             }
             long exponent = Long.parseLong(matcher.group(3)) + additionalExponent;
+            if (exponent > MAX_EXPONENT) {
+                return INFINITY;
+            }
             return integer + fraction + "e" + sign + exponent;
         }
         matcher = PATTERN_DECIMAL_ZEROS.matcher(raw);
