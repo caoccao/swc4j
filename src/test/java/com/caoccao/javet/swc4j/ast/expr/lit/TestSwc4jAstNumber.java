@@ -31,15 +31,24 @@ public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
     public void testCoercion() {
         assertEquals("0", Swc4jAstNumber.create(0).getRaw().get());
         assertEquals("1", Swc4jAstNumber.create(1).getRaw().get());
+        assertEquals("-1", Swc4jAstNumber.create(-1).getRaw().get());
+        assertEquals("-1", Swc4jAstNumber.create(-1, "-1.0").toString());
+        assertEquals("1", Swc4jAstNumber.create(1, "+1.0").toString());
         assertEquals("1.1", Swc4jAstNumber.create(1.1D).toString());
+        assertEquals("-1.1", Swc4jAstNumber.create(-1.1D).toString());
         assertEquals("1.1e+20", Swc4jAstNumber.create(1.1e20D).toString());
         assertEquals("1.23e+21", Swc4jAstNumber.create(12.30e20D).toString());
         assertEquals("1.234e+21", Swc4jAstNumber.create(12.340e20D, "12.340e20").toString());
+        assertEquals("-1.234e+21", Swc4jAstNumber.create(12.340e20D, "-12.340e20").toString());
         assertEquals("1.234e+21", Swc4jAstNumber.create(12.340e20D, "12.34000e20").toString());
         assertEquals("Infinity", Swc4jAstNumber.create(Double.POSITIVE_INFINITY).toString());
         assertEquals("Infinity", Swc4jAstNumber.create(Double.POSITIVE_INFINITY, "1e309").toString());
+        assertEquals("-Infinity", Swc4jAstNumber.create(Double.NEGATIVE_INFINITY).toString());
+        assertEquals("-Infinity", Swc4jAstNumber.create(Double.NEGATIVE_INFINITY, "-1e309").toString());
         assertEquals("1.1e-20", Swc4jAstNumber.create(1.1e-20D).toString());
+        assertEquals("-1.1e-20", Swc4jAstNumber.create(-1.1e-20D).toString());
         assertEquals(1, Swc4jAstNumber.create(1.1D).asInt());
+        assertEquals(-1, Swc4jAstNumber.create(-1.1D).asInt());
         assertEquals("NaN", Swc4jAstNumber.create(Double.NaN).toString());
         assertEquals(0, Swc4jAstNumber.create(Double.NaN).asInt());
     }

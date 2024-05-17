@@ -37,11 +37,11 @@ public class Swc4jAstNumber
     public static final String INFINITY = "Infinity";
     protected static final int MAX_EXPONENT = 308;
     protected static final Pattern PATTERN_DECIMAL_ZEROS =
-            Pattern.compile("^(\\d+)\\.0*$", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("^([\\+\\-]?)(\\d+)\\.0*$", Pattern.CASE_INSENSITIVE);
     protected static final Pattern PATTERN_SCIENTIFIC_NOTATION_WITHOUT_FRACTION =
-            Pattern.compile("^(\\d+)e([\\+\\-]?)(\\d+)$", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("^([\\+\\-]?)(\\d+)e([\\+\\-]?)(\\d+)$", Pattern.CASE_INSENSITIVE);
     protected static final Pattern PATTERN_SCIENTIFIC_NOTATION_WITH_FRACTION =
-            Pattern.compile("^(\\d+)\\.(\\d*)e([\\+\\-]?)(\\d+)$", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("^([\\+\\-]?)(\\d+)\\.(\\d*)e([\\+\\-]?)(\\d+)$", Pattern.CASE_INSENSITIVE);
     @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
     protected double value;
@@ -71,9 +71,10 @@ public class Swc4jAstNumber
     protected static String normalize(String raw) {
         Matcher matcher = PATTERN_SCIENTIFIC_NOTATION_WITH_FRACTION.matcher(raw);
         if (matcher.matches()) {
-            String sign = StringUtils.isEmpty(matcher.group(3)) ? "+" : matcher.group(3);
-            String integer = matcher.group(1);
-            String fraction = matcher.group(2);
+            String sign = "-".equals(matcher.group(1)) ? "-" : "";
+            String exponentSign = StringUtils.isEmpty(matcher.group(4)) ? "+" : matcher.group(4);
+            String integer = matcher.group(2);
+            String fraction = matcher.group(3);
             int additionalExponent = 0;
             while (fraction.endsWith("0")) {
                 fraction = fraction.substring(0, fraction.length() - 1);
@@ -86,16 +87,17 @@ public class Swc4jAstNumber
             if (StringUtils.isNotEmpty(fraction)) {
                 fraction = "." + fraction;
             }
-            long exponent = Long.parseLong(matcher.group(4)) + additionalExponent;
+            long exponent = Long.parseLong(matcher.group(5)) + additionalExponent;
             if (exponent > MAX_EXPONENT) {
                 return INFINITY;
             }
-            return integer + fraction + "e" + sign + exponent;
+            return sign + integer + fraction + "e" + exponentSign + exponent;
         }
         matcher = PATTERN_SCIENTIFIC_NOTATION_WITHOUT_FRACTION.matcher(raw);
         if (matcher.matches()) {
-            String sign = StringUtils.isEmpty(matcher.group(2)) ? "+" : matcher.group(2);
-            String integer = matcher.group(1);
+            String sign = "-".equals(matcher.group(1)) ? "-" : "";
+            String exponentSign = StringUtils.isEmpty(matcher.group(3)) ? "+" : matcher.group(3);
+            String integer = matcher.group(2);
             String fraction = "";
             int additionalExponent = 0;
             while (integer.endsWith("0")) {
@@ -107,15 +109,16 @@ public class Swc4jAstNumber
                 fraction = "." + integer.substring(1);
                 integer = integer.substring(0, 1);
             }
-            long exponent = Long.parseLong(matcher.group(3)) + additionalExponent;
+            long exponent = Long.parseLong(matcher.group(4)) + additionalExponent;
             if (exponent > MAX_EXPONENT) {
-                return INFINITY;
+                return sign + INFINITY;
             }
-            return integer + fraction + "e" + sign + exponent;
+            return sign + integer + fraction + "e" + exponentSign + exponent;
         }
         matcher = PATTERN_DECIMAL_ZEROS.matcher(raw);
         if (matcher.matches()) {
-            return matcher.group(1);
+            String sign = "-".equals(matcher.group(1)) ? "-" : "";
+            return sign + matcher.group(2);
         }
         return raw;
     }
