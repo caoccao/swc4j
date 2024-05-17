@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCoercionPrimitive;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropOrSpread;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -35,7 +36,7 @@ import java.util.List;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstObjectLit
         extends Swc4jAst
-        implements ISwc4jAstExpr {
+        implements ISwc4jAstExpr, ISwc4jAstCoercionPrimitive {
     protected final List<ISwc4jAstPropOrSpread> props;
 
     @Jni2RustMethod
@@ -45,6 +46,46 @@ public class Swc4jAstObjectLit
         super(span);
         this.props = AssertionUtils.notNull(props, "Props");
         props.forEach(node -> node.setParent(this));
+    }
+
+    @Override
+    public boolean asBoolean() {
+        return true;
+    }
+
+    @Override
+    public byte asByte() {
+        return 0;
+    }
+
+    @Override
+    public double asDouble() {
+        return Double.NaN;
+    }
+
+    @Override
+    public float asFloat() {
+        return Float.NaN;
+    }
+
+    @Override
+    public int asInt() {
+        return 0;
+    }
+
+    @Override
+    public long asLong() {
+        return 0;
+    }
+
+    @Override
+    public short asShort() {
+        return 0;
+    }
+
+    @Override
+    public String asString() {
+        return toString();
     }
 
     @Override
@@ -75,6 +116,11 @@ public class Swc4jAstObjectLit
             }
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "[object Object]";
     }
 
     @Override

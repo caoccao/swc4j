@@ -54,7 +54,7 @@ public class Swc4jAstArrayLit
 
     @Override
     public boolean asBoolean() {
-        return false;
+        return true;
     }
 
     @Override

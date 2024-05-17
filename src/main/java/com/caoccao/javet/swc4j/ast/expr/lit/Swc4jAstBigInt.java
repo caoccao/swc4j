@@ -19,10 +19,7 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBigIntSign;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.jni2rust.*;
@@ -37,7 +34,7 @@ import java.util.Optional;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, customFromJava = true, customToJava = true)
 public class Swc4jAstBigInt
         extends Swc4jAst
-        implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit {
+        implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
     public static final String BIG_INT_SUFFIX = "n";
     @Jni2RustField(atom = true)
     protected Optional<String> raw;
@@ -54,6 +51,46 @@ public class Swc4jAstBigInt
         super(span);
         setRaw(raw);
         setSign(sign);
+    }
+
+    @Override
+    public boolean asBoolean() {
+        return !BigInteger.ZERO.equals(value);
+    }
+
+    @Override
+    public byte asByte() {
+        return value.byteValue();
+    }
+
+    @Override
+    public double asDouble() {
+        return value.doubleValue();
+    }
+
+    @Override
+    public float asFloat() {
+        return value.floatValue();
+    }
+
+    @Override
+    public int asInt() {
+        return value.intValue();
+    }
+
+    @Override
+    public long asLong() {
+        return value.longValue();
+    }
+
+    @Override
+    public short asShort() {
+        return value.shortValue();
+    }
+
+    @Override
+    public String asString() {
+        return toString();
     }
 
     @Override
@@ -107,7 +144,7 @@ public class Swc4jAstBigInt
 
     @Override
     public String toString() {
-        return raw.orElse(null);
+        return raw.orElse((sign == Swc4jAstBigIntSign.Minus ? "-" : "") + value.toString());
     }
 
     @Override

@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCoercionPrimitive;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -32,11 +33,53 @@ import java.util.List;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstNull
         extends Swc4jAst
-        implements ISwc4jAstLit {
+        implements ISwc4jAstLit, ISwc4jAstCoercionPrimitive {
+    public static final String NULL = "null";
+
     @Jni2RustMethod
     public Swc4jAstNull(
             Swc4jSpan span) {
         super(span);
+    }
+
+    @Override
+    public boolean asBoolean() {
+        return false;
+    }
+
+    @Override
+    public byte asByte() {
+        return 0;
+    }
+
+    @Override
+    public double asDouble() {
+        return 0;
+    }
+
+    @Override
+    public float asFloat() {
+        return 0;
+    }
+
+    @Override
+    public int asInt() {
+        return 0;
+    }
+
+    @Override
+    public long asLong() {
+        return 0;
+    }
+
+    @Override
+    public short asShort() {
+        return 0;
+    }
+
+    @Override
+    public String asString() {
+        return NULL;
     }
 
     @Override
