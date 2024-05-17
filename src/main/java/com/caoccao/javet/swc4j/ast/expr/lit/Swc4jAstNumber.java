@@ -89,7 +89,7 @@ public class Swc4jAstNumber
             }
             long exponent = Long.parseLong(matcher.group(5)) + additionalExponent;
             if (exponent > MAX_EXPONENT) {
-                return INFINITY;
+                return sign + INFINITY;
             }
             return sign + integer + fraction + "e" + exponentSign + exponent;
         }
