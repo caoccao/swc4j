@@ -34,11 +34,11 @@ import java.util.regex.Pattern;
 public class Swc4jAstNumber
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
-    protected static final Pattern PATTERN_ALL_ZEROS =
-            Pattern.compile("^0+$", Pattern.CASE_INSENSITIVE);
     protected static final Pattern PATTERN_DECIMAL_ZEROS =
             Pattern.compile("^(\\d+)\\.0*$", Pattern.CASE_INSENSITIVE);
-    protected static final Pattern PATTERN_SCIENTIFIC_NOTATION =
+    protected static final Pattern PATTERN_SCIENTIFIC_NOTATION_WITHOUT_FRACTION =
+            Pattern.compile("^(\\d+)e([\\+\\-]?)(\\d+)$", Pattern.CASE_INSENSITIVE);
+    protected static final Pattern PATTERN_SCIENTIFIC_NOTATION_WITH_FRACTION =
             Pattern.compile("^(\\d+)\\.(\\d*)e([\\+\\-]?)(\\d+)$", Pattern.CASE_INSENSITIVE);
     @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
@@ -59,24 +59,57 @@ public class Swc4jAstNumber
     }
 
     public static Swc4jAstNumber create(double value) {
-        return new Swc4jAstNumber(value, getNormalizedNumberString(Double.toString(value)), Swc4jSpan.DUMMY);
+        return new Swc4jAstNumber(value, null, Swc4jSpan.DUMMY);
     }
 
     public static Swc4jAstNumber create(double value, String raw) {
         return new Swc4jAstNumber(value, raw, Swc4jSpan.DUMMY);
     }
 
-    protected static String getNormalizedNumberString(String raw) {
-        Matcher matcher = PATTERN_SCIENTIFIC_NOTATION.matcher(raw);
+    public static String getNormalizedNumberString(String raw) {
+        Matcher matcher = PATTERN_SCIENTIFIC_NOTATION_WITH_FRACTION.matcher(raw);
         if (matcher.matches()) {
             String sign = StringUtils.isEmpty(matcher.group(3)) ? "+" : matcher.group(3);
-            if (StringUtils.isEmpty(matcher.group(2))) {
-                return matcher.group(1) + "e" + sign + matcher.group(4);
-            } else if (PATTERN_ALL_ZEROS.matcher(matcher.group(2)).matches()) {
-                return matcher.group(1) + "e" + sign + matcher.group(4);
-            } else {
-                return matcher.group(1) + "." + matcher.group(2) + "e" + sign + matcher.group(4);
+            String integer = matcher.group(1);
+            String fraction = matcher.group(2);
+            int additionalExponent = 0;
+            while (fraction.endsWith("0")) {
+                fraction = fraction.substring(0, fraction.length() - 1);
             }
+            while (integer.startsWith("0")) {
+                integer = integer.substring(1);
+            }
+            if (integer.length() > 1) {
+                additionalExponent += integer.length() - 1;
+                fraction = integer.substring(1) + fraction;
+                integer = integer.substring(0, 1);
+            }
+            if (StringUtils.isNotEmpty(fraction)) {
+                fraction = "." + fraction;
+            }
+            long exponent = Long.parseLong(matcher.group(4)) + additionalExponent;
+            return integer + fraction + "e" + sign + exponent;
+        }
+        matcher = PATTERN_SCIENTIFIC_NOTATION_WITHOUT_FRACTION.matcher(raw);
+        if (matcher.matches()) {
+            String sign = StringUtils.isEmpty(matcher.group(2)) ? "+" : matcher.group(2);
+            String integer = matcher.group(1);
+            String fraction = "";
+            int additionalExponent = 0;
+            while (integer.startsWith("0")) {
+                integer = integer.substring(1);
+            }
+            while (integer.endsWith("0")) {
+                ++additionalExponent;
+                integer = integer.substring(0, integer.length() - 1);
+            }
+            if (integer.length() > 1) {
+                additionalExponent += integer.length() - 1;
+                fraction = "." + integer.substring(1);
+                integer = integer.substring(0, 1);
+            }
+            long exponent = Long.parseLong(matcher.group(3)) + additionalExponent;
+            return integer + fraction + "e" + sign + exponent;
         }
         matcher = PATTERN_DECIMAL_ZEROS.matcher(raw);
         if (matcher.matches()) {
@@ -122,7 +155,7 @@ public class Swc4jAstNumber
 
     @Override
     public String asString() {
-        return getNormalizedNumberString(Double.toString(value));
+        return toString();
     }
 
     @Override
@@ -162,7 +195,7 @@ public class Swc4jAstNumber
 
     @Override
     public String toString() {
-        return raw.orElse(Double.toString(value));
+        return getNormalizedNumberString(raw.orElse(Double.toString(value)));
     }
 
     @Override

@@ -135,17 +135,17 @@ public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
                         break;
                     case Number: {
                         Swc4jAstNumber number = arg.as(Swc4jAstNumber.class);
-                        newNode = Swc4jAstNumber.create(number.getValue());
+                        newNode = Swc4jAstNumber.create(number.getValue(), number.getRaw().orElse(null));
                     }
                     break;
                     case Str: {
-                        Swc4jAstStr str = arg.as(Swc4jAstStr.class);
+                        double value;
                         try {
-                            double value = Double.parseDouble(str.getValue());
-                            newNode = Swc4jAstNumber.create(value);
+                            value = Double.parseDouble(arg.as(Swc4jAstStr.class).getValue());
                         } catch (Throwable t) {
-                            newNode = Swc4jAstNumber.create(Double.NaN);
+                            value = Double.NaN;
                         }
+                        newNode = Swc4jAstNumber.create(value);
                     }
                     break;
                     default:
