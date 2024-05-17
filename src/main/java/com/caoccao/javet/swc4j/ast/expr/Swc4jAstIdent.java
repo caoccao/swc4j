@@ -36,6 +36,7 @@ public class Swc4jAstIdent
         implements ISwc4jAstExpr, ISwc4jAstProp, ISwc4jAstTsModuleRef, ISwc4jAstModuleExportName, ISwc4jAstTsEntityName,
         ISwc4jAstPropName, ISwc4jAstTsModuleName, ISwc4jAstJsxObject, ISwc4jAstJsxElementName, ISwc4jAstMemberProp,
         ISwc4jAstSuperProp, ISwc4jAstJsxAttrName, ISwc4jAstTsThisTypeOrIdent, ISwc4jAstTsEnumMemberId {
+    public static final String UNDEFINED = "undefined";
     protected static final String QUESTION_MARK = "?";
     protected boolean optional;
     @Jni2RustField(atom = true)
@@ -49,6 +50,10 @@ public class Swc4jAstIdent
         super(span);
         setOptional(optional);
         setSym(sym);
+    }
+
+    public static Swc4jAstIdent createUndefined() {
+        return new Swc4jAstIdent(UNDEFINED, false, Swc4jSpan.DUMMY);
     }
 
     @Override
@@ -69,6 +74,10 @@ public class Swc4jAstIdent
     @Jni2RustMethod
     public boolean isOptional() {
         return optional;
+    }
+
+    public boolean isUndefined() {
+        return !optional && UNDEFINED.equals(sym);
     }
 
     @Override

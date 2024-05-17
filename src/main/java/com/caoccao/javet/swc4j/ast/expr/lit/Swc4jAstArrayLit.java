@@ -64,17 +64,19 @@ public class Swc4jAstArrayLit
 
     @Override
     public double asDouble() {
-        if (!elems.isEmpty()) {
-            if (elems.size() == 1) {
+        switch (elems.size()) {
+            case 0:
+                return 0;
+            case 1:
                 return elems.get(0)
                         .map(Swc4jAstExprOrSpread::getExpr)
                         .filter(n -> n.getType() == Swc4jAstType.Number)
                         .map(n -> (Swc4jAstNumber) n)
                         .map(Swc4jAstNumber::getValue)
                         .orElse(Double.NaN);
-            }
+            default:
+                return Double.NaN;
         }
-        return 0;
     }
 
     @Override

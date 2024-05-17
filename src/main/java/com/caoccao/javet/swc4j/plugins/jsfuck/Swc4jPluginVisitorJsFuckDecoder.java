@@ -19,8 +19,10 @@ package com.caoccao.javet.swc4j.plugins.jsfuck;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
@@ -31,6 +33,12 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 
+/**
+ * The type Swc4j plugin visitor jsfuck decoder.
+ * It partially implements the features.
+ *
+ * @since 0.8.0
+ */
 public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
     protected int count;
 
@@ -75,6 +83,10 @@ public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
                     String value = left.as(ISwc4jAstCoercionPrimitive.class).asString()
                             + right.as(ISwc4jAstCoercionPrimitive.class).asString();
                     newNode = Swc4jAstStr.create(value);
+                } else if ((leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Ident) ||
+                        (leftType == Swc4jAstType.Ident && rightType == Swc4jAstType.ArrayLit)) {
+                    String value = left.toString() + right;
+                    newNode = Swc4jAstStr.create(value);
                 }
                 break;
             default:
@@ -89,22 +101,39 @@ public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
 
     @Override
     public Swc4jAstVisitorResponse visitMemberExpr(Swc4jAstMemberExpr node) {
+        ISwc4jAst newNode = null;
         ISwc4jAstExpr obj = node.getObj().unParenExpr();
         ISwc4jAstMemberProp prop = node.getProp();
-        if (obj.getType() == Swc4jAstType.Str) {
-            if (prop.getType() == Swc4jAstType.ComputedPropName) {
-                Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
-                ISwc4jAstExpr expr = computedPropName.getExpr();
-                if (expr.getType() == Swc4jAstType.Number) {
+        switch (obj.getType()) {
+            case ArrayLit:
+                Swc4jAstArrayLit arrayLit = obj.as(Swc4jAstArrayLit.class);
+                if (arrayLit.getElems().isEmpty()) {
+                    newNode = Swc4jAstIdent.createUndefined();
+                }
+                break;
+            case Str:
+                if (prop.getType() == Swc4jAstType.ComputedPropName) {
+                    Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
+                    ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
                     String value = obj.as(Swc4jAstStr.class).getValue();
-                    int index = expr.as(Swc4jAstNumber.class).asInt();
-                    if (index >= 0 && index < value.length()) {
-                        value = value.substring(index, index + 1);
-                        ++count;
-                        node.getParent().replaceNode(node, Swc4jAstStr.create(value));
+                    switch (expr.getType()) {
+                        case Number:
+                        case Str:
+                            int index = expr.as(ISwc4jAstCoercionPrimitive.class).asInt();
+                            if (index >= 0 && index < value.length()) {
+                                value = value.substring(index, index + 1);
+                                newNode = Swc4jAstStr.create(value);
+                            }
+                            break;
                     }
                 }
-            }
+                break;
+            default:
+                break;
+        }
+        if (newNode != null) {
+            ++count;
+            node.getParent().replaceNode(node, newNode);
         }
         return super.visitMemberExpr(node);
     }
@@ -129,15 +158,18 @@ public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
                 break;
             case Plus:
                 switch (arg.getType()) {
-                    case ArrayLit:
+                    case ArrayLit: {
+                        newNode = Swc4jAstNumber.create(arg.as(Swc4jAstArrayLit.class).asDouble());
+                        break;
+                    }
                     case Bool:
                         newNode = Swc4jAstNumber.create(arg.as(ISwc4jAstCoercionPrimitive.class).asInt());
                         break;
                     case Number: {
                         Swc4jAstNumber number = arg.as(Swc4jAstNumber.class);
                         newNode = Swc4jAstNumber.create(number.getValue(), number.getRaw().orElse(null));
+                        break;
                     }
-                    break;
                     case Str: {
                         double value;
                         try {
@@ -146,8 +178,8 @@ public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
                             value = Double.NaN;
                         }
                         newNode = Swc4jAstNumber.create(value);
+                        break;
                     }
-                    break;
                     default:
                         break;
                 }
