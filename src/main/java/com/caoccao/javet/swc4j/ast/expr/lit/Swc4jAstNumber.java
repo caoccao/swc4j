@@ -68,7 +68,7 @@ public class Swc4jAstNumber
         return new Swc4jAstNumber(value, raw, Swc4jSpan.DUMMY);
     }
 
-    public static String getNormalizedNumberString(String raw) {
+    protected static String normalize(String raw) {
         Matcher matcher = PATTERN_SCIENTIFIC_NOTATION_WITH_FRACTION.matcher(raw);
         if (matcher.matches()) {
             String sign = StringUtils.isEmpty(matcher.group(3)) ? "+" : matcher.group(3);
@@ -197,7 +197,7 @@ public class Swc4jAstNumber
 
     @Override
     public String toString() {
-        return getNormalizedNumberString(raw.orElse(Double.toString(value)));
+        return normalize(raw.orElse(Double.toString(value)));
     }
 
     @Override
