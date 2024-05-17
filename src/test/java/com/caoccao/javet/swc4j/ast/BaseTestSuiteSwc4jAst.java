@@ -86,9 +86,11 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
                 case TsKeywordType:
                     text = node.toString();
                     break;
-                case Str:
-                    text = node.as(Swc4jAstStr.class).getRawString();
+                case Str: {
+                    Swc4jAstStr str = node.as(Swc4jAstStr.class);
+                    text = str.getRaw().orElse(str.getValue());
                     break;
+                }
                 default:
                     break;
             }

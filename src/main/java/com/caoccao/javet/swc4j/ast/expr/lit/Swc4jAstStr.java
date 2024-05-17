@@ -107,10 +107,6 @@ public class Swc4jAstStr
         return raw;
     }
 
-    public String getRawString() {
-        return raw.orElse(value);
-    }
-
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.Str;

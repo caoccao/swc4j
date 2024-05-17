@@ -3,6 +3,8 @@
 ## 0.8.0
 
 * Added `replaceNode()` to `ISwc4jAst`
+* Added coercion to primitive AST types
+* Added experimental JsFuck decoder
 
 ## 0.7.0
 
