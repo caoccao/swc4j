@@ -116,7 +116,8 @@ public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
                             (leftType == Swc4jAstType.Ident && rightType == Swc4jAstType.ArrayLit)) {
                         String value = left.toString() + right;
                         newNode = Swc4jAstStr.create(value);
-                    } else if ((leftType == Swc4jAstType.Str || leftType == Swc4jAstType.Number) && rightType == Swc4jAstType.CallExpr) {
+                    } else if ((leftType == Swc4jAstType.Str || leftType == Swc4jAstType.Number || leftType == Swc4jAstType.ArrayLit)
+                            && rightType == Swc4jAstType.CallExpr) {
                         Swc4jAstCallExpr callExpr = right.as(Swc4jAstCallExpr.class);
                         if (callExpr.getCallee().getType() == Swc4jAstType.MemberExpr && callExpr.getArgs().isEmpty()) {
                             Swc4jAstMemberExpr memberExpr = callExpr.getCallee().as(Swc4jAstMemberExpr.class);
@@ -128,6 +129,23 @@ public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
                                     Swc4jAstStr str = expr.as(Swc4jAstStr.class);
                                     String leftString = left.as(ISwc4jAstCoercionPrimitive.class).asString();
                                     String rightString = ARRAY_FUNCTION_STRING_MAP.getOrDefault(str.getValue(), Swc4jAstIdent.UNDEFINED);
+                                    newNode = Swc4jAstStr.create(leftString + rightString);
+                                }
+                            }
+                        }
+                    } else if ((rightType == Swc4jAstType.Str || rightType == Swc4jAstType.Number || rightType == Swc4jAstType.ArrayLit)
+                            && leftType == Swc4jAstType.CallExpr) {
+                        Swc4jAstCallExpr callExpr = left.as(Swc4jAstCallExpr.class);
+                        if (callExpr.getCallee().getType() == Swc4jAstType.MemberExpr && callExpr.getArgs().isEmpty()) {
+                            Swc4jAstMemberExpr memberExpr = callExpr.getCallee().as(Swc4jAstMemberExpr.class);
+                            ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
+                            if (obj.getType() == Swc4jAstType.ArrayLit && memberExpr.getProp().getType() == Swc4jAstType.ComputedPropName) {
+                                Swc4jAstComputedPropName computedPropName = memberExpr.getProp().as(Swc4jAstComputedPropName.class);
+                                ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
+                                if (expr.getType() == Swc4jAstType.Str) {
+                                    Swc4jAstStr str = expr.as(Swc4jAstStr.class);
+                                    String leftString = ARRAY_FUNCTION_STRING_MAP.getOrDefault(str.getValue(), Swc4jAstIdent.UNDEFINED);
+                                    String rightString = right.as(ISwc4jAstCoercionPrimitive.class).asString();
                                     newNode = Swc4jAstStr.create(leftString + rightString);
                                 }
                             }
