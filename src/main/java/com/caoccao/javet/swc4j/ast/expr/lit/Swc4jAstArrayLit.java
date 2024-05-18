@@ -30,15 +30,80 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.SimpleMap;
+import com.caoccao.javet.swc4j.utils.SimpleSet;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstArrayLit
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstCoercionPrimitive {
+    public static final Set<String> ARRAY_FUNCTION_SET = SimpleSet.immutableOf(
+            "at",
+            "concat",
+            "copyWithin",
+            "entries",
+            "every",
+            "fill",
+            "filter",
+            "find",
+            "findIndex",
+            "findLast",
+            "findLastIndex",
+            "flat",
+            "flatMap",
+            "forEach",
+            "includes",
+            "indexOf",
+            "join",
+            "keys",
+            "lastIndexOf",
+            "map",
+            "pop",
+            "push",
+            "reduce",
+            "reduceRight",
+            "reverse",
+            "shift",
+            "slice",
+            "some",
+            "sort",
+            "splice",
+            "toLocaleString",
+            "toReversed",
+            "toSorted",
+            "toSpliced",
+            "toString",
+            "unshift",
+            "values",
+            "with");
+    public static final Map<String, String> ARRAY_FUNCTION_STRING_MAP = SimpleMap.immutableOf(
+            "concat", "",
+            "copyWithin", "",
+            "entries", "[object Array Iterator]",
+            "fill", "",
+            "flat", "",
+            "indexOf", "-1",
+            "includes", "false",
+            "join", "",
+            "keys", "[object Array Iterator]",
+            "lastIndexOf", "-1",
+            "push", "0",
+            "reverse", "",
+            "slice", "",
+            "sort", "",
+            "splice", "",
+            "toReversed", "",
+            "toSorted", "",
+            "toSpliced", "",
+            "toString", "",
+            "unshift", "0",
+            "values", "[object Array Iterator]");
     protected final List<Optional<Swc4jAstExprOrSpread>> elems;
 
     @Jni2RustMethod

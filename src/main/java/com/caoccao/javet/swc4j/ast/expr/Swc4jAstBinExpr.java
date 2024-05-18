@@ -35,39 +35,14 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.utils.SimpleMap;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstBinExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
-    protected static final Map<String, String> ARRAY_FUNCTION_STRING_MAP = SimpleMap.immutableOf(
-            "concat", "",
-            "copyWithin", "",
-            "entries", "[object Array Iterator]",
-            "fill", "",
-            "flat", "",
-            "indexOf", "-1",
-            "includes", "false",
-            "join", "",
-            "keys", "[object Array Iterator]",
-            "lastIndexOf", "-1",
-            "push", "0",
-            "reverse", "",
-            "slice", "",
-            "sort", "",
-            "splice", "",
-            "toReversed", "",
-            "toSorted", "",
-            "toSpliced", "",
-            "toString", "",
-            "unshift", "0",
-            "values", "[object Array Iterator]");
-
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr left;
     protected Swc4jAstBinaryOp op;
@@ -139,7 +114,7 @@ public class Swc4jAstBinExpr
                                 if (expr.getType() == Swc4jAstType.Str) {
                                     Swc4jAstStr str = expr.as(Swc4jAstStr.class);
                                     String leftString = left.as(ISwc4jAstCoercionPrimitive.class).asString();
-                                    String rightString = ARRAY_FUNCTION_STRING_MAP.getOrDefault(str.getValue(), Swc4jAstIdent.UNDEFINED);
+                                    String rightString = Swc4jAstArrayLit.ARRAY_FUNCTION_STRING_MAP.getOrDefault(str.getValue(), Swc4jAstIdent.UNDEFINED);
                                     return Optional.of(Swc4jAstStr.create(leftString + rightString));
                                 }
                             }
@@ -155,7 +130,7 @@ public class Swc4jAstBinExpr
                                 ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
                                 if (expr.getType() == Swc4jAstType.Str) {
                                     Swc4jAstStr str = expr.as(Swc4jAstStr.class);
-                                    String leftString = ARRAY_FUNCTION_STRING_MAP.getOrDefault(str.getValue(), Swc4jAstIdent.UNDEFINED);
+                                    String leftString = Swc4jAstArrayLit.ARRAY_FUNCTION_STRING_MAP.getOrDefault(str.getValue(), Swc4jAstIdent.UNDEFINED);
                                     String rightString = right.as(ISwc4jAstCoercionPrimitive.class).asString();
                                     return Optional.of(Swc4jAstStr.create(leftString + rightString));
                                 }

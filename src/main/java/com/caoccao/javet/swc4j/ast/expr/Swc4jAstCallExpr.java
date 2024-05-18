@@ -71,24 +71,28 @@ public class Swc4jAstCallExpr
                 ISwc4jAstExpr expr = prop.getExpr().unParenExpr();
                 if (expr instanceof Swc4jAstStr) {
                     Swc4jAstStr str = expr.as(Swc4jAstStr.class);
-                    if (BUILT_IN_FUNCTION_SET.contains(str.getValue())) {
-                        ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
-                        while (obj instanceof Swc4jAstSeqExpr) {
-                            Swc4jAstSeqExpr seqExpr = obj.as(Swc4jAstSeqExpr.class);
-                            if (seqExpr.getExprs().isEmpty()) {
-                                break;
-                            } else {
-                                obj = seqExpr.getExprs().get(seqExpr.getExprs().size() - 1);
-                            }
+                    memberExpr.setProp(Swc4jAstIdent.create(str.getValue()));
+                }
+            }
+            if (memberExpr.getProp() instanceof Swc4jAstIdent) {
+                Swc4jAstIdent ident = memberExpr.getProp().as(Swc4jAstIdent.class);
+                if (BUILT_IN_FUNCTION_SET.contains(ident.getSym())) {
+                    ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
+                    while (obj instanceof Swc4jAstSeqExpr) {
+                        Swc4jAstSeqExpr seqExpr = obj.as(Swc4jAstSeqExpr.class);
+                        if (seqExpr.getExprs().isEmpty()) {
+                            break;
+                        } else {
+                            obj = seqExpr.getExprs().get(seqExpr.getExprs().size() - 1);
                         }
-                        if (obj instanceof Swc4jAstStr) {
-                            String objString = obj.as(Swc4jAstStr.class).getValue();
-                            if (FONTCOLOR.equals(str.getValue())) {
-                                String argString = args.isEmpty() ? Swc4jAstIdent.UNDEFINED : args.get(0).toString();
-                                return Optional.of(Swc4jAstStr.create("<font color=\"" + argString + "\">" + objString + "</font>"));
-                            } else if (ITALICS.equals(str.getValue())) {
-                                return Optional.of(Swc4jAstStr.create("<i>" + objString + "</i>"));
-                            }
+                    }
+                    if (obj instanceof Swc4jAstStr) {
+                        String objString = obj.as(Swc4jAstStr.class).getValue();
+                        if (FONTCOLOR.equals(ident.getSym())) {
+                            String argString = args.isEmpty() ? Swc4jAstIdent.UNDEFINED : args.get(0).toString();
+                            return Optional.of(Swc4jAstStr.create("<font color=\"" + argString + "\">" + objString + "</font>"));
+                        } else if (ITALICS.equals(ident.getSym())) {
+                            return Optional.of(Swc4jAstStr.create("<i>" + objString + "</i>"));
                         }
                     }
                 }
