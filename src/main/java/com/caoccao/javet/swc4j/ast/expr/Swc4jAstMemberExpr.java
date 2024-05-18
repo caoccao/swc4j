@@ -40,6 +40,8 @@ import java.util.Optional;
 public class Swc4jAstMemberExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstOptChainBase, ISwc4jAstSimpleAssignTarget {
+    public static final String CONSTRUCTOR = "constructor";
+    public static final String FUNCTION = "Function";
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr obj;
     protected ISwc4jAstMemberProp prop;
@@ -74,6 +76,31 @@ public class Swc4jAstMemberExpr
                 if (!ignore) {
                     if (arrayLit.getElems().isEmpty()) {
                         return Optional.of(Swc4jAstIdent.createUndefined());
+                    }
+                }
+                break;
+            case MemberExpr:
+                if (prop.getType() == Swc4jAstType.ComputedPropName) {
+                    Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
+                    ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
+                    if (expr.getType() == Swc4jAstType.Str) {
+                        setProp(Swc4jAstIdent.create(expr.as(Swc4jAstStr.class).getValue()));
+                    }
+                }
+                if (prop.getType() == Swc4jAstType.Ident) {
+                    if (CONSTRUCTOR.equals(prop.as(Swc4jAstIdent.class).getSym())) {
+                        Swc4jAstMemberExpr childMemberExpr = obj.as(Swc4jAstMemberExpr.class);
+                        if (childMemberExpr.getObj().getType() == Swc4jAstType.ArrayLit
+                                && childMemberExpr.getProp().getType() == Swc4jAstType.ComputedPropName) {
+                            Swc4jAstComputedPropName childComputedPropName = childMemberExpr.getProp().as(Swc4jAstComputedPropName.class);
+                            ISwc4jAstExpr childExpr = childComputedPropName.getExpr().unParenExpr();
+                            if (childExpr.getType() == Swc4jAstType.Str) {
+                                Swc4jAstStr childStr = childExpr.as(Swc4jAstStr.class);
+                                if (Swc4jAstArrayLit.ARRAY_FUNCTION_SET.contains(childStr.getValue())) {
+                                    return Optional.of(Swc4jAstIdent.create(FUNCTION));
+                                }
+                            }
+                        }
                     }
                 }
                 break;
