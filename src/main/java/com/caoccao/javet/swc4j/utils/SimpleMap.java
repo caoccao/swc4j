@@ -43,6 +43,19 @@ public final class SimpleMap {
     }
 
     /**
+     * Immutable of map.
+     *
+     * @param <K>     the type parameter
+     * @param <V>     the type parameter
+     * @param objects the objects
+     * @return the map
+     * @since 0.8.0
+     */
+    public static <K, V> Map<K, V> immutableOf(Object... objects) {
+        return immutable(of(objects));
+    }
+
+    /**
      * Of map.
      *
      * @param <K> the type parameter
@@ -305,6 +318,7 @@ public final class SimpleMap {
      * @param <V>     the type parameter
      * @param objects the objects
      * @return the map
+     * @since 0.2.0
      */
     @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> of(Object... objects) {

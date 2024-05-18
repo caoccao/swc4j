@@ -124,6 +124,16 @@ public class Swc4jAstArrayLit
         return Swc4jAstType.ArrayLit;
     }
 
+    public boolean isAllPrimitive() {
+        return elems.stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(Swc4jAstExprOrSpread::getExpr)
+                .map(ISwc4jAstExpr::unParenExpr)
+                .map(ISwc4jAst::getType)
+                .allMatch(Swc4jAstType::isPrimitive);
+    }
+
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
         if (!elems.isEmpty() && (newNode == null || newNode instanceof Swc4jAstExprOrSpread)) {

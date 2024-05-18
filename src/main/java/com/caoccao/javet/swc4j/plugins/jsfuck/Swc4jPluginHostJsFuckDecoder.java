@@ -44,6 +44,7 @@ public class Swc4jPluginHostJsFuckDecoder implements ISwc4jPluginHost {
                 break;
             }
         }
+        System.out.println(program.toDebugString());
         return true;
     }
 

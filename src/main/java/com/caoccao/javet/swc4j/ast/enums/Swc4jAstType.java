@@ -462,4 +462,8 @@ public enum Swc4jAstType implements ISwc4jEnumId {
     public int getId() {
         return id;
     }
+
+    public boolean isPrimitive() {
+        return this == Str || this == Number || this == Bool || this == Null || this == BigInt;
+    }
 }

@@ -18,10 +18,7 @@ package com.caoccao.javet.swc4j.plugins.jsfuck;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
@@ -32,6 +29,9 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.utils.SimpleMap;
+
+import java.util.Map;
 
 /**
  * The type Swc4j plugin visitor jsfuck decoder.
@@ -40,6 +40,28 @@ import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
  * @since 0.8.0
  */
 public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
+    protected static final Map<String, String> ARRAY_FUNCTION_STRING_MAP = SimpleMap.immutableOf(
+            "concat", "",
+            "copyWithin", "",
+            "entries", "[object Array Iterator]",
+            "fill", "",
+            "flat", "",
+            "indexOf", "-1",
+            "includes", "false",
+            "join", "",
+            "keys", "[object Array Iterator]",
+            "lastIndexOf", "-1",
+            "push", "0",
+            "reverse", "",
+            "slice", "",
+            "sort", "",
+            "splice", "",
+            "toReversed", "",
+            "toSorted", "",
+            "toSpliced", "",
+            "toString", "",
+            "unshift", "0",
+            "values", "[object Array Iterator]");
     protected int count;
 
     public Swc4jPluginVisitorJsFuckDecoder() {
@@ -63,30 +85,54 @@ public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
         Swc4jAstType rightType = right.getType();
         switch (node.getOp()) {
             case Add:
-                if ((leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.Number) ||
-                        (leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.Bool) ||
-                        (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Bool) ||
-                        (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Number)) {
-                    double value = left.as(ISwc4jAstCoercionPrimitive.class).asDouble()
-                            + right.as(ISwc4jAstCoercionPrimitive.class).asDouble();
-                    newNode = Swc4jAstNumber.create(value);
-                } else if ((leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.ArrayLit) ||
-                        (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Bool) ||
-                        (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.ArrayLit) ||
-                        (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.ArrayLit) ||
-                        (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Str) ||
-                        (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Str) ||
-                        (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Number) ||
-                        (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Number) ||
-                        (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Str) ||
-                        (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.ArrayLit)) {
-                    String value = left.as(ISwc4jAstCoercionPrimitive.class).asString()
-                            + right.as(ISwc4jAstCoercionPrimitive.class).asString();
-                    newNode = Swc4jAstStr.create(value);
-                } else if ((leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Ident) ||
-                        (leftType == Swc4jAstType.Ident && rightType == Swc4jAstType.ArrayLit)) {
-                    String value = left.toString() + right;
-                    newNode = Swc4jAstStr.create(value);
+                boolean ignore = false;
+                if (leftType == Swc4jAstType.ArrayLit) {
+                    ignore = !left.as(Swc4jAstArrayLit.class).isAllPrimitive();
+                } else if (rightType == Swc4jAstType.ArrayLit) {
+                    ignore = !right.as(Swc4jAstArrayLit.class).isAllPrimitive();
+                }
+                if (!ignore) {
+                    if ((leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.Number) ||
+                            (leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.Bool) ||
+                            (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Bool) ||
+                            (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Number)) {
+                        double value = left.as(ISwc4jAstCoercionPrimitive.class).asDouble()
+                                + right.as(ISwc4jAstCoercionPrimitive.class).asDouble();
+                        newNode = Swc4jAstNumber.create(value);
+                    } else if ((leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.ArrayLit) ||
+                            (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Bool) ||
+                            (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.ArrayLit) ||
+                            (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.ArrayLit) ||
+                            (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Str) ||
+                            (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Str) ||
+                            (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Number) ||
+                            (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Number) ||
+                            (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Str) ||
+                            (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.ArrayLit)) {
+                        String value = left.as(ISwc4jAstCoercionPrimitive.class).asString()
+                                + right.as(ISwc4jAstCoercionPrimitive.class).asString();
+                        newNode = Swc4jAstStr.create(value);
+                    } else if ((leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Ident) ||
+                            (leftType == Swc4jAstType.Ident && rightType == Swc4jAstType.ArrayLit)) {
+                        String value = left.toString() + right;
+                        newNode = Swc4jAstStr.create(value);
+                    } else if ((leftType == Swc4jAstType.Str || leftType == Swc4jAstType.Number) && rightType == Swc4jAstType.CallExpr) {
+                        Swc4jAstCallExpr callExpr = right.as(Swc4jAstCallExpr.class);
+                        if (callExpr.getCallee().getType() == Swc4jAstType.MemberExpr && callExpr.getArgs().isEmpty()) {
+                            Swc4jAstMemberExpr memberExpr = callExpr.getCallee().as(Swc4jAstMemberExpr.class);
+                            ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
+                            if (obj.getType() == Swc4jAstType.ArrayLit && memberExpr.getProp().getType() == Swc4jAstType.ComputedPropName) {
+                                Swc4jAstComputedPropName computedPropName = memberExpr.getProp().as(Swc4jAstComputedPropName.class);
+                                ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
+                                if (expr.getType() == Swc4jAstType.Str) {
+                                    Swc4jAstStr str = expr.as(Swc4jAstStr.class);
+                                    String leftString = left.as(ISwc4jAstCoercionPrimitive.class).asString();
+                                    String rightString = ARRAY_FUNCTION_STRING_MAP.getOrDefault(str.getValue(), Swc4jAstIdent.UNDEFINED);
+                                    newNode = Swc4jAstStr.create(leftString + rightString);
+                                }
+                            }
+                        }
+                    }
                 }
                 break;
             default:
@@ -107,8 +153,21 @@ public class Swc4jPluginVisitorJsFuckDecoder extends Swc4jAstVisitor {
         switch (obj.getType()) {
             case ArrayLit:
                 Swc4jAstArrayLit arrayLit = obj.as(Swc4jAstArrayLit.class);
-                if (arrayLit.getElems().isEmpty()) {
-                    newNode = Swc4jAstIdent.createUndefined();
+                boolean ignore = false;
+                if (prop.getType() == Swc4jAstType.ComputedPropName) {
+                    Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
+                    ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
+                    switch (expr.getType()) {
+                        case BinExpr:
+                        case Str:
+                            ignore = true;
+                            break;
+                    }
+                }
+                if (!ignore) {
+                    if (arrayLit.getElems().isEmpty()) {
+                        newNode = Swc4jAstIdent.createUndefined();
+                    }
                 }
                 break;
             case Str:
