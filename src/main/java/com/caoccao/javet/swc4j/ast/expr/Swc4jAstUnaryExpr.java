@@ -19,7 +19,12 @@ package com.caoccao.javet.swc4j.ast.expr;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCoercionPrimitive;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -32,6 +37,7 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
+import java.util.Optional;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstUnaryExpr
@@ -49,6 +55,51 @@ public class Swc4jAstUnaryExpr
         super(span);
         setArg(arg);
         setOp(op);
+    }
+
+    @Override
+    public Optional<ISwc4jAst> eval() {
+        ISwc4jAstExpr arg = this.arg.unParenExpr();
+        switch (op) {
+            case Bang:
+                switch (arg.getType()) {
+                    case ArrayLit:
+                        return Optional.of(Swc4jAstBool.create(false));
+                    case Bool:
+                    case Number:
+                        return Optional.of(Swc4jAstBool.create(!arg.as(ISwc4jAstCoercionPrimitive.class).asBoolean()));
+                    default:
+                        break;
+                }
+                break;
+            case Plus:
+                switch (arg.getType()) {
+                    case ArrayLit: {
+                        return Optional.of(Swc4jAstNumber.create(arg.as(Swc4jAstArrayLit.class).asDouble()));
+                    }
+                    case Bool:
+                        return Optional.of(Swc4jAstNumber.create(arg.as(ISwc4jAstCoercionPrimitive.class).asInt()));
+                    case Number: {
+                        Swc4jAstNumber number = arg.as(Swc4jAstNumber.class);
+                        return Optional.of(Swc4jAstNumber.create(number.getValue(), number.getRaw().orElse(null)));
+                    }
+                    case Str: {
+                        double value;
+                        try {
+                            value = Double.parseDouble(arg.as(Swc4jAstStr.class).getValue());
+                        } catch (Throwable t) {
+                            value = Double.NaN;
+                        }
+                        return Optional.of(Swc4jAstNumber.create(value));
+                    }
+                    default:
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+        return super.eval();
     }
 
     @Jni2RustMethod

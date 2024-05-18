@@ -17,7 +17,11 @@
 package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -30,6 +34,7 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
+import java.util.Optional;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstMemberExpr
@@ -47,6 +52,63 @@ public class Swc4jAstMemberExpr
         super(span);
         setObj(obj);
         setProp(prop);
+    }
+
+    @Override
+    public Optional<ISwc4jAst> eval() {
+        ISwc4jAstExpr obj = this.obj.unParenExpr();
+        switch (obj.getType()) {
+            case ArrayLit:
+                Swc4jAstArrayLit arrayLit = obj.as(Swc4jAstArrayLit.class);
+                boolean ignore = false;
+                if (prop.getType() == Swc4jAstType.ComputedPropName) {
+                    Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
+                    ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
+                    switch (expr.getType()) {
+                        case BinExpr:
+                        case Str:
+                            ignore = true;
+                            break;
+                    }
+                }
+                if (!ignore) {
+                    if (arrayLit.getElems().isEmpty()) {
+                        return Optional.of(Swc4jAstIdent.createUndefined());
+                    }
+                }
+                break;
+            case Str:
+                if (prop.getType() == Swc4jAstType.ComputedPropName) {
+                    Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
+                    ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
+                    String value = obj.as(Swc4jAstStr.class).getValue();
+                    switch (expr.getType()) {
+                        case Number: {
+                            int index = expr.as(Swc4jAstNumber.class).asInt();
+                            if (index >= 0 && index < value.length()) {
+                                value = value.substring(index, index + 1);
+                                return Optional.of(Swc4jAstStr.create(value));
+                            }
+                            break;
+                        }
+                        case Str: {
+                            Swc4jAstStr str = expr.as(Swc4jAstStr.class);
+                            if (!Swc4jAstCallExpr.BUILT_IN_FUNCTION_SET.contains(str.getValue())) {
+                                int index = str.asInt();
+                                if (index >= 0 && index < value.length()) {
+                                    value = value.substring(index, index + 1);
+                                    return Optional.of(Swc4jAstStr.create(value));
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        return super.eval();
     }
 
     @Override

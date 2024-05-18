@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.ast.interfaces;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
@@ -72,7 +71,7 @@ public interface ISwc4jAstExpr
         ISwc4jAstAssignTarget {
     default ISwc4jAstExpr unParenExpr() {
         ISwc4jAstExpr expr = this;
-        while (expr.getType() == Swc4jAstType.ParenExpr) {
+        while (expr instanceof Swc4jAstParenExpr) {
             expr = expr.as(Swc4jAstParenExpr.class).getExpr();
         }
         return expr;

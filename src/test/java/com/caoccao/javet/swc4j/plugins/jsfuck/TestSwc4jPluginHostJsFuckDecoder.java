@@ -39,10 +39,14 @@ public class TestSwc4jPluginHostJsFuckDecoder extends BaseTestSuite {
         testCaseMap.put("020", "16;");
         testCaseMap.put("0x20", "32;");
         testCaseMap.put("+[![]]", "NaN;");
+        testCaseMap.put("false+'a'", "\"falsea\";");
+        testCaseMap.put("'a'+true", "\"atrue\";");
         testCaseMap.put("[][[]]+[]", "\"undefined\";");
         testCaseMap.put("''+[]['entries']()", "\"[object Array Iterator]\";");
         testCaseMap.put("([![]]+[][[]])[+!+[]+[+[]]]", "\"i\";");
         testCaseMap.put("true+[][\"flat\"]", "\"truefunction flat() { [native code] }\";");
+        testCaseMap.put("('a','b')[\"fontcolor\"]('c','d')", "'<font color=\"c\">b</font>';");
+        testCaseMap.put("('a','b')['italics']('c','d')", "\"<i>b</i>\";");
         testCaseMap.put("[+!+[]]+(+(+!+[]+(!+[]+[])[!+[]+!+[]+!+[]]+[+!+[]]+[+[]]+[+[]])+[])[!+[]+!+[]]+[+!+[]]", "\"1+1\";");
         testCaseMap.put("(+((+(+!+[]+[+!+[]]+(!![]+[])[!+[]+!+[]+!+[]]+[!+[]+!+[]]+[+[]])+[])[+!+[]]+[+[]+[+[]]+[+[]]+[+[]]+[+[]]+[+[]]+[+!+[]]])+[])[!+[]+!+[]]", "\"-\";");
         testCaseMap.put("[+!+[]]+(+((+(+!+[]+[+!+[]]+(!![]+[])[!+[]+!+[]+!+[]]+[!+[]+!+[]]+[+[]])+[])[+!+[]]+[+[]+[+[]]+[+[]]+[+[]]+[+[]]+[+[]]+[+!+[]]])+[])[!+[]+!+[]]+[+!+[]]", "\"1-1\";");

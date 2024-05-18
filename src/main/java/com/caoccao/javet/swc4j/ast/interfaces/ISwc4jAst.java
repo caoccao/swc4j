@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The interface Swc4j ast.
@@ -42,6 +43,16 @@ public interface ISwc4jAst {
     @SuppressWarnings("unchecked")
     default <T> T as(Class<T> clazz) {
         return clazz.isAssignableFrom(getClass()) ? (T) this : null;
+    }
+
+    /**
+     * Eval to a new optional AST node.
+     *
+     * @return the optional AST node
+     * @since 0.8.0
+     */
+    default Optional<ISwc4jAst> eval() {
+        return Optional.empty();
     }
 
     /**

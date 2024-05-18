@@ -17,7 +17,9 @@
 package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -28,14 +30,20 @@ import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.SimpleSet;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstCallExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    public static final String FONTCOLOR = "fontcolor";
+    public static final String ITALICS = "italics";
+    public static final Set<String> BUILT_IN_FUNCTION_SET = SimpleSet.immutableOf(FONTCOLOR, ITALICS);
+
     protected final List<Swc4jAstExprOrSpread> args;
     protected ISwc4jAstCallee callee;
     @Jni2RustField(componentBox = true)
@@ -52,6 +60,41 @@ public class Swc4jAstCallExpr
         setTypeArgs(typeArgs);
         this.args = AssertionUtils.notNull(args, "Args");
         this.args.forEach(node -> node.setParent(this));
+    }
+
+    @Override
+    public Optional<ISwc4jAst> eval() {
+        if (callee instanceof Swc4jAstMemberExpr) {
+            Swc4jAstMemberExpr memberExpr = callee.as(Swc4jAstMemberExpr.class);
+            if (memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
+                Swc4jAstComputedPropName prop = memberExpr.getProp().as(Swc4jAstComputedPropName.class);
+                ISwc4jAstExpr expr = prop.getExpr().unParenExpr();
+                if (expr instanceof Swc4jAstStr) {
+                    Swc4jAstStr str = expr.as(Swc4jAstStr.class);
+                    if (BUILT_IN_FUNCTION_SET.contains(str.getValue())) {
+                        ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
+                        while (obj instanceof Swc4jAstSeqExpr) {
+                            Swc4jAstSeqExpr seqExpr = obj.as(Swc4jAstSeqExpr.class);
+                            if (seqExpr.getExprs().isEmpty()) {
+                                break;
+                            } else {
+                                obj = seqExpr.getExprs().get(seqExpr.getExprs().size() - 1);
+                            }
+                        }
+                        if (obj instanceof Swc4jAstStr) {
+                            String objString = obj.as(Swc4jAstStr.class).getValue();
+                            if (FONTCOLOR.equals(str.getValue())) {
+                                String argString = args.isEmpty() ? Swc4jAstIdent.UNDEFINED : args.get(0).toString();
+                                return Optional.of(Swc4jAstStr.create("<font color=\"" + argString + "\">" + objString + "</font>"));
+                            } else if (ITALICS.equals(str.getValue())) {
+                                return Optional.of(Swc4jAstStr.create("<i>" + objString + "</i>"));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return super.eval();
     }
 
     @Jni2RustMethod
