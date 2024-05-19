@@ -159,7 +159,7 @@ public class Swc4jAstRegex
 
     @Override
     public String toString() {
-        return "/" + escape(exp) + "/" + flags;
+        return "/" + exp + "/" + flags;
     }
 
     @Override

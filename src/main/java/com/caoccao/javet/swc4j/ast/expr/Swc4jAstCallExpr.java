@@ -108,7 +108,8 @@ public class Swc4jAstCallExpr
                                 case 1:
                                     ISwc4jAstExpr arg = args.get(0).getExpr().unParenExpr();
                                     if (arg instanceof Swc4jAstStr) {
-                                        return Optional.of(Swc4jAstRegex.create(arg.as(Swc4jAstStr.class).getValue()));
+                                        return Optional.of(Swc4jAstRegex.create(
+                                                Swc4jAstRegex.escape(arg.as(Swc4jAstStr.class).getValue())));
                                     }
                                     break;
                                 default:
@@ -116,7 +117,7 @@ public class Swc4jAstCallExpr
                                     ISwc4jAstExpr arg2 = args.get(1).getExpr().unParenExpr();
                                     if (arg1 instanceof Swc4jAstStr && arg2 instanceof Swc4jAstStr) {
                                         return Optional.of(Swc4jAstRegex.create(
-                                                arg1.as(Swc4jAstStr.class).getValue(),
+                                                Swc4jAstRegex.escape(arg1.as(Swc4jAstStr.class).getValue()),
                                                 arg2.as(Swc4jAstStr.class).getValue()));
                                     }
                                     break;
