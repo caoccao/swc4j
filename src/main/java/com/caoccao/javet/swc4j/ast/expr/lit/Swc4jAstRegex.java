@@ -36,6 +36,7 @@ import java.util.List;
 public class Swc4jAstRegex
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstCoercionPrimitive {
+    public static final String CONSTRUCTOR = "RegExp";
     @Jni2RustField(atom = true)
     protected String exp;
     @Jni2RustField(atom = true)
@@ -49,6 +50,36 @@ public class Swc4jAstRegex
         super(span);
         setExp(exp);
         setFlags(flags);
+    }
+
+    public static Swc4jAstRegex create() {
+        return create("(?:)");
+    }
+
+    public static Swc4jAstRegex create(String exp) {
+        return create(exp, "");
+    }
+
+    public static Swc4jAstRegex create(String exp, String flags) {
+        return new Swc4jAstRegex(exp, flags, Swc4jSpan.DUMMY);
+    }
+
+    public static String escape(String str) {
+        StringBuilder sb = new StringBuilder();
+        for (char c : str.toCharArray()) {
+            switch (c) {
+                case '\\':
+                    sb.append("\\\\");
+                    break;
+                case '/':
+                    sb.append("\\/");
+                    break;
+                default:
+                    sb.append(c);
+                    break;
+            }
+        }
+        return sb.toString();
     }
 
     @Override
@@ -128,7 +159,7 @@ public class Swc4jAstRegex
 
     @Override
     public String toString() {
-        return "/" + exp + "/" + flags;
+        return "/" + escape(exp) + "/" + flags;
     }
 
     @Override

@@ -71,8 +71,19 @@ public interface ISwc4jAstExpr
         ISwc4jAstAssignTarget {
     default ISwc4jAstExpr unParenExpr() {
         ISwc4jAstExpr expr = this;
-        while (expr instanceof Swc4jAstParenExpr) {
-            expr = expr.as(Swc4jAstParenExpr.class).getExpr();
+        while (true) {
+            if (expr instanceof Swc4jAstParenExpr) {
+                expr = expr.as(Swc4jAstParenExpr.class).getExpr();
+            } else if (expr instanceof Swc4jAstSeqExpr) {
+                Swc4jAstSeqExpr seqExpr = expr.as(Swc4jAstSeqExpr.class);
+                if (seqExpr.getExprs().isEmpty()) {
+                    break;
+                } else {
+                    expr = seqExpr.getExprs().get(seqExpr.getExprs().size() - 1);
+                }
+            } else {
+                break;
+            }
         }
         return expr;
     }

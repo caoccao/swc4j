@@ -16,17 +16,25 @@
 
 package com.caoccao.javet.swc4j.ast.expr;
 
+import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstRegex;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
+import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.jni2rust.*;
+import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
+import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -43,7 +51,10 @@ public class Swc4jAstCallExpr
     public static final String FONTCOLOR = "fontcolor";
     public static final String ITALICS = "italics";
     public static final Set<String> BUILT_IN_FUNCTION_SET = SimpleSet.immutableOf(FONTCOLOR, ITALICS);
-
+    protected static final Swc4jParseOptions PARSE_OPTIONS = new Swc4jParseOptions()
+            .setCaptureAst(true)
+            .setMediaType(Swc4jMediaType.JavaScript);
+    protected static final Swc4j SWC4J = new Swc4j();
     protected final List<Swc4jAstExprOrSpread> args;
     protected ISwc4jAstCallee callee;
     @Jni2RustField(componentBox = true)
@@ -64,38 +75,79 @@ public class Swc4jAstCallExpr
 
     @Override
     public Optional<ISwc4jAst> eval() {
-        if (callee instanceof Swc4jAstMemberExpr) {
-            String specialCall = null;
-            Swc4jAstMemberExpr memberExpr = callee.as(Swc4jAstMemberExpr.class);
-            if (memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
-                Swc4jAstComputedPropName prop = memberExpr.getProp().as(Swc4jAstComputedPropName.class);
-                ISwc4jAstExpr expr = prop.getExpr().unParenExpr();
-                if (expr instanceof Swc4jAstStr) {
-                    specialCall = expr.as(Swc4jAstStr.class).getValue();
+        switch (callee.getType()) {
+            case MemberExpr:
+                String specialCall = null;
+                Swc4jAstMemberExpr memberExpr = callee.as(Swc4jAstMemberExpr.class);
+                if (memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
+                    Swc4jAstComputedPropName prop = memberExpr.getProp().as(Swc4jAstComputedPropName.class);
+                    ISwc4jAstExpr expr = prop.getExpr().unParenExpr();
+                    if (expr instanceof Swc4jAstStr) {
+                        specialCall = expr.as(Swc4jAstStr.class).getValue();
+                    }
+                } else if (memberExpr.getProp() instanceof Swc4jAstIdent) {
+                    specialCall = memberExpr.getProp().as(Swc4jAstIdent.class).getSym();
                 }
-            } else if (memberExpr.getProp() instanceof Swc4jAstIdent) {
-                specialCall = memberExpr.getProp().as(Swc4jAstIdent.class).getSym();
-            }
-            if (specialCall != null && BUILT_IN_FUNCTION_SET.contains(specialCall)) {
-                ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
-                while (obj instanceof Swc4jAstSeqExpr) {
-                    Swc4jAstSeqExpr seqExpr = obj.as(Swc4jAstSeqExpr.class);
-                    if (seqExpr.getExprs().isEmpty()) {
-                        break;
-                    } else {
-                        obj = seqExpr.getExprs().get(seqExpr.getExprs().size() - 1).unParenExpr();
+                if (specialCall != null) {
+                    if (BUILT_IN_FUNCTION_SET.contains(specialCall)) {
+                        ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
+                        if (obj instanceof Swc4jAstStr) {
+                            String objString = obj.as(Swc4jAstStr.class).getValue();
+                            if (FONTCOLOR.equals(specialCall)) {
+                                String argString = args.isEmpty() ? Swc4jAstIdent.UNDEFINED : args.get(0).toString();
+                                return Optional.of(Swc4jAstStr.create("<font color=\"" + argString + "\">" + objString + "</font>"));
+                            } else if (ITALICS.equals(specialCall)) {
+                                return Optional.of(Swc4jAstStr.create("<i>" + objString + "</i>"));
+                            }
+                        }
+                    } else if (Swc4jAstMemberExpr.CONSTRUCTOR.equals(specialCall)) {
+                        if (memberExpr.getObj() instanceof Swc4jAstRegex) {
+                            switch (args.size()) {
+                                case 0:
+                                    return Optional.of(Swc4jAstRegex.create());
+                                case 1:
+                                    ISwc4jAstExpr arg = args.get(0).getExpr().unParenExpr();
+                                    if (arg instanceof Swc4jAstStr) {
+                                        return Optional.of(Swc4jAstRegex.create(arg.as(Swc4jAstStr.class).getValue()));
+                                    }
+                                    break;
+                                default:
+                                    ISwc4jAstExpr arg1 = args.get(0).getExpr().unParenExpr();
+                                    ISwc4jAstExpr arg2 = args.get(1).getExpr().unParenExpr();
+                                    if (arg1 instanceof Swc4jAstStr && arg2 instanceof Swc4jAstStr) {
+                                        return Optional.of(Swc4jAstRegex.create(
+                                                arg1.as(Swc4jAstStr.class).getValue(),
+                                                arg2.as(Swc4jAstStr.class).getValue()));
+                                    }
+                                    break;
+                            }
+                        }
                     }
                 }
-                if (obj instanceof Swc4jAstStr) {
-                    String objString = obj.as(Swc4jAstStr.class).getValue();
-                    if (FONTCOLOR.equals(specialCall)) {
-                        String argString = args.isEmpty() ? Swc4jAstIdent.UNDEFINED : args.get(0).toString();
-                        return Optional.of(Swc4jAstStr.create("<font color=\"" + argString + "\">" + objString + "</font>"));
-                    } else if (ITALICS.equals(specialCall)) {
-                        return Optional.of(Swc4jAstStr.create("<i>" + objString + "</i>"));
+                break;
+            case CallExpr:
+                Swc4jAstCallExpr callExpr = callee.as(Swc4jAstCallExpr.class);
+                if (callExpr.getCallee() instanceof Swc4jAstIdent && args.isEmpty()) {
+                    Swc4jAstIdent ident = callExpr.getCallee().as(Swc4jAstIdent.class);
+                    if (Swc4jAstFunction.CONSTRUCTOR.equals(ident.getSym()) && callExpr.getArgs().size() == 1) {
+                        ISwc4jAstExpr expr = callExpr.getArgs().get(0).getExpr().unParenExpr();
+                        if (expr instanceof Swc4jAstStr) {
+                            String code = expr.as(Swc4jAstStr.class).getValue();
+                            try {
+                                Swc4jParseOutput output = SWC4J.parse(code, PARSE_OPTIONS);
+                                List<? extends ISwc4jAst> body = output.getProgram().getBody();
+                                if (body.size() == 1 && body.get(0) instanceof Swc4jAstReturnStmt) {
+                                    Swc4jAstReturnStmt returnStmt = body.get(0).as(Swc4jAstReturnStmt.class);
+                                    return Optional.of(returnStmt.getArg().orElse(Swc4jAstIdent.createUndefined()));
+                                }
+                            } catch (Swc4jCoreException ignored) {
+                            }
+                        }
                     }
                 }
-            }
+                break;
+            default:
+                break;
         }
         return super.eval();
     }

@@ -88,6 +88,15 @@ public class Swc4jAstBinExpr
                         (leftType.isStr() && rightType.isArrayLit()) ||
                         (leftType.isArrayLit() && rightType.isStr()) ||
                         (leftType.isStr() && rightType.isStr()) ||
+                        (leftType.isRegex() && rightType.isArrayLit()) ||
+                        (leftType.isArrayLit() && rightType.isRegex()) ||
+                        (leftType.isRegex() && rightType.isStr()) ||
+                        (leftType.isStr() && rightType.isRegex()) ||
+                        (leftType.isRegex() && rightType.isBool()) ||
+                        (leftType.isBool() && rightType.isRegex()) ||
+                        (leftType.isRegex() && rightType.isNumber()) ||
+                        (leftType.isNumber() && rightType.isRegex()) ||
+                        (leftType.isRegex() && rightType.isRegex()) ||
                         (leftType.isStr() && rightType.isNumber()) ||
                         (leftType.isStr() && rightType.isBool()) ||
                         (leftType.isBool() && rightType.isStr()) ||

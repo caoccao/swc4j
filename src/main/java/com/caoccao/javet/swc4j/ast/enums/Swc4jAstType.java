@@ -491,6 +491,10 @@ public enum Swc4jAstType implements ISwc4jEnumId {
         return this == Str || this == Number || this == Bool || this == Null || this == BigInt;
     }
 
+    public boolean isRegex() {
+        return this == Regex;
+    }
+
     public boolean isStr() {
         return this == Str;
     }

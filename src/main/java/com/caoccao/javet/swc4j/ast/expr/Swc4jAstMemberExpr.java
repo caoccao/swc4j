@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
@@ -41,7 +42,6 @@ public class Swc4jAstMemberExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstOptChainBase, ISwc4jAstSimpleAssignTarget {
     public static final String CONSTRUCTOR = "constructor";
-    public static final String FUNCTION = "Function";
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr obj;
     protected ISwc4jAstMemberProp prop;
@@ -75,7 +75,7 @@ public class Swc4jAstMemberExpr
                     return Optional.of(Swc4jAstIdent.createUndefined());
                 }
                 break;
-            case MemberExpr:
+            case MemberExpr: {
                 String specialCall = null;
                 if (prop instanceof Swc4jAstComputedPropName) {
                     Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
@@ -95,12 +95,13 @@ public class Swc4jAstMemberExpr
                         if (childExpr instanceof Swc4jAstStr) {
                             Swc4jAstStr childStr = childExpr.as(Swc4jAstStr.class);
                             if (Swc4jAstArrayLit.ARRAY_FUNCTION_SET.contains(childStr.getValue())) {
-                                return Optional.of(Swc4jAstIdent.create(FUNCTION));
+                                return Optional.of(Swc4jAstIdent.create(Swc4jAstFunction.CONSTRUCTOR));
                             }
                         }
                     }
                 }
                 break;
+            }
             case Str:
                 if (prop instanceof Swc4jAstComputedPropName) {
                     Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
