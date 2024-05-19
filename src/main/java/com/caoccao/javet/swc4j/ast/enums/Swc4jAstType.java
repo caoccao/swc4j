@@ -463,7 +463,35 @@ public enum Swc4jAstType implements ISwc4jEnumId {
         return id;
     }
 
+    public boolean isArrayLit() {
+        return this == ArrayLit;
+    }
+
+    public boolean isBool() {
+        return this == Bool;
+    }
+
+    public boolean isCallExpr() {
+        return this == CallExpr;
+    }
+
+    public boolean isIdent() {
+        return this == Ident;
+    }
+
+    public boolean isMemberExpr() {
+        return this == MemberExpr;
+    }
+
+    public boolean isNumber() {
+        return this == Number;
+    }
+
     public boolean isPrimitive() {
         return this == Str || this == Number || this == Bool || this == Null || this == BigInt;
+    }
+
+    public boolean isStr() {
+        return this == Str;
     }
 }

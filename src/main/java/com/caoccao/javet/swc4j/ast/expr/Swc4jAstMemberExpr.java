@@ -62,50 +62,47 @@ public class Swc4jAstMemberExpr
         switch (obj.getType()) {
             case ArrayLit:
                 Swc4jAstArrayLit arrayLit = obj.as(Swc4jAstArrayLit.class);
-                boolean ignore = false;
-                if (prop.getType() == Swc4jAstType.ComputedPropName) {
+                if (prop instanceof Swc4jAstComputedPropName) {
                     Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
                     ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
                     switch (expr.getType()) {
                         case BinExpr:
                         case Str:
-                            ignore = true;
-                            break;
+                            return super.eval();
                     }
                 }
-                if (!ignore) {
-                    if (arrayLit.getElems().isEmpty()) {
-                        return Optional.of(Swc4jAstIdent.createUndefined());
-                    }
+                if (arrayLit.getElems().isEmpty()) {
+                    return Optional.of(Swc4jAstIdent.createUndefined());
                 }
                 break;
             case MemberExpr:
-                if (prop.getType() == Swc4jAstType.ComputedPropName) {
+                String specialCall = null;
+                if (prop instanceof Swc4jAstComputedPropName) {
                     Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
                     ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
-                    if (expr.getType() == Swc4jAstType.Str) {
-                        setProp(Swc4jAstIdent.create(expr.as(Swc4jAstStr.class).getValue()));
+                    if (expr instanceof Swc4jAstStr) {
+                        specialCall = expr.as(Swc4jAstStr.class).getValue();
                     }
+                } else if (prop instanceof Swc4jAstIdent) {
+                    specialCall = prop.as(Swc4jAstIdent.class).getSym();
                 }
-                if (prop.getType() == Swc4jAstType.Ident) {
-                    if (CONSTRUCTOR.equals(prop.as(Swc4jAstIdent.class).getSym())) {
-                        Swc4jAstMemberExpr childMemberExpr = obj.as(Swc4jAstMemberExpr.class);
-                        if (childMemberExpr.getObj().getType() == Swc4jAstType.ArrayLit
-                                && childMemberExpr.getProp().getType() == Swc4jAstType.ComputedPropName) {
-                            Swc4jAstComputedPropName childComputedPropName = childMemberExpr.getProp().as(Swc4jAstComputedPropName.class);
-                            ISwc4jAstExpr childExpr = childComputedPropName.getExpr().unParenExpr();
-                            if (childExpr.getType() == Swc4jAstType.Str) {
-                                Swc4jAstStr childStr = childExpr.as(Swc4jAstStr.class);
-                                if (Swc4jAstArrayLit.ARRAY_FUNCTION_SET.contains(childStr.getValue())) {
-                                    return Optional.of(Swc4jAstIdent.create(FUNCTION));
-                                }
+                if (CONSTRUCTOR.equals(specialCall)) {
+                    Swc4jAstMemberExpr childMemberExpr = obj.as(Swc4jAstMemberExpr.class);
+                    if (childMemberExpr.getObj() instanceof Swc4jAstArrayLit
+                            && childMemberExpr.getProp() instanceof Swc4jAstComputedPropName) {
+                        Swc4jAstComputedPropName childComputedPropName = childMemberExpr.getProp().as(Swc4jAstComputedPropName.class);
+                        ISwc4jAstExpr childExpr = childComputedPropName.getExpr().unParenExpr();
+                        if (childExpr instanceof Swc4jAstStr) {
+                            Swc4jAstStr childStr = childExpr.as(Swc4jAstStr.class);
+                            if (Swc4jAstArrayLit.ARRAY_FUNCTION_SET.contains(childStr.getValue())) {
+                                return Optional.of(Swc4jAstIdent.create(FUNCTION));
                             }
                         }
                     }
                 }
                 break;
             case Str:
-                if (prop.getType() == Swc4jAstType.ComputedPropName) {
+                if (prop instanceof Swc4jAstComputedPropName) {
                     Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
                     ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
                     String value = obj.as(Swc4jAstStr.class).getValue();

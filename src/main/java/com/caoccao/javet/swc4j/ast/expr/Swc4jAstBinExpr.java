@@ -69,100 +69,94 @@ public class Swc4jAstBinExpr
         Swc4jAstType rightType = right.getType();
         switch (op) {
             case Add:
-                boolean ignore = false;
-                if (leftType == Swc4jAstType.ArrayLit) {
-                    ignore = !left.as(Swc4jAstArrayLit.class).isAllPrimitive();
-                } else if (rightType == Swc4jAstType.ArrayLit) {
-                    ignore = !right.as(Swc4jAstArrayLit.class).isAllPrimitive();
+                if (leftType.isArrayLit() && !left.as(Swc4jAstArrayLit.class).isAllPrimitive()) {
+                    return super.eval();
                 }
-                if (!ignore) {
-                    if ((leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.Number) ||
-                            (leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.Bool) ||
-                            (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Bool) ||
-                            (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Number)) {
-                        double value = left.as(ISwc4jAstCoercionPrimitive.class).asDouble()
-                                + right.as(ISwc4jAstCoercionPrimitive.class).asDouble();
-                        return Optional.of(Swc4jAstNumber.create(value));
-                    } else if ((leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.ArrayLit) ||
-                            (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Bool) ||
-                            (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.ArrayLit) ||
-                            (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.ArrayLit) ||
-                            (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Str) ||
-                            (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Str) ||
-                            (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Number) ||
-                            (leftType == Swc4jAstType.Str && rightType == Swc4jAstType.Bool) ||
-                            (leftType == Swc4jAstType.Bool && rightType == Swc4jAstType.Str) ||
-                            (leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Number) ||
-                            (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.Str) ||
-                            (leftType == Swc4jAstType.Number && rightType == Swc4jAstType.ArrayLit)) {
-                        String value = left.as(ISwc4jAstCoercionPrimitive.class).asString()
-                                + right.as(ISwc4jAstCoercionPrimitive.class).asString();
-                        return Optional.of(Swc4jAstStr.create(value));
-                    } else if ((leftType == Swc4jAstType.ArrayLit && rightType == Swc4jAstType.Ident) ||
-                            (leftType == Swc4jAstType.Ident && rightType == Swc4jAstType.ArrayLit)) {
-                        String value = left.toString() + right;
-                        return Optional.of(Swc4jAstStr.create(value));
-                    } else if ((leftType.isPrimitive() || leftType == Swc4jAstType.ArrayLit)
-                            && rightType == Swc4jAstType.CallExpr) {
-                        Swc4jAstCallExpr callExpr = right.as(Swc4jAstCallExpr.class);
-                        if (callExpr.getCallee().getType() == Swc4jAstType.MemberExpr && callExpr.getArgs().isEmpty()) {
-                            Swc4jAstMemberExpr memberExpr = callExpr.getCallee().as(Swc4jAstMemberExpr.class);
-                            ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
-                            if (obj.getType() == Swc4jAstType.ArrayLit && memberExpr.getProp().getType() == Swc4jAstType.ComputedPropName) {
-                                Swc4jAstComputedPropName computedPropName = memberExpr.getProp().as(Swc4jAstComputedPropName.class);
-                                ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
-                                if (expr.getType() == Swc4jAstType.Str) {
-                                    Swc4jAstStr str = expr.as(Swc4jAstStr.class);
-                                    String leftString = left.as(ISwc4jAstCoercionPrimitive.class).asString();
-                                    String rightString = Swc4jAstArrayLit.ARRAY_FUNCTION_STRING_MAP.getOrDefault(str.getValue(), Swc4jAstIdent.UNDEFINED);
-                                    return Optional.of(Swc4jAstStr.create(leftString + rightString));
-                                }
-                            }
-                        }
-                    } else if ((rightType.isPrimitive() || rightType == Swc4jAstType.ArrayLit)
-                            && leftType == Swc4jAstType.CallExpr) {
-                        Swc4jAstCallExpr callExpr = left.as(Swc4jAstCallExpr.class);
-                        if (callExpr.getCallee().getType() == Swc4jAstType.MemberExpr && callExpr.getArgs().isEmpty()) {
-                            Swc4jAstMemberExpr memberExpr = callExpr.getCallee().as(Swc4jAstMemberExpr.class);
-                            ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
-                            if (obj.getType() == Swc4jAstType.ArrayLit && memberExpr.getProp().getType() == Swc4jAstType.ComputedPropName) {
-                                Swc4jAstComputedPropName computedPropName = memberExpr.getProp().as(Swc4jAstComputedPropName.class);
-                                ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
-                                if (expr.getType() == Swc4jAstType.Str) {
-                                    Swc4jAstStr str = expr.as(Swc4jAstStr.class);
-                                    String leftString = Swc4jAstArrayLit.ARRAY_FUNCTION_STRING_MAP.getOrDefault(str.getValue(), Swc4jAstIdent.UNDEFINED);
-                                    String rightString = right.as(ISwc4jAstCoercionPrimitive.class).asString();
-                                    return Optional.of(Swc4jAstStr.create(leftString + rightString));
-                                }
-                            }
-                        }
-                    } else if ((leftType.isPrimitive() || leftType == Swc4jAstType.ArrayLit)
-                            && rightType == Swc4jAstType.MemberExpr) {
-                        Swc4jAstMemberExpr memberExpr = right.as(Swc4jAstMemberExpr.class);
+                if (rightType.isArrayLit() && !right.as(Swc4jAstArrayLit.class).isAllPrimitive()) {
+                    return super.eval();
+                }
+                if ((leftType.isBool() && rightType.isNumber()) ||
+                        (leftType.isBool() && rightType.isBool()) ||
+                        (leftType.isNumber() && rightType.isBool()) ||
+                        (leftType.isNumber() && rightType.isNumber())) {
+                    double value = left.as(ISwc4jAstCoercionPrimitive.class).asDouble()
+                            + right.as(ISwc4jAstCoercionPrimitive.class).asDouble();
+                    return Optional.of(Swc4jAstNumber.create(value));
+                } else if ((leftType.isBool() && rightType.isArrayLit()) ||
+                        (leftType.isArrayLit() && rightType.isBool()) ||
+                        (leftType.isArrayLit() && rightType.isArrayLit()) ||
+                        (leftType.isStr() && rightType.isArrayLit()) ||
+                        (leftType.isArrayLit() && rightType.isStr()) ||
+                        (leftType.isStr() && rightType.isStr()) ||
+                        (leftType.isStr() && rightType.isNumber()) ||
+                        (leftType.isStr() && rightType.isBool()) ||
+                        (leftType.isBool() && rightType.isStr()) ||
+                        (leftType.isArrayLit() && rightType.isNumber()) ||
+                        (leftType.isNumber() && rightType.isStr()) ||
+                        (leftType.isNumber() && rightType.isArrayLit())) {
+                    String value = left.as(ISwc4jAstCoercionPrimitive.class).asString()
+                            + right.as(ISwc4jAstCoercionPrimitive.class).asString();
+                    return Optional.of(Swc4jAstStr.create(value));
+                } else if ((leftType.isArrayLit() && rightType.isIdent()) ||
+                        (leftType.isIdent() && rightType.isArrayLit())) {
+                    String value = left.toString() + right;
+                    return Optional.of(Swc4jAstStr.create(value));
+                } else if ((leftType.isPrimitive() || leftType.isArrayLit()) && rightType.isCallExpr()) {
+                    Swc4jAstCallExpr callExpr = right.as(Swc4jAstCallExpr.class);
+                    if (callExpr.getCallee() instanceof Swc4jAstMemberExpr && callExpr.getArgs().isEmpty()) {
+                        Swc4jAstMemberExpr memberExpr = callExpr.getCallee().as(Swc4jAstMemberExpr.class);
                         ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
-                        if (obj.getType() == Swc4jAstType.ArrayLit && memberExpr.getProp().getType() == Swc4jAstType.ComputedPropName) {
+                        if (obj instanceof Swc4jAstArrayLit && memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
                             Swc4jAstComputedPropName computedPropName = memberExpr.getProp().as(Swc4jAstComputedPropName.class);
                             ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
-                            if (expr.getType() == Swc4jAstType.Str) {
+                            if (expr instanceof Swc4jAstStr) {
                                 Swc4jAstStr str = expr.as(Swc4jAstStr.class);
                                 String leftString = left.as(ISwc4jAstCoercionPrimitive.class).asString();
-                                String rightString = "function " + str.getValue() + "() { [native code] }";
+                                String rightString = Swc4jAstArrayLit.ARRAY_FUNCTION_STRING_MAP.getOrDefault(str.getValue(), Swc4jAstIdent.UNDEFINED);
                                 return Optional.of(Swc4jAstStr.create(leftString + rightString));
                             }
                         }
-                    } else if ((rightType.isPrimitive() || rightType == Swc4jAstType.ArrayLit)
-                            && leftType == Swc4jAstType.MemberExpr) {
-                        Swc4jAstMemberExpr memberExpr = left.as(Swc4jAstMemberExpr.class);
+                    }
+                } else if ((rightType.isPrimitive() || rightType.isArrayLit()) && leftType.isCallExpr()) {
+                    Swc4jAstCallExpr callExpr = left.as(Swc4jAstCallExpr.class);
+                    if (callExpr.getCallee() instanceof Swc4jAstMemberExpr && callExpr.getArgs().isEmpty()) {
+                        Swc4jAstMemberExpr memberExpr = callExpr.getCallee().as(Swc4jAstMemberExpr.class);
                         ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
-                        if (obj.getType() == Swc4jAstType.ArrayLit && memberExpr.getProp().getType() == Swc4jAstType.ComputedPropName) {
+                        if (obj instanceof Swc4jAstArrayLit && memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
                             Swc4jAstComputedPropName computedPropName = memberExpr.getProp().as(Swc4jAstComputedPropName.class);
                             ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
-                            if (expr.getType() == Swc4jAstType.Str) {
+                            if (expr instanceof Swc4jAstStr) {
                                 Swc4jAstStr str = expr.as(Swc4jAstStr.class);
-                                String leftString = "function " + str.getValue() + "() { [native code] }";
+                                String leftString = Swc4jAstArrayLit.ARRAY_FUNCTION_STRING_MAP.getOrDefault(str.getValue(), Swc4jAstIdent.UNDEFINED);
                                 String rightString = right.as(ISwc4jAstCoercionPrimitive.class).asString();
                                 return Optional.of(Swc4jAstStr.create(leftString + rightString));
                             }
+                        }
+                    }
+                } else if ((leftType.isPrimitive() || leftType.isArrayLit()) && rightType.isMemberExpr()) {
+                    Swc4jAstMemberExpr memberExpr = right.as(Swc4jAstMemberExpr.class);
+                    ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
+                    if (obj instanceof Swc4jAstArrayLit && memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
+                        Swc4jAstComputedPropName computedPropName = memberExpr.getProp().as(Swc4jAstComputedPropName.class);
+                        ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
+                        if (expr instanceof Swc4jAstStr) {
+                            Swc4jAstStr str = expr.as(Swc4jAstStr.class);
+                            String leftString = left.as(ISwc4jAstCoercionPrimitive.class).asString();
+                            String rightString = "function " + str.getValue() + "() { [native code] }";
+                            return Optional.of(Swc4jAstStr.create(leftString + rightString));
+                        }
+                    }
+                } else if ((rightType.isPrimitive() || rightType.isArrayLit()) && leftType.isMemberExpr()) {
+                    Swc4jAstMemberExpr memberExpr = left.as(Swc4jAstMemberExpr.class);
+                    ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
+                    if (obj instanceof Swc4jAstArrayLit && memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
+                        Swc4jAstComputedPropName computedPropName = memberExpr.getProp().as(Swc4jAstComputedPropName.class);
+                        ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
+                        if (expr instanceof Swc4jAstStr) {
+                            Swc4jAstStr str = expr.as(Swc4jAstStr.class);
+                            String leftString = "function " + str.getValue() + "() { [native code] }";
+                            String rightString = right.as(ISwc4jAstCoercionPrimitive.class).asString();
+                            return Optional.of(Swc4jAstStr.create(leftString + rightString));
                         }
                     }
                 }

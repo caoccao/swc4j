@@ -65,35 +65,34 @@ public class Swc4jAstCallExpr
     @Override
     public Optional<ISwc4jAst> eval() {
         if (callee instanceof Swc4jAstMemberExpr) {
+            String specialCall = null;
             Swc4jAstMemberExpr memberExpr = callee.as(Swc4jAstMemberExpr.class);
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
                 Swc4jAstComputedPropName prop = memberExpr.getProp().as(Swc4jAstComputedPropName.class);
                 ISwc4jAstExpr expr = prop.getExpr().unParenExpr();
                 if (expr instanceof Swc4jAstStr) {
-                    Swc4jAstStr str = expr.as(Swc4jAstStr.class);
-                    memberExpr.setProp(Swc4jAstIdent.create(str.getValue()));
+                    specialCall = expr.as(Swc4jAstStr.class).getValue();
                 }
+            } else if (memberExpr.getProp() instanceof Swc4jAstIdent) {
+                specialCall = memberExpr.getProp().as(Swc4jAstIdent.class).getSym();
             }
-            if (memberExpr.getProp() instanceof Swc4jAstIdent) {
-                Swc4jAstIdent ident = memberExpr.getProp().as(Swc4jAstIdent.class);
-                if (BUILT_IN_FUNCTION_SET.contains(ident.getSym())) {
-                    ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
-                    while (obj instanceof Swc4jAstSeqExpr) {
-                        Swc4jAstSeqExpr seqExpr = obj.as(Swc4jAstSeqExpr.class);
-                        if (seqExpr.getExprs().isEmpty()) {
-                            break;
-                        } else {
-                            obj = seqExpr.getExprs().get(seqExpr.getExprs().size() - 1);
-                        }
+            if (specialCall != null && BUILT_IN_FUNCTION_SET.contains(specialCall)) {
+                ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
+                while (obj instanceof Swc4jAstSeqExpr) {
+                    Swc4jAstSeqExpr seqExpr = obj.as(Swc4jAstSeqExpr.class);
+                    if (seqExpr.getExprs().isEmpty()) {
+                        break;
+                    } else {
+                        obj = seqExpr.getExprs().get(seqExpr.getExprs().size() - 1).unParenExpr();
                     }
-                    if (obj instanceof Swc4jAstStr) {
-                        String objString = obj.as(Swc4jAstStr.class).getValue();
-                        if (FONTCOLOR.equals(ident.getSym())) {
-                            String argString = args.isEmpty() ? Swc4jAstIdent.UNDEFINED : args.get(0).toString();
-                            return Optional.of(Swc4jAstStr.create("<font color=\"" + argString + "\">" + objString + "</font>"));
-                        } else if (ITALICS.equals(ident.getSym())) {
-                            return Optional.of(Swc4jAstStr.create("<i>" + objString + "</i>"));
-                        }
+                }
+                if (obj instanceof Swc4jAstStr) {
+                    String objString = obj.as(Swc4jAstStr.class).getValue();
+                    if (FONTCOLOR.equals(specialCall)) {
+                        String argString = args.isEmpty() ? Swc4jAstIdent.UNDEFINED : args.get(0).toString();
+                        return Optional.of(Swc4jAstStr.create("<font color=\"" + argString + "\">" + objString + "</font>"));
+                    } else if (ITALICS.equals(specialCall)) {
+                        return Optional.of(Swc4jAstStr.create("<i>" + objString + "</i>"));
                     }
                 }
             }

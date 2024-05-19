@@ -135,7 +135,7 @@ public class Swc4jAstArrayLit
             case 1:
                 return elems.get(0)
                         .map(Swc4jAstExprOrSpread::getExpr)
-                        .filter(n -> n.getType() == Swc4jAstType.Number)
+                        .filter(n -> n instanceof Swc4jAstNumber)
                         .map(n -> (Swc4jAstNumber) n)
                         .map(Swc4jAstNumber::getValue)
                         .orElse(Double.NaN);
