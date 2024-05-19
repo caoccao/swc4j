@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 public class Swc4jAstNumber
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
+    public static final String CONSTRUCTOR = "Number";
     public static final String INFINITY = "Infinity";
     protected static final int MAX_EXPONENT = 308;
     protected static final Pattern PATTERN_DECIMAL_ZEROS =

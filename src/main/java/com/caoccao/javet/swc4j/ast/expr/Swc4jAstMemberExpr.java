@@ -76,28 +76,13 @@ public class Swc4jAstMemberExpr
                 }
                 break;
             case MemberExpr: {
-                String specialCall = null;
-                if (prop instanceof Swc4jAstComputedPropName) {
-                    Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
-                    ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
-                    if (expr instanceof Swc4jAstStr) {
-                        specialCall = expr.as(Swc4jAstStr.class).getValue();
-                    }
-                } else if (prop instanceof Swc4jAstIdent) {
-                    specialCall = prop.as(Swc4jAstIdent.class).getSym();
-                }
-                if (CONSTRUCTOR.equals(specialCall)) {
+                Optional<String> call = evalAsCall();
+                if (call.isPresent() && CONSTRUCTOR.equals(call.get())) {
                     Swc4jAstMemberExpr childMemberExpr = obj.as(Swc4jAstMemberExpr.class);
-                    if (childMemberExpr.getObj() instanceof Swc4jAstArrayLit
-                            && childMemberExpr.getProp() instanceof Swc4jAstComputedPropName) {
-                        Swc4jAstComputedPropName childComputedPropName = childMemberExpr.getProp().as(Swc4jAstComputedPropName.class);
-                        ISwc4jAstExpr childExpr = childComputedPropName.getExpr().unParenExpr();
-                        if (childExpr instanceof Swc4jAstStr) {
-                            Swc4jAstStr childStr = childExpr.as(Swc4jAstStr.class);
-                            if (Swc4jAstArrayLit.ARRAY_FUNCTION_SET.contains(childStr.getValue())) {
-                                return Optional.of(Swc4jAstIdent.create(Swc4jAstFunction.CONSTRUCTOR));
-                            }
-                        }
+                    if (childMemberExpr.getObj() instanceof Swc4jAstArrayLit) {
+                        return childMemberExpr.evalAsCall()
+                                .filter(Swc4jAstArrayLit.ARRAY_FUNCTION_SET::contains)
+                                .map(c -> Swc4jAstIdent.create(Swc4jAstFunction.CONSTRUCTOR));
                     }
                 }
                 break;
@@ -134,6 +119,38 @@ public class Swc4jAstMemberExpr
                 break;
         }
         return super.eval();
+    }
+
+    public Optional<String> evalAsCall() {
+        if (prop instanceof Swc4jAstComputedPropName) {
+            Swc4jAstComputedPropName computedPropName = prop.as(Swc4jAstComputedPropName.class);
+            ISwc4jAstExpr expr = computedPropName.getExpr().unParenExpr();
+            if (expr instanceof Swc4jAstStr) {
+                return Optional.of(expr.as(Swc4jAstStr.class).getValue());
+            }
+        } else if (prop instanceof Swc4jAstIdent) {
+            return Optional.of(prop.as(Swc4jAstIdent.class).getSym());
+        }
+        return Optional.empty();
+    }
+
+    public Optional<String> evalAsString() {
+        ISwc4jAstExpr obj = this.obj.unParenExpr();
+        Optional<String> call = evalAsCall();
+        if (call.isPresent()) {
+            switch (obj.getType()) {
+                case ArrayLit:
+                    call = call.filter(Swc4jAstArrayLit.ARRAY_FUNCTION_SET::contains);
+                    break;
+                case Number:
+                    call = call.filter(CONSTRUCTOR::equals).map(c -> Swc4jAstNumber.CONSTRUCTOR);
+                    break;
+                default:
+                    call = Optional.empty();
+                    break;
+            }
+        }
+        return call.map(c -> "function " + c + "() { [native code] }");
     }
 
     @Override

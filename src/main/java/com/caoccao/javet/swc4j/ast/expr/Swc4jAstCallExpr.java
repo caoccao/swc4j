@@ -18,9 +18,9 @@ package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstRegex;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
@@ -77,30 +77,21 @@ public class Swc4jAstCallExpr
     public Optional<ISwc4jAst> eval() {
         switch (callee.getType()) {
             case MemberExpr:
-                String specialCall = null;
                 Swc4jAstMemberExpr memberExpr = callee.as(Swc4jAstMemberExpr.class);
-                if (memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
-                    Swc4jAstComputedPropName prop = memberExpr.getProp().as(Swc4jAstComputedPropName.class);
-                    ISwc4jAstExpr expr = prop.getExpr().unParenExpr();
-                    if (expr instanceof Swc4jAstStr) {
-                        specialCall = expr.as(Swc4jAstStr.class).getValue();
-                    }
-                } else if (memberExpr.getProp() instanceof Swc4jAstIdent) {
-                    specialCall = memberExpr.getProp().as(Swc4jAstIdent.class).getSym();
-                }
-                if (specialCall != null) {
-                    if (BUILT_IN_FUNCTION_SET.contains(specialCall)) {
+                Optional<String> call = memberExpr.evalAsCall();
+                if (call.isPresent()) {
+                    if (BUILT_IN_FUNCTION_SET.contains(call.get())) {
                         ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
                         if (obj instanceof Swc4jAstStr) {
                             String objString = obj.as(Swc4jAstStr.class).getValue();
-                            if (FONTCOLOR.equals(specialCall)) {
+                            if (FONTCOLOR.equals(call.get())) {
                                 String argString = args.isEmpty() ? Swc4jAstIdent.UNDEFINED : args.get(0).toString();
                                 return Optional.of(Swc4jAstStr.create("<font color=\"" + argString + "\">" + objString + "</font>"));
-                            } else if (ITALICS.equals(specialCall)) {
+                            } else if (ITALICS.equals(call.get())) {
                                 return Optional.of(Swc4jAstStr.create("<i>" + objString + "</i>"));
                             }
                         }
-                    } else if (Swc4jAstMemberExpr.CONSTRUCTOR.equals(specialCall)) {
+                    } else if (Swc4jAstMemberExpr.CONSTRUCTOR.equals(call.get())) {
                         if (memberExpr.getObj() instanceof Swc4jAstRegex) {
                             switch (args.size()) {
                                 case 0:
@@ -151,6 +142,17 @@ public class Swc4jAstCallExpr
                 break;
         }
         return super.eval();
+    }
+
+    public Optional<String> evalAsString() {
+        if (callee instanceof Swc4jAstMemberExpr && args.isEmpty()) {
+            Swc4jAstMemberExpr memberExpr = callee.as(Swc4jAstMemberExpr.class);
+            ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
+            return memberExpr.evalAsCall()
+                    .filter(c -> obj instanceof Swc4jAstArrayLit)
+                    .map(c -> Swc4jAstArrayLit.ARRAY_FUNCTION_STRING_MAP.getOrDefault(c, Swc4jAstIdent.UNDEFINED));
+        }
+        return Optional.empty();
     }
 
     @Jni2RustMethod
