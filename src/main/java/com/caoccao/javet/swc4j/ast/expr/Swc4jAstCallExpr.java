@@ -126,9 +126,6 @@ public class Swc4jAstCallExpr
                                     radix = arg.as(ISwc4jAstCoercionPrimitive.class).asInt();
                                 }
                             }
-                            if (radix < 2 || radix > 32) {
-                                radix = 10;
-                            }
                             String value = Integer.toString(obj.as(Swc4jAstNumber.class).asInt(), radix);
                             return Optional.of(Swc4jAstStr.create(value));
                         }
