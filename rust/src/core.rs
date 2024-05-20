@@ -114,6 +114,9 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
       match result {
         Ok(_) => match String::from_utf8(buffer.to_vec()) {
           Ok(mut code) => {
+            if options.omit_last_semi && code.ends_with(";") {
+              code.truncate(code.len() - 1);
+            }
             let source_map: Option<String> = if options.source_map != SourceMapOption::None {
               let mut buffer = Vec::new();
               let source_map_config = SourceMapConfig {

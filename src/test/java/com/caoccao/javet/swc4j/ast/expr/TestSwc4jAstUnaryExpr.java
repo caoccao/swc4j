@@ -21,12 +21,19 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
+import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
+import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
+import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
+import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -68,6 +75,59 @@ public class TestSwc4jAstUnaryExpr extends BaseTestSuiteSwc4jAst {
                     unaryExpr, unaryExpr.getArg().as(Swc4jAstIdent.class), Swc4jAstType.Ident, code.length() - 1, code.length());
             assertEquals("a", ident.getSym());
             assertSpan(code, script);
+        }
+    }
+
+    @Test
+    public void testEval() throws Swc4jCoreException {
+        Map<String, String> testCaseMap = SimpleMap.of(
+                "!true", "false",
+                "!false", "true",
+                "!1", "false",
+                "!1.1", "false",
+                "!0", "true",
+                "!0e10", "true",
+                "![]", "false",
+                "![0]", "false",
+                "![false]", "false",
+                "!{}", "false",
+                "!{a:1}", "false",
+                "!'a'", "false",
+                "!''", "true",
+                "+[]", "0",
+                "+[1]", "1",
+                "+[1.1]", "1.1",
+                "+[1,2]", "NaN",
+                "+['a']", "NaN",
+                "+true", "1",
+                "+false", "0",
+                "+1", "1",
+                "+1.1", "1.1",
+                "+1e5", "1e5",
+                "+1.23e5", "123e3",
+                "+NaN", "NaN",
+                "+Infinity", "Infinity",
+                "+'a'", "NaN",
+                "+'1.1'", "1.1",
+                "+'1.23e5'", "123e3",
+                "+'1'", "1");
+        ISwc4jPluginHost pluginHost = program -> {
+            program.visit(new Swc4jAstVisitor() {
+                @Override
+                public Swc4jAstVisitorResponse visitUnaryExpr(Swc4jAstUnaryExpr node) {
+                    node.eval().ifPresent(n -> node.getParent().replaceNode(node, n));
+                    return super.visitUnaryExpr(node);
+                }
+            });
+            return true;
+        };
+        for (Map.Entry<String, String> entry : testCaseMap.entrySet()) {
+            jsScriptTransformOptions
+                    .setOmitLastSemi(true)
+                    .setSourceMap(Swc4jSourceMapOption.None)
+                    .setPluginHost(pluginHost);
+            Swc4jTransformOutput output = swc4j.transform(entry.getKey(), jsScriptTransformOptions);
+            assertEquals(entry.getValue(), output.getCode(), "Failed to evaluate " + entry.getKey());
         }
     }
 }

@@ -64,9 +64,11 @@ public class Swc4jAstUnaryExpr
             case Bang:
                 switch (arg.getType()) {
                     case ArrayLit:
+                    case ObjectLit:
                         return Optional.of(Swc4jAstBool.create(false));
                     case Bool:
                     case Number:
+                    case Str:
                         return Optional.of(Swc4jAstBool.create(!arg.as(ISwc4jAstCoercionPrimitive.class).asBoolean()));
                     default:
                         break;
@@ -74,23 +76,30 @@ public class Swc4jAstUnaryExpr
                 break;
             case Plus:
                 switch (arg.getType()) {
-                    case ArrayLit: {
+                    case ArrayLit:
                         return Optional.of(Swc4jAstNumber.create(arg.as(Swc4jAstArrayLit.class).asDouble()));
-                    }
                     case Bool:
                         return Optional.of(Swc4jAstNumber.create(arg.as(ISwc4jAstCoercionPrimitive.class).asInt()));
-                    case Number: {
+                    case Ident:
+                        Swc4jAstIdent ident = arg.as(Swc4jAstIdent.class);
+                        if (Swc4jAstNumber.NAN.equals(ident.getSym())) {
+                            return Optional.of(Swc4jAstNumber.createNaN());
+                        } else if (Swc4jAstNumber.INFINITY.equals(ident.getSym())) {
+                            return Optional.of(Swc4jAstNumber.createInfinity(true));
+                        }
+                        break;
+                    case Number:
                         Swc4jAstNumber number = arg.as(Swc4jAstNumber.class);
                         return Optional.of(Swc4jAstNumber.create(number.getValue(), number.getRaw().orElse(null)));
-                    }
+                    case ObjectLit:
+                        return Optional.of(Swc4jAstNumber.createNaN());
                     case Str: {
-                        double value;
                         try {
-                            value = Double.parseDouble(arg.as(Swc4jAstStr.class).getValue());
+                            return Optional.of(Swc4jAstNumber.create(
+                                    Double.parseDouble(arg.as(Swc4jAstStr.class).getValue())));
                         } catch (Throwable t) {
-                            value = Double.NaN;
+                            return Optional.of(Swc4jAstNumber.createNaN());
                         }
-                        return Optional.of(Swc4jAstNumber.create(value));
                     }
                     default:
                         break;

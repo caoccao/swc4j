@@ -36,6 +36,7 @@ public class Swc4jAstNumber
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
     public static final String CONSTRUCTOR = "Number";
     public static final String INFINITY = "Infinity";
+    public static final String NAN = "NaN";
     protected static final int MAX_EXPONENT = 308;
     protected static final Pattern PATTERN_DECIMAL_ZEROS =
             Pattern.compile("^([\\+\\-]?)(\\d+)\\.0*$", Pattern.CASE_INSENSITIVE);
@@ -67,6 +68,14 @@ public class Swc4jAstNumber
 
     public static Swc4jAstNumber create(double value, String raw) {
         return new Swc4jAstNumber(value, raw, Swc4jSpan.DUMMY);
+    }
+
+    public static Swc4jAstNumber createInfinity(boolean positive) {
+        return new Swc4jAstNumber(positive ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY, null, Swc4jSpan.DUMMY);
+    }
+
+    public static Swc4jAstNumber createNaN() {
+        return new Swc4jAstNumber(Double.NaN, null, Swc4jSpan.DUMMY);
     }
 
     protected static String normalize(String raw) {
