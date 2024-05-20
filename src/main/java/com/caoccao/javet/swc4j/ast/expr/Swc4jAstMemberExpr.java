@@ -70,6 +70,8 @@ public class Swc4jAstMemberExpr
                         case Str:
                             return super.eval();
                     }
+                } else if (prop instanceof Swc4jAstIdent) {
+                    return super.eval();
                 }
                 if (arrayLit.getElems().isEmpty()) {
                     return Optional.of(Swc4jAstIdent.createUndefined());
