@@ -74,6 +74,37 @@ public class Swc4jAstUnaryExpr
                         break;
                 }
                 break;
+            case Minus:
+                switch (arg.getType()) {
+                    case ArrayLit:
+                        return Optional.of(Swc4jAstNumber.create(-arg.as(Swc4jAstArrayLit.class).asDouble()));
+                    case Bool:
+                        return Optional.of(Swc4jAstNumber.create(-arg.as(ISwc4jAstCoercionPrimitive.class).asInt()));
+                    case Ident:
+                        Swc4jAstIdent ident = arg.as(Swc4jAstIdent.class);
+                        if (Swc4jAstNumber.NAN.equals(ident.getSym())) {
+                            return Optional.of(Swc4jAstNumber.createNaN());
+                        } else if (Swc4jAstNumber.INFINITY.equals(ident.getSym())) {
+                            return Optional.of(Swc4jAstNumber.createInfinity(false));
+                        }
+                        break;
+                    case Number:
+                        Swc4jAstNumber number = arg.as(Swc4jAstNumber.class);
+                        return Optional.of(Swc4jAstNumber.create(-number.getValue(), number.getRaw().map(n -> "-" + n).orElse(null)));
+                    case ObjectLit:
+                        return Optional.of(Swc4jAstNumber.createNaN());
+                    case Str: {
+                        try {
+                            return Optional.of(Swc4jAstNumber.create(
+                                    -Double.parseDouble(arg.as(Swc4jAstStr.class).getValue())));
+                        } catch (Throwable t) {
+                            return Optional.of(Swc4jAstNumber.createNaN());
+                        }
+                    }
+                    default:
+                        break;
+                }
+                break;
             case Plus:
                 switch (arg.getType()) {
                     case ArrayLit:

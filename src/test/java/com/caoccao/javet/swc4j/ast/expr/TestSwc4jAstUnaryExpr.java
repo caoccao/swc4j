@@ -110,7 +110,22 @@ public class TestSwc4jAstUnaryExpr extends BaseTestSuiteSwc4jAst {
                 "+'a'", "NaN",
                 "+'1.1'", "1.1",
                 "+'1.23e5'", "123e3",
-                "+'1'", "1");
+                "+'1'", "1",
+                "-[]", "-0",
+                "-[1]", "-1",
+                "-[1.1]", "-1.1",
+                "-[1,2]", "NaN",
+                "-['a']", "NaN",
+                "-1", "-1",
+                "-1.1", "-1.1",
+                "-1e5", "-1e5",
+                "-1.23e5", "-123e3",
+                "-NaN", "NaN",
+                "-Infinity", "-Infinity",
+                "-'a'", "NaN",
+                "-'1.1'", "-1.1",
+                "-'1.23e5'", "-123e3",
+                "-'1'", "-1");
         ISwc4jPluginHost pluginHost = program -> {
             program.visit(new Swc4jAstVisitor() {
                 @Override
