@@ -23,8 +23,12 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstCounterVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
+import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
+import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
+import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -104,8 +108,15 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
         }
     }
 
-    protected void assertVisitor(Swc4jParseOptions options, List<VisitorCase> visitorCases) {
-        assertVisitor(options, visitorCases, false);
+    protected void assertTransformJs(Map<String, String> testCaseMap, ISwc4jPluginHost pluginHost) throws Swc4jCoreException {
+        for (Map.Entry<String, String> entry : testCaseMap.entrySet()) {
+            jsScriptTransformOptions
+                    .setOmitLastSemi(true)
+                    .setSourceMap(Swc4jSourceMapOption.None)
+                    .setPluginHost(pluginHost);
+            Swc4jTransformOutput output = swc4j.transform(entry.getKey(), jsScriptTransformOptions);
+            assertEquals(entry.getValue(), output.getCode(), "Failed to evaluate " + entry.getKey());
+        }
     }
 
     protected void assertVisitor(Swc4jParseOptions options, List<VisitorCase> visitorCases, boolean debugEnabled) {
@@ -126,6 +137,10 @@ public abstract class BaseTestSuiteSwc4jAst extends BaseTestSuite {
         } catch (Throwable t) {
             fail(t);
         }
+    }
+
+    protected void assertVisitor(Swc4jParseOptions options, List<VisitorCase> visitorCases) {
+        assertVisitor(options, visitorCases, false);
     }
 
     @BeforeEach

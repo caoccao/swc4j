@@ -24,10 +24,8 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
-import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
-import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
@@ -38,7 +36,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSwc4jAstMemberExpr extends BaseTestSuiteSwc4jAst {
     @Test
-    public void testComputedPropName() throws Swc4jCoreException {
+    public void testEval() throws Swc4jCoreException {
+        Map<String, String> testCaseMap = SimpleMap.of(
+                "'abc'[1]", "\"b\"",
+                "'abc'['1']", "\"b\"",
+                "[]['at']['constructor']", "Function");
+        ISwc4jPluginHost pluginHost = program -> {
+            program.visit(new Swc4jAstVisitor() {
+                @Override
+                public Swc4jAstVisitorResponse visitMemberExpr(Swc4jAstMemberExpr node) {
+                    node.eval().ifPresent(n -> node.getParent().replaceNode(node, n));
+                    return super.visitMemberExpr(node);
+                }
+            });
+            return true;
+        };
+        assertTransformJs(testCaseMap, pluginHost);
+    }
+
+    @Test
+    public void testPropAsComputedPropName() throws Swc4jCoreException {
         String code = "a['b']";
         Swc4jParseOutput output = swc4j.parse(code, jsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
@@ -58,33 +75,7 @@ public class TestSwc4jAstMemberExpr extends BaseTestSuiteSwc4jAst {
     }
 
     @Test
-    public void testEval() throws Swc4jCoreException {
-        Map<String, String> testCaseMap = SimpleMap.of(
-                "'abc'[1]", "\"b\"",
-                "'abc'['1']", "\"b\"",
-                "[]['at']['constructor']", "Function");
-        ISwc4jPluginHost pluginHost = program -> {
-            program.visit(new Swc4jAstVisitor() {
-                @Override
-                public Swc4jAstVisitorResponse visitMemberExpr(Swc4jAstMemberExpr node) {
-                    node.eval().ifPresent(n -> node.getParent().replaceNode(node, n));
-                    return super.visitMemberExpr(node);
-                }
-            });
-            return true;
-        };
-        for (Map.Entry<String, String> entry : testCaseMap.entrySet()) {
-            jsScriptTransformOptions
-                    .setOmitLastSemi(true)
-                    .setSourceMap(Swc4jSourceMapOption.None)
-                    .setPluginHost(pluginHost);
-            Swc4jTransformOutput output = swc4j.transform(entry.getKey(), jsScriptTransformOptions);
-            assertEquals(entry.getValue(), output.getCode(), "Failed to evaluate " + entry.getKey());
-        }
-    }
-
-    @Test
-    public void testIdent() throws Swc4jCoreException {
+    public void testPropAsIdent() throws Swc4jCoreException {
         String code = "a.b";
         Swc4jParseOutput output = swc4j.parse(code, jsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);

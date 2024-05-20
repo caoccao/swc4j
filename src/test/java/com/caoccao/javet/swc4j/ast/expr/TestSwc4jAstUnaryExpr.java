@@ -23,10 +23,8 @@ import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
-import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
-import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 import com.caoccao.javet.swc4j.utils.SimpleMap;
@@ -136,13 +134,6 @@ public class TestSwc4jAstUnaryExpr extends BaseTestSuiteSwc4jAst {
             });
             return true;
         };
-        for (Map.Entry<String, String> entry : testCaseMap.entrySet()) {
-            jsScriptTransformOptions
-                    .setOmitLastSemi(true)
-                    .setSourceMap(Swc4jSourceMapOption.None)
-                    .setPluginHost(pluginHost);
-            Swc4jTransformOutput output = swc4j.transform(entry.getKey(), jsScriptTransformOptions);
-            assertEquals(entry.getValue(), output.getCode(), "Failed to evaluate " + entry.getKey());
-        }
+        assertTransformJs(testCaseMap, pluginHost);
     }
 }
