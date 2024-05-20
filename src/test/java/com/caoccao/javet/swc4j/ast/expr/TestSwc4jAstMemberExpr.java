@@ -40,6 +40,7 @@ public class TestSwc4jAstMemberExpr extends BaseTestSuiteSwc4jAst {
         Map<String, String> testCaseMap = SimpleMap.of(
                 "'abc'[1]", "\"b\"",
                 "'abc'['1']", "\"b\"",
+                "('')['constructor']['name']", "\"String\"",
                 "[]['at']['constructor']", "Function");
         ISwc4jPluginHost pluginHost = program -> {
             program.visit(new Swc4jAstVisitor() {

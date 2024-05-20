@@ -74,6 +74,7 @@ public class TestSwc4jAstCallExpr extends BaseTestSuiteSwc4jAst {
                 "/a/['constructor']()", "/(?:)/",
                 "/a/['constructor']('abc')", "/abc/",
                 "/a/['constructor']('a/b', 'i')", "/a\\/b/i",
+                "(31)['toString']('32')", "\"v\"",
                 "Function('return \"abc\"')()", "\"abc\"");
         ISwc4jPluginHost pluginHost = program -> {
             program.visit(new Swc4jAstVisitor() {

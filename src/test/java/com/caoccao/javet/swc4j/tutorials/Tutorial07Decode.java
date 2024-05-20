@@ -45,6 +45,7 @@ public class Tutorial07Decode {
                 .setSpecifier(specifier)
                 .setPluginHost(pluginHost)
                 .setMediaType(Swc4jMediaType.JavaScript)
+                .setOmitLastSemi(true)
                 .setInlineSources(false)
                 .setSourceMap(Swc4jSourceMapOption.None);
         // Transform the code.

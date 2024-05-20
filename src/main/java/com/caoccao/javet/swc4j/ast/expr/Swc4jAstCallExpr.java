@@ -21,10 +21,12 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstRegex;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCallee;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCoercionPrimitive;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
@@ -50,6 +52,7 @@ public class Swc4jAstCallExpr
         implements ISwc4jAstExpr {
     public static final String FONTCOLOR = "fontcolor";
     public static final String ITALICS = "italics";
+    public static final String TO_STRING = "toString";
     public static final Set<String> BUILT_IN_FUNCTION_SET = SimpleSet.immutableOf(FONTCOLOR, ITALICS);
     protected static final Swc4jParseOptions PARSE_OPTIONS = new Swc4jParseOptions()
             .setCaptureAst(true)
@@ -80,8 +83,8 @@ public class Swc4jAstCallExpr
                 Swc4jAstMemberExpr memberExpr = callee.as(Swc4jAstMemberExpr.class);
                 Optional<String> call = memberExpr.evalAsCall();
                 if (call.isPresent()) {
+                    ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
                     if (BUILT_IN_FUNCTION_SET.contains(call.get())) {
-                        ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
                         if (obj instanceof Swc4jAstStr) {
                             String objString = obj.as(Swc4jAstStr.class).getValue();
                             if (FONTCOLOR.equals(call.get())) {
@@ -92,7 +95,7 @@ public class Swc4jAstCallExpr
                             }
                         }
                     } else if (Swc4jAstMemberExpr.CONSTRUCTOR.equals(call.get())) {
-                        if (memberExpr.getObj() instanceof Swc4jAstRegex) {
+                        if (obj instanceof Swc4jAstRegex) {
                             switch (args.size()) {
                                 case 0:
                                     return Optional.of(Swc4jAstRegex.create());
@@ -113,6 +116,21 @@ public class Swc4jAstCallExpr
                                     }
                                     break;
                             }
+                        }
+                    } else if (TO_STRING.equals(call.get())) {
+                        if (obj instanceof Swc4jAstNumber) {
+                            int radix = 10;
+                            if (!args.isEmpty()) {
+                                ISwc4jAstExpr arg = args.get(0).getExpr().unParenExpr();
+                                if (arg instanceof Swc4jAstNumber || arg instanceof Swc4jAstStr) {
+                                    radix = arg.as(ISwc4jAstCoercionPrimitive.class).asInt();
+                                }
+                            }
+                            if (radix < 2 || radix > 32) {
+                                radix = 10;
+                            }
+                            String value = Integer.toString(obj.as(Swc4jAstNumber.class).asInt(), radix);
+                            return Optional.of(Swc4jAstStr.create(value));
                         }
                     }
                 }

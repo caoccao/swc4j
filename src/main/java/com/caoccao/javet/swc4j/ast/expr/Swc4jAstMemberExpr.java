@@ -42,6 +42,7 @@ public class Swc4jAstMemberExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstOptChainBase, ISwc4jAstSimpleAssignTarget {
     public static final String CONSTRUCTOR = "constructor";
+    public static final String NAME = "name";
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr obj;
     protected ISwc4jAstMemberProp prop;
@@ -79,12 +80,25 @@ public class Swc4jAstMemberExpr
                 break;
             case MemberExpr: {
                 Optional<String> call = evalAsCall();
-                if (call.isPresent() && CONSTRUCTOR.equals(call.get())) {
-                    Swc4jAstMemberExpr childMemberExpr = obj.as(Swc4jAstMemberExpr.class);
-                    if (childMemberExpr.getObj() instanceof Swc4jAstArrayLit) {
-                        return childMemberExpr.evalAsCall()
-                                .filter(Swc4jAstArrayLit.ARRAY_FUNCTION_SET::contains)
-                                .map(c -> Swc4jAstIdent.create(Swc4jAstFunction.CONSTRUCTOR));
+                if (call.isPresent()) {
+                    if (CONSTRUCTOR.equals(call.get())) {
+                        Swc4jAstMemberExpr childMemberExpr = obj.as(Swc4jAstMemberExpr.class);
+                        if (childMemberExpr.getObj() instanceof Swc4jAstArrayLit) {
+                            return childMemberExpr.evalAsCall()
+                                    .filter(Swc4jAstArrayLit.ARRAY_FUNCTION_SET::contains)
+                                    .map(c -> Swc4jAstIdent.create(Swc4jAstFunction.CONSTRUCTOR));
+                        }
+                    } else if (NAME.equals(call.get())) {
+                        Swc4jAstMemberExpr childMemberExpr = obj.as(Swc4jAstMemberExpr.class);
+                        Optional<String> childCall = childMemberExpr.evalAsCall();
+                        if (childCall.isPresent()) {
+                            if (CONSTRUCTOR.equals(childCall.get())) {
+                                ISwc4jAstExpr childExpr = childMemberExpr.getObj().unParenExpr();
+                                if (childExpr instanceof Swc4jAstStr) {
+                                    return Optional.of(Swc4jAstStr.create(Swc4jAstStr.CONSTRUCTOR));
+                                }
+                            }
+                        }
                     }
                 }
                 break;
