@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -73,6 +74,14 @@ public class Swc4jAstIdent
     @Override
     public Swc4jAstType getType() {
         return Swc4jAstType.Ident;
+    }
+
+    public boolean isInfinity() {
+        return !optional && Swc4jAstNumber.INFINITY.equals(sym);
+    }
+
+    public boolean isNaN() {
+        return !optional && Swc4jAstNumber.NAN.equals(sym);
     }
 
     @Jni2RustMethod

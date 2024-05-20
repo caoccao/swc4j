@@ -21,31 +21,31 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumIdName;
 import java.util.stream.Stream;
 
 public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
-    Add(0, "+"),
-    BitAnd(1, "&"),
-    BitOr(2, "|"),
-    BitXor(3, "^"),
-    Div(4, "/"),
-    EqEq(5, "=="),
-    EqEqEq(6, "==="),
-    Exp(7, "**"),
-    Gt(8, ">"),
-    GtEq(9, ">="),
-    In(10, "in"),
-    InstanceOf(11, "instanceof"),
-    LogicalAnd(12, "&&"),
-    LogicalOr(13, "||"),
-    LShift(14, "<<"),
-    Lt(15, "<"),
-    LtEq(16, "<="),
-    Mod(17, "%"),
-    Mul(18, "*"),
-    NotEq(19, "!="),
-    NotEqEq(20, "!=="),
-    NullishCoalescing(21, "??"),
-    RShift(22, ">>"),
-    Sub(23, "-"),
-    ZeroFillRShift(24, ">>>"),
+    Add(0, "+", false),
+    BitAnd(1, "&", false),
+    BitOr(2, "|", false),
+    BitXor(3, "^", false),
+    Div(4, "/", false),
+    EqEq(5, "==", false),
+    EqEqEq(6, "===", false),
+    Exp(7, "**", false),
+    Gt(8, ">", false),
+    GtEq(9, ">=", false),
+    In(10, "in", true),
+    InstanceOf(11, "instanceof", true),
+    LogicalAnd(12, "&&", false),
+    LogicalOr(13, "||", false),
+    LShift(14, "<<", false),
+    Lt(15, "<", false),
+    LtEq(16, "<=", false),
+    Mod(17, "%", false),
+    Mul(18, "*", false),
+    NotEq(19, "!=", false),
+    NotEqEq(20, "!==", false),
+    NullishCoalescing(21, "??", false),
+    RShift(22, ">>", false),
+    Sub(23, "-", false),
+    ZeroFillRShift(24, ">>>", false),
     ;
 
     private static final int LENGTH = values().length;
@@ -57,10 +57,12 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
 
     private final int id;
     private final String name;
+    private final boolean spaceRequired;
 
-    Swc4jAstBinaryOp(int id, String name) {
+    Swc4jAstBinaryOp(int id, String name, boolean spaceRequired) {
         this.id = id;
         this.name = name;
+        this.spaceRequired = spaceRequired;
     }
 
     public static Swc4jAstBinaryOp parse(int id) {
@@ -75,5 +77,9 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
     @Override
     public String getName() {
         return name;
+    }
+
+    public boolean isSpaceRequired() {
+        return spaceRequired;
     }
 }
