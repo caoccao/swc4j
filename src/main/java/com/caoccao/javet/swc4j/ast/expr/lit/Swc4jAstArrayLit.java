@@ -170,6 +170,15 @@ public class Swc4jAstArrayLit
         return toString();
     }
 
+    public void concat(Swc4jAstArrayLit arrayLit) {
+        if (!AssertionUtils.notNull(arrayLit, "Array lit").getElems().isEmpty()) {
+            arrayLit.getElems().forEach(elem -> {
+                elem.ifPresent(e -> e.setParent(this));
+                elems.add(elem);
+            });
+        }
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of();
@@ -196,8 +205,15 @@ public class Swc4jAstArrayLit
                 .map(Optional::get)
                 .map(Swc4jAstExprOrSpread::getExpr)
                 .map(ISwc4jAstExpr::unParenExpr)
-                .map(ISwc4jAst::getType)
-                .allMatch(Swc4jAstType::isPrimitive);
+                .allMatch(elem -> {
+                    if (elem.getType().isPrimitive() || elem.isUndefined() || elem.isInfinity() || elem.isNaN()) {
+                        return true;
+                    }
+                    if (elem instanceof Swc4jAstArrayLit) {
+                        return elem.as(Swc4jAstArrayLit.class).isAllPrimitive();
+                    }
+                    return false;
+                });
     }
 
     @Override
@@ -221,7 +237,14 @@ public class Swc4jAstArrayLit
     public String toString() {
         return elems.stream()
                 .map(optionalElem -> optionalElem
-                        .map(Swc4jAstExprOrSpread::toString)
+                        .map(elem -> {
+                            ISwc4jAstExpr expr = elem.as(Swc4jAstExprOrSpread.class).getExpr().unParenExpr();
+                            if (expr.isUndefined()) {
+                                return "";
+                            } else {
+                                return expr.toString();
+                            }
+                        })
                         .orElse(""))
                 .collect(Collectors.joining(","));
     }

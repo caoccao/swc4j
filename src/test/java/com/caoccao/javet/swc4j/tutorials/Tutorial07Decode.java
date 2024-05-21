@@ -40,7 +40,7 @@ public class Tutorial07Decode {
         // Prepare a script name.
         URL specifier = new URL("file:///abc.ts");
         // Create a plugin host.
-        ISwc4jPluginHost pluginHost = new Swc4jPluginHostJsFuckDecoder();
+        ISwc4jPluginHost pluginHost = new Swc4jPluginHostJsFuckDecoder(10);
         Swc4jTransformOptions options = new Swc4jTransformOptions()
                 .setSpecifier(specifier)
                 .setPluginHost(pluginHost)

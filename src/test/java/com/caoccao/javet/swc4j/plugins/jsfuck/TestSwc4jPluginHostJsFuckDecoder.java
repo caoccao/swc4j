@@ -44,6 +44,9 @@ public class TestSwc4jPluginHostJsFuckDecoder extends BaseTestSuite {
         testCaseMap.put("'a'+true", "\"atrue\"");
         testCaseMap.put("[][[]]", "undefined");
         testCaseMap.put("[][[]]+[]", "\"undefined\"");
+        testCaseMap.put("[[],[]]+''", "\",\"");
+        testCaseMap.put("[[],undefined]+''", "\",\"");
+        testCaseMap.put("[[]][\"concat\"]([[]])+[]", "\",\"");
         testCaseMap.put("''+[]['entries']()", "\"[object Array Iterator]\"");
         testCaseMap.put("([![]]+[][[]])[+!+[]+[+[]]]", "\"i\"");
         testCaseMap.put("true+[][\"flat\"]", "\"truefunction flat() { [native code] }\"");

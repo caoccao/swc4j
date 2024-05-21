@@ -56,6 +56,7 @@ public class Swc4jAstCallExpr
     public static final String TO_STRING = "toString";
     public static final Set<String> BUILT_IN_FUNCTION_SET = SimpleSet.immutableOf(FONTCOLOR, ITALICS);
     public static final String SLICE = "slice";
+    public static final String CONCAT = "concat";
     protected static final Swc4jParseOptions PARSE_OPTIONS = new Swc4jParseOptions()
             .setCaptureAst(true)
             .setMediaType(Swc4jMediaType.JavaScript);
@@ -115,8 +116,20 @@ public class Swc4jAstCallExpr
                             }
                         }
                     } else if (obj instanceof Swc4jAstArrayLit) {
-                        return Optional.of(Swc4jAstStr.create(Swc4jAstArrayLit.ARRAY_FUNCTION_STRING_MAP
-                                .getOrDefault(call.get(), Swc4jAstIdent.UNDEFINED)));
+                        if (CONCAT.equals(call.get())) {
+                            if (!args.isEmpty()) {
+                                ISwc4jAstExpr expr = args.get(0).getExpr().unParenExpr();
+                                if (expr instanceof Swc4jAstArrayLit) {
+                                    Swc4jAstArrayLit leftArrayLit = obj.as(Swc4jAstArrayLit.class);
+                                    Swc4jAstArrayLit rightArrayLit = expr.as(Swc4jAstArrayLit.class);
+                                    leftArrayLit.concat(rightArrayLit);
+                                    return Optional.of(leftArrayLit);
+                                }
+                            }
+                        } else {
+                            return Optional.of(Swc4jAstStr.create(Swc4jAstArrayLit.ARRAY_FUNCTION_STRING_MAP
+                                    .getOrDefault(call.get(), Swc4jAstIdent.UNDEFINED)));
+                        }
                     } else if (Swc4jAstMemberExpr.CONSTRUCTOR.equals(call.get())) {
                         if (obj instanceof Swc4jAstRegex) {
                             switch (args.size()) {
