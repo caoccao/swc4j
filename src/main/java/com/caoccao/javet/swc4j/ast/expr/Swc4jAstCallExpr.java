@@ -40,23 +40,14 @@ import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.utils.SimpleSet;
-import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstCallExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
-    public static final String FONTCOLOR = "fontcolor";
-    public static final String ITALICS = "italics";
-    public static final String TO_STRING = "toString";
-    public static final Set<String> BUILT_IN_FUNCTION_SET = SimpleSet.immutableOf(FONTCOLOR, ITALICS);
-    public static final String SLICE = "slice";
-    public static final String CONCAT = "concat";
     protected static final Swc4jParseOptions PARSE_OPTIONS = new Swc4jParseOptions()
             .setCaptureAst(true)
             .setMediaType(Swc4jMediaType.JavaScript);
@@ -87,51 +78,99 @@ public class Swc4jAstCallExpr
                 Optional<String> call = memberExpr.evalAsCall();
                 if (call.isPresent()) {
                     ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
-                    if (BUILT_IN_FUNCTION_SET.contains(call.get())) {
-                        if (obj instanceof Swc4jAstStr) {
-                            String objString = obj.as(Swc4jAstStr.class).getValue();
-                            if (FONTCOLOR.equals(call.get())) {
-                                String argString = Swc4jAstIdent.UNDEFINED;
-                                if (!args.isEmpty()) {
-                                    Swc4jAstExprOrSpread exprOrSpread = args.get(0);
-                                    ISwc4jAstExpr expr = exprOrSpread.getExpr().unParenExpr();
-                                    if (expr instanceof Swc4jAstStr || expr instanceof Swc4jAstNumber) {
-                                        argString = expr.as(ISwc4jAstCoercionPrimitive.class).asString();
-                                    } else if (expr.isNaN()) {
-                                        argString = Swc4jAstNumber.NAN;
-                                    } else if (expr.isInfinity()) {
-                                        argString = Swc4jAstNumber.INFINITY;
-                                    } else {
-                                        return Optional.empty();
-                                    }
-                                }
-                                try {
-                                    String escapeArgString = argString.replace("\"", "&quot;");
-                                    return Optional.of(Swc4jAstStr.create("<font color=\"" + escapeArgString + "\">" + objString + "</font>"));
-                                } catch (Throwable ignored) {
+                    if (obj instanceof Swc4jAstStr) {
+                        Swc4jAstStr objString = obj.as(Swc4jAstStr.class);
+                        if (Swc4jAstStr.FONTCOLOR.equals(call.get())) {
+                            String argString = Swc4jAstIdent.UNDEFINED;
+                            if (!args.isEmpty()) {
+                                Swc4jAstExprOrSpread exprOrSpread = args.get(0);
+                                ISwc4jAstExpr expr = exprOrSpread.getExpr().unParenExpr();
+                                if (expr instanceof Swc4jAstStr || expr instanceof Swc4jAstNumber) {
+                                    argString = expr.as(ISwc4jAstCoercionPrimitive.class).asString();
+                                } else if (expr.isNaN()) {
+                                    argString = Swc4jAstNumber.NAN;
+                                } else if (expr.isInfinity()) {
+                                    argString = Swc4jAstNumber.INFINITY;
+                                } else {
                                     return Optional.empty();
                                 }
-                            } else if (ITALICS.equals(call.get())) {
-                                return Optional.of(Swc4jAstStr.create("<i>" + objString + "</i>"));
+                            }
+                            return Optional.of(Swc4jAstStr.create(objString.fontcolor(argString)));
+                        } else if (Swc4jAstStr.ITALICS.equals(call.get())) {
+                            return Optional.of(Swc4jAstStr.create(objString.italics()));
+                        } else if (Swc4jAstStr.SPLIT.equals(call.get())) {
+                            switch (args.size()) {
+                                case 0:
+                                    return Optional.of(Swc4jAstArrayLit.create(objString.split()));
+                                case 1:
+                                    ISwc4jAstExpr arg = args.get(0).getExpr().unParenExpr();
+                                    if (arg instanceof ISwc4jAstCoercionPrimitive) {
+                                        String separator = arg.as(ISwc4jAstCoercionPrimitive.class).asString();
+                                        return Optional.of(Swc4jAstArrayLit.create(objString.split(separator)));
+                                    }
+                                    break;
+                                default:
+                                    ISwc4jAstExpr arg1 = args.get(0).getExpr().unParenExpr();
+                                    ISwc4jAstExpr arg2 = args.get(1).getExpr().unParenExpr();
+                                    if (arg1 instanceof ISwc4jAstCoercionPrimitive &&
+                                            arg2 instanceof ISwc4jAstCoercionPrimitive) {
+                                        String separator = arg1.as(ISwc4jAstCoercionPrimitive.class).asString();
+                                        int limit = arg2.as(ISwc4jAstCoercionPrimitive.class).asInt();
+                                        return Optional.of(Swc4jAstArrayLit.create(objString.split(separator, limit)));
+                                    }
+                                    break;
+                            }
+                        } else if (Swc4jAstStr.SLICE.equals(call.get())) {
+                            switch (args.size()) {
+                                case 0:
+                                    return Optional.of(Swc4jAstStr.create(objString.slice()));
+                                case 1:
+                                    ISwc4jAstExpr arg = args.get(0).getExpr().unParenExpr();
+                                    if (arg instanceof ISwc4jAstCoercionPrimitive) {
+                                        int indexStart = arg.as(ISwc4jAstCoercionPrimitive.class).asInt();
+                                        return Optional.of(Swc4jAstStr.create(objString.slice(indexStart)));
+                                    }
+                                    break;
+                                default:
+                                    ISwc4jAstExpr arg1 = args.get(0).getExpr().unParenExpr();
+                                    ISwc4jAstExpr arg2 = args.get(1).getExpr().unParenExpr();
+                                    if (arg1 instanceof ISwc4jAstCoercionPrimitive &&
+                                            arg2 instanceof ISwc4jAstCoercionPrimitive) {
+                                        int indexStart = arg1.as(ISwc4jAstCoercionPrimitive.class).asInt();
+                                        int indexEnd = arg2.as(ISwc4jAstCoercionPrimitive.class).asInt();
+                                        return Optional.of(Swc4jAstStr.create(objString.slice(indexStart, indexEnd)));
+                                    }
+                                    break;
                             }
                         }
                     } else if (obj instanceof Swc4jAstArrayLit) {
-                        if (CONCAT.equals(call.get())) {
+                        Swc4jAstArrayLit objArrayLit = obj.as(Swc4jAstArrayLit.class);
+                        if (Swc4jAstArrayLit.CONCAT.equals(call.get())) {
                             if (!args.isEmpty()) {
                                 ISwc4jAstExpr expr = args.get(0).getExpr().unParenExpr();
                                 if (expr instanceof Swc4jAstArrayLit) {
-                                    Swc4jAstArrayLit leftArrayLit = obj.as(Swc4jAstArrayLit.class);
                                     Swc4jAstArrayLit rightArrayLit = expr.as(Swc4jAstArrayLit.class);
-                                    leftArrayLit.concat(rightArrayLit);
-                                    return Optional.of(leftArrayLit);
+                                    objArrayLit.concat(rightArrayLit);
+                                    return Optional.of(objArrayLit);
                                 }
+                            }
+                        } else if (Swc4jAstArrayLit.JOIN.equals(call.get())) {
+                            if (objArrayLit.isAllPrimitive()) {
+                                String separator = null;
+                                if (!args.isEmpty()) {
+                                    ISwc4jAstExpr expr = args.get(0).getExpr().unParenExpr();
+                                    if (!expr.isUndefined() && expr instanceof ISwc4jAstCoercionPrimitive) {
+                                        separator = expr.as(ISwc4jAstCoercionPrimitive.class).asString();
+                                    }
+                                }
+                                return Optional.of(Swc4jAstStr.create(objArrayLit.join(separator)));
                             }
                         } else {
                             return Optional.of(Swc4jAstStr.create(Swc4jAstArrayLit.ARRAY_FUNCTION_STRING_MAP
                                     .getOrDefault(call.get(), Swc4jAstIdent.UNDEFINED)));
                         }
-                    } else if (Swc4jAstMemberExpr.CONSTRUCTOR.equals(call.get())) {
-                        if (obj instanceof Swc4jAstRegex) {
+                    } else if (obj instanceof Swc4jAstRegex) {
+                        if (Swc4jAstMemberExpr.CONSTRUCTOR.equals(call.get())) {
                             switch (args.size()) {
                                 case 0:
                                     return Optional.of(Swc4jAstRegex.create());
@@ -153,34 +192,8 @@ public class Swc4jAstCallExpr
                                     break;
                             }
                         }
-                    } else if (SLICE.equals(call.get())) {
-                        if (obj instanceof Swc4jAstStr) {
-                            String objString = obj.as(Swc4jAstStr.class).getValue();
-                            switch (args.size()) {
-                                case 0:
-                                    return Optional.of(Swc4jAstStr.create(objString));
-                                case 1:
-                                    ISwc4jAstExpr arg = args.get(0).getExpr().unParenExpr();
-                                    if (arg instanceof ISwc4jAstCoercionPrimitive) {
-                                        int indexStart = arg.as(ISwc4jAstCoercionPrimitive.class).asInt();
-                                        int indexEnd = objString.length();
-                                        return Optional.of(Swc4jAstStr.create(StringUtils.slice(objString, indexStart, indexEnd)));
-                                    }
-                                    break;
-                                default:
-                                    ISwc4jAstExpr arg1 = args.get(0).getExpr().unParenExpr();
-                                    ISwc4jAstExpr arg2 = args.get(1).getExpr().unParenExpr();
-                                    if (arg1 instanceof ISwc4jAstCoercionPrimitive &&
-                                            arg2 instanceof ISwc4jAstCoercionPrimitive) {
-                                        int indexStart = arg1.as(ISwc4jAstCoercionPrimitive.class).asInt();
-                                        int indexEnd = arg2.as(ISwc4jAstCoercionPrimitive.class).asInt();
-                                        return Optional.of(Swc4jAstStr.create(StringUtils.slice(objString, indexStart, indexEnd)));
-                                    }
-                                    break;
-                            }
-                        }
-                    } else if (TO_STRING.equals(call.get())) {
-                        if (obj instanceof Swc4jAstNumber) {
+                    } else if (obj instanceof Swc4jAstNumber) {
+                        if (Swc4jAstNumber.TO_STRING.equals(call.get())) {
                             int radix = 10;
                             if (!args.isEmpty()) {
                                 ISwc4jAstExpr arg = args.get(0).getExpr().unParenExpr();
@@ -188,8 +201,7 @@ public class Swc4jAstCallExpr
                                     radix = arg.as(ISwc4jAstCoercionPrimitive.class).asInt();
                                 }
                             }
-                            String value = Integer.toString(obj.as(Swc4jAstNumber.class).asInt(), radix);
-                            return Optional.of(Swc4jAstStr.create(value));
+                            return Optional.of(Swc4jAstStr.create(obj.as(Swc4jAstNumber.class).toString(radix)));
                         }
                     }
                 }

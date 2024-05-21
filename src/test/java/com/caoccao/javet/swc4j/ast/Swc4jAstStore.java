@@ -124,7 +124,7 @@ public final class Swc4jAstStore {
                             Map<String, Method> methodMap = Stream.of(clazz.getDeclaredMethods())
                                     .filter(method -> !Modifier.isStatic(method.getModifiers()))
                                     .filter(method -> !Modifier.isAbstract(method.getModifiers()))
-                                    .collect(Collectors.toMap(Method::getName, Function.identity()));
+                                    .collect(Collectors.toMap(Method::getName, Function.identity(), (n1, n2) -> n1));
                             ReflectionUtils.getDeclaredFields(clazz).values().stream()
                                     .filter(field -> !Modifier.isStatic(field.getModifiers()))
                                     .filter(field -> !new Jni2RustFieldUtils(field).isIgnore())

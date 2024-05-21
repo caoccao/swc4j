@@ -16,10 +16,7 @@
 
 package com.caoccao.javet.swc4j.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 
 /**
  * The type String utils.
@@ -179,6 +176,36 @@ public final class StringUtils {
             return EMPTY;
         }
         return str.substring(indexStart, indexEnd);
+    }
+
+    /**
+     * String.prototype.split()
+     * The split() method of String values takes a pattern and divides this string into an ordered list of substrings
+     * by searching for the pattern, puts these substrings into an array, and returns the array.
+     *
+     * @param str       the str
+     * @param separator The pattern describing where each split should occur. Can be undefined, a string,
+     *                  or an object with a Symbol.split method — the typical example being a regular expression.
+     *                  Omitting separator or passing undefined causes split() to return an array with the calling
+     *                  string as a single element. All values that are not undefined or objects with a @@split method
+     *                  are coerced to strings.
+     * @param limit     A non-negative integer specifying a limit on the number of substrings to be included in the
+     *                  array. If provided, splits the string at each occurrence of the specified separator,
+     *                  but stops when limit entries have been placed in the array.
+     *                  Any leftover text is not included in the array at all.
+     * @return A list of strings, split at each point where the separator occurs in the given string.
+     * @since 0.8.0
+     */
+    public static List<String> split(String str, String separator, int limit) {
+        List<String> list = new ArrayList<>();
+        if (isNotEmpty(str)) {
+            if (separator == null) {
+                list.add(str);
+            } else {
+                Collections.addAll(list, str.split(separator, limit));
+            }
+        }
+        return list;
     }
 
     /**

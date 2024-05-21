@@ -33,10 +33,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 import com.caoccao.javet.swc4j.utils.SimpleMap;
 import com.caoccao.javet.swc4j.utils.SimpleSet;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
@@ -104,7 +101,9 @@ public class Swc4jAstArrayLit
             "toString", "",
             "unshift", "0",
             "values", "[object Array Iterator]");
+    public static final String CONCAT = "concat";
     public static final String CONSTRUCTOR = "Array";
+    public static final String JOIN = "join";
     protected final List<Optional<Swc4jAstExprOrSpread>> elems;
 
     @Jni2RustMethod
@@ -116,6 +115,14 @@ public class Swc4jAstArrayLit
                 .map(Optional::ofNullable)
                 .collect(Collectors.toList());
         this.elems.stream().filter(Optional::isPresent).map(Optional::get).forEach(node -> node.setParent(this));
+    }
+
+    public static Swc4jAstArrayLit create(List<String> list) {
+        List<Swc4jAstExprOrSpread> elems = new ArrayList<>();
+        if (list != null && !list.isEmpty()) {
+            list.forEach(str -> elems.add(str == null ? null : Swc4jAstExprOrSpread.create(Swc4jAstStr.create(str))));
+        }
+        return new Swc4jAstArrayLit(elems, Swc4jSpan.DUMMY);
     }
 
     @Override
@@ -214,6 +221,19 @@ public class Swc4jAstArrayLit
                     }
                     return false;
                 });
+    }
+
+    public String join(String separator) {
+        if (separator == null) {
+            separator = ",";
+        }
+        return elems.stream()
+                .map(elem -> elem
+                        .map(e -> e.getExpr().unParenExpr())
+                        .map(e -> e.as(ISwc4jAstCoercionPrimitive.class))
+                        .map(ISwc4jAstCoercionPrimitive::toString)
+                        .orElse(""))
+                .collect(Collectors.joining(separator));
     }
 
     @Override

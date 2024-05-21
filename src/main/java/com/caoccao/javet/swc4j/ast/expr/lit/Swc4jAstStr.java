@@ -35,6 +35,10 @@ public class Swc4jAstStr
         implements ISwc4jAstLit, ISwc4jAstModuleExportName, ISwc4jAstPropName, ISwc4jAstTsModuleName, ISwc4jAstTsLit,
         ISwc4jAstTsEnumMemberId, ISwc4jAstCoercionPrimitive {
     public static final String CONSTRUCTOR = "String";
+    public static final String FONTCOLOR = "fontcolor";
+    public static final String ITALICS = "italics";
+    public static final String SLICE = "slice";
+    public static final String SPLIT = "split";
     @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
     @Jni2RustField(atom = true)
@@ -98,6 +102,11 @@ public class Swc4jAstStr
         return toString();
     }
 
+    public String fontcolor(String arg) {
+        String escapeArg = arg.replace("\"", "&quot;");
+        return "<font color=\"" + escapeArg + "\">" + value + "</font>";
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;
@@ -118,6 +127,10 @@ public class Swc4jAstStr
         return value;
     }
 
+    public String italics() {
+        return "<i>" + value + "</i>";
+    }
+
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
         return false;
@@ -131,6 +144,30 @@ public class Swc4jAstStr
     public Swc4jAstStr setValue(String value) {
         this.value = AssertionUtils.notNull(value, "Value");
         return this;
+    }
+
+    public String slice() {
+        return slice(0);
+    }
+
+    public String slice(int indexStart) {
+        return slice(indexStart, value.length());
+    }
+
+    public String slice(int indexStart, int indexEnd) {
+        return StringUtils.slice(value, indexStart, indexEnd);
+    }
+
+    public List<String> split() {
+        return split(null, 0);
+    }
+
+    public List<String> split(String separator) {
+        return split(separator, 0);
+    }
+
+    public List<String> split(String separator, int limit) {
+        return StringUtils.split(value, separator, limit);
     }
 
     @Override

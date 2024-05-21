@@ -37,6 +37,7 @@ public class Swc4jAstNumber
     public static final String CONSTRUCTOR = "Number";
     public static final String INFINITY = "Infinity";
     public static final String NAN = "NaN";
+    public static final String TO_STRING = "toString";
     protected static final int MAX_EXPONENT = 308;
     protected static final Pattern PATTERN_DECIMAL_ZEROS =
             Pattern.compile("^([\\+\\-]?)(\\d+)\\.0*$", Pattern.CASE_INSENSITIVE);
@@ -47,6 +48,7 @@ public class Swc4jAstNumber
     @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
     protected double value;
+
     @Jni2RustMethod
     public Swc4jAstNumber(
             double value,
@@ -220,6 +222,10 @@ public class Swc4jAstNumber
     @Override
     public String toString() {
         return normalize(raw.orElse(Double.toString(value)));
+    }
+
+    public String toString(int radix) {
+        return Integer.toString(asInt(), radix);
     }
 
     @Override
