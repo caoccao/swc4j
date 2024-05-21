@@ -105,79 +105,69 @@ public class Swc4jAstBinExpr
                     String value = left.as(ISwc4jAstCoercionPrimitive.class).asString()
                             + right.as(ISwc4jAstCoercionPrimitive.class).asString();
                     return Optional.of(Swc4jAstStr.create(value));
-                } else if (leftType.isIdent()) {
-                    if (left.as(Swc4jAstIdent.class).isNaN()) {
-                        if (rightType.isNumber() || rightType.isBool()) {
-                            return Optional.of(Swc4jAstNumber.createNaN());
-                        } else if (rightType.isStr() || rightType.isArrayLit()) {
-                            return Optional.of(Swc4jAstStr.create(Swc4jAstNumber.NAN + right.as(ISwc4jAstCoercionPrimitive.class).asString()));
-                        } else if (rightType.isIdent()) {
-                            Swc4jAstIdent ident = right.as(Swc4jAstIdent.class);
-                            if (ident.isNaN() || ident.isUndefined() || ident.isInfinity()) {
-                                return Optional.of(Swc4jAstNumber.createNaN());
-                            }
-                        }
-                    } else if (left.as(Swc4jAstIdent.class).isInfinity()) {
-                        if (rightType.isNumber() || rightType.isBool()) {
-                            return Optional.of(Swc4jAstNumber.createInfinity(true));
-                        } else if (rightType.isStr() || rightType.isArrayLit()) {
-                            return Optional.of(Swc4jAstStr.create(Swc4jAstNumber.INFINITY + right.as(ISwc4jAstCoercionPrimitive.class).asString()));
-                        } else if (rightType.isIdent()) {
-                            Swc4jAstIdent ident = right.as(Swc4jAstIdent.class);
-                            if (ident.isInfinity()) {
-                                return Optional.of(Swc4jAstNumber.createInfinity(true));
-                            } else if (ident.isNaN() || ident.isUndefined()) {
-                                return Optional.of(Swc4jAstNumber.createNaN());
-                            }
-                        }
-                    } else if (left.as(Swc4jAstIdent.class).isUndefined()) {
-                        if (rightType.isNumber() || rightType.isBool()) {
-                            return Optional.of(Swc4jAstNumber.createNaN());
-                        } else if (rightType.isStr() || rightType.isArrayLit()) {
-                            return Optional.of(Swc4jAstStr.create(Swc4jAstIdent.UNDEFINED + right.as(ISwc4jAstCoercionPrimitive.class).asString()));
-                        } else if (rightType.isIdent()) {
-                            Swc4jAstIdent ident = right.as(Swc4jAstIdent.class);
-                            if (ident.isNaN() || ident.isUndefined() || ident.isInfinity()) {
-                                return Optional.of(Swc4jAstNumber.createNaN());
-                            }
-                        }
+                } else if (left.isNaN()) {
+                    if (rightType.isNumber() || rightType.isBool()) {
+                        return Optional.of(Swc4jAstNumber.createNaN());
+                    } else if (rightType.isStr() || rightType.isArrayLit()) {
+                        return Optional.of(Swc4jAstStr.create(Swc4jAstNumber.NAN + right.as(ISwc4jAstCoercionPrimitive.class).asString()));
+                    } else if (rightType.isMemberExpr()) {
+                        return right.as(Swc4jAstMemberExpr.class).evalAsString()
+                                .map(rightString -> Swc4jAstStr.create(Swc4jAstNumber.NAN + rightString));
+                    } else if (right.isNaN() || right.isUndefined() || right.isInfinity()) {
+                        return Optional.of(Swc4jAstNumber.createNaN());
                     }
-                } else if (rightType.isIdent() && right.as(Swc4jAstIdent.class).isNaN()) {
-                    if (right.as(Swc4jAstIdent.class).isNaN()) {
-                        if (leftType.isNumber() || leftType.isBool()) {
-                            return Optional.of(Swc4jAstNumber.createNaN());
-                        } else if (leftType.isStr() || leftType.isArrayLit()) {
-                            return Optional.of(Swc4jAstStr.create(left.as(ISwc4jAstCoercionPrimitive.class).asString() + Swc4jAstNumber.NAN));
-                        } else if (leftType.isIdent()) {
-                            Swc4jAstIdent ident = left.as(Swc4jAstIdent.class);
-                            if (ident.isNaN() || ident.isUndefined() || ident.isInfinity()) {
-                                return Optional.of(Swc4jAstNumber.createNaN());
-                            }
-                        }
-                    } else if (right.as(Swc4jAstIdent.class).isInfinity()) {
-                        if (leftType.isNumber() || leftType.isBool()) {
-                            return Optional.of(Swc4jAstNumber.createInfinity(true));
-                        } else if (leftType.isStr() || leftType.isArrayLit()) {
-                            return Optional.of(Swc4jAstStr.create(left.as(ISwc4jAstCoercionPrimitive.class).asString() + Swc4jAstNumber.INFINITY));
-                        } else if (leftType.isIdent()) {
-                            Swc4jAstIdent ident = left.as(Swc4jAstIdent.class);
-                            if (ident.isInfinity()) {
-                                return Optional.of(Swc4jAstNumber.createInfinity(true));
-                            } else if (ident.isNaN() || ident.isUndefined()) {
-                                return Optional.of(Swc4jAstNumber.createNaN());
-                            }
-                        }
-                    } else if (right.as(Swc4jAstIdent.class).isUndefined()) {
-                        if (leftType.isNumber() || leftType.isBool()) {
-                            return Optional.of(Swc4jAstNumber.createNaN());
-                        } else if (leftType.isStr() || leftType.isArrayLit()) {
-                            return Optional.of(Swc4jAstStr.create(left.as(ISwc4jAstCoercionPrimitive.class).asString() + Swc4jAstIdent.UNDEFINED));
-                        } else if (leftType.isIdent()) {
-                            Swc4jAstIdent ident = left.as(Swc4jAstIdent.class);
-                            if (ident.isNaN() || ident.isUndefined() || ident.isInfinity()) {
-                                return Optional.of(Swc4jAstNumber.createNaN());
-                            }
-                        }
+                } else if (left.isInfinity()) {
+                    if (rightType.isNumber() || rightType.isBool()) {
+                        return Optional.of(Swc4jAstNumber.createInfinity(true));
+                    } else if (rightType.isStr() || rightType.isArrayLit()) {
+                        return Optional.of(Swc4jAstStr.create(Swc4jAstNumber.INFINITY + right.as(ISwc4jAstCoercionPrimitive.class).asString()));
+                    } else if (rightType.isMemberExpr()) {
+                        return right.as(Swc4jAstMemberExpr.class).evalAsString()
+                                .map(rightString -> Swc4jAstStr.create(Swc4jAstNumber.INFINITY + rightString));
+                    } else if (right.isInfinity()) {
+                        return Optional.of(Swc4jAstNumber.createInfinity(true));
+                    } else if (right.isNaN() || right.isUndefined()) {
+                        return Optional.of(Swc4jAstNumber.createNaN());
+                    }
+                } else if (left.isUndefined()) {
+                    if (rightType.isNumber() || rightType.isBool()) {
+                        return Optional.of(Swc4jAstNumber.createNaN());
+                    } else if (rightType.isStr() || rightType.isArrayLit()) {
+                        return Optional.of(Swc4jAstStr.create(Swc4jAstIdent.UNDEFINED + right.as(ISwc4jAstCoercionPrimitive.class).asString()));
+                    } else if (right.isNaN() || right.isUndefined() || right.isInfinity()) {
+                        return Optional.of(Swc4jAstNumber.createNaN());
+                    }
+                } else if (right.isNaN()) {
+                    if (leftType.isNumber() || leftType.isBool()) {
+                        return Optional.of(Swc4jAstNumber.createNaN());
+                    } else if (leftType.isStr() || leftType.isArrayLit()) {
+                        return Optional.of(Swc4jAstStr.create(left.as(ISwc4jAstCoercionPrimitive.class).asString() + Swc4jAstNumber.NAN));
+                    } else if (leftType.isMemberExpr()) {
+                        return left.as(Swc4jAstMemberExpr.class).evalAsString()
+                                .map(leftString -> Swc4jAstStr.create(leftString + Swc4jAstNumber.NAN));
+                    } else if (left.isNaN() || left.isUndefined() || left.isInfinity()) {
+                        return Optional.of(Swc4jAstNumber.createNaN());
+                    }
+                } else if (right.isInfinity()) {
+                    if (leftType.isNumber() || leftType.isBool()) {
+                        return Optional.of(Swc4jAstNumber.createInfinity(true));
+                    } else if (leftType.isStr() || leftType.isArrayLit()) {
+                        return Optional.of(Swc4jAstStr.create(left.as(ISwc4jAstCoercionPrimitive.class).asString() + Swc4jAstNumber.INFINITY));
+                    } else if (leftType.isMemberExpr()) {
+                        return left.as(Swc4jAstMemberExpr.class).evalAsString()
+                                .map(leftString -> Swc4jAstStr.create(leftString + Swc4jAstNumber.INFINITY));
+                    } else if (left.isInfinity()) {
+                        return Optional.of(Swc4jAstNumber.createInfinity(true));
+                    } else if (left.isNaN() || left.isUndefined()) {
+                        return Optional.of(Swc4jAstNumber.createNaN());
+                    }
+                } else if (right.isUndefined()) {
+                    if (leftType.isNumber() || leftType.isBool()) {
+                        return Optional.of(Swc4jAstNumber.createNaN());
+                    } else if (leftType.isStr() || leftType.isArrayLit()) {
+                        return Optional.of(Swc4jAstStr.create(left.as(ISwc4jAstCoercionPrimitive.class).asString() + Swc4jAstIdent.UNDEFINED));
+                    } else if (left.isNaN() || left.isUndefined() || left.isInfinity()) {
+                        return Optional.of(Swc4jAstNumber.createNaN());
                     }
                 } else if ((leftType.isArrayLit() || leftType.isStr())
                         && rightType.isIdent() && right.as(Swc4jAstIdent.class).isUndefined()) {
@@ -190,12 +180,12 @@ public class Swc4jAstBinExpr
                         (leftType.isIdent() && left.as(Swc4jAstIdent.class).isUndefined() && rightType.isIdent() && right.as(Swc4jAstIdent.class).isUndefined())) {
                     return Optional.of(Swc4jAstNumber.createNaN());
                 } else if ((leftType.isPrimitive() || leftType.isArrayLit()) && rightType.isCallExpr()) {
-                    return right.as(Swc4jAstCallExpr.class).evalAsString()
-                            .map(rightString -> left.as(ISwc4jAstCoercionPrimitive.class).asString() + rightString)
+                    return right.as(Swc4jAstCallExpr.class).eval()
+                            .map(n -> left.as(ISwc4jAstCoercionPrimitive.class).asString() + n)
                             .map(Swc4jAstStr::create);
                 } else if ((rightType.isPrimitive() || rightType.isArrayLit()) && leftType.isCallExpr()) {
-                    return left.as(Swc4jAstCallExpr.class).evalAsString()
-                            .map(leftString -> leftString + right.as(ISwc4jAstCoercionPrimitive.class).asString())
+                    return left.as(Swc4jAstCallExpr.class).eval()
+                            .map(n -> n + right.as(ISwc4jAstCoercionPrimitive.class).asString())
                             .map(Swc4jAstStr::create);
                 } else if ((leftType.isPrimitive() || leftType.isArrayLit()) && rightType.isMemberExpr()) {
                     return right.as(Swc4jAstMemberExpr.class).evalAsString()

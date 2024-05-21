@@ -90,12 +90,33 @@ public class Swc4jAstCallExpr
                         if (obj instanceof Swc4jAstStr) {
                             String objString = obj.as(Swc4jAstStr.class).getValue();
                             if (FONTCOLOR.equals(call.get())) {
-                                String argString = args.isEmpty() ? Swc4jAstIdent.UNDEFINED : args.get(0).toString();
-                                return Optional.of(Swc4jAstStr.create("<font color=\"" + argString + "\">" + objString + "</font>"));
+                                String argString = Swc4jAstIdent.UNDEFINED;
+                                if (!args.isEmpty()) {
+                                    Swc4jAstExprOrSpread exprOrSpread = args.get(0);
+                                    ISwc4jAstExpr expr = exprOrSpread.getExpr().unParenExpr();
+                                    if (expr instanceof Swc4jAstStr || expr instanceof Swc4jAstNumber) {
+                                        argString = expr.as(ISwc4jAstCoercionPrimitive.class).asString();
+                                    } else if (expr.isNaN()) {
+                                        argString = Swc4jAstNumber.NAN;
+                                    } else if (expr.isInfinity()) {
+                                        argString = Swc4jAstNumber.INFINITY;
+                                    } else {
+                                        return Optional.empty();
+                                    }
+                                }
+                                try {
+                                    String escapeArgString = argString.replace("\"", "&quot;");
+                                    return Optional.of(Swc4jAstStr.create("<font color=\"" + escapeArgString + "\">" + objString + "</font>"));
+                                } catch (Throwable ignored) {
+                                    return Optional.empty();
+                                }
                             } else if (ITALICS.equals(call.get())) {
                                 return Optional.of(Swc4jAstStr.create("<i>" + objString + "</i>"));
                             }
                         }
+                    } else if (obj instanceof Swc4jAstArrayLit) {
+                        return Optional.of(Swc4jAstStr.create(Swc4jAstArrayLit.ARRAY_FUNCTION_STRING_MAP
+                                .getOrDefault(call.get(), Swc4jAstIdent.UNDEFINED)));
                     } else if (Swc4jAstMemberExpr.CONSTRUCTOR.equals(call.get())) {
                         if (obj instanceof Swc4jAstRegex) {
                             switch (args.size()) {
@@ -185,17 +206,6 @@ public class Swc4jAstCallExpr
                 break;
         }
         return super.eval();
-    }
-
-    public Optional<String> evalAsString() {
-        if (callee instanceof Swc4jAstMemberExpr && args.isEmpty()) {
-            Swc4jAstMemberExpr memberExpr = callee.as(Swc4jAstMemberExpr.class);
-            ISwc4jAstExpr obj = memberExpr.getObj().unParenExpr();
-            return memberExpr.evalAsCall()
-                    .filter(c -> obj instanceof Swc4jAstArrayLit)
-                    .map(c -> Swc4jAstArrayLit.ARRAY_FUNCTION_STRING_MAP.getOrDefault(c, Swc4jAstIdent.UNDEFINED));
-        }
-        return Optional.empty();
     }
 
     @Jni2RustMethod

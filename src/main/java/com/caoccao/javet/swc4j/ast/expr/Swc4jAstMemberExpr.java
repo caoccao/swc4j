@@ -157,17 +157,23 @@ public class Swc4jAstMemberExpr
         if (call.isPresent()) {
             switch (obj.getType()) {
                 case ArrayLit:
-                    call = call.filter(Swc4jAstArrayLit.ARRAY_FUNCTION_SET::contains);
-                    break;
+                    if (Swc4jAstArrayLit.ARRAY_FUNCTION_SET.contains(call.get())) {
+                        return Optional.of("function " + call.get() + "() { [native code] }");
+                    }
+                    if (CONSTRUCTOR.equals(call.get())) {
+                        return Optional.of("function " + Swc4jAstArrayLit.CONSTRUCTOR + "() { [native code] }");
+                    }
+                    return Optional.of(Swc4jAstIdent.UNDEFINED);
                 case Number:
-                    call = call.filter(CONSTRUCTOR::equals).map(c -> Swc4jAstNumber.CONSTRUCTOR);
-                    break;
+                    if (CONSTRUCTOR.equals(call.get())) {
+                        return Optional.of("function " + Swc4jAstNumber.CONSTRUCTOR + "() { [native code] }");
+                    }
+                    return Optional.of(Swc4jAstIdent.UNDEFINED);
                 default:
-                    call = Optional.empty();
                     break;
             }
         }
-        return call.map(c -> "function " + c + "() { [native code] }");
+        return Optional.empty();
     }
 
     @Override

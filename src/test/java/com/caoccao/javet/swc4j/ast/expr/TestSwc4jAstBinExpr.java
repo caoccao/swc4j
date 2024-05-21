@@ -57,6 +57,8 @@ public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
                 "0+undefined", "NaN",
                 "0+NaN", "NaN",
                 "NaN+undefined", "NaN",
+                "NaN+[]['flat']", "NaNfunction flat() { [native code] }",
+                "Infinity+[]['flat']", "Infinityfunction flat() { [native code] }",
                 "Infinity+undefined", "NaN",
                 "Infinity+0", "Infinity",
                 "Infinity+[]", "\"Infinity\"",

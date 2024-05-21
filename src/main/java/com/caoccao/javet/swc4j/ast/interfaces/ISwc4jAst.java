@@ -89,6 +89,36 @@ public interface ISwc4jAst {
     Swc4jAstType getType();
 
     /**
+     * Is infinity.
+     *
+     * @return true : yes, false : no
+     * @since 0.8.0
+     */
+    default boolean isInfinity() {
+        return false;
+    }
+
+    /**
+     * Is NaN.
+     *
+     * @return true : yes, false : no
+     * @since 0.8.0
+     */
+    default boolean isNaN() {
+        return false;
+    }
+
+    /**
+     * Is undefined.
+     *
+     * @return true : yes, false : no
+     * @since 0.8.0
+     */
+    default boolean isUndefined() {
+        return false;
+    }
+
+    /**
      * Replace the old node with the new node.
      *
      * @param oldNode the old node

@@ -104,6 +104,7 @@ public class Swc4jAstArrayLit
             "toString", "",
             "unshift", "0",
             "values", "[object Array Iterator]");
+    public static final String CONSTRUCTOR = "Array";
     protected final List<Optional<Swc4jAstExprOrSpread>> elems;
 
     @Jni2RustMethod

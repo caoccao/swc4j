@@ -47,7 +47,6 @@ public class Swc4jAstNumber
     @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
     protected double value;
-
     @Jni2RustMethod
     public Swc4jAstNumber(
             double value,
@@ -191,6 +190,16 @@ public class Swc4jAstNumber
     @Jni2RustMethod
     public double getValue() {
         return value;
+    }
+
+    @Override
+    public boolean isInfinity() {
+        return Double.isInfinite(value);
+    }
+
+    @Override
+    public boolean isNaN() {
+        return Double.isNaN(value);
     }
 
     @Override

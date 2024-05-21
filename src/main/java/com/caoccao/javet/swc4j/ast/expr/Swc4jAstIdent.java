@@ -76,10 +76,12 @@ public class Swc4jAstIdent
         return Swc4jAstType.Ident;
     }
 
+    @Override
     public boolean isInfinity() {
         return !optional && Swc4jAstNumber.INFINITY.equals(sym);
     }
 
+    @Override
     public boolean isNaN() {
         return !optional && Swc4jAstNumber.NAN.equals(sym);
     }
@@ -89,6 +91,7 @@ public class Swc4jAstIdent
         return optional;
     }
 
+    @Override
     public boolean isUndefined() {
         return !optional && UNDEFINED.equals(sym);
     }
