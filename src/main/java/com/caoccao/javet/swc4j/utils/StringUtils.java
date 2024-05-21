@@ -59,6 +59,25 @@ public final class StringUtils {
     }
 
     /**
+     * Is digit.
+     *
+     * @param str the str
+     * @return true : yes, false : no
+     * @since 0.8.0
+     */
+    public static boolean isDigit(String str) {
+        if (isNotEmpty(str)) {
+            for (char c : str.toCharArray()) {
+                if (!Character.isDigit(c)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Is empty.
      *
      * @param str the str
@@ -127,6 +146,39 @@ public final class StringUtils {
             sb.append(str);
         }
         return sb.toString();
+    }
+
+    /**
+     * String.prototype.slice()
+     * The slice() method of String values extracts a section of this string and returns it as a new string,
+     * without modifying the original string.
+     *
+     * @param str        the str
+     * @param indexStart The index of the first character to include in the returned substring.
+     * @param indexEnd   The index of the first character to exclude from the returned substring.
+     * @return A new string containing the extracted section of the string.
+     * @since 0.8.0
+     */
+    public static String slice(String str, int indexStart, int indexEnd) {
+        if (isEmpty(str)) {
+            return str;
+        }
+        if (indexStart >= str.length()) {
+            return EMPTY;
+        }
+        if (indexEnd > str.length()) {
+            indexEnd = str.length();
+        }
+        if (indexStart < 0) {
+            indexStart = Math.max(indexStart + str.length(), 0);
+        }
+        if (indexEnd < 0) {
+            indexEnd = Math.max(indexEnd + str.length(), 0);
+        }
+        if (indexEnd <= indexStart) {
+            return EMPTY;
+        }
+        return str.substring(indexStart, indexEnd);
     }
 
     /**

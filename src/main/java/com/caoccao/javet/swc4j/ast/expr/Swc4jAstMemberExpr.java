@@ -33,6 +33,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -119,7 +120,7 @@ public class Swc4jAstMemberExpr
                         }
                         case Str: {
                             Swc4jAstStr str = expr.as(Swc4jAstStr.class);
-                            if (!Swc4jAstCallExpr.BUILT_IN_FUNCTION_SET.contains(str.getValue())) {
+                            if (StringUtils.isDigit(str.getValue())) {
                                 int index = str.asInt();
                                 if (index >= 0 && index < value.length()) {
                                     value = value.substring(index, index + 1);

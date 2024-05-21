@@ -41,6 +41,7 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 import com.caoccao.javet.swc4j.utils.SimpleSet;
+import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +55,7 @@ public class Swc4jAstCallExpr
     public static final String ITALICS = "italics";
     public static final String TO_STRING = "toString";
     public static final Set<String> BUILT_IN_FUNCTION_SET = SimpleSet.immutableOf(FONTCOLOR, ITALICS);
+    public static final String SLICE = "slice";
     protected static final Swc4jParseOptions PARSE_OPTIONS = new Swc4jParseOptions()
             .setCaptureAst(true)
             .setMediaType(Swc4jMediaType.JavaScript);
@@ -113,6 +115,32 @@ public class Swc4jAstCallExpr
                                         return Optional.of(Swc4jAstRegex.create(
                                                 Swc4jAstRegex.escape(arg1.as(Swc4jAstStr.class).getValue()),
                                                 arg2.as(Swc4jAstStr.class).getValue()));
+                                    }
+                                    break;
+                            }
+                        }
+                    } else if (SLICE.equals(call.get())) {
+                        if (obj instanceof Swc4jAstStr) {
+                            String objString = obj.as(Swc4jAstStr.class).getValue();
+                            switch (args.size()) {
+                                case 0:
+                                    return Optional.of(Swc4jAstStr.create(objString));
+                                case 1:
+                                    ISwc4jAstExpr arg = args.get(0).getExpr().unParenExpr();
+                                    if (arg instanceof ISwc4jAstCoercionPrimitive) {
+                                        int indexStart = arg.as(ISwc4jAstCoercionPrimitive.class).asInt();
+                                        int indexEnd = objString.length();
+                                        return Optional.of(Swc4jAstStr.create(StringUtils.slice(objString, indexStart, indexEnd)));
+                                    }
+                                    break;
+                                default:
+                                    ISwc4jAstExpr arg1 = args.get(0).getExpr().unParenExpr();
+                                    ISwc4jAstExpr arg2 = args.get(1).getExpr().unParenExpr();
+                                    if (arg1 instanceof ISwc4jAstCoercionPrimitive &&
+                                            arg2 instanceof ISwc4jAstCoercionPrimitive) {
+                                        int indexStart = arg1.as(ISwc4jAstCoercionPrimitive.class).asInt();
+                                        int indexEnd = arg2.as(ISwc4jAstCoercionPrimitive.class).asInt();
+                                        return Optional.of(Swc4jAstStr.create(StringUtils.slice(objString, indexStart, indexEnd)));
                                     }
                                     break;
                             }
