@@ -16,10 +16,9 @@
 
 package com.caoccao.javet.swc4j.plugins.jsfuck;
 
-import com.caoccao.javet.swc4j.BaseTestSuite;
-import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
+import com.caoccao.javet.swc4j.plugins.BaseTestSuiteSwc4jPlugin;
 import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +27,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestSwc4jPluginHostJsFuckDecoder extends BaseTestSuite {
+public class TestSwc4jPluginHostJsFuckDecoder extends BaseTestSuiteSwc4jPlugin {
     @Test
     public void test() throws Swc4jCoreException {
         Map<String, String> testCaseMap = new LinkedHashMap<>();
@@ -68,8 +67,7 @@ public class TestSwc4jPluginHostJsFuckDecoder extends BaseTestSuite {
         ISwc4jPluginHost pluginHost = new Swc4jPluginHostJsFuckDecoder();
         jsScriptTransformOptions
                 .setPluginHost(pluginHost)
-                .setOmitLastSemi(true)
-                .setSourceMap(Swc4jSourceMapOption.None);
+                .setOmitLastSemi(true);
         for (Map.Entry<String, String> entry : testCaseMap.entrySet()) {
             Swc4jTransformOutput output = swc4j.transform(entry.getKey(), jsScriptTransformOptions);
             assertEquals(entry.getValue(), output.getCode(), entry.getKey());

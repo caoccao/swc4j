@@ -205,6 +205,18 @@ public class Swc4jAstArrayLit
         return Swc4jAstType.ArrayLit;
     }
 
+    public int indexOf(Swc4jAstExprOrSpread node) {
+        if (!elems.isEmpty()) {
+            final int length = elems.size();
+            for (int i = 0; i < length; i++) {
+                if (elems.get(i).map(elem -> elem == node).orElse(false)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
     public boolean isAllPrimitive() {
         return elems.stream()
                 .filter(Optional::isPresent)

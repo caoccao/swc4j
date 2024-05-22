@@ -70,6 +70,10 @@ public class Swc4jAstCallExpr
         this.args.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstCallExpr create(ISwc4jAstCallee callee) {
+        return new Swc4jAstCallExpr(callee, SimpleList.of(), null, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public Optional<ISwc4jAst> eval() {
         switch (callee.getType()) {
