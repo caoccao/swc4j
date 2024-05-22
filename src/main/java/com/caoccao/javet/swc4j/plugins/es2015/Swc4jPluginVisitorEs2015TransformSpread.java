@@ -55,9 +55,10 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                         if (optionalExprOrSpread.map(e -> e.getSpread().isPresent()).orElse(false)) {
                             break;
                         } else {
-                            Swc4jAstExprOrSpread elem = Swc4jAstExprOrSpread.create(optionalExprOrSpread.get().getExpr());
-                            elem.setParent(objArrayLit);
-                            objArrayLit.getElems().add(Optional.of(elem));
+                            Optional<Swc4jAstExprOrSpread> elem = optionalExprOrSpread
+                                    .map(e -> Swc4jAstExprOrSpread.create(e.getExpr()));
+                            elem.ifPresent(e -> e.setParent(objArrayLit));
+                            objArrayLit.getElems().add(elem);
                             startIndex = i + 1;
                         }
                     }
@@ -86,12 +87,12 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                         if (objArrayLit == null) {
                             objArrayLit = Swc4jAstArrayLit.create();
                         }
-                        Swc4jAstExprOrSpread elem = null;
-                        if (optionalExprOrSpread.isPresent()) {
-                            elem = Swc4jAstExprOrSpread.create(optionalExprOrSpread.get().getExpr());
-                            elem.setParent(objArrayLit);
+                        Optional<Swc4jAstExprOrSpread> elem = optionalExprOrSpread
+                                .map(e -> Swc4jAstExprOrSpread.create(e.getExpr()));
+                        if (elem.isPresent()) {
+                            elem.get().setParent(objArrayLit);
                         }
-                        objArrayLit.getElems().add(Optional.ofNullable(elem));
+                        objArrayLit.getElems().add(elem);
                     }
                 }
                 if (objArrayLit != null) {
