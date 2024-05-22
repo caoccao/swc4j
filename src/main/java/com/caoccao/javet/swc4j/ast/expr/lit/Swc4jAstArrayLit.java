@@ -28,10 +28,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
-import com.caoccao.javet.swc4j.utils.AssertionUtils;
-import com.caoccao.javet.swc4j.utils.SimpleList;
-import com.caoccao.javet.swc4j.utils.SimpleMap;
-import com.caoccao.javet.swc4j.utils.SimpleSet;
+import com.caoccao.javet.swc4j.utils.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -177,12 +174,14 @@ public class Swc4jAstArrayLit
         return toString();
     }
 
-    public void concat(Swc4jAstArrayLit arrayLit) {
-        if (!AssertionUtils.notNull(arrayLit, "Array lit").getElems().isEmpty()) {
-            arrayLit.getElems().forEach(elem -> {
-                elem.ifPresent(e -> e.setParent(this));
-                elems.add(elem);
-            });
+    public void concat(Swc4jAstArrayLit... arrayLits) {
+        if (ArrayUtils.isNotEmpty(AssertionUtils.notNull(arrayLits, "Array lits"))) {
+            for (Swc4jAstArrayLit arrayLit : arrayLits) {
+                AssertionUtils.notNull(arrayLit, "Array lit").getElems().forEach(elem -> {
+                    elem.ifPresent(e -> e.setParent(this));
+                    elems.add(elem);
+                });
+            }
         }
     }
 
