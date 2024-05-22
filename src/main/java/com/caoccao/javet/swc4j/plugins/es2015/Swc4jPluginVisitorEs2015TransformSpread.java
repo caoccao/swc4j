@@ -39,23 +39,26 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
             switch (node.getParent().getType()) {
                 case ArrayLit:
                     Swc4jAstArrayLit arrayLit = node.getParent().as(Swc4jAstArrayLit.class);
-                    if (arrayLit.getElems().size() == 1) {
+                    final int length = arrayLit.getElems().size();
+                    if (length == 1) {
                         arrayLit.getParent().replaceNode(arrayLit, node.getExpr());
                     } else {
-                        Swc4jAstIdent identConcat = Swc4jAstIdent.create(Swc4jAstArrayLit.CONCAT);
                         int index = arrayLit.indexOf(node);
                         if (index == 0) {
-                            Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(node.getExpr(), identConcat);
+                            Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(
+                                    node.getExpr(),
+                                    Swc4jAstIdent.create(Swc4jAstArrayLit.CONCAT));
                             Swc4jAstCallExpr callExpr = Swc4jAstCallExpr.create(memberExpr);
                             ISwc4jAst newNode = callExpr;
-                            final int length = arrayLit.getElems().size();
                             for (int i = 1; i < length; i++) {
                                 Optional<Swc4jAstExprOrSpread> elem = arrayLit.getElems().get(i);
                                 if (elem.isPresent()) {
                                     if (elem.get().getSpread().isPresent()) {
                                         callExpr.getArgs().add(Swc4jAstExprOrSpread.create(elem.get().getExpr()));
                                         newNode = callExpr;
-                                        memberExpr = Swc4jAstMemberExpr.create(callExpr, identConcat);
+                                        memberExpr = Swc4jAstMemberExpr.create(
+                                                callExpr,
+                                                Swc4jAstIdent.create(Swc4jAstArrayLit.CONCAT));
                                         callExpr = Swc4jAstCallExpr.create(memberExpr);
                                     } else {
                                         // TODO
@@ -65,6 +68,10 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                                 }
                             }
                             arrayLit.getParent().replaceNode(arrayLit, newNode);
+                        } else if (index == length - 1) {
+                            // TODO
+                        } else {
+                            // TODO
                         }
                     }
                     break;

@@ -23,7 +23,7 @@ import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class TestSwc4jPluginVisitorJsFuckDecoder extends BaseTestSuiteSwc4jPlugin {
+public class TestSwc4jPluginVisitorEs2015TransformSpread extends BaseTestSuiteSwc4jPlugin {
 
     @BeforeEach
     @Override
