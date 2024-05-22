@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNull;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -33,12 +34,29 @@ import java.util.Optional;
  * @since 0.8.0
  */
 public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
+    protected static final String APPLY = "apply";
+    protected static final String ARGUMENTS = "arguments";
+
+    protected ISwc4jAstExpr convertArguments(ISwc4jAstExpr expr) {
+        ISwc4jAstExpr innerExpr = expr.unParenExpr();
+        if (innerExpr instanceof Swc4jAstIdent && ARGUMENTS.equals(innerExpr.as(Swc4jAstIdent.class).getSym())) {
+            Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(
+                    Swc4jAstIdent.create(Swc4jAstArrayLit.CONSTRUCTOR),
+                    Swc4jAstIdent.create(APPLY));
+            Swc4jAstCallExpr callExpr = Swc4jAstCallExpr.create(memberExpr);
+            callExpr.getArgs().add(Swc4jAstExprOrSpread.create(Swc4jAstNull.create()));
+            callExpr.getArgs().add(Swc4jAstExprOrSpread.create(innerExpr));
+            return callExpr;
+        }
+        return expr;
+    }
+
     @Override
     public Swc4jAstVisitorResponse visitArrayLit(Swc4jAstArrayLit node) {
         if (node.isSpreadPresent()) {
             final int length = node.getElems().size();
             if (length == 1) {
-                node.getParent().replaceNode(node, node.getElems().get(0).get().getExpr());
+                node.getParent().replaceNode(node, convertArguments(node.getElems().get(0).get().getExpr()));
             } else {
                 // Prepare obj
                 ISwc4jAstExpr obj;
@@ -46,7 +64,7 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                 int startIndex;
                 if (optionalExprOrSpread.map(e -> e.getSpread().isPresent()).orElse(false)) {
                     startIndex = 1;
-                    obj = optionalExprOrSpread.get().getExpr();
+                    obj = convertArguments(optionalExprOrSpread.get().getExpr());
                 } else {
                     startIndex = 0;
                     Swc4jAstArrayLit objArrayLit = Swc4jAstArrayLit.create();
@@ -80,7 +98,8 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                             callExpr.getArgs().add(arg);
                             objArrayLit = null;
                         }
-                        Swc4jAstExprOrSpread elem = Swc4jAstExprOrSpread.create(optionalExprOrSpread.get().getExpr());
+                        Swc4jAstExprOrSpread elem = Swc4jAstExprOrSpread.create(
+                                convertArguments(optionalExprOrSpread.get().getExpr()));
                         elem.setParent(callExpr);
                         callExpr.getArgs().add(elem);
                     } else {

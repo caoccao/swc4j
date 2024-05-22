@@ -53,6 +53,12 @@ public class TestSwc4jPluginVisitorEs2015TransformSpread extends BaseTestSuiteSw
                 "const a=[1,2];const b=[3,4];JSON.stringify([,,].concat(a,b));",
                 "const a = [1,2]; const b = [3,4]; JSON.stringify([,,...a,,, ...b]);",
                 "const a=[1,2];const b=[3,4];JSON.stringify([,,].concat(a,[,,],b));",
+                "function x(a, b) { return [...a, ...arguments, ...b]; } JSON.stringify(x([1,2], [3,4]));",
+                "function x(a,b){return a.concat(Array.apply(null,arguments),b);}JSON.stringify(x([1,2],[3,4]));",
+                "function x(a, b) { return [...arguments, ...a, ...b]; } JSON.stringify(x([1,2], [3,4]));",
+                "function x(a,b){return Array.apply(null,arguments).concat(a,b);}JSON.stringify(x([1,2],[3,4]));",
+                "function x(a, b) { return [...arguments]; } JSON.stringify(x([1,2], [3,4]));",
+                "function x(a,b){return Array.apply(null,arguments);}JSON.stringify(x([1,2],[3,4]));",
                 "const a = [1,2]; JSON.stringify([...a]);",
                 "const a=[1,2];JSON.stringify(a);"));
     }

@@ -42,6 +42,10 @@ public class Swc4jAstNull
         super(span);
     }
 
+    public static Swc4jAstNull create() {
+        return new Swc4jAstNull(Swc4jSpan.DUMMY);
+    }
+
     @Override
     public boolean asBoolean() {
         return false;
