@@ -37,17 +37,18 @@ public class TestSwc4jPluginVisitorEs2015TransformSpread extends BaseTestSuiteSw
     }
 
     @Test
-    public void testArrayLitFirst() {
+    public void testArrayLit() {
         assertTransformAndEvalAsString(SimpleMap.of(
                 "const a = [1,2]; const b = [3,4]; JSON.stringify([...a, ...b]);",
                 "const a=[1,2];const b=[3,4];JSON.stringify(a.concat(b));",
                 "const a = [1,2]; const b = [3,4]; JSON.stringify([...a, ...b, ...b, ...a]);",
-                "const a=[1,2];const b=[3,4];JSON.stringify(a.concat(b).concat(b).concat(a));"));
-    }
-
-    @Test
-    public void testArrayLitOne() {
-        assertTransformAndEvalAsString(SimpleMap.of(
+                "const a=[1,2];const b=[3,4];JSON.stringify(a.concat(b,b,a));",
+                "const a = [1,2]; const b = [3,4]; JSON.stringify(['x', ...a, ...b, 'y']);",
+                "const a=[1,2];const b=[3,4];JSON.stringify([\"x\"].concat(a,b,[\"y\"]));",
+                "const a = [1,2]; const b = [3,4]; JSON.stringify(['x', 'y', ...a, ...b]);",
+                "const a=[1,2];const b=[3,4];JSON.stringify([\"x\",\"y\"].concat(a,b));",
+                "const a = [1,2]; const b = [3,4]; JSON.stringify([...a, ...[...a, ...b], ...b]);",
+                "const a=[1,2];const b=[3,4];JSON.stringify(a.concat(a.concat(b),b));",
                 "const a = [1,2]; JSON.stringify([...a]);",
                 "const a=[1,2];JSON.stringify(a);"));
     }

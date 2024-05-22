@@ -114,6 +114,10 @@ public class Swc4jAstArrayLit
         this.elems.stream().filter(Optional::isPresent).map(Optional::get).forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstArrayLit create() {
+        return new Swc4jAstArrayLit(SimpleList.of(), Swc4jSpan.DUMMY);
+    }
+
     public static Swc4jAstArrayLit create(List<String> list) {
         List<Swc4jAstExprOrSpread> elems = new ArrayList<>();
         if (list != null && !list.isEmpty()) {
@@ -232,6 +236,10 @@ public class Swc4jAstArrayLit
                     }
                     return false;
                 });
+    }
+
+    public boolean isSpreadPresent() {
+        return elems.stream().anyMatch(elem -> elem.map(e -> e.getSpread().isPresent()).orElse(false));
     }
 
     public String join(String separator) {

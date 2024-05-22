@@ -21,7 +21,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 
@@ -34,57 +34,74 @@ import java.util.Optional;
  */
 public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
     @Override
-    public Swc4jAstVisitorResponse visitExprOrSpread(Swc4jAstExprOrSpread node) {
-        if (node.getSpread().isPresent()) {
-            switch (node.getParent().getType()) {
-                case ArrayLit:
-                    Swc4jAstArrayLit arrayLit = node.getParent().as(Swc4jAstArrayLit.class);
-                    final int length = arrayLit.getElems().size();
-                    if (length == 1) {
-                        arrayLit.getParent().replaceNode(arrayLit, node.getExpr());
-                    } else {
-                        int index = arrayLit.indexOf(node);
-                        if (index == 0) {
-                            Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(
-                                    node.getExpr(),
-                                    Swc4jAstIdent.create(Swc4jAstArrayLit.CONCAT));
-                            Swc4jAstCallExpr callExpr = Swc4jAstCallExpr.create(memberExpr);
-                            ISwc4jAst newNode = callExpr;
-                            for (int i = 1; i < length; i++) {
-                                Optional<Swc4jAstExprOrSpread> elem = arrayLit.getElems().get(i);
-                                if (elem.isPresent()) {
-                                    if (elem.get().getSpread().isPresent()) {
-                                        callExpr.getArgs().add(Swc4jAstExprOrSpread.create(elem.get().getExpr()));
-                                        newNode = callExpr;
-                                        memberExpr = Swc4jAstMemberExpr.create(
-                                                callExpr,
-                                                Swc4jAstIdent.create(Swc4jAstArrayLit.CONCAT));
-                                        callExpr = Swc4jAstCallExpr.create(memberExpr);
-                                    } else {
-                                        // TODO
-                                    }
-                                } else {
-                                    // TODO
-                                }
-                            }
-                            arrayLit.getParent().replaceNode(arrayLit, newNode);
-                        } else if (index == length - 1) {
-                            // TODO
+    public Swc4jAstVisitorResponse visitArrayLit(Swc4jAstArrayLit node) {
+        if (node.isSpreadPresent()) {
+            final int length = node.getElems().size();
+            if (length == 1) {
+                node.getParent().replaceNode(node, node.getElems().get(0).get().getExpr());
+            } else {
+                // Prepare obj
+                ISwc4jAstExpr obj;
+                Optional<Swc4jAstExprOrSpread> optionalExprOrSpread = node.getElems().get(0);
+                int startIndex;
+                if (optionalExprOrSpread.map(e -> e.getSpread().isPresent()).orElse(false)) {
+                    startIndex = 1;
+                    obj = optionalExprOrSpread.get().getExpr();
+                } else {
+                    startIndex = 0;
+                    Swc4jAstArrayLit objArrayLit = Swc4jAstArrayLit.create();
+                    for (int i = 0; i < length; i++) {
+                        optionalExprOrSpread = node.getElems().get(i);
+                        if (optionalExprOrSpread.map(e -> e.getSpread().isPresent()).orElse(false)) {
+                            break;
                         } else {
-                            // TODO
+                            Swc4jAstExprOrSpread elem = Swc4jAstExprOrSpread.create(optionalExprOrSpread.get().getExpr());
+                            elem.setParent(objArrayLit);
+                            objArrayLit.getElems().add(Optional.of(elem));
+                            startIndex = i + 1;
                         }
                     }
-                    break;
-                case CallExpr:
-                    break;
-                case NewExpr:
-                    break;
-                case OptCall:
-                    break;
-                default:
-                    break;
+                    obj = objArrayLit;
+                }
+                // Prepare concat()
+                Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(
+                        obj,
+                        Swc4jAstIdent.create(Swc4jAstArrayLit.CONCAT));
+                Swc4jAstCallExpr callExpr = Swc4jAstCallExpr.create(memberExpr);
+                Swc4jAstArrayLit objArrayLit = null;
+                // Prepare args
+                for (int i = startIndex; i < length; i++) {
+                    optionalExprOrSpread = node.getElems().get(i);
+                    if (optionalExprOrSpread.map(e -> e.getSpread().isPresent()).orElse(false)) {
+                        if (objArrayLit != null) {
+                            Swc4jAstExprOrSpread arg = Swc4jAstExprOrSpread.create(objArrayLit);
+                            arg.setParent(callExpr);
+                            callExpr.getArgs().add(arg);
+                            objArrayLit = null;
+                        }
+                        Swc4jAstExprOrSpread elem = Swc4jAstExprOrSpread.create(optionalExprOrSpread.get().getExpr());
+                        elem.setParent(callExpr);
+                        callExpr.getArgs().add(elem);
+                    } else {
+                        if (objArrayLit == null) {
+                            objArrayLit = Swc4jAstArrayLit.create();
+                        }
+                        Swc4jAstExprOrSpread elem = null;
+                        if (optionalExprOrSpread.isPresent()) {
+                            elem = Swc4jAstExprOrSpread.create(optionalExprOrSpread.get().getExpr());
+                            elem.setParent(objArrayLit);
+                        }
+                        objArrayLit.getElems().add(Optional.ofNullable(elem));
+                    }
+                }
+                if (objArrayLit != null) {
+                    Swc4jAstExprOrSpread arg = Swc4jAstExprOrSpread.create(objArrayLit);
+                    arg.setParent(callExpr);
+                    callExpr.getArgs().add(arg);
+                }
+                node.getParent().replaceNode(node, callExpr);
             }
         }
-        return super.visitExprOrSpread(node);
+        return super.visitArrayLit(node);
     }
 }
