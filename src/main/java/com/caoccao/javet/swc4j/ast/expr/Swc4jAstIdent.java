@@ -55,6 +55,26 @@ public class Swc4jAstIdent
         return new Swc4jAstIdent(sym, false, Swc4jSpan.DUMMY);
     }
 
+    public static Swc4jAstIdent createApply() {
+        return create(ISwc4jConstants.APPLY);
+    }
+
+    public static Swc4jAstIdent createArray() {
+        return create(ISwc4jConstants.ARRAY);
+    }
+
+    public static Swc4jAstIdent createConcat() {
+        return create(ISwc4jConstants.CONCAT);
+    }
+
+    public static Swc4jAstIdent createDummy() {
+        return create(ISwc4jConstants.DUMMY);
+    }
+
+    public static Swc4jAstIdent createFunction() {
+        return create(ISwc4jConstants.FUNCTION);
+    }
+
     public static Swc4jAstIdent createUndefined() {
         return create(ISwc4jConstants.UNDEFINED);
     }

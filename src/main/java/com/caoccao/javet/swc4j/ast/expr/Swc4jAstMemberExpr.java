@@ -91,7 +91,7 @@ public class Swc4jAstMemberExpr
                         if (childMemberExpr.getObj() instanceof Swc4jAstArrayLit) {
                             return childMemberExpr.evalAsCall()
                                     .filter(Swc4jAstArrayLit.ARRAY_FUNCTION_SET::contains)
-                                    .map(c -> Swc4jAstIdent.create(ISwc4jConstants.FUNCTION));
+                                    .map(c -> Swc4jAstIdent.createFunction());
                         }
                     } else if (ISwc4jConstants.NAME.equals(call.get())) {
                         Swc4jAstMemberExpr childMemberExpr = obj.as(Swc4jAstMemberExpr.class);

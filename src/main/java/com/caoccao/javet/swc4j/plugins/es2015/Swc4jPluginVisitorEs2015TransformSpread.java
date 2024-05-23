@@ -45,8 +45,8 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
         if (innerExpr instanceof Swc4jAstIdent &&
                 ISwc4jConstants.ARGUMENTS.equals(innerExpr.as(Swc4jAstIdent.class).getSym())) {
             Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(
-                    Swc4jAstIdent.create(ISwc4jConstants.ARRAY),
-                    Swc4jAstIdent.create(ISwc4jConstants.APPLY));
+                    Swc4jAstIdent.createArray(),
+                    Swc4jAstIdent.createApply());
             Swc4jAstCallExpr callExpr = Swc4jAstCallExpr.create(memberExpr);
             callExpr.getArgs().add(Swc4jAstExprOrSpread.create(Swc4jAstNull.create()));
             callExpr.getArgs().add(Swc4jAstExprOrSpread.create(innerExpr));
@@ -88,9 +88,7 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                     obj = objArrayLit;
                 }
                 // Prepare concat()
-                Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(
-                        obj,
-                        Swc4jAstIdent.create(ISwc4jConstants.CONCAT));
+                Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(obj, Swc4jAstIdent.createConcat());
                 Swc4jAstCallExpr callExpr = Swc4jAstCallExpr.create(memberExpr);
                 Swc4jAstArrayLit objArrayLit = null;
                 // Prepare args
@@ -136,9 +134,7 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
             ISwc4jAstExpr callee = node.getCallee().as(ISwc4jAstExpr.class);
             List<Swc4jAstExprOrSpread> args = node.getArgs();
             final int length = args.size();
-            Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(
-                    callee,
-                    Swc4jAstIdent.create(ISwc4jConstants.APPLY));
+            Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(callee, Swc4jAstIdent.createApply());
             node.setCallee(memberExpr);
             Swc4jAstExprOrSpread thisArg;
             if (callee instanceof Swc4jAstMemberExpr) {
@@ -147,7 +143,7 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                 Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create();
                 Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var);
                 Swc4jAstVarDeclarator varDeclarator = Swc4jAstVarDeclarator.create(
-                        Swc4jAstIdent.create(ISwc4jConstants.DUMMY),
+                        Swc4jAstIdent.createDummy(),
                         childMemberExpr.getObj());
                 varDecl.getDecls().add(varDeclarator);
                 varDecl.updateParent();
@@ -155,8 +151,8 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                 blockStmt.getStmts().add(Swc4jAstExprStmt.create(node));
                 blockStmt.updateParent();
                 stmt.getParent().replaceNode(stmt, blockStmt);
-                childMemberExpr.setObj(Swc4jAstIdent.create(ISwc4jConstants.DUMMY));
-                thisArg = Swc4jAstExprOrSpread.create(Swc4jAstIdent.create(ISwc4jConstants.DUMMY));
+                childMemberExpr.setObj(Swc4jAstIdent.createDummy());
+                thisArg = Swc4jAstExprOrSpread.create(Swc4jAstIdent.createDummy());
             } else {
                 thisArg = Swc4jAstExprOrSpread.create(Swc4jAstNull.create());
             }
@@ -188,9 +184,7 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                     obj = objArrayLit;
                 }
                 // Prepare concat()
-                Swc4jAstMemberExpr childMemberExpr = Swc4jAstMemberExpr.create(
-                        obj,
-                        Swc4jAstIdent.create(ISwc4jConstants.CONCAT));
+                Swc4jAstMemberExpr childMemberExpr = Swc4jAstMemberExpr.create(obj, Swc4jAstIdent.createConcat());
                 Swc4jAstCallExpr childCallExpr = Swc4jAstCallExpr.create(childMemberExpr);
                 Swc4jAstArrayLit objArrayLit = null;
                 // Prepare args
