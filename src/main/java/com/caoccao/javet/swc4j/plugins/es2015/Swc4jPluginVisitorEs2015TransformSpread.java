@@ -249,7 +249,33 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
 
     @Override
     public Swc4jAstVisitorResponse visitOptCall(Swc4jAstOptCall node) {
-        // TODO
+        if (node.isSpreadPresent() && node.getCallee() instanceof Swc4jAstOptChainExpr) {
+            Swc4jAstOptChainExpr callee = node.getCallee().as(Swc4jAstOptChainExpr.class);
+            if (callee.getBase() instanceof Swc4jAstMemberExpr) {
+                Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(callee, Swc4jAstIdent.createApply());
+                node.setCallee(memberExpr);
+                Swc4jAstMemberExpr childMemberExpr = callee.getBase().as(Swc4jAstMemberExpr.class);
+                ISwc4jAstStmt stmt = node.getParent(ISwc4jAstStmt.class);
+                Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create();
+                Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var);
+                Swc4jAstVarDeclarator varDeclarator = Swc4jAstVarDeclarator.create(
+                        Swc4jAstIdent.createDummy(),
+                        childMemberExpr.getObj());
+                varDecl.getDecls().add(varDeclarator);
+                varDecl.updateParent();
+                blockStmt.getStmts().add(varDecl);
+                blockStmt.getStmts().add(Swc4jAstExprStmt.create(node.getParent().as(ISwc4jAstExpr.class)));
+                blockStmt.updateParent();
+                stmt.getParent().replaceNode(stmt, blockStmt);
+                childMemberExpr.setObj(Swc4jAstIdent.createDummy());
+                List<Swc4jAstExprOrSpread> args = node.getArgs();
+                Swc4jAstExprOrSpread arg = getConcatNode(args);
+                args.clear();
+                args.add(Swc4jAstExprOrSpread.create(Swc4jAstIdent.createDummy()));
+                args.add(arg);
+                node.updateParent();
+            }
+        }
         return super.visitOptCall(node);
     }
 }

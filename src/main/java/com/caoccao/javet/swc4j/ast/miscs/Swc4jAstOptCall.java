@@ -42,7 +42,6 @@ public class Swc4jAstOptCall
     protected ISwc4jAstExpr callee;
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
-
     @Jni2RustMethod
     public Swc4jAstOptCall(
             ISwc4jAstExpr callee,
@@ -82,6 +81,10 @@ public class Swc4jAstOptCall
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeArgs() {
         return typeArgs;
+    }
+
+    public boolean isSpreadPresent() {
+        return args.stream().anyMatch(arg -> arg.getSpread().isPresent());
     }
 
     @Override

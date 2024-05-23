@@ -88,4 +88,13 @@ public class TestSwc4jPluginVisitorEs2015TransformSpread extends BaseTestSuiteSw
                 "const a = [1,2]; JSON.stringify(new Array(...a));",
                 "const a=[1,2];JSON.stringify(Array.apply(null,a));"));
     }
+
+    @Test
+    public void testOptCall() {
+        assertTransformAndEvalAsString(SimpleMap.of(
+                "function x() { JSON.stringify(arguments); } const a = [1,2]; const b = {x:x}; b?.x(3,...a,4);",
+                "function x(){JSON.stringify(arguments);}const a=[1,2];const b={x:x};{var _swc4j_dummy_=b;_swc4j_dummy_?.x.apply(_swc4j_dummy_,[3].concat(a,[4]));}",
+                "function x() { JSON.stringify(arguments); } const a = [1,2]; const b = {x:{x:x}}; b?.x?.x(3,...a,4);",
+                "function x(){JSON.stringify(arguments);}const a=[1,2];const b={x:{x:x}};{var _swc4j_dummy_=b?.x;_swc4j_dummy_?.x.apply(_swc4j_dummy_,[3].concat(a,[4]));}"));
+    }
 }
