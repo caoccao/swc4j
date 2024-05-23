@@ -81,6 +81,10 @@ public class Swc4jAstNewExpr
         return typeArgs;
     }
 
+    public boolean isSpreadPresent() {
+        return args.map(list -> list.stream().anyMatch(arg -> arg.getSpread().isPresent())).orElse(false);
+    }
+
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
         if (args.isPresent() && !args.get().isEmpty() && newNode instanceof Swc4jAstExprOrSpread) {

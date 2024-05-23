@@ -55,6 +55,71 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
         return expr;
     }
 
+    protected Swc4jAstExprOrSpread getConcatNode(List<Swc4jAstExprOrSpread> args) {
+        final int length = args.size();
+        Swc4jAstExprOrSpread arg;
+        if (length == 1) {
+            arg = Swc4jAstExprOrSpread.create(convertArguments(args.get(0).getExpr()));
+        } else {
+            // Prepare obj
+            ISwc4jAstExpr obj;
+            arg = args.get(0);
+            int startIndex;
+            if (arg.getSpread().isPresent()) {
+                startIndex = 1;
+                obj = convertArguments(arg.getExpr());
+            } else {
+                startIndex = 0;
+                Swc4jAstArrayLit objArrayLit = Swc4jAstArrayLit.create();
+                for (int i = 0; i < length; i++) {
+                    arg = args.get(i);
+                    if (arg.getSpread().isPresent()) {
+                        break;
+                    } else {
+                        Swc4jAstExprOrSpread elem = Swc4jAstExprOrSpread.create(arg.getExpr());
+                        elem.setParent(objArrayLit);
+                        objArrayLit.getElems().add(Optional.of(elem));
+                        startIndex = i + 1;
+                    }
+                }
+                obj = objArrayLit;
+            }
+            // Prepare concat()
+            Swc4jAstMemberExpr childMemberExpr = Swc4jAstMemberExpr.create(obj, Swc4jAstIdent.createConcat());
+            Swc4jAstCallExpr childCallExpr = Swc4jAstCallExpr.create(childMemberExpr);
+            Swc4jAstArrayLit objArrayLit = null;
+            // Prepare args
+            for (int i = startIndex; i < length; i++) {
+                arg = args.get(i);
+                if (arg.getSpread().isPresent()) {
+                    if (objArrayLit != null) {
+                        Swc4jAstExprOrSpread childArg = Swc4jAstExprOrSpread.create(objArrayLit);
+                        childArg.setParent(childCallExpr);
+                        childCallExpr.getArgs().add(childArg);
+                        objArrayLit = null;
+                    }
+                    Swc4jAstExprOrSpread childElem = Swc4jAstExprOrSpread.create(convertArguments(arg.getExpr()));
+                    childElem.setParent(childCallExpr);
+                    childCallExpr.getArgs().add(childElem);
+                } else {
+                    if (objArrayLit == null) {
+                        objArrayLit = Swc4jAstArrayLit.create();
+                    }
+                    Swc4jAstExprOrSpread elem = Swc4jAstExprOrSpread.create(arg.getExpr());
+                    elem.setParent(objArrayLit);
+                    objArrayLit.getElems().add(Optional.of(elem));
+                }
+            }
+            if (objArrayLit != null) {
+                Swc4jAstExprOrSpread childArg = Swc4jAstExprOrSpread.create(objArrayLit);
+                childArg.setParent(childCallExpr);
+                childCallExpr.getArgs().add(childArg);
+            }
+            arg = Swc4jAstExprOrSpread.create(childCallExpr);
+        }
+        return arg;
+    }
+
     @Override
     public Swc4jAstVisitorResponse visitArrayLit(Swc4jAstArrayLit node) {
         if (node.isSpreadPresent()) {
@@ -133,7 +198,6 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
         if (node.isSpreadPresent() && node.getCallee() instanceof ISwc4jAstExpr) {
             ISwc4jAstExpr callee = node.getCallee().as(ISwc4jAstExpr.class);
             List<Swc4jAstExprOrSpread> args = node.getArgs();
-            final int length = args.size();
             Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(callee, Swc4jAstIdent.createApply());
             node.setCallee(memberExpr);
             Swc4jAstExprOrSpread thisArg;
@@ -156,66 +220,7 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
             } else {
                 thisArg = Swc4jAstExprOrSpread.create(Swc4jAstNull.create());
             }
-            Swc4jAstExprOrSpread arg;
-            if (length == 1) {
-                arg = Swc4jAstExprOrSpread.create(convertArguments(args.get(0).getExpr()));
-            } else {
-                // Prepare obj
-                ISwc4jAstExpr obj;
-                arg = args.get(0);
-                int startIndex;
-                if (arg.getSpread().isPresent()) {
-                    startIndex = 1;
-                    obj = convertArguments(arg.getExpr());
-                } else {
-                    startIndex = 0;
-                    Swc4jAstArrayLit objArrayLit = Swc4jAstArrayLit.create();
-                    for (int i = 0; i < length; i++) {
-                        arg = args.get(i);
-                        if (arg.getSpread().isPresent()) {
-                            break;
-                        } else {
-                            Swc4jAstExprOrSpread elem = Swc4jAstExprOrSpread.create(arg.getExpr());
-                            elem.setParent(objArrayLit);
-                            objArrayLit.getElems().add(Optional.of(elem));
-                            startIndex = i + 1;
-                        }
-                    }
-                    obj = objArrayLit;
-                }
-                // Prepare concat()
-                Swc4jAstMemberExpr childMemberExpr = Swc4jAstMemberExpr.create(obj, Swc4jAstIdent.createConcat());
-                Swc4jAstCallExpr childCallExpr = Swc4jAstCallExpr.create(childMemberExpr);
-                Swc4jAstArrayLit objArrayLit = null;
-                // Prepare args
-                for (int i = startIndex; i < length; i++) {
-                    arg = args.get(i);
-                    if (arg.getSpread().isPresent()) {
-                        if (objArrayLit != null) {
-                            Swc4jAstExprOrSpread childArg = Swc4jAstExprOrSpread.create(objArrayLit);
-                            childArg.setParent(childCallExpr);
-                            childCallExpr.getArgs().add(childArg);
-                            objArrayLit = null;
-                        }
-                        Swc4jAstExprOrSpread childElem = Swc4jAstExprOrSpread.create(convertArguments(arg.getExpr()));
-                        childElem.setParent(childCallExpr);
-                        childCallExpr.getArgs().add(childElem);
-                    } else {
-                        if (objArrayLit == null) {
-                            objArrayLit = Swc4jAstArrayLit.create();
-                        }
-                        Swc4jAstExprOrSpread elem = Swc4jAstExprOrSpread.create(arg.getExpr());
-                        elem.setParent(objArrayLit);
-                        objArrayLit.getElems().add(Optional.of(elem));
-                    }
-                }
-                if (objArrayLit != null) {
-                    Swc4jAstExprOrSpread childArg = Swc4jAstExprOrSpread.create(objArrayLit);
-                    childArg.setParent(childCallExpr);
-                    childCallExpr.getArgs().add(childArg);
-                }
-                arg = Swc4jAstExprOrSpread.create(childCallExpr);
-            }
+            Swc4jAstExprOrSpread arg = getConcatNode(args);
             args.clear();
             args.add(thisArg);
             args.add(arg);
@@ -225,7 +230,16 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
 
     @Override
     public Swc4jAstVisitorResponse visitNewExpr(Swc4jAstNewExpr node) {
-        // TODO
+        if (node.isSpreadPresent()) {
+            ISwc4jAstExpr callee = node.getCallee();
+            List<Swc4jAstExprOrSpread> args = node.getArgs().get();
+            Swc4jAstExprOrSpread arg = getConcatNode(args);
+            Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(callee, Swc4jAstIdent.createApply());
+            Swc4jAstCallExpr callExpr = Swc4jAstCallExpr.create(memberExpr);
+            callExpr.getArgs().add(Swc4jAstExprOrSpread.create(Swc4jAstNull.create()));
+            callExpr.getArgs().add(arg);
+            node.getParent().replaceNode(node, callExpr);
+        }
         return super.visitNewExpr(node);
     }
 
