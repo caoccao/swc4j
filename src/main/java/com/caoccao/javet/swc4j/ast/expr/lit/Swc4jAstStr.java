@@ -34,11 +34,6 @@ public class Swc4jAstStr
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstModuleExportName, ISwc4jAstPropName, ISwc4jAstTsModuleName, ISwc4jAstTsLit,
         ISwc4jAstTsEnumMemberId, ISwc4jAstCoercionPrimitive {
-    public static final String CONSTRUCTOR = "String";
-    public static final String FONTCOLOR = "fontcolor";
-    public static final String ITALICS = "italics";
-    public static final String SLICE = "slice";
-    public static final String SPLIT = "split";
     @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
     @Jni2RustField(atom = true)

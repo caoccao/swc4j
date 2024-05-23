@@ -35,7 +35,6 @@ import java.util.Optional;
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstFunction
         extends Swc4jAst {
-    public static final String CONSTRUCTOR = "Function";
     protected final List<Swc4jAstDecorator> decorators;
     protected final List<Swc4jAstParam> params;
     @Jni2RustField(name = "is_async")

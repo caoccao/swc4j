@@ -53,6 +53,14 @@ public class Swc4jAstVarDeclarator
         setName(name);
     }
 
+    public static Swc4jAstVarDeclarator create(ISwc4jAstPat name) {
+        return create(name, null);
+    }
+
+    public static Swc4jAstVarDeclarator create(ISwc4jAstPat name, ISwc4jAstExpr init) {
+        return new Swc4jAstVarDeclarator(name, init, false, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(name);

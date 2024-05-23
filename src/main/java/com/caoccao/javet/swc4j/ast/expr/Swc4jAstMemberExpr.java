@@ -18,7 +18,6 @@ package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
@@ -26,6 +25,7 @@ import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.constants.ISwc4jConstants;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
@@ -42,8 +42,6 @@ import java.util.Optional;
 public class Swc4jAstMemberExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstOptChainBase, ISwc4jAstSimpleAssignTarget {
-    public static final String CONSTRUCTOR = "constructor";
-    public static final String NAME = "name";
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr obj;
     protected ISwc4jAstMemberProp prop;
@@ -88,21 +86,21 @@ public class Swc4jAstMemberExpr
             case MemberExpr: {
                 Optional<String> call = evalAsCall();
                 if (call.isPresent()) {
-                    if (CONSTRUCTOR.equals(call.get())) {
+                    if (ISwc4jConstants.CONSTRUCTOR.equals(call.get())) {
                         Swc4jAstMemberExpr childMemberExpr = obj.as(Swc4jAstMemberExpr.class);
                         if (childMemberExpr.getObj() instanceof Swc4jAstArrayLit) {
                             return childMemberExpr.evalAsCall()
                                     .filter(Swc4jAstArrayLit.ARRAY_FUNCTION_SET::contains)
-                                    .map(c -> Swc4jAstIdent.create(Swc4jAstFunction.CONSTRUCTOR));
+                                    .map(c -> Swc4jAstIdent.create(ISwc4jConstants.FUNCTION));
                         }
-                    } else if (NAME.equals(call.get())) {
+                    } else if (ISwc4jConstants.NAME.equals(call.get())) {
                         Swc4jAstMemberExpr childMemberExpr = obj.as(Swc4jAstMemberExpr.class);
                         Optional<String> childCall = childMemberExpr.evalAsCall();
                         if (childCall.isPresent()) {
-                            if (CONSTRUCTOR.equals(childCall.get())) {
+                            if (ISwc4jConstants.CONSTRUCTOR.equals(childCall.get())) {
                                 ISwc4jAstExpr childExpr = childMemberExpr.getObj().unParenExpr();
                                 if (childExpr instanceof Swc4jAstStr) {
-                                    return Optional.of(Swc4jAstStr.create(Swc4jAstStr.CONSTRUCTOR));
+                                    return Optional.of(Swc4jAstStr.create(ISwc4jConstants.STRING));
                                 }
                             }
                         }
@@ -166,15 +164,15 @@ public class Swc4jAstMemberExpr
                     if (Swc4jAstArrayLit.ARRAY_FUNCTION_SET.contains(call.get())) {
                         return Optional.of("function " + call.get() + "() { [native code] }");
                     }
-                    if (CONSTRUCTOR.equals(call.get())) {
-                        return Optional.of("function " + Swc4jAstArrayLit.CONSTRUCTOR + "() { [native code] }");
+                    if (ISwc4jConstants.CONSTRUCTOR.equals(call.get())) {
+                        return Optional.of("function " + ISwc4jConstants.ARRAY + "() { [native code] }");
                     }
-                    return Optional.of(Swc4jAstIdent.UNDEFINED);
+                    return Optional.of(ISwc4jConstants.UNDEFINED);
                 case Number:
-                    if (CONSTRUCTOR.equals(call.get())) {
-                        return Optional.of("function " + Swc4jAstNumber.CONSTRUCTOR + "() { [native code] }");
+                    if (ISwc4jConstants.CONSTRUCTOR.equals(call.get())) {
+                        return Optional.of("function " + ISwc4jConstants.NUMBER + "() { [native code] }");
                     }
-                    return Optional.of(Swc4jAstIdent.UNDEFINED);
+                    return Optional.of(ISwc4jConstants.UNDEFINED);
                 default:
                     break;
             }

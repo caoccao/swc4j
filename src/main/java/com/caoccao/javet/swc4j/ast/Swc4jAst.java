@@ -224,12 +224,8 @@ public abstract class Swc4jAst implements ISwc4jAst {
         return StringUtils.join("\n", lines);
     }
 
-    /**
-     * Update parent.
-     *
-     * @since 0.2.0
-     */
-    protected void updateParent() {
+    @Override
+    public void updateParent() {
         getChildNodes().forEach(node -> node.setParent(this));
     }
 }

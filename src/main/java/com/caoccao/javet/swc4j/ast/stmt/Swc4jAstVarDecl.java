@@ -55,6 +55,14 @@ public class Swc4jAstVarDecl
         this.decls.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstVarDecl create(Swc4jAstVarDeclKind kind) {
+        return create(kind, false);
+    }
+
+    public static Swc4jAstVarDecl create(Swc4jAstVarDeclKind kind, boolean declare) {
+        return new Swc4jAstVarDecl(kind, declare, SimpleList.of(), Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.copyOf(decls);

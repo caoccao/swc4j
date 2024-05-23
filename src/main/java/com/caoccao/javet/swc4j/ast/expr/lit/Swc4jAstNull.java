@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCoercionPrimitive;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.constants.ISwc4jConstants;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
@@ -34,8 +35,6 @@ import java.util.List;
 public class Swc4jAstNull
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstCoercionPrimitive {
-    public static final String NULL = "null";
-
     @Jni2RustMethod
     public Swc4jAstNull(
             Swc4jSpan span) {
@@ -83,7 +82,7 @@ public class Swc4jAstNull
 
     @Override
     public String asString() {
-        return NULL;
+        return toString();
     }
 
     @Override
@@ -103,7 +102,7 @@ public class Swc4jAstNull
 
     @Override
     public String toString() {
-        return "null";
+        return ISwc4jConstants.NULL;
     }
 
     @Override

@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.constants.ISwc4jConstants;
 import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.StringUtils;
@@ -34,10 +35,6 @@ import java.util.regex.Pattern;
 public class Swc4jAstNumber
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
-    public static final String CONSTRUCTOR = "Number";
-    public static final String INFINITY = "Infinity";
-    public static final String NAN = "NaN";
-    public static final String TO_STRING = "toString";
     protected static final int MAX_EXPONENT = 308;
     protected static final Pattern PATTERN_DECIMAL_ZEROS =
             Pattern.compile("^([\\+\\-]?)(\\d+)\\.0*$", Pattern.CASE_INSENSITIVE);
@@ -100,7 +97,7 @@ public class Swc4jAstNumber
             }
             long exponent = Long.parseLong(matcher.group(5)) + additionalExponent;
             if (exponent > MAX_EXPONENT) {
-                return sign + INFINITY;
+                return sign + ISwc4jConstants.INFINITY;
             }
             return sign + integer + fraction + "e" + exponentSign + exponent;
         }
@@ -122,7 +119,7 @@ public class Swc4jAstNumber
             }
             long exponent = Long.parseLong(matcher.group(4)) + additionalExponent;
             if (exponent > MAX_EXPONENT) {
-                return sign + INFINITY;
+                return sign + ISwc4jConstants.INFINITY;
             }
             return sign + integer + fraction + "e" + exponentSign + exponent;
         }

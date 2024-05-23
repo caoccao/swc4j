@@ -36,7 +36,6 @@ import java.util.List;
 public class Swc4jAstRegex
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstCoercionPrimitive {
-    public static final String CONSTRUCTOR = "RegExp";
     @Jni2RustField(atom = true)
     protected String exp;
     @Jni2RustField(atom = true)

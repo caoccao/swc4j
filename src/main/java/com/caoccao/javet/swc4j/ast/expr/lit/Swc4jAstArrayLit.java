@@ -98,9 +98,6 @@ public class Swc4jAstArrayLit
             "toString", "",
             "unshift", "0",
             "values", "[object Array Iterator]");
-    public static final String CONCAT = "concat";
-    public static final String CONSTRUCTOR = "Array";
-    public static final String JOIN = "join";
     protected final List<Optional<Swc4jAstExprOrSpread>> elems;
 
     @Jni2RustMethod

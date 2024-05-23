@@ -72,6 +72,23 @@ public interface ISwc4jAst {
     ISwc4jAst getParent();
 
     /**
+     * Gets parent.
+     *
+     * @param <T>   the type parameter
+     * @param clazz the clazz
+     * @return the parent
+     * @since 0.2.0
+     */
+    @SuppressWarnings("unchecked")
+    default <T extends ISwc4jAst> T getParent(Class<T> clazz) {
+        ISwc4jAst parent = getParent();
+        while (parent != null && !clazz.isAssignableFrom(parent.getClass())) {
+            parent = parent.getParent();
+        }
+        return (T) parent;
+    }
+
+    /**
      * Gets span.
      *
      * @return the span
@@ -143,6 +160,12 @@ public interface ISwc4jAst {
      * @since 0.2.0
      */
     String toDebugString();
+
+    /**
+     * Update parent.
+     * @since 0.8.0
+     */
+    void updateParent();
 
     /**
      * Visit the ast.

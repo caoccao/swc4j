@@ -28,6 +28,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCoercionPrimitive;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.constants.ISwc4jConstants;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
@@ -82,9 +83,9 @@ public class Swc4jAstUnaryExpr
                         return Optional.of(Swc4jAstNumber.create(-arg.as(ISwc4jAstCoercionPrimitive.class).asInt()));
                     case Ident:
                         Swc4jAstIdent ident = arg.as(Swc4jAstIdent.class);
-                        if (Swc4jAstNumber.NAN.equals(ident.getSym())) {
+                        if (ISwc4jConstants.NAN.equals(ident.getSym())) {
                             return Optional.of(Swc4jAstNumber.createNaN());
-                        } else if (Swc4jAstNumber.INFINITY.equals(ident.getSym())) {
+                        } else if (ISwc4jConstants.INFINITY.equals(ident.getSym())) {
                             return Optional.of(Swc4jAstNumber.createInfinity(false));
                         }
                         break;
@@ -113,9 +114,9 @@ public class Swc4jAstUnaryExpr
                         return Optional.of(Swc4jAstNumber.create(arg.as(ISwc4jAstCoercionPrimitive.class).asInt()));
                     case Ident:
                         Swc4jAstIdent ident = arg.as(Swc4jAstIdent.class);
-                        if (Swc4jAstNumber.NAN.equals(ident.getSym())) {
+                        if (ISwc4jConstants.NAN.equals(ident.getSym())) {
                             return Optional.of(Swc4jAstNumber.createNaN());
-                        } else if (Swc4jAstNumber.INFINITY.equals(ident.getSym())) {
+                        } else if (ISwc4jConstants.INFINITY.equals(ident.getSym())) {
                             return Optional.of(Swc4jAstNumber.createInfinity(true));
                         }
                         break;

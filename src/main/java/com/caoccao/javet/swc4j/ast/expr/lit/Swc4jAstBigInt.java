@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.constants.ISwc4jConstants;
 import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
@@ -35,7 +36,6 @@ import java.util.Optional;
 public class Swc4jAstBigInt
         extends Swc4jAst
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
-    public static final String BIG_INT_SUFFIX = "n";
     @Jni2RustField(atom = true)
     protected Optional<String> raw;
     @Jni2RustField(ignore = true)
@@ -127,7 +127,7 @@ public class Swc4jAstBigInt
         this.raw = Optional.ofNullable(raw);
         value = StringUtils.isEmpty(raw)
                 ? BigInteger.ZERO
-                : new BigInteger(raw.substring(0, raw.length() - BIG_INT_SUFFIX.length()));
+                : new BigInteger(raw.substring(0, raw.length() - ISwc4jConstants.N.length()));
         return this;
     }
 
@@ -138,7 +138,7 @@ public class Swc4jAstBigInt
 
     public Swc4jAstBigInt setValue(BigInteger value) {
         this.value = AssertionUtils.notNull(value, "Value");
-        raw = Optional.of(value.toString() + BIG_INT_SUFFIX);
+        raw = Optional.of(value.toString() + ISwc4jConstants.N);
         return this;
     }
 

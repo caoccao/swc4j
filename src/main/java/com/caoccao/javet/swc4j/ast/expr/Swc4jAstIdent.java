@@ -18,10 +18,10 @@ package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.constants.ISwc4jConstants;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
@@ -37,8 +37,6 @@ public class Swc4jAstIdent
         implements ISwc4jAstExpr, ISwc4jAstProp, ISwc4jAstTsModuleRef, ISwc4jAstModuleExportName, ISwc4jAstTsEntityName,
         ISwc4jAstPropName, ISwc4jAstTsModuleName, ISwc4jAstJsxObject, ISwc4jAstJsxElementName, ISwc4jAstMemberProp,
         ISwc4jAstSuperProp, ISwc4jAstJsxAttrName, ISwc4jAstTsThisTypeOrIdent, ISwc4jAstTsEnumMemberId {
-    public static final String UNDEFINED = "undefined";
-    protected static final String QUESTION_MARK = "?";
     protected boolean optional;
     @Jni2RustField(atom = true)
     protected String sym;
@@ -58,7 +56,7 @@ public class Swc4jAstIdent
     }
 
     public static Swc4jAstIdent createUndefined() {
-        return create(UNDEFINED);
+        return create(ISwc4jConstants.UNDEFINED);
     }
 
     @Override
@@ -78,12 +76,12 @@ public class Swc4jAstIdent
 
     @Override
     public boolean isInfinity() {
-        return !optional && Swc4jAstNumber.INFINITY.equals(sym);
+        return !optional && ISwc4jConstants.INFINITY.equals(sym);
     }
 
     @Override
     public boolean isNaN() {
-        return !optional && Swc4jAstNumber.NAN.equals(sym);
+        return !optional && ISwc4jConstants.NAN.equals(sym);
     }
 
     @Jni2RustMethod
@@ -93,7 +91,7 @@ public class Swc4jAstIdent
 
     @Override
     public boolean isUndefined() {
-        return !optional && UNDEFINED.equals(sym);
+        return !optional && ISwc4jConstants.UNDEFINED.equals(sym);
     }
 
     @Override
@@ -115,7 +113,7 @@ public class Swc4jAstIdent
     public String toString() {
         StringBuilder sb = new StringBuilder(sym);
         if (optional) {
-            sb.append(QUESTION_MARK);
+            sb.append(ISwc4jConstants.QUESTION_MARK);
         }
         return sb.toString();
     }
