@@ -48,6 +48,9 @@ import java.util.Optional;
 public class Swc4jAstCallExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    public static final String APPLY = "apply";
+    public static final String BIND = "bind";
+    public static final String CALL = "call";
     protected static final Swc4jParseOptions PARSE_OPTIONS = new Swc4jParseOptions()
             .setCaptureAst(true)
             .setMediaType(Swc4jMediaType.JavaScript);
@@ -263,6 +266,10 @@ public class Swc4jAstCallExpr
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeParamInstantiation> getTypeArgs() {
         return typeArgs;
+    }
+
+    public boolean isSpreadPresent() {
+        return args.stream().anyMatch(arg -> arg.getSpread().isPresent());
     }
 
     @Override
