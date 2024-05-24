@@ -5,6 +5,7 @@
 * Added `replaceNode()` to `ISwc4jAst`
 * Added coercion to primitive AST types
 * Added experimental JsFuck decoder
+* Added plugin ES2015 transform spread
 
 ## 0.7.0
 
