@@ -15,7 +15,7 @@
 * [Parse](docs/parse.md)
   * [AST](docs/features/ast.md)
     * [Visitor](docs/features/ast_visitor.md)
-    * Plugin
+    * [Plugin](docs/features/plugin.md)
   * Comments
   * Tokens
 * [Transform](docs/transform.md)
