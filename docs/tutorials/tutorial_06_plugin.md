@@ -34,10 +34,11 @@ There is a built-in plugin `Swc4jPluginVisitors` which holds a list of `ISwc4jAs
 
 ## Write a plugin for Assign Expression
 
-* Define a visitor that swaps the left and right identifiers of an assign expression.
+* Create a plugin host, plugin, and define a visitor that swaps the left and right identifiers of an assign expression.
 
 ```java
-public class AssignExprVisitor extends Swc4jAstVisitor {
+// Create a plugin visitors and add an assign expression visitor.
+Swc4jPluginVisitors pluginVisitors = new Swc4jPluginVisitors().add(new Swc4jAstVisitor() {
     @Override
     public Swc4jAstVisitorResponse visitAssignExpr(Swc4jAstAssignExpr node) {
         Swc4jAstBindingIdent leftBindingIdent = node.getLeft().as(Swc4jAstBindingIdent.class);
@@ -47,16 +48,7 @@ public class AssignExprVisitor extends Swc4jAstVisitor {
         node.setRight(leftIdent);
         return super.visitAssignExpr(node);
     }
-}
-```
-
-* Create a plugin host, plugin, and visitor.
-
-```java
-// Create an assign expression visitor.
-AssignExprVisitor assignExprVisitor = new AssignExprVisitor();
-// Create a plugin visitors and add the assign expression visitor.
-Swc4jPluginVisitors pluginVisitors = new Swc4jPluginVisitors().add(assignExprVisitor);
+});
 // Create a plugin host and add the plugin visitors.
 Swc4jPluginHost pluginHost = new Swc4jPluginHost().add(pluginVisitors);
 ```
@@ -137,7 +129,8 @@ b=a;d=c;
 * Define a visitor that swaps the conditions and alternative conditions of an if statement.
 
 ```java
-public class IfStmtVisitor extends Swc4jAstVisitor {
+// Add an if statement visitor to the plugin visitors.
+pluginVisitors.add(new Swc4jAstVisitor() {
     @Override
     public Swc4jAstVisitorResponse visitIfStmt(Swc4jAstIfStmt node) {
         ISwc4jAstStmt cons = node.getCons().as(ISwc4jAstStmt.class);
@@ -146,16 +139,7 @@ public class IfStmtVisitor extends Swc4jAstVisitor {
         node.setAlt(cons);
         return super.visitIfStmt(node);
     }
-}
-```
-
-* Create and the plugin.
-
-```java
-// Create an if statement visitor.
-IfStmtVisitor ifStmtVisitor = new IfStmtVisitor();
-// Add the if statement visitor to the plugin visitors.
-pluginVisitors.add(ifStmtVisitor);
+});
 ```
 
 * Create an if statement in JavaScript as follows.
