@@ -14,7 +14,7 @@ swc4j provides a plugin system for manipulating the AST during `parse()`, `trans
 
 In SWC, a plugin is usually written in Rust and built into Wasm. In swc4j, we can write plugins in pure Java.
 
-In Babel, a plugin is usually written in JavaScript and there are huge room for Babel to improve its performance. In swc4j, the similar visitor based plugin development experience is provided with a much better performance.
+In Babel, a plugin is usually written in JavaScript and there are huge room for Babel to improve its performance. In swc4j, the similar visitor-based plugin development experience is provided with a much better performance.
 
 ## What is a plugin host
 

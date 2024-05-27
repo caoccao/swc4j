@@ -31,7 +31,7 @@ import com.caoccao.javet.swc4j.plugins.jsfuck.Swc4jPluginHostJsFuckDecoder;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class Tutorial07Decode {
+public class Tutorial08Decode {
     public static void main(String[] args) throws Swc4jCoreException, MalformedURLException, JavetException {
         // Create an instance of swc4j.
         Swc4j swc4j = new Swc4j();
