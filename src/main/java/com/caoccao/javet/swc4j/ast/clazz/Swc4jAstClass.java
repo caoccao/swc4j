@@ -73,6 +73,12 @@ public class Swc4jAstClass
         this.decorators.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstClass create(List<ISwc4jAstClassMember> body) {
+        return new Swc4jAstClass(
+                SimpleList.of(), body, null, false, null,
+                null, SimpleList.of(), Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public List<ISwc4jAstClassMember> getBody() {
         return body;

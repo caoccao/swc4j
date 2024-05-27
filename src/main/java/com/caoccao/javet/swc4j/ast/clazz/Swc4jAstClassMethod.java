@@ -23,7 +23,6 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamDecl;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.jni2rust.*;
@@ -72,6 +71,15 @@ public class Swc4jAstClassMethod
         setOptional(optional);
         setOverride(_override);
         setStatic(_static);
+    }
+
+    public static Swc4jAstClassMethod create(
+            ISwc4jAstPropName key,
+            Swc4jAstFunction function,
+            Swc4jAstMethodKind kind) {
+        return new Swc4jAstClassMethod(
+                key, function, kind, false, null,
+                false, false, false, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod

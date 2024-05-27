@@ -52,6 +52,10 @@ public class Swc4jAstAssignProp
         setValue(value);
     }
 
+    public static Swc4jAstAssignProp create(Swc4jAstIdent key, ISwc4jAstExpr value) {
+        return new Swc4jAstAssignProp(key, value, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(key, value);

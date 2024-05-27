@@ -50,8 +50,9 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                     Swc4jAstIdent.createApply());
             return Swc4jAstCallExpr.create(
                     memberExpr,
-                    Swc4jAstExprOrSpread.create(Swc4jAstNull.create()),
-                    Swc4jAstExprOrSpread.create(innerExpr));
+                    SimpleList.of(
+                            Swc4jAstExprOrSpread.create(Swc4jAstNull.create()),
+                            Swc4jAstExprOrSpread.create(innerExpr)));
         }
         return expr;
     }
@@ -203,8 +204,8 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                 Swc4jAstVarDeclarator varDeclarator = Swc4jAstVarDeclarator.create(
                         Swc4jAstIdent.createDummy(),
                         childMemberExpr.getObj());
-                Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var, varDeclarator);
-                Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create(varDecl, Swc4jAstExprStmt.create(node));
+                Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var, SimpleList.of(varDeclarator));
+                Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create(SimpleList.of(varDecl, Swc4jAstExprStmt.create(node)));
                 stmt.getParent().replaceNode(stmt, blockStmt);
                 childMemberExpr.setObj(Swc4jAstIdent.createDummy());
                 thisArg = Swc4jAstExprOrSpread.create(Swc4jAstIdent.createDummy());
@@ -230,8 +231,9 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
             // ident.apply(null, arg)
             Swc4jAstCallExpr callExpr = Swc4jAstCallExpr.create(
                     memberExpr,
-                    Swc4jAstExprOrSpread.create(Swc4jAstNull.create()),
-                    getConcatNode(node.getArgs().get()));
+                    SimpleList.of(
+                            Swc4jAstExprOrSpread.create(Swc4jAstNull.create()),
+                            getConcatNode(node.getArgs().get())));
             node.getParent().replaceNode(node, callExpr);
         }
         return super.visitNewExpr(node);
@@ -249,9 +251,9 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                 Swc4jAstVarDeclarator varDeclarator = Swc4jAstVarDeclarator.create(
                         Swc4jAstIdent.createDummy(),
                         childMemberExpr.getObj());
-                Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var, varDeclarator);
-                Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create(
-                        varDecl, Swc4jAstExprStmt.create(node.getParent().as(ISwc4jAstExpr.class)));
+                Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var, SimpleList.of(varDeclarator));
+                Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create(SimpleList.of(
+                        varDecl, Swc4jAstExprStmt.create(node.getParent().as(ISwc4jAstExpr.class))));
                 stmt.getParent().replaceNode(stmt, blockStmt);
                 childMemberExpr.setObj(Swc4jAstIdent.createDummy());
                 List<Swc4jAstExprOrSpread> args = node.getArgs();

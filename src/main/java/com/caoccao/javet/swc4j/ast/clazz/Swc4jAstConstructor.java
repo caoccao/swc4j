@@ -62,6 +62,23 @@ public class Swc4jAstConstructor
         this.params.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstConstructor create(ISwc4jAstPropName key) {
+        return create(key, SimpleList.of());
+    }
+
+    public static Swc4jAstConstructor create(
+            ISwc4jAstPropName key,
+            List<ISwc4jAstParamOrTsParamProp> params) {
+        return create(key, params, null);
+    }
+
+    public static Swc4jAstConstructor create(
+            ISwc4jAstPropName key,
+            List<ISwc4jAstParamOrTsParamProp> params,
+            Swc4jAstBlockStmt body) {
+        return new Swc4jAstConstructor(key, params, body, null, false, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;

@@ -78,6 +78,16 @@ public class Swc4jAstAutoAccessor
         this.decorators.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstAutoAccessor create(ISwc4jAstKey key) {
+        return create(key, null);
+    }
+
+    public static Swc4jAstAutoAccessor create(ISwc4jAstKey key, ISwc4jAstExpr value) {
+        return new Swc4jAstAutoAccessor(
+                key, value, null, false, SimpleList.of(),
+                null, false, false, false, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;

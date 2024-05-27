@@ -88,6 +88,17 @@ public class Swc4jAstClassProp
         this.decorators.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstClassProp create(ISwc4jAstPropName key) {
+        return create(key, null);
+    }
+
+    public static Swc4jAstClassProp create(ISwc4jAstPropName key, ISwc4jAstExpr value) {
+        return new Swc4jAstClassProp(
+                key, value, null, false, SimpleList.of(),
+                null, false, false, false, false,
+                false, false, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
