@@ -71,7 +71,15 @@ public class Swc4jAstCallExpr
     }
 
     public static Swc4jAstCallExpr create(ISwc4jAstCallee callee) {
-        return new Swc4jAstCallExpr(callee, SimpleList.of(), null, Swc4jSpan.DUMMY);
+        return create(callee, SimpleList.of());
+    }
+
+    public static Swc4jAstCallExpr create(ISwc4jAstCallee callee, Swc4jAstExprOrSpread... args) {
+        return create(callee, SimpleList.of(args));
+    }
+
+    public static Swc4jAstCallExpr create(ISwc4jAstCallee callee, List<Swc4jAstExprOrSpread> args) {
+        return new Swc4jAstCallExpr(callee, args, null, Swc4jSpan.DUMMY);
     }
 
     @Override

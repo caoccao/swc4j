@@ -30,6 +30,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.constants.ISwc4jConstants;
+import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,11 +48,10 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
             Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(
                     Swc4jAstIdent.createArray(),
                     Swc4jAstIdent.createApply());
-            Swc4jAstCallExpr callExpr = Swc4jAstCallExpr.create(memberExpr);
-            callExpr.getArgs().add(Swc4jAstExprOrSpread.create(Swc4jAstNull.create()));
-            callExpr.getArgs().add(Swc4jAstExprOrSpread.create(innerExpr));
-            callExpr.updateParent();
-            return callExpr;
+            return Swc4jAstCallExpr.create(
+                    memberExpr,
+                    Swc4jAstExprOrSpread.create(Swc4jAstNull.create()),
+                    Swc4jAstExprOrSpread.create(innerExpr));
         }
         return expr;
     }
@@ -87,21 +87,17 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
             }
             // Prepare concat()
             Swc4jAstMemberExpr childMemberExpr = Swc4jAstMemberExpr.create(obj, Swc4jAstIdent.createConcat());
-            Swc4jAstCallExpr childCallExpr = Swc4jAstCallExpr.create(childMemberExpr);
-            Swc4jAstArrayLit objArrayLit = null;
             // Prepare args
+            List<Swc4jAstExprOrSpread> childArgs = SimpleList.of();
+            Swc4jAstArrayLit objArrayLit = null;
             for (int i = startIndex; i < length; i++) {
                 arg = args.get(i);
                 if (arg.getSpread().isPresent()) {
                     if (objArrayLit != null) {
-                        Swc4jAstExprOrSpread childArg = Swc4jAstExprOrSpread.create(objArrayLit);
-                        childArg.setParent(childCallExpr);
-                        childCallExpr.getArgs().add(childArg);
+                        childArgs.add(Swc4jAstExprOrSpread.create(objArrayLit));
                         objArrayLit = null;
                     }
-                    Swc4jAstExprOrSpread childElem = Swc4jAstExprOrSpread.create(convertArguments(arg.getExpr()));
-                    childElem.setParent(childCallExpr);
-                    childCallExpr.getArgs().add(childElem);
+                    childArgs.add(Swc4jAstExprOrSpread.create(convertArguments(arg.getExpr())));
                 } else {
                     if (objArrayLit == null) {
                         objArrayLit = Swc4jAstArrayLit.create();
@@ -112,10 +108,9 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                 }
             }
             if (objArrayLit != null) {
-                Swc4jAstExprOrSpread childArg = Swc4jAstExprOrSpread.create(objArrayLit);
-                childArg.setParent(childCallExpr);
-                childCallExpr.getArgs().add(childArg);
+                childArgs.add(Swc4jAstExprOrSpread.create(objArrayLit));
             }
+            Swc4jAstCallExpr childCallExpr = Swc4jAstCallExpr.create(childMemberExpr, childArgs);
             arg = Swc4jAstExprOrSpread.create(childCallExpr);
         }
         return arg;
@@ -205,16 +200,11 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
             if (callee instanceof Swc4jAstMemberExpr) {
                 Swc4jAstMemberExpr childMemberExpr = callee.as(Swc4jAstMemberExpr.class);
                 ISwc4jAstStmt stmt = node.getParent(ISwc4jAstStmt.class);
-                Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create();
-                Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var);
                 Swc4jAstVarDeclarator varDeclarator = Swc4jAstVarDeclarator.create(
                         Swc4jAstIdent.createDummy(),
                         childMemberExpr.getObj());
-                varDecl.getDecls().add(varDeclarator);
-                varDecl.updateParent();
-                blockStmt.getStmts().add(varDecl);
-                blockStmt.getStmts().add(Swc4jAstExprStmt.create(node));
-                blockStmt.updateParent();
+                Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var, varDeclarator);
+                Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create(varDecl, Swc4jAstExprStmt.create(node));
                 stmt.getParent().replaceNode(stmt, blockStmt);
                 childMemberExpr.setObj(Swc4jAstIdent.createDummy());
                 thisArg = Swc4jAstExprOrSpread.create(Swc4jAstIdent.createDummy());
@@ -224,9 +214,10 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
             List<Swc4jAstExprOrSpread> args = node.getArgs();
             Swc4jAstExprOrSpread arg = getConcatNode(args);
             args.clear();
+            thisArg.setParent(node);
+            arg.setParent(node);
             args.add(thisArg);
             args.add(arg);
-            node.updateParent();
         }
         return super.visitCallExpr(node);
     }
@@ -236,12 +227,11 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
         if (node.isSpreadPresent()) {
             // ident.apply
             Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(node.getCallee(), Swc4jAstIdent.createApply());
-            // ident.apply()
-            Swc4jAstCallExpr callExpr = Swc4jAstCallExpr.create(memberExpr);
             // ident.apply(null, arg)
-            callExpr.getArgs().add(Swc4jAstExprOrSpread.create(Swc4jAstNull.create()));
-            callExpr.getArgs().add(getConcatNode(node.getArgs().get()));
-            callExpr.updateParent();
+            Swc4jAstCallExpr callExpr = Swc4jAstCallExpr.create(
+                    memberExpr,
+                    Swc4jAstExprOrSpread.create(Swc4jAstNull.create()),
+                    getConcatNode(node.getArgs().get()));
             node.getParent().replaceNode(node, callExpr);
         }
         return super.visitNewExpr(node);
@@ -256,24 +246,22 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                 node.setCallee(memberExpr);
                 Swc4jAstMemberExpr childMemberExpr = callee.getBase().as(Swc4jAstMemberExpr.class);
                 ISwc4jAstStmt stmt = node.getParent(ISwc4jAstStmt.class);
-                Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create();
-                Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var);
                 Swc4jAstVarDeclarator varDeclarator = Swc4jAstVarDeclarator.create(
                         Swc4jAstIdent.createDummy(),
                         childMemberExpr.getObj());
-                varDecl.getDecls().add(varDeclarator);
-                varDecl.updateParent();
-                blockStmt.getStmts().add(varDecl);
-                blockStmt.getStmts().add(Swc4jAstExprStmt.create(node.getParent().as(ISwc4jAstExpr.class)));
-                blockStmt.updateParent();
+                Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var, varDeclarator);
+                Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create(
+                        varDecl, Swc4jAstExprStmt.create(node.getParent().as(ISwc4jAstExpr.class)));
                 stmt.getParent().replaceNode(stmt, blockStmt);
                 childMemberExpr.setObj(Swc4jAstIdent.createDummy());
                 List<Swc4jAstExprOrSpread> args = node.getArgs();
                 Swc4jAstExprOrSpread arg = getConcatNode(args);
                 args.clear();
-                args.add(Swc4jAstExprOrSpread.create(Swc4jAstIdent.createDummy()));
+                Swc4jAstExprOrSpread dummyExprOrSpread = Swc4jAstExprOrSpread.create(Swc4jAstIdent.createDummy());
+                dummyExprOrSpread.setParent(node);
+                arg.setParent(node);
+                args.add(dummyExprOrSpread);
                 args.add(arg);
-                node.updateParent();
             }
         }
         return super.visitOptCall(node);

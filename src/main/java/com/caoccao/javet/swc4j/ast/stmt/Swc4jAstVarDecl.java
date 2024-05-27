@@ -59,8 +59,24 @@ public class Swc4jAstVarDecl
         return create(kind, false);
     }
 
+    public static Swc4jAstVarDecl create(Swc4jAstVarDeclKind kind, Swc4jAstVarDeclarator... decls) {
+        return create(kind, false, SimpleList.of(decls));
+    }
+
+    public static Swc4jAstVarDecl create(Swc4jAstVarDeclKind kind, List<Swc4jAstVarDeclarator> decls) {
+        return create(kind, false, decls);
+    }
+
     public static Swc4jAstVarDecl create(Swc4jAstVarDeclKind kind, boolean declare) {
-        return new Swc4jAstVarDecl(kind, declare, SimpleList.of(), Swc4jSpan.DUMMY);
+        return create(kind, declare, SimpleList.of());
+    }
+
+    public static Swc4jAstVarDecl create(Swc4jAstVarDeclKind kind, boolean declare, Swc4jAstVarDeclarator... decls) {
+        return create(kind, declare, SimpleList.of(decls));
+    }
+
+    public static Swc4jAstVarDecl create(Swc4jAstVarDeclKind kind, boolean declare, List<Swc4jAstVarDeclarator> decls) {
+        return new Swc4jAstVarDecl(kind, declare, decls, Swc4jSpan.DUMMY);
     }
 
     @Override

@@ -50,6 +50,10 @@ public class Swc4jAstParam
         this.decorators.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstParam create(ISwc4jAstPat pat) {
+        return new Swc4jAstParam(SimpleList.of(), pat, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(decorators);

@@ -51,6 +51,10 @@ public class Swc4jAstBlockStmt
         return new Swc4jAstBlockStmt(SimpleList.of(), Swc4jSpan.DUMMY);
     }
 
+    public static Swc4jAstBlockStmt create(ISwc4jAstStmt... stmts) {
+        return new Swc4jAstBlockStmt(SimpleList.of(stmts), Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.copyOf(stmts);

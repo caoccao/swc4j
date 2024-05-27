@@ -45,6 +45,10 @@ public class Swc4jAstReturnStmt
         setArg(arg);
     }
 
+    public static Swc4jAstReturnStmt create(ISwc4jAstExpr arg) {
+        return new Swc4jAstReturnStmt(arg, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getArg() {
         return arg;
