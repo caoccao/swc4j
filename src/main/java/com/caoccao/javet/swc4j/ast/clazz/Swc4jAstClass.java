@@ -73,6 +73,10 @@ public class Swc4jAstClass
         this.decorators.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstClass create() {
+        return create(SimpleList.of());
+    }
+
     public static Swc4jAstClass create(List<ISwc4jAstClassMember> body) {
         return new Swc4jAstClass(
                 SimpleList.of(), body, null, false, null,

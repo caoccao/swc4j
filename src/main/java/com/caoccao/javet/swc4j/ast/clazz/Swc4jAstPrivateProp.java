@@ -81,6 +81,17 @@ public class Swc4jAstPrivateProp
         this.decorators.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstPrivateProp create(Swc4jAstPrivateName key) {
+        return create(key, null);
+    }
+
+    public static Swc4jAstPrivateProp create(Swc4jAstPrivateName key, ISwc4jAstExpr value) {
+        return new Swc4jAstPrivateProp(
+                key, value, null, false, SimpleList.of(),
+                null, false, false, false, false,
+                Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;

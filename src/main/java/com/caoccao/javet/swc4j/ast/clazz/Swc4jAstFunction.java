@@ -69,6 +69,27 @@ public class Swc4jAstFunction
         this.params.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstFunction create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstFunction create(List<Swc4jAstParam> params) {
+        return create(params, SimpleList.of());
+    }
+
+    public static Swc4jAstFunction create(List<Swc4jAstParam> params, List<Swc4jAstDecorator> decorators) {
+        return create(params, decorators, null);
+    }
+
+    public static Swc4jAstFunction create(
+            List<Swc4jAstParam> params,
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstBlockStmt body) {
+        return new Swc4jAstFunction(
+                params, decorators, body, false, false,
+                null, null, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<Swc4jAstBlockStmt> getBody() {
         return body;

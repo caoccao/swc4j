@@ -46,6 +46,10 @@ public class Swc4jAstDecorator
         setExpr(expr);
     }
 
+    public static Swc4jAstDecorator create(ISwc4jAstExpr expr) {
+        return new Swc4jAstDecorator(expr, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(expr);

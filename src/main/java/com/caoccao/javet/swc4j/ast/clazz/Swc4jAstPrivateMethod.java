@@ -72,6 +72,15 @@ public class Swc4jAstPrivateMethod
         setStatic(_static);
     }
 
+    public static Swc4jAstPrivateMethod create(
+            Swc4jAstPrivateName key,
+            Swc4jAstFunction function,
+            Swc4jAstMethodKind kind) {
+        return new Swc4jAstPrivateMethod(
+                key, function, kind, false, null,
+                false, false, false, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;

@@ -57,6 +57,18 @@ public class Swc4jAstSetterProp
         setThisParam(thisParam);
     }
 
+    public static Swc4jAstSetterProp create(ISwc4jAstPropName key, ISwc4jAstPat param) {
+        return create(key, null, param, null);
+    }
+
+    public static Swc4jAstSetterProp create(
+            ISwc4jAstPropName key,
+            ISwc4jAstPat thisParam,
+            ISwc4jAstPat param,
+            Swc4jAstBlockStmt body) {
+        return new Swc4jAstSetterProp(key, thisParam, param, body, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<Swc4jAstBlockStmt> getBody() {
         return body;

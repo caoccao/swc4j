@@ -39,6 +39,10 @@ public class Swc4jAstSuper
         super(span);
     }
 
+    public static Swc4jAstSuper create() {
+        return new Swc4jAstSuper(Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;

@@ -46,6 +46,10 @@ public class Swc4jAstStaticBlock
         setBody(body);
     }
 
+    public static Swc4jAstStaticBlock create(Swc4jAstBlockStmt body) {
+        return new Swc4jAstStaticBlock(body, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Swc4jAstBlockStmt getBody() {
         return body;

@@ -54,6 +54,14 @@ public class Swc4jAstGetterProp
         setTypeAnn(typeAnn);
     }
 
+    public static Swc4jAstGetterProp create(ISwc4jAstPropName key) {
+        return create(key, null);
+    }
+
+    public static Swc4jAstGetterProp create(ISwc4jAstPropName key, Swc4jAstBlockStmt body) {
+        return new Swc4jAstGetterProp(key, null, body, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<Swc4jAstBlockStmt> getBody() {
         return body;

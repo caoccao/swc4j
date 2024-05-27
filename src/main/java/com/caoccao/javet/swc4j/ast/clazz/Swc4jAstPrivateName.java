@@ -48,6 +48,10 @@ public class Swc4jAstPrivateName
         setId(id);
     }
 
+    public static Swc4jAstPrivateName create(Swc4jAstIdent id) {
+        return new Swc4jAstPrivateName(id, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(id);

@@ -51,6 +51,10 @@ public class Swc4jAstMethodProp
         setKey(key);
     }
 
+    public static Swc4jAstMethodProp create(ISwc4jAstPropName key, Swc4jAstFunction function) {
+        return new Swc4jAstMethodProp(key, function, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(key, function);
