@@ -12,7 +12,7 @@ In this tutorial, we are going to learn the following.
 
 ## Is it easy to mimic Babel?
 
-Yes, it's easy to mimic the major features that Babel has by implementing the similar visitor-based plugins. Wait, not all features? That's right. Because Babel relies on some additional JavaScript / TypeScript libraries to complete the transformation. swc4j doesn't ship such libraries, so there are a few edge cases not covered. But, we may borrow those Babel libraries in the applications and have the swc4j plugins rely on them to achieve 100% compatibility with Babel.
+Yes, it's easy to mimic the major features that Babel has by implementing similar visitor-based plugins. Wait, not all features? That's right. Because Babel relies on some additional JavaScript / TypeScript libraries to complete the transformation. swc4j doesn't ship such libraries, so there are a few edge cases not covered. But we may borrow those Babel libraries in the applications and have the swc4j plugins rely on them to achieve 100% compatibility with Babel.
 
 ## Arrow Expression Transformation
 
@@ -30,7 +30,7 @@ function(a, b) { return a + b; }
 function(a, b) { return a * b; }
 ```
 
-As there are ~170 AST types in SWC, it could be quite hard to manipulate the AST types at the beginning. No worry, we can visit the [SWC Playground](https://swc.rs/playground) to analyze the source and target AST structures. After getting a general understanding on the AST structure, we may proceed with the plugin development.
+As there are ~170 AST types in SWC, it could be quite hard to manipulate the AST types at the beginning. No worry, we can visit the [SWC Playground](https://swc.rs/playground) to analyze the source and target AST structures. After getting a general understanding of the AST structure, we may proceed with the plugin development.
 
 * Create an arrow expression visitor.
 
@@ -54,7 +54,7 @@ public Swc4jAstFnExpr(
         Swc4jSpan span)
 ```
 
-* The function constructor signature is as follows. There are quite some arguments to be prepared. No worry, let's handle them one by one.
+* The function constructor signature is as follows. There are quite a few arguments to be prepared. No worry, let's handle them one by one.
 
 ```java
 public Swc4jAstFunction(
@@ -183,7 +183,7 @@ public Swc4jAstVisitorResponse visitArrowExpr(Swc4jAstArrowExpr node) {
 }
 ```
 
-* Let's put them together and have some test.
+* Let's put them together and have a test.
 
 ```java
 // Create an instance of swc4j.
@@ -231,7 +231,7 @@ Because there are quite some edge cases not covered.
 
 * `this` from the parent scope is not handled.
 * `arguments` from the parent scope is not handled.
-* Default argument is not handled.
+* The default argument is not handled.
 * ...
 
 ## Conclusion
