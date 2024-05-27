@@ -10,7 +10,7 @@ In this tutorial, we are going to learn the following.
   * Function expression
 * Visualize the AST structure with [SWC Playground](https://swc.rs/playground).
 
-## Is it easy to mimic babel?
+## Is it easy to mimic Babel?
 
 Yes, it's easy to mimic the major features that Babel has by implementing the similar visitor-based plugins. Wait, not all features? That's right. Because Babel relies on some additional JavaScript / TypeScript libraries to complete the transformation. swc4j doesn't ship such libraries, so there are a few edge cases not covered. But, we may borrow those Babel libraries in the applications and have the swc4j plugins rely on them to achieve 100% compatibility with Babel.
 
@@ -236,6 +236,6 @@ Because there are quite some edge cases not covered.
 
 ## Conclusion
 
-In this tutorial we've learned how to write a Babel flavored plugin, how to analyze the AST structure with SWC playground and swc4j AST types.
+In this tutorial we've learned how to write a Babel flavored plugin, how to analyze the AST structure with the SWC playground and swc4j AST types.
 
 The source code of this tutorial is at [here](../../src/test/java/com/caoccao/javet/swc4j/tutorials/Tutorial07MimicBabel.java).
