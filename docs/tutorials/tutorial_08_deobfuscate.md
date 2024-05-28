@@ -186,7 +186,7 @@ public static class DeobfuscatorVisitorV1 extends Swc4jAstVisitor {
 }
 ```
 
-The implementation might be quite a bit complicated. Actually it strictly follows the JavaScript specification, acting as a script execution engine that evaluates the code at AST level.
+The implementation might be quite a bit complicated. Actually, it strictly follows the JavaScript specification, acting as a script execution engine that evaluates the code at AST level.
 
 Let's run the V1.
 
@@ -220,7 +220,7 @@ Let's focus on the first 7 characters `[+!+[]]` to see how visitor V1 works.
 [1]     // Iteration 3
 ```
 
-In the end of the transformation, there are no unary expression any more, but a lot of binary expressions.
+In the end of the transformation, there are no unary expressions any more, but a lot of binary expressions.
 
 ## Version 2: Binary Expression
 
@@ -405,7 +405,7 @@ The output is as follows.
 [1]+(+(1+("true")[3]+[1]+[0]+[0])+[])[2]+[1]
 ```
 
-It shows there are 4 iterations til the transformed code is stable.
+It shows there are 4 iterations till the transformed code is stable.
 
 Let's focus on `[!+[]+!+[]+!+[]]` to see how visitor V2 works.
 
@@ -546,7 +546,7 @@ The output is as follows.
 1+1
 ```
 
-As we can see, `Swc4jPluginHostJsFuckDecoder` delivers the transformed code in 1 pass which means there is no intermediate iterations any more so that the performance is much better.
+As we can see, `Swc4jPluginHostJsFuckDecoder` delivers the transformed code in 1 pass which means there are no intermediate iterations any more so that the performance is much better.
 
 It calls `Swc4jPluginVisitorJsFuckDecoder` internally. And the source code of `Swc4jPluginVisitorJsFuckDecoder` is very simple as follows.
 
