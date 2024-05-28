@@ -115,6 +115,7 @@ public class Swc4jAstMemberExpr
                     String value = obj.as(Swc4jAstStr.class).getValue();
                     switch (expr.getType()) {
                         case Number: {
+                            // 'string'[0] => 's'
                             int index = expr.as(Swc4jAstNumber.class).asInt();
                             if (index >= 0 && index < value.length()) {
                                 value = value.substring(index, index + 1);
@@ -123,6 +124,7 @@ public class Swc4jAstMemberExpr
                             break;
                         }
                         case Str: {
+                            // 'string'['0'] => 's'
                             Swc4jAstStr str = expr.as(Swc4jAstStr.class);
                             if (StringUtils.isDigit(str.getValue())) {
                                 int index = str.asInt();

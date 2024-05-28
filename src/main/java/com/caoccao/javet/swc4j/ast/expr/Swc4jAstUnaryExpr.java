@@ -36,6 +36,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,6 +59,10 @@ public class Swc4jAstUnaryExpr
         setOp(op);
     }
 
+    public static Swc4jAstUnaryExpr create(Swc4jAstUnaryOp op, ISwc4jAstExpr arg) {
+        return new Swc4jAstUnaryExpr(op, arg, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public Optional<ISwc4jAst> eval() {
         ISwc4jAstExpr arg = this.arg.unParenExpr();
@@ -66,10 +71,12 @@ public class Swc4jAstUnaryExpr
                 switch (arg.getType()) {
                     case ArrayLit:
                     case ObjectLit:
+                        // ![] => false, !{} => false
                         return Optional.of(Swc4jAstBool.create(false));
                     case Bool:
                     case Number:
                     case Str:
+                        // !true => false, !false => true, !0 => true, !0.1 => false, !'' => true, !'false' => false
                         return Optional.of(Swc4jAstBool.create(!arg.as(ISwc4jAstCoercionPrimitive.class).asBoolean()));
                     default:
                         break;
@@ -109,30 +116,42 @@ public class Swc4jAstUnaryExpr
             case Plus:
                 switch (arg.getType()) {
                     case ArrayLit:
+                        // +[] => 0, +[1] => 1, +[1,2] => NaN
                         return Optional.of(Swc4jAstNumber.create(arg.as(Swc4jAstArrayLit.class).asDouble()));
                     case Bool:
+                        // +true => 1, +false => 0
                         return Optional.of(Swc4jAstNumber.create(arg.as(ISwc4jAstCoercionPrimitive.class).asInt()));
                     case Ident:
-                        Swc4jAstIdent ident = arg.as(Swc4jAstIdent.class);
-                        if (ISwc4jConstants.NAN.equals(ident.getSym())) {
+                        if (arg.isNaN() || arg.isUndefined()) {
+                            // +NaN => NaN, +undefined => NaN
                             return Optional.of(Swc4jAstNumber.createNaN());
-                        } else if (ISwc4jConstants.INFINITY.equals(ident.getSym())) {
+                        } else if (arg.isInfinity()) {
+                            // +Infinity => Infinity
                             return Optional.of(Swc4jAstNumber.createInfinity(true));
                         }
                         break;
                     case Number:
+                        // +1 => 1, +1e22 => 1e+22
                         Swc4jAstNumber number = arg.as(Swc4jAstNumber.class);
                         return Optional.of(Swc4jAstNumber.create(number.getValue(), number.getRaw().orElse(null)));
                     case ObjectLit:
+                        // +{} => NaN
                         return Optional.of(Swc4jAstNumber.createNaN());
-                    case Str: {
-                        try {
-                            return Optional.of(Swc4jAstNumber.create(
-                                    Double.parseDouble(arg.as(Swc4jAstStr.class).getValue())));
-                        } catch (Throwable t) {
-                            return Optional.of(Swc4jAstNumber.createNaN());
+                    case Str:
+                        // +'  ' => 0, +' 0.1 ' => 0.1, +'a' => NaN
+                        String stringValue = arg.as(Swc4jAstStr.class).getValue().trim();
+                        double doubleValue;
+                        if (StringUtils.isEmpty(stringValue)) {
+                            doubleValue = 0;
+                        } else {
+                            try {
+                                doubleValue = Double.parseDouble(stringValue);
+                            } catch (Throwable t) {
+                                doubleValue = Double.NaN;
+                            }
                         }
-                    }
+                        return Optional.of(Swc4jAstNumber.create(doubleValue));
+
                     default:
                         break;
                 }

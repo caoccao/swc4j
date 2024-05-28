@@ -9,6 +9,7 @@
 * [Tutorial 05: Minify](tutorial_05_minify.md)
 * [Tutorial 06: Plugin](tutorial_06_plugin.md)
 * [Tutorial 07: Mimic Babel](tutorial_07_mimic_babel.md)
+* [Tutorial 08: Deobfuscate](tutorial_08_deobfuscate.md)
 
 ## Sanitizer
 
