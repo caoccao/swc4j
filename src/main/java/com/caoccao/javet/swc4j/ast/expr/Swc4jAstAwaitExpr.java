@@ -47,6 +47,10 @@ public class Swc4jAstAwaitExpr
         setArg(arg);
     }
 
+    public static Swc4jAstAwaitExpr create(ISwc4jAstExpr arg) {
+        return new Swc4jAstAwaitExpr(arg, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstExpr getArg() {
         return arg;

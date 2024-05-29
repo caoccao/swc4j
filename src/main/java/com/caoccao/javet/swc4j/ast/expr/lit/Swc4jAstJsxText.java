@@ -51,6 +51,10 @@ public class Swc4jAstJsxText
         setValue(value);
     }
 
+    public static Swc4jAstJsxText create(String value, String raw) {
+        return new Swc4jAstJsxText(value, raw, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;
@@ -66,14 +70,14 @@ public class Swc4jAstJsxText
         return Swc4jAstType.JsxText;
     }
 
-    @Override
-    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        return false;
-    }
-
     @Jni2RustMethod
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
+        return false;
     }
 
     public Swc4jAstJsxText setRaw(String raw) {

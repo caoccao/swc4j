@@ -156,7 +156,12 @@ public class Swc4jAstBigInt
 
     @Override
     public String toString() {
-        return raw.orElse((sign == Swc4jAstBigIntSign.Minus ? "-" : "") + value.toString());
+        return raw.orElseGet(() -> {
+            String signString = sign == Swc4jAstBigIntSign.Minus
+                    ? Swc4jAstBigIntSign.Minus.getName()
+                    : Swc4jAstBigIntSign.NoSign.getName();
+            return signString + value;
+        });
     }
 
     @Override

@@ -76,7 +76,14 @@ public class Swc4jAstCallExpr
     }
 
     public static Swc4jAstCallExpr create(ISwc4jAstCallee callee, List<Swc4jAstExprOrSpread> args) {
-        return new Swc4jAstCallExpr(callee, args, null, Swc4jSpan.DUMMY);
+        return create(callee, args, null);
+    }
+
+    public static Swc4jAstCallExpr create(
+            ISwc4jAstCallee callee,
+            List<Swc4jAstExprOrSpread> args,
+            Swc4jAstTsTypeParamInstantiation typeArgs) {
+        return new Swc4jAstCallExpr(callee, args, typeArgs, Swc4jSpan.DUMMY);
     }
 
     @Override

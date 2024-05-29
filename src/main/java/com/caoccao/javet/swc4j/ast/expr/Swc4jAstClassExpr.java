@@ -50,6 +50,10 @@ public class Swc4jAstClassExpr
         setIdent(ident);
     }
 
+    public static Swc4jAstClassExpr create(Swc4jAstIdent ident, Swc4jAstClass clazz) {
+        return new Swc4jAstClassExpr(ident, clazz, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(clazz);

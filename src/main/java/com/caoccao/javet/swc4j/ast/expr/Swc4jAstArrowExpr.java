@@ -69,6 +69,39 @@ public class Swc4jAstArrowExpr
         this.params.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstArrowExpr create(
+            List<ISwc4jAstPat> params,
+            ISwc4jAstBlockStmtOrExpr body) {
+        return create(params, body, false, false);
+    }
+
+    public static Swc4jAstArrowExpr create(
+            List<ISwc4jAstPat> params,
+            ISwc4jAstBlockStmtOrExpr body,
+            boolean _async,
+            boolean generator) {
+        return create(params, body, _async, generator, null);
+    }
+
+    public static Swc4jAstArrowExpr create(
+            List<ISwc4jAstPat> params,
+            ISwc4jAstBlockStmtOrExpr body,
+            boolean _async,
+            boolean generator,
+            Swc4jAstTsTypeParamDecl typeParams) {
+        return create(params, body, _async, generator, typeParams, null);
+    }
+
+    public static Swc4jAstArrowExpr create(
+            List<ISwc4jAstPat> params,
+            ISwc4jAstBlockStmtOrExpr body,
+            boolean _async,
+            boolean generator,
+            Swc4jAstTsTypeParamDecl typeParams,
+            Swc4jAstTsTypeAnn returnType) {
+        return new Swc4jAstArrowExpr(params, body, _async, generator, typeParams, returnType, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstBlockStmtOrExpr getBody() {
         return body;

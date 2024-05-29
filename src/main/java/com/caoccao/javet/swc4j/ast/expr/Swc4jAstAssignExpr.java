@@ -55,6 +55,13 @@ public class Swc4jAstAssignExpr
         setRight(right);
     }
 
+    public static Swc4jAstAssignExpr create(
+            Swc4jAstAssignOp op,
+            ISwc4jAstAssignTarget left,
+            ISwc4jAstExpr right) {
+        return new Swc4jAstAssignExpr(op, left, right, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(left, right);

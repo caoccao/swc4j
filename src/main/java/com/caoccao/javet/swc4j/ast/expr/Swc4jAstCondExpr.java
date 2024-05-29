@@ -55,6 +55,10 @@ public class Swc4jAstCondExpr
         setTest(test);
     }
 
+    public static Swc4jAstCondExpr create(ISwc4jAstExpr test, ISwc4jAstExpr cons, ISwc4jAstExpr alt) {
+        return new Swc4jAstCondExpr(test, cons, alt, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstExpr getAlt() {
         return alt;

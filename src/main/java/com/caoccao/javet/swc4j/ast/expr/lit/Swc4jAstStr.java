@@ -50,7 +50,11 @@ public class Swc4jAstStr
     }
 
     public static Swc4jAstStr create(String value) {
-        return new Swc4jAstStr(value, "\"" + value + "\"", Swc4jSpan.DUMMY);
+        return create(value, "\"" + value + "\"");
+    }
+
+    public static Swc4jAstStr create(String value, String raw) {
+        return new Swc4jAstStr(value, raw, Swc4jSpan.DUMMY);
     }
 
     @Override

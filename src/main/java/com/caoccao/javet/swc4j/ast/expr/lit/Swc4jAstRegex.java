@@ -29,6 +29,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.util.List;
 
@@ -56,7 +57,7 @@ public class Swc4jAstRegex
     }
 
     public static Swc4jAstRegex create(String exp) {
-        return create(exp, "");
+        return create(exp, StringUtils.EMPTY);
     }
 
     public static Swc4jAstRegex create(String exp, String flags) {

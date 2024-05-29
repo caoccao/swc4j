@@ -26,6 +26,7 @@ import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
+import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +49,11 @@ public class Swc4jAstExprOrSpread
     }
 
     public static Swc4jAstExprOrSpread create(ISwc4jAstExpr expr) {
-        return new Swc4jAstExprOrSpread(null, expr, Swc4jSpan.DUMMY);
+        return create(null, expr);
+    }
+
+    public static Swc4jAstExprOrSpread create(Swc4jSpan spread, ISwc4jAstExpr expr) {
+        return new Swc4jAstExprOrSpread(spread, expr, Swc4jSpan.DUMMY);
     }
 
     @Override
@@ -93,7 +98,7 @@ public class Swc4jAstExprOrSpread
 
     @Override
     public String toString() {
-        String str = spread.map(span -> "...").orElse("");
+        String str = spread.map(span -> "...").orElse(StringUtils.EMPTY);
         str += expr.toString();
         return str;
     }
