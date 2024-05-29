@@ -58,6 +58,23 @@ public class Swc4jAstJsxElement
         this.children.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstJsxElement create(Swc4jAstJsxOpeningElement opening) {
+        return create(opening, SimpleList.of());
+    }
+
+    public static Swc4jAstJsxElement create(
+            Swc4jAstJsxOpeningElement opening,
+            List<ISwc4jAstJsxElementChild> children) {
+        return create(opening, children, null);
+    }
+
+    public static Swc4jAstJsxElement create(
+            Swc4jAstJsxOpeningElement opening,
+            List<ISwc4jAstJsxElementChild> children,
+            Swc4jAstJsxClosingElement closing) {
+        return new Swc4jAstJsxElement(opening, children, closing, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(children);

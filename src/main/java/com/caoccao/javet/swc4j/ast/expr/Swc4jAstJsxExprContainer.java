@@ -44,6 +44,10 @@ public class Swc4jAstJsxExprContainer
         setExpr(expr);
     }
 
+    public static Swc4jAstJsxExprContainer create(ISwc4jAstJsxExpr expr) {
+        return new Swc4jAstJsxExprContainer(expr, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(expr);

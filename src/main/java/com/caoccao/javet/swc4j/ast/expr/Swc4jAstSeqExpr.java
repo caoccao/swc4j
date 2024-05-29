@@ -49,6 +49,10 @@ public class Swc4jAstSeqExpr
         this.exprs.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstSeqExpr create(List<ISwc4jAstExpr> exprs) {
+        return new Swc4jAstSeqExpr(exprs, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.copyOf(exprs);

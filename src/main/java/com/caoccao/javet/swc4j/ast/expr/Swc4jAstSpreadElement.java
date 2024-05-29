@@ -52,6 +52,14 @@ public class Swc4jAstSpreadElement
         setExpr(expr);
     }
 
+    public static Swc4jAstSpreadElement create(ISwc4jAstExpr expr) {
+        return create(Swc4jSpan.DUMMY, expr);
+    }
+
+    public static Swc4jAstSpreadElement create(Swc4jSpan dot3Token, ISwc4jAstExpr expr) {
+        return new Swc4jAstSpreadElement(dot3Token, expr, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(expr);

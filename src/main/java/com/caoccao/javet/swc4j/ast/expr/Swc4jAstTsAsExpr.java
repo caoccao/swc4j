@@ -53,6 +53,10 @@ public class Swc4jAstTsAsExpr
         setTypeAnn(typeAnn);
     }
 
+    public static Swc4jAstTsAsExpr create(ISwc4jAstExpr expr, ISwc4jAstTsType typeAnn) {
+        return new Swc4jAstTsAsExpr(expr, typeAnn, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(expr, typeAnn);

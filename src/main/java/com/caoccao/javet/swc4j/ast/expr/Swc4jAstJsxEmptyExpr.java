@@ -40,6 +40,10 @@ public class Swc4jAstJsxEmptyExpr
         super(span);
     }
 
+    public static Swc4jAstJsxEmptyExpr create() {
+        return new Swc4jAstJsxEmptyExpr(Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;

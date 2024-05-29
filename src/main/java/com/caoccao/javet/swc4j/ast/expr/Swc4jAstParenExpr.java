@@ -48,6 +48,10 @@ public class Swc4jAstParenExpr
         setExpr(expr);
     }
 
+    public static Swc4jAstParenExpr create(ISwc4jAstExpr expr) {
+        return new Swc4jAstParenExpr(expr, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(expr);

@@ -53,6 +53,23 @@ public class Swc4jAstNewExpr
         setTypeArgs(typeArgs);
     }
 
+    public static Swc4jAstNewExpr create(ISwc4jAstExpr callee) {
+        return create(callee, null);
+    }
+
+    public static Swc4jAstNewExpr create(
+            ISwc4jAstExpr callee,
+            List<Swc4jAstExprOrSpread> args) {
+        return create(callee, args, null);
+    }
+
+    public static Swc4jAstNewExpr create(
+            ISwc4jAstExpr callee,
+            List<Swc4jAstExprOrSpread> args,
+            Swc4jAstTsTypeParamInstantiation typeArgs) {
+        return new Swc4jAstNewExpr(callee, args, typeArgs, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<List<Swc4jAstExprOrSpread>> getArgs() {
         return args;
@@ -110,7 +127,7 @@ public class Swc4jAstNewExpr
     }
 
     public Swc4jAstNewExpr setArgs(List<Swc4jAstExprOrSpread> args) {
-        this.args = Optional.ofNullable(args).map(SimpleList::immutableCopyOf);
+        this.args = Optional.ofNullable(args);
         this.args.ifPresent(nodes -> nodes.forEach(node -> node.setParent(this)));
         return this;
     }

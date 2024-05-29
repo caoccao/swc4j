@@ -52,6 +52,14 @@ public class Swc4jAstOptChainExpr
         setOptional(optional);
     }
 
+    public static Swc4jAstOptChainExpr create(ISwc4jAstOptChainBase base) {
+        return create(false, base);
+    }
+
+    public static Swc4jAstOptChainExpr create(boolean optional, ISwc4jAstOptChainBase base) {
+        return new Swc4jAstOptChainExpr(optional, base, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstOptChainBase getBase() {
         return base;

@@ -52,7 +52,11 @@ public class Swc4jAstIdent
     }
 
     public static Swc4jAstIdent create(String sym) {
-        return new Swc4jAstIdent(sym, false, Swc4jSpan.DUMMY);
+        return create(sym, false);
+    }
+
+    public static Swc4jAstIdent create(String sym, boolean optional) {
+        return new Swc4jAstIdent(sym, optional, Swc4jSpan.DUMMY);
     }
 
     public static Swc4jAstIdent createApply() {

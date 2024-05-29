@@ -50,6 +50,10 @@ public class Swc4jAstJsxNamespacedName
         setNs(ns);
     }
 
+    public static Swc4jAstJsxNamespacedName create(Swc4jAstIdent ns, Swc4jAstIdent name) {
+        return new Swc4jAstJsxNamespacedName(ns, name, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(ns, name);

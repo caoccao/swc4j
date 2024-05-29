@@ -47,6 +47,10 @@ public class Swc4jAstTsConstAssertion
         setExpr(expr);
     }
 
+    public static Swc4jAstTsConstAssertion create(ISwc4jAstExpr expr) {
+        return new Swc4jAstTsConstAssertion(expr, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(expr);

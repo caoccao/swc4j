@@ -50,6 +50,14 @@ public class Swc4jAstFnExpr
         setIdent(ident);
     }
 
+    public static Swc4jAstFnExpr create(Swc4jAstFunction function) {
+        return create(null, function);
+    }
+
+    public static Swc4jAstFnExpr create(Swc4jAstIdent ident, Swc4jAstFunction function) {
+        return new Swc4jAstFnExpr(ident, function, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(function);

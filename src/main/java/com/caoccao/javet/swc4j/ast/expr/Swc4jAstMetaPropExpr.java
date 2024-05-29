@@ -45,6 +45,10 @@ public class Swc4jAstMetaPropExpr
         setKind(kind);
     }
 
+    public static Swc4jAstMetaPropExpr create(Swc4jAstMetaPropKind kind) {
+        return new Swc4jAstMetaPropExpr(kind, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;

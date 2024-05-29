@@ -20,8 +20,6 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
-import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeAnn;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -56,6 +54,17 @@ public class Swc4jAstTaggedTpl
         setTypeParams(typeParams);
     }
 
+    public static Swc4jAstTaggedTpl create(ISwc4jAstExpr tag, Swc4jAstTpl tpl) {
+        return create(tag, null, tpl);
+    }
+
+    public static Swc4jAstTaggedTpl create(
+            ISwc4jAstExpr tag,
+            Swc4jAstTsTypeParamInstantiation typeParams,
+            Swc4jAstTpl tpl) {
+        return new Swc4jAstTaggedTpl(tag, typeParams, tpl, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(tag, tpl);
@@ -78,6 +87,11 @@ public class Swc4jAstTaggedTpl
         return Swc4jAstType.TaggedTpl;
     }
 
+    @Jni2RustMethod
+    public Optional<Swc4jAstTsTypeParamInstantiation> getTypeParams() {
+        return typeParams;
+    }
+
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
         if (tag == oldNode && newNode instanceof ISwc4jAstExpr) {
@@ -93,11 +107,6 @@ public class Swc4jAstTaggedTpl
             return true;
         }
         return false;
-    }
-
-    @Jni2RustMethod
-    public Optional<Swc4jAstTsTypeParamInstantiation> getTypeParams() {
-        return typeParams;
     }
 
     public Swc4jAstTaggedTpl setTag(ISwc4jAstExpr tag) {

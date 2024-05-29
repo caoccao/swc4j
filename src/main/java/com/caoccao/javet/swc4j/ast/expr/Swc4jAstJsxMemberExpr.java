@@ -50,6 +50,10 @@ public class Swc4jAstJsxMemberExpr
         setProp(prop);
     }
 
+    public static Swc4jAstJsxMemberExpr create(ISwc4jAstJsxObject obj, Swc4jAstIdent prop) {
+        return new Swc4jAstJsxMemberExpr(obj, prop, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(obj, prop);

@@ -54,6 +54,14 @@ public class Swc4jAstUpdateExpr
         setPrefix(prefix);
     }
 
+    public static Swc4jAstUpdateExpr create(Swc4jAstUpdateOp op, ISwc4jAstExpr arg) {
+        return create(op, false, arg);
+    }
+
+    public static Swc4jAstUpdateExpr create(Swc4jAstUpdateOp op, boolean prefix, ISwc4jAstExpr arg) {
+        return new Swc4jAstUpdateExpr(op, prefix, arg, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstExpr getArg() {
         return arg;

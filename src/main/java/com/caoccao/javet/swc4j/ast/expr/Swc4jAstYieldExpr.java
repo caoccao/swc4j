@@ -47,6 +47,18 @@ public class Swc4jAstYieldExpr
         setDelegate(delegate);
     }
 
+    public static Swc4jAstYieldExpr create() {
+        return create(null);
+    }
+
+    public static Swc4jAstYieldExpr create(ISwc4jAstExpr arg) {
+        return create(arg, false);
+    }
+
+    public static Swc4jAstYieldExpr create(ISwc4jAstExpr arg, boolean delegate) {
+        return new Swc4jAstYieldExpr(arg, delegate, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<ISwc4jAstExpr> getArg() {
         return arg;

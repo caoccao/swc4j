@@ -51,6 +51,10 @@ public class Swc4jAstSuperPropExpr
         setProp(prop);
     }
 
+    public static Swc4jAstSuperPropExpr create(Swc4jAstSuper obj, ISwc4jAstSuperProp prop) {
+        return new Swc4jAstSuperPropExpr(obj, prop, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(obj, prop);

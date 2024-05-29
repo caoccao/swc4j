@@ -48,6 +48,10 @@ public class Swc4jAstJsxSpreadChild
         setExpr(expr);
     }
 
+    public static Swc4jAstJsxSpreadChild create(ISwc4jAstExpr expr) {
+        return new Swc4jAstJsxSpreadChild(expr, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(expr);

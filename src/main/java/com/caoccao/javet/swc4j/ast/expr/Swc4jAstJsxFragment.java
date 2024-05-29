@@ -56,6 +56,23 @@ public class Swc4jAstJsxFragment
         this.children.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstJsxFragment create(Swc4jAstJsxOpeningFragment opening) {
+        return create(opening, SimpleList.of());
+    }
+
+    public static Swc4jAstJsxFragment create(
+            Swc4jAstJsxOpeningFragment opening,
+            List<ISwc4jAstJsxElementChild> children) {
+        return create(opening, children, null);
+    }
+
+    public static Swc4jAstJsxFragment create(
+            Swc4jAstJsxOpeningFragment opening,
+            List<ISwc4jAstJsxElementChild> children,
+            Swc4jAstJsxClosingFragment closing) {
+        return new Swc4jAstJsxFragment(opening, children, closing, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(children);

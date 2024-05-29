@@ -53,6 +53,18 @@ public class Swc4jAstTpl
         this.quasis.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTpl create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstTpl create(List<ISwc4jAstExpr> exprs) {
+        return create(exprs, SimpleList.of());
+    }
+
+    public static Swc4jAstTpl create(List<ISwc4jAstExpr> exprs, List<Swc4jAstTplElement> quasis) {
+        return new Swc4jAstTpl(exprs, quasis, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(exprs);

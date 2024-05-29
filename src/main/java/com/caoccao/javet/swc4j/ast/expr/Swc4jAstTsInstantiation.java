@@ -53,6 +53,10 @@ public class Swc4jAstTsInstantiation
         setTypeArgs(typeArgs);
     }
 
+    public static Swc4jAstTsInstantiation create(ISwc4jAstExpr expr, Swc4jAstTsTypeParamInstantiation typeArgs) {
+        return new Swc4jAstTsInstantiation(expr, typeArgs, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(expr, typeArgs);

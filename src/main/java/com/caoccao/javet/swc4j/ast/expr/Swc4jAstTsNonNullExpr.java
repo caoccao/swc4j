@@ -48,6 +48,10 @@ public class Swc4jAstTsNonNullExpr
         setExpr(expr);
     }
 
+    public static Swc4jAstTsNonNullExpr create(ISwc4jAstExpr expr) {
+        return new Swc4jAstTsNonNullExpr(expr, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(expr);
