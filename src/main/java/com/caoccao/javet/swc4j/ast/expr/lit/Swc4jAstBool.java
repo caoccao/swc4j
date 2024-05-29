@@ -19,8 +19,8 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstCoercionPrimitive;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsLit;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -43,6 +43,10 @@ public class Swc4jAstBool
             Swc4jSpan span) {
         super(span);
         setValue(value);
+    }
+
+    public static Swc4jAstBool create() {
+        return create(false);
     }
 
     public static Swc4jAstBool create(boolean value) {

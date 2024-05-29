@@ -30,7 +30,10 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.*;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
@@ -112,14 +115,10 @@ public class Swc4jAstArrayLit
     }
 
     public static Swc4jAstArrayLit create() {
-        return new Swc4jAstArrayLit(SimpleList.of(), Swc4jSpan.DUMMY);
+        return create(SimpleList.of());
     }
 
-    public static Swc4jAstArrayLit create(List<String> list) {
-        List<Swc4jAstExprOrSpread> elems = new ArrayList<>();
-        if (list != null && !list.isEmpty()) {
-            list.forEach(str -> elems.add(str == null ? null : Swc4jAstExprOrSpread.create(Swc4jAstStr.create(str))));
-        }
+    public static Swc4jAstArrayLit create(List<Swc4jAstExprOrSpread> elems) {
         return new Swc4jAstArrayLit(elems, Swc4jSpan.DUMMY);
     }
 

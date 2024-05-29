@@ -56,9 +56,7 @@ public class Swc4jAstMemberExpr
         setProp(prop);
     }
 
-    public static Swc4jAstMemberExpr create(
-            ISwc4jAstExpr obj,
-            ISwc4jAstMemberProp prop) {
+    public static Swc4jAstMemberExpr create(ISwc4jAstExpr obj, ISwc4jAstMemberProp prop) {
         return new Swc4jAstMemberExpr(obj, prop, Swc4jSpan.DUMMY);
     }
 
@@ -135,6 +133,8 @@ public class Swc4jAstMemberExpr
                             }
                             break;
                         }
+                        default:
+                            break;
                     }
                 }
                 break;

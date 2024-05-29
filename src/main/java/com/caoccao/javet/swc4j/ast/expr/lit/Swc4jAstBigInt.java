@@ -53,6 +53,18 @@ public class Swc4jAstBigInt
         setSign(sign);
     }
 
+    public static Swc4jAstBigInt create() {
+        return create(Swc4jAstBigIntSign.NoSign, null);
+    }
+
+    public static Swc4jAstBigInt create(String raw) {
+        return create(Swc4jAstBigIntSign.Plus, raw);
+    }
+
+    public static Swc4jAstBigInt create(Swc4jAstBigIntSign sign, String raw) {
+        return new Swc4jAstBigInt(sign, raw, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public boolean asBoolean() {
         return !BigInteger.ZERO.equals(value);

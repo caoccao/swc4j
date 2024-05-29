@@ -160,6 +160,7 @@ public class Tutorial08Deobfuscate {
                                 }
                             }
                             newNode = Optional.of(Swc4jAstNumber.create(doubleValue));
+                            break;
                         default:
                             break;
                     }
@@ -355,6 +356,8 @@ public class Tutorial08Deobfuscate {
                                 }
                                 break;
                             }
+                            default:
+                                break;
                         }
                     }
                     break;

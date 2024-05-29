@@ -61,6 +61,10 @@ public class Swc4jAstBinExpr
         setRight(right);
     }
 
+    public static Swc4jAstBinExpr create(Swc4jAstBinaryOp op, ISwc4jAstExpr left, ISwc4jAstExpr right) {
+        return new Swc4jAstBinExpr(op, left, right, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public Optional<ISwc4jAst> eval() {
         ISwc4jAstExpr left = this.left.unParenExpr();
