@@ -56,6 +56,31 @@ public class Swc4jAstJsxOpeningElement
         this.attrs.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstJsxOpeningElement create(ISwc4jAstJsxElementName name) {
+        return create(name, SimpleList.of());
+    }
+
+    public static Swc4jAstJsxOpeningElement create(
+            ISwc4jAstJsxElementName name,
+            List<ISwc4jAstJsxAttrOrSpread> attrs) {
+        return create(name, attrs, false);
+    }
+
+    public static Swc4jAstJsxOpeningElement create(
+            ISwc4jAstJsxElementName name,
+            List<ISwc4jAstJsxAttrOrSpread> attrs,
+            boolean selfClosing) {
+        return create(name, attrs, selfClosing, null);
+    }
+
+    public static Swc4jAstJsxOpeningElement create(
+            ISwc4jAstJsxElementName name,
+            List<ISwc4jAstJsxAttrOrSpread> attrs,
+            boolean selfClosing,
+            Swc4jAstTsTypeParamInstantiation typeArgs) {
+        return new Swc4jAstJsxOpeningElement(name, attrs, selfClosing, typeArgs, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public List<ISwc4jAstJsxAttrOrSpread> getAttrs() {
         return attrs;

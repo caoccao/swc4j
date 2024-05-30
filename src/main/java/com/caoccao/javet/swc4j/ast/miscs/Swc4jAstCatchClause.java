@@ -50,6 +50,14 @@ public class Swc4jAstCatchClause
         setParam(param);
     }
 
+    public static Swc4jAstCatchClause create(Swc4jAstBlockStmt body) {
+        return create(null, body);
+    }
+
+    public static Swc4jAstCatchClause create(ISwc4jAstPat param, Swc4jAstBlockStmt body) {
+        return new Swc4jAstCatchClause(param, body, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Swc4jAstBlockStmt getBody() {
         return body;

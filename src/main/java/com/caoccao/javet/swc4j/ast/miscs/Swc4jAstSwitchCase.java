@@ -49,6 +49,18 @@ public class Swc4jAstSwitchCase
         this.cons.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstSwitchCase create() {
+        return create(null);
+    }
+
+    public static Swc4jAstSwitchCase create(ISwc4jAstExpr test) {
+        return create(test, SimpleList.of());
+    }
+
+    public static Swc4jAstSwitchCase create(ISwc4jAstExpr test, List<ISwc4jAstStmt> cons) {
+        return new Swc4jAstSwitchCase(test, cons, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(cons);

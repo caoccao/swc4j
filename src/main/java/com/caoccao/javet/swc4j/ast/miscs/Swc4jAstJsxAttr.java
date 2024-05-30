@@ -52,6 +52,14 @@ public class Swc4jAstJsxAttr
         setValue(value);
     }
 
+    public static Swc4jAstJsxAttr create(ISwc4jAstJsxAttrName name) {
+        return create(name, null);
+    }
+
+    public static Swc4jAstJsxAttr create(ISwc4jAstJsxAttrName name, ISwc4jAstJsxAttrValue value) {
+        return new Swc4jAstJsxAttr(name, value, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(name);

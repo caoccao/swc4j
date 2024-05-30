@@ -49,6 +49,14 @@ public class Swc4jAstTplElement
         setTail(tail);
     }
 
+    public static Swc4jAstTplElement create(boolean tail, String raw) {
+        return create(tail, null, raw);
+    }
+
+    public static Swc4jAstTplElement create(boolean tail, String cooked, String raw) {
+        return new Swc4jAstTplElement(tail, cooked, raw, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;

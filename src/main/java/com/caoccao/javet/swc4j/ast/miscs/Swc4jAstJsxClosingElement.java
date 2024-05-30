@@ -44,6 +44,10 @@ public class Swc4jAstJsxClosingElement
         setName(name);
     }
 
+    public static Swc4jAstJsxClosingElement create(ISwc4jAstJsxElementName name) {
+        return new Swc4jAstJsxClosingElement(name, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(name);

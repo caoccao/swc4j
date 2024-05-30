@@ -42,6 +42,7 @@ public class Swc4jAstOptCall
     protected ISwc4jAstExpr callee;
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
+
     @Jni2RustMethod
     public Swc4jAstOptCall(
             ISwc4jAstExpr callee,
@@ -53,6 +54,21 @@ public class Swc4jAstOptCall
         setTypeArgs(typeArgs);
         this.args = AssertionUtils.notNull(args, "Args");
         this.args.forEach(node -> node.setParent(this));
+    }
+
+    public static Swc4jAstOptCall create(ISwc4jAstExpr callee) {
+        return create(callee, SimpleList.of());
+    }
+
+    public static Swc4jAstOptCall create(ISwc4jAstExpr callee, List<Swc4jAstExprOrSpread> args) {
+        return create(callee, args, null);
+    }
+
+    public static Swc4jAstOptCall create(
+            ISwc4jAstExpr callee,
+            List<Swc4jAstExprOrSpread> args,
+            Swc4jAstTsTypeParamInstantiation typeArgs) {
+        return new Swc4jAstOptCall(callee, args, typeArgs, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod

@@ -37,6 +37,10 @@ public class Swc4jAstJsxClosingFragment
         super(span);
     }
 
+    public static Swc4jAstJsxClosingFragment create() {
+        return new Swc4jAstJsxClosingFragment(Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;

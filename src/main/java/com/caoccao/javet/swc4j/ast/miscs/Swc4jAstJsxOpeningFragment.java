@@ -37,6 +37,10 @@ public class Swc4jAstJsxOpeningFragment
         super(span);
     }
 
+    public static Swc4jAstJsxOpeningFragment create() {
+        return new Swc4jAstJsxOpeningFragment(Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;
