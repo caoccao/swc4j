@@ -46,6 +46,10 @@ public class Swc4jAstImportStarAsSpecifier
         setLocal(local);
     }
 
+    public static Swc4jAstImportStarAsSpecifier create(Swc4jAstIdent local) {
+        return new Swc4jAstImportStarAsSpecifier(local, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(local);

@@ -59,6 +59,33 @@ public class Swc4jAstNamedExport
         this.specifiers.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstNamedExport create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstNamedExport create(List<ISwc4jAstExportSpecifier> specifiers) {
+        return create(specifiers, null);
+    }
+
+    public static Swc4jAstNamedExport create(List<ISwc4jAstExportSpecifier> specifiers, Swc4jAstStr src) {
+        return create(specifiers, src, false);
+    }
+
+    public static Swc4jAstNamedExport create(
+            List<ISwc4jAstExportSpecifier> specifiers,
+            Swc4jAstStr src,
+            boolean typeOnly) {
+        return create(specifiers, src, typeOnly, null);
+    }
+
+    public static Swc4jAstNamedExport create(
+            List<ISwc4jAstExportSpecifier> specifiers,
+            Swc4jAstStr src,
+            boolean typeOnly,
+            Swc4jAstObjectLit with) {
+        return new Swc4jAstNamedExport(specifiers, src, typeOnly, with, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(specifiers);

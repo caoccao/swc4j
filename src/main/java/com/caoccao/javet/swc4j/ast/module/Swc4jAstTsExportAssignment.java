@@ -48,6 +48,10 @@ public class Swc4jAstTsExportAssignment
         setExpr(expr);
     }
 
+    public static Swc4jAstTsExportAssignment create(ISwc4jAstExpr expr) {
+        return new Swc4jAstTsExportAssignment(expr, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(expr);

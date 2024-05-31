@@ -46,6 +46,10 @@ public class Swc4jAstTsNamespaceExportDecl
         setId(id);
     }
 
+    public static Swc4jAstTsNamespaceExportDecl create(Swc4jAstIdent id) {
+        return new Swc4jAstTsNamespaceExportDecl(id, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(id);

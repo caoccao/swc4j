@@ -46,6 +46,10 @@ public class Swc4jAstTsExternalModuleRef
         setExpr(expr);
     }
 
+    public static Swc4jAstTsExternalModuleRef create(Swc4jAstStr expr) {
+        return new Swc4jAstTsExternalModuleRef(expr, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(expr);

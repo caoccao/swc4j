@@ -57,6 +57,27 @@ public class Swc4jAstTsNamespaceDecl
         setId(id);
     }
 
+    public static Swc4jAstTsNamespaceDecl create(
+            Swc4jAstIdent id,
+            ISwc4jAstTsNamespaceBody body) {
+        return create(false, id, body);
+    }
+
+    public static Swc4jAstTsNamespaceDecl create(
+            boolean declare,
+            Swc4jAstIdent id,
+            ISwc4jAstTsNamespaceBody body) {
+        return create(declare, false, id, body);
+    }
+
+    public static Swc4jAstTsNamespaceDecl create(
+            boolean declare,
+            boolean global,
+            Swc4jAstIdent id,
+            ISwc4jAstTsNamespaceBody body) {
+        return new Swc4jAstTsNamespaceDecl(declare, global, id, body, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstTsNamespaceBody getBody() {
         return body;
