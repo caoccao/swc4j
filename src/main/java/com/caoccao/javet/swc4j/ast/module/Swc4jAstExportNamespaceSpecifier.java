@@ -46,6 +46,10 @@ public class Swc4jAstExportNamespaceSpecifier
         setName(name);
     }
 
+    public static Swc4jAstExportNamespaceSpecifier create(ISwc4jAstModuleExportName name) {
+        return new Swc4jAstExportNamespaceSpecifier(name, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(name);

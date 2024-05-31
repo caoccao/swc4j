@@ -52,6 +52,23 @@ public class Swc4jAstExportNamedSpecifier
         setTypeOnly(typeOnly);
     }
 
+    public static Swc4jAstExportNamedSpecifier create(ISwc4jAstModuleExportName orig) {
+        return create(orig, null);
+    }
+
+    public static Swc4jAstExportNamedSpecifier create(
+            ISwc4jAstModuleExportName orig,
+            ISwc4jAstModuleExportName exported) {
+        return create(orig, exported, false);
+    }
+
+    public static Swc4jAstExportNamedSpecifier create(
+            ISwc4jAstModuleExportName orig,
+            ISwc4jAstModuleExportName exported,
+            boolean typeOnly) {
+        return new Swc4jAstExportNamedSpecifier(orig, exported, typeOnly, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(orig);

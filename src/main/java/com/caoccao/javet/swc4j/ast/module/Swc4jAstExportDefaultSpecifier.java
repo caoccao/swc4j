@@ -47,6 +47,10 @@ public class Swc4jAstExportDefaultSpecifier
         setExported(exported);
     }
 
+    public static Swc4jAstExportDefaultSpecifier create(Swc4jAstIdent exported) {
+        return new Swc4jAstExportDefaultSpecifier(exported, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(exported);

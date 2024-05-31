@@ -45,6 +45,10 @@ public class Swc4jAstImport
         setPhase(phase);
     }
 
+    public static Swc4jAstImport create(Swc4jAstImportPhase phase) {
+        return new Swc4jAstImport(phase, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;

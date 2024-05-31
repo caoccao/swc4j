@@ -46,6 +46,10 @@ public class Swc4jAstExportDefaultDecl
         setDecl(decl);
     }
 
+    public static Swc4jAstExportDefaultDecl create(ISwc4jAstDefaultDecl decl) {
+        return new Swc4jAstExportDefaultDecl(decl, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(decl);

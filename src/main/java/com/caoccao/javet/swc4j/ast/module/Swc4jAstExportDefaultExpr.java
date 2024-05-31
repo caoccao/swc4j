@@ -48,6 +48,10 @@ public class Swc4jAstExportDefaultExpr
         setExpr(expr);
     }
 
+    public static Swc4jAstExportDefaultExpr create(ISwc4jAstExpr expr) {
+        return new Swc4jAstExportDefaultExpr(expr, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(expr);

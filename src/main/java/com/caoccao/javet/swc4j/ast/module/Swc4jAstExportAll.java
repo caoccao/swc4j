@@ -54,6 +54,18 @@ public class Swc4jAstExportAll
         setWith(with);
     }
 
+    public static Swc4jAstExportAll create(Swc4jAstStr src) {
+        return create(src, false);
+    }
+
+    public static Swc4jAstExportAll create(Swc4jAstStr src, boolean typeOnly) {
+        return create(src, typeOnly, null);
+    }
+
+    public static Swc4jAstExportAll create(Swc4jAstStr src, boolean typeOnly, Swc4jAstObjectLit with) {
+        return new Swc4jAstExportAll(src, typeOnly, with, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(src);

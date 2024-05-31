@@ -49,6 +49,10 @@ public class Swc4jAstTplElement
         setTail(tail);
     }
 
+    public static Swc4jAstTplElement create(String raw) {
+        return create(false, raw);
+    }
+
     public static Swc4jAstTplElement create(boolean tail, String raw) {
         return create(tail, null, raw);
     }

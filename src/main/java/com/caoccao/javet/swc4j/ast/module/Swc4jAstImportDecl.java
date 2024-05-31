@@ -63,6 +63,34 @@ public class Swc4jAstImportDecl
         this.specifiers.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstImportDecl create(Swc4jAstStr src, Swc4jAstImportPhase phase) {
+        return create(SimpleList.of(), src, phase);
+    }
+
+    public static Swc4jAstImportDecl create(
+            List<ISwc4jAstImportSpecifier> specifiers,
+            Swc4jAstStr src,
+            Swc4jAstImportPhase phase) {
+        return create(specifiers, src, false, phase);
+    }
+
+    public static Swc4jAstImportDecl create(
+            List<ISwc4jAstImportSpecifier> specifiers,
+            Swc4jAstStr src,
+            boolean typeOnly,
+            Swc4jAstImportPhase phase) {
+        return create(specifiers, src, typeOnly, null, phase);
+    }
+
+    public static Swc4jAstImportDecl create(
+            List<ISwc4jAstImportSpecifier> specifiers,
+            Swc4jAstStr src,
+            boolean typeOnly,
+            Swc4jAstObjectLit with,
+            Swc4jAstImportPhase phase) {
+        return new Swc4jAstImportDecl(specifiers, src, typeOnly, with, phase, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(specifiers);
