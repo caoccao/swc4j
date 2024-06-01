@@ -49,6 +49,14 @@ public class Swc4jAstBindingIdent
         setTypeAnn(typeAnn);
     }
 
+    public static Swc4jAstBindingIdent create(Swc4jAstIdent id) {
+        return create(id, null);
+    }
+
+    public static Swc4jAstBindingIdent create(Swc4jAstIdent id, Swc4jAstTsTypeAnn typeAnn) {
+        return new Swc4jAstBindingIdent(id, typeAnn, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(id);

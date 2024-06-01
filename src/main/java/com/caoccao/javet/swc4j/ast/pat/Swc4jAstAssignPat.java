@@ -53,6 +53,10 @@ public class Swc4jAstAssignPat
         setRight(right);
     }
 
+    public static Swc4jAstAssignPat create(ISwc4jAstPat left, ISwc4jAstExpr right) {
+        return new Swc4jAstAssignPat(left, right, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(left, right);

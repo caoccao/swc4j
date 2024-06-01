@@ -55,6 +55,18 @@ public class Swc4jAstRestPat
         setTypeAnn(typeAnn);
     }
 
+    public static Swc4jAstRestPat create(ISwc4jAstPat arg) {
+        return create(Swc4jSpan.DUMMY, arg);
+    }
+
+    public static Swc4jAstRestPat create(Swc4jSpan dot3Token, ISwc4jAstPat arg) {
+        return create(dot3Token, arg, null);
+    }
+
+    public static Swc4jAstRestPat create(Swc4jSpan dot3Token, ISwc4jAstPat arg, Swc4jAstTsTypeAnn typeAnn) {
+        return new Swc4jAstRestPat(dot3Token, arg, typeAnn, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstPat getArg() {
         return arg;

@@ -49,6 +49,14 @@ public class Swc4jAstAssignPatProp
         setValue(value);
     }
 
+    public static Swc4jAstAssignPatProp create(Swc4jAstBindingIdent key) {
+        return create(key, null);
+    }
+
+    public static Swc4jAstAssignPatProp create(Swc4jAstBindingIdent key, ISwc4jAstExpr value) {
+        return new Swc4jAstAssignPatProp(key, value, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(key);

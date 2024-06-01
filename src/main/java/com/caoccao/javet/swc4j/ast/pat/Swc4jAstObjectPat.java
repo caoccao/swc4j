@@ -52,6 +52,25 @@ public class Swc4jAstObjectPat
         this.props.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstObjectPat create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstObjectPat create(List<ISwc4jAstObjectPatProp> props) {
+        return create(props, false);
+    }
+
+    public static Swc4jAstObjectPat create(List<ISwc4jAstObjectPatProp> props, boolean optional) {
+        return create(props, optional, null);
+    }
+
+    public static Swc4jAstObjectPat create(
+            List<ISwc4jAstObjectPatProp> props,
+            boolean optional,
+            Swc4jAstTsTypeAnn typeAnn) {
+        return new Swc4jAstObjectPat(props, optional, typeAnn, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(props);

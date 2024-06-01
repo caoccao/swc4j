@@ -55,6 +55,22 @@ public class Swc4jAstArrayPat
         this.elems.stream().filter(Optional::isPresent).map(Optional::get).forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstArrayPat create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstArrayPat create(List<ISwc4jAstPat> elems) {
+        return create(elems, false);
+    }
+
+    public static Swc4jAstArrayPat create(List<ISwc4jAstPat> elems, boolean optional) {
+        return create(elems, optional, null);
+    }
+
+    public static Swc4jAstArrayPat create(List<ISwc4jAstPat> elems, boolean optional, Swc4jAstTsTypeAnn typeAnn) {
+        return new Swc4jAstArrayPat(elems, optional, typeAnn, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of();

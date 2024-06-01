@@ -38,6 +38,10 @@ public class Swc4jAstInvalid
         super(span);
     }
 
+    public static Swc4jAstInvalid create() {
+        return new Swc4jAstInvalid(Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;
