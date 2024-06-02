@@ -55,6 +55,14 @@ public class Swc4jAstClassDecl
         setIdent(ident);
     }
 
+    public static Swc4jAstClassDecl create(Swc4jAstIdent ident, Swc4jAstClass clazz) {
+        return create(ident, false, clazz);
+    }
+
+    public static Swc4jAstClassDecl create(Swc4jAstIdent ident, boolean declare, Swc4jAstClass clazz) {
+        return new Swc4jAstClassDecl(ident, declare, clazz, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(clazz, ident);

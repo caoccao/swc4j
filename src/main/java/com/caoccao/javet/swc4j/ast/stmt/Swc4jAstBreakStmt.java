@@ -47,6 +47,14 @@ public class Swc4jAstBreakStmt
         setLabel(label);
     }
 
+    public static Swc4jAstBreakStmt create() {
+        return create(null);
+    }
+
+    public static Swc4jAstBreakStmt create(Swc4jAstIdent label) {
+        return new Swc4jAstBreakStmt(label, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of();

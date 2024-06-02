@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.9.0
+
+* Added `create()` to AST types
+
 ## 0.8.0
 
 * Added `replaceNode()` to `ISwc4jAst`

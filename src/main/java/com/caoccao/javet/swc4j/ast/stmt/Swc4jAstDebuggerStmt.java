@@ -39,6 +39,10 @@ public class Swc4jAstDebuggerStmt
         super(span);
     }
 
+    public static Swc4jAstDebuggerStmt create() {
+        return new Swc4jAstDebuggerStmt(Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;

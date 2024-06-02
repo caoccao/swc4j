@@ -55,6 +55,14 @@ public class Swc4jAstFnDecl
         setIdent(ident);
     }
 
+    public static Swc4jAstFnDecl create(Swc4jAstIdent ident, Swc4jAstFunction function) {
+        return create(ident, false, function);
+    }
+
+    public static Swc4jAstFnDecl create(Swc4jAstIdent ident, boolean declare, Swc4jAstFunction function) {
+        return new Swc4jAstFnDecl(ident, declare, function, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(function, ident);

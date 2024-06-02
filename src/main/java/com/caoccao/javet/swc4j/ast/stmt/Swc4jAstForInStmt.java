@@ -56,6 +56,10 @@ public class Swc4jAstForInStmt
         setRight(right);
     }
 
+    public static Swc4jAstForInStmt create(ISwc4jAstForHead left, ISwc4jAstExpr right, ISwc4jAstStmt body) {
+        return new Swc4jAstForInStmt(left, right, body, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;

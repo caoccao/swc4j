@@ -48,7 +48,7 @@ public class Swc4jAstBlockStmt
     }
 
     public static Swc4jAstBlockStmt create() {
-        return new Swc4jAstBlockStmt(SimpleList.of(), Swc4jSpan.DUMMY);
+        return create(SimpleList.of());
     }
 
     public static Swc4jAstBlockStmt create(List<ISwc4jAstStmt> stmts) {

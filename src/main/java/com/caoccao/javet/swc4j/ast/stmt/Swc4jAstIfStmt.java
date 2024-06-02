@@ -54,6 +54,14 @@ public class Swc4jAstIfStmt
         setTest(test);
     }
 
+    public static Swc4jAstIfStmt create(ISwc4jAstExpr test, ISwc4jAstStmt cons) {
+        return create(test, cons, null);
+    }
+
+    public static Swc4jAstIfStmt create(ISwc4jAstExpr test, ISwc4jAstStmt cons, ISwc4jAstStmt alt) {
+        return new Swc4jAstIfStmt(test, cons, alt, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<ISwc4jAstStmt> getAlt() {
         return alt;

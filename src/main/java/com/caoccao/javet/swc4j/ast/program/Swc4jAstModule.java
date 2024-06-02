@@ -73,6 +73,18 @@ public class Swc4jAstModule
         this.body.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstModule create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstModule create(List<ISwc4jAstModuleItem> body) {
+        return create(body, null);
+    }
+
+    public static Swc4jAstModule create(List<ISwc4jAstModuleItem> body, String shebang) {
+        return new Swc4jAstModule(body, shebang, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     @Override
     public List<ISwc4jAstModuleItem> getBody() {

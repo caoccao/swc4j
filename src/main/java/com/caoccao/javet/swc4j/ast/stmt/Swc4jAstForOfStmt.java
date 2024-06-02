@@ -57,6 +57,21 @@ public class Swc4jAstForOfStmt
         setRight(right);
     }
 
+    public static Swc4jAstForOfStmt create(
+            ISwc4jAstForHead left,
+            ISwc4jAstExpr right,
+            ISwc4jAstStmt body) {
+        return create(false, left, right, body);
+    }
+
+    public static Swc4jAstForOfStmt create(
+            boolean _await,
+            ISwc4jAstForHead left,
+            ISwc4jAstExpr right,
+            ISwc4jAstStmt body) {
+        return new Swc4jAstForOfStmt(_await, left, right, body, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;

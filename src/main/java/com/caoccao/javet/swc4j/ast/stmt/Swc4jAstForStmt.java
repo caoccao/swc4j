@@ -58,6 +58,26 @@ public class Swc4jAstForStmt
         setUpdate(update);
     }
 
+    public static Swc4jAstForStmt create(ISwc4jAstStmt body) {
+        return create(null, body);
+    }
+
+    public static Swc4jAstForStmt create(ISwc4jAstVarDeclOrExpr init, ISwc4jAstStmt body) {
+        return create(init, null, body);
+    }
+
+    public static Swc4jAstForStmt create(ISwc4jAstVarDeclOrExpr init, ISwc4jAstExpr test, ISwc4jAstStmt body) {
+        return create(init, test, null, body);
+    }
+
+    public static Swc4jAstForStmt create(
+            ISwc4jAstVarDeclOrExpr init,
+            ISwc4jAstExpr test,
+            ISwc4jAstExpr update,
+            ISwc4jAstStmt body) {
+        return new Swc4jAstForStmt(init, test, update, body, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;
