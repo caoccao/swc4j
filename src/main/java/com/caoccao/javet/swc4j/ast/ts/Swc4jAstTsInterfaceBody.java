@@ -45,6 +45,14 @@ public class Swc4jAstTsInterfaceBody
         this.body.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTsInterfaceBody create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstTsInterfaceBody create(List<ISwc4jAstTsTypeElement> body) {
+        return new Swc4jAstTsInterfaceBody(body, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public List<ISwc4jAstTsTypeElement> getBody() {
         return body;

@@ -48,6 +48,14 @@ public class Swc4jAstTsExprWithTypeArgs
         setTypeArgs(typeArgs);
     }
 
+    public static Swc4jAstTsExprWithTypeArgs create(ISwc4jAstExpr expr) {
+        return create(expr, null);
+    }
+
+    public static Swc4jAstTsExprWithTypeArgs create(ISwc4jAstExpr expr, Swc4jAstTsTypeParamInstantiation typeArgs) {
+        return new Swc4jAstTsExprWithTypeArgs(expr, typeArgs, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(expr);

@@ -59,6 +59,14 @@ public class Swc4jAstTsConditionalType
         setTrueType(trueType);
     }
 
+    public static Swc4jAstTsConditionalType create(
+            ISwc4jAstTsType checkType,
+            ISwc4jAstTsType extendsType,
+            ISwc4jAstTsType trueType,
+            ISwc4jAstTsType falseType) {
+        return new Swc4jAstTsConditionalType(checkType, extendsType, trueType, falseType, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstTsType getCheckType() {
         return checkType;

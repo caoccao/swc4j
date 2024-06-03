@@ -47,6 +47,10 @@ public class Swc4jAstTsArrayType
         setElemType(elemType);
     }
 
+    public static Swc4jAstTsArrayType create(ISwc4jAstTsType elemType) {
+        return new Swc4jAstTsArrayType(elemType, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(elemType);

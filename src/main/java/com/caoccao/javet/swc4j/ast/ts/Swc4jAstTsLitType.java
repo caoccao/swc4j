@@ -46,6 +46,10 @@ public class Swc4jAstTsLitType
         setLit(lit);
     }
 
+    public static Swc4jAstTsLitType create(ISwc4jAstTsLit lit) {
+        return new Swc4jAstTsLitType(lit, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(lit);

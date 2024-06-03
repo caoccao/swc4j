@@ -58,6 +58,33 @@ public class Swc4jAstTsIndexSignature
         this.params.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTsIndexSignature create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstTsIndexSignature create(List<ISwc4jAstTsFnParam> params) {
+        return create(params, null);
+    }
+
+    public static Swc4jAstTsIndexSignature create(List<ISwc4jAstTsFnParam> params, Swc4jAstTsTypeAnn typeAnn) {
+        return create(params, typeAnn, false);
+    }
+
+    public static Swc4jAstTsIndexSignature create(
+            List<ISwc4jAstTsFnParam> params,
+            Swc4jAstTsTypeAnn typeAnn,
+            boolean readonly) {
+        return create(params, typeAnn, readonly, false);
+    }
+
+    public static Swc4jAstTsIndexSignature create(
+            List<ISwc4jAstTsFnParam> params,
+            Swc4jAstTsTypeAnn typeAnn,
+            boolean readonly,
+            boolean _static) {
+        return new Swc4jAstTsIndexSignature(params, typeAnn, readonly, _static, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(params);

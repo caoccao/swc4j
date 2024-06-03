@@ -59,6 +59,35 @@ public class Swc4jAstTsGetterSignature
         setTypeAnn(typeAnn);
     }
 
+    public static Swc4jAstTsGetterSignature create(ISwc4jAstExpr key) {
+        return create(false, key);
+    }
+
+    public static Swc4jAstTsGetterSignature create(boolean readonly, ISwc4jAstExpr key) {
+        return create(readonly, key, false);
+    }
+
+    public static Swc4jAstTsGetterSignature create(boolean readonly, ISwc4jAstExpr key, boolean computed) {
+        return create(readonly, key, computed, false);
+    }
+
+    public static Swc4jAstTsGetterSignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional) {
+        return create(readonly, key, computed, optional, null);
+    }
+
+    public static Swc4jAstTsGetterSignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional,
+            Swc4jAstTsTypeAnn typeAnn) {
+        return new Swc4jAstTsGetterSignature(readonly, key, computed, optional, typeAnn, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(key);

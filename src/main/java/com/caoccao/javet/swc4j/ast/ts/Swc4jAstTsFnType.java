@@ -54,6 +54,21 @@ public class Swc4jAstTsFnType
         this.params.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTsFnType create(Swc4jAstTsTypeAnn typeAnn) {
+        return create(SimpleList.of(), typeAnn);
+    }
+
+    public static Swc4jAstTsFnType create(List<ISwc4jAstTsFnParam> params, Swc4jAstTsTypeAnn typeAnn) {
+        return create(params, null, typeAnn);
+    }
+
+    public static Swc4jAstTsFnType create(
+            List<ISwc4jAstTsFnParam> params,
+            Swc4jAstTsTypeParamDecl typeParams,
+            Swc4jAstTsTypeAnn typeAnn) {
+        return new Swc4jAstTsFnType(params, typeParams, typeAnn, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(params);

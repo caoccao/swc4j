@@ -54,6 +54,29 @@ public class Swc4jAstTsConstructSignatureDecl
         this.params.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTsConstructSignatureDecl create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstTsConstructSignatureDecl create(List<ISwc4jAstTsFnParam> params) {
+        return create(params, null, null);
+    }
+
+    public static Swc4jAstTsConstructSignatureDecl create(List<ISwc4jAstTsFnParam> params, Swc4jAstTsTypeAnn typeAnn) {
+        return create(params, typeAnn, null);
+    }
+
+    public static Swc4jAstTsConstructSignatureDecl create(List<ISwc4jAstTsFnParam> params, Swc4jAstTsTypeParamDecl typeParams) {
+        return create(params, null, typeParams);
+    }
+
+    public static Swc4jAstTsConstructSignatureDecl create(
+            List<ISwc4jAstTsFnParam> params,
+            Swc4jAstTsTypeAnn typeAnn,
+            Swc4jAstTsTypeParamDecl typeParams) {
+        return new Swc4jAstTsConstructSignatureDecl(params, typeAnn, typeParams, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(params);

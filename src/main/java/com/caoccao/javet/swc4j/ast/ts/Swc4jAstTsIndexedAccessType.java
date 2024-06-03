@@ -54,6 +54,17 @@ public class Swc4jAstTsIndexedAccessType
         setReadonly(readonly);
     }
 
+    public static Swc4jAstTsIndexedAccessType create(ISwc4jAstTsType objType, ISwc4jAstTsType indexType) {
+        return create(false, objType, indexType);
+    }
+
+    public static Swc4jAstTsIndexedAccessType create(
+            boolean readonly,
+            ISwc4jAstTsType objType,
+            ISwc4jAstTsType indexType) {
+        return new Swc4jAstTsIndexedAccessType(readonly, objType, indexType, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(objType, indexType);

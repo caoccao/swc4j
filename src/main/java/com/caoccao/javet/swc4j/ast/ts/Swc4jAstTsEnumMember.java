@@ -48,6 +48,14 @@ public class Swc4jAstTsEnumMember
         setInit(init);
     }
 
+    public static Swc4jAstTsEnumMember create(ISwc4jAstTsEnumMemberId id) {
+        return create(id, null);
+    }
+
+    public static Swc4jAstTsEnumMember create(ISwc4jAstTsEnumMemberId id, ISwc4jAstExpr init) {
+        return new Swc4jAstTsEnumMember(id, init, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(id);

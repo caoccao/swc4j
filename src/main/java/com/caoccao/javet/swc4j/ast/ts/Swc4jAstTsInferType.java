@@ -45,6 +45,10 @@ public class Swc4jAstTsInferType
         setTypeParam(typeParam);
     }
 
+    public static Swc4jAstTsInferType create(Swc4jAstTsTypeParam typeParam) {
+        return new Swc4jAstTsInferType(typeParam, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(typeParam);

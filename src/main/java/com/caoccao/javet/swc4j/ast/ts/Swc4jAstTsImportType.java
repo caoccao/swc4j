@@ -54,6 +54,25 @@ public class Swc4jAstTsImportType
         setTypeArgs(typeArgs);
     }
 
+    public static Swc4jAstTsImportType create(Swc4jAstStr arg) {
+        return create(arg, null, null);
+    }
+
+    public static Swc4jAstTsImportType create(Swc4jAstStr arg, ISwc4jAstTsEntityName qualifier) {
+        return create(arg, qualifier, null);
+    }
+
+    public static Swc4jAstTsImportType create(Swc4jAstStr arg, Swc4jAstTsTypeParamInstantiation typeArgs) {
+        return create(arg, null, typeArgs);
+    }
+
+    public static Swc4jAstTsImportType create(
+            Swc4jAstStr arg,
+            ISwc4jAstTsEntityName qualifier,
+            Swc4jAstTsTypeParamInstantiation typeArgs) {
+        return new Swc4jAstTsImportType(arg, qualifier, typeArgs, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Swc4jAstStr getArg() {
         return arg;

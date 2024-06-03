@@ -45,6 +45,10 @@ public class Swc4jAstTsKeywordType
         setKind(kind);
     }
 
+    public static Swc4jAstTsKeywordType create(Swc4jAstTsKeywordTypeKind kind) {
+        return new Swc4jAstTsKeywordType(kind, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;
