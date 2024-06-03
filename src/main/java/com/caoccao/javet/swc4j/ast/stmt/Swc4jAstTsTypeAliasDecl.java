@@ -58,6 +58,25 @@ public class Swc4jAstTsTypeAliasDecl
         setTypeParams(typeParams);
     }
 
+    public static Swc4jAstTsTypeAliasDecl create(Swc4jAstIdent id, ISwc4jAstTsType typeAnn) {
+        return create(id, null, typeAnn);
+    }
+
+    public static Swc4jAstTsTypeAliasDecl create(
+            Swc4jAstIdent id,
+            Swc4jAstTsTypeParamDecl typeParams,
+            ISwc4jAstTsType typeAnn) {
+        return create(id, false, typeParams, typeAnn);
+    }
+
+    public static Swc4jAstTsTypeAliasDecl create(
+            Swc4jAstIdent id,
+            boolean declare,
+            Swc4jAstTsTypeParamDecl typeParams,
+            ISwc4jAstTsType typeAnn) {
+        return new Swc4jAstTsTypeAliasDecl(id, declare, typeParams, typeAnn, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(id, typeAnn);

@@ -53,6 +53,14 @@ public class Swc4jAstSwitchStmt
         this.cases.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstSwitchStmt create(ISwc4jAstExpr discriminant) {
+        return create(discriminant, SimpleList.of());
+    }
+
+    public static Swc4jAstSwitchStmt create(ISwc4jAstExpr discriminant, List<Swc4jAstSwitchCase> cases) {
+        return new Swc4jAstSwitchStmt(discriminant, cases, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public List<Swc4jAstSwitchCase> getCases() {
         return cases;

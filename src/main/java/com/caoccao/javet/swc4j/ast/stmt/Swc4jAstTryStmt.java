@@ -54,6 +54,25 @@ public class Swc4jAstTryStmt
         setHandler(handler);
     }
 
+    public static Swc4jAstTryStmt create(Swc4jAstBlockStmt block) {
+        return create(block, null, null);
+    }
+
+    public static Swc4jAstTryStmt create(Swc4jAstBlockStmt block, Swc4jAstCatchClause handler) {
+        return create(block, handler, null);
+    }
+
+    public static Swc4jAstTryStmt create(Swc4jAstBlockStmt block, Swc4jAstBlockStmt finalizer) {
+        return create(block, null, finalizer);
+    }
+
+    public static Swc4jAstTryStmt create(
+            Swc4jAstBlockStmt block,
+            Swc4jAstCatchClause handler,
+            Swc4jAstBlockStmt finalizer) {
+        return new Swc4jAstTryStmt(block, handler, finalizer, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Swc4jAstBlockStmt getBlock() {
         return block;

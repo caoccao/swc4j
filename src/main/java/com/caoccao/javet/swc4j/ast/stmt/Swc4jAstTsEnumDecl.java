@@ -56,6 +56,29 @@ public class Swc4jAstTsEnumDecl
         this.members.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTsEnumDecl create(Swc4jAstIdent id) {
+        return create(id, SimpleList.of());
+    }
+
+    public static Swc4jAstTsEnumDecl create(Swc4jAstIdent id, List<Swc4jAstTsEnumMember> members) {
+        return create(false, id, members);
+    }
+
+    public static Swc4jAstTsEnumDecl create(
+            boolean declare,
+            Swc4jAstIdent id,
+            List<Swc4jAstTsEnumMember> members) {
+        return create(declare, false, id, members);
+    }
+
+    public static Swc4jAstTsEnumDecl create(
+            boolean declare,
+            boolean _const,
+            Swc4jAstIdent id,
+            List<Swc4jAstTsEnumMember> members) {
+        return new Swc4jAstTsEnumDecl(declare, _const, id, members, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(members);

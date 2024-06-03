@@ -51,6 +51,10 @@ public class Swc4jAstLabeledStmt
         setLabel(label);
     }
 
+    public static Swc4jAstLabeledStmt create(Swc4jAstIdent label, ISwc4jAstStmt body) {
+        return new Swc4jAstLabeledStmt(label, body, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;

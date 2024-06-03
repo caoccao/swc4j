@@ -58,7 +58,11 @@ public class Swc4jAstVarDeclarator
     }
 
     public static Swc4jAstVarDeclarator create(ISwc4jAstPat name, ISwc4jAstExpr init) {
-        return new Swc4jAstVarDeclarator(name, init, false, Swc4jSpan.DUMMY);
+        return create(name, init, false);
+    }
+
+    public static Swc4jAstVarDeclarator create(ISwc4jAstPat name, ISwc4jAstExpr init, boolean definite) {
+        return new Swc4jAstVarDeclarator(name, init, definite, Swc4jSpan.DUMMY);
     }
 
     @Override

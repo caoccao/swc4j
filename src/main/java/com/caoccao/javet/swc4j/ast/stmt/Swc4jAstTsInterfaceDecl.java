@@ -63,6 +63,34 @@ public class Swc4jAstTsInterfaceDecl
         this._extends.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTsInterfaceDecl create(Swc4jAstIdent id, Swc4jAstTsInterfaceBody body) {
+        return create(id, SimpleList.of(), body);
+    }
+
+    public static Swc4jAstTsInterfaceDecl create(
+            Swc4jAstIdent id,
+            List<Swc4jAstTsExprWithTypeArgs> _extends,
+            Swc4jAstTsInterfaceBody body) {
+        return create(id, null, _extends, body);
+    }
+
+    public static Swc4jAstTsInterfaceDecl create(
+            Swc4jAstIdent id,
+            Swc4jAstTsTypeParamDecl typeParams,
+            List<Swc4jAstTsExprWithTypeArgs> _extends,
+            Swc4jAstTsInterfaceBody body) {
+        return create(id, false, typeParams, _extends, body);
+    }
+
+    public static Swc4jAstTsInterfaceDecl create(
+            Swc4jAstIdent id,
+            boolean declare,
+            Swc4jAstTsTypeParamDecl typeParams,
+            List<Swc4jAstTsExprWithTypeArgs> _extends,
+            Swc4jAstTsInterfaceBody body) {
+        return new Swc4jAstTsInterfaceDecl(id, declare, typeParams, _extends, body, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Swc4jAstTsInterfaceBody getBody() {
         return body;

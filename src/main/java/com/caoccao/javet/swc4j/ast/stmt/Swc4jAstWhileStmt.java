@@ -52,6 +52,10 @@ public class Swc4jAstWhileStmt
         setTest(test);
     }
 
+    public static Swc4jAstWhileStmt create(ISwc4jAstExpr test, ISwc4jAstStmt body) {
+        return new Swc4jAstWhileStmt(test, body, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstStmt getBody() {
         return body;

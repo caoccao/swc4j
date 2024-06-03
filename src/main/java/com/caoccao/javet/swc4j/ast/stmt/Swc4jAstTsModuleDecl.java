@@ -58,6 +58,29 @@ public class Swc4jAstTsModuleDecl
         setId(id);
     }
 
+    public static Swc4jAstTsModuleDecl create(ISwc4jAstTsModuleName id) {
+        return create(id, null);
+    }
+
+    public static Swc4jAstTsModuleDecl create(ISwc4jAstTsModuleName id, ISwc4jAstTsNamespaceBody body) {
+        return create(false, id, body);
+    }
+
+    public static Swc4jAstTsModuleDecl create(
+            boolean declare,
+            ISwc4jAstTsModuleName id,
+            ISwc4jAstTsNamespaceBody body) {
+        return create(declare, false, id, body);
+    }
+
+    public static Swc4jAstTsModuleDecl create(
+            boolean declare,
+            boolean global,
+            ISwc4jAstTsModuleName id,
+            ISwc4jAstTsNamespaceBody body) {
+        return new Swc4jAstTsModuleDecl(declare, global, id, body, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<ISwc4jAstTsNamespaceBody> getBody() {
         return body;

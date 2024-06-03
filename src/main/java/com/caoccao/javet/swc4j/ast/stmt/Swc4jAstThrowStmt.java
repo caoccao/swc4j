@@ -48,6 +48,10 @@ public class Swc4jAstThrowStmt
         setArg(arg);
     }
 
+    public static Swc4jAstThrowStmt create(ISwc4jAstExpr arg) {
+        return new Swc4jAstThrowStmt(arg, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public ISwc4jAstExpr getArg() {
         return arg;

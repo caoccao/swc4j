@@ -50,6 +50,18 @@ public class Swc4jAstUsingDecl
         this.decls.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstUsingDecl create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstUsingDecl create(List<Swc4jAstVarDeclarator> decls) {
+        return create(false, decls);
+    }
+
+    public static Swc4jAstUsingDecl create(boolean _await, List<Swc4jAstVarDeclarator> decls) {
+        return new Swc4jAstUsingDecl(_await, decls, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.copyOf(decls);
