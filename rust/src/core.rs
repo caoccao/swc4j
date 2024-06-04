@@ -28,11 +28,11 @@ const VERSION: &'static str = "0.9.0";
 
 fn parse_by_mode(
   parse_params: ParseParams,
-  code: &str,
   parse_mode: enums::ParseMode,
   plugin_host: &mut Option<plugin_utils::PluginHost>,
 ) -> Result<ParsedSource, ParseDiagnostic> {
   if let Some(plugin_host) = plugin_host {
+    let code: &str = &parse_params.text.to_owned();
     match parse_mode {
       enums::ParseMode::Module => {
         parse_module_with_post_process(parse_params, |module, _| plugin_host.process_module(code, module))
@@ -54,14 +54,14 @@ fn parse_by_mode(
 pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<outputs::ParseOutput, String> {
   let parse_params = ParseParams {
     specifier: options.get_specifier(),
-    text_info: SourceTextInfo::from_string(code.to_owned()),
+    text: code.into(),
     media_type: options.media_type,
     capture_tokens: options.capture_tokens,
     maybe_syntax: None,
     scope_analysis: options.scope_analysis,
   };
   let mut plugin_host = options.plugin_host.clone();
-  match parse_by_mode(parse_params, &code.as_str(), options.parse_mode, &mut plugin_host) {
+  match parse_by_mode(parse_params, options.parse_mode, &mut plugin_host) {
     Ok(parsed_source) => Ok(outputs::ParseOutput::new(&options, &parsed_source)),
     Err(e) => Err(e.to_string()),
   }
@@ -70,14 +70,14 @@ pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<out
 pub fn transform<'local>(code: String, options: options::TransformOptions) -> Result<outputs::TransformOutput, String> {
   let parse_params = ParseParams {
     specifier: options.get_specifier(),
-    text_info: SourceTextInfo::from_string(code.to_owned()),
+    text: code.clone().into(),
     media_type: options.media_type,
     capture_tokens: false,
     maybe_syntax: None,
     scope_analysis: false,
   };
   let mut plugin_host = options.plugin_host.clone();
-  match parse_by_mode(parse_params, &code.as_str(), options.parse_mode, &mut plugin_host) {
+  match parse_by_mode(parse_params, options.parse_mode, &mut plugin_host) {
     Ok(parsed_source) => {
       let source_map = Lrc::new(SourceMap::new(FilePathMapping::empty()));
       source_map.new_source_file(FileName::Url(options.get_specifier()), code.to_owned());
@@ -160,14 +160,14 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
 pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Result<outputs::TranspileOutput, String> {
   let parse_params = ParseParams {
     specifier: options.get_specifier(),
-    text_info: SourceTextInfo::from_string(code.to_owned()),
+    text: code.into(),
     media_type: options.media_type,
     capture_tokens: options.capture_tokens,
     maybe_syntax: None,
     scope_analysis: options.scope_analysis,
   };
   let mut plugin_host = options.plugin_host.clone();
-  match parse_by_mode(parse_params, &code.as_str(), options.parse_mode, &mut plugin_host) {
+  match parse_by_mode(parse_params, options.parse_mode, &mut plugin_host) {
     Ok(parsed_source) => {
       let transpile_options = TranspileOptions {
         emit_metadata: options.emit_metadata,
@@ -186,7 +186,7 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
       };
       let emit_options = EmitOptions {
         inline_sources: options.inline_sources,
-        keep_comments: options.keep_comments,
+        remove_comments: !options.keep_comments,
         source_map: options.source_map,
         source_map_file: None,
       };

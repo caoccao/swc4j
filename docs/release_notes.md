@@ -2,6 +2,7 @@
 
 ## 0.9.0
 
+* Upgraded deno_ast to v0.39.0
 * Added `create()` to AST types
 
 ## 0.8.0

@@ -11,7 +11,7 @@ crate_type = ["cdylib", "rlib"]
 [dependencies]
 base64 = "0.22.1"
 debug_print = "1.0.0"
-deno_ast = { version = "0.38.1", features = [
+deno_ast = { version = "0.39.0", features = [
   "bundler",
   "cjs",
   "codegen",

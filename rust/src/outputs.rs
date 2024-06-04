@@ -270,7 +270,7 @@ impl ParseOutput {
     } else {
       None
     };
-    let source_text = parsed_source.text_info().text().to_string();
+    let source_text = parsed_source.text().to_string();
     let tokens = if parse_options.capture_tokens {
       Some(Arc::new(parsed_source.tokens().to_vec()))
     } else {
@@ -414,7 +414,7 @@ impl TranspileOutput {
       None
     };
     let emitted_source = transpile_result.clone().into_source();
-    let code = emitted_source.text.to_owned();
+    let code = String::from_utf8(emitted_source.source).unwrap_or_default();
     let media_type = parsed_source.media_type();
     let parse_mode = if parsed_source.is_module() {
       ParseMode::Module
@@ -426,8 +426,8 @@ impl TranspileOutput {
     } else {
       None
     };
-    let source_map = emitted_source.source_map.to_owned();
-    let source_text = parsed_source.text_info().text().to_string();
+    let source_map = emitted_source.source_map.map(|source_map| String::from_utf8(source_map).unwrap_or_default());
+    let source_text = parsed_source.text().to_string();
     let tokens = if transpile_options.capture_tokens {
       Some(Arc::new(parsed_source.tokens().to_vec()))
     } else {
