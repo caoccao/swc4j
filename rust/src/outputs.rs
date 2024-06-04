@@ -299,10 +299,7 @@ impl ParseOutput {
         value.iter().for_each(|comment| map.register_by_span(&comment.span));
       });
     });
-    self
-      .program
-      .as_ref()
-      .map(|program| program.register_with_map(&mut map));
+    self.program.as_ref().map(|program| program.register_with_map(&mut map));
     self.tokens.as_ref().map(|token_and_spans| {
       token_and_spans.iter().for_each(|token_and_span| {
         map.register_by_span(&token_and_span.span);
@@ -320,7 +317,7 @@ impl ToJava for ParseOutput {
   {
     let byte_to_index_map = self.get_byte_to_index_map();
     let java_program = self.program.as_ref().map_or(Default::default(), |program| {
-        program.to_java_with_map(env, &byte_to_index_map)
+      program.to_java_with_map(env, &byte_to_index_map)
     });
     let java_media_type = self.media_type.to_java(env);
     let java_parse_mode = self.parse_mode.to_java(env);
@@ -426,7 +423,9 @@ impl TranspileOutput {
     } else {
       None
     };
-    let source_map = emitted_source.source_map.map(|source_map| String::from_utf8(source_map).unwrap_or_default());
+    let source_map = emitted_source
+      .source_map
+      .map(|source_map| String::from_utf8(source_map).unwrap_or_default());
     let source_text = parsed_source.text().to_string();
     let tokens = if transpile_options.capture_tokens {
       Some(Arc::new(parsed_source.tokens().to_vec()))

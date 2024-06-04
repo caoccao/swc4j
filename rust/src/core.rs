@@ -70,17 +70,18 @@ pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<out
 pub fn transform<'local>(code: String, options: options::TransformOptions) -> Result<outputs::TransformOutput, String> {
   let parse_params = ParseParams {
     specifier: options.get_specifier(),
-    text: code.clone().into(),
+    text: code.into(),
     media_type: options.media_type,
     capture_tokens: false,
     maybe_syntax: None,
     scope_analysis: false,
   };
   let mut plugin_host = options.plugin_host.clone();
+  let code: String = parse_params.text.clone().to_string();
   match parse_by_mode(parse_params, options.parse_mode, &mut plugin_host) {
     Ok(parsed_source) => {
       let source_map = Lrc::new(SourceMap::new(FilePathMapping::empty()));
-      source_map.new_source_file(FileName::Url(options.get_specifier()), code.to_owned());
+      source_map.new_source_file(FileName::Url(options.get_specifier()), code);
       let mut buffer = vec![];
       let mut source_map_buffer = vec![];
       let mut writer = Box::new(JsWriter::new(
