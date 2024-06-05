@@ -72,6 +72,73 @@ public class Swc4jAstTsPropertySignature
         this.params.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTsPropertySignature create(ISwc4jAstExpr key) {
+        return create(key, SimpleList.of());
+    }
+
+    public static Swc4jAstTsPropertySignature create(ISwc4jAstExpr key, List<ISwc4jAstTsFnParam> params) {
+        return create(false, key, params);
+    }
+
+    public static Swc4jAstTsPropertySignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            List<ISwc4jAstTsFnParam> params) {
+        return create(readonly, key, false, params);
+    }
+
+    public static Swc4jAstTsPropertySignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            List<ISwc4jAstTsFnParam> params) {
+        return create(readonly, key, computed, false, params);
+    }
+
+    public static Swc4jAstTsPropertySignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional,
+            List<ISwc4jAstTsFnParam> params) {
+        return create(readonly, key, computed, optional, null, params);
+    }
+
+    public static Swc4jAstTsPropertySignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional,
+            ISwc4jAstExpr init,
+            List<ISwc4jAstTsFnParam> params) {
+        return create(readonly, key, computed, optional, init, params, null);
+    }
+
+    public static Swc4jAstTsPropertySignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional,
+            ISwc4jAstExpr init,
+            List<ISwc4jAstTsFnParam> params,
+            Swc4jAstTsTypeAnn typeAnn) {
+        return create(readonly, key, computed, optional, init, params, typeAnn, null);
+    }
+
+    public static Swc4jAstTsPropertySignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional,
+            ISwc4jAstExpr init,
+            List<ISwc4jAstTsFnParam> params,
+            Swc4jAstTsTypeAnn typeAnn,
+            Swc4jAstTsTypeParamDecl typeParams) {
+        return new Swc4jAstTsPropertySignature(
+                readonly, key, computed, optional, init,
+                params, typeAnn, typeParams, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(params);

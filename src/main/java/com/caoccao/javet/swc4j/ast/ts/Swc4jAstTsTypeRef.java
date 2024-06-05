@@ -49,6 +49,16 @@ public class Swc4jAstTsTypeRef
         setTypeParams(typeParams);
     }
 
+    public static Swc4jAstTsTypeRef create(ISwc4jAstTsEntityName typeName) {
+        return create(typeName, null);
+    }
+
+    public static Swc4jAstTsTypeRef create(
+            ISwc4jAstTsEntityName typeName,
+            Swc4jAstTsTypeParamInstantiation typeParams) {
+        return new Swc4jAstTsTypeRef(typeName, typeParams, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(typeName);

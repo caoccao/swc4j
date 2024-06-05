@@ -49,6 +49,16 @@ public class Swc4jAstTsTypeQuery
         setTypeArgs(typeArgs);
     }
 
+    public static Swc4jAstTsTypeQuery create(ISwc4jAstTsTypeQueryExpr exprName) {
+        return create(exprName, null);
+    }
+
+    public static Swc4jAstTsTypeQuery create(
+            ISwc4jAstTsTypeQueryExpr exprName,
+            Swc4jAstTsTypeParamInstantiation typeArgs) {
+        return new Swc4jAstTsTypeQuery(exprName, typeArgs, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(exprName);

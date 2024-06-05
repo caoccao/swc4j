@@ -47,6 +47,10 @@ public class Swc4jAstTsParenthesizedType
         setTypeAnn(typeAnn);
     }
 
+    public static Swc4jAstTsParenthesizedType create(ISwc4jAstTsType typeAnn) {
+        return new Swc4jAstTsParenthesizedType(typeAnn, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(typeAnn);

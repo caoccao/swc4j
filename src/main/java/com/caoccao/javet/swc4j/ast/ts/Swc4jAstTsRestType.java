@@ -47,6 +47,10 @@ public class Swc4jAstTsRestType
         setTypeAnn(typeAnn);
     }
 
+    public static Swc4jAstTsRestType create(ISwc4jAstTsType typeAnn) {
+        return new Swc4jAstTsRestType(typeAnn, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(typeAnn);

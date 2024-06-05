@@ -49,6 +49,10 @@ public class Swc4jAstTsQualifiedName
         setRight(right);
     }
 
+    public static Swc4jAstTsQualifiedName create(ISwc4jAstTsEntityName left, Swc4jAstIdent right) {
+        return new Swc4jAstTsQualifiedName(left, right, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(left, right);

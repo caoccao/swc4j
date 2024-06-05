@@ -61,6 +61,34 @@ public class Swc4jAstTsSetterSignature
         setReadonly(readonly);
     }
 
+    public static Swc4jAstTsSetterSignature create(ISwc4jAstExpr key, ISwc4jAstTsFnParam param) {
+        return create(false, key, param);
+    }
+
+    public static Swc4jAstTsSetterSignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            ISwc4jAstTsFnParam param) {
+        return create(readonly, key, false, param);
+    }
+
+    public static Swc4jAstTsSetterSignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            ISwc4jAstTsFnParam param) {
+        return create(readonly, key, computed, false, param);
+    }
+
+    public static Swc4jAstTsSetterSignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional,
+            ISwc4jAstTsFnParam param) {
+        return new Swc4jAstTsSetterSignature(readonly, key, computed, optional, param, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(key, param);

@@ -40,6 +40,10 @@ public class Swc4jAstTsThisType
         super(span);
     }
 
+    public static Swc4jAstTsThisType create() {
+        return new Swc4jAstTsThisType(Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;

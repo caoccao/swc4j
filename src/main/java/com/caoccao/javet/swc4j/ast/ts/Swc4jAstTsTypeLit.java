@@ -47,6 +47,14 @@ public class Swc4jAstTsTypeLit
         this.members.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTsTypeLit create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstTsTypeLit create(List<ISwc4jAstTsTypeElement> members) {
+        return new Swc4jAstTsTypeLit(members, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.copyOf(members);

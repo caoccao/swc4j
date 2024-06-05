@@ -20,7 +20,9 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstDecorator;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAccessibility;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.*;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstParamOrTsParamProp;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsParamPropParam;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.jni2rust.*;
@@ -59,6 +61,38 @@ public class Swc4jAstTsParamProp
         this.decorators.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTsParamProp create(ISwc4jAstTsParamPropParam param) {
+        return create(SimpleList.of(), param);
+    }
+
+    public static Swc4jAstTsParamProp create(List<Swc4jAstDecorator> decorators, ISwc4jAstTsParamPropParam param) {
+        return create(decorators, null, param);
+    }
+
+    public static Swc4jAstTsParamProp create(
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstAccessibility accessibility,
+            ISwc4jAstTsParamPropParam param) {
+        return create(decorators, accessibility, false, param);
+    }
+
+    public static Swc4jAstTsParamProp create(
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstAccessibility accessibility,
+            boolean _override,
+            ISwc4jAstTsParamPropParam param) {
+        return create(decorators, accessibility, _override, false, param);
+    }
+
+    public static Swc4jAstTsParamProp create(
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstAccessibility accessibility,
+            boolean _override,
+            boolean readonly,
+            ISwc4jAstTsParamPropParam param) {
+        return new Swc4jAstTsParamProp(decorators, accessibility, _override, readonly, param, Swc4jSpan.DUMMY);
+    }
+
     @Jni2RustMethod
     public Optional<Swc4jAstAccessibility> getAccessibility() {
         return accessibility;
@@ -86,6 +120,16 @@ public class Swc4jAstTsParamProp
         return Swc4jAstType.TsParamProp;
     }
 
+    @Jni2RustMethod
+    public boolean isOverride() {
+        return _override;
+    }
+
+    @Jni2RustMethod
+    public boolean isReadonly() {
+        return readonly;
+    }
+
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
         if (!decorators.isEmpty() && newNode instanceof Swc4jAstDecorator) {
@@ -103,16 +147,6 @@ public class Swc4jAstTsParamProp
             return true;
         }
         return false;
-    }
-
-    @Jni2RustMethod
-    public boolean isOverride() {
-        return _override;
-    }
-
-    @Jni2RustMethod
-    public boolean isReadonly() {
-        return readonly;
     }
 
     public Swc4jAstTsParamProp setAccessibility(Swc4jAstAccessibility accessibility) {

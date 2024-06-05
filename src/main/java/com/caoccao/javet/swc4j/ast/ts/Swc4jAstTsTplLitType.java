@@ -54,6 +54,14 @@ public class Swc4jAstTsTplLitType
         this.types.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTsTplLitType create(List<ISwc4jAstTsType> types) {
+        return create(types, SimpleList.of());
+    }
+
+    public static Swc4jAstTsTplLitType create(List<ISwc4jAstTsType> types, List<Swc4jAstTplElement> quasis) {
+        return new Swc4jAstTsTplLitType(types, quasis, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(types);

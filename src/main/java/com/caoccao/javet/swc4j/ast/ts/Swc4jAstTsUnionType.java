@@ -49,6 +49,14 @@ public class Swc4jAstTsUnionType
         this.types.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTsUnionType create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstTsUnionType create(List<ISwc4jAstTsType> types) {
+        return new Swc4jAstTsUnionType(types, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.copyOf(types);

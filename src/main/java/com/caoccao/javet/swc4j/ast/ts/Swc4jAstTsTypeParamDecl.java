@@ -44,6 +44,14 @@ public class Swc4jAstTsTypeParamDecl
         this.params.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTsTypeParamDecl create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstTsTypeParamDecl create(List<Swc4jAstTsTypeParam> params) {
+        return new Swc4jAstTsTypeParamDecl(params, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.copyOf(params);

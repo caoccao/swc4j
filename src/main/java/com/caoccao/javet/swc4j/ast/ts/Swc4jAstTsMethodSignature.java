@@ -68,6 +68,61 @@ public class Swc4jAstTsMethodSignature
         this.params.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstTsMethodSignature create(ISwc4jAstExpr key) {
+        return create(key, SimpleList.of());
+    }
+
+    public static Swc4jAstTsMethodSignature create(ISwc4jAstExpr key, List<ISwc4jAstTsFnParam> params) {
+        return create(false, key, params);
+    }
+
+    public static Swc4jAstTsMethodSignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            List<ISwc4jAstTsFnParam> params) {
+        return create(readonly, key, false, params);
+    }
+
+    public static Swc4jAstTsMethodSignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            List<ISwc4jAstTsFnParam> params) {
+        return create(readonly, key, computed, false, params);
+    }
+
+    public static Swc4jAstTsMethodSignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional,
+            List<ISwc4jAstTsFnParam> params) {
+        return create(readonly, key, computed, optional, params, null);
+    }
+
+    public static Swc4jAstTsMethodSignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional,
+            List<ISwc4jAstTsFnParam> params,
+            Swc4jAstTsTypeAnn typeAnn) {
+        return create(readonly, key, computed, optional, params, typeAnn, null);
+    }
+
+    public static Swc4jAstTsMethodSignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            boolean optional,
+            List<ISwc4jAstTsFnParam> params,
+            Swc4jAstTsTypeAnn typeAnn,
+            Swc4jAstTsTypeParamDecl typeParams) {
+        return new Swc4jAstTsMethodSignature(
+                readonly, key, computed, optional, params,
+                typeAnn, typeParams, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.copyOf(params);

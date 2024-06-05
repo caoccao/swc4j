@@ -19,7 +19,6 @@ package com.caoccao.javet.swc4j.ast.ts;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -45,6 +44,14 @@ public class Swc4jAstTsTupleType
         super(span);
         this.elemTypes = AssertionUtils.notNull(elemTypes, "ElemTypes");
         this.elemTypes.forEach(node -> node.setParent(this));
+    }
+
+    public static Swc4jAstTsTupleType create() {
+        return create(SimpleList.of());
+    }
+
+    public static Swc4jAstTsTupleType create(List<Swc4jAstTsTupleElement> elemTypes) {
+        return new Swc4jAstTsTupleType(elemTypes, Swc4jSpan.DUMMY);
     }
 
     @Override

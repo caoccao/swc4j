@@ -51,6 +51,10 @@ public class Swc4jAstTsTypeOperator
         setTypeAnn(typeAnn);
     }
 
+    public static Swc4jAstTsTypeOperator create(Swc4jAstTsTypeOperatorOp op, ISwc4jAstTsType typeAnn) {
+        return new Swc4jAstTsTypeOperator(op, typeAnn, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.of(typeAnn);

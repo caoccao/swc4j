@@ -52,6 +52,21 @@ public class Swc4jAstTsTypePredicate
         setTypeAnn(typeAnn);
     }
 
+    public static Swc4jAstTsTypePredicate create(ISwc4jAstTsThisTypeOrIdent paramName) {
+        return create(false, paramName);
+    }
+
+    public static Swc4jAstTsTypePredicate create(boolean asserts, ISwc4jAstTsThisTypeOrIdent paramName) {
+        return create(asserts, paramName, null);
+    }
+
+    public static Swc4jAstTsTypePredicate create(
+            boolean asserts,
+            ISwc4jAstTsThisTypeOrIdent paramName,
+            Swc4jAstTsTypeAnn typeAnn) {
+        return new Swc4jAstTsTypePredicate(asserts, paramName, typeAnn, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(paramName);

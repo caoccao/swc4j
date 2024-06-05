@@ -64,6 +64,41 @@ public class Swc4jAstTsTypeParam
         setOut(out);
     }
 
+    public static Swc4jAstTsTypeParam create(Swc4jAstIdent name) {
+        return create(name, false);
+    }
+
+    public static Swc4jAstTsTypeParam create(Swc4jAstIdent name, boolean in) {
+        return create(name, in, false);
+    }
+
+    public static Swc4jAstTsTypeParam create(Swc4jAstIdent name, boolean in, boolean out) {
+        return create(name, in, out, false);
+    }
+
+    public static Swc4jAstTsTypeParam create(Swc4jAstIdent name, boolean in, boolean out, boolean _const) {
+        return create(name, in, out, _const, null);
+    }
+
+    public static Swc4jAstTsTypeParam create(
+            Swc4jAstIdent name,
+            boolean in,
+            boolean out,
+            boolean _const,
+            ISwc4jAstTsType constraint) {
+        return create(name, in, out, _const, constraint, null);
+    }
+
+    public static Swc4jAstTsTypeParam create(
+            Swc4jAstIdent name,
+            boolean in,
+            boolean out,
+            boolean _const,
+            ISwc4jAstTsType constraint,
+            ISwc4jAstTsType _default) {
+        return new Swc4jAstTsTypeParam(name, in, out, _const, constraint, _default, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(name);

@@ -48,6 +48,14 @@ public class Swc4jAstTsTupleElement
         setTy(ty);
     }
 
+    public static Swc4jAstTsTupleElement create(ISwc4jAstTsType ty) {
+        return create(null, ty);
+    }
+
+    public static Swc4jAstTsTupleElement create(ISwc4jAstPat label, ISwc4jAstTsType ty) {
+        return new Swc4jAstTsTupleElement(label, ty, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(ty);

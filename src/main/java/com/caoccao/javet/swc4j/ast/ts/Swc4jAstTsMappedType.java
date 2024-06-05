@@ -59,6 +59,38 @@ public class Swc4jAstTsMappedType
         setTypeParam(typeParam);
     }
 
+    public static Swc4jAstTsMappedType create(Swc4jAstTsTypeParam typeParam) {
+        return create(null, typeParam);
+    }
+
+    public static Swc4jAstTsMappedType create(Swc4jAstTruePlusMinus readonly, Swc4jAstTsTypeParam typeParam) {
+        return create(readonly, typeParam, null);
+    }
+
+    public static Swc4jAstTsMappedType create(
+            Swc4jAstTruePlusMinus readonly,
+            Swc4jAstTsTypeParam typeParam,
+            ISwc4jAstTsType nameType) {
+        return create(readonly, typeParam, nameType, null);
+    }
+
+    public static Swc4jAstTsMappedType create(
+            Swc4jAstTruePlusMinus readonly,
+            Swc4jAstTsTypeParam typeParam,
+            ISwc4jAstTsType nameType,
+            Swc4jAstTruePlusMinus optional) {
+        return create(readonly, typeParam, nameType, optional, null);
+    }
+
+    public static Swc4jAstTsMappedType create(
+            Swc4jAstTruePlusMinus readonly,
+            Swc4jAstTsTypeParam typeParam,
+            ISwc4jAstTsType nameType,
+            Swc4jAstTruePlusMinus optional,
+            ISwc4jAstTsType typeAnn) {
+        return new Swc4jAstTsMappedType(readonly, typeParam, nameType, optional, typeAnn, Swc4jSpan.DUMMY);
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(typeParam);
