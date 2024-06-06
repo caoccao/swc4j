@@ -22,6 +22,8 @@ object Config {
     const val VERSION = Versions.SWC4J
     const val URL = "https://github.com/caoccao/swc4j"
 
+    const val MODULE_NAME = "$GROUP_ID.$NAME"
+
     object Pom {
         const val ARTIFACT_ID = "swc4j"
         const val DESCRIPTION =
@@ -131,7 +133,7 @@ task<Exec>("buildJNIHeaders") {
 
 tasks.jar {
     manifest {
-        attributes["Automatic-Module-Name"] = Config.GROUP_ID
+        attributes["Automatic-Module-Name"] = Config.MODULE_NAME
     }
 }
 
