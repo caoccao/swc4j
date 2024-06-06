@@ -51,7 +51,11 @@ public class Swc4jAstParam
     }
 
     public static Swc4jAstParam create(ISwc4jAstPat pat) {
-        return new Swc4jAstParam(SimpleList.of(), pat, Swc4jSpan.DUMMY);
+        return create(SimpleList.of(), pat);
+    }
+
+    public static Swc4jAstParam create(List<Swc4jAstDecorator> decorators, ISwc4jAstPat pat) {
+        return new Swc4jAstParam(decorators, pat, Swc4jSpan.DUMMY);
     }
 
     @Override

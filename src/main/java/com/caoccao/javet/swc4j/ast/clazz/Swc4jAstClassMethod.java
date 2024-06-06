@@ -77,9 +77,59 @@ public class Swc4jAstClassMethod
             ISwc4jAstPropName key,
             Swc4jAstFunction function,
             Swc4jAstMethodKind kind) {
+        return create(key, function, kind, false);
+    }
+
+    public static Swc4jAstClassMethod create(
+            ISwc4jAstPropName key,
+            Swc4jAstFunction function,
+            Swc4jAstMethodKind kind,
+            boolean _static) {
+        return create(key, function, kind, _static, null);
+    }
+
+    public static Swc4jAstClassMethod create(
+            ISwc4jAstPropName key,
+            Swc4jAstFunction function,
+            Swc4jAstMethodKind kind,
+            boolean _static,
+            Swc4jAstAccessibility accessibility) {
+        return create(key, function, kind, _static, accessibility, false);
+    }
+
+    public static Swc4jAstClassMethod create(
+            ISwc4jAstPropName key,
+            Swc4jAstFunction function,
+            Swc4jAstMethodKind kind,
+            boolean _static,
+            Swc4jAstAccessibility accessibility,
+            boolean _abstract) {
+        return create(key, function, kind, _static, accessibility, _abstract, false);
+    }
+
+    public static Swc4jAstClassMethod create(
+            ISwc4jAstPropName key,
+            Swc4jAstFunction function,
+            Swc4jAstMethodKind kind,
+            boolean _static,
+            Swc4jAstAccessibility accessibility,
+            boolean _abstract,
+            boolean optional) {
+        return create(key, function, kind, _static, accessibility, _abstract, optional, false);
+    }
+
+    public static Swc4jAstClassMethod create(
+            ISwc4jAstPropName key,
+            Swc4jAstFunction function,
+            Swc4jAstMethodKind kind,
+            boolean _static,
+            Swc4jAstAccessibility accessibility,
+            boolean _abstract,
+            boolean optional,
+            boolean _override) {
         return new Swc4jAstClassMethod(
-                key, function, kind, false, null,
-                false, false, false, Swc4jSpan.DUMMY);
+                key, function, kind, _static, accessibility,
+                _abstract, optional, _override, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod

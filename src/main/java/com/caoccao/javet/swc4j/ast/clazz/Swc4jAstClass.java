@@ -78,9 +78,58 @@ public class Swc4jAstClass
     }
 
     public static Swc4jAstClass create(List<ISwc4jAstClassMember> body) {
+        return create(SimpleList.of(), body);
+    }
+
+    public static Swc4jAstClass create(List<Swc4jAstDecorator> decorators, List<ISwc4jAstClassMember> body) {
+        return create(decorators, body, null);
+    }
+
+    public static Swc4jAstClass create(
+            List<Swc4jAstDecorator> decorators,
+            List<ISwc4jAstClassMember> body,
+            ISwc4jAstExpr superClass) {
+        return create(decorators, body, superClass, false);
+    }
+
+    public static Swc4jAstClass create(
+            List<Swc4jAstDecorator> decorators,
+            List<ISwc4jAstClassMember> body,
+            ISwc4jAstExpr superClass,
+            boolean _abstract) {
+        return create(decorators, body, superClass, _abstract, null);
+    }
+
+    public static Swc4jAstClass create(
+            List<Swc4jAstDecorator> decorators,
+            List<ISwc4jAstClassMember> body,
+            ISwc4jAstExpr superClass,
+            boolean _abstract,
+            Swc4jAstTsTypeParamDecl typeParams) {
+        return create(decorators, body, superClass, _abstract, typeParams, null);
+    }
+
+    public static Swc4jAstClass create(
+            List<Swc4jAstDecorator> decorators,
+            List<ISwc4jAstClassMember> body,
+            ISwc4jAstExpr superClass,
+            boolean _abstract,
+            Swc4jAstTsTypeParamDecl typeParams,
+            Swc4jAstTsTypeParamInstantiation superTypeParams) {
+        return create(decorators, body, superClass, _abstract, typeParams, superTypeParams, SimpleList.of());
+    }
+
+    public static Swc4jAstClass create(
+            List<Swc4jAstDecorator> decorators,
+            List<ISwc4jAstClassMember> body,
+            ISwc4jAstExpr superClass,
+            boolean _abstract,
+            Swc4jAstTsTypeParamDecl typeParams,
+            Swc4jAstTsTypeParamInstantiation superTypeParams,
+            List<Swc4jAstTsExprWithTypeArgs> _implements) {
         return new Swc4jAstClass(
-                SimpleList.of(), body, null, false, null,
-                null, SimpleList.of(), Swc4jSpan.DUMMY);
+                decorators, body, superClass, _abstract, typeParams,
+                superTypeParams, _implements, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod

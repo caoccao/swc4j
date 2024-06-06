@@ -149,7 +149,7 @@ node.getParent().replaceNode(node, fnExpr);
 public Swc4jAstVisitorResponse visitArrowExpr(Swc4jAstArrowExpr node) {
     // Transform the params.
     List<Swc4jAstParam> params = node.getParams().stream()
-            .map(param -> new Swc4jAstParam(new ArrayList<>(), param, Swc4jSpan.DUMMY))
+            .map(Swc4jAstParam::create)
             .collect(Collectors.toList());
     // Transform the block statement.
     Swc4jAstBlockStmt blockStmt;
@@ -161,22 +161,20 @@ public Swc4jAstVisitorResponse visitArrowExpr(Swc4jAstArrowExpr node) {
         // If the body is an expression, put that expression in a return statement
         // and add that return statement to the block statement.
         List<ISwc4jAstStmt> stmts = new ArrayList<>();
-        Swc4jAstReturnStmt returnStmt = new Swc4jAstReturnStmt(body.as(ISwc4jAstExpr.class), Swc4jSpan.DUMMY);
-        stmts.add(returnStmt);
-        blockStmt = new Swc4jAstBlockStmt(stmts, Swc4jSpan.DUMMY);
+        stmts.add(Swc4jAstReturnStmt.create(body.as(ISwc4jAstExpr.class)));
+        blockStmt = Swc4jAstBlockStmt.create(stmts);
     }
     // Create the function.
-    Swc4jAstFunction fn = new Swc4jAstFunction(
+    Swc4jAstFunction fn = Swc4jAstFunction.create(
             params,
             new ArrayList<>(),
             blockStmt,
             node.isGenerator(),
             node.isAsync(),
             node.getTypeParams().orElse(null),
-            node.getReturnType().orElse(null),
-            Swc4jSpan.DUMMY);
+            node.getReturnType().orElse(null));
     // Create the function expression.
-    Swc4jAstFnExpr fnExpr = new Swc4jAstFnExpr(null, fn, Swc4jSpan.DUMMY);
+    Swc4jAstFnExpr fnExpr = Swc4jAstFnExpr.create(fn);
     // Replace the arrow expression with the function expression.
     node.getParent().replaceNode(node, fnExpr);
     return super.visitArrowExpr(node);

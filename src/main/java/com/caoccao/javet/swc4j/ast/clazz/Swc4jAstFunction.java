@@ -85,9 +85,48 @@ public class Swc4jAstFunction
             List<Swc4jAstParam> params,
             List<Swc4jAstDecorator> decorators,
             Swc4jAstBlockStmt body) {
+        return create(params, decorators, body, false);
+    }
+
+    public static Swc4jAstFunction create(
+            List<Swc4jAstParam> params,
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstBlockStmt body,
+            boolean generator) {
+        return create(params, decorators, body, generator, false, null, null);
+    }
+
+    public static Swc4jAstFunction create(
+            List<Swc4jAstParam> params,
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstBlockStmt body,
+            boolean generator,
+            boolean _async,
+            Swc4jAstTsTypeParamDecl typeParams) {
+        return create(params, decorators, body, generator, _async, typeParams, null);
+    }
+
+    public static Swc4jAstFunction create(
+            List<Swc4jAstParam> params,
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstBlockStmt body,
+            boolean generator,
+            boolean _async,
+            Swc4jAstTsTypeAnn returnType) {
+        return create(params, decorators, body, generator, _async, null, returnType);
+    }
+
+    public static Swc4jAstFunction create(
+            List<Swc4jAstParam> params,
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstBlockStmt body,
+            boolean generator,
+            boolean _async,
+            Swc4jAstTsTypeParamDecl typeParams,
+            Swc4jAstTsTypeAnn returnType) {
         return new Swc4jAstFunction(
-                params, decorators, body, false, false,
-                null, null, Swc4jSpan.DUMMY);
+                params, decorators, body, generator, _async,
+                typeParams, returnType, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod

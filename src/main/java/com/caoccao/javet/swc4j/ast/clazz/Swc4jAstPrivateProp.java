@@ -86,9 +86,92 @@ public class Swc4jAstPrivateProp
     }
 
     public static Swc4jAstPrivateProp create(Swc4jAstPrivateName key, ISwc4jAstExpr value) {
+        return create(key, value, null);
+    }
+
+    public static Swc4jAstPrivateProp create(Swc4jAstPrivateName key, ISwc4jAstExpr value, Swc4jAstTsTypeAnn typeAnn) {
+        return create(key, value, typeAnn, false);
+    }
+
+    public static Swc4jAstPrivateProp create(
+            Swc4jAstPrivateName key,
+            ISwc4jAstExpr value,
+            Swc4jAstTsTypeAnn typeAnn,
+            boolean _static) {
+        return create(key, value, typeAnn, _static, SimpleList.of());
+    }
+
+    public static Swc4jAstPrivateProp create(
+            Swc4jAstPrivateName key,
+            ISwc4jAstExpr value,
+            Swc4jAstTsTypeAnn typeAnn,
+            boolean _static,
+            List<Swc4jAstDecorator> decorators) {
+        return create(key, value, typeAnn, _static, decorators, null);
+    }
+
+    public static Swc4jAstPrivateProp create(
+            Swc4jAstPrivateName key,
+            ISwc4jAstExpr value,
+            Swc4jAstTsTypeAnn typeAnn,
+            boolean _static,
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstAccessibility accessibility) {
+        return create(key, value, typeAnn, _static, decorators, accessibility, false);
+    }
+
+    public static Swc4jAstPrivateProp create(
+            Swc4jAstPrivateName key,
+            ISwc4jAstExpr value,
+            Swc4jAstTsTypeAnn typeAnn,
+            boolean _static,
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstAccessibility accessibility,
+            boolean optional) {
+        return create(key, value, typeAnn, _static, decorators, accessibility, optional, false);
+    }
+
+    public static Swc4jAstPrivateProp create(
+            Swc4jAstPrivateName key,
+            ISwc4jAstExpr value,
+            Swc4jAstTsTypeAnn typeAnn,
+            boolean _static,
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstAccessibility accessibility,
+            boolean optional,
+            boolean _override) {
+        return create(key, value, typeAnn, _static, decorators, accessibility, optional, _override, false);
+    }
+
+    public static Swc4jAstPrivateProp create(
+            Swc4jAstPrivateName key,
+            ISwc4jAstExpr value,
+            Swc4jAstTsTypeAnn typeAnn,
+            boolean _static,
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstAccessibility accessibility,
+            boolean optional,
+            boolean _override,
+            boolean readonly) {
+        return create(
+                key, value, typeAnn, _static, decorators,
+                accessibility, optional, _override, readonly, false);
+    }
+
+    public static Swc4jAstPrivateProp create(
+            Swc4jAstPrivateName key,
+            ISwc4jAstExpr value,
+            Swc4jAstTsTypeAnn typeAnn,
+            boolean _static,
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstAccessibility accessibility,
+            boolean optional,
+            boolean _override,
+            boolean readonly,
+            boolean definite) {
         return new Swc4jAstPrivateProp(
-                key, value, null, false, SimpleList.of(),
-                null, false, false, false, false,
+                key, value, typeAnn, _static, decorators,
+                accessibility, optional, _override, readonly, definite,
                 Swc4jSpan.DUMMY);
     }
 

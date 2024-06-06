@@ -76,7 +76,24 @@ public class Swc4jAstConstructor
             ISwc4jAstPropName key,
             List<ISwc4jAstParamOrTsParamProp> params,
             Swc4jAstBlockStmt body) {
-        return new Swc4jAstConstructor(key, params, body, null, false, Swc4jSpan.DUMMY);
+        return create(key, params, body, null);
+    }
+
+    public static Swc4jAstConstructor create(
+            ISwc4jAstPropName key,
+            List<ISwc4jAstParamOrTsParamProp> params,
+            Swc4jAstBlockStmt body,
+            Swc4jAstAccessibility accessibility) {
+        return create(key, params, body, accessibility, false);
+    }
+
+    public static Swc4jAstConstructor create(
+            ISwc4jAstPropName key,
+            List<ISwc4jAstParamOrTsParamProp> params,
+            Swc4jAstBlockStmt body,
+            Swc4jAstAccessibility accessibility,
+            boolean optional) {
+        return new Swc4jAstConstructor(key, params, body, accessibility, optional, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod

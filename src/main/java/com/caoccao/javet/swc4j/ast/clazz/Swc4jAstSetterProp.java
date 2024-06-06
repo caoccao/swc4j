@@ -58,7 +58,14 @@ public class Swc4jAstSetterProp
     }
 
     public static Swc4jAstSetterProp create(ISwc4jAstPropName key, ISwc4jAstPat param) {
-        return create(key, null, param, null);
+        return create(key, null, param);
+    }
+
+    public static Swc4jAstSetterProp create(
+            ISwc4jAstPropName key,
+            ISwc4jAstPat thisParam,
+            ISwc4jAstPat param) {
+        return create(key, thisParam, param, null);
     }
 
     public static Swc4jAstSetterProp create(
