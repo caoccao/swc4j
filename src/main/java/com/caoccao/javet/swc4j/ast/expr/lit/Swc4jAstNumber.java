@@ -57,11 +57,11 @@ public class Swc4jAstNumber
     }
 
     public static Swc4jAstNumber create(int value) {
-        return new Swc4jAstNumber(value, Integer.toString(value), Swc4jSpan.DUMMY);
+        return create(value, Integer.toString(value));
     }
 
     public static Swc4jAstNumber create(double value) {
-        return new Swc4jAstNumber(value, null, Swc4jSpan.DUMMY);
+        return create(value, null);
     }
 
     public static Swc4jAstNumber create(double value, String raw) {
@@ -69,11 +69,11 @@ public class Swc4jAstNumber
     }
 
     public static Swc4jAstNumber createInfinity(boolean positive) {
-        return new Swc4jAstNumber(positive ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY, null, Swc4jSpan.DUMMY);
+        return create(positive ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY, null);
     }
 
     public static Swc4jAstNumber createNaN() {
-        return new Swc4jAstNumber(Double.NaN, null, Swc4jSpan.DUMMY);
+        return create(Double.NaN, null);
     }
 
     protected static String normalize(String raw) {

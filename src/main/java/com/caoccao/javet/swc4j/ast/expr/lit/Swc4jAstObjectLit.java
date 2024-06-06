@@ -48,6 +48,10 @@ public class Swc4jAstObjectLit
         props.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstObjectLit create() {
+        return create(SimpleList.of());
+    }
+
     public static Swc4jAstObjectLit create(List<ISwc4jAstPropOrSpread> props) {
         return new Swc4jAstObjectLit(props, Swc4jSpan.DUMMY);
     }

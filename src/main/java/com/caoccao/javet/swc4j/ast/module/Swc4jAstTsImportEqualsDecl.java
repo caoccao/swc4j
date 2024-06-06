@@ -59,16 +59,11 @@ public class Swc4jAstTsImportEqualsDecl
         setTypeOnly(typeOnly);
     }
 
-    public static Swc4jAstTsImportEqualsDecl create(
-            Swc4jAstIdent id,
-            ISwc4jAstTsModuleRef moduleRef) {
+    public static Swc4jAstTsImportEqualsDecl create(Swc4jAstIdent id, ISwc4jAstTsModuleRef moduleRef) {
         return create(false, id, moduleRef);
     }
 
-    public static Swc4jAstTsImportEqualsDecl create(
-            boolean export,
-            Swc4jAstIdent id,
-            ISwc4jAstTsModuleRef moduleRef) {
+    public static Swc4jAstTsImportEqualsDecl create(boolean export, Swc4jAstIdent id, ISwc4jAstTsModuleRef moduleRef) {
         return create(export, false, id, moduleRef);
     }
 

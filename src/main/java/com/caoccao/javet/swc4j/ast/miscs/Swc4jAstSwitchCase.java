@@ -50,11 +50,15 @@ public class Swc4jAstSwitchCase
     }
 
     public static Swc4jAstSwitchCase create() {
-        return create(null);
+        return create(SimpleList.of());
     }
 
     public static Swc4jAstSwitchCase create(ISwc4jAstExpr test) {
         return create(test, SimpleList.of());
+    }
+
+    public static Swc4jAstSwitchCase create(List<ISwc4jAstStmt> cons) {
+        return create(null, cons);
     }
 
     public static Swc4jAstSwitchCase create(ISwc4jAstExpr test, List<ISwc4jAstStmt> cons) {

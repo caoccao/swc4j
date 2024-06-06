@@ -57,16 +57,11 @@ public class Swc4jAstTsNamespaceDecl
         setId(id);
     }
 
-    public static Swc4jAstTsNamespaceDecl create(
-            Swc4jAstIdent id,
-            ISwc4jAstTsNamespaceBody body) {
+    public static Swc4jAstTsNamespaceDecl create(Swc4jAstIdent id, ISwc4jAstTsNamespaceBody body) {
         return create(false, id, body);
     }
 
-    public static Swc4jAstTsNamespaceDecl create(
-            boolean declare,
-            Swc4jAstIdent id,
-            ISwc4jAstTsNamespaceBody body) {
+    public static Swc4jAstTsNamespaceDecl create(boolean declare, Swc4jAstIdent id, ISwc4jAstTsNamespaceBody body) {
         return create(declare, false, id, body);
     }
 

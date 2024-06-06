@@ -69,10 +69,19 @@ public class Swc4jAstArrowExpr
         this.params.forEach(node -> node.setParent(this));
     }
 
+    public static Swc4jAstArrowExpr create(ISwc4jAstBlockStmtOrExpr body) {
+        return create(SimpleList.of(), body);
+    }
+
+    public static Swc4jAstArrowExpr create(List<ISwc4jAstPat> params, ISwc4jAstBlockStmtOrExpr body) {
+        return create(params, body, false);
+    }
+
     public static Swc4jAstArrowExpr create(
             List<ISwc4jAstPat> params,
-            ISwc4jAstBlockStmtOrExpr body) {
-        return create(params, body, false, false);
+            ISwc4jAstBlockStmtOrExpr body,
+            boolean _async) {
+        return create(params, body, _async, false);
     }
 
     public static Swc4jAstArrowExpr create(
