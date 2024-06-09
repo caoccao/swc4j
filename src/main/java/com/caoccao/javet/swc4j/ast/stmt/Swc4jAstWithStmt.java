@@ -52,6 +52,10 @@ public class Swc4jAstWithStmt
         setObj(obj);
     }
 
+    public static Swc4jAstWithStmt create(ISwc4jAstExpr obj) {
+        return create(obj, ISwc4jAstStmt.createDefault());
+    }
+
     public static Swc4jAstWithStmt create(ISwc4jAstExpr obj, ISwc4jAstStmt body) {
         return new Swc4jAstWithStmt(obj, body, Swc4jSpan.DUMMY);
     }

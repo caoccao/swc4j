@@ -57,10 +57,11 @@ public class Swc4jAstForOfStmt
         setRight(right);
     }
 
-    public static Swc4jAstForOfStmt create(
-            ISwc4jAstForHead left,
-            ISwc4jAstExpr right,
-            ISwc4jAstStmt body) {
+    public static Swc4jAstForOfStmt create(ISwc4jAstForHead left, ISwc4jAstExpr right) {
+        return create(false, left, right, ISwc4jAstStmt.createDefault());
+    }
+
+    public static Swc4jAstForOfStmt create(ISwc4jAstForHead left, ISwc4jAstExpr right, ISwc4jAstStmt body) {
         return create(false, left, right, body);
     }
 

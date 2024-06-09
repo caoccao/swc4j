@@ -44,4 +44,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
         }
 )
 public interface ISwc4jAstStmt extends ISwc4jAstModuleItem {
+    static ISwc4jAstStmt createDefault() {
+        return Swc4jAstEmptyStmt.create();
+    }
 }

@@ -61,7 +61,6 @@ public class TestSwc4jAstIfStmt extends BaseTestSuiteSwc4jAst {
         String code = "if (a) b; else c;";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
-        System.out.println(script.toDebugString());
         Swc4jAstIfStmt ifStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstIfStmt.class), Swc4jAstType.IfStmt, 0, 17);
         Swc4jAstIdent ident = assertAst(

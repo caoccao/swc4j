@@ -58,6 +58,10 @@ public class Swc4jAstForStmt
         setUpdate(update);
     }
 
+    public static Swc4jAstForStmt create() {
+        return create(ISwc4jAstStmt.createDefault());
+    }
+
     public static Swc4jAstForStmt create(ISwc4jAstStmt body) {
         return create(null, body);
     }

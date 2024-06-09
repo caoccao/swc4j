@@ -54,6 +54,10 @@ public class Swc4jAstIfStmt
         setTest(test);
     }
 
+    public static Swc4jAstIfStmt create(ISwc4jAstExpr test) {
+        return create(test, ISwc4jAstStmt.createDefault());
+    }
+
     public static Swc4jAstIfStmt create(ISwc4jAstExpr test, ISwc4jAstStmt cons) {
         return create(test, cons, null);
     }

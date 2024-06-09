@@ -52,6 +52,10 @@ public class Swc4jAstDoWhileStmt
         setTest(test);
     }
 
+    public static Swc4jAstDoWhileStmt create(ISwc4jAstExpr test) {
+        return create(test, ISwc4jAstStmt.createDefault());
+    }
+
     public static Swc4jAstDoWhileStmt create(ISwc4jAstExpr test, ISwc4jAstStmt body) {
         return new Swc4jAstDoWhileStmt(test, body, Swc4jSpan.DUMMY);
     }
