@@ -19,19 +19,21 @@ package com.caoccao.javet.swc4j.ast.clazz;
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstFnExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstFnDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstFunction extends BaseTestSuiteSwc4jAst {
     @Test
-    public void testAnonymousFunction() throws Swc4jCoreException {
+    public void testAnonymousEmptyFunction() throws Swc4jCoreException {
         String code = "const a = function() {}";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
@@ -49,6 +51,30 @@ public class TestSwc4jAstFunction extends BaseTestSuiteSwc4jAst {
         assertFalse(function.isGenerator());
         assertFalse(function.getReturnType().isPresent());
         assertFalse(function.getTypeParams().isPresent());
+        assertSpan(code, script);
+    }
+
+    @Test
+    public void testNamedEmptyFunction() throws Swc4jCoreException {
+        String code = "function a() {}";
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstFnDecl fnDecl = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstFnDecl.class), Swc4jAstType.FnDecl, 0, 15);
+        assertFalse(fnDecl.isDeclare());
+        Swc4jAstIdent ident = assertAst(
+                fnDecl, fnDecl.getIdent().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 9, 10);
+        assertEquals("a", ident.getSym());
+        Swc4jAstFunction function = assertAst(
+                fnDecl, fnDecl.getFunction(), Swc4jAstType.Function, 0, 15);
+        assertFalse(function.isAsync());
+        assertFalse(function.isGenerator());
+        assertFalse(function.getReturnType().isPresent());
+        assertFalse(function.getTypeParams().isPresent());
+        assertTrue(function.getBody().isPresent());
+        Swc4jAstBlockStmt blockStmt = assertAst(
+                function, function.getBody().get(), Swc4jAstType.BlockStmt, 13, 15);
+        assertTrue(blockStmt.getStmts().isEmpty());
         assertSpan(code, script);
     }
 }
