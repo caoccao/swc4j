@@ -30,7 +30,7 @@ public class TestSwc4jAstRegex extends BaseTestSuiteSwc4jAst {
     @Test
     public void testExpAndFlags() throws Swc4jCoreException {
         String code = "/abc/ig";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
+        Swc4jParseOutput output = swc4j.parse(code, jsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstExprStmt exprStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 7);
@@ -38,13 +38,14 @@ public class TestSwc4jAstRegex extends BaseTestSuiteSwc4jAst {
                 exprStmt, exprStmt.getExpr().as(Swc4jAstRegex.class), Swc4jAstType.Regex, 0, 7);
         assertEquals("abc", regex.getExp());
         assertEquals("ig", regex.getFlags());
+        assertEquals(code, regex.toString());
         assertSpan(code, script);
     }
 
     @Test
     public void testExpOnly() throws Swc4jCoreException {
         String code = "/abc/";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
+        Swc4jParseOutput output = swc4j.parse(code, jsScriptParseOptions);
         Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
         Swc4jAstExprStmt exprStmt = assertAst(
                 script, script.getBody().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 0, 5);
@@ -52,6 +53,7 @@ public class TestSwc4jAstRegex extends BaseTestSuiteSwc4jAst {
                 exprStmt, exprStmt.getExpr().as(Swc4jAstRegex.class), Swc4jAstType.Regex, 0, 5);
         assertEquals("abc", regex.getExp());
         assertEquals("", regex.getFlags());
+        assertEquals(code, regex.toString());
         assertSpan(code, script);
     }
 }
