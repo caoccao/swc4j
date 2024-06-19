@@ -16,14 +16,18 @@
 
 package com.caoccao.javet.sanitizer.codegen;
 
+import com.caoccao.javet.exceptions.JavetException;
+import com.caoccao.javet.interop.V8Host;
+import com.caoccao.javet.interop.V8Runtime;
 import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
+import com.caoccao.javet.values.reference.builtin.V8ValueBuiltInObject;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestJavetSanitizerFridge {
     @Test
-    public void testGenerate() {
+    public void testGenerate() throws JavetException {
         JavetSanitizerOptions options = JavetSanitizerOptions.Default.toClone();
         options.getToBeDeletedIdentifierList().clear();
         options.getToBeDeletedIdentifierList().add("eval");
@@ -59,5 +63,12 @@ public class TestJavetSanitizerFridge {
                         "Object.freeze(Array);\n" +
                         "Object.freeze(Array.prototype);\n\n",
                 codeString);
+        try (V8Runtime v8Runtime = V8Host.getV8Instance().createV8Runtime()) {
+            try (V8ValueBuiltInObject v8ValueBuiltInObject = v8Runtime.getGlobalObject().getBuiltInObject()) {
+                assertFalse(v8ValueBuiltInObject.isFrozen());
+                v8Runtime.getExecutor(codeString).executeVoid();
+                assertTrue(v8ValueBuiltInObject.isFrozen());
+            }
+        }
     }
 }
