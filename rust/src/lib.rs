@@ -20,7 +20,6 @@ use jni::sys::{jint, jobject, jstring, JNI_VERSION_1_8};
 use jni::{JNIEnv, JavaVM};
 use jni_utils::FromJava;
 
-use debug_print::debug_println;
 use std::ffi::c_void;
 use std::ptr::null_mut;
 
@@ -40,7 +39,8 @@ use crate::jni_utils::{jstring_to_optional_string, jstring_to_string, string_to_
 
 #[no_mangle]
 pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
-  debug_println!("JNI_OnLoad()");
+  env_logger::init();
+  log::debug!("JNI_OnLoad()");
   let mut env = java_vm.get_env().expect("Cannot get JNI env");
   ast_utils::init(&mut env);
   comment_utils::init(&mut env);
