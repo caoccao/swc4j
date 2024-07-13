@@ -52,7 +52,12 @@ public class Swc4jAstCallExpr
     protected static final Swc4jParseOptions PARSE_OPTIONS = new Swc4jParseOptions()
             .setCaptureAst(true)
             .setMediaType(Swc4jMediaType.JavaScript);
-    protected static final Swc4j SWC4J = new Swc4j();
+    /**
+     * The constant swc4j is for evaluating the expression.
+     *
+     * @since 0.10.0
+     */
+    protected static Swc4j swc4j;
     protected final List<Swc4jAstExprOrSpread> args;
     protected ISwc4jAstCallee callee;
     @Jni2RustField(componentBox = true)
@@ -84,6 +89,13 @@ public class Swc4jAstCallExpr
             List<Swc4jAstExprOrSpread> args,
             Swc4jAstTsTypeParamInstantiation typeArgs) {
         return new Swc4jAstCallExpr(callee, args, typeArgs, Swc4jSpan.DUMMY);
+    }
+
+    protected static Swc4j getSwc4j() {
+        if (swc4j == null) {
+            swc4j = new Swc4j();
+        }
+        return swc4j;
     }
 
     @Override
@@ -244,7 +256,7 @@ public class Swc4jAstCallExpr
                         if (expr instanceof Swc4jAstStr) {
                             String code = expr.as(Swc4jAstStr.class).getValue();
                             try {
-                                Swc4jParseOutput output = SWC4J.parse(code, PARSE_OPTIONS);
+                                Swc4jParseOutput output = getSwc4j().parse(code, PARSE_OPTIONS);
                                 List<? extends ISwc4jAst> body = output.getProgram().getBody();
                                 if (body.size() == 1 && body.get(0) instanceof Swc4jAstReturnStmt) {
                                     Swc4jAstReturnStmt returnStmt = body.get(0).as(Swc4jAstReturnStmt.class);

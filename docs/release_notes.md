@@ -5,6 +5,7 @@
 * Upgraded deno_ast to v0.40.0
 * Upgraded rust toolchain to v1.79.0
 * Replaced `debug_print` with `log`
+* Fixed extra line separators in JsxText
 
 ## 0.9.0
 
