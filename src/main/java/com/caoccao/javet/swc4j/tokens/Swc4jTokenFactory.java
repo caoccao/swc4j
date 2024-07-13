@@ -212,17 +212,19 @@ public final class Swc4jTokenFactory {
      * Create token jsx tag text.
      *
      * @param text           the text
+     * @param value          the value
      * @param span           the span
      * @param lineBreakAhead the line break ahead
      * @return the token jsx tag text
      * @since 0.2.0
      */
     @Jni2RustMethod
-    public static Swc4jTokenText createJsxTagText(
+    public static Swc4jTokenTextValue<String> createJsxTagText(
             String text,
+            String value,
             Swc4jSpan span,
             boolean lineBreakAhead) {
-        return new Swc4jTokenText(Swc4jTokenType.JsxTagText, text, span, lineBreakAhead);
+        return new Swc4jTokenTextValue<>(Swc4jTokenType.JsxTagText, text, value, span, lineBreakAhead);
     }
 
     /**

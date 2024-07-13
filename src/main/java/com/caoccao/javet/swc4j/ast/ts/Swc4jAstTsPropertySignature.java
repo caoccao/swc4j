@@ -20,7 +20,6 @@ import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsFnParam;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsTypeElement;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -36,18 +35,13 @@ import java.util.Optional;
 public class Swc4jAstTsPropertySignature
         extends Swc4jAst
         implements ISwc4jAstTsTypeElement {
-    protected final List<ISwc4jAstTsFnParam> params;
     protected boolean computed;
-    @Jni2RustField(componentBox = true)
-    protected Optional<ISwc4jAstExpr> init;
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr key;
     protected boolean optional;
     protected boolean readonly;
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
-    @Jni2RustField(componentBox = true)
-    protected Optional<Swc4jAstTsTypeParamDecl> typeParams;
 
     @Jni2RustMethod
     public Swc4jAstTsPropertySignature(
@@ -55,74 +49,37 @@ public class Swc4jAstTsPropertySignature
             ISwc4jAstExpr key,
             boolean computed,
             boolean optional,
-            @Jni2RustParam(optional = true) ISwc4jAstExpr init,
-            List<ISwc4jAstTsFnParam> params,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
-            @Jni2RustParam(optional = true) Swc4jAstTsTypeParamDecl typeParams,
             Swc4jSpan span) {
         super(span);
         setComputed(computed);
-        setInit(init);
         setKey(key);
         setOptional(optional);
         setReadonly(readonly);
         setTypeAnn(typeAnn);
-        setTypeParams(typeParams);
-        this.params = AssertionUtils.notNull(params, "Params");
-        this.params.forEach(node -> node.setParent(this));
     }
 
     public static Swc4jAstTsPropertySignature create(ISwc4jAstExpr key) {
-        return create(key, SimpleList.of());
+        return create(key, null);
     }
 
-    public static Swc4jAstTsPropertySignature create(ISwc4jAstExpr key, List<ISwc4jAstTsFnParam> params) {
-        return create(false, key, params);
-    }
-
-    public static Swc4jAstTsPropertySignature create(
-            boolean readonly,
-            ISwc4jAstExpr key,
-            List<ISwc4jAstTsFnParam> params) {
-        return create(readonly, key, false, params);
+    public static Swc4jAstTsPropertySignature create(ISwc4jAstExpr key, Swc4jAstTsTypeAnn typeAnn) {
+        return create(false, key, typeAnn);
     }
 
     public static Swc4jAstTsPropertySignature create(
             boolean readonly,
             ISwc4jAstExpr key,
-            boolean computed,
-            List<ISwc4jAstTsFnParam> params) {
-        return create(readonly, key, computed, false, params);
-    }
-
-    public static Swc4jAstTsPropertySignature create(
-            boolean readonly,
-            ISwc4jAstExpr key,
-            boolean computed,
-            boolean optional,
-            List<ISwc4jAstTsFnParam> params) {
-        return create(readonly, key, computed, optional, null, params);
-    }
-
-    public static Swc4jAstTsPropertySignature create(
-            boolean readonly,
-            ISwc4jAstExpr key,
-            boolean computed,
-            boolean optional,
-            ISwc4jAstExpr init,
-            List<ISwc4jAstTsFnParam> params) {
-        return create(readonly, key, computed, optional, init, params, null);
-    }
-
-    public static Swc4jAstTsPropertySignature create(
-            boolean readonly,
-            ISwc4jAstExpr key,
-            boolean computed,
-            boolean optional,
-            ISwc4jAstExpr init,
-            List<ISwc4jAstTsFnParam> params,
             Swc4jAstTsTypeAnn typeAnn) {
-        return create(readonly, key, computed, optional, init, params, typeAnn, null);
+        return create(readonly, key, false, typeAnn);
+    }
+
+    public static Swc4jAstTsPropertySignature create(
+            boolean readonly,
+            ISwc4jAstExpr key,
+            boolean computed,
+            Swc4jAstTsTypeAnn typeAnn) {
+        return create(readonly, key, computed, false, typeAnn);
     }
 
     public static Swc4jAstTsPropertySignature create(
@@ -130,38 +87,20 @@ public class Swc4jAstTsPropertySignature
             ISwc4jAstExpr key,
             boolean computed,
             boolean optional,
-            ISwc4jAstExpr init,
-            List<ISwc4jAstTsFnParam> params,
-            Swc4jAstTsTypeAnn typeAnn,
-            Swc4jAstTsTypeParamDecl typeParams) {
-        return new Swc4jAstTsPropertySignature(
-                readonly, key, computed, optional, init,
-                params, typeAnn, typeParams, Swc4jSpan.DUMMY);
+            Swc4jAstTsTypeAnn typeAnn) {
+        return new Swc4jAstTsPropertySignature(readonly, key, computed, optional, typeAnn, Swc4jSpan.DUMMY);
     }
 
     @Override
     public List<ISwc4jAst> getChildNodes() {
-        List<ISwc4jAst> childNodes = SimpleList.copyOf(params);
-        init.ifPresent(childNodes::add);
-        childNodes.add(key);
+        List<ISwc4jAst> childNodes = SimpleList.of(key);
         typeAnn.ifPresent(childNodes::add);
-        typeParams.ifPresent(childNodes::add);
         return childNodes;
-    }
-
-    @Jni2RustMethod
-    public Optional<ISwc4jAstExpr> getInit() {
-        return init;
     }
 
     @Jni2RustMethod
     public ISwc4jAstExpr getKey() {
         return key;
-    }
-
-    @Jni2RustMethod
-    public List<ISwc4jAstTsFnParam> getParams() {
-        return params;
     }
 
     @Override
@@ -172,11 +111,6 @@ public class Swc4jAstTsPropertySignature
     @Jni2RustMethod
     public Optional<Swc4jAstTsTypeAnn> getTypeAnn() {
         return typeAnn;
-    }
-
-    @Jni2RustMethod
-    public Optional<Swc4jAstTsTypeParamDecl> getTypeParams() {
-        return typeParams;
     }
 
     @Jni2RustMethod
@@ -196,30 +130,12 @@ public class Swc4jAstTsPropertySignature
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (init.isPresent() && init.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
-            setInit((ISwc4jAstExpr) newNode);
-            return true;
-        }
         if (key == oldNode && newNode instanceof ISwc4jAstExpr) {
             setKey((ISwc4jAstExpr) newNode);
             return true;
         }
-        if (!params.isEmpty() && newNode instanceof ISwc4jAstTsFnParam) {
-            final int size = params.size();
-            for (int i = 0; i < size; i++) {
-                if (params.get(i) == oldNode) {
-                    params.set(i, (ISwc4jAstTsFnParam) newNode);
-                    newNode.setParent(this);
-                    return true;
-                }
-            }
-        }
         if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
             setTypeAnn((Swc4jAstTsTypeAnn) newNode);
-            return true;
-        }
-        if (typeParams.isPresent() && typeParams.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamDecl)) {
-            setTypeParams((Swc4jAstTsTypeParamDecl) newNode);
             return true;
         }
         return false;
@@ -227,12 +143,6 @@ public class Swc4jAstTsPropertySignature
 
     public Swc4jAstTsPropertySignature setComputed(boolean computed) {
         this.computed = computed;
-        return this;
-    }
-
-    public Swc4jAstTsPropertySignature setInit(ISwc4jAstExpr init) {
-        this.init = Optional.ofNullable(init);
-        this.init.ifPresent(node -> node.setParent(this));
         return this;
     }
 
@@ -255,12 +165,6 @@ public class Swc4jAstTsPropertySignature
     public Swc4jAstTsPropertySignature setTypeAnn(Swc4jAstTsTypeAnn typeAnn) {
         this.typeAnn = Optional.ofNullable(typeAnn);
         this.typeAnn.ifPresent(node -> node.setParent(this));
-        return this;
-    }
-
-    public Swc4jAstTsPropertySignature setTypeParams(Swc4jAstTsTypeParamDecl typeParams) {
-        this.typeParams = Optional.ofNullable(typeParams);
-        this.typeParams.ifPresent(node -> node.setParent(this));
         return this;
     }
 

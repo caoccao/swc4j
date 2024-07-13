@@ -66,6 +66,10 @@ The string module specifier to implicitly import JSX factories from when transpi
 
 Should JSX be precompiled into static strings that need to be concatenated with dynamic content. Defaults to `false`, mutually exclusive with `transform_jsx`.
 
+### Precompile JSX Dynamic Props
+
+List of properties/attributes that should always be treated as dynamic.
+
 ### Precompile JSX Skip Elements
 
 List of elements that should not be precompiled when the JSX precompile transform is used.

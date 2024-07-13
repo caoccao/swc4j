@@ -16832,8 +16832,6 @@ struct JavaSwc4jAstTsGetterSignature {
   method_get_key: JMethodID,
   method_get_type_ann: JMethodID,
   method_is_computed: JMethodID,
-  method_is_optional: JMethodID,
-  method_is_readonly: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsGetterSignature {}
 unsafe impl Sync for JavaSwc4jAstTsGetterSignature {}
@@ -16851,7 +16849,7 @@ impl JavaSwc4jAstTsGetterSignature {
       .get_method_id(
         &class,
         "<init>",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTsGetterSignature::new");
     let method_get_key = env
@@ -16875,55 +16873,35 @@ impl JavaSwc4jAstTsGetterSignature {
         "()Z",
       )
       .expect("Couldn't find method Swc4jAstTsGetterSignature.isComputed");
-    let method_is_optional = env
-      .get_method_id(
-        &class,
-        "isOptional",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jAstTsGetterSignature.isOptional");
-    let method_is_readonly = env
-      .get_method_id(
-        &class,
-        "isReadonly",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jAstTsGetterSignature.isReadonly");
     JavaSwc4jAstTsGetterSignature {
       class,
       method_construct,
       method_get_key,
       method_get_type_ann,
       method_is_computed,
-      method_is_optional,
-      method_is_readonly,
     }
   }
 
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    readonly: bool,
     key: &JObject<'_>,
     computed: bool,
-    optional: bool,
     type_ann: &Option<JObject>,
     span: &JObject<'_>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let readonly = boolean_to_jvalue!(readonly);
     let key = object_to_jvalue!(key);
     let computed = boolean_to_jvalue!(computed);
-    let optional = boolean_to_jvalue!(optional);
     let type_ann = optional_object_to_jvalue!(type_ann);
     let span = object_to_jvalue!(span);
     let return_value = call_as_construct!(
         env,
         &self.class,
         self.method_construct,
-        &[readonly, key, computed, optional, type_ann, span],
+        &[key, computed, type_ann, span],
         "Swc4jAstTsGetterSignature construct()"
       );
     return_value
@@ -16977,38 +16955,6 @@ impl JavaSwc4jAstTsGetterSignature {
         self.method_is_computed,
         &[],
         "boolean is_computed()"
-      );
-    return_value
-  }
-
-  pub fn is_optional<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> bool
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_optional,
-        &[],
-        "boolean is_optional()"
-      );
-    return_value
-  }
-
-  pub fn is_readonly<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> bool
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_readonly,
-        &[],
-        "boolean is_readonly()"
       );
     return_value
   }
@@ -18511,7 +18457,6 @@ struct JavaSwc4jAstTsMethodSignature {
   method_get_type_params: JMethodID,
   method_is_computed: JMethodID,
   method_is_optional: JMethodID,
-  method_is_readonly: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsMethodSignature {}
 unsafe impl Sync for JavaSwc4jAstTsMethodSignature {}
@@ -18529,7 +18474,7 @@ impl JavaSwc4jAstTsMethodSignature {
       .get_method_id(
         &class,
         "<init>",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTsMethodSignature::new");
     let method_get_key = env
@@ -18574,13 +18519,6 @@ impl JavaSwc4jAstTsMethodSignature {
         "()Z",
       )
       .expect("Couldn't find method Swc4jAstTsMethodSignature.isOptional");
-    let method_is_readonly = env
-      .get_method_id(
-        &class,
-        "isReadonly",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jAstTsMethodSignature.isReadonly");
     JavaSwc4jAstTsMethodSignature {
       class,
       method_construct,
@@ -18590,14 +18528,12 @@ impl JavaSwc4jAstTsMethodSignature {
       method_get_type_params,
       method_is_computed,
       method_is_optional,
-      method_is_readonly,
     }
   }
 
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    readonly: bool,
     key: &JObject<'_>,
     computed: bool,
     optional: bool,
@@ -18609,7 +18545,6 @@ impl JavaSwc4jAstTsMethodSignature {
   where
     'local: 'a,
   {
-    let readonly = boolean_to_jvalue!(readonly);
     let key = object_to_jvalue!(key);
     let computed = boolean_to_jvalue!(computed);
     let optional = boolean_to_jvalue!(optional);
@@ -18621,7 +18556,7 @@ impl JavaSwc4jAstTsMethodSignature {
         env,
         &self.class,
         self.method_construct,
-        &[readonly, key, computed, optional, params, type_ann, type_params, span],
+        &[key, computed, optional, params, type_ann, type_params, span],
         "Swc4jAstTsMethodSignature construct()"
       );
     return_value
@@ -18727,22 +18662,6 @@ impl JavaSwc4jAstTsMethodSignature {
         self.method_is_optional,
         &[],
         "boolean is_optional()"
-      );
-    return_value
-  }
-
-  pub fn is_readonly<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> bool
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_readonly,
-        &[],
-        "boolean is_readonly()"
       );
     return_value
   }
@@ -19662,11 +19581,8 @@ impl JavaSwc4jAstTsParenthesizedType {
 struct JavaSwc4jAstTsPropertySignature {
   class: GlobalRef,
   method_construct: JMethodID,
-  method_get_init: JMethodID,
   method_get_key: JMethodID,
-  method_get_params: JMethodID,
   method_get_type_ann: JMethodID,
-  method_get_type_params: JMethodID,
   method_is_computed: JMethodID,
   method_is_optional: JMethodID,
   method_is_readonly: JMethodID,
@@ -19687,16 +19603,9 @@ impl JavaSwc4jAstTsPropertySignature {
       .get_method_id(
         &class,
         "<init>",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTsPropertySignature::new");
-    let method_get_init = env
-      .get_method_id(
-        &class,
-        "getInit",
-        "()Ljava/util/Optional;",
-      )
-      .expect("Couldn't find method Swc4jAstTsPropertySignature.getInit");
     let method_get_key = env
       .get_method_id(
         &class,
@@ -19704,13 +19613,6 @@ impl JavaSwc4jAstTsPropertySignature {
         "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;",
       )
       .expect("Couldn't find method Swc4jAstTsPropertySignature.getKey");
-    let method_get_params = env
-      .get_method_id(
-        &class,
-        "getParams",
-        "()Ljava/util/List;",
-      )
-      .expect("Couldn't find method Swc4jAstTsPropertySignature.getParams");
     let method_get_type_ann = env
       .get_method_id(
         &class,
@@ -19718,13 +19620,6 @@ impl JavaSwc4jAstTsPropertySignature {
         "()Ljava/util/Optional;",
       )
       .expect("Couldn't find method Swc4jAstTsPropertySignature.getTypeAnn");
-    let method_get_type_params = env
-      .get_method_id(
-        &class,
-        "getTypeParams",
-        "()Ljava/util/Optional;",
-      )
-      .expect("Couldn't find method Swc4jAstTsPropertySignature.getTypeParams");
     let method_is_computed = env
       .get_method_id(
         &class,
@@ -19749,11 +19644,8 @@ impl JavaSwc4jAstTsPropertySignature {
     JavaSwc4jAstTsPropertySignature {
       class,
       method_construct,
-      method_get_init,
       method_get_key,
-      method_get_params,
       method_get_type_ann,
-      method_get_type_params,
       method_is_computed,
       method_is_optional,
       method_is_readonly,
@@ -19767,10 +19659,7 @@ impl JavaSwc4jAstTsPropertySignature {
     key: &JObject<'_>,
     computed: bool,
     optional: bool,
-    init: &Option<JObject>,
-    params: &JObject<'_>,
     type_ann: &Option<JObject>,
-    type_params: &Option<JObject>,
     span: &JObject<'_>,
   ) -> JObject<'a>
   where
@@ -19780,35 +19669,14 @@ impl JavaSwc4jAstTsPropertySignature {
     let key = object_to_jvalue!(key);
     let computed = boolean_to_jvalue!(computed);
     let optional = boolean_to_jvalue!(optional);
-    let init = optional_object_to_jvalue!(init);
-    let params = object_to_jvalue!(params);
     let type_ann = optional_object_to_jvalue!(type_ann);
-    let type_params = optional_object_to_jvalue!(type_params);
     let span = object_to_jvalue!(span);
     let return_value = call_as_construct!(
         env,
         &self.class,
         self.method_construct,
-        &[readonly, key, computed, optional, init, params, type_ann, type_params, span],
+        &[readonly, key, computed, optional, type_ann, span],
         "Swc4jAstTsPropertySignature construct()"
-      );
-    return_value
-  }
-
-  pub fn get_init<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let return_value = call_as_object!(
-        env,
-        obj,
-        self.method_get_init,
-        &[],
-        "Optional get_init()"
       );
     return_value
   }
@@ -19831,24 +19699,6 @@ impl JavaSwc4jAstTsPropertySignature {
     return_value
   }
 
-  pub fn get_params<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let return_value = call_as_object!(
-        env,
-        obj,
-        self.method_get_params,
-        &[],
-        "List get_params()"
-      );
-    return_value
-  }
-
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -19863,24 +19713,6 @@ impl JavaSwc4jAstTsPropertySignature {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
-  }
-
-  pub fn get_type_params<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
-  {
-    let return_value = call_as_object!(
-        env,
-        obj,
-        self.method_get_type_params,
-        &[],
-        "Optional get_type_params()"
       );
     return_value
   }
@@ -20236,8 +20068,6 @@ struct JavaSwc4jAstTsSetterSignature {
   method_get_key: JMethodID,
   method_get_param: JMethodID,
   method_is_computed: JMethodID,
-  method_is_optional: JMethodID,
-  method_is_readonly: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsSetterSignature {}
 unsafe impl Sync for JavaSwc4jAstTsSetterSignature {}
@@ -20255,7 +20085,7 @@ impl JavaSwc4jAstTsSetterSignature {
       .get_method_id(
         &class,
         "<init>",
-        "(ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsFnParam;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsFnParam;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTsSetterSignature::new");
     let method_get_key = env
@@ -20279,55 +20109,35 @@ impl JavaSwc4jAstTsSetterSignature {
         "()Z",
       )
       .expect("Couldn't find method Swc4jAstTsSetterSignature.isComputed");
-    let method_is_optional = env
-      .get_method_id(
-        &class,
-        "isOptional",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jAstTsSetterSignature.isOptional");
-    let method_is_readonly = env
-      .get_method_id(
-        &class,
-        "isReadonly",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jAstTsSetterSignature.isReadonly");
     JavaSwc4jAstTsSetterSignature {
       class,
       method_construct,
       method_get_key,
       method_get_param,
       method_is_computed,
-      method_is_optional,
-      method_is_readonly,
     }
   }
 
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    readonly: bool,
     key: &JObject<'_>,
     computed: bool,
-    optional: bool,
     param: &JObject<'_>,
     span: &JObject<'_>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let readonly = boolean_to_jvalue!(readonly);
     let key = object_to_jvalue!(key);
     let computed = boolean_to_jvalue!(computed);
-    let optional = boolean_to_jvalue!(optional);
     let param = object_to_jvalue!(param);
     let span = object_to_jvalue!(span);
     let return_value = call_as_construct!(
         env,
         &self.class,
         self.method_construct,
-        &[readonly, key, computed, optional, param, span],
+        &[key, computed, param, span],
         "Swc4jAstTsSetterSignature construct()"
       );
     return_value
@@ -20381,38 +20191,6 @@ impl JavaSwc4jAstTsSetterSignature {
         self.method_is_computed,
         &[],
         "boolean is_computed()"
-      );
-    return_value
-  }
-
-  pub fn is_optional<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> bool
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_optional,
-        &[],
-        "boolean is_optional()"
-      );
-    return_value
-  }
-
-  pub fn is_readonly<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> bool
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_readonly,
-        &[],
-        "boolean is_readonly()"
       );
     return_value
   }
@@ -32316,13 +32094,11 @@ impl ToJavaWithMap<ByteToIndexMap> for TsGetterSignature {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let readonly = self.readonly;
     let java_key = self.key.to_java_with_map(env, map);
     let computed = self.computed;
-    let optional = self.optional;
     let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
     let return_value = unsafe { JAVA_CLASS_TS_GETTER_SIGNATURE.as_ref().unwrap() }
-      .construct(env, readonly, &java_key, computed, optional, &java_optional_type_ann, &java_span_ex);
+      .construct(env, &java_key, computed, &java_optional_type_ann, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_span_ex);
@@ -32335,13 +32111,11 @@ impl<'local> FromJava<'local> for TsGetterSignature {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_GETTER_SIGNATURE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let readonly = java_class.is_readonly(env, jobj);
     let java_key = java_class.get_key(env, jobj);
     let key = Expr::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
     let key = Box::new(key);
     let computed = java_class.is_computed(env, jobj);
-    let optional = java_class.is_optional(env, jobj);
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = if optional_is_present(env, &java_optional_type_ann) {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
@@ -32355,10 +32129,8 @@ impl<'local> FromJava<'local> for TsGetterSignature {
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
     TsGetterSignature {
       span,
-      readonly,
       key,
       computed,
-      optional,
       type_ann,
     }
   }
@@ -33045,7 +32817,6 @@ impl ToJavaWithMap<ByteToIndexMap> for TsMethodSignature {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let readonly = self.readonly;
     let java_key = self.key.to_java_with_map(env, map);
     let computed = self.computed;
     let optional = self.optional;
@@ -33058,7 +32829,7 @@ impl ToJavaWithMap<ByteToIndexMap> for TsMethodSignature {
     let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
     let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
     let return_value = unsafe { JAVA_CLASS_TS_METHOD_SIGNATURE.as_ref().unwrap() }
-      .construct(env, readonly, &java_key, computed, optional, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
+      .construct(env, &java_key, computed, optional, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_key);
@@ -33073,7 +32844,6 @@ impl<'local> FromJava<'local> for TsMethodSignature {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_METHOD_SIGNATURE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let readonly = java_class.is_readonly(env, jobj);
     let java_key = java_class.get_key(env, jobj);
     let key = Expr::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
@@ -33112,7 +32882,6 @@ impl<'local> FromJava<'local> for TsMethodSignature {
     let type_params = type_params.map(|type_params| Box::new(type_params));
     TsMethodSignature {
       span,
-      readonly,
       key,
       computed,
       optional,
@@ -33510,12 +33279,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsPropertySignature {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
-    self.init.as_ref().map(|node| node.register_with_map(map));
-    self.params.iter().for_each(|node| {
-      node.register_with_map(map);
-    });
     self.type_ann.as_ref().map(|node| node.register_with_map(map));
-    self.type_params.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
@@ -33529,22 +33293,11 @@ impl ToJavaWithMap<ByteToIndexMap> for TsPropertySignature {
     let java_key = self.key.to_java_with_map(env, map);
     let computed = self.computed;
     let optional = self.optional;
-    let java_optional_init = self.init.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_params = list_new(env, self.params.len());
-    self.params.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_params, &java_node);
-      delete_local_ref!(env, java_node);
-    });
     let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
     let return_value = unsafe { JAVA_CLASS_TS_PROPERTY_SIGNATURE.as_ref().unwrap() }
-      .construct(env, readonly, &java_key, computed, optional, &java_optional_init, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
-    delete_local_optional_ref!(env, java_optional_init);
+      .construct(env, readonly, &java_key, computed, optional, &java_optional_type_ann, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_type_ann);
-    delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_key);
-    delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_span_ex);
     return_value
   }
@@ -33562,25 +33315,6 @@ impl<'local> FromJava<'local> for TsPropertySignature {
     let key = Box::new(key);
     let computed = java_class.is_computed(env, jobj);
     let optional = java_class.is_optional(env, jobj);
-    let java_optional_init = java_class.get_init(env, jobj);
-    let init = if optional_is_present(env, &java_optional_init) {
-      let java_init = optional_get(env, &java_optional_init);
-      let init = Expr::from_java(env, &java_init);
-      delete_local_ref!(env, java_init);
-      Some(init)
-    } else {
-      None
-    };
-    delete_local_ref!(env, java_optional_init);
-    let init = init.map(|init| Box::new(init));
-    let java_params = java_class.get_params(env, jobj);
-    let length = list_size(env, &java_params);
-    let params = (0..length).map(|i| {
-      let java_item = list_get(env, &java_params, i);
-      let params = TsFnParam::from_java(env, &java_item);
-      delete_local_ref!(env, java_item);
-      params
-    }).collect();
     let java_optional_type_ann = java_class.get_type_ann(env, jobj);
     let type_ann = if optional_is_present(env, &java_optional_type_ann) {
       let java_type_ann = optional_get(env, &java_optional_type_ann);
@@ -33592,27 +33326,13 @@ impl<'local> FromJava<'local> for TsPropertySignature {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    let java_optional_type_params = java_class.get_type_params(env, jobj);
-    let type_params = if optional_is_present(env, &java_optional_type_params) {
-      let java_type_params = optional_get(env, &java_optional_type_params);
-      let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
-      delete_local_ref!(env, java_type_params);
-      Some(type_params)
-    } else {
-      None
-    };
-    delete_local_ref!(env, java_optional_type_params);
-    let type_params = type_params.map(|type_params| Box::new(type_params));
     TsPropertySignature {
       span,
       readonly,
       key,
       computed,
       optional,
-      init,
-      params,
       type_ann,
-      type_params,
     }
   }
 }
@@ -33757,13 +33477,11 @@ impl ToJavaWithMap<ByteToIndexMap> for TsSetterSignature {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let readonly = self.readonly;
     let java_key = self.key.to_java_with_map(env, map);
     let computed = self.computed;
-    let optional = self.optional;
     let java_param = self.param.to_java_with_map(env, map);
     let return_value = unsafe { JAVA_CLASS_TS_SETTER_SIGNATURE.as_ref().unwrap() }
-      .construct(env, readonly, &java_key, computed, optional, &java_param, &java_span_ex);
+      .construct(env, &java_key, computed, &java_param, &java_span_ex);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_param);
     delete_local_ref!(env, java_span_ex);
@@ -33776,22 +33494,18 @@ impl<'local> FromJava<'local> for TsSetterSignature {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_SETTER_SIGNATURE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let readonly = java_class.is_readonly(env, jobj);
     let java_key = java_class.get_key(env, jobj);
     let key = Expr::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
     let key = Box::new(key);
     let computed = java_class.is_computed(env, jobj);
-    let optional = java_class.is_optional(env, jobj);
     let java_param = java_class.get_param(env, jobj);
     let param = TsFnParam::from_java(env, &java_param);
     delete_local_ref!(env, java_param);
     TsSetterSignature {
       span,
-      readonly,
       key,
       computed,
-      optional,
       param,
     }
   }

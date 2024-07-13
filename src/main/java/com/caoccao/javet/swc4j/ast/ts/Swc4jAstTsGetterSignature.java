@@ -38,54 +38,36 @@ public class Swc4jAstTsGetterSignature
     protected boolean computed;
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr key;
-    protected boolean optional;
-    protected boolean readonly;
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
 
     @Jni2RustMethod
     public Swc4jAstTsGetterSignature(
-            boolean readonly,
             ISwc4jAstExpr key,
             boolean computed,
-            boolean optional,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
             Swc4jSpan span) {
         super(span);
         setComputed(computed);
         setKey(key);
-        setOptional(optional);
-        setReadonly(readonly);
         setTypeAnn(typeAnn);
     }
 
     public static Swc4jAstTsGetterSignature create(ISwc4jAstExpr key) {
-        return create(false, key);
-    }
-
-    public static Swc4jAstTsGetterSignature create(boolean readonly, ISwc4jAstExpr key) {
-        return create(readonly, key, false);
-    }
-
-    public static Swc4jAstTsGetterSignature create(boolean readonly, ISwc4jAstExpr key, boolean computed) {
-        return create(readonly, key, computed, false);
+        return create(key, null);
     }
 
     public static Swc4jAstTsGetterSignature create(
-            boolean readonly,
             ISwc4jAstExpr key,
-            boolean computed,
-            boolean optional) {
-        return create(readonly, key, computed, optional, null);
-    }
-
-    public static Swc4jAstTsGetterSignature create(
-            boolean readonly,
-            ISwc4jAstExpr key,
-            boolean computed,
-            boolean optional,
             Swc4jAstTsTypeAnn typeAnn) {
-        return new Swc4jAstTsGetterSignature(readonly, key, computed, optional, typeAnn, Swc4jSpan.DUMMY);
+        return create(key, false, typeAnn);
+    }
+
+    public static Swc4jAstTsGetterSignature create(
+            ISwc4jAstExpr key,
+            boolean computed,
+            Swc4jAstTsTypeAnn typeAnn) {
+        return new Swc4jAstTsGetterSignature(key, computed, typeAnn, Swc4jSpan.DUMMY);
     }
 
     @Override
@@ -115,16 +97,6 @@ public class Swc4jAstTsGetterSignature
         return computed;
     }
 
-    @Jni2RustMethod
-    public boolean isOptional() {
-        return optional;
-    }
-
-    @Jni2RustMethod
-    public boolean isReadonly() {
-        return readonly;
-    }
-
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
         if (key == oldNode && newNode instanceof ISwc4jAstExpr) {
@@ -146,16 +118,6 @@ public class Swc4jAstTsGetterSignature
     public Swc4jAstTsGetterSignature setKey(ISwc4jAstExpr key) {
         this.key = AssertionUtils.notNull(key, "Key");
         this.key.setParent(this);
-        return this;
-    }
-
-    public Swc4jAstTsGetterSignature setOptional(boolean optional) {
-        this.optional = optional;
-        return this;
-    }
-
-    public Swc4jAstTsGetterSignature setReadonly(boolean readonly) {
-        this.readonly = readonly;
         return this;
     }
 

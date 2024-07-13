@@ -41,52 +41,29 @@ public class Swc4jAstTsSetterSignature
     protected boolean computed;
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr key;
-    protected boolean optional;
     protected ISwc4jAstTsFnParam param;
-    protected boolean readonly;
 
     @Jni2RustMethod
     public Swc4jAstTsSetterSignature(
-            boolean readonly,
             ISwc4jAstExpr key,
             boolean computed,
-            boolean optional,
             ISwc4jAstTsFnParam param,
             Swc4jSpan span) {
         super(span);
         setComputed(computed);
         setKey(key);
-        setOptional(optional);
         setParam(param);
-        setReadonly(readonly);
     }
 
     public static Swc4jAstTsSetterSignature create(ISwc4jAstExpr key, ISwc4jAstTsFnParam param) {
-        return create(false, key, param);
+        return create(key, false, param);
     }
 
     public static Swc4jAstTsSetterSignature create(
-            boolean readonly,
-            ISwc4jAstExpr key,
-            ISwc4jAstTsFnParam param) {
-        return create(readonly, key, false, param);
-    }
-
-    public static Swc4jAstTsSetterSignature create(
-            boolean readonly,
             ISwc4jAstExpr key,
             boolean computed,
             ISwc4jAstTsFnParam param) {
-        return create(readonly, key, computed, false, param);
-    }
-
-    public static Swc4jAstTsSetterSignature create(
-            boolean readonly,
-            ISwc4jAstExpr key,
-            boolean computed,
-            boolean optional,
-            ISwc4jAstTsFnParam param) {
-        return new Swc4jAstTsSetterSignature(readonly, key, computed, optional, param, Swc4jSpan.DUMMY);
+        return new Swc4jAstTsSetterSignature(key, computed, param, Swc4jSpan.DUMMY);
     }
 
     @Override
@@ -114,16 +91,6 @@ public class Swc4jAstTsSetterSignature
         return computed;
     }
 
-    @Jni2RustMethod
-    public boolean isOptional() {
-        return optional;
-    }
-
-    @Jni2RustMethod
-    public boolean isReadonly() {
-        return readonly;
-    }
-
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
         if (key == oldNode && newNode instanceof ISwc4jAstExpr) {
@@ -148,19 +115,9 @@ public class Swc4jAstTsSetterSignature
         return this;
     }
 
-    public Swc4jAstTsSetterSignature setOptional(boolean optional) {
-        this.optional = optional;
-        return this;
-    }
-
     public Swc4jAstTsSetterSignature setParam(ISwc4jAstTsFnParam param) {
         this.param = AssertionUtils.notNull(param, "Param");
         this.param.setParent(this);
-        return this;
-    }
-
-    public Swc4jAstTsSetterSignature setReadonly(boolean readonly) {
-        this.readonly = readonly;
         return this;
     }
 

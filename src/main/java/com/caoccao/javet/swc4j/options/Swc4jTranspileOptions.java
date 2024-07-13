@@ -121,6 +121,12 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     protected boolean precompileJsx;
     /**
+     * List of properties/attributes that should always be treated as dynamic.
+     *
+     * @since 0.10.0
+     */
+    protected List<String> precompileJsxDynamicProps;
+    /**
      * List of elements that should not be precompiled when the JSX precompile transform is used.
      *
      * @since 0.7.0
@@ -176,6 +182,7 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
         setInlineSources(true);
         setKeepComments(false);
         setPrecompileJsx(false);
+        setPrecompileJsxDynamicProps(null);
         setPrecompileJsxSkipElements(null);
         setSourceMap(Swc4jSourceMapOption.Inline);
         setTransformJsx(true);
@@ -225,6 +232,17 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     @Jni2RustMethod(optional = true)
     public String getJsxImportSource() {
         return jsxImportSource;
+    }
+
+    /**
+     * Gets precompile jsx dynamic props.
+     *
+     * @return the precompile jsx dynamic props
+     * @since 0.10.0
+     */
+    @Jni2RustMethod(optional = true)
+    public List<String> getPrecompileJsxDynamicProps() {
+        return precompileJsxDynamicProps;
     }
 
     /**
@@ -525,6 +543,16 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     public Swc4jTranspileOptions setPrecompileJsx(boolean precompileJsx) {
         this.precompileJsx = precompileJsx;
         return this;
+    }
+
+    /**
+     * Sets precompile jsx dynamic props.
+     *
+     * @param precompileJsxDynamicProps the precompile jsx dynamic props
+     * @since 0.10.0
+     */
+    public void setPrecompileJsxDynamicProps(List<String> precompileJsxDynamicProps) {
+        this.precompileJsxDynamicProps = precompileJsxDynamicProps;
     }
 
     /**

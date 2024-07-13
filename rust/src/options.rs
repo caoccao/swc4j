@@ -614,6 +614,7 @@ struct JavaSwc4jTranspileOptions {
   method_get_media_type: JMethodID,
   method_get_parse_mode: JMethodID,
   method_get_plugin_host: JMethodID,
+  method_get_precompile_jsx_dynamic_props: JMethodID,
   method_get_precompile_jsx_skip_elements: JMethodID,
   method_get_source_map: JMethodID,
   method_get_specifier: JMethodID,
@@ -693,6 +694,13 @@ impl JavaSwc4jTranspileOptions {
         "()Lcom/caoccao/javet/swc4j/plugins/ISwc4jPluginHost;",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getPluginHost");
+    let method_get_precompile_jsx_dynamic_props = env
+      .get_method_id(
+        &class,
+        "getPrecompileJsxDynamicProps",
+        "()Ljava/util/List;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getPrecompileJsxDynamicProps");
     let method_get_precompile_jsx_skip_elements = env
       .get_method_id(
         &class,
@@ -821,6 +829,7 @@ impl JavaSwc4jTranspileOptions {
       method_get_media_type,
       method_get_parse_mode,
       method_get_plugin_host,
+      method_get_precompile_jsx_dynamic_props,
       method_get_precompile_jsx_skip_elements,
       method_get_source_map,
       method_get_specifier,
@@ -966,6 +975,29 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_plugin_host,
         &[],
         "ISwc4jPluginHost get_plugin_host()"
+      );
+    let return_value = if return_value.is_null() {
+      None
+    } else {
+      Some(return_value)
+    };
+    return_value
+  }
+
+  pub fn get_precompile_jsx_dynamic_props<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Option<JObject<'a>>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_precompile_jsx_dynamic_props,
+        &[],
+        "List get_precompile_jsx_dynamic_props()"
       );
     let return_value = if return_value.is_null() {
       None
@@ -1508,6 +1540,9 @@ pub struct TranspileOptions<'a> {
   /// with dynamic content. Defaults to `false`, mutually exclusive with
   /// `transform_jsx`.
   pub precompile_jsx: bool,
+  /// List of properties/attributes that should always be treated as
+  /// dynamic.
+  pub precompile_jsx_dynamic_props: Option<Vec<String>>,
   /// List of elements that should not be precompiled when the JSX precompile
   /// transform is used.
   pub precompile_jsx_skip_elements: Option<Vec<String>>,
@@ -1555,6 +1590,7 @@ impl<'a> Default for TranspileOptions<'a> {
       parse_mode: ParseMode::Program,
       plugin_host: None,
       precompile_jsx: false,
+      precompile_jsx_dynamic_props: None,
       precompile_jsx_skip_elements: None,
       scope_analysis: false,
       source_map: SourceMapOption::Inline,
@@ -1599,6 +1635,19 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
     });
     delete_local_optional_ref!(env, java_optional_plugin_host);
     let precompile_jsx = java_transpile_options.is_precompile_jsx(env, obj);
+    let java_optional_precompile_jsx_dynamic_props = java_transpile_options.get_precompile_jsx_dynamic_props(env, obj);
+    let precompile_jsx_dynamic_props = java_optional_precompile_jsx_dynamic_props.as_ref().map(|elements| {
+      let length = list_size(env, &elements);
+      (0..length)
+        .map(|i| {
+          let java_item = list_get(env, &elements, i);
+          let element = jstring_to_string!(env, java_item.as_raw());
+          delete_local_ref!(env, java_item);
+          element
+        })
+        .collect()
+    });
+    delete_local_optional_ref!(env, java_optional_precompile_jsx_dynamic_props);
     let java_optional_precompile_jsx_skip_elements = java_transpile_options.get_precompile_jsx_skip_elements(env, obj);
     let precompile_jsx_skip_elements = java_optional_precompile_jsx_skip_elements.as_ref().map(|elements| {
       let length = list_size(env, &elements);
@@ -1639,6 +1688,7 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
       parse_mode,
       plugin_host,
       precompile_jsx,
+      precompile_jsx_dynamic_props,
       precompile_jsx_skip_elements,
       scope_analysis,
       source_map,

@@ -55,11 +55,9 @@ public class TestSwc4jAstJsxText extends BaseTestSuiteSwc4jAst {
         assertEquals("h1", ident.getSym());
         Swc4jAstJsxText jsxText = assertAst(
                 jsxElement, jsxElement.getChildren().get(0).as(Swc4jAstJsxText.class), Swc4jAstType.JsxText, 4, 26);
-        // This is a bug in SWC.
-        // https://github.com/caoccao/swc4j/issues/5
-        assertEquals("    \n\n    test    \n\n    ", jsxText.getValue());
-        assertEquals("    \n\n    test    \n\n    ", jsxText.getRaw());
-//        assertSpan(code, script);
+        assertEquals("    \n    test    \n    ", jsxText.getValue());
+        assertEquals("    \n    test    \n    ", jsxText.getRaw());
+        assertSpan(code, script);
     }
 
     @Test

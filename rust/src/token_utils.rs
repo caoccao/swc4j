@@ -135,7 +135,7 @@ impl JavaSwc4jTokenFactory {
       .get_static_method_id(
         &class,
         "createJsxTagText",
-        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenText;",
+        "(Ljava/lang/String;Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;Z)Lcom/caoccao/javet/swc4j/tokens/Swc4jTokenTextValue;",
       )
       .expect("Couldn't find method Swc4jTokenFactory.createJsxTagText");
     let method_create_keyword = env
@@ -450,6 +450,7 @@ impl JavaSwc4jTokenFactory {
     &self,
     env: &mut JNIEnv<'local>,
     text: &str,
+    value: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
   ) -> JObject<'a>
@@ -458,16 +459,19 @@ impl JavaSwc4jTokenFactory {
   {
     let java_text = string_to_jstring!(env, &text);
     let text = object_to_jvalue!(java_text);
+    let java_value = string_to_jstring!(env, &value);
+    let value = object_to_jvalue!(java_value);
     let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(
         env,
         &self.class,
         self.method_create_jsx_tag_text,
-        &[text, span, line_break_ahead],
-        "Swc4jTokenText create_jsx_tag_text()"
+        &[text, value, span, line_break_ahead],
+        "Swc4jTokenTextValue create_jsx_tag_text()"
       );
     delete_local_ref!(env, java_text);
+    delete_local_ref!(env, java_value);
     return_value
   }
 
@@ -796,7 +800,9 @@ where
           Token::JSXName { name } => {
             java_token_factory.create_jsx_tag_name(env, &name, &java_span_ex, line_break_ahead)
           }
-          Token::JSXText { raw } => java_token_factory.create_jsx_tag_text(env, &raw, &java_span_ex, line_break_ahead),
+          Token::JSXText { value, raw } => {
+            java_token_factory.create_jsx_tag_text(env, &value, &raw, &java_span_ex, line_break_ahead)
+          }
           token => match &TokenType::parse_by_generic_operator(token) {
             TokenType::Unknown => {
               eprintln!("Unknown {:?}", token);

@@ -179,6 +179,7 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
         jsx_fragment_factory: options.jsx_fragment_factory.to_owned(),
         jsx_import_source: options.jsx_import_source.to_owned(),
         precompile_jsx: options.precompile_jsx,
+        precompile_jsx_dynamic_props: options.precompile_jsx_dynamic_props.to_owned(),
         precompile_jsx_skip_elements: options.precompile_jsx_skip_elements.to_owned(),
         transform_jsx: options.transform_jsx,
         var_decl_imports: options.var_decl_imports,

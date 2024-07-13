@@ -41,7 +41,6 @@ public class Swc4jAstTsMethodSignature
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr key;
     protected boolean optional;
-    protected boolean readonly;
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeAnn> typeAnn;
     @Jni2RustField(componentBox = true)
@@ -49,7 +48,6 @@ public class Swc4jAstTsMethodSignature
 
     @Jni2RustMethod
     public Swc4jAstTsMethodSignature(
-            boolean readonly,
             ISwc4jAstExpr key,
             boolean computed,
             boolean optional,
@@ -61,7 +59,6 @@ public class Swc4jAstTsMethodSignature
         setComputed(computed);
         setKey(key);
         setOptional(optional);
-        setReadonly(readonly);
         setTypeAnn(typeAnn);
         setTypeParams(typeParams);
         this.params = AssertionUtils.notNull(params, "Params");
@@ -72,55 +69,44 @@ public class Swc4jAstTsMethodSignature
         return create(key, SimpleList.of());
     }
 
-    public static Swc4jAstTsMethodSignature create(ISwc4jAstExpr key, List<ISwc4jAstTsFnParam> params) {
-        return create(false, key, params);
-    }
-
     public static Swc4jAstTsMethodSignature create(
-            boolean readonly,
             ISwc4jAstExpr key,
             List<ISwc4jAstTsFnParam> params) {
-        return create(readonly, key, false, params);
+        return create(key, false, params);
     }
 
     public static Swc4jAstTsMethodSignature create(
-            boolean readonly,
             ISwc4jAstExpr key,
             boolean computed,
             List<ISwc4jAstTsFnParam> params) {
-        return create(readonly, key, computed, false, params);
+        return create(key, computed, false, params);
     }
 
     public static Swc4jAstTsMethodSignature create(
-            boolean readonly,
             ISwc4jAstExpr key,
             boolean computed,
             boolean optional,
             List<ISwc4jAstTsFnParam> params) {
-        return create(readonly, key, computed, optional, params, null);
+        return create(key, computed, optional, params, null);
     }
 
     public static Swc4jAstTsMethodSignature create(
-            boolean readonly,
             ISwc4jAstExpr key,
             boolean computed,
             boolean optional,
             List<ISwc4jAstTsFnParam> params,
             Swc4jAstTsTypeAnn typeAnn) {
-        return create(readonly, key, computed, optional, params, typeAnn, null);
+        return create(key, computed, optional, params, typeAnn, null);
     }
 
     public static Swc4jAstTsMethodSignature create(
-            boolean readonly,
             ISwc4jAstExpr key,
             boolean computed,
             boolean optional,
             List<ISwc4jAstTsFnParam> params,
             Swc4jAstTsTypeAnn typeAnn,
             Swc4jAstTsTypeParamDecl typeParams) {
-        return new Swc4jAstTsMethodSignature(
-                readonly, key, computed, optional, params,
-                typeAnn, typeParams, Swc4jSpan.DUMMY);
+        return new Swc4jAstTsMethodSignature(key, computed, optional, params, typeAnn, typeParams, Swc4jSpan.DUMMY);
     }
 
     @Override
@@ -167,11 +153,6 @@ public class Swc4jAstTsMethodSignature
         return optional;
     }
 
-    @Jni2RustMethod
-    public boolean isReadonly() {
-        return readonly;
-    }
-
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
         if (key == oldNode && newNode instanceof ISwc4jAstExpr) {
@@ -212,11 +193,6 @@ public class Swc4jAstTsMethodSignature
 
     public Swc4jAstTsMethodSignature setOptional(boolean optional) {
         this.optional = optional;
-        return this;
-    }
-
-    public Swc4jAstTsMethodSignature setReadonly(boolean readonly) {
-        this.readonly = readonly;
         return this;
     }
 

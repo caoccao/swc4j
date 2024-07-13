@@ -2,7 +2,7 @@
 
 ## 0.10.0
 
-* Upgraded deno_ast to v0.39.2
+* Upgraded deno_ast to v0.40.0
 * Upgraded rust toolchain to v1.79.0
 * Replaced `debug_print` with `log`
 
