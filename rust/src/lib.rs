@@ -75,8 +75,8 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse<'local
   let options = options::ParseOptions::from_java(&mut env, &options);
   match core::parse(code, options) {
     Ok(output) => output.to_java(&mut env).as_raw(),
-    Err(message) => {
-      error::throw_parse_error(&mut env, message.as_str());
+    Err(err) => {
+      error::throw_parse_error(&mut env, err.to_string().as_str());
       null_mut()
     }
   }
@@ -94,8 +94,8 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTransform<'l
   let options = options::TransformOptions::from_java(&mut env, &options);
   match core::transform(code, options) {
     Ok(output) => output.to_java(&mut env).as_raw(),
-    Err(message) => {
-      error::throw_parse_error(&mut env, message.as_str());
+    Err(err) => {
+      error::throw_parse_error(&mut env, err.to_string().as_str());
       null_mut()
     }
   }
@@ -113,8 +113,8 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'l
   let options = options::TranspileOptions::from_java(&mut env, &options);
   match core::transpile(code, options) {
     Ok(output) => output.to_java(&mut env).as_raw(),
-    Err(message) => {
-      error::throw_transpile_error(&mut env, message.as_str());
+    Err(err) => {
+      error::throw_transpile_error(&mut env, err.to_string().as_str());
       null_mut()
     }
   }

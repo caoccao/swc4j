@@ -160,7 +160,7 @@ fn test_parse_typescript_with_comments() {
 #[test]
 fn test_parse_wrong_media_type() {
   let code = "function add(a:number, b:number) { return a+b; }";
-  let expected_error = String::from("Expected ',', got ':' at file:///main.js:1:15\n")
+  let expected_message = String::from("Expected ',', got ':' at file:///main.js:1:15\n")
     + "\n"
     + "  function add(a:number, b:number) { return a+b; }\n"
     + "                ~";
@@ -170,14 +170,15 @@ fn test_parse_wrong_media_type() {
   };
   let output = core::parse(code.to_owned(), options);
   assert!(output.is_err());
-  let output_error = output.err().unwrap();
-  assert_eq!(expected_error, output_error);
+  let err = output.err().unwrap();
+  let output_message = err.to_string();
+  assert_eq!(expected_message, output_message);
 }
 
 #[test]
 fn test_transform_with_default_options() {
   let code = "function add(a:number, b:number) { return a+b; }";
-  let expected_code ="function add(a:number,b:number){return a+b;}\n";
+  let expected_code = "function add(a:number,b:number){return a+b;}\n";
   let expected_source_map_prefix = "//# sourceMappingURL=data:application/json;base64,";
   let options = options::TransformOptions {
     media_type: MediaType::TypeScript,
@@ -295,7 +296,7 @@ fn test_transpile_type_script_without_inline_source_map() {
 #[test]
 fn test_transpile_wrong_media_type() {
   let code = "function add(a:number, b:number) { return a+b; }";
-  let expected_error = String::from("Expected ',', got ':' at file:///main.js:1:15\n")
+  let expected_message = String::from("Expected ',', got ':' at file:///main.js:1:15\n")
     + "\n"
     + "  function add(a:number, b:number) { return a+b; }\n"
     + "                ~";
@@ -305,6 +306,7 @@ fn test_transpile_wrong_media_type() {
   };
   let output = core::transpile(code.to_owned(), options);
   assert!(output.is_err());
-  let output_error = output.err().unwrap();
-  assert_eq!(expected_error, output_error);
+  let err = output.err().unwrap();
+  let output_message = err.to_string();
+  assert_eq!(expected_message, output_message);
 }

@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.11.0
+
+* Revised internal error handling
+
 ## 0.10.0
 
 * Upgraded deno_ast to v0.40.0
