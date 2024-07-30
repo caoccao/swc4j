@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.0.0
+
+* Revised internal error handling to relay exception in `transform()`
+
 ## 0.11.0
 
 * Upgraded deno_ast to v0.41.1
