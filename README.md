@@ -47,18 +47,18 @@
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j</artifactId>
-    <version>0.10.0</version>
+    <version>0.11.0</version>
 </dependency>
 ```
 
 ```kotlin
 // Gradle Kotlin DSL
-implementation("com.caoccao.javet:swc4j:0.10.0")
+implementation("com.caoccao.javet:swc4j:0.11.0")
 ```
 
 ```groovy
 // Gradle Groovy DSL
-implementation 'com.caoccao.javet:swc4j:0.10.0'
+implementation 'com.caoccao.javet:swc4j:0.11.0'
 ```
 
 ### Transpile
