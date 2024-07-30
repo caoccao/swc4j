@@ -40,6 +40,8 @@ public class Swc4jAstFunction
     @Jni2RustField(name = "is_async")
     protected boolean _async;
     protected Optional<Swc4jAstBlockStmt> body;
+    @Jni2RustField(syntaxContext = true)
+    protected int ctxt;
     @Jni2RustField(name = "is_generator")
     protected boolean generator;
     @Jni2RustField(componentBox = true)
@@ -49,6 +51,7 @@ public class Swc4jAstFunction
 
     @Jni2RustMethod
     public Swc4jAstFunction(
+            @Jni2RustParam(syntaxContext = true) int ctxt,
             List<Swc4jAstParam> params,
             List<Swc4jAstDecorator> decorators,
             @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
@@ -60,6 +63,7 @@ public class Swc4jAstFunction
         super(span);
         setAsync(_async);
         setBody(body);
+        setCtxt(ctxt);
         setGenerator(generator);
         setReturnType(returnType);
         setTypeParams(typeParams);
@@ -124,9 +128,21 @@ public class Swc4jAstFunction
             boolean _async,
             Swc4jAstTsTypeParamDecl typeParams,
             Swc4jAstTsTypeAnn returnType) {
+        return create(0, params, decorators, body, generator, _async, typeParams, returnType);
+    }
+
+    public static Swc4jAstFunction create(
+            int ctxt,
+            List<Swc4jAstParam> params,
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstBlockStmt body,
+            boolean generator,
+            boolean _async,
+            Swc4jAstTsTypeParamDecl typeParams,
+            Swc4jAstTsTypeAnn returnType) {
         return new Swc4jAstFunction(
-                params, decorators, body, generator, _async,
-                typeParams, returnType, Swc4jSpan.DUMMY);
+                ctxt, params, decorators, body, generator,
+                _async, typeParams, returnType, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod
@@ -142,6 +158,11 @@ public class Swc4jAstFunction
         typeParams.ifPresent(childNodes::add);
         returnType.ifPresent(childNodes::add);
         return childNodes;
+    }
+
+    @Jni2RustMethod
+    public int getCtxt() {
+        return ctxt;
     }
 
     @Jni2RustMethod
@@ -224,6 +245,11 @@ public class Swc4jAstFunction
     public Swc4jAstFunction setBody(Swc4jAstBlockStmt body) {
         this.body = Optional.ofNullable(body);
         this.body.ifPresent(node -> node.setParent(this));
+        return this;
+    }
+
+    public Swc4jAstFunction setCtxt(int ctxt) {
+        this.ctxt = ctxt;
         return this;
     }
 

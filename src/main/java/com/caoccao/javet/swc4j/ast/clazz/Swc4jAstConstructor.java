@@ -41,12 +41,15 @@ public class Swc4jAstConstructor
     protected final List<ISwc4jAstParamOrTsParamProp> params;
     protected Optional<Swc4jAstAccessibility> accessibility;
     protected Optional<Swc4jAstBlockStmt> body;
+    @Jni2RustField(syntaxContext = true)
+    protected int ctxt;
     protected ISwc4jAstPropName key;
     @Jni2RustField(name = "is_optional")
     protected boolean optional;
 
     @Jni2RustMethod
     public Swc4jAstConstructor(
+            @Jni2RustParam(syntaxContext = true) int ctxt,
             ISwc4jAstPropName key,
             List<ISwc4jAstParamOrTsParamProp> params,
             @Jni2RustParam(optional = true) Swc4jAstBlockStmt body,
@@ -56,6 +59,7 @@ public class Swc4jAstConstructor
         super(span);
         setAccessibility(accessibility);
         setBody(body);
+        setCtxt(ctxt);
         setKey(key);
         setOptional(optional);
         this.params = AssertionUtils.notNull(params, "Params");
@@ -93,7 +97,17 @@ public class Swc4jAstConstructor
             Swc4jAstBlockStmt body,
             Swc4jAstAccessibility accessibility,
             boolean optional) {
-        return new Swc4jAstConstructor(key, params, body, accessibility, optional, Swc4jSpan.DUMMY);
+        return create(0, key, params, body, accessibility, optional);
+    }
+
+    public static Swc4jAstConstructor create(
+            int ctxt,
+            ISwc4jAstPropName key,
+            List<ISwc4jAstParamOrTsParamProp> params,
+            Swc4jAstBlockStmt body,
+            Swc4jAstAccessibility accessibility,
+            boolean optional) {
+        return new Swc4jAstConstructor(ctxt, key, params, body, accessibility, optional, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod
@@ -112,6 +126,11 @@ public class Swc4jAstConstructor
         body.ifPresent(childNodes::add);
         childNodes.add(key);
         return childNodes;
+    }
+
+    @Jni2RustMethod
+    public int getCtxt() {
+        return ctxt;
     }
 
     @Jni2RustMethod
@@ -165,6 +184,11 @@ public class Swc4jAstConstructor
     public Swc4jAstConstructor setBody(Swc4jAstBlockStmt body) {
         this.body = Optional.ofNullable(body);
         this.body.ifPresent(node -> node.setParent(this));
+        return this;
+    }
+
+    public Swc4jAstConstructor setCtxt(int ctxt) {
+        this.ctxt = ctxt;
         return this;
     }
 

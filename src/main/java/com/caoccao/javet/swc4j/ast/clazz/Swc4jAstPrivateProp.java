@@ -43,6 +43,8 @@ public class Swc4jAstPrivateProp
     @Jni2RustField(name = "is_static")
     protected boolean _static;
     protected Optional<Swc4jAstAccessibility> accessibility;
+    @Jni2RustField(syntaxContext = true)
+    protected int ctxt;
     protected boolean definite;
     protected Swc4jAstPrivateName key;
     @Jni2RustField(name = "is_optional")
@@ -53,9 +55,9 @@ public class Swc4jAstPrivateProp
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> value;
 
-
     @Jni2RustMethod
     public Swc4jAstPrivateProp(
+            @Jni2RustParam(syntaxContext = true) int ctxt,
             Swc4jAstPrivateName key,
             @Jni2RustParam(optional = true) ISwc4jAstExpr value,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeAnn typeAnn,
@@ -69,6 +71,7 @@ public class Swc4jAstPrivateProp
             Swc4jSpan span) {
         super(span);
         setAccessibility(accessibility);
+        setCtxt(ctxt);
         setDefinite(definite);
         setKey(key);
         setOptional(optional);
@@ -169,10 +172,28 @@ public class Swc4jAstPrivateProp
             boolean _override,
             boolean readonly,
             boolean definite) {
+        return create(
+                0, key, value, typeAnn, _static,
+                decorators, accessibility, optional, _override, readonly,
+                definite);
+    }
+
+    public static Swc4jAstPrivateProp create(
+            int ctxt,
+            Swc4jAstPrivateName key,
+            ISwc4jAstExpr value,
+            Swc4jAstTsTypeAnn typeAnn,
+            boolean _static,
+            List<Swc4jAstDecorator> decorators,
+            Swc4jAstAccessibility accessibility,
+            boolean optional,
+            boolean _override,
+            boolean readonly,
+            boolean definite) {
         return new Swc4jAstPrivateProp(
-                key, value, typeAnn, _static, decorators,
-                accessibility, optional, _override, readonly, definite,
-                Swc4jSpan.DUMMY);
+                ctxt, key, value, typeAnn, _static,
+                decorators, accessibility, optional, _override, readonly,
+                definite, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod
@@ -187,6 +208,11 @@ public class Swc4jAstPrivateProp
         value.ifPresent(childNodes::add);
         typeAnn.ifPresent(childNodes::add);
         return childNodes;
+    }
+
+    @Jni2RustMethod
+    public int getCtxt() {
+        return ctxt;
     }
 
     @Jni2RustMethod
@@ -268,6 +294,11 @@ public class Swc4jAstPrivateProp
 
     public Swc4jAstPrivateProp setAccessibility(Swc4jAstAccessibility accessibility) {
         this.accessibility = Optional.ofNullable(accessibility);
+        return this;
+    }
+
+    public Swc4jAstPrivateProp setCtxt(int ctxt) {
+        this.ctxt = ctxt;
         return this;
     }
 

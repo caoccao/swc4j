@@ -21,7 +21,7 @@ use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use deno_ast::swc::atoms::Atom;
-use deno_ast::swc::common::source_map::Pos;
+use deno_ast::swc::common::source_map::SmallPos;
 use deno_ast::swc::parser::error::Error;
 use deno_ast::swc::parser::token::{IdentLike, Token, TokenAndSpan, Word};
 

@@ -57,4 +57,8 @@ public class Jni2RustFieldUtils {
     public boolean isIgnore() {
         return optionalJni2RustField.map(Jni2RustField::ignore).orElse(false);
     }
+
+    public boolean isSyntaxContext() {
+        return optionalJni2RustField.map(Jni2RustField::syntaxContext).orElse(false);
+    }
 }

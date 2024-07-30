@@ -43,6 +43,8 @@ public class Swc4jAstArrowExpr
     protected boolean _async;
     @Jni2RustField(box = true)
     protected ISwc4jAstBlockStmtOrExpr body;
+    @Jni2RustField(syntaxContext = true)
+    protected int ctxt;
     @Jni2RustField(name = "is_generator")
     protected boolean generator;
     @Jni2RustField(componentBox = true)
@@ -52,6 +54,7 @@ public class Swc4jAstArrowExpr
 
     @Jni2RustMethod
     public Swc4jAstArrowExpr(
+            @Jni2RustParam(syntaxContext = true) int ctxt,
             List<ISwc4jAstPat> params,
             ISwc4jAstBlockStmtOrExpr body,
             @Jni2RustParam(name = "is_async") boolean _async,
@@ -62,6 +65,7 @@ public class Swc4jAstArrowExpr
         super(span);
         setAsync(_async);
         setBody(body);
+        setCtxt(ctxt);
         setGenerator(generator);
         setReturnType(returnType);
         setTypeParams(typeParams);
@@ -108,7 +112,18 @@ public class Swc4jAstArrowExpr
             boolean generator,
             Swc4jAstTsTypeParamDecl typeParams,
             Swc4jAstTsTypeAnn returnType) {
-        return new Swc4jAstArrowExpr(params, body, _async, generator, typeParams, returnType, Swc4jSpan.DUMMY);
+        return create(0, params, body, _async, generator, typeParams, returnType);
+    }
+
+    public static Swc4jAstArrowExpr create(
+            int ctxt,
+            List<ISwc4jAstPat> params,
+            ISwc4jAstBlockStmtOrExpr body,
+            boolean _async,
+            boolean generator,
+            Swc4jAstTsTypeParamDecl typeParams,
+            Swc4jAstTsTypeAnn returnType) {
+        return new Swc4jAstArrowExpr(ctxt, params, body, _async, generator, typeParams, returnType, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod
@@ -123,6 +138,11 @@ public class Swc4jAstArrowExpr
         typeParams.ifPresent(childNodes::add);
         returnType.ifPresent(childNodes::add);
         return childNodes;
+    }
+
+    @Jni2RustMethod
+    public int getCtxt() {
+        return ctxt;
     }
 
     @Jni2RustMethod
@@ -190,6 +210,11 @@ public class Swc4jAstArrowExpr
     public Swc4jAstArrowExpr setBody(ISwc4jAstBlockStmtOrExpr body) {
         this.body = AssertionUtils.notNull(body, "Body");
         this.body.setParent(this);
+        return this;
+    }
+
+    public Swc4jAstArrowExpr setCtxt(int ctxt) {
+        this.ctxt = ctxt;
         return this;
     }
 

@@ -151,8 +151,8 @@ public class Swc4jAstMemberExpr
             if (expr instanceof Swc4jAstStr) {
                 return Optional.of(expr.as(Swc4jAstStr.class).getValue());
             }
-        } else if (prop instanceof Swc4jAstIdent) {
-            return Optional.of(prop.as(Swc4jAstIdent.class).getSym());
+        } else if (prop instanceof Swc4jAstIdentName) {
+            return Optional.of(prop.as(Swc4jAstIdentName.class).getSym());
         }
         return Optional.empty();
     }

@@ -25,9 +25,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstForHead;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -39,16 +37,20 @@ public class Swc4jAstVarDecl
         extends Swc4jAst
         implements ISwc4jAstDecl, ISwc4jAstVarDeclOrExpr, ISwc4jAstForHead {
     protected final List<Swc4jAstVarDeclarator> decls;
+    @Jni2RustField(syntaxContext = true)
+    protected int ctxt;
     protected boolean declare;
     protected Swc4jAstVarDeclKind kind;
 
     @Jni2RustMethod
     public Swc4jAstVarDecl(
+            @Jni2RustParam(syntaxContext = true) int ctxt,
             Swc4jAstVarDeclKind kind,
             boolean declare,
             List<Swc4jAstVarDeclarator> decls,
             Swc4jSpan span) {
         super(span);
+        setCtxt(ctxt);
         setDeclare(declare);
         setKind(kind);
         this.decls = AssertionUtils.notNull(decls, "Decls");
@@ -67,13 +69,29 @@ public class Swc4jAstVarDecl
         return create(kind, declare, SimpleList.of());
     }
 
-    public static Swc4jAstVarDecl create(Swc4jAstVarDeclKind kind, boolean declare, List<Swc4jAstVarDeclarator> decls) {
-        return new Swc4jAstVarDecl(kind, declare, decls, Swc4jSpan.DUMMY);
+    public static Swc4jAstVarDecl create(
+            Swc4jAstVarDeclKind kind,
+            boolean declare,
+            List<Swc4jAstVarDeclarator> decls) {
+        return create(0, kind, declare, decls);
+    }
+
+    public static Swc4jAstVarDecl create(
+            int ctxt,
+            Swc4jAstVarDeclKind kind,
+            boolean declare,
+            List<Swc4jAstVarDeclarator> decls) {
+        return new Swc4jAstVarDecl(ctxt, kind, declare, decls, Swc4jSpan.DUMMY);
     }
 
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.copyOf(decls);
+    }
+
+    @Jni2RustMethod
+    public int getCtxt() {
+        return ctxt;
     }
 
     @Jni2RustMethod
@@ -109,6 +127,11 @@ public class Swc4jAstVarDecl
             }
         }
         return false;
+    }
+
+    public Swc4jAstVarDecl setCtxt(int ctxt) {
+        this.ctxt = ctxt;
+        return this;
     }
 
     public Swc4jAstVarDecl setDeclare(boolean declare) {

@@ -22,10 +22,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.constants.ISwc4jConstants;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
@@ -35,18 +32,22 @@ import java.util.List;
 public class Swc4jAstIdent
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstProp, ISwc4jAstTsModuleRef, ISwc4jAstModuleExportName, ISwc4jAstTsEntityName,
-        ISwc4jAstPropName, ISwc4jAstTsModuleName, ISwc4jAstJsxObject, ISwc4jAstJsxElementName, ISwc4jAstMemberProp,
-        ISwc4jAstSuperProp, ISwc4jAstJsxAttrName, ISwc4jAstTsThisTypeOrIdent, ISwc4jAstTsEnumMemberId {
+        ISwc4jAstTsModuleName, ISwc4jAstJsxObject, ISwc4jAstJsxElementName, ISwc4jAstTsThisTypeOrIdent,
+        ISwc4jAstTsEnumMemberId {
+    @Jni2RustField(syntaxContext = true)
+    protected int ctxt;
     protected boolean optional;
     @Jni2RustField(atom = true)
     protected String sym;
 
     @Jni2RustMethod
     public Swc4jAstIdent(
+            @Jni2RustParam(syntaxContext = true) int ctxt,
             String sym,
             boolean optional,
             Swc4jSpan span) {
         super(span);
+        setCtxt(ctxt);
         setOptional(optional);
         setSym(sym);
     }
@@ -56,7 +57,11 @@ public class Swc4jAstIdent
     }
 
     public static Swc4jAstIdent create(String sym, boolean optional) {
-        return new Swc4jAstIdent(sym, optional, Swc4jSpan.DUMMY);
+        return create(0, sym, optional);
+    }
+
+    public static Swc4jAstIdent create(int ctxt, String sym, boolean optional) {
+        return new Swc4jAstIdent(ctxt, sym, optional, Swc4jSpan.DUMMY);
     }
 
     public static Swc4jAstIdent createApply() {
@@ -86,6 +91,11 @@ public class Swc4jAstIdent
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;
+    }
+
+    @Jni2RustMethod
+    public int getCtxt() {
+        return ctxt;
     }
 
     @Jni2RustMethod
@@ -121,6 +131,11 @@ public class Swc4jAstIdent
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
         return false;
+    }
+
+    public Swc4jAstIdent setCtxt(int ctxt) {
+        this.ctxt = ctxt;
+        return this;
     }
 
     public Swc4jAstIdent setOptional(boolean optional) {

@@ -35,6 +35,8 @@ import java.util.Optional;
 public class Swc4jAstTaggedTpl
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    @Jni2RustField(syntaxContext = true)
+    protected int ctxt;
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr tag;
     @Jni2RustField(box = true)
@@ -44,11 +46,13 @@ public class Swc4jAstTaggedTpl
 
     @Jni2RustMethod
     public Swc4jAstTaggedTpl(
+            @Jni2RustParam(syntaxContext = true) int ctxt,
             ISwc4jAstExpr tag,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeParams,
             Swc4jAstTpl tpl,
             Swc4jSpan span) {
         super(span);
+        setCtxt(ctxt);
         setTag(tag);
         setTpl(tpl);
         setTypeParams(typeParams);
@@ -62,7 +66,15 @@ public class Swc4jAstTaggedTpl
             ISwc4jAstExpr tag,
             Swc4jAstTsTypeParamInstantiation typeParams,
             Swc4jAstTpl tpl) {
-        return new Swc4jAstTaggedTpl(tag, typeParams, tpl, Swc4jSpan.DUMMY);
+        return create(0, tag, typeParams, tpl);
+    }
+
+    public static Swc4jAstTaggedTpl create(
+            int ctxt,
+            ISwc4jAstExpr tag,
+            Swc4jAstTsTypeParamInstantiation typeParams,
+            Swc4jAstTpl tpl) {
+        return new Swc4jAstTaggedTpl(ctxt, tag, typeParams, tpl, Swc4jSpan.DUMMY);
     }
 
     @Override
@@ -70,6 +82,11 @@ public class Swc4jAstTaggedTpl
         List<ISwc4jAst> childNodes = SimpleList.of(tag, tpl);
         typeParams.ifPresent(childNodes::add);
         return childNodes;
+    }
+
+    @Jni2RustMethod
+    public int getCtxt() {
+        return ctxt;
     }
 
     @Jni2RustMethod
@@ -107,6 +124,11 @@ public class Swc4jAstTaggedTpl
             return true;
         }
         return false;
+    }
+
+    public Swc4jAstTaggedTpl setCtxt(int ctxt) {
+        this.ctxt = ctxt;
+        return this;
     }
 
     public Swc4jAstTaggedTpl setTag(ISwc4jAstExpr tag) {

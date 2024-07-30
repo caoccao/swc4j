@@ -58,9 +58,9 @@ public class TestSwc4jAstCallExpr extends BaseTestSuiteSwc4jAst {
         ident = assertAst(
                 memberExpr, memberExpr.getObj().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 0, 1);
         assertEquals("a", ident.getSym());
-        ident = assertAst(
-                memberExpr, memberExpr.getProp().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 2, 3);
-        assertEquals("b", ident.getSym());
+        Swc4jAstIdentName identName = assertAst(
+                memberExpr, memberExpr.getProp().as(Swc4jAstIdentName.class), Swc4jAstType.IdentName, 2, 3);
+        assertEquals("b", identName.getSym());
         assertSpan(code, script);
     }
 

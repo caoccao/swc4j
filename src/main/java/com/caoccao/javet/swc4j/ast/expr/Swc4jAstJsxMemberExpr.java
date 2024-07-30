@@ -33,24 +33,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
-@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXMemberExpr", span = false)
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXMemberExpr")
 public class Swc4jAstJsxMemberExpr
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxObject, ISwc4jAstJsxElementName {
     protected ISwc4jAstJsxObject obj;
-    protected Swc4jAstIdent prop;
+    protected Swc4jAstIdentName prop;
 
     @Jni2RustMethod
     public Swc4jAstJsxMemberExpr(
             ISwc4jAstJsxObject obj,
-            Swc4jAstIdent prop,
+            Swc4jAstIdentName prop,
             Swc4jSpan span) {
         super(span);
         setObj(obj);
         setProp(prop);
     }
 
-    public static Swc4jAstJsxMemberExpr create(ISwc4jAstJsxObject obj, Swc4jAstIdent prop) {
+    public static Swc4jAstJsxMemberExpr create(ISwc4jAstJsxObject obj, Swc4jAstIdentName prop) {
         return new Swc4jAstJsxMemberExpr(obj, prop, Swc4jSpan.DUMMY);
     }
 
@@ -65,7 +65,7 @@ public class Swc4jAstJsxMemberExpr
     }
 
     @Jni2RustMethod
-    public Swc4jAstIdent getProp() {
+    public Swc4jAstIdentName getProp() {
         return prop;
     }
 
@@ -80,8 +80,8 @@ public class Swc4jAstJsxMemberExpr
             setObj((ISwc4jAstJsxObject) newNode);
             return true;
         }
-        if (prop == oldNode && newNode instanceof Swc4jAstIdent) {
-            setProp((Swc4jAstIdent) newNode);
+        if (prop == oldNode && newNode instanceof Swc4jAstIdentName) {
+            setProp((Swc4jAstIdentName) newNode);
             return true;
         }
         return false;
@@ -93,7 +93,7 @@ public class Swc4jAstJsxMemberExpr
         return this;
     }
 
-    public Swc4jAstJsxMemberExpr setProp(Swc4jAstIdent prop) {
+    public Swc4jAstJsxMemberExpr setProp(Swc4jAstIdentName prop) {
         this.prop = AssertionUtils.notNull(prop, "Prop");
         this.prop.setParent(this);
         return this;

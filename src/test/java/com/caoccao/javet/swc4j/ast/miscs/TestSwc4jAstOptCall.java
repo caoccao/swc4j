@@ -18,10 +18,7 @@ package com.caoccao.javet.swc4j.ast.miscs;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstExprOrSpread;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstOptChainExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -63,9 +60,9 @@ public class TestSwc4jAstOptCall extends BaseTestSuiteSwc4jAst {
         ident = assertAst(
                 memberExpr, memberExpr.getObj().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 0, 1);
         assertEquals("a", ident.getSym());
-        ident = assertAst(
-                memberExpr, memberExpr.getProp().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 3, 4);
-        assertEquals("b", ident.getSym());
+        Swc4jAstIdentName identName = assertAst(
+                memberExpr, memberExpr.getProp().as(Swc4jAstIdentName.class), Swc4jAstType.IdentName, 3, 4);
+        assertEquals("b", identName.getSym());
         assertSpan(code, script);
     }
 }

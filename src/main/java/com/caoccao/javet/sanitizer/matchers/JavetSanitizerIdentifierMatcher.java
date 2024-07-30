@@ -18,6 +18,7 @@ package com.caoccao.javet.sanitizer.matchers;
 
 import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.utils.StringUtils;
 
@@ -48,8 +49,15 @@ public final class JavetSanitizerIdentifierMatcher implements IJavetSanitizerMat
     @Override
     public ISwc4jAst matches(JavetSanitizerOptions options, ISwc4jAst node) {
         return Optional.of(node)
-                .map(n -> n.as(Swc4jAstIdent.class))
-                .filter(n -> matches(options, n.getSym()))
+                .filter(n -> {
+                    if (n instanceof Swc4jAstIdent) {
+                        return matches(options, n.as(Swc4jAstIdent.class).getSym());
+                    }
+                    if (n instanceof Swc4jAstIdentName) {
+                        return matches(options, n.as(Swc4jAstIdentName.class).getSym());
+                    }
+                    return false;
+                })
                 .orElse(null);
     }
 

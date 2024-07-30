@@ -680,6 +680,9 @@ public class TestCodeGen {
                                 processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
                                         arg,
                                         getterName));
+                                if (fieldType == int.class && jni2RustFieldUtils.isSyntaxContext()) {
+                                    processLines.add(String.format("    let %s = SyntaxContext::from_u32(%s as u32);", arg, arg));
+                                }
                             } else if (fieldType.isEnum()) {
                                 processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
                                         javaVar,

@@ -32,4 +32,6 @@ public @interface Jni2RustParam {
     String[] preCalls() default {};
 
     String rustType() default "";
+
+    boolean syntaxContext() default false;
 }

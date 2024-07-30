@@ -79,7 +79,8 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
   let code: String = parse_params.text.clone().to_string();
   let parsed_source = parse_by_mode(parse_params, options.parse_mode, &mut plugin_host)?;
   let source_map = Lrc::new(SourceMap::new(FilePathMapping::empty()));
-  source_map.new_source_file(FileName::Url(options.get_specifier()), code);
+  let filename = Lrc::new(FileName::Url(options.get_specifier()));
+  source_map.new_source_file(filename, code);
   let mut buffer = vec![];
   let mut source_map_buffer = vec![];
   let mut writer = Box::new(JsWriter::new(
@@ -118,6 +119,7 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
     let mut buffer = Vec::new();
     let source_map_config = SourceMapConfig {
       inline_sources: options.inline_sources,
+      maybe_base: None,
     };
     source_map
       .build_source_map_with_config(&source_map_buffer, None, source_map_config)
@@ -169,6 +171,7 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
     inline_sources: options.inline_sources,
     remove_comments: !options.keep_comments,
     source_map: options.source_map,
+    source_map_base: None,
     source_map_file: None,
   };
   parsed_source

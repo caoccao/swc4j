@@ -34,7 +34,7 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
-@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstAssignProp
         extends Swc4jAst
         implements ISwc4jAstProp {

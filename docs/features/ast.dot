@@ -14,7 +14,7 @@ digraph {
   ForHead -> { Pat UsingDecl VarDecl }
   Pat -> { ArrayPat AssignPat Expr BindingIdent Invalid ObjectPat RestPat }
   ImportSpecifier -> { ImportDefaultSpecifier ImportNamedSpecifier ImportStarAsSpecifier }
-  JSXAttrName -> { Ident JSXNamespacedName }
+  JSXAttrName -> { IdentName JSXNamespacedName }
   JSXAttrOrSpread -> { JSXAttr SpreadElement }
   JSXAttrValue -> { JSXElement JSXExprContainer JSXFragment Lit }
   JSXElementChild -> { JSXElement JSXExprContainer JSXFragment JSXSpreadChild JSXText }
@@ -22,8 +22,8 @@ digraph {
   JSXExpr -> { Expr JSXEmptyExpr }
   JSXObject -> { Ident JSXMemberExpr }
   Key -> { PrivateName PropName }
-  PropName -> { BigInt ComputedPropName Ident Number Str }
-  MemberProp -> { ComputedPropName Ident PrivateName }
+  PropName -> { BigInt ComputedPropName IdentName Number Str }
+  MemberProp -> { ComputedPropName IdentName PrivateName }
   ModuleDecl -> { ExportAll ExportDecl ExportDefaultDecl ExportDefaultExpr NamedExport ImportDecl TsExportAssignment TsImportEqualsDecl TsNamespaceExportDecl }
   ModuleExportName -> { Ident Str }
   ModuleItem -> { ModuleDecl Stmt }
@@ -34,7 +34,7 @@ digraph {
   Program -> { Module Script }
   Prop -> { AssignProp GetterProp KeyValueProp MethodProp SetterProp Ident }
   PropOrSpread -> { Prop SpreadElement }
-  SuperProp -> { ComputedPropName Ident }
+  SuperProp -> { ComputedPropName IdentName }
   TsEntityName -> { Ident TsQualifiedName }
   TsEnumMemberId -> { Ident Str }
   TsFnOrConstructorType -> { TsConstructorType TsFnType }

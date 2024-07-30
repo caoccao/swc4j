@@ -23,9 +23,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstBlockStmtOrExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
-import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
+import com.caoccao.javet.swc4j.jni2rust.*;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
@@ -37,12 +35,16 @@ public class Swc4jAstBlockStmt
         extends Swc4jAst
         implements ISwc4jAstStmt, ISwc4jAstBlockStmtOrExpr {
     protected final List<ISwc4jAstStmt> stmts;
+    @Jni2RustField(syntaxContext = true)
+    protected int ctxt;
 
     @Jni2RustMethod
     public Swc4jAstBlockStmt(
+            @Jni2RustParam(syntaxContext = true) int ctxt,
             List<ISwc4jAstStmt> stmts,
             Swc4jSpan span) {
         super(span);
+        setCtxt(ctxt);
         this.stmts = AssertionUtils.notNull(stmts, "Stmts");
         this.stmts.forEach(node -> node.setParent(this));
     }
@@ -52,12 +54,21 @@ public class Swc4jAstBlockStmt
     }
 
     public static Swc4jAstBlockStmt create(List<ISwc4jAstStmt> stmts) {
-        return new Swc4jAstBlockStmt(stmts, Swc4jSpan.DUMMY);
+        return create(0, stmts);
+    }
+
+    public static Swc4jAstBlockStmt create(int ctxt, List<ISwc4jAstStmt> stmts) {
+        return new Swc4jAstBlockStmt(ctxt, stmts, Swc4jSpan.DUMMY);
     }
 
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return SimpleList.copyOf(stmts);
+    }
+
+    @Jni2RustMethod
+    public int getCtxt() {
+        return ctxt;
     }
 
     @Jni2RustMethod
@@ -83,6 +94,11 @@ public class Swc4jAstBlockStmt
             }
         }
         return false;
+    }
+
+    public Swc4jAstBlockStmt setCtxt(int ctxt) {
+        this.ctxt = ctxt;
+        return this;
     }
 
     @Override

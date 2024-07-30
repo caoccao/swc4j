@@ -106,11 +106,13 @@ public class Jni2Rust<T> {
                     for (Parameter parameter : executable.getParameters()) {
                         Class<?> parameterType = parameter.getType();
                         boolean isOptional = false;
+                        boolean isSyntaxContext = false;
                         boolean isCustomRustType = false;
                         String rustType = null;
                         if (AnnotationUtils.isAnnotationPresent(parameter, Jni2RustParam.class)) {
                             Jni2RustParam jni2RustParam = AnnotationUtils.getAnnotation(parameter, Jni2RustParam.class);
                             isOptional = Objects.requireNonNull(jni2RustParam).optional();
+                            isSyntaxContext = Objects.requireNonNull(jni2RustParam).syntaxContext();
                             if (StringUtils.isNotEmpty(jni2RustParam.rustType())) {
                                 isCustomRustType = true;
                                 rustType = jni2RustParam.rustType();
@@ -126,7 +128,11 @@ public class Jni2Rust<T> {
                             String name = getParameterName(parameter);
                             StringBuilder sb = new StringBuilder(name).append(": ");
                             if (parameterType.isPrimitive()) {
-                                sb.append(options.getJavaTypeToRustTypeMap().get(parameterType.getName()));
+                                if (parameterType == int.class && isSyntaxContext) {
+                                    sb.append("SyntaxContext");
+                                } else {
+                                    sb.append(options.getJavaTypeToRustTypeMap().get(parameterType.getName()));
+                                }
                             } else if (parameterType == String.class) {
                                 if (isOptional) {
                                     sb.append("&Option<String>");
@@ -172,16 +178,21 @@ public class Jni2Rust<T> {
                         String name = getParameterName(parameter);
                         Class<?> parameterType = parameter.getType();
                         boolean isOptional = false;
+                        boolean isSyntaxContext = false;
                         String[] preCalls = null;
                         if (AnnotationUtils.isAnnotationPresent(parameter, Jni2RustParam.class)) {
                             Jni2RustParam jni2RustParam = AnnotationUtils.getAnnotation(parameter, Jni2RustParam.class);
                             isOptional = Objects.requireNonNull(jni2RustParam).optional();
+                            isSyntaxContext = Objects.requireNonNull(jni2RustParam).syntaxContext();
                             if (ArrayUtils.isNotEmpty(jni2RustParam.preCalls())) {
                                 preCalls = jni2RustParam.preCalls();
                             }
                         }
                         if (ArrayUtils.isEmpty(preCalls)) {
                             if (parameterType.isPrimitive()) {
+                                if (parameterType == int.class && isSyntaxContext) {
+                                    lines.add(String.format("    let %s = %s.as_u32() as i32;", name, name));
+                                }
                                 lines.add(String.format("    let %s = %s_to_jvalue!(%s);", name, parameterType.getName(), name));
                             } else if (parameterType == String.class) {
                                 if (isOptional) {

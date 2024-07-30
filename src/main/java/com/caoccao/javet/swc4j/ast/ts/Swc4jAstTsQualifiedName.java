@@ -18,7 +18,7 @@ package com.caoccao.javet.swc4j.ast.ts;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsEntityName;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
@@ -32,24 +32,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
-@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, span = false)
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstTsQualifiedName
         extends Swc4jAst
         implements ISwc4jAstTsEntityName {
     protected ISwc4jAstTsEntityName left;
-    protected Swc4jAstIdent right;
+    protected Swc4jAstIdentName right;
 
     @Jni2RustMethod
     public Swc4jAstTsQualifiedName(
             ISwc4jAstTsEntityName left,
-            Swc4jAstIdent right,
+            Swc4jAstIdentName right,
             Swc4jSpan span) {
         super(span);
         setLeft(left);
         setRight(right);
     }
 
-    public static Swc4jAstTsQualifiedName create(ISwc4jAstTsEntityName left, Swc4jAstIdent right) {
+    public static Swc4jAstTsQualifiedName create(ISwc4jAstTsEntityName left, Swc4jAstIdentName right) {
         return new Swc4jAstTsQualifiedName(left, right, Swc4jSpan.DUMMY);
     }
 
@@ -64,7 +64,7 @@ public class Swc4jAstTsQualifiedName
     }
 
     @Jni2RustMethod
-    public Swc4jAstIdent getRight() {
+    public Swc4jAstIdentName getRight() {
         return right;
     }
 
@@ -79,8 +79,8 @@ public class Swc4jAstTsQualifiedName
             setLeft((ISwc4jAstTsEntityName) newNode);
             return true;
         }
-        if (right == oldNode && newNode instanceof Swc4jAstIdent) {
-            setRight((Swc4jAstIdent) newNode);
+        if (right == oldNode && newNode instanceof Swc4jAstIdentName) {
+            setRight((Swc4jAstIdentName) newNode);
             return true;
         }
         return false;
@@ -92,7 +92,7 @@ public class Swc4jAstTsQualifiedName
         return this;
     }
 
-    public Swc4jAstTsQualifiedName setRight(Swc4jAstIdent right) {
+    public Swc4jAstTsQualifiedName setRight(Swc4jAstIdentName right) {
         this.right = AssertionUtils.notNull(right, "Right");
         this.right.setParent(this);
         return this;

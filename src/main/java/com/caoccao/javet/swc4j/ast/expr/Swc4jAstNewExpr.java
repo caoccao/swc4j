@@ -38,11 +38,14 @@ public class Swc4jAstNewExpr
     protected Optional<List<Swc4jAstExprOrSpread>> args;
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr callee;
+    @Jni2RustField(syntaxContext = true)
+    protected int ctxt;
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
 
     @Jni2RustMethod
     public Swc4jAstNewExpr(
+            @Jni2RustParam(syntaxContext = true) int ctxt,
             ISwc4jAstExpr callee,
             @Jni2RustParam(optional = true) List<Swc4jAstExprOrSpread> args,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
@@ -50,6 +53,7 @@ public class Swc4jAstNewExpr
         super(span);
         setArgs(args);
         setCallee(callee);
+        setCtxt(ctxt);
         setTypeArgs(typeArgs);
     }
 
@@ -67,7 +71,15 @@ public class Swc4jAstNewExpr
             ISwc4jAstExpr callee,
             List<Swc4jAstExprOrSpread> args,
             Swc4jAstTsTypeParamInstantiation typeArgs) {
-        return new Swc4jAstNewExpr(callee, args, typeArgs, Swc4jSpan.DUMMY);
+        return create(0, callee, args, typeArgs);
+    }
+
+    public static Swc4jAstNewExpr create(
+            int ctxt,
+            ISwc4jAstExpr callee,
+            List<Swc4jAstExprOrSpread> args,
+            Swc4jAstTsTypeParamInstantiation typeArgs) {
+        return new Swc4jAstNewExpr(ctxt, callee, args, typeArgs, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod
@@ -86,6 +98,11 @@ public class Swc4jAstNewExpr
         args.ifPresent(childNodes::addAll);
         typeArgs.ifPresent(childNodes::add);
         return childNodes;
+    }
+
+    @Jni2RustMethod
+    public int getCtxt() {
+        return ctxt;
     }
 
     @Override
@@ -135,6 +152,11 @@ public class Swc4jAstNewExpr
     public Swc4jAstNewExpr setCallee(ISwc4jAstExpr callee) {
         this.callee = AssertionUtils.notNull(callee, "Callee");
         this.callee.setParent(this);
+        return this;
+    }
+
+    public Swc4jAstNewExpr setCtxt(int ctxt) {
+        this.ctxt = ctxt;
         return this;
     }
 

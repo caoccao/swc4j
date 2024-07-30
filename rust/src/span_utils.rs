@@ -22,7 +22,7 @@ use jni::JNIEnv;
 
 use std::collections::BTreeMap;
 
-use deno_ast::swc::common::source_map::Pos;
+use deno_ast::swc::common::source_map::SmallPos;
 use deno_ast::swc::common::{BytePos, Span};
 
 use crate::jni_utils::*;

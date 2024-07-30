@@ -16,7 +16,7 @@
 
 package com.caoccao.javet.swc4j.ast.interfaces;
 
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstJsxNamespacedName;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
@@ -24,7 +24,7 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 @Jni2RustClass(
         name = "JSXAttrName",
         mappings = {
-                @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstIdent.class),
+                @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstIdentName.class),
                 @Jni2RustEnumMapping(name = "JSXNamespacedName", type = Swc4jAstJsxNamespacedName.class),
         }
 )

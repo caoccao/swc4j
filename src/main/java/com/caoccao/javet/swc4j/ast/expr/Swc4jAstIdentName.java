@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.ast.clazz;
+package com.caoccao.javet.swc4j.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstKey;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
+import com.caoccao.javet.swc4j.constants.ISwc4jConstants;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
@@ -34,22 +32,46 @@ import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import java.util.List;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
-public class Swc4jAstPrivateName
+public class Swc4jAstIdentName
         extends Swc4jAst
-        implements ISwc4jAstKey, ISwc4jAstExpr, ISwc4jAstMemberProp {
+        implements ISwc4jAstSuperProp, ISwc4jAstPropName, ISwc4jAstMemberProp, ISwc4jAstJsxAttrName {
     @Jni2RustField(atom = true)
-    protected String name;
+    protected String sym;
 
     @Jni2RustMethod
-    public Swc4jAstPrivateName(
-            String name,
+    public Swc4jAstIdentName(
+            String sym,
             Swc4jSpan span) {
         super(span);
-        setName(name);
+        setSym(sym);
     }
 
-    public static Swc4jAstPrivateName create(String name) {
-        return new Swc4jAstPrivateName(name, Swc4jSpan.DUMMY);
+    public static Swc4jAstIdentName create(String sym) {
+        return new Swc4jAstIdentName(sym, Swc4jSpan.DUMMY);
+    }
+
+    public static Swc4jAstIdentName createApply() {
+        return create(ISwc4jConstants.APPLY);
+    }
+
+    public static Swc4jAstIdentName createArray() {
+        return create(ISwc4jConstants.ARRAY);
+    }
+
+    public static Swc4jAstIdentName createConcat() {
+        return create(ISwc4jConstants.CONCAT);
+    }
+
+    public static Swc4jAstIdentName createDummy() {
+        return create(ISwc4jConstants.DUMMY);
+    }
+
+    public static Swc4jAstIdentName createFunction() {
+        return create(ISwc4jConstants.FUNCTION);
+    }
+
+    public static Swc4jAstIdentName createUndefined() {
+        return create(ISwc4jConstants.UNDEFINED);
     }
 
     @Override
@@ -58,13 +80,28 @@ public class Swc4jAstPrivateName
     }
 
     @Jni2RustMethod
-    public String getName() {
-        return name;
+    public String getSym() {
+        return sym;
     }
 
     @Override
     public Swc4jAstType getType() {
-        return Swc4jAstType.PrivateName;
+        return Swc4jAstType.IdentName;
+    }
+
+    @Override
+    public boolean isInfinity() {
+        return ISwc4jConstants.INFINITY.equals(sym);
+    }
+
+    @Override
+    public boolean isNaN() {
+        return ISwc4jConstants.NAN.equals(sym);
+    }
+
+    @Override
+    public boolean isUndefined() {
+        return ISwc4jConstants.UNDEFINED.equals(sym);
     }
 
     @Override
@@ -72,14 +109,19 @@ public class Swc4jAstPrivateName
         return false;
     }
 
-    public Swc4jAstPrivateName setName(String name) {
-        this.name = AssertionUtils.notNull(name, "Name");
+    public Swc4jAstIdentName setSym(String sym) {
+        this.sym = AssertionUtils.notNull(sym, "Sym");
         return this;
     }
 
     @Override
+    public String toString() {
+        return sym;
+    }
+
+    @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitPrivateName(this)) {
+        switch (visitor.visitIdentName(this)) {
             case Error:
                 return Swc4jAstVisitorResponse.Error;
             case OkAndBreak:

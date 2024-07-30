@@ -25,7 +25,7 @@ use crate::jni_utils::*;
 use crate::span_utils::{ByteToIndexMap, RegisterWithMap, ToJavaWithMap};
 
 use deno_ast::swc::ast::*;
-use deno_ast::swc::common::{Span, Spanned, DUMMY_SP};
+use deno_ast::swc::common::{Span, Spanned, SyntaxContext, DUMMY_SP};
 use num_bigint::{BigInt as BigIntValue, BigUint, Sign};
 
 use std::ptr::null_mut;
@@ -98,7 +98,6 @@ impl ToJavaWithMap<ByteToIndexMap> for BindingIdent {
       Span {
         lo: self.id.span.lo,
         hi: type_ann.as_ref().span.hi,
-        ctxt: self.id.span.ctxt,
       }
     } else {
       self.span()
@@ -2838,6 +2837,7 @@ struct JavaSwc4jAstArrowExpr {
   class: GlobalRef,
   method_construct: JMethodID,
   method_get_body: JMethodID,
+  method_get_ctxt: JMethodID,
   method_get_params: JMethodID,
   method_get_return_type: JMethodID,
   method_get_type_params: JMethodID,
@@ -2860,7 +2860,7 @@ impl JavaSwc4jAstArrowExpr {
       .get_method_id(
         &class,
         "<init>",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstBlockStmtOrExpr;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ILjava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstBlockStmtOrExpr;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstArrowExpr::new");
     let method_get_body = env
@@ -2870,6 +2870,13 @@ impl JavaSwc4jAstArrowExpr {
         "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstBlockStmtOrExpr;",
       )
       .expect("Couldn't find method Swc4jAstArrowExpr.getBody");
+    let method_get_ctxt = env
+      .get_method_id(
+        &class,
+        "getCtxt",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jAstArrowExpr.getCtxt");
     let method_get_params = env
       .get_method_id(
         &class,
@@ -2909,6 +2916,7 @@ impl JavaSwc4jAstArrowExpr {
       class,
       method_construct,
       method_get_body,
+      method_get_ctxt,
       method_get_params,
       method_get_return_type,
       method_get_type_params,
@@ -2920,6 +2928,7 @@ impl JavaSwc4jAstArrowExpr {
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    ctxt: SyntaxContext,
     params: &JObject<'_>,
     body: &JObject<'_>,
     is_async: bool,
@@ -2931,6 +2940,8 @@ impl JavaSwc4jAstArrowExpr {
   where
     'local: 'a,
   {
+    let ctxt = ctxt.as_u32() as i32;
+    let ctxt = int_to_jvalue!(ctxt);
     let params = object_to_jvalue!(params);
     let body = object_to_jvalue!(body);
     let is_async = boolean_to_jvalue!(is_async);
@@ -2942,7 +2953,7 @@ impl JavaSwc4jAstArrowExpr {
         env,
         &self.class,
         self.method_construct,
-        &[params, body, is_async, generator, type_params, return_type, span],
+        &[ctxt, params, body, is_async, generator, type_params, return_type, span],
         "Swc4jAstArrowExpr construct()"
       );
     return_value
@@ -2962,6 +2973,22 @@ impl JavaSwc4jAstArrowExpr {
         self.method_get_body,
         &[],
         "ISwc4jAstBlockStmtOrExpr get_body()"
+      );
+    return_value
+  }
+
+  pub fn get_ctxt<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_ctxt,
+        &[],
+        "int get_ctxt()"
       );
     return_value
   }
@@ -4282,6 +4309,7 @@ impl JavaSwc4jAstBindingIdent {
 struct JavaSwc4jAstBlockStmt {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_ctxt: JMethodID,
   method_get_stmts: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstBlockStmt {}
@@ -4300,9 +4328,16 @@ impl JavaSwc4jAstBlockStmt {
       .get_method_id(
         &class,
         "<init>",
-        "(Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ILjava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstBlockStmt::new");
+    let method_get_ctxt = env
+      .get_method_id(
+        &class,
+        "getCtxt",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jAstBlockStmt.getCtxt");
     let method_get_stmts = env
       .get_method_id(
         &class,
@@ -4313,6 +4348,7 @@ impl JavaSwc4jAstBlockStmt {
     JavaSwc4jAstBlockStmt {
       class,
       method_construct,
+      method_get_ctxt,
       method_get_stmts,
     }
   }
@@ -4320,20 +4356,39 @@ impl JavaSwc4jAstBlockStmt {
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    ctxt: SyntaxContext,
     stmts: &JObject<'_>,
     span: &JObject<'_>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
+    let ctxt = ctxt.as_u32() as i32;
+    let ctxt = int_to_jvalue!(ctxt);
     let stmts = object_to_jvalue!(stmts);
     let span = object_to_jvalue!(span);
     let return_value = call_as_construct!(
         env,
         &self.class,
         self.method_construct,
-        &[stmts, span],
+        &[ctxt, stmts, span],
         "Swc4jAstBlockStmt construct()"
+      );
+    return_value
+  }
+
+  pub fn get_ctxt<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_ctxt,
+        &[],
+        "int get_ctxt()"
       );
     return_value
   }
@@ -4519,6 +4574,7 @@ struct JavaSwc4jAstCallExpr {
   method_construct: JMethodID,
   method_get_args: JMethodID,
   method_get_callee: JMethodID,
+  method_get_ctxt: JMethodID,
   method_get_type_args: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstCallExpr {}
@@ -4537,7 +4593,7 @@ impl JavaSwc4jAstCallExpr {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstCallee;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstCallee;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstCallExpr::new");
     let method_get_args = env
@@ -4554,6 +4610,13 @@ impl JavaSwc4jAstCallExpr {
         "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstCallee;",
       )
       .expect("Couldn't find method Swc4jAstCallExpr.getCallee");
+    let method_get_ctxt = env
+      .get_method_id(
+        &class,
+        "getCtxt",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jAstCallExpr.getCtxt");
     let method_get_type_args = env
       .get_method_id(
         &class,
@@ -4566,6 +4629,7 @@ impl JavaSwc4jAstCallExpr {
       method_construct,
       method_get_args,
       method_get_callee,
+      method_get_ctxt,
       method_get_type_args,
     }
   }
@@ -4573,6 +4637,7 @@ impl JavaSwc4jAstCallExpr {
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    ctxt: SyntaxContext,
     callee: &JObject<'_>,
     args: &JObject<'_>,
     type_args: &Option<JObject>,
@@ -4581,6 +4646,8 @@ impl JavaSwc4jAstCallExpr {
   where
     'local: 'a,
   {
+    let ctxt = ctxt.as_u32() as i32;
+    let ctxt = int_to_jvalue!(ctxt);
     let callee = object_to_jvalue!(callee);
     let args = object_to_jvalue!(args);
     let type_args = optional_object_to_jvalue!(type_args);
@@ -4589,7 +4656,7 @@ impl JavaSwc4jAstCallExpr {
         env,
         &self.class,
         self.method_construct,
-        &[callee, args, type_args, span],
+        &[ctxt, callee, args, type_args, span],
         "Swc4jAstCallExpr construct()"
       );
     return_value
@@ -4627,6 +4694,22 @@ impl JavaSwc4jAstCallExpr {
         self.method_get_callee,
         &[],
         "ISwc4jAstCallee get_callee()"
+      );
+    return_value
+  }
+
+  pub fn get_ctxt<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_ctxt,
+        &[],
+        "int get_ctxt()"
       );
     return_value
   }
@@ -4763,6 +4846,7 @@ struct JavaSwc4jAstClass {
   class: GlobalRef,
   method_construct: JMethodID,
   method_get_body: JMethodID,
+  method_get_ctxt: JMethodID,
   method_get_decorators: JMethodID,
   method_get_implements: JMethodID,
   method_get_super_class: JMethodID,
@@ -4786,7 +4870,7 @@ impl JavaSwc4jAstClass {
       .get_method_id(
         &class,
         "<init>",
-        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ILjava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;ZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Ljava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstClass::new");
     let method_get_body = env
@@ -4796,6 +4880,13 @@ impl JavaSwc4jAstClass {
         "()Ljava/util/List;",
       )
       .expect("Couldn't find method Swc4jAstClass.getBody");
+    let method_get_ctxt = env
+      .get_method_id(
+        &class,
+        "getCtxt",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jAstClass.getCtxt");
     let method_get_decorators = env
       .get_method_id(
         &class,
@@ -4842,6 +4933,7 @@ impl JavaSwc4jAstClass {
       class,
       method_construct,
       method_get_body,
+      method_get_ctxt,
       method_get_decorators,
       method_get_implements,
       method_get_super_class,
@@ -4854,6 +4946,7 @@ impl JavaSwc4jAstClass {
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    ctxt: SyntaxContext,
     decorators: &JObject<'_>,
     body: &JObject<'_>,
     super_class: &Option<JObject>,
@@ -4866,6 +4959,8 @@ impl JavaSwc4jAstClass {
   where
     'local: 'a,
   {
+    let ctxt = ctxt.as_u32() as i32;
+    let ctxt = int_to_jvalue!(ctxt);
     let decorators = object_to_jvalue!(decorators);
     let body = object_to_jvalue!(body);
     let super_class = optional_object_to_jvalue!(super_class);
@@ -4878,7 +4973,7 @@ impl JavaSwc4jAstClass {
         env,
         &self.class,
         self.method_construct,
-        &[decorators, body, super_class, is_abstract, type_params, super_type_params, implements, span],
+        &[ctxt, decorators, body, super_class, is_abstract, type_params, super_type_params, implements, span],
         "Swc4jAstClass construct()"
       );
     return_value
@@ -4898,6 +4993,22 @@ impl JavaSwc4jAstClass {
         self.method_get_body,
         &[],
         "List get_body()"
+      );
+    return_value
+  }
+
+  pub fn get_ctxt<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_ctxt,
+        &[],
+        "int get_ctxt()"
       );
     return_value
   }
@@ -6132,6 +6243,7 @@ struct JavaSwc4jAstConstructor {
   method_construct: JMethodID,
   method_get_accessibility: JMethodID,
   method_get_body: JMethodID,
+  method_get_ctxt: JMethodID,
   method_get_key: JMethodID,
   method_get_params: JMethodID,
   method_is_optional: JMethodID,
@@ -6152,7 +6264,7 @@ impl JavaSwc4jAstConstructor {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstAccessibility;ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstPropName;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstAccessibility;ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstConstructor::new");
     let method_get_accessibility = env
@@ -6169,6 +6281,13 @@ impl JavaSwc4jAstConstructor {
         "()Ljava/util/Optional;",
       )
       .expect("Couldn't find method Swc4jAstConstructor.getBody");
+    let method_get_ctxt = env
+      .get_method_id(
+        &class,
+        "getCtxt",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jAstConstructor.getCtxt");
     let method_get_key = env
       .get_method_id(
         &class,
@@ -6195,6 +6314,7 @@ impl JavaSwc4jAstConstructor {
       method_construct,
       method_get_accessibility,
       method_get_body,
+      method_get_ctxt,
       method_get_key,
       method_get_params,
       method_is_optional,
@@ -6204,6 +6324,7 @@ impl JavaSwc4jAstConstructor {
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    ctxt: SyntaxContext,
     key: &JObject<'_>,
     params: &JObject<'_>,
     body: &Option<JObject>,
@@ -6214,6 +6335,8 @@ impl JavaSwc4jAstConstructor {
   where
     'local: 'a,
   {
+    let ctxt = ctxt.as_u32() as i32;
+    let ctxt = int_to_jvalue!(ctxt);
     let key = object_to_jvalue!(key);
     let params = object_to_jvalue!(params);
     let body = optional_object_to_jvalue!(body);
@@ -6224,7 +6347,7 @@ impl JavaSwc4jAstConstructor {
         env,
         &self.class,
         self.method_construct,
-        &[key, params, body, accessibility, optional, span],
+        &[ctxt, key, params, body, accessibility, optional, span],
         "Swc4jAstConstructor construct()"
       );
     return_value
@@ -6262,6 +6385,22 @@ impl JavaSwc4jAstConstructor {
         self.method_get_body,
         &[],
         "Optional get_body()"
+      );
+    return_value
+  }
+
+  pub fn get_ctxt<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_ctxt,
+        &[],
+        "int get_ctxt()"
       );
     return_value
   }
@@ -8252,6 +8391,7 @@ struct JavaSwc4jAstFunction {
   class: GlobalRef,
   method_construct: JMethodID,
   method_get_body: JMethodID,
+  method_get_ctxt: JMethodID,
   method_get_decorators: JMethodID,
   method_get_params: JMethodID,
   method_get_return_type: JMethodID,
@@ -8275,7 +8415,7 @@ impl JavaSwc4jAstFunction {
       .get_method_id(
         &class,
         "<init>",
-        "(Ljava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ILjava/util/List;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/stmt/Swc4jAstBlockStmt;ZZLcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamDecl;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstFunction::new");
     let method_get_body = env
@@ -8285,6 +8425,13 @@ impl JavaSwc4jAstFunction {
         "()Ljava/util/Optional;",
       )
       .expect("Couldn't find method Swc4jAstFunction.getBody");
+    let method_get_ctxt = env
+      .get_method_id(
+        &class,
+        "getCtxt",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jAstFunction.getCtxt");
     let method_get_decorators = env
       .get_method_id(
         &class,
@@ -8331,6 +8478,7 @@ impl JavaSwc4jAstFunction {
       class,
       method_construct,
       method_get_body,
+      method_get_ctxt,
       method_get_decorators,
       method_get_params,
       method_get_return_type,
@@ -8343,6 +8491,7 @@ impl JavaSwc4jAstFunction {
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    ctxt: SyntaxContext,
     params: &JObject<'_>,
     decorators: &JObject<'_>,
     body: &Option<JObject>,
@@ -8355,6 +8504,8 @@ impl JavaSwc4jAstFunction {
   where
     'local: 'a,
   {
+    let ctxt = ctxt.as_u32() as i32;
+    let ctxt = int_to_jvalue!(ctxt);
     let params = object_to_jvalue!(params);
     let decorators = object_to_jvalue!(decorators);
     let body = optional_object_to_jvalue!(body);
@@ -8367,7 +8518,7 @@ impl JavaSwc4jAstFunction {
         env,
         &self.class,
         self.method_construct,
-        &[params, decorators, body, is_generator, is_async, type_params, return_type, span],
+        &[ctxt, params, decorators, body, is_generator, is_async, type_params, return_type, span],
         "Swc4jAstFunction construct()"
       );
     return_value
@@ -8387,6 +8538,22 @@ impl JavaSwc4jAstFunction {
         self.method_get_body,
         &[],
         "Optional get_body()"
+      );
+    return_value
+  }
+
+  pub fn get_ctxt<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_ctxt,
+        &[],
+        "int get_ctxt()"
       );
     return_value
   }
@@ -8637,6 +8804,7 @@ impl JavaSwc4jAstGetterProp {
 struct JavaSwc4jAstIdent {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_ctxt: JMethodID,
   method_get_sym: JMethodID,
   method_is_optional: JMethodID,
 }
@@ -8656,9 +8824,16 @@ impl JavaSwc4jAstIdent {
       .get_method_id(
         &class,
         "<init>",
-        "(Ljava/lang/String;ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ILjava/lang/String;ZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstIdent::new");
+    let method_get_ctxt = env
+      .get_method_id(
+        &class,
+        "getCtxt",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jAstIdent.getCtxt");
     let method_get_sym = env
       .get_method_id(
         &class,
@@ -8676,6 +8851,7 @@ impl JavaSwc4jAstIdent {
     JavaSwc4jAstIdent {
       class,
       method_construct,
+      method_get_ctxt,
       method_get_sym,
       method_is_optional,
     }
@@ -8684,6 +8860,7 @@ impl JavaSwc4jAstIdent {
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    ctxt: SyntaxContext,
     sym: &str,
     optional: bool,
     span: &JObject<'_>,
@@ -8691,6 +8868,8 @@ impl JavaSwc4jAstIdent {
   where
     'local: 'a,
   {
+    let ctxt = ctxt.as_u32() as i32;
+    let ctxt = int_to_jvalue!(ctxt);
     let java_sym = string_to_jstring!(env, &sym);
     let sym = object_to_jvalue!(java_sym);
     let optional = boolean_to_jvalue!(optional);
@@ -8699,10 +8878,26 @@ impl JavaSwc4jAstIdent {
         env,
         &self.class,
         self.method_construct,
-        &[sym, optional, span],
+        &[ctxt, sym, optional, span],
         "Swc4jAstIdent construct()"
       );
     delete_local_ref!(env, java_sym);
+    return_value
+  }
+
+  pub fn get_ctxt<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_ctxt,
+        &[],
+        "int get_ctxt()"
+      );
     return_value
   }
 
@@ -8738,6 +8933,88 @@ impl JavaSwc4jAstIdent {
         &[],
         "boolean is_optional()"
       );
+    return_value
+  }
+}
+
+#[allow(dead_code)]
+struct JavaSwc4jAstIdentName {
+  class: GlobalRef,
+  method_construct: JMethodID,
+  method_get_sym: JMethodID,
+}
+unsafe impl Send for JavaSwc4jAstIdentName {}
+unsafe impl Sync for JavaSwc4jAstIdentName {}
+
+#[allow(dead_code)]
+impl JavaSwc4jAstIdentName {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/expr/Swc4jAstIdentName")
+      .expect("Couldn't find class Swc4jAstIdentName");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstIdentName");
+    let method_construct = env
+      .get_method_id(
+        &class,
+        "<init>",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+      )
+      .expect("Couldn't find method Swc4jAstIdentName::new");
+    let method_get_sym = env
+      .get_method_id(
+        &class,
+        "getSym",
+        "()Ljava/lang/String;",
+      )
+      .expect("Couldn't find method Swc4jAstIdentName.getSym");
+    JavaSwc4jAstIdentName {
+      class,
+      method_construct,
+      method_get_sym,
+    }
+  }
+
+  pub fn construct<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    sym: &str,
+    span: &JObject<'_>,
+  ) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_sym = string_to_jstring!(env, &sym);
+    let sym = object_to_jvalue!(java_sym);
+    let span = object_to_jvalue!(span);
+    let return_value = call_as_construct!(
+        env,
+        &self.class,
+        self.method_construct,
+        &[sym, span],
+        "Swc4jAstIdentName construct()"
+      );
+    delete_local_ref!(env, java_sym);
+    return_value
+  }
+
+  pub fn get_sym<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> String
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_sym,
+        &[],
+        "String get_sym()"
+      );
+    let java_return_value = return_value;
+    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    delete_local_ref!(env, java_return_value);
     return_value
   }
 }
@@ -10157,7 +10434,7 @@ impl JavaSwc4jAstJsxMemberExpr {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxObject;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstJsxObject;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdentName;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstJsxMemberExpr::new");
     let method_get_obj = env
@@ -10171,7 +10448,7 @@ impl JavaSwc4jAstJsxMemberExpr {
       .get_method_id(
         &class,
         "getProp",
-        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdentName;",
       )
       .expect("Couldn't find method Swc4jAstJsxMemberExpr.getProp");
     JavaSwc4jAstJsxMemberExpr {
@@ -10236,7 +10513,7 @@ impl JavaSwc4jAstJsxMemberExpr {
         obj,
         self.method_get_prop,
         &[],
-        "Swc4jAstIdent get_prop()"
+        "Swc4jAstIdentName get_prop()"
       );
     return_value
   }
@@ -10265,21 +10542,21 @@ impl JavaSwc4jAstJsxNamespacedName {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdentName;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdentName;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstJsxNamespacedName::new");
     let method_get_name = env
       .get_method_id(
         &class,
         "getName",
-        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdentName;",
       )
       .expect("Couldn't find method Swc4jAstJsxNamespacedName.getName");
     let method_get_ns = env
       .get_method_id(
         &class,
         "getNs",
-        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdentName;",
       )
       .expect("Couldn't find method Swc4jAstJsxNamespacedName.getNs");
     JavaSwc4jAstJsxNamespacedName {
@@ -10326,7 +10603,7 @@ impl JavaSwc4jAstJsxNamespacedName {
         obj,
         self.method_get_name,
         &[],
-        "Swc4jAstIdent get_name()"
+        "Swc4jAstIdentName get_name()"
       );
     return_value
   }
@@ -10344,7 +10621,7 @@ impl JavaSwc4jAstJsxNamespacedName {
         obj,
         self.method_get_ns,
         &[],
-        "Swc4jAstIdent get_ns()"
+        "Swc4jAstIdentName get_ns()"
       );
     return_value
   }
@@ -11656,6 +11933,7 @@ struct JavaSwc4jAstNewExpr {
   method_construct: JMethodID,
   method_get_args: JMethodID,
   method_get_callee: JMethodID,
+  method_get_ctxt: JMethodID,
   method_get_type_args: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstNewExpr {}
@@ -11674,7 +11952,7 @@ impl JavaSwc4jAstNewExpr {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstNewExpr::new");
     let method_get_args = env
@@ -11691,6 +11969,13 @@ impl JavaSwc4jAstNewExpr {
         "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;",
       )
       .expect("Couldn't find method Swc4jAstNewExpr.getCallee");
+    let method_get_ctxt = env
+      .get_method_id(
+        &class,
+        "getCtxt",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jAstNewExpr.getCtxt");
     let method_get_type_args = env
       .get_method_id(
         &class,
@@ -11703,6 +11988,7 @@ impl JavaSwc4jAstNewExpr {
       method_construct,
       method_get_args,
       method_get_callee,
+      method_get_ctxt,
       method_get_type_args,
     }
   }
@@ -11710,6 +11996,7 @@ impl JavaSwc4jAstNewExpr {
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    ctxt: SyntaxContext,
     callee: &JObject<'_>,
     args: &Option<JObject>,
     type_args: &Option<JObject>,
@@ -11718,6 +12005,8 @@ impl JavaSwc4jAstNewExpr {
   where
     'local: 'a,
   {
+    let ctxt = ctxt.as_u32() as i32;
+    let ctxt = int_to_jvalue!(ctxt);
     let callee = object_to_jvalue!(callee);
     let args = optional_object_to_jvalue!(args);
     let type_args = optional_object_to_jvalue!(type_args);
@@ -11726,7 +12015,7 @@ impl JavaSwc4jAstNewExpr {
         env,
         &self.class,
         self.method_construct,
-        &[callee, args, type_args, span],
+        &[ctxt, callee, args, type_args, span],
         "Swc4jAstNewExpr construct()"
       );
     return_value
@@ -11764,6 +12053,22 @@ impl JavaSwc4jAstNewExpr {
         self.method_get_callee,
         &[],
         "ISwc4jAstExpr get_callee()"
+      );
+    return_value
+  }
+
+  pub fn get_ctxt<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_ctxt,
+        &[],
+        "int get_ctxt()"
       );
     return_value
   }
@@ -12165,6 +12470,7 @@ struct JavaSwc4jAstOptCall {
   method_construct: JMethodID,
   method_get_args: JMethodID,
   method_get_callee: JMethodID,
+  method_get_ctxt: JMethodID,
   method_get_type_args: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstOptCall {}
@@ -12183,7 +12489,7 @@ impl JavaSwc4jAstOptCall {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Ljava/util/List;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstOptCall::new");
     let method_get_args = env
@@ -12200,6 +12506,13 @@ impl JavaSwc4jAstOptCall {
         "()Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;",
       )
       .expect("Couldn't find method Swc4jAstOptCall.getCallee");
+    let method_get_ctxt = env
+      .get_method_id(
+        &class,
+        "getCtxt",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jAstOptCall.getCtxt");
     let method_get_type_args = env
       .get_method_id(
         &class,
@@ -12212,6 +12525,7 @@ impl JavaSwc4jAstOptCall {
       method_construct,
       method_get_args,
       method_get_callee,
+      method_get_ctxt,
       method_get_type_args,
     }
   }
@@ -12219,6 +12533,7 @@ impl JavaSwc4jAstOptCall {
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    ctxt: SyntaxContext,
     callee: &JObject<'_>,
     args: &JObject<'_>,
     type_args: &Option<JObject>,
@@ -12227,6 +12542,8 @@ impl JavaSwc4jAstOptCall {
   where
     'local: 'a,
   {
+    let ctxt = ctxt.as_u32() as i32;
+    let ctxt = int_to_jvalue!(ctxt);
     let callee = object_to_jvalue!(callee);
     let args = object_to_jvalue!(args);
     let type_args = optional_object_to_jvalue!(type_args);
@@ -12235,7 +12552,7 @@ impl JavaSwc4jAstOptCall {
         env,
         &self.class,
         self.method_construct,
-        &[callee, args, type_args, span],
+        &[ctxt, callee, args, type_args, span],
         "Swc4jAstOptCall construct()"
       );
     return_value
@@ -12273,6 +12590,22 @@ impl JavaSwc4jAstOptCall {
         self.method_get_callee,
         &[],
         "ISwc4jAstExpr get_callee()"
+      );
+    return_value
+  }
+
+  pub fn get_ctxt<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_ctxt,
+        &[],
+        "int get_ctxt()"
       );
     return_value
   }
@@ -12867,7 +13200,7 @@ impl JavaSwc4jAstPrivateMethod {
 struct JavaSwc4jAstPrivateName {
   class: GlobalRef,
   method_construct: JMethodID,
-  method_get_id: JMethodID,
+  method_get_name: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstPrivateName {}
 unsafe impl Sync for JavaSwc4jAstPrivateName {}
@@ -12885,59 +13218,62 @@ impl JavaSwc4jAstPrivateName {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(Ljava/lang/String;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstPrivateName::new");
-    let method_get_id = env
+    let method_get_name = env
       .get_method_id(
         &class,
-        "getId",
-        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+        "getName",
+        "()Ljava/lang/String;",
       )
-      .expect("Couldn't find method Swc4jAstPrivateName.getId");
+      .expect("Couldn't find method Swc4jAstPrivateName.getName");
     JavaSwc4jAstPrivateName {
       class,
       method_construct,
-      method_get_id,
+      method_get_name,
     }
   }
 
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
-    id: &JObject<'_>,
+    name: &str,
     span: &JObject<'_>,
   ) -> JObject<'a>
   where
     'local: 'a,
   {
-    let id = object_to_jvalue!(id);
+    let java_name = string_to_jstring!(env, &name);
+    let name = object_to_jvalue!(java_name);
     let span = object_to_jvalue!(span);
     let return_value = call_as_construct!(
         env,
         &self.class,
         self.method_construct,
-        &[id, span],
+        &[name, span],
         "Swc4jAstPrivateName construct()"
       );
+    delete_local_ref!(env, java_name);
     return_value
   }
 
-  pub fn get_id<'local, 'a>(
+  pub fn get_name<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
-  where
-    'local: 'a,
+  ) -> String
   {
     let return_value = call_as_object!(
         env,
         obj,
-        self.method_get_id,
+        self.method_get_name,
         &[],
-        "Swc4jAstIdent get_id()"
+        "String get_name()"
       );
+    let java_return_value = return_value;
+    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    delete_local_ref!(env, java_return_value);
     return_value
   }
 }
@@ -12947,6 +13283,7 @@ struct JavaSwc4jAstPrivateProp {
   class: GlobalRef,
   method_construct: JMethodID,
   method_get_accessibility: JMethodID,
+  method_get_ctxt: JMethodID,
   method_get_decorators: JMethodID,
   method_get_key: JMethodID,
   method_get_type_ann: JMethodID,
@@ -12973,7 +13310,7 @@ impl JavaSwc4jAstPrivateProp {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstAccessibility;ZZZZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ILcom/caoccao/javet/swc4j/ast/clazz/Swc4jAstPrivateName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeAnn;ZLjava/util/List;Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstAccessibility;ZZZZLcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstPrivateProp::new");
     let method_get_accessibility = env
@@ -12983,6 +13320,13 @@ impl JavaSwc4jAstPrivateProp {
         "()Ljava/util/Optional;",
       )
       .expect("Couldn't find method Swc4jAstPrivateProp.getAccessibility");
+    let method_get_ctxt = env
+      .get_method_id(
+        &class,
+        "getCtxt",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jAstPrivateProp.getCtxt");
     let method_get_decorators = env
       .get_method_id(
         &class,
@@ -13050,6 +13394,7 @@ impl JavaSwc4jAstPrivateProp {
       class,
       method_construct,
       method_get_accessibility,
+      method_get_ctxt,
       method_get_decorators,
       method_get_key,
       method_get_type_ann,
@@ -13065,6 +13410,7 @@ impl JavaSwc4jAstPrivateProp {
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    ctxt: SyntaxContext,
     key: &JObject<'_>,
     value: &Option<JObject>,
     type_ann: &Option<JObject>,
@@ -13080,6 +13426,8 @@ impl JavaSwc4jAstPrivateProp {
   where
     'local: 'a,
   {
+    let ctxt = ctxt.as_u32() as i32;
+    let ctxt = int_to_jvalue!(ctxt);
     let key = object_to_jvalue!(key);
     let value = optional_object_to_jvalue!(value);
     let type_ann = optional_object_to_jvalue!(type_ann);
@@ -13095,7 +13443,7 @@ impl JavaSwc4jAstPrivateProp {
         env,
         &self.class,
         self.method_construct,
-        &[key, value, type_ann, is_static, decorators, accessibility, optional, is_override, readonly, definite, span],
+        &[ctxt, key, value, type_ann, is_static, decorators, accessibility, optional, is_override, readonly, definite, span],
         "Swc4jAstPrivateProp construct()"
       );
     return_value
@@ -13115,6 +13463,22 @@ impl JavaSwc4jAstPrivateProp {
         self.method_get_accessibility,
         &[],
         "Optional get_accessibility()"
+      );
+    return_value
+  }
+
+  pub fn get_ctxt<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_ctxt,
+        &[],
+        "int get_ctxt()"
       );
     return_value
   }
@@ -14635,6 +14999,7 @@ impl JavaSwc4jAstSwitchStmt {
 struct JavaSwc4jAstTaggedTpl {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_ctxt: JMethodID,
   method_get_tag: JMethodID,
   method_get_tpl: JMethodID,
   method_get_type_params: JMethodID,
@@ -14655,9 +15020,16 @@ impl JavaSwc4jAstTaggedTpl {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTpl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ILcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstExpr;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstTpl;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTaggedTpl::new");
+    let method_get_ctxt = env
+      .get_method_id(
+        &class,
+        "getCtxt",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jAstTaggedTpl.getCtxt");
     let method_get_tag = env
       .get_method_id(
         &class,
@@ -14682,6 +15054,7 @@ impl JavaSwc4jAstTaggedTpl {
     JavaSwc4jAstTaggedTpl {
       class,
       method_construct,
+      method_get_ctxt,
       method_get_tag,
       method_get_tpl,
       method_get_type_params,
@@ -14691,6 +15064,7 @@ impl JavaSwc4jAstTaggedTpl {
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    ctxt: SyntaxContext,
     tag: &JObject<'_>,
     type_params: &Option<JObject>,
     tpl: &JObject<'_>,
@@ -14699,6 +15073,8 @@ impl JavaSwc4jAstTaggedTpl {
   where
     'local: 'a,
   {
+    let ctxt = ctxt.as_u32() as i32;
+    let ctxt = int_to_jvalue!(ctxt);
     let tag = object_to_jvalue!(tag);
     let type_params = optional_object_to_jvalue!(type_params);
     let tpl = object_to_jvalue!(tpl);
@@ -14707,8 +15083,24 @@ impl JavaSwc4jAstTaggedTpl {
         env,
         &self.class,
         self.method_construct,
-        &[tag, type_params, tpl, span],
+        &[ctxt, tag, type_params, tpl, span],
         "Swc4jAstTaggedTpl construct()"
+      );
+    return_value
+  }
+
+  pub fn get_ctxt<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_ctxt,
+        &[],
+        "int get_ctxt()"
       );
     return_value
   }
@@ -19789,7 +20181,7 @@ impl JavaSwc4jAstTsQualifiedName {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdentName;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTsQualifiedName::new");
     let method_get_left = env
@@ -19803,7 +20195,7 @@ impl JavaSwc4jAstTsQualifiedName {
       .get_method_id(
         &class,
         "getRight",
-        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdent;",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/Swc4jAstIdentName;",
       )
       .expect("Couldn't find method Swc4jAstTsQualifiedName.getRight");
     JavaSwc4jAstTsQualifiedName {
@@ -19868,7 +20260,7 @@ impl JavaSwc4jAstTsQualifiedName {
         obj,
         self.method_get_right,
         &[],
-        "Swc4jAstIdent get_right()"
+        "Swc4jAstIdentName get_right()"
       );
     return_value
   }
@@ -22238,6 +22630,7 @@ impl JavaSwc4jAstUsingDecl {
 struct JavaSwc4jAstVarDecl {
   class: GlobalRef,
   method_construct: JMethodID,
+  method_get_ctxt: JMethodID,
   method_get_decls: JMethodID,
   method_get_kind: JMethodID,
   method_is_declare: JMethodID,
@@ -22258,9 +22651,16 @@ impl JavaSwc4jAstVarDecl {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/enums/Swc4jAstVarDeclKind;ZLjava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ILcom/caoccao/javet/swc4j/ast/enums/Swc4jAstVarDeclKind;ZLjava/util/List;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstVarDecl::new");
+    let method_get_ctxt = env
+      .get_method_id(
+        &class,
+        "getCtxt",
+        "()I",
+      )
+      .expect("Couldn't find method Swc4jAstVarDecl.getCtxt");
     let method_get_decls = env
       .get_method_id(
         &class,
@@ -22285,6 +22685,7 @@ impl JavaSwc4jAstVarDecl {
     JavaSwc4jAstVarDecl {
       class,
       method_construct,
+      method_get_ctxt,
       method_get_decls,
       method_get_kind,
       method_is_declare,
@@ -22294,6 +22695,7 @@ impl JavaSwc4jAstVarDecl {
   pub fn construct<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
+    ctxt: SyntaxContext,
     kind: &JObject<'_>,
     declare: bool,
     decls: &JObject<'_>,
@@ -22302,6 +22704,8 @@ impl JavaSwc4jAstVarDecl {
   where
     'local: 'a,
   {
+    let ctxt = ctxt.as_u32() as i32;
+    let ctxt = int_to_jvalue!(ctxt);
     let kind = object_to_jvalue!(kind);
     let declare = boolean_to_jvalue!(declare);
     let decls = object_to_jvalue!(decls);
@@ -22310,8 +22714,24 @@ impl JavaSwc4jAstVarDecl {
         env,
         &self.class,
         self.method_construct,
-        &[kind, declare, decls, span],
+        &[ctxt, kind, declare, decls, span],
         "Swc4jAstVarDecl construct()"
+      );
+    return_value
+  }
+
+  pub fn get_ctxt<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> i32
+  {
+    let return_value = call_as_int!(
+        env,
+        obj,
+        self.method_get_ctxt,
+        &[],
+        "int get_ctxt()"
       );
     return_value
   }
@@ -22924,6 +23344,7 @@ static mut JAVA_CLASS_FOR_STMT: Option<JavaSwc4jAstForStmt> = None;
 static mut JAVA_CLASS_FUNCTION: Option<JavaSwc4jAstFunction> = None;
 static mut JAVA_CLASS_GETTER_PROP: Option<JavaSwc4jAstGetterProp> = None;
 static mut JAVA_CLASS_IDENT: Option<JavaSwc4jAstIdent> = None;
+static mut JAVA_CLASS_IDENT_NAME: Option<JavaSwc4jAstIdentName> = None;
 static mut JAVA_CLASS_IF_STMT: Option<JavaSwc4jAstIfStmt> = None;
 static mut JAVA_CLASS_IMPORT: Option<JavaSwc4jAstImport> = None;
 static mut JAVA_CLASS_IMPORT_DECL: Option<JavaSwc4jAstImportDecl> = None;
@@ -23148,6 +23569,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
     JAVA_CLASS_FUNCTION = Some(JavaSwc4jAstFunction::new(env));
     JAVA_CLASS_GETTER_PROP = Some(JavaSwc4jAstGetterProp::new(env));
     JAVA_CLASS_IDENT = Some(JavaSwc4jAstIdent::new(env));
+    JAVA_CLASS_IDENT_NAME = Some(JavaSwc4jAstIdentName::new(env));
     JAVA_CLASS_IF_STMT = Some(JavaSwc4jAstIfStmt::new(env));
     JAVA_CLASS_IMPORT = Some(JavaSwc4jAstImport::new(env));
     JAVA_CLASS_IMPORT_DECL = Some(JavaSwc4jAstImportDecl::new(env));
@@ -23950,8 +24372,8 @@ impl<'local> FromJava<'local> for JSXAttrName {
   #[allow(unused_variables)]
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let return_value = 
-      if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXAttrName::Ident(Ident::from_java(env, jobj))
+      if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
+        JSXAttrName::Ident(IdentName::from_java(env, jobj))
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_NAMESPACED_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
         JSXAttrName::JSXNamespacedName(JSXNamespacedName::from_java(env, jobj))
       } else {
@@ -24349,8 +24771,8 @@ impl<'local> FromJava<'local> for MemberProp {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
         MemberProp::Computed(ComputedPropName::from_java(env, jobj))
-      } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        MemberProp::Ident(Ident::from_java(env, jobj))
+      } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
+        MemberProp::Ident(IdentName::from_java(env, jobj))
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
         MemberProp::PrivateName(PrivateName::from_java(env, jobj))
       } else {
@@ -24817,8 +25239,8 @@ impl<'local> FromJava<'local> for PropName {
         PropName::BigInt(BigInt::from_java(env, jobj))
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
         PropName::Computed(ComputedPropName::from_java(env, jobj))
-      } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        PropName::Ident(Ident::from_java(env, jobj))
+      } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
+        PropName::Ident(IdentName::from_java(env, jobj))
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_NUMBER.as_ref().unwrap()}.class)).unwrap_or(false) {
         PropName::Num(Number::from_java(env, jobj))
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_STR.as_ref().unwrap()}.class)).unwrap_or(false) {
@@ -25081,8 +25503,8 @@ impl<'local> FromJava<'local> for SuperProp {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
         SuperProp::Computed(ComputedPropName::from_java(env, jobj))
-      } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SuperProp::Ident(Ident::from_java(env, jobj))
+      } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
+        SuperProp::Ident(IdentName::from_java(env, jobj))
       } else {
         let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
         let ast_type = AstType::from_java(env, &java_ast_type);
@@ -25944,6 +26366,7 @@ impl ToJavaWithMap<ByteToIndexMap> for ArrowExpr {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let ctxt = self.ctxt;
     let java_params = list_new(env, self.params.len());
     self.params.iter().for_each(|node| {
       let java_node = node.to_java_with_map(env, map);
@@ -25956,7 +26379,7 @@ impl ToJavaWithMap<ByteToIndexMap> for ArrowExpr {
     let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
     let java_optional_return_type = self.return_type.as_ref().map(|node| node.to_java_with_map(env, map));
     let return_value = unsafe { JAVA_CLASS_ARROW_EXPR.as_ref().unwrap() }
-      .construct(env, &java_params, &java_body, is_async, is_generator, &java_optional_type_params, &java_optional_return_type, &java_span_ex);
+      .construct(env, ctxt, &java_params, &java_body, is_async, is_generator, &java_optional_type_params, &java_optional_return_type, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_optional_ref!(env, java_optional_return_type);
     delete_local_ref!(env, java_params);
@@ -25971,6 +26394,8 @@ impl<'local> FromJava<'local> for ArrowExpr {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ARROW_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
+    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = SyntaxContext::from_u32(ctxt as u32);
     let java_params = java_class.get_params(env, jobj);
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
@@ -26009,6 +26434,7 @@ impl<'local> FromJava<'local> for ArrowExpr {
     let return_type = return_type.map(|return_type| Box::new(return_type));
     ArrowExpr {
       span,
+      ctxt,
       params,
       body,
       is_async,
@@ -26170,7 +26596,7 @@ impl<'local> FromJava<'local> for AssignPatProp {
 
 impl RegisterWithMap<ByteToIndexMap> for AssignProp {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
-    map.register_by_span(&self.span());
+    map.register_by_span(&self.span);
     self.key.register_with_map(map);
     self.value.register_with_map(map);
   }
@@ -26181,7 +26607,7 @@ impl ToJavaWithMap<ByteToIndexMap> for AssignProp {
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
     let java_key = self.key.to_java_with_map(env, map);
     let java_value = self.value.to_java_with_map(env, map);
     let return_value = unsafe { JAVA_CLASS_ASSIGN_PROP.as_ref().unwrap() }
@@ -26197,6 +26623,7 @@ impl<'local> FromJava<'local> for AssignProp {
   #[allow(unused_variables)]
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_ASSIGN_PROP.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_key = java_class.get_key(env, jobj);
     let key = Ident::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
@@ -26205,6 +26632,7 @@ impl<'local> FromJava<'local> for AssignProp {
     delete_local_ref!(env, java_value);
     let value = Box::new(value);
     AssignProp {
+      span,
       key,
       value,
     }
@@ -26466,6 +26894,7 @@ impl ToJavaWithMap<ByteToIndexMap> for BlockStmt {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let ctxt = self.ctxt;
     let java_stmts = list_new(env, self.stmts.len());
     self.stmts.iter().for_each(|node| {
       let java_node = node.to_java_with_map(env, map);
@@ -26473,7 +26902,7 @@ impl ToJavaWithMap<ByteToIndexMap> for BlockStmt {
       delete_local_ref!(env, java_node);
     });
     let return_value = unsafe { JAVA_CLASS_BLOCK_STMT.as_ref().unwrap() }
-      .construct(env, &java_stmts, &java_span_ex);
+      .construct(env, ctxt, &java_stmts, &java_span_ex);
     delete_local_ref!(env, java_stmts);
     delete_local_ref!(env, java_span_ex);
     return_value
@@ -26485,6 +26914,8 @@ impl<'local> FromJava<'local> for BlockStmt {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_BLOCK_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
+    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = SyntaxContext::from_u32(ctxt as u32);
     let java_stmts = java_class.get_stmts(env, jobj);
     let length = list_size(env, &java_stmts);
     let stmts = (0..length).map(|i| {
@@ -26495,6 +26926,7 @@ impl<'local> FromJava<'local> for BlockStmt {
     }).collect();
     BlockStmt {
       span,
+      ctxt,
       stmts,
     }
   }
@@ -26594,6 +27026,7 @@ impl ToJavaWithMap<ByteToIndexMap> for CallExpr {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let ctxt = self.ctxt;
     let java_callee = self.callee.to_java_with_map(env, map);
     let java_args = list_new(env, self.args.len());
     self.args.iter().for_each(|node| {
@@ -26603,7 +27036,7 @@ impl ToJavaWithMap<ByteToIndexMap> for CallExpr {
     });
     let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
     let return_value = unsafe { JAVA_CLASS_CALL_EXPR.as_ref().unwrap() }
-      .construct(env, &java_callee, &java_args, &java_optional_type_args, &java_span_ex);
+      .construct(env, ctxt, &java_callee, &java_args, &java_optional_type_args, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_type_args);
     delete_local_ref!(env, java_callee);
     delete_local_ref!(env, java_args);
@@ -26617,6 +27050,8 @@ impl<'local> FromJava<'local> for CallExpr {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CALL_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
+    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = SyntaxContext::from_u32(ctxt as u32);
     let java_callee = java_class.get_callee(env, jobj);
     let callee = Callee::from_java(env, &java_callee);
     delete_local_ref!(env, java_callee);
@@ -26641,6 +27076,7 @@ impl<'local> FromJava<'local> for CallExpr {
     let type_args = type_args.map(|type_args| Box::new(type_args));
     CallExpr {
       span,
+      ctxt,
       callee,
       args,
       type_args,
@@ -26723,6 +27159,7 @@ impl ToJavaWithMap<ByteToIndexMap> for Class {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let ctxt = self.ctxt;
     let java_decorators = list_new(env, self.decorators.len());
     self.decorators.iter().for_each(|node| {
       let java_node = node.to_java_with_map(env, map);
@@ -26746,7 +27183,7 @@ impl ToJavaWithMap<ByteToIndexMap> for Class {
       delete_local_ref!(env, java_node);
     });
     let return_value = unsafe { JAVA_CLASS_CLASS.as_ref().unwrap() }
-      .construct(env, &java_decorators, &java_body, &java_optional_super_class, is_abstract, &java_optional_type_params, &java_optional_super_type_params, &java_implements, &java_span_ex);
+      .construct(env, ctxt, &java_decorators, &java_body, &java_optional_super_class, is_abstract, &java_optional_type_params, &java_optional_super_type_params, &java_implements, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_super_class);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_optional_ref!(env, java_optional_super_type_params);
@@ -26763,6 +27200,8 @@ impl<'local> FromJava<'local> for Class {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CLASS.as_ref().unwrap() };
     let span = DUMMY_SP;
+    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = SyntaxContext::from_u32(ctxt as u32);
     let java_decorators = java_class.get_decorators(env, jobj);
     let length = list_size(env, &java_decorators);
     let decorators = (0..length).map(|i| {
@@ -26823,6 +27262,7 @@ impl<'local> FromJava<'local> for Class {
     }).collect();
     Class {
       span,
+      ctxt,
       decorators,
       body,
       super_class,
@@ -27235,6 +27675,7 @@ impl ToJavaWithMap<ByteToIndexMap> for Constructor {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let ctxt = self.ctxt;
     let java_key = self.key.to_java_with_map(env, map);
     let java_params = list_new(env, self.params.len());
     self.params.iter().for_each(|node| {
@@ -27246,7 +27687,7 @@ impl ToJavaWithMap<ByteToIndexMap> for Constructor {
     let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
     let is_optional = self.is_optional;
     let return_value = unsafe { JAVA_CLASS_CONSTRUCTOR.as_ref().unwrap() }
-      .construct(env, &java_key, &java_params, &java_optional_body, &java_optional_accessibility, is_optional, &java_span_ex);
+      .construct(env, ctxt, &java_key, &java_params, &java_optional_body, &java_optional_accessibility, is_optional, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_body);
     delete_local_optional_ref!(env, java_optional_accessibility);
     delete_local_ref!(env, java_key);
@@ -27261,6 +27702,8 @@ impl<'local> FromJava<'local> for Constructor {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_CONSTRUCTOR.as_ref().unwrap() };
     let span = DUMMY_SP;
+    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = SyntaxContext::from_u32(ctxt as u32);
     let java_key = java_class.get_key(env, jobj);
     let key = PropName::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
@@ -27295,6 +27738,7 @@ impl<'local> FromJava<'local> for Constructor {
     let is_optional = java_class.is_optional(env, jobj);
     Constructor {
       span,
+      ctxt,
       key,
       params,
       body,
@@ -28176,6 +28620,7 @@ impl ToJavaWithMap<ByteToIndexMap> for Function {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let ctxt = self.ctxt;
     let java_params = list_new(env, self.params.len());
     self.params.iter().for_each(|node| {
       let java_node = node.to_java_with_map(env, map);
@@ -28194,7 +28639,7 @@ impl ToJavaWithMap<ByteToIndexMap> for Function {
     let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
     let java_optional_return_type = self.return_type.as_ref().map(|node| node.to_java_with_map(env, map));
     let return_value = unsafe { JAVA_CLASS_FUNCTION.as_ref().unwrap() }
-      .construct(env, &java_params, &java_decorators, &java_optional_body, is_generator, is_async, &java_optional_type_params, &java_optional_return_type, &java_span_ex);
+      .construct(env, ctxt, &java_params, &java_decorators, &java_optional_body, is_generator, is_async, &java_optional_type_params, &java_optional_return_type, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_body);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_optional_ref!(env, java_optional_return_type);
@@ -28210,6 +28655,8 @@ impl<'local> FromJava<'local> for Function {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_FUNCTION.as_ref().unwrap() };
     let span = DUMMY_SP;
+    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = SyntaxContext::from_u32(ctxt as u32);
     let java_params = java_class.get_params(env, jobj);
     let length = list_size(env, &java_params);
     let params = (0..length).map(|i| {
@@ -28262,6 +28709,7 @@ impl<'local> FromJava<'local> for Function {
     let return_type = return_type.map(|return_type| Box::new(return_type));
     Function {
       span,
+      ctxt,
       params,
       decorators,
       body,
@@ -28351,10 +28799,11 @@ impl ToJavaWithMap<ByteToIndexMap> for Ident {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let ctxt = self.ctxt;
     let sym = self.sym.as_str();
     let optional = self.optional;
     let return_value = unsafe { JAVA_CLASS_IDENT.as_ref().unwrap() }
-      .construct(env, sym, optional, &java_span_ex);
+      .construct(env, ctxt, sym, optional, &java_span_ex);
     delete_local_ref!(env, java_span_ex);
     return_value
   }
@@ -28365,13 +28814,50 @@ impl<'local> FromJava<'local> for Ident {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_IDENT.as_ref().unwrap() };
     let span = DUMMY_SP;
+    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = SyntaxContext::from_u32(ctxt as u32);
     let sym = java_class.get_sym(env, jobj);
     let sym = sym.into();
     let optional = java_class.is_optional(env, jobj);
     Ident {
       span,
+      ctxt,
       sym,
       optional,
+    }
+  }
+}
+
+impl RegisterWithMap<ByteToIndexMap> for IdentName {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for IdentName {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let sym = self.sym.as_str();
+    let return_value = unsafe { JAVA_CLASS_IDENT_NAME.as_ref().unwrap() }
+      .construct(env, sym, &java_span_ex);
+    delete_local_ref!(env, java_span_ex);
+    return_value
+  }
+}
+
+impl<'local> FromJava<'local> for IdentName {
+  #[allow(unused_variables)]
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+    let java_class = unsafe { JAVA_CLASS_IDENT_NAME.as_ref().unwrap() };
+    let span = DUMMY_SP;
+    let sym = java_class.get_sym(env, jobj);
+    let sym = sym.into();
+    IdentName {
+      span,
+      sym,
     }
   }
 }
@@ -29029,7 +29515,7 @@ impl<'local> FromJava<'local> for JSXFragment {
 
 impl RegisterWithMap<ByteToIndexMap> for JSXMemberExpr {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
-    map.register_by_span(&self.span());
+    map.register_by_span(&self.span);
     self.obj.register_with_map(map);
     self.prop.register_with_map(map);
   }
@@ -29040,7 +29526,7 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXMemberExpr {
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
     let java_obj = self.obj.to_java_with_map(env, map);
     let java_prop = self.prop.to_java_with_map(env, map);
     let return_value = unsafe { JAVA_CLASS_JSX_MEMBER_EXPR.as_ref().unwrap() }
@@ -29056,13 +29542,15 @@ impl<'local> FromJava<'local> for JSXMemberExpr {
   #[allow(unused_variables)]
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_MEMBER_EXPR.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_obj = java_class.get_obj(env, jobj);
     let obj = JSXObject::from_java(env, &java_obj);
     delete_local_ref!(env, java_obj);
     let java_prop = java_class.get_prop(env, jobj);
-    let prop = Ident::from_java(env, &java_prop);
+    let prop = IdentName::from_java(env, &java_prop);
     delete_local_ref!(env, java_prop);
     JSXMemberExpr {
+      span,
       obj,
       prop,
     }
@@ -29071,7 +29559,7 @@ impl<'local> FromJava<'local> for JSXMemberExpr {
 
 impl RegisterWithMap<ByteToIndexMap> for JSXNamespacedName {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
-    map.register_by_span(&self.span());
+    map.register_by_span(&self.span);
     self.ns.register_with_map(map);
     self.name.register_with_map(map);
   }
@@ -29082,7 +29570,7 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXNamespacedName {
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
     let java_ns = self.ns.to_java_with_map(env, map);
     let java_name = self.name.to_java_with_map(env, map);
     let return_value = unsafe { JAVA_CLASS_JSX_NAMESPACED_NAME.as_ref().unwrap() }
@@ -29098,13 +29586,15 @@ impl<'local> FromJava<'local> for JSXNamespacedName {
   #[allow(unused_variables)]
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_JSX_NAMESPACED_NAME.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_ns = java_class.get_ns(env, jobj);
-    let ns = Ident::from_java(env, &java_ns);
+    let ns = IdentName::from_java(env, &java_ns);
     delete_local_ref!(env, java_ns);
     let java_name = java_class.get_name(env, jobj);
-    let name = Ident::from_java(env, &java_name);
+    let name = IdentName::from_java(env, &java_name);
     delete_local_ref!(env, java_name);
     JSXNamespacedName {
+      span,
       ns,
       name,
     }
@@ -29704,6 +30194,7 @@ impl ToJavaWithMap<ByteToIndexMap> for NewExpr {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let ctxt = self.ctxt;
     let java_callee = self.callee.to_java_with_map(env, map);
     let java_optional_args = self.args.as_ref().map(|nodes| {
       let java_args = list_new(env, nodes.len());
@@ -29716,7 +30207,7 @@ impl ToJavaWithMap<ByteToIndexMap> for NewExpr {
     });
     let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
     let return_value = unsafe { JAVA_CLASS_NEW_EXPR.as_ref().unwrap() }
-      .construct(env, &java_callee, &java_optional_args, &java_optional_type_args, &java_span_ex);
+      .construct(env, ctxt, &java_callee, &java_optional_args, &java_optional_type_args, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_args);
     delete_local_optional_ref!(env, java_optional_type_args);
     delete_local_ref!(env, java_callee);
@@ -29730,6 +30221,8 @@ impl<'local> FromJava<'local> for NewExpr {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_NEW_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
+    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = SyntaxContext::from_u32(ctxt as u32);
     let java_callee = java_class.get_callee(env, jobj);
     let callee = Expr::from_java(env, &java_callee);
     delete_local_ref!(env, java_callee);
@@ -29762,6 +30255,7 @@ impl<'local> FromJava<'local> for NewExpr {
     let type_args = type_args.map(|type_args| Box::new(type_args));
     NewExpr {
       span,
+      ctxt,
       callee,
       args,
       type_args,
@@ -29977,6 +30471,7 @@ impl ToJavaWithMap<ByteToIndexMap> for OptCall {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let ctxt = self.ctxt;
     let java_callee = self.callee.to_java_with_map(env, map);
     let java_args = list_new(env, self.args.len());
     self.args.iter().for_each(|node| {
@@ -29986,7 +30481,7 @@ impl ToJavaWithMap<ByteToIndexMap> for OptCall {
     });
     let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
     let return_value = unsafe { JAVA_CLASS_OPT_CALL.as_ref().unwrap() }
-      .construct(env, &java_callee, &java_args, &java_optional_type_args, &java_span_ex);
+      .construct(env, ctxt, &java_callee, &java_args, &java_optional_type_args, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_type_args);
     delete_local_ref!(env, java_callee);
     delete_local_ref!(env, java_args);
@@ -30000,6 +30495,8 @@ impl<'local> FromJava<'local> for OptCall {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_OPT_CALL.as_ref().unwrap() };
     let span = DUMMY_SP;
+    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = SyntaxContext::from_u32(ctxt as u32);
     let java_callee = java_class.get_callee(env, jobj);
     let callee = Expr::from_java(env, &java_callee);
     delete_local_ref!(env, java_callee);
@@ -30025,6 +30522,7 @@ impl<'local> FromJava<'local> for OptCall {
     let type_args = type_args.map(|type_args| Box::new(type_args));
     OptCall {
       span,
+      ctxt,
       callee,
       args,
       type_args,
@@ -30246,7 +30744,6 @@ impl<'local> FromJava<'local> for PrivateMethod {
 impl RegisterWithMap<ByteToIndexMap> for PrivateName {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.id.register_with_map(map);
   }
 }
 
@@ -30256,10 +30753,9 @@ impl ToJavaWithMap<ByteToIndexMap> for PrivateName {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_id = self.id.to_java_with_map(env, map);
+    let name = self.name.as_str();
     let return_value = unsafe { JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap() }
-      .construct(env, &java_id, &java_span_ex);
-    delete_local_ref!(env, java_id);
+      .construct(env, name, &java_span_ex);
     delete_local_ref!(env, java_span_ex);
     return_value
   }
@@ -30270,12 +30766,11 @@ impl<'local> FromJava<'local> for PrivateName {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_id = java_class.get_id(env, jobj);
-    let id = Ident::from_java(env, &java_id);
-    delete_local_ref!(env, java_id);
+    let name = java_class.get_name(env, jobj);
+    let name = name.into();
     PrivateName {
       span,
-      id,
+      name,
     }
   }
 }
@@ -30298,6 +30793,7 @@ impl ToJavaWithMap<ByteToIndexMap> for PrivateProp {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let ctxt = self.ctxt;
     let java_key = self.key.to_java_with_map(env, map);
     let java_optional_value = self.value.as_ref().map(|node| node.to_java_with_map(env, map));
     let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
@@ -30314,7 +30810,7 @@ impl ToJavaWithMap<ByteToIndexMap> for PrivateProp {
     let readonly = self.readonly;
     let definite = self.definite;
     let return_value = unsafe { JAVA_CLASS_PRIVATE_PROP.as_ref().unwrap() }
-      .construct(env, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_optional, is_override, readonly, definite, &java_span_ex);
+      .construct(env, ctxt, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_optional, is_override, readonly, definite, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_value);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_accessibility);
@@ -30330,6 +30826,8 @@ impl<'local> FromJava<'local> for PrivateProp {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_PRIVATE_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
+    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = SyntaxContext::from_u32(ctxt as u32);
     let java_key = java_class.get_key(env, jobj);
     let key = PrivateName::from_java(env, &java_key);
     delete_local_ref!(env, java_key);
@@ -30380,6 +30878,7 @@ impl<'local> FromJava<'local> for PrivateProp {
     let definite = java_class.is_definite(env, jobj);
     PrivateProp {
       span,
+      ctxt,
       key,
       value,
       type_ann,
@@ -31053,11 +31552,12 @@ impl ToJavaWithMap<ByteToIndexMap> for TaggedTpl {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let ctxt = self.ctxt;
     let java_tag = self.tag.to_java_with_map(env, map);
     let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
     let java_tpl = self.tpl.to_java_with_map(env, map);
     let return_value = unsafe { JAVA_CLASS_TAGGED_TPL.as_ref().unwrap() }
-      .construct(env, &java_tag, &java_optional_type_params, &java_tpl, &java_span_ex);
+      .construct(env, ctxt, &java_tag, &java_optional_type_params, &java_tpl, &java_span_ex);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_tag);
     delete_local_ref!(env, java_tpl);
@@ -31071,6 +31571,8 @@ impl<'local> FromJava<'local> for TaggedTpl {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TAGGED_TPL.as_ref().unwrap() };
     let span = DUMMY_SP;
+    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = SyntaxContext::from_u32(ctxt as u32);
     let java_tag = java_class.get_tag(env, jobj);
     let tag = Expr::from_java(env, &java_tag);
     delete_local_ref!(env, java_tag);
@@ -31092,6 +31594,7 @@ impl<'local> FromJava<'local> for TaggedTpl {
     let tpl = Box::new(tpl);
     TaggedTpl {
       span,
+      ctxt,
       tag,
       type_params,
       tpl,
@@ -33339,7 +33842,7 @@ impl<'local> FromJava<'local> for TsPropertySignature {
 
 impl RegisterWithMap<ByteToIndexMap> for TsQualifiedName {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
-    map.register_by_span(&self.span());
+    map.register_by_span(&self.span);
     self.left.register_with_map(map);
     self.right.register_with_map(map);
   }
@@ -33350,7 +33853,7 @@ impl ToJavaWithMap<ByteToIndexMap> for TsQualifiedName {
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
     let java_left = self.left.to_java_with_map(env, map);
     let java_right = self.right.to_java_with_map(env, map);
     let return_value = unsafe { JAVA_CLASS_TS_QUALIFIED_NAME.as_ref().unwrap() }
@@ -33366,13 +33869,15 @@ impl<'local> FromJava<'local> for TsQualifiedName {
   #[allow(unused_variables)]
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_TS_QUALIFIED_NAME.as_ref().unwrap() };
+    let span = DUMMY_SP;
     let java_left = java_class.get_left(env, jobj);
     let left = TsEntityName::from_java(env, &java_left);
     delete_local_ref!(env, java_left);
     let java_right = java_class.get_right(env, jobj);
-    let right = Ident::from_java(env, &java_right);
+    let right = IdentName::from_java(env, &java_right);
     delete_local_ref!(env, java_right);
     TsQualifiedName {
+      span,
       left,
       right,
     }
@@ -34489,6 +34994,7 @@ impl ToJavaWithMap<ByteToIndexMap> for VarDecl {
     'local: 'a,
   {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let ctxt = self.ctxt;
     let java_kind = self.kind.to_java(env);
     let declare = self.declare;
     let java_decls = list_new(env, self.decls.len());
@@ -34498,7 +35004,7 @@ impl ToJavaWithMap<ByteToIndexMap> for VarDecl {
       delete_local_ref!(env, java_node);
     });
     let return_value = unsafe { JAVA_CLASS_VAR_DECL.as_ref().unwrap() }
-      .construct(env, &java_kind, declare, &java_decls, &java_span_ex);
+      .construct(env, ctxt, &java_kind, declare, &java_decls, &java_span_ex);
     delete_local_ref!(env, java_kind);
     delete_local_ref!(env, java_decls);
     delete_local_ref!(env, java_span_ex);
@@ -34511,6 +35017,8 @@ impl<'local> FromJava<'local> for VarDecl {
   fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
     let java_class = unsafe { JAVA_CLASS_VAR_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
+    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = SyntaxContext::from_u32(ctxt as u32);
     let java_kind = java_class.get_kind(env, jobj);
     let kind = VarDeclKind::from_java(env, &java_kind);
     delete_local_ref!(env, java_kind);
@@ -34525,6 +35033,7 @@ impl<'local> FromJava<'local> for VarDecl {
     }).collect();
     VarDecl {
       span,
+      ctxt,
       kind,
       declare,
       decls,

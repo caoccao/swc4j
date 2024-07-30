@@ -34,4 +34,6 @@ public @interface Jni2RustField {
     boolean ignore() default false;
 
     String name() default "";
+
+    boolean syntaxContext() default false;
 }

@@ -2,7 +2,9 @@
 
 ## 0.11.0
 
+* Upgraded deno_ast to v0.41.1
 * Revised internal error handling
+* Added `IdentName`
 
 ## 0.10.0
 

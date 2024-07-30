@@ -122,6 +122,8 @@ public interface ISwc4jAstVisitor {
 
     Swc4jAstVisitorResponse visitIdent(Swc4jAstIdent node);
 
+    Swc4jAstVisitorResponse visitIdentName(Swc4jAstIdentName node);
+
     Swc4jAstVisitorResponse visitIfStmt(Swc4jAstIfStmt node);
 
     Swc4jAstVisitorResponse visitImport(Swc4jAstImport node);

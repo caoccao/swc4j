@@ -18,14 +18,14 @@ package com.caoccao.javet.swc4j.ast.interfaces;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstPrivateName;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
 
 @Jni2RustClass(
         mappings = {
                 @Jni2RustEnumMapping(name = "Computed", type = Swc4jAstComputedPropName.class),
-                @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstIdent.class),
+                @Jni2RustEnumMapping(name = "Ident", type = Swc4jAstIdentName.class),
                 @Jni2RustEnumMapping(name = "PrivateName", type = Swc4jAstPrivateName.class),
         }
 )

@@ -341,6 +341,12 @@ public class Swc4jAstCounterVisitor extends Swc4jAstVisitor {
     }
 
     @Override
+    public Swc4jAstVisitorResponse visitIdentName(Swc4jAstIdentName node) {
+        incrementAndGet(Swc4jAstType.IdentName);
+        return super.visitIdentName(node);
+    }
+
+    @Override
     public Swc4jAstVisitorResponse visitIfStmt(Swc4jAstIfStmt node) {
         incrementAndGet(Swc4jAstType.IfStmt);
         return super.visitIfStmt(node);

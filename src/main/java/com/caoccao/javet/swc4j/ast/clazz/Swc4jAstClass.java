@@ -43,6 +43,8 @@ public class Swc4jAstClass
     protected final List<Swc4jAstDecorator> decorators;
     @Jni2RustField(name = "is_abstract")
     protected boolean _abstract;
+    @Jni2RustField(syntaxContext = true)
+    protected int ctxt;
     @Jni2RustField(componentBox = true)
     protected Optional<ISwc4jAstExpr> superClass;
     @Jni2RustField(componentBox = true)
@@ -52,6 +54,7 @@ public class Swc4jAstClass
 
     @Jni2RustMethod
     public Swc4jAstClass(
+            @Jni2RustParam(syntaxContext = true) int ctxt,
             List<Swc4jAstDecorator> decorators,
             List<ISwc4jAstClassMember> body,
             @Jni2RustParam(optional = true) ISwc4jAstExpr superClass,
@@ -62,6 +65,7 @@ public class Swc4jAstClass
             Swc4jSpan span) {
         super(span);
         setAbstract(_abstract);
+        setCtxt(ctxt);
         setSuperClass(superClass);
         setSuperTypeParams(superTypeParams);
         setTypeParams(typeParams);
@@ -127,9 +131,21 @@ public class Swc4jAstClass
             Swc4jAstTsTypeParamDecl typeParams,
             Swc4jAstTsTypeParamInstantiation superTypeParams,
             List<Swc4jAstTsExprWithTypeArgs> _implements) {
+        return create(0, decorators, body, superClass, _abstract, typeParams, superTypeParams, _implements);
+    }
+
+    public static Swc4jAstClass create(
+            int ctxt,
+            List<Swc4jAstDecorator> decorators,
+            List<ISwc4jAstClassMember> body,
+            ISwc4jAstExpr superClass,
+            boolean _abstract,
+            Swc4jAstTsTypeParamDecl typeParams,
+            Swc4jAstTsTypeParamInstantiation superTypeParams,
+            List<Swc4jAstTsExprWithTypeArgs> _implements) {
         return new Swc4jAstClass(
-                decorators, body, superClass, _abstract, typeParams,
-                superTypeParams, _implements, Swc4jSpan.DUMMY);
+                ctxt, decorators, body, superClass, _abstract,
+                typeParams, superTypeParams, _implements, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod
@@ -146,6 +162,11 @@ public class Swc4jAstClass
         superTypeParams.ifPresent(childNodes::add);
         typeParams.ifPresent(childNodes::add);
         return childNodes;
+    }
+
+    @Jni2RustMethod
+    public int getCtxt() {
+        return ctxt;
     }
 
     @Jni2RustMethod
@@ -232,6 +253,11 @@ public class Swc4jAstClass
 
     public Swc4jAstClass setAbstract(boolean _abstract) {
         this._abstract = _abstract;
+        return this;
+    }
+
+    public Swc4jAstClass setCtxt(int ctxt) {
+        this.ctxt = ctxt;
         return this;
     }
 

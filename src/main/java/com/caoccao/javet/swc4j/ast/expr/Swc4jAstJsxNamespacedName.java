@@ -33,24 +33,24 @@ import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 
-@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXNamespacedName", span = false)
+@Jni2RustClass(filePath = Jni2RustFilePath.AstUtils, name = "JSXNamespacedName")
 public class Swc4jAstJsxNamespacedName
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstJsxElementName, ISwc4jAstJsxAttrName {
-    protected Swc4jAstIdent name;
-    protected Swc4jAstIdent ns;
+    protected Swc4jAstIdentName name;
+    protected Swc4jAstIdentName ns;
 
     @Jni2RustMethod
     public Swc4jAstJsxNamespacedName(
-            Swc4jAstIdent ns,
-            Swc4jAstIdent name,
+            Swc4jAstIdentName ns,
+            Swc4jAstIdentName name,
             Swc4jSpan span) {
         super(span);
         setName(name);
         setNs(ns);
     }
 
-    public static Swc4jAstJsxNamespacedName create(Swc4jAstIdent ns, Swc4jAstIdent name) {
+    public static Swc4jAstJsxNamespacedName create(Swc4jAstIdentName ns, Swc4jAstIdentName name) {
         return new Swc4jAstJsxNamespacedName(ns, name, Swc4jSpan.DUMMY);
     }
 
@@ -60,12 +60,12 @@ public class Swc4jAstJsxNamespacedName
     }
 
     @Jni2RustMethod
-    public Swc4jAstIdent getName() {
+    public Swc4jAstIdentName getName() {
         return name;
     }
 
     @Jni2RustMethod
-    public Swc4jAstIdent getNs() {
+    public Swc4jAstIdentName getNs() {
         return ns;
     }
 
@@ -76,24 +76,24 @@ public class Swc4jAstJsxNamespacedName
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (name == oldNode && newNode instanceof Swc4jAstIdent) {
-            setName((Swc4jAstIdent) newNode);
+        if (name == oldNode && newNode instanceof Swc4jAstIdentName) {
+            setName((Swc4jAstIdentName) newNode);
             return true;
         }
-        if (ns == oldNode && newNode instanceof Swc4jAstIdent) {
-            setNs((Swc4jAstIdent) newNode);
+        if (ns == oldNode && newNode instanceof Swc4jAstIdentName) {
+            setNs((Swc4jAstIdentName) newNode);
             return true;
         }
         return false;
     }
 
-    public Swc4jAstJsxNamespacedName setName(Swc4jAstIdent name) {
+    public Swc4jAstJsxNamespacedName setName(Swc4jAstIdentName name) {
         this.name = AssertionUtils.notNull(name, "Name");
         this.name.setParent(this);
         return this;
     }
 
-    public Swc4jAstJsxNamespacedName setNs(Swc4jAstIdent ns) {
+    public Swc4jAstJsxNamespacedName setNs(Swc4jAstIdentName ns) {
         this.ns = AssertionUtils.notNull(ns, "Ns");
         this.ns.setParent(this);
         return this;

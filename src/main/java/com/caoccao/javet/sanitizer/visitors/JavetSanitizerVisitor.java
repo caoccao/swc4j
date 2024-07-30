@@ -74,6 +74,13 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
         }
     }
 
+    protected void validateIdentifierName(ISwc4jAst node) {
+        ISwc4jAst matchedNode = JavetSanitizerIdentifierMatcher.getInstance().matches(options, node);
+        if (matchedNode != null) {
+            raiseError(JavetSanitizerException.identifierNotAllowed(node.as(Swc4jAstIdentName.class).getSym()), matchedNode);
+        }
+    }
+
     @Override
     public Swc4jAstVisitorResponse visitArrowExpr(Swc4jAstArrowExpr node) {
         if (!options.isKeywordAsyncEnabled() && node.isAsync()) {
@@ -192,6 +199,12 @@ public class JavetSanitizerVisitor extends Swc4jAstVisitor implements IJavetSani
     public Swc4jAstVisitorResponse visitIdent(Swc4jAstIdent node) {
         validateIdentifier(node);
         return super.visitIdent(node);
+    }
+
+    @Override
+    public Swc4jAstVisitorResponse visitIdentName(Swc4jAstIdentName node) {
+        validateIdentifierName(node);
+        return super.visitIdentName(node);
     }
 
     @Override
