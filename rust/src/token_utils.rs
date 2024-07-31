@@ -16,8 +16,6 @@
 */
 
 use jni::objects::{GlobalRef, JObject, JStaticMethodID};
-use jni::signature::ReturnType;
-use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use deno_ast::swc::atoms::Atom;
@@ -310,9 +308,7 @@ impl JavaSwc4jTokenFactory {
     let java_text = string_to_jstring!(env, &text);
     let text = object_to_jvalue!(java_text);
     let java_error = string_to_jstring!(env, &format!("{:?}", error));
-    let error = jvalue {
-      l: java_error.as_raw(),
-    };
+    let error = object_to_jvalue!(java_error);
     let span = object_to_jvalue!(span);
     let line_break_ahead = boolean_to_jvalue!(line_break_ahead);
     let return_value = call_static_as_object!(

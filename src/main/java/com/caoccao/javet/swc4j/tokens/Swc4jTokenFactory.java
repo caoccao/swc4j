@@ -109,9 +109,7 @@ public final class Swc4jTokenFactory {
                     rustType = "error: &Error",
                     preCalls = {
                             "    let java_error = string_to_jstring!(env, &format!(\"{:?}\", error));",
-                            "    let error = jvalue {",
-                            "      l: java_error.as_raw(),",
-                            "    };",
+                            "    let error = object_to_jvalue!(java_error);",
                     }) String error,
             Swc4jSpan span,
             boolean lineBreakAhead) {

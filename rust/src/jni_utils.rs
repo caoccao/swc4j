@@ -16,13 +16,18 @@
 */
 
 use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID, JString};
-use jni::signature::{Primitive, ReturnType};
-use jni::sys::jvalue;
 use jni::JNIEnv;
 
 macro_rules! call_as_boolean {
   ($env: ident, $obj: expr, $method: expr, $args: expr, $name: literal) => {
-    match unsafe { $env.call_method_unchecked($obj, $method, ReturnType::Primitive(Primitive::Boolean), $args) } {
+    match unsafe {
+      $env.call_method_unchecked(
+        $obj,
+        $method,
+        jni::signature::ReturnType::Primitive(jni::signature::Primitive::Boolean),
+        $args,
+      )
+    } {
       Ok(java_object) => match java_object.z() {
         Ok(object) => object,
         Err(err) => panic!("Couldn't convert {} because {}", $name, err),
@@ -45,7 +50,14 @@ pub(crate) use call_as_construct;
 
 macro_rules! call_as_double {
   ($env: ident, $obj: expr, $method: expr, $args: expr, $name: literal) => {
-    match unsafe { $env.call_method_unchecked($obj, $method, ReturnType::Primitive(Primitive::Double), $args) } {
+    match unsafe {
+      $env.call_method_unchecked(
+        $obj,
+        $method,
+        jni::signature::ReturnType::Primitive(jni::signature::Primitive::Double),
+        $args,
+      )
+    } {
       Ok(java_object) => match java_object.d() {
         Ok(object) => object,
         Err(err) => panic!("Couldn't convert {} because {}", $name, err),
@@ -58,7 +70,14 @@ pub(crate) use call_as_double;
 
 macro_rules! call_as_int {
   ($env: ident, $obj: expr, $method: expr, $args: expr, $name: literal) => {
-    match unsafe { $env.call_method_unchecked($obj, $method, ReturnType::Primitive(Primitive::Int), $args) } {
+    match unsafe {
+      $env.call_method_unchecked(
+        $obj,
+        $method,
+        jni::signature::ReturnType::Primitive(jni::signature::Primitive::Int),
+        $args,
+      )
+    } {
       Ok(java_object) => match java_object.i() {
         Ok(object) => object,
         Err(err) => panic!("Couldn't convert {} because {}", $name, err),
@@ -71,7 +90,7 @@ pub(crate) use call_as_int;
 
 macro_rules! call_as_object {
   ($env: ident, $obj: expr, $method: expr, $args: expr, $name: literal) => {
-    match unsafe { $env.call_method_unchecked($obj, $method, ReturnType::Object, $args) } {
+    match unsafe { $env.call_method_unchecked($obj, $method, jni::signature::ReturnType::Object, $args) } {
       Ok(java_object) => match java_object.l() {
         Ok(object) => object,
         Err(err) => panic!("Couldn't convert {} because {}", $name, err),
@@ -86,7 +105,12 @@ pub(crate) use call_as_object;
 macro_rules! call_static_as_boolean {
   ($env: ident, $class: expr, $method: expr, $args: expr, $name: literal) => {
     match unsafe {
-      $env.call_static_method_unchecked($class, $method, ReturnType::Primitive(Primitive::Boolean), $args)
+      $env.call_static_method_unchecked(
+        $class,
+        $method,
+        jni::signature::ReturnType::Primitive(jni::signature::Primitive::Boolean),
+        $args,
+      )
     } {
       Ok(java_object) => match java_object.z() {
         Ok(object) => object,
@@ -102,7 +126,14 @@ pub(crate) use call_static_as_boolean;
 #[allow(unused_macros)]
 macro_rules! call_static_as_int {
   ($env: ident, $class: expr, $method: expr, $args: expr, $name: literal) => {
-    match unsafe { $env.call_static_method_unchecked($class, $method, ReturnType::Primitive(Primitive::Int), $args) } {
+    match unsafe {
+      $env.call_static_method_unchecked(
+        $class,
+        $method,
+        jni::signature::ReturnType::Primitive(jni::signature::Primitive::Int),
+        $args,
+      )
+    } {
       Ok(java_object) => match java_object.i() {
         Ok(object) => object,
         Err(err) => panic!("Couldn't convert {} because {}", $name, err),
@@ -116,7 +147,7 @@ pub(crate) use call_static_as_int;
 
 macro_rules! call_static_as_object {
   ($env: ident, $class: expr, $method: expr, $args: expr, $name: literal) => {
-    match unsafe { $env.call_static_method_unchecked($class, $method, ReturnType::Object, $args) } {
+    match unsafe { $env.call_static_method_unchecked($class, $method, jni::signature::ReturnType::Object, $args) } {
       Ok(java_object) => match java_object.l() {
         Ok(object) => object,
         Err(err) => panic!("Couldn't convert {} because {}", $name, err),
@@ -195,7 +226,7 @@ pub(crate) use string_to_jstring;
 
 macro_rules! boolean_to_jvalue {
   ($object: expr) => {
-    jvalue { z: $object as u8 }
+    jni::sys::jvalue { z: $object as u8 }
   };
 }
 pub(crate) use boolean_to_jvalue;
@@ -203,7 +234,7 @@ pub(crate) use boolean_to_jvalue;
 #[allow(unused_macros)]
 macro_rules! byte_to_jvalue {
   ($object: expr) => {
-    jvalue { b: $object as i8 }
+    jni::sys::jvalue { b: $object as i8 }
   };
 }
 #[allow(unused_imports)]
@@ -212,7 +243,7 @@ pub(crate) use byte_to_jvalue;
 #[allow(unused_macros)]
 macro_rules! char_to_jvalue {
   ($object: expr) => {
-    jvalue { c: $object as char }
+    jni::sys::jvalue { c: $object as char }
   };
 }
 #[allow(unused_imports)]
@@ -220,7 +251,7 @@ pub(crate) use char_to_jvalue;
 
 macro_rules! double_to_jvalue {
   ($object: expr) => {
-    jvalue { d: $object as f64 }
+    jni::sys::jvalue { d: $object as f64 }
   };
 }
 pub(crate) use double_to_jvalue;
@@ -228,7 +259,7 @@ pub(crate) use double_to_jvalue;
 #[allow(unused_macros)]
 macro_rules! float_to_jvalue {
   ($object: expr) => {
-    jvalue { f: $object as f32 }
+    jni::sys::jvalue { f: $object as f32 }
   };
 }
 #[allow(unused_imports)]
@@ -236,7 +267,7 @@ pub(crate) use float_to_jvalue;
 
 macro_rules! int_to_jvalue {
   ($object: expr) => {
-    jvalue { i: $object as i32 }
+    jni::sys::jvalue { i: $object as i32 }
   };
 }
 pub(crate) use int_to_jvalue;
@@ -244,7 +275,7 @@ pub(crate) use int_to_jvalue;
 #[allow(unused_macros)]
 macro_rules! long_to_jvalue {
   ($object: expr) => {
-    jvalue { j: $object as i64 }
+    jni::sys::jvalue { j: $object as i64 }
   };
 }
 #[allow(unused_imports)]
@@ -252,14 +283,14 @@ pub(crate) use long_to_jvalue;
 
 macro_rules! object_to_jvalue {
   ($object: expr) => {
-    jvalue { l: $object.as_raw() }
+    jni::sys::jvalue { l: $object.as_raw() }
   };
 }
 pub(crate) use object_to_jvalue;
 
 macro_rules! optional_object_to_jvalue {
   ($object: expr) => {
-    jvalue {
+    jni::sys::jvalue {
       l: match $object {
         Some(o) => o.as_raw(),
         None => null_mut(),
@@ -272,7 +303,7 @@ pub(crate) use optional_object_to_jvalue;
 #[allow(unused_macros)]
 macro_rules! short_to_jvalue {
   ($object: expr) => {
-    jvalue { s: $object as i16 }
+    jni::sys::jvalue { s: $object as i16 }
   };
 }
 #[allow(unused_imports)]

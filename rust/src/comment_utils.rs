@@ -19,7 +19,6 @@ use deno_ast::swc::common::comments::Comment;
 use deno_ast::MultiThreadedComments;
 
 use jni::objects::{GlobalRef, JMethodID, JObject};
-use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use crate::jni_utils::*;

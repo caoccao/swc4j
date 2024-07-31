@@ -18,8 +18,6 @@
 use anyhow::Result;
 use deno_ast::swc::ast::{Module, Program, Script};
 use jni::objects::{GlobalRef, JMethodID, JObject};
-use jni::signature::{Primitive, ReturnType};
-use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use crate::jni_utils::*;

@@ -16,8 +16,6 @@
 */
 
 use jni::objects::{GlobalRef, JStaticMethodID, JThrowable};
-use jni::signature::ReturnType;
-use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use crate::jni_utils::*;

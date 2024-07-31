@@ -16,8 +16,6 @@
 */
 
 use jni::objects::{GlobalRef, JMethodID, JObject, JString};
-use jni::signature::{Primitive, ReturnType};
-use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use crate::enums::AstType;

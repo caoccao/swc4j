@@ -18,7 +18,6 @@
 use anyhow::{Error, Result};
 use deno_ast::ModuleSpecifier;
 use jni::objects::{GlobalRef, JMethodID, JObject, JString};
-use jni::signature::{Primitive, ReturnType};
 use jni::JNIEnv;
 
 use crate::enums::*;

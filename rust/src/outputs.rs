@@ -20,7 +20,6 @@ use deno_ast::swc::parser::token::TokenAndSpan;
 use deno_ast::{MultiThreadedComments, ParsedSource, TranspileResult};
 
 use jni::objects::{GlobalRef, JMethodID, JObject};
-use jni::sys::jvalue;
 use jni::JNIEnv;
 
 use std::sync::Arc;

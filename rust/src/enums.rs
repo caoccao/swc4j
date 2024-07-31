@@ -16,8 +16,6 @@
 */
 
 use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID};
-use jni::signature::{Primitive, ReturnType};
-use jni::sys::jvalue;
 use jni::JNIEnv;
 
 pub use deno_ast::swc::ast::EsVersion;
