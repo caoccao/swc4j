@@ -15,11 +15,11 @@
 * limitations under the License.
 */
 
+use anyhow::{Error, Result};
+use deno_ast::ModuleSpecifier;
 use jni::objects::{GlobalRef, JMethodID, JObject, JString};
 use jni::signature::{Primitive, ReturnType};
 use jni::JNIEnv;
-
-use deno_ast::ModuleSpecifier;
 
 use crate::enums::*;
 use crate::jni_utils::*;
@@ -1325,9 +1325,8 @@ pub struct ParseOptions<'a> {
 }
 
 impl<'a> ParseOptions<'a> {
-  pub fn get_specifier(&self) -> ModuleSpecifier {
-    ModuleSpecifier::parse(self.specifier.as_str())
-      .unwrap_or_else(|_| ModuleSpecifier::parse(&"file:///main.js").unwrap())
+  pub fn get_specifier(&self) -> Result<ModuleSpecifier> {
+    ModuleSpecifier::parse(self.specifier.as_str()).map_err(Error::msg)
   }
 }
 
@@ -1422,9 +1421,8 @@ pub struct TransformOptions<'a> {
 }
 
 impl<'a> TransformOptions<'a> {
-  pub fn get_specifier(&self) -> ModuleSpecifier {
-    ModuleSpecifier::parse(self.specifier.as_str())
-      .unwrap_or_else(|_| ModuleSpecifier::parse(&"file:///main.js").unwrap())
+  pub fn get_specifier(&self) -> Result<ModuleSpecifier> {
+    ModuleSpecifier::parse(self.specifier.as_str()).map_err(Error::msg)
   }
 }
 
@@ -1565,9 +1563,8 @@ pub struct TranspileOptions<'a> {
 }
 
 impl<'a> TranspileOptions<'a> {
-  pub fn get_specifier(&self) -> ModuleSpecifier {
-    ModuleSpecifier::parse(self.specifier.as_str())
-      .unwrap_or_else(|_| ModuleSpecifier::parse(&"file:///main.js").unwrap())
+  pub fn get_specifier(&self) -> Result<ModuleSpecifier> {
+    ModuleSpecifier::parse(self.specifier.as_str()).map_err(Error::msg)
   }
 }
 

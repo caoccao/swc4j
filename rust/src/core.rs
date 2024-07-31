@@ -17,10 +17,11 @@
 
 use anyhow::{Error, Result};
 use base64::Engine;
-use deno_ast::swc::ast::Program;
+use deno_ast::swc::ast::{Module, Program, Script};
 use deno_ast::swc::codegen::{text_writer::JsWriter, Config, Emitter};
 use deno_ast::swc::common::{sync::Lrc, FileName, FilePathMapping, SourceMap};
 use deno_ast::*;
+use swc::common::util::take::Take;
 
 use crate::{enums, options, outputs, plugin_utils};
 
@@ -33,14 +34,40 @@ fn parse_by_mode(
 ) -> Result<ParsedSource> {
   let result = if let Some(plugin_host) = plugin_host {
     let code: &str = &parse_params.text.to_owned();
-    match parse_mode {
-      enums::ParseMode::Module => {
-        parse_module_with_post_process(parse_params, |module, _| plugin_host.process_module(code, module))
-      }
-      enums::ParseMode::Script => {
-        parse_script_with_post_process(parse_params, |script, _| plugin_host.process_script(code, script))
-      }
-      _ => parse_program_with_post_process(parse_params, |program, _| plugin_host.process_program(code, program)),
+    let mut error: Option<Error> = None;
+    let result = match parse_mode {
+      enums::ParseMode::Module => parse_module_with_post_process(parse_params, |module, _| {
+        match plugin_host.process_module(code, module) {
+          Ok(module) => module,
+          Err(err) => {
+            error = Some(err);
+            Module::dummy()
+          }
+        }
+      }),
+      enums::ParseMode::Script => parse_script_with_post_process(parse_params, |script, _| {
+        match plugin_host.process_script(code, script) {
+          Ok(script) => script,
+          Err(err) => {
+            error = Some(err);
+            Script::dummy()
+          }
+        }
+      }),
+      _ => parse_program_with_post_process(parse_params, |program, _| {
+        match plugin_host.process_program(code, program) {
+          Ok(program) => program,
+          Err(err) => {
+            error = Some(err);
+            Program::Script(Script::dummy())
+          }
+        }
+      }),
+    };
+    if let Some(error) = error {
+      return Err(error);
+    } else {
+      result
     }
   } else {
     match parse_mode {
@@ -53,8 +80,9 @@ fn parse_by_mode(
 }
 
 pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<outputs::ParseOutput> {
+  let specifier = options.get_specifier()?;
   let parse_params = ParseParams {
-    specifier: options.get_specifier(),
+    specifier,
     text: code.into(),
     media_type: options.media_type,
     capture_tokens: options.capture_tokens,
@@ -67,8 +95,9 @@ pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<out
 }
 
 pub fn transform<'local>(code: String, options: options::TransformOptions) -> Result<outputs::TransformOutput> {
+  let specifier = options.get_specifier()?;
   let parse_params = ParseParams {
-    specifier: options.get_specifier(),
+    specifier: specifier.clone(),
     text: code.into(),
     media_type: options.media_type,
     capture_tokens: false,
@@ -79,7 +108,7 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
   let code: String = parse_params.text.clone().to_string();
   let parsed_source = parse_by_mode(parse_params, options.parse_mode, &mut plugin_host)?;
   let source_map = Lrc::new(SourceMap::new(FilePathMapping::empty()));
-  let filename = Lrc::new(FileName::Url(options.get_specifier()));
+  let filename = Lrc::new(FileName::Url(specifier));
   source_map.new_source_file(filename, code);
   let mut buffer = vec![];
   let mut source_map_buffer = vec![];
@@ -141,8 +170,9 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
 }
 
 pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Result<outputs::TranspileOutput> {
+  let specifier = options.get_specifier()?;
   let parse_params = ParseParams {
-    specifier: options.get_specifier(),
+    specifier,
     text: code.into(),
     media_type: options.media_type,
     capture_tokens: options.capture_tokens,

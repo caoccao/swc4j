@@ -15,12 +15,12 @@
 * limitations under the License.
 */
 
+use anyhow::Result;
+use deno_ast::swc::ast::{Module, Program, Script};
 use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::signature::{Primitive, ReturnType};
 use jni::sys::jvalue;
 use jni::JNIEnv;
-
-use deno_ast::swc::ast::{Module, Program, Script};
 
 use crate::jni_utils::*;
 use crate::span_utils::{ByteToIndexMap, RegisterWithMap, ToJavaWithMap};
@@ -39,7 +39,7 @@ impl<'local> PluginHost<'local> {
     }
   }
 
-  pub fn process_module(&mut self, s: &str, module: Module) -> Module {
+  pub fn process_module(&mut self, s: &str, module: Module) -> Result<Module> {
     let java_class = unsafe { JAVA_CLASS_I_PLUGIN_HOST.as_ref().unwrap() };
     let mut map = ByteToIndexMap::new();
     module.register_with_map(&mut map);
@@ -51,10 +51,10 @@ impl<'local> PluginHost<'local> {
       module
     };
     delete_local_ref!(self.env, java_module);
-    module
+    Ok(module)
   }
 
-  pub fn process_program(&mut self, s: &str, program: Program) -> Program {
+  pub fn process_program(&mut self, s: &str, program: Program) -> Result<Program> {
     let java_class = unsafe { JAVA_CLASS_I_PLUGIN_HOST.as_ref().unwrap() };
     let mut map = ByteToIndexMap::new();
     program.register_with_map(&mut map);
@@ -66,10 +66,10 @@ impl<'local> PluginHost<'local> {
       program
     };
     delete_local_ref!(self.env, java_program);
-    program
+    Ok(program)
   }
 
-  pub fn process_script(&mut self, s: &str, script: Script) -> Script {
+  pub fn process_script(&mut self, s: &str, script: Script) -> Result<Script> {
     let java_class = unsafe { JAVA_CLASS_I_PLUGIN_HOST.as_ref().unwrap() };
     let mut map = ByteToIndexMap::new();
     script.register_with_map(&mut map);
@@ -81,7 +81,7 @@ impl<'local> PluginHost<'local> {
       script
     };
     delete_local_ref!(self.env, java_script);
-    script
+    Ok(script)
   }
 }
 
