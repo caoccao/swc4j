@@ -82,14 +82,14 @@ public class TestCodeGen {
                     registrationLines.add("  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {");
                     registrationLines.add("    match self {");
                     toJavaLines.add(String.format("impl ToJavaWithMap<ByteToIndexMap> for %s {", enumName));
-                    toJavaLines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>");
+                    toJavaLines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>");
                     toJavaLines.add("  where");
                     toJavaLines.add("    'local: 'a,");
                     toJavaLines.add("  {");
                     toJavaLines.add("    match self {");
                     fromJavaLines.add(String.format("impl<'local> FromJava<'local> for %s {", enumName));
                     fromJavaLines.add("  #[allow(unused_variables)]");
-                    fromJavaLines.add("  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {");
+                    fromJavaLines.add("  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {");
                     fromJavaLines.add("    let return_value = ");
                     final AtomicInteger mappingCounter = new AtomicInteger();
                     Stream.of(jni2RustClassUtils.getMappings())
@@ -115,24 +115,24 @@ public class TestCodeGen {
                                         prefix,
                                         StringUtils.toSnakeCase(rawMappingName).toUpperCase()));
                                 if (mapping.box()) {
-                                    fromJavaLines.add(String.format("        %s::%s(Box::new(%s::from_java(env, jobj)))",
+                                    fromJavaLines.add(String.format("        %s::%s(%s::from_java(env, jobj)?)",
                                             enumName,
                                             mapping.name(),
                                             mappingTypeName));
                                 } else {
-                                    fromJavaLines.add(String.format("        %s::%s(%s::from_java(env, jobj))",
+                                    fromJavaLines.add(String.format("        %s::%s(*%s::from_java(env, jobj)?)",
                                             enumName,
                                             mapping.name(),
                                             mappingTypeName));
                                 }
                             });
                     fromJavaLines.add("      } else {");
-                    fromJavaLines.add("        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);");
+                    fromJavaLines.add("        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;");
                     fromJavaLines.add("        let ast_type = AstType::from_java(env, &java_ast_type);");
                     fromJavaLines.add("        delete_local_ref!(env, java_ast_type);");
                     fromJavaLines.add(String.format("        panic!(\"Type {:?} is not supported by %s\", ast_type);", enumName));
                     fromJavaLines.add("      };");
-                    fromJavaLines.add("    return_value");
+                    fromJavaLines.add("    Ok(Box::new(return_value))");
                     registrationLines.add("    }");
                     registrationLines.add("  }");
                     registrationLines.add("}\n");
@@ -312,7 +312,7 @@ public class TestCodeGen {
                                     }
                                 } else if (List.class.isAssignableFrom(fieldType)) {
                                     if (field.getGenericType() instanceof ParameterizedType) {
-                                        lines.add(String.format("    self.%s.iter().for_each(|node| {", arg));
+                                        lines.add(String.format("    for node in self.%s.iter() {", arg));
                                         Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                                         if (innerType instanceof Class) {
                                             lines.add("      node.register_with_map(map);");
@@ -324,7 +324,7 @@ public class TestCodeGen {
                                         } else {
                                             fail(innerType.getTypeName() + " is not expected");
                                         }
-                                        lines.add("    });");
+                                        lines.add("    }");
                                     } else {
                                         fail(field.getGenericType().getTypeName() + " is not expected");
                                     }
@@ -342,11 +342,11 @@ public class TestCodeGen {
                         final List<String> javaVars = new ArrayList<>();
                         final List<String> javaOptionalVars = new ArrayList<>();
                         lines.add(String.format("impl ToJavaWithMap<ByteToIndexMap> for %s {", className));
-                        lines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>");
+                        lines.add("  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>");
                         lines.add("  where");
                         lines.add("    'local: 'a,");
                         lines.add("  {");
-                        lines.add(String.format("    let java_span_ex = map.get_span_ex_by_span(&self.span%s).to_java(env);", spanCall));
+                        lines.add(String.format("    let java_span_ex = map.get_span_ex_by_span(&self.span%s).to_java(env)?;", spanCall));
                         ReflectionUtils.getDeclaredFields(clazz).values().stream()
                                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
                                 .filter(field -> !new Jni2RustFieldUtils(field).isIgnore())
@@ -365,16 +365,22 @@ public class TestCodeGen {
                                                     String javaOptionalVar = String.format("java_optional_%s", arg);
                                                     args.add("&" + javaOptionalVar);
                                                     javaOptionalVars.add(javaOptionalVar);
-                                                    lines.add(String.format("    let %s = self.%s.as_ref().map(|node| node.to_java_with_map(env, map));",
+                                                    lines.add(String.format("    let %s = match self.%s.as_ref() {",
                                                             javaOptionalVar,
                                                             arg));
+                                                    lines.add("      Some(node) => Some(node.to_java_with_map(env, map)?),");
+                                                    lines.add("      None => None,");
+                                                    lines.add("    };");
                                                 } else if (Swc4jSpan.class.isAssignableFrom(innerClass)) {
                                                     String javaOptionalVar = String.format("java_optional_%s", arg);
                                                     args.add("&" + javaOptionalVar);
                                                     javaOptionalVars.add(javaOptionalVar);
-                                                    lines.add(String.format("    let %s = self.%s.as_ref().map(|node| map.get_span_ex_by_span(node).to_java(env));",
+                                                    lines.add(String.format("    let %s = match self.%s.as_ref() {",
                                                             javaOptionalVar,
                                                             arg));
+                                                    lines.add("      Some(node) => Some(map.get_span_ex_by_span(node).to_java(env)?),");
+                                                    lines.add("      None => None,");
+                                                    lines.add("    };");
                                                 } else if (innerClass == String.class) {
                                                     String optionalVar = String.format("optional_%s", arg);
                                                     args.add("&" + optionalVar);
@@ -385,9 +391,12 @@ public class TestCodeGen {
                                                     String javaOptionalVar = String.format("java_optional_%s", arg);
                                                     args.add("&" + javaOptionalVar);
                                                     javaOptionalVars.add(javaOptionalVar);
-                                                    lines.add(String.format("    let %s = self.%s.as_ref().map(|node| node.to_java(env));",
+                                                    lines.add(String.format("    let %s = match self.%s.as_ref() {",
                                                             javaOptionalVar,
                                                             arg));
+                                                    lines.add("      Some(node) => Some(node.to_java(env)?),");
+                                                    lines.add("      None => None,");
+                                                    lines.add("    };");
                                                 } else {
                                                     fail(field.getGenericType().getTypeName() + " is not expected");
                                                 }
@@ -398,20 +407,22 @@ public class TestCodeGen {
                                                 String javaOptionalVar = String.format("java_optional_%s", arg);
                                                 args.add("&" + javaOptionalVar);
                                                 javaOptionalVars.add(javaOptionalVar);
-                                                lines.add(String.format("    let %s = self.%s.as_ref().map(|nodes| {",
+                                                lines.add(String.format("    let %s = match self.%s.as_ref() {",
                                                         javaOptionalVar,
                                                         arg));
-                                                lines.add(String.format("      let java_%s = list_new(env, nodes.len());",
+                                                lines.add("      Some(nodes) => {");
+                                                lines.add(String.format("        let java_%s = list_new(env, nodes.len())?;",
                                                         arg));
-                                                lines.add("      nodes.iter().for_each(|node| {");
-                                                lines.add("        let java_node = node.to_java_with_map(env, map);");
-                                                lines.add(String.format("        list_add(env, &java_%s, &java_node);",
+                                                lines.add("        for node in nodes.iter() {");
+                                                lines.add("          let java_node = node.to_java_with_map(env, map)?;");
+                                                lines.add(String.format("          list_add(env, &java_%s, &java_node)?;",
                                                         arg));
-                                                lines.add("        delete_local_ref!(env, java_node);");
-                                                lines.add("      });");
-                                                lines.add(String.format("      java_%s",
-                                                        arg));
-                                                lines.add("    });");
+                                                lines.add("          delete_local_ref!(env, java_node);");
+                                                lines.add("        }");
+                                                lines.add(String.format("        Some(java_%s)", arg));
+                                                lines.add("      }");
+                                                lines.add("      None => None,");
+                                                lines.add("    };");
                                             } else {
                                                 fail(field.getGenericType().getTypeName() + " is not expected");
                                             }
@@ -423,17 +434,17 @@ public class TestCodeGen {
                                             String javaVar = String.format("java_%s", arg);
                                             args.add("&" + javaVar);
                                             javaVars.add(javaVar);
-                                            lines.add(String.format("    let %s = list_new(env, self.%s.len());",
+                                            lines.add(String.format("    let %s = list_new(env, self.%s.len())?;",
                                                     javaVar,
                                                     arg));
-                                            lines.add(String.format("    self.%s.iter().for_each(|node| {",
+                                            lines.add(String.format("    for node in self.%s.iter() {",
                                                     arg));
                                             Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                                             if (innerType instanceof Class) {
                                                 Class<?> innerClass = (Class<?>) innerType;
                                                 if (ISwc4jAst.class.isAssignableFrom(innerClass)) {
-                                                    lines.add("      let java_node = node.to_java_with_map(env, map);");
-                                                    lines.add(String.format("      list_add(env, &%s, &java_node);", javaVar));
+                                                    lines.add("      let java_node = node.to_java_with_map(env, map)?;");
+                                                    lines.add(String.format("      list_add(env, &%s, &java_node)?;", javaVar));
                                                     lines.add("      delete_local_ref!(env, java_node);");
                                                 } else {
                                                     fail(innerClass.getName() + " is not expected");
@@ -442,15 +453,16 @@ public class TestCodeGen {
                                                 assertTrue(Optional.class.isAssignableFrom((Class<?>) ((ParameterizedType) innerType).getRawType()));
                                                 Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
                                                 assertInstanceOf(Class.class, innerType2);
-                                                lines.add("      let java_node = node.as_ref().map_or_else(");
-                                                lines.add("        || Default::default(),");
-                                                lines.add("        |node| node.to_java_with_map(env, map));");
-                                                lines.add(String.format("    list_add(env, &%s, &java_node);", javaVar));
+                                                lines.add("      let java_node = match node.as_ref() {");
+                                                lines.add("        Some(node) => node.to_java_with_map(env, map)?,");
+                                                lines.add("        None => Default::default(),");
+                                                lines.add("      };");
+                                                lines.add(String.format("      list_add(env, &%s, &java_node)?;", javaVar));
                                                 lines.add("      delete_local_ref!(env, java_node);");
                                             } else {
                                                 fail(innerType.getTypeName() + " is not expected");
                                             }
-                                            lines.add("    });");
+                                            lines.add("    }");
                                         } else {
                                             fail(field.getGenericType().getTypeName() + " is not expected");
                                         }
@@ -458,14 +470,14 @@ public class TestCodeGen {
                                         String javaVar = String.format("java_%s", arg);
                                         args.add("&" + javaVar);
                                         javaVars.add(javaVar);
-                                        lines.add(String.format("    let %s = self.%s.to_java_with_map(env, map);",
+                                        lines.add(String.format("    let %s = self.%s.to_java_with_map(env, map)?;",
                                                 javaVar,
                                                 arg));
                                     } else if (Swc4jSpan.class.isAssignableFrom(fieldType)) {
                                         String javaVar = String.format("java_%s", arg);
                                         args.add("&" + javaVar);
                                         javaVars.add(javaVar);
-                                        lines.add(String.format("    let %s = map.get_span_ex_by_span(&self.%s).to_java(env);",
+                                        lines.add(String.format("    let %s = map.get_span_ex_by_span(&self.%s).to_java(env)?;",
                                                 javaVar,
                                                 arg));
                                     } else if (fieldType.isPrimitive()) {
@@ -478,7 +490,7 @@ public class TestCodeGen {
                                         String javaVar = String.format("java_%s", arg);
                                         args.add("&" + javaVar);
                                         javaVars.add(javaVar);
-                                        lines.add(String.format("    let %s = self.%s.to_java(env);",
+                                        lines.add(String.format("    let %s = self.%s.to_java(env)?;",
                                                 javaVar,
                                                 arg));
                                     } else {
@@ -489,18 +501,18 @@ public class TestCodeGen {
                         javaVars.add("java_span_ex");
                         lines.add(String.format("    let return_value = unsafe { JAVA_CLASS_%s.as_ref().unwrap() }",
                                 StringUtils.toSnakeCase(jni2RustClassUtils.getName()).toUpperCase()));
-                        lines.add(String.format("      .construct(env, %s);",
+                        lines.add(String.format("      .construct(env, %s)?;",
                                 StringUtils.join(", ", args)));
                         javaOptionalVars.forEach(javaOptionalVar -> lines.add(String.format("    delete_local_optional_ref!(env, %s);", javaOptionalVar)));
                         javaVars.forEach(javaVar -> lines.add(String.format("    delete_local_ref!(env, %s);", javaVar)));
-                        lines.add("    return_value");
+                        lines.add("    Ok(return_value)");
                         lines.add("  }");
                         lines.add("}\n");
                     }
                     if (!jni2RustClassUtils.isCustomFromJava()) {
                         lines.add(String.format("impl<'local> FromJava<'local> for %s {", className));
                         lines.add("  #[allow(unused_variables)]");
-                        lines.add("  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {");
+                        lines.add("  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {");
                         List<Field> fields = ReflectionUtils.getDeclaredFields(clazz).values().stream()
                                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
                                 .filter(field -> !new Jni2RustFieldUtils(field).isIgnore())
@@ -531,19 +543,19 @@ public class TestCodeGen {
                                 String javaOptionalVar = String.format("java_optional_%s", arg);
                                 if (field.getGenericType() instanceof ParameterizedType) {
                                     Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                                    processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
+                                    processLines.add(String.format("    let %s = java_class.%s(env, jobj)?;",
                                             javaOptionalVar,
                                             getterName));
-                                    processLines.add(String.format("    let %s = if optional_is_present(env, &%s) {",
+                                    processLines.add(String.format("    let %s = if optional_is_present(env, &%s)? {",
                                             arg,
                                             javaOptionalVar));
                                     if (innerType instanceof Class) {
                                         Class<?> innerClass = (Class<?>) innerType;
                                         if (ISwc4jAst.class.isAssignableFrom(innerClass) || innerClass.isEnum()) {
-                                            processLines.add(String.format("      let %s = optional_get(env, &%s);",
+                                            processLines.add(String.format("      let %s = optional_get(env, &%s)?;",
                                                     javaVar,
                                                     javaOptionalVar));
-                                            processLines.add(String.format("      let %s = %s::from_java(env, &%s);",
+                                            processLines.add(String.format("      let %s = *%s::from_java(env, &%s)?;",
                                                     arg,
                                                     new Jni2RustClassUtils<>(innerClass).getName(),
                                                     javaVar));
@@ -553,12 +565,15 @@ public class TestCodeGen {
                                         } else if (Swc4jSpan.class.isAssignableFrom(innerClass)) {
                                             processLines.add("      Some(DUMMY_SP)");
                                         } else if (innerClass == String.class) {
-                                            processLines.add(String.format("      let %s = optional_get(env, &%s);",
+                                            processLines.add(String.format("      let %s = optional_get(env, &%s)?;",
                                                     javaVar,
                                                     javaOptionalVar));
-                                            processLines.add(String.format("      let %s = jstring_to_string!(env, %s.as_raw());",
+                                            processLines.add(String.format("      let %s: Result<String> = jstring_to_string!(env, %s.as_raw());",
                                                     arg,
                                                     javaVar));
+                                            processLines.add(String.format("      let %s = %s?;",
+                                                    arg,
+                                                    arg));
                                             processLines.add(String.format("      delete_local_ref!(env, %s);",
                                                     javaVar));
                                             processLines.add(String.format("      Some(%s)", arg));
@@ -570,21 +585,23 @@ public class TestCodeGen {
                                         Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
                                         assertInstanceOf(Class.class, innerType2);
                                         Class<?> innerClass = (Class<?>) innerType2;
-                                        processLines.add(String.format("      let %s = optional_get(env, &%s);",
+                                        Jni2RustClassUtils<?> innerJni2RustClassUtils = new Jni2RustClassUtils<>(innerClass);
+                                        processLines.add(String.format("      let %s = optional_get(env, &%s)?;",
                                                 javaVar,
                                                 javaOptionalVar));
-                                        processLines.add(String.format("      let length = list_size(env, &%s);",
+                                        processLines.add(String.format("      let length = list_size(env, &%s)?;",
                                                 javaVar));
-                                        processLines.add(String.format("      let %s = (0..length).map(|i| {",
-                                                arg));
-                                        processLines.add(String.format("        let java_item = list_get(env, &%s, i);",
-                                                javaVar));
-                                        processLines.add(String.format("        let %s = %s::from_java(env, &java_item);",
+                                        processLines.add(String.format("      let mut %s: Vec<%s> = Vec::with_capacity(length);",
                                                 arg,
-                                                new Jni2RustClassUtils<>(innerClass).getName()));
+                                                innerJni2RustClassUtils.getName()));
+                                        processLines.add("      for i in 0..length {");
+                                        processLines.add(String.format("        let java_item = list_get(env, &%s, i)?;",
+                                                javaVar));
+                                        processLines.add(String.format("        let element = *%s::from_java(env, &java_item)?;",
+                                                innerJni2RustClassUtils.getName()));
                                         processLines.add("        delete_local_ref!(env, java_item);");
-                                        processLines.add(String.format("        %s", arg));
-                                        processLines.add("      }).collect();");
+                                        processLines.add(String.format("      %s.push(element);", arg));
+                                        processLines.add("      }");
                                         processLines.add(String.format("      Some(%s)", arg));
                                     } else {
                                         fail(field.getGenericType().getTypeName() + " is not expected");
@@ -611,22 +628,27 @@ public class TestCodeGen {
                                 }
                             } else if (List.class.isAssignableFrom(fieldType)) {
                                 if (field.getGenericType() instanceof ParameterizedType) {
-                                    processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
+                                    processLines.add(String.format("    let %s = java_class.%s(env, jobj)?;",
                                             javaVar,
                                             getterName));
-                                    processLines.add(String.format("    let length = list_size(env, &%s);",
-                                            javaVar));
-                                    processLines.add(String.format("    let %s = (0..length).map(|i| {",
-                                            arg));
-                                    processLines.add(String.format("      let java_item = list_get(env, &%s, i);",
+                                    processLines.add(String.format("    let length = list_size(env, &%s)?;",
                                             javaVar));
                                     Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                                     if (innerType instanceof Class) {
                                         Class<?> innerClass = (Class<?>) innerType;
                                         if (ISwc4jAst.class.isAssignableFrom(innerClass)) {
-                                            processLines.add(String.format("      let %s = %s::from_java(env, &java_item);",
+                                            Jni2RustClassUtils<?> innerJni2RustClassUtils = new Jni2RustClassUtils<>(innerClass);
+                                            processLines.add(String.format("    let mut %s: Vec<%s> = Vec::with_capacity(length);",
                                                     arg,
-                                                    new Jni2RustClassUtils<>(innerClass).getName()));
+                                                    innerJni2RustClassUtils.getName()));
+                                            processLines.add("    for i in 0..length {");
+                                            processLines.add(String.format("      let java_item = list_get(env, &%s, i)?;",
+                                                    javaVar));
+                                            processLines.add(String.format("      let element = *%s::from_java(env, &java_item)?;",
+                                                    innerJni2RustClassUtils.getName()));
+                                            processLines.add("      delete_local_ref!(env, java_item);");
+                                            processLines.add(String.format("      %s.push(element)", arg));
+                                            processLines.add("    }");
                                         } else {
                                             fail(innerClass.getName() + " is not expected");
                                         }
@@ -635,41 +657,48 @@ public class TestCodeGen {
                                         Type innerType2 = ((ParameterizedType) innerType).getActualTypeArguments()[0];
                                         assertInstanceOf(Class.class, innerType2);
                                         Class<?> innerClass = (Class<?>) innerType2;
-                                        processLines.add(String.format("      let %s = if optional_is_present(env, &java_item) {",
-                                                arg));
-                                        processLines.add("        let java_inner_item = optional_get(env, &java_item);");
-                                        processLines.add(String.format("        let %s = %s::from_java(env, &java_inner_item);",
+                                        Jni2RustClassUtils<?> innerJni2RustClassUtils = new Jni2RustClassUtils<>(innerClass);
+                                        processLines.add(String.format("    let mut %s: Vec<Option<%s>> = Vec::with_capacity(length);",
                                                 arg,
-                                                new Jni2RustClassUtils<>(innerClass).getName()));
+                                                innerJni2RustClassUtils.getName()));
+                                        processLines.add("    for i in 0..length {");
+                                        processLines.add(String.format("      let java_item = list_get(env, &%s, i)?;",
+                                                javaVar));
+                                        processLines.add("      let element = if optional_is_present(env, &java_item)? {");
+                                        processLines.add("        let java_inner_item = optional_get(env, &java_item)?;");
+                                        processLines.add(String.format("        let element = *%s::from_java(env, &java_inner_item)?;",
+                                                innerJni2RustClassUtils.getName()));
                                         processLines.add("        delete_local_ref!(env, java_inner_item);");
-                                        processLines.add(String.format("        Some(%s)", arg));
+                                        processLines.add("        Some(element)");
                                         processLines.add("      } else {");
                                         processLines.add("        None");
                                         processLines.add("      };");
+                                        processLines.add("      delete_local_ref!(env, java_item);");
+                                        processLines.add(String.format("      %s.push(element)", arg));
+                                        processLines.add("    }");
                                     } else {
                                         fail(innerType.getTypeName() + " is not expected");
                                     }
-                                    processLines.add("      delete_local_ref!(env, java_item);");
                                     if (jni2RustFieldUtils.isComponentBox()) {
                                         if (jni2RustFieldUtils.isComponentAtom()) {
-                                            processLines.add(String.format("      Box::new(%s.into())", arg));
+                                            processLines.add(String.format("    let %s = %s.into_iter().map(|%s| Box::new(%s.into())).collect();",
+                                                    arg, arg, arg, arg));
                                         } else {
-                                            processLines.add(String.format("      Box::new(%s)", arg));
+                                            processLines.add(String.format("    let %s = %s.into_iter().map(|%s| Box::new(%s)).collect();",
+                                                    arg, arg, arg, arg));
                                         }
                                     } else if (jni2RustFieldUtils.isComponentAtom()) {
-                                        processLines.add(String.format("      %s.into()", arg));
-                                    } else {
-                                        processLines.add(String.format("      %s", arg));
+                                        processLines.add(String.format("    let %s = %s.into_iter().map(|%s| %s.into()).collect();",
+                                                arg, arg, arg, arg));
                                     }
-                                    processLines.add("    }).collect();");
                                 } else {
                                     fail(field.getGenericType().getTypeName() + " is not expected");
                                 }
                             } else if (ISwc4jAst.class.isAssignableFrom(fieldType)) {
-                                processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
+                                processLines.add(String.format("    let %s = java_class.%s(env, jobj)?;",
                                         javaVar,
                                         getterName));
-                                processLines.add(String.format("    let %s = %s::from_java(env, &%s);",
+                                processLines.add(String.format("    let %s = *%s::from_java(env, &%s)?;",
                                         arg,
                                         new Jni2RustClassUtils<>(fieldType).getName(),
                                         javaVar));
@@ -677,17 +706,17 @@ public class TestCodeGen {
                             } else if (Swc4jSpan.class.isAssignableFrom(fieldType)) {
                                 processLines.add(String.format("    let %s = DUMMY_SP;", arg));
                             } else if (fieldType.isPrimitive() || fieldType == String.class) {
-                                processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
+                                processLines.add(String.format("    let %s = java_class.%s(env, jobj)?;",
                                         arg,
                                         getterName));
                                 if (fieldType == int.class && jni2RustFieldUtils.isSyntaxContext()) {
                                     processLines.add(String.format("    let %s = SyntaxContext::from_u32(%s as u32);", arg, arg));
                                 }
                             } else if (fieldType.isEnum()) {
-                                processLines.add(String.format("    let %s = java_class.%s(env, jobj);",
+                                processLines.add(String.format("    let %s = java_class.%s(env, jobj)?;",
                                         javaVar,
                                         getterName));
-                                processLines.add(String.format("    let %s = %s::from_java(env, &%s);",
+                                processLines.add(String.format("    let %s = *%s::from_java(env, &%s)?;",
                                         arg,
                                         new Jni2RustClassUtils<>(fieldType).getName(),
                                         javaVar));
@@ -707,9 +736,9 @@ public class TestCodeGen {
                             initLines.add(String.format("      %s,", arg));
                         });
                         lines.addAll(processLines);
-                        lines.add(String.format("    %s {", className));
+                        lines.add(String.format("    Ok(Box::new(%s {", className));
                         lines.addAll(initLines);
-                        lines.add("    }");
+                        lines.add("    }))");
                         lines.add("  }");
                         lines.add("}\n");
                     }

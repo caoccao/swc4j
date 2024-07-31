@@ -155,19 +155,19 @@ public class Jni2Rust<T> {
                     if (isVoid) {
                         lines.add("  )");
                     } else if (isPrimitive) {
-                        lines.add(String.format("  ) -> %s",
+                        lines.add(String.format("  ) -> Result<%s>",
                                 options.getJavaTypeToRustTypeMap().get(((Method) executable).getReturnType().getName())));
                     } else if (isString) {
                         if (jni2RustMethodUtils.isOptional()) {
-                            lines.add("  ) -> Option<String>");
+                            lines.add("  ) -> Result<Option<String>>");
                         } else {
-                            lines.add("  ) -> String");
+                            lines.add("  ) -> Result<String>");
                         }
                     } else {
                         if (jni2RustMethodUtils.isOptional()) {
-                            lines.add("  ) -> Option<JObject<'a>>");
+                            lines.add("  ) -> Result<Option<JObject<'a>>>");
                         } else {
-                            lines.add("  ) -> JObject<'a>");
+                            lines.add("  ) -> Result<JObject<'a>>");
                         }
                         lines.add("  where");
                         lines.add("    'local: 'a,");
@@ -237,15 +237,16 @@ public class Jni2Rust<T> {
                     lines.add(String.format("        self.method_%s,", methodName));
                     lines.add(String.format("        &[%s],", StringUtils.join(", ", parameterNames)));
                     lines.add(String.format("        \"%s %s()\"", returnTypeName, methodName));
-                    lines.add("      );");
+                    lines.add("      )?;");
                     if (isPrimitive) {
                         // Do nothing
                     } else if (isString) {
                         lines.add("    let java_return_value = return_value;");
                         if (jni2RustMethodUtils.isOptional()) {
-                            lines.add("    let return_value = jstring_to_optional_string!(env, java_return_value.as_raw());");
+                            lines.add("    let return_value = jstring_to_optional_string!(env, java_return_value.as_raw())?;");
                         } else {
-                            lines.add("    let return_value = jstring_to_string!(env, java_return_value.as_raw());");
+                            lines.add("    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());");
+                            lines.add("    let return_value = return_value?;");
                         }
                         lines.add("    delete_local_ref!(env, java_return_value);");
                     } else {
@@ -277,7 +278,7 @@ public class Jni2Rust<T> {
                         }
                     }
                     // return
-                    lines.add("    return_value");
+                    lines.add("    Ok(return_value)");
                     lines.add("  }");
                 });
     }

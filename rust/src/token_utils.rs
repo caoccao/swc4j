@@ -15,13 +15,13 @@
 * limitations under the License.
 */
 
-use jni::objects::{GlobalRef, JObject, JStaticMethodID};
-use jni::JNIEnv;
-
+use anyhow::Result;
 use deno_ast::swc::atoms::Atom;
 use deno_ast::swc::common::source_map::SmallPos;
 use deno_ast::swc::parser::error::Error;
 use deno_ast::swc::parser::token::{IdentLike, Token, TokenAndSpan, Word};
+use jni::objects::{GlobalRef, JObject, JStaticMethodID};
+use jni::JNIEnv;
 
 use crate::enums::*;
 use crate::jni_utils::*;
@@ -229,7 +229,7 @@ impl JavaSwc4jTokenFactory {
     token_type: &TokenType,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -242,8 +242,8 @@ impl JavaSwc4jTokenFactory {
         self.method_create_assign_operator,
         &[type_id, span, line_break_ahead],
         "Swc4jToken create_assign_operator()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn create_big_int<'local, 'a>(
@@ -252,7 +252,7 @@ impl JavaSwc4jTokenFactory {
     text: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -266,9 +266,9 @@ impl JavaSwc4jTokenFactory {
         self.method_create_big_int,
         &[text, span, line_break_ahead],
         "Swc4jTokenTextValue create_big_int()"
-      );
+      )?;
     delete_local_ref!(env, java_text);
-    return_value
+    Ok(return_value)
   }
 
   pub fn create_binary_operator<'local, 'a>(
@@ -277,7 +277,7 @@ impl JavaSwc4jTokenFactory {
     token_type: &TokenType,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -290,8 +290,8 @@ impl JavaSwc4jTokenFactory {
         self.method_create_binary_operator,
         &[type_id, span, line_break_ahead],
         "Swc4jToken create_binary_operator()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn create_error<'local, 'a>(
@@ -301,7 +301,7 @@ impl JavaSwc4jTokenFactory {
     error: &Error,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -317,10 +317,10 @@ impl JavaSwc4jTokenFactory {
         self.method_create_error,
         &[text, error, span, line_break_ahead],
         "Swc4jTokenTextValue create_error()"
-      );
+      )?;
     delete_local_ref!(env, java_text);
     delete_local_ref!(env, java_error);
-    return_value
+    Ok(return_value)
   }
 
   pub fn create_false<'local, 'a>(
@@ -328,7 +328,7 @@ impl JavaSwc4jTokenFactory {
     env: &mut JNIEnv<'local>,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -340,8 +340,8 @@ impl JavaSwc4jTokenFactory {
         self.method_create_false,
         &[span, line_break_ahead],
         "Swc4jToken create_false()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn create_generic_operator<'local, 'a>(
@@ -350,7 +350,7 @@ impl JavaSwc4jTokenFactory {
     token_type: &TokenType,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -363,8 +363,8 @@ impl JavaSwc4jTokenFactory {
         self.method_create_generic_operator,
         &[type_id, span, line_break_ahead],
         "Swc4jToken create_generic_operator()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn create_ident_known<'local, 'a>(
@@ -373,7 +373,7 @@ impl JavaSwc4jTokenFactory {
     text: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -387,9 +387,9 @@ impl JavaSwc4jTokenFactory {
         self.method_create_ident_known,
         &[text, span, line_break_ahead],
         "Swc4jTokenText create_ident_known()"
-      );
+      )?;
     delete_local_ref!(env, java_text);
-    return_value
+    Ok(return_value)
   }
 
   pub fn create_ident_other<'local, 'a>(
@@ -398,7 +398,7 @@ impl JavaSwc4jTokenFactory {
     text: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -412,9 +412,9 @@ impl JavaSwc4jTokenFactory {
         self.method_create_ident_other,
         &[text, span, line_break_ahead],
         "Swc4jTokenText create_ident_other()"
-      );
+      )?;
     delete_local_ref!(env, java_text);
-    return_value
+    Ok(return_value)
   }
 
   pub fn create_jsx_tag_name<'local, 'a>(
@@ -423,7 +423,7 @@ impl JavaSwc4jTokenFactory {
     text: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -437,9 +437,9 @@ impl JavaSwc4jTokenFactory {
         self.method_create_jsx_tag_name,
         &[text, span, line_break_ahead],
         "Swc4jTokenText create_jsx_tag_name()"
-      );
+      )?;
     delete_local_ref!(env, java_text);
-    return_value
+    Ok(return_value)
   }
 
   pub fn create_jsx_tag_text<'local, 'a>(
@@ -449,7 +449,7 @@ impl JavaSwc4jTokenFactory {
     value: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -465,10 +465,10 @@ impl JavaSwc4jTokenFactory {
         self.method_create_jsx_tag_text,
         &[text, value, span, line_break_ahead],
         "Swc4jTokenTextValue create_jsx_tag_text()"
-      );
+      )?;
     delete_local_ref!(env, java_text);
     delete_local_ref!(env, java_value);
-    return_value
+    Ok(return_value)
   }
 
   pub fn create_keyword<'local, 'a>(
@@ -477,7 +477,7 @@ impl JavaSwc4jTokenFactory {
     token_type: &TokenType,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -490,8 +490,8 @@ impl JavaSwc4jTokenFactory {
         self.method_create_keyword,
         &[type_id, span, line_break_ahead],
         "Swc4jToken create_keyword()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn create_null<'local, 'a>(
@@ -499,7 +499,7 @@ impl JavaSwc4jTokenFactory {
     env: &mut JNIEnv<'local>,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -511,8 +511,8 @@ impl JavaSwc4jTokenFactory {
         self.method_create_null,
         &[span, line_break_ahead],
         "Swc4jToken create_null()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn create_number<'local, 'a>(
@@ -522,7 +522,7 @@ impl JavaSwc4jTokenFactory {
     value: f64,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -537,9 +537,9 @@ impl JavaSwc4jTokenFactory {
         self.method_create_number,
         &[text, value, span, line_break_ahead],
         "Swc4jTokenTextValue create_number()"
-      );
+      )?;
     delete_local_ref!(env, java_text);
-    return_value
+    Ok(return_value)
   }
 
   pub fn create_regex<'local, 'a>(
@@ -550,7 +550,7 @@ impl JavaSwc4jTokenFactory {
     flags: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -568,11 +568,11 @@ impl JavaSwc4jTokenFactory {
         self.method_create_regex,
         &[text, value, flags, span, line_break_ahead],
         "Swc4jTokenTextValueFlags create_regex()"
-      );
+      )?;
     delete_local_ref!(env, java_text);
     delete_local_ref!(env, java_value);
     delete_local_ref!(env, java_flags);
-    return_value
+    Ok(return_value)
   }
 
   pub fn create_shebang<'local, 'a>(
@@ -582,7 +582,7 @@ impl JavaSwc4jTokenFactory {
     value: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -598,10 +598,10 @@ impl JavaSwc4jTokenFactory {
         self.method_create_shebang,
         &[text, value, span, line_break_ahead],
         "Swc4jTokenTextValue create_shebang()"
-      );
+      )?;
     delete_local_ref!(env, java_text);
     delete_local_ref!(env, java_value);
-    return_value
+    Ok(return_value)
   }
 
   pub fn create_string<'local, 'a>(
@@ -611,7 +611,7 @@ impl JavaSwc4jTokenFactory {
     value: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -627,10 +627,10 @@ impl JavaSwc4jTokenFactory {
         self.method_create_string,
         &[text, value, span, line_break_ahead],
         "Swc4jTokenTextValue create_string()"
-      );
+      )?;
     delete_local_ref!(env, java_text);
     delete_local_ref!(env, java_value);
-    return_value
+    Ok(return_value)
   }
 
   pub fn create_template<'local, 'a>(
@@ -640,7 +640,7 @@ impl JavaSwc4jTokenFactory {
     value: &Option<String>,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -656,10 +656,10 @@ impl JavaSwc4jTokenFactory {
         self.method_create_template,
         &[text, value, span, line_break_ahead],
         "Swc4jTokenTextValue create_template()"
-      );
+      )?;
     delete_local_ref!(env, java_text);
     delete_local_ref!(env, java_value);
-    return_value
+    Ok(return_value)
   }
 
   pub fn create_true<'local, 'a>(
@@ -667,7 +667,7 @@ impl JavaSwc4jTokenFactory {
     env: &mut JNIEnv<'local>,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -679,8 +679,8 @@ impl JavaSwc4jTokenFactory {
         self.method_create_true,
         &[span, line_break_ahead],
         "Swc4jToken create_true()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn create_unknown<'local, 'a>(
@@ -689,7 +689,7 @@ impl JavaSwc4jTokenFactory {
     text: &str,
     span: &JObject<'_>,
     line_break_ahead: bool,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -703,9 +703,9 @@ impl JavaSwc4jTokenFactory {
         self.method_create_unknown,
         &[text, span, line_break_ahead],
         "Swc4jTokenText create_unknown()"
-      );
+      )?;
     delete_local_ref!(env, java_text);
-    return_value
+    Ok(return_value)
   }
 }
 /* JavaSwc4jTokenFactory End */
@@ -723,21 +723,21 @@ pub fn token_and_spans_to_java_list<'local, 'a>(
   map: &ByteToIndexMap,
   source_text: &str,
   token_and_spans: Option<Arc<Vec<TokenAndSpan>>>,
-) -> JObject<'a>
+) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
   match token_and_spans {
     Some(token_and_spans) => {
       let java_token_factory = unsafe { JAVA_TOKEN_FACTORY.as_ref().unwrap() };
-      let list = list_new(env, token_and_spans.len());
-      token_and_spans.iter().for_each(|token_and_span| {
+      let list = list_new(env, token_and_spans.len())?;
+      for token_and_span in token_and_spans.iter() {
         let line_break_ahead = token_and_span.had_line_break;
         let text = &source_text[Range {
           start: token_and_span.span.lo().to_usize() - 1,
           end: token_and_span.span.hi().to_usize() - 1,
         }];
-        let java_span_ex = map.get_span_ex_by_span(&token_and_span.span).to_java(env);
+        let java_span_ex = map.get_span_ex_by_span(&token_and_span.span).to_java(env)?;
         let java_token = match &token_and_span.token {
           Token::Word(word) => match word {
             Word::Keyword(keyword) => java_token_factory.create_keyword(
@@ -808,13 +808,13 @@ where
               java_token_factory.create_generic_operator(env, generic_operator_type, &java_span_ex, line_break_ahead)
             }
           },
-        };
-        list_add(env, &list, &java_token);
+        }?;
+        list_add(env, &list, &java_token)?;
         delete_local_ref!(env, java_token);
         delete_local_ref!(env, java_span_ex);
-      });
-      list
+      }
+      Ok(list)
     }
-    None => Default::default(),
+    None => Ok(Default::default()),
   }
 }

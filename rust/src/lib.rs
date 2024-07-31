@@ -15,13 +15,13 @@
 * limitations under the License.
 */
 
+use anyhow::Result;
 use jni::objects::{JClass, JObject, JString};
 use jni::sys::{jint, jobject, jstring, JNI_VERSION_1_8};
 use jni::{JNIEnv, JavaVM};
 use jni_utils::FromJava;
 
 use std::ffi::c_void;
-use std::ptr::null_mut;
 
 pub mod ast_utils;
 pub mod comment_utils;
@@ -70,15 +70,9 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse<'local
   code: jstring,
   options: jobject,
 ) -> jobject {
-  let code = jstring_to_string!(env, code);
-  let options = unsafe { JObject::from_raw(options) };
-  let options = options::ParseOptions::from_java(&mut env, &options);
-  match core::parse(code, options) {
-    Ok(output) => output.to_java(&mut env).as_raw(),
-    Err(err) => {
-      error::throw_parse_error(&mut env, err.to_string().as_str());
-      null_mut()
-    }
+  match core_parse(&mut env, code, options) {
+    Ok(output) => output,
+    Err(err) => error::throw_parse_error(&mut env, err.to_string().as_str()),
   }
 }
 
@@ -89,15 +83,9 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTransform<'l
   code: jstring,
   options: jobject,
 ) -> jobject {
-  let code = jstring_to_string!(env, code);
-  let options = unsafe { JObject::from_raw(options) };
-  let options = options::TransformOptions::from_java(&mut env, &options);
-  match core::transform(code, options) {
-    Ok(output) => output.to_java(&mut env).as_raw(),
-    Err(err) => {
-      error::throw_parse_error(&mut env, err.to_string().as_str());
-      null_mut()
-    }
+  match core_transform(&mut env, code, options) {
+    Ok(output) => output,
+    Err(err) => error::throw_transform_error(&mut env, err.to_string().as_str()),
   }
 }
 
@@ -108,14 +96,38 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'l
   code: jstring,
   options: jobject,
 ) -> jobject {
-  let code = jstring_to_string!(env, code);
-  let options = unsafe { JObject::from_raw(options) };
-  let options = options::TranspileOptions::from_java(&mut env, &options);
-  match core::transpile(code, options) {
-    Ok(output) => output.to_java(&mut env).as_raw(),
-    Err(err) => {
-      error::throw_transpile_error(&mut env, err.to_string().as_str());
-      null_mut()
-    }
+  match core_transpile(&mut env, code, options) {
+    Ok(output) => output,
+    Err(err) => error::throw_transpile_error(&mut env, err.to_string().as_str()),
   }
+}
+
+fn core_parse<'local>(env: &mut JNIEnv<'local>, code: jstring, options: jobject) -> Result<jobject> {
+  let code: Result<String> = jstring_to_string!(env, code);
+  let code = code?;
+  let options = unsafe { JObject::from_raw(options) };
+  let options = options::ParseOptions::from_java(env, &options)?;
+  let output = core::parse(code, *options)?;
+  let output = output.to_java(env)?;
+  Ok(output.as_raw())
+}
+
+fn core_transform<'local>(env: &mut JNIEnv<'local>, code: jstring, options: jobject) -> Result<jobject> {
+  let code: Result<String> = jstring_to_string!(env, code);
+  let code = code?;
+  let options = unsafe { JObject::from_raw(options) };
+  let options = options::TransformOptions::from_java(env, &options)?;
+  let output = core::transform(code, *options)?;
+  let output = output.to_java(env)?;
+  Ok(output.as_raw())
+}
+
+fn core_transpile<'local>(env: &mut JNIEnv<'local>, code: jstring, options: jobject) -> Result<jobject> {
+  let code: Result<String> = jstring_to_string!(env, code);
+  let code = code?;
+  let options = unsafe { JObject::from_raw(options) };
+  let options = options::TranspileOptions::from_java(env, &options)?;
+  let output = core::transpile(code, *options)?;
+  let output = output.to_java(env)?;
+  Ok(output.as_raw())
 }

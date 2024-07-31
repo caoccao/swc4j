@@ -122,7 +122,7 @@ impl JavaSwc4jParseOptions {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -132,15 +132,15 @@ impl JavaSwc4jParseOptions {
         self.method_get_media_type,
         &[],
         "Swc4jMediaType get_media_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_parse_mode<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -150,15 +150,15 @@ impl JavaSwc4jParseOptions {
         self.method_get_parse_mode,
         &[],
         "Swc4jParseMode get_parse_mode()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_plugin_host<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> Option<JObject<'a>>
+  ) -> Result<Option<JObject<'a>>>
   where
     'local: 'a,
   {
@@ -168,20 +168,20 @@ impl JavaSwc4jParseOptions {
         self.method_get_plugin_host,
         &[],
         "ISwc4jPluginHost get_plugin_host()"
-      );
+      )?;
     let return_value = if return_value.is_null() {
       None
     } else {
       Some(return_value)
     };
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_specifier<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -191,15 +191,15 @@ impl JavaSwc4jParseOptions {
         self.method_get_specifier,
         &[],
         "URL get_specifier()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_capture_ast<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -207,15 +207,15 @@ impl JavaSwc4jParseOptions {
         self.method_is_capture_ast,
         &[],
         "boolean is_capture_ast()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_capture_comments<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -223,15 +223,15 @@ impl JavaSwc4jParseOptions {
         self.method_is_capture_comments,
         &[],
         "boolean is_capture_comments()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_capture_tokens<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -239,15 +239,15 @@ impl JavaSwc4jParseOptions {
         self.method_is_capture_tokens,
         &[],
         "boolean is_capture_tokens()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_scope_analysis<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -255,8 +255,8 @@ impl JavaSwc4jParseOptions {
         self.method_is_scope_analysis,
         &[],
         "boolean is_scope_analysis()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 /* JavaSwc4jParseOptions End */
@@ -395,7 +395,7 @@ impl JavaSwc4jTransformOptions {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -405,15 +405,15 @@ impl JavaSwc4jTransformOptions {
         self.method_get_media_type,
         &[],
         "Swc4jMediaType get_media_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_parse_mode<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -423,15 +423,15 @@ impl JavaSwc4jTransformOptions {
         self.method_get_parse_mode,
         &[],
         "Swc4jParseMode get_parse_mode()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_plugin_host<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> Option<JObject<'a>>
+  ) -> Result<Option<JObject<'a>>>
   where
     'local: 'a,
   {
@@ -441,20 +441,20 @@ impl JavaSwc4jTransformOptions {
         self.method_get_plugin_host,
         &[],
         "ISwc4jPluginHost get_plugin_host()"
-      );
+      )?;
     let return_value = if return_value.is_null() {
       None
     } else {
       Some(return_value)
     };
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_source_map<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -464,15 +464,15 @@ impl JavaSwc4jTransformOptions {
         self.method_get_source_map,
         &[],
         "Swc4jSourceMapOption get_source_map()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_specifier<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -482,15 +482,15 @@ impl JavaSwc4jTransformOptions {
         self.method_get_specifier,
         &[],
         "URL get_specifier()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_target<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -500,15 +500,15 @@ impl JavaSwc4jTransformOptions {
         self.method_get_target,
         &[],
         "Swc4jEsVersion get_target()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_ascii_only<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -516,15 +516,15 @@ impl JavaSwc4jTransformOptions {
         self.method_is_ascii_only,
         &[],
         "boolean is_ascii_only()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_emit_assert_for_import_attributes<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -532,15 +532,15 @@ impl JavaSwc4jTransformOptions {
         self.method_is_emit_assert_for_import_attributes,
         &[],
         "boolean is_emit_assert_for_import_attributes()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_inline_sources<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -548,15 +548,15 @@ impl JavaSwc4jTransformOptions {
         self.method_is_inline_sources,
         &[],
         "boolean is_inline_sources()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_keep_comments<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -564,15 +564,15 @@ impl JavaSwc4jTransformOptions {
         self.method_is_keep_comments,
         &[],
         "boolean is_keep_comments()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_minify<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -580,15 +580,15 @@ impl JavaSwc4jTransformOptions {
         self.method_is_minify,
         &[],
         "boolean is_minify()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_omit_last_semi<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -596,8 +596,8 @@ impl JavaSwc4jTransformOptions {
         self.method_is_omit_last_semi,
         &[],
         "boolean is_omit_last_semi()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 /* JavaSwc4jTransformOptions End */
@@ -853,7 +853,7 @@ impl JavaSwc4jTranspileOptions {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -863,15 +863,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_imports_not_used_as_values,
         &[],
         "Swc4jImportsNotUsedAsValues get_imports_not_used_as_values()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_jsx_factory<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> String
+  ) -> Result<String>
   {
     let return_value = call_as_object!(
         env,
@@ -879,18 +879,19 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_jsx_factory,
         &[],
         "String get_jsx_factory()"
-      );
+      )?;
     let java_return_value = return_value;
-    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value = return_value?;
     delete_local_ref!(env, java_return_value);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_jsx_fragment_factory<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> String
+  ) -> Result<String>
   {
     let return_value = call_as_object!(
         env,
@@ -898,18 +899,19 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_jsx_fragment_factory,
         &[],
         "String get_jsx_fragment_factory()"
-      );
+      )?;
     let java_return_value = return_value;
-    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value = return_value?;
     delete_local_ref!(env, java_return_value);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_jsx_import_source<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> Option<String>
+  ) -> Result<Option<String>>
   {
     let return_value = call_as_object!(
         env,
@@ -917,18 +919,18 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_jsx_import_source,
         &[],
         "String get_jsx_import_source()"
-      );
+      )?;
     let java_return_value = return_value;
-    let return_value = jstring_to_optional_string!(env, java_return_value.as_raw());
+    let return_value = jstring_to_optional_string!(env, java_return_value.as_raw())?;
     delete_local_ref!(env, java_return_value);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_media_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -938,15 +940,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_media_type,
         &[],
         "Swc4jMediaType get_media_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_parse_mode<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -956,15 +958,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_parse_mode,
         &[],
         "Swc4jParseMode get_parse_mode()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_plugin_host<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> Option<JObject<'a>>
+  ) -> Result<Option<JObject<'a>>>
   where
     'local: 'a,
   {
@@ -974,20 +976,20 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_plugin_host,
         &[],
         "ISwc4jPluginHost get_plugin_host()"
-      );
+      )?;
     let return_value = if return_value.is_null() {
       None
     } else {
       Some(return_value)
     };
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_precompile_jsx_dynamic_props<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> Option<JObject<'a>>
+  ) -> Result<Option<JObject<'a>>>
   where
     'local: 'a,
   {
@@ -997,20 +999,20 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_precompile_jsx_dynamic_props,
         &[],
         "List get_precompile_jsx_dynamic_props()"
-      );
+      )?;
     let return_value = if return_value.is_null() {
       None
     } else {
       Some(return_value)
     };
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_precompile_jsx_skip_elements<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> Option<JObject<'a>>
+  ) -> Result<Option<JObject<'a>>>
   where
     'local: 'a,
   {
@@ -1020,20 +1022,20 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_precompile_jsx_skip_elements,
         &[],
         "List get_precompile_jsx_skip_elements()"
-      );
+      )?;
     let return_value = if return_value.is_null() {
       None
     } else {
       Some(return_value)
     };
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_source_map<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1043,15 +1045,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_source_map,
         &[],
         "Swc4jSourceMapOption get_source_map()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_specifier<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1061,15 +1063,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_specifier,
         &[],
         "URL get_specifier()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_capture_ast<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1077,15 +1079,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_capture_ast,
         &[],
         "boolean is_capture_ast()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_capture_comments<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1093,15 +1095,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_capture_comments,
         &[],
         "boolean is_capture_comments()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_capture_tokens<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1109,15 +1111,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_capture_tokens,
         &[],
         "boolean is_capture_tokens()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_emit_metadata<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1125,15 +1127,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_emit_metadata,
         &[],
         "boolean is_emit_metadata()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_inline_sources<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1141,15 +1143,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_inline_sources,
         &[],
         "boolean is_inline_sources()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_jsx_automatic<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1157,15 +1159,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_jsx_automatic,
         &[],
         "boolean is_jsx_automatic()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_jsx_development<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1173,15 +1175,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_jsx_development,
         &[],
         "boolean is_jsx_development()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_keep_comments<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1189,15 +1191,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_keep_comments,
         &[],
         "boolean is_keep_comments()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_precompile_jsx<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1205,15 +1207,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_precompile_jsx,
         &[],
         "boolean is_precompile_jsx()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_scope_analysis<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1221,15 +1223,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_scope_analysis,
         &[],
         "boolean is_scope_analysis()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_transform_jsx<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1237,15 +1239,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_transform_jsx,
         &[],
         "boolean is_transform_jsx()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_use_decorators_proposal<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1253,15 +1255,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_use_decorators_proposal,
         &[],
         "boolean is_use_decorators_proposal()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_use_ts_decorators<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1269,15 +1271,15 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_use_ts_decorators,
         &[],
         "boolean is_use_ts_decorators()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_var_decl_imports<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -1285,8 +1287,8 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_var_decl_imports,
         &[],
         "boolean is_var_decl_imports()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 /* JavaSwc4jTranspileOptions End */
@@ -1345,28 +1347,28 @@ impl<'a> Default for ParseOptions<'a> {
 }
 
 impl<'local> FromJava<'local> for ParseOptions<'local> {
-  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> ParseOptions<'local> {
+  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<ParseOptions<'local>>> {
     let java_parse_options = unsafe { JAVA_PARSE_OPTIONS.as_ref().unwrap() };
-    let capture_ast = java_parse_options.is_capture_ast(env, obj);
-    let capture_comments = java_parse_options.is_capture_comments(env, obj);
-    let capture_tokens = java_parse_options.is_capture_tokens(env, obj);
-    let java_media_type = java_parse_options.get_media_type(env, obj);
-    let media_type = MediaType::from_java(env, &java_media_type);
-    let scope_analysis = java_parse_options.is_scope_analysis(env, obj);
-    let specifier = java_parse_options.get_specifier(env, obj);
-    let specifier = url_to_string(env, &specifier);
-    let java_optional_plugin_host = java_parse_options.get_plugin_host(env, obj);
+    let capture_ast = java_parse_options.is_capture_ast(env, obj)?;
+    let capture_comments = java_parse_options.is_capture_comments(env, obj)?;
+    let capture_tokens = java_parse_options.is_capture_tokens(env, obj)?;
+    let java_media_type = java_parse_options.get_media_type(env, obj)?;
+    let media_type = *MediaType::from_java(env, &java_media_type)?;
+    let scope_analysis = java_parse_options.is_scope_analysis(env, obj)?;
+    let specifier = java_parse_options.get_specifier(env, obj)?;
+    let specifier = url_to_string(env, &specifier)?;
+    let java_optional_plugin_host = java_parse_options.get_plugin_host(env, obj)?;
     let plugin_host = java_optional_plugin_host.map(|host| {
       let host = env
         .new_global_ref(host)
         .expect("Failed to create global reference for plugin host");
       PluginHost::new(env, host)
     });
-    let java_parse_mode = java_parse_options.get_parse_mode(env, obj);
-    let parse_mode = ParseMode::from_java(env, &java_parse_mode);
+    let java_parse_mode = java_parse_options.get_parse_mode(env, obj)?;
+    let parse_mode = *ParseMode::from_java(env, &java_parse_mode)?;
     delete_local_ref!(env, java_media_type);
     delete_local_ref!(env, java_parse_mode);
-    ParseOptions {
+    Ok(Box::new(ParseOptions {
       capture_ast,
       capture_comments,
       capture_tokens,
@@ -1375,7 +1377,7 @@ impl<'local> FromJava<'local> for ParseOptions<'local> {
       plugin_host,
       scope_analysis,
       specifier,
-    }
+    }))
   }
 }
 
@@ -1445,36 +1447,36 @@ impl<'a> Default for TransformOptions<'a> {
 }
 
 impl<'local> FromJava<'local> for TransformOptions<'local> {
-  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> TransformOptions<'local> {
+  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<TransformOptions<'local>>> {
     let java_transform_options = unsafe { JAVA_TRANSFORM_OPTIONS.as_ref().unwrap() };
-    let ascii_only = java_transform_options.is_ascii_only(env, obj);
-    let emit_assert_for_import_attributes = java_transform_options.is_emit_assert_for_import_attributes(env, obj);
-    let inline_sources = java_transform_options.is_inline_sources(env, obj);
-    let keep_comments = java_transform_options.is_keep_comments(env, obj);
-    let java_media_type = java_transform_options.get_media_type(env, obj);
-    let media_type = MediaType::from_java(env, &java_media_type);
-    let minify = java_transform_options.is_minify(env, obj);
-    let omit_last_semi = java_transform_options.is_omit_last_semi(env, obj);
-    let java_source_map = java_transform_options.get_source_map(env, obj);
-    let source_map = SourceMapOption::from_java(env, &java_source_map);
-    let java_parse_mode = java_transform_options.get_parse_mode(env, obj);
-    let parse_mode = ParseMode::from_java(env, &java_parse_mode);
-    let java_optional_plugin_host = java_transform_options.get_plugin_host(env, obj);
+    let ascii_only = java_transform_options.is_ascii_only(env, obj)?;
+    let emit_assert_for_import_attributes = java_transform_options.is_emit_assert_for_import_attributes(env, obj)?;
+    let inline_sources = java_transform_options.is_inline_sources(env, obj)?;
+    let keep_comments = java_transform_options.is_keep_comments(env, obj)?;
+    let java_media_type = java_transform_options.get_media_type(env, obj)?;
+    let media_type = *MediaType::from_java(env, &java_media_type)?;
+    let minify = java_transform_options.is_minify(env, obj)?;
+    let omit_last_semi = java_transform_options.is_omit_last_semi(env, obj)?;
+    let java_source_map = java_transform_options.get_source_map(env, obj)?;
+    let source_map = *SourceMapOption::from_java(env, &java_source_map)?;
+    let java_parse_mode = java_transform_options.get_parse_mode(env, obj)?;
+    let parse_mode = *ParseMode::from_java(env, &java_parse_mode)?;
+    let java_optional_plugin_host = java_transform_options.get_plugin_host(env, obj)?;
     let plugin_host = java_optional_plugin_host.map(|host| {
       let host = env
         .new_global_ref(host)
         .expect("Failed to create global reference for plugin host");
       PluginHost::new(env, host)
     });
-    let specifier = java_transform_options.get_specifier(env, obj);
-    let specifier = url_to_string(env, &specifier);
-    let java_target = java_transform_options.get_target(env, obj);
-    let target = EsVersion::from_java(env, &java_target);
+    let specifier = java_transform_options.get_specifier(env, obj)?;
+    let specifier = url_to_string(env, &specifier)?;
+    let java_target = java_transform_options.get_target(env, obj)?;
+    let target = *EsVersion::from_java(env, &java_target)?;
     delete_local_ref!(env, java_media_type);
     delete_local_ref!(env, java_source_map);
     delete_local_ref!(env, java_parse_mode);
     delete_local_ref!(env, java_target);
-    TransformOptions {
+    Ok(Box::new(TransformOptions {
       ascii_only,
       emit_assert_for_import_attributes,
       inline_sources,
@@ -1487,7 +1489,7 @@ impl<'local> FromJava<'local> for TransformOptions<'local> {
       source_map,
       specifier,
       target,
-    }
+    }))
   }
 }
 
@@ -1600,29 +1602,29 @@ impl<'a> Default for TranspileOptions<'a> {
 }
 
 impl<'local> FromJava<'local> for TranspileOptions<'local> {
-  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> TranspileOptions<'local> {
+  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<TranspileOptions<'local>>> {
     let java_transpile_options = unsafe { JAVA_TRANSPILE_OPTIONS.as_ref().unwrap() };
-    let capture_ast = java_transpile_options.is_capture_ast(env, obj);
-    let capture_comments = java_transpile_options.is_capture_comments(env, obj);
-    let capture_tokens = java_transpile_options.is_capture_tokens(env, obj);
-    let emit_metadata = java_transpile_options.is_emit_metadata(env, obj);
-    let java_imports_not_used_as_values = java_transpile_options.get_imports_not_used_as_values(env, obj);
-    let imports_not_used_as_values = ImportsNotUsedAsValues::from_java(env, &java_imports_not_used_as_values);
+    let capture_ast = java_transpile_options.is_capture_ast(env, obj)?;
+    let capture_comments = java_transpile_options.is_capture_comments(env, obj)?;
+    let capture_tokens = java_transpile_options.is_capture_tokens(env, obj)?;
+    let emit_metadata = java_transpile_options.is_emit_metadata(env, obj)?;
+    let java_imports_not_used_as_values = java_transpile_options.get_imports_not_used_as_values(env, obj)?;
+    let imports_not_used_as_values = *ImportsNotUsedAsValues::from_java(env, &java_imports_not_used_as_values)?;
     delete_local_ref!(env, java_imports_not_used_as_values);
-    let inline_sources = java_transpile_options.is_inline_sources(env, obj);
-    let jsx_automatic = java_transpile_options.is_jsx_automatic(env, obj);
-    let jsx_development = java_transpile_options.is_jsx_development(env, obj);
-    let jsx_factory = java_transpile_options.get_jsx_factory(env, obj);
-    let jsx_fragment_factory = java_transpile_options.get_jsx_fragment_factory(env, obj);
-    let jsx_import_source = java_transpile_options.get_jsx_import_source(env, obj);
-    let keep_comments = java_transpile_options.is_keep_comments(env, obj);
-    let java_media_type = java_transpile_options.get_media_type(env, obj);
-    let media_type = MediaType::from_java(env, &java_media_type);
+    let inline_sources = java_transpile_options.is_inline_sources(env, obj)?;
+    let jsx_automatic = java_transpile_options.is_jsx_automatic(env, obj)?;
+    let jsx_development = java_transpile_options.is_jsx_development(env, obj)?;
+    let jsx_factory = java_transpile_options.get_jsx_factory(env, obj)?;
+    let jsx_fragment_factory = java_transpile_options.get_jsx_fragment_factory(env, obj)?;
+    let jsx_import_source = java_transpile_options.get_jsx_import_source(env, obj)?;
+    let keep_comments = java_transpile_options.is_keep_comments(env, obj)?;
+    let java_media_type = java_transpile_options.get_media_type(env, obj)?;
+    let media_type = *MediaType::from_java(env, &java_media_type)?;
     delete_local_ref!(env, java_media_type);
-    let java_parse_mode = java_transpile_options.get_parse_mode(env, obj);
-    let parse_mode = ParseMode::from_java(env, &java_parse_mode);
+    let java_parse_mode = java_transpile_options.get_parse_mode(env, obj)?;
+    let parse_mode = *ParseMode::from_java(env, &java_parse_mode)?;
     delete_local_ref!(env, java_parse_mode);
-    let java_optional_plugin_host = java_transpile_options.get_plugin_host(env, obj);
+    let java_optional_plugin_host = java_transpile_options.get_plugin_host(env, obj)?;
     let plugin_host = java_optional_plugin_host.as_ref().map(|host| {
       let host = env
         .new_global_ref(host)
@@ -1630,44 +1632,50 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
       PluginHost::new(env, host)
     });
     delete_local_optional_ref!(env, java_optional_plugin_host);
-    let precompile_jsx = java_transpile_options.is_precompile_jsx(env, obj);
-    let java_optional_precompile_jsx_dynamic_props = java_transpile_options.get_precompile_jsx_dynamic_props(env, obj);
-    let precompile_jsx_dynamic_props = java_optional_precompile_jsx_dynamic_props.as_ref().map(|elements| {
-      let length = list_size(env, &elements);
-      (0..length)
-        .map(|i| {
-          let java_item = list_get(env, &elements, i);
-          let element = jstring_to_string!(env, java_item.as_raw());
-          delete_local_ref!(env, java_item);
-          element
-        })
-        .collect()
-    });
-    delete_local_optional_ref!(env, java_optional_precompile_jsx_dynamic_props);
-    let java_optional_precompile_jsx_skip_elements = java_transpile_options.get_precompile_jsx_skip_elements(env, obj);
-    let precompile_jsx_skip_elements = java_optional_precompile_jsx_skip_elements.as_ref().map(|elements| {
-      let length = list_size(env, &elements);
-      (0..length)
-        .map(|i| {
-          let java_item = list_get(env, &elements, i);
-          let element = jstring_to_string!(env, java_item.as_raw());
-          delete_local_ref!(env, java_item);
-          element
-        })
-        .collect()
-    });
-    delete_local_optional_ref!(env, java_optional_precompile_jsx_skip_elements);
-    let scope_analysis = java_transpile_options.is_scope_analysis(env, obj);
-    let java_source_map = java_transpile_options.get_source_map(env, obj);
-    let source_map = SourceMapOption::from_java(env, &java_source_map);
-    let specifier = java_transpile_options.get_specifier(env, obj);
-    let specifier = url_to_string(env, &specifier);
-    let transform_jsx = java_transpile_options.is_transform_jsx(env, obj);
-    let var_decl_imports = java_transpile_options.is_var_decl_imports(env, obj);
-    let use_decorators_proposal = java_transpile_options.is_use_decorators_proposal(env, obj);
-    let use_ts_decorators = java_transpile_options.is_use_ts_decorators(env, obj);
+    let precompile_jsx = java_transpile_options.is_precompile_jsx(env, obj)?;
+    let java_optional_precompile_jsx_dynamic_props =
+      java_transpile_options.get_precompile_jsx_dynamic_props(env, obj)?;
+    let precompile_jsx_dynamic_props = if let Some(elements) = java_optional_precompile_jsx_dynamic_props {
+      let length = list_size(env, &elements)?;
+      let mut results: Vec<String> = Vec::with_capacity(length);
+      for i in 0..length {
+        let java_item = list_get(env, &elements, i)?;
+        let element: Result<String> = jstring_to_string!(env, java_item.as_raw());
+        delete_local_ref!(env, java_item);
+        results.push(element?);
+      }
+      delete_local_ref!(env, elements);
+      Some(results)
+    } else {
+      None
+    };
+    let java_optional_precompile_jsx_skip_elements =
+      java_transpile_options.get_precompile_jsx_skip_elements(env, obj)?;
+    let precompile_jsx_skip_elements = if let Some(elements) = java_optional_precompile_jsx_skip_elements {
+      let length = list_size(env, &elements)?;
+      let mut results: Vec<String> = Vec::with_capacity(length);
+      for i in 0..length {
+        let java_item = list_get(env, &elements, i)?;
+        let element: Result<String> = jstring_to_string!(env, java_item.as_raw());
+        delete_local_ref!(env, java_item);
+        results.push(element?);
+      }
+      delete_local_ref!(env, elements);
+      Some(results)
+    } else {
+      None
+    };
+    let scope_analysis = java_transpile_options.is_scope_analysis(env, obj)?;
+    let java_source_map = java_transpile_options.get_source_map(env, obj)?;
+    let source_map = *SourceMapOption::from_java(env, &java_source_map)?;
+    let specifier = java_transpile_options.get_specifier(env, obj)?;
+    let specifier = url_to_string(env, &specifier)?;
+    let transform_jsx = java_transpile_options.is_transform_jsx(env, obj)?;
+    let var_decl_imports = java_transpile_options.is_var_decl_imports(env, obj)?;
+    let use_decorators_proposal = java_transpile_options.is_use_decorators_proposal(env, obj)?;
+    let use_ts_decorators = java_transpile_options.is_use_ts_decorators(env, obj)?;
     delete_local_ref!(env, java_source_map);
-    TranspileOptions {
+    Ok(Box::new(TranspileOptions {
       capture_ast,
       capture_comments,
       capture_tokens,
@@ -1693,6 +1701,6 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
       var_decl_imports,
       use_decorators_proposal,
       use_ts_decorators,
-    }
+    }))
   }
 }

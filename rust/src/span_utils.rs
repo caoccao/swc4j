@@ -15,13 +15,12 @@
 * limitations under the License.
 */
 
-use jni::objects::{GlobalRef, JMethodID, JObject};
-use jni::JNIEnv;
-
-use std::collections::BTreeMap;
-
+use anyhow::Result;
 use deno_ast::swc::common::source_map::SmallPos;
 use deno_ast::swc::common::{BytePos, Span};
+use jni::objects::{GlobalRef, JMethodID, JObject};
+use jni::JNIEnv;
+use std::collections::BTreeMap;
 
 use crate::jni_utils::*;
 
@@ -45,7 +44,7 @@ impl Default for SpanEx {
 }
 
 impl ToJava for SpanEx {
-  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -64,7 +63,7 @@ pub trait RegisterWithMap<Map> {
 }
 
 pub trait ToJavaWithMap<Map> {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ Map) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ Map) -> Result<JObject<'a>>
   where
     'local: 'a;
 }
@@ -214,7 +213,7 @@ impl JavaSwc4jSpan {
     end: i32,
     line: i32,
     column: i32,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -228,15 +227,15 @@ impl JavaSwc4jSpan {
         self.method_construct,
         &[start, end, line, column],
         "Swc4jSpan construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_column<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -244,15 +243,15 @@ impl JavaSwc4jSpan {
         self.method_get_column,
         &[],
         "int get_column()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_end<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -260,15 +259,15 @@ impl JavaSwc4jSpan {
         self.method_get_end,
         &[],
         "int get_end()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_line<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -276,15 +275,15 @@ impl JavaSwc4jSpan {
         self.method_get_line,
         &[],
         "int get_line()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_start<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -292,8 +291,8 @@ impl JavaSwc4jSpan {
         self.method_get_start,
         &[],
         "int get_start()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 /* JavaSwc4jSpan End */

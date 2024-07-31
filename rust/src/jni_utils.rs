@@ -15,6 +15,7 @@
 * limitations under the License.
 */
 
+use anyhow::Result;
 use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID, JString};
 use jni::JNIEnv;
 
@@ -28,11 +29,10 @@ macro_rules! call_as_boolean {
         $args,
       )
     } {
-      Ok(java_object) => match java_object.z() {
-        Ok(object) => object,
-        Err(err) => panic!("Couldn't convert {} because {}", $name, err),
-      },
-      Err(err) => panic!("Couldn't call {} because {}", $name, err),
+      Ok(java_object) => java_object
+        .z()
+        .map_err(|err| anyhow::anyhow!("Couldn't convert {} because {}", $name, err)),
+      Err(err) => Err(anyhow::anyhow!("Couldn't call {} because {}", $name, err)),
     }
   };
 }
@@ -40,10 +40,8 @@ pub(crate) use call_as_boolean;
 
 macro_rules! call_as_construct {
   ($env: ident, $class: expr, $method: expr, $args: expr, $name: literal) => {
-    match unsafe { $env.new_object_unchecked($class, $method, $args) } {
-      Ok(java_object) => java_object,
-      Err(err) => panic!("Couldn't construct {} because {}", $name, err),
-    }
+    unsafe { $env.new_object_unchecked($class, $method, $args) }
+      .map_err(|err| anyhow::anyhow!("Couldn't construct {} because {}", $name, err))
   };
 }
 pub(crate) use call_as_construct;
@@ -58,10 +56,9 @@ macro_rules! call_as_double {
         $args,
       )
     } {
-      Ok(java_object) => match java_object.d() {
-        Ok(object) => object,
-        Err(err) => panic!("Couldn't convert {} because {}", $name, err),
-      },
+      Ok(java_object) => java_object
+        .d()
+        .map_err(|err| anyhow::anyhow!("Couldn't convert {} because {}", $name, err)),
       Err(err) => panic!("Couldn't call {} because {}", $name, err),
     }
   };
@@ -78,10 +75,9 @@ macro_rules! call_as_int {
         $args,
       )
     } {
-      Ok(java_object) => match java_object.i() {
-        Ok(object) => object,
-        Err(err) => panic!("Couldn't convert {} because {}", $name, err),
-      },
+      Ok(java_object) => java_object
+        .i()
+        .map_err(|err| anyhow::anyhow!("Couldn't convert {} because {}", $name, err)),
       Err(err) => panic!("Couldn't call {} because {}", $name, err),
     }
   };
@@ -91,10 +87,9 @@ pub(crate) use call_as_int;
 macro_rules! call_as_object {
   ($env: ident, $obj: expr, $method: expr, $args: expr, $name: literal) => {
     match unsafe { $env.call_method_unchecked($obj, $method, jni::signature::ReturnType::Object, $args) } {
-      Ok(java_object) => match java_object.l() {
-        Ok(object) => object,
-        Err(err) => panic!("Couldn't convert {} because {}", $name, err),
-      },
+      Ok(java_object) => java_object
+        .l()
+        .map_err(|err| anyhow::anyhow!("Couldn't convert {} because {}", $name, err)),
       Err(err) => panic!("Couldn't call {} because {}", $name, err),
     }
   };
@@ -112,10 +107,9 @@ macro_rules! call_static_as_boolean {
         $args,
       )
     } {
-      Ok(java_object) => match java_object.z() {
-        Ok(object) => object,
-        Err(err) => panic!("Couldn't convert {} because {}", $name, err),
-      },
+      Ok(java_object) => java_object
+        .z()
+        .map_err(|err| anyhow::anyhow!("Couldn't convert {} because {}", $name, err)),
       Err(err) => panic!("Couldn't call {} because {}", $name, err),
     }
   };
@@ -134,10 +128,9 @@ macro_rules! call_static_as_int {
         $args,
       )
     } {
-      Ok(java_object) => match java_object.i() {
-        Ok(object) => object,
-        Err(err) => panic!("Couldn't convert {} because {}", $name, err),
-      },
+      Ok(java_object) => java_object
+        .i()
+        .map_err(|err| anyhow::anyhow!("Couldn't convert {} because {}", $name, err)),
       Err(err) => panic!("Couldn't call {} because {}", $name, err),
     }
   };
@@ -148,10 +141,9 @@ pub(crate) use call_static_as_int;
 macro_rules! call_static_as_object {
   ($env: ident, $class: expr, $method: expr, $args: expr, $name: literal) => {
     match unsafe { $env.call_static_method_unchecked($class, $method, jni::signature::ReturnType::Object, $args) } {
-      Ok(java_object) => match java_object.l() {
-        Ok(object) => object,
-        Err(err) => panic!("Couldn't convert {} because {}", $name, err),
-      },
+      Ok(java_object) => java_object
+        .l()
+        .map_err(|err| anyhow::anyhow!("Couldn't convert {} because {}", $name, err)),
       Err(err) => panic!("Couldn't call {} because {}", $name, err),
     }
   };
@@ -181,12 +173,12 @@ pub(crate) use delete_local_ref;
 macro_rules! jstring_to_optional_string {
   ($env: ident, $s: expr) => {
     if $s.is_null() {
-      None
+      Ok(None)
     } else {
       unsafe {
         match $env.get_string(&JString::from_raw($s)) {
-          Ok(s) => Some(s.into()),
-          Err(_) => None,
+          Ok(s) => Ok(Some(s.into())),
+          Err(err) => Err(anyhow::Error::msg(err)),
         }
       }
     }
@@ -196,9 +188,9 @@ pub(crate) use jstring_to_optional_string;
 
 macro_rules! jstring_to_string {
   ($env: ident, $s: expr) => {
-    match jstring_to_optional_string!($env, $s) {
-      Some(s) => s,
-      None => "".to_owned(),
+    match jstring_to_optional_string!($env, $s)? {
+      Some(s) => Ok(s),
+      None => Ok("".to_owned()),
     }
   };
 }
@@ -310,11 +302,11 @@ macro_rules! short_to_jvalue {
 pub(crate) use short_to_jvalue;
 
 pub trait FromJava<'local> {
-  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self;
+  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<Self>>;
 }
 
 pub trait ToJava {
-  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> Result<JObject<'a>>
   where
     'local: 'a;
 }
@@ -357,7 +349,7 @@ impl JavaArrayList {
     }
   }
 
-  pub fn construct<'local, 'a>(&self, env: &mut JNIEnv<'local>, initial_capacity: usize) -> JObject<'a>
+  pub fn construct<'local, 'a>(&self, env: &mut JNIEnv<'local>, initial_capacity: usize) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -371,12 +363,12 @@ impl JavaArrayList {
     )
   }
 
-  pub fn add<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> bool {
+  pub fn add<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> Result<bool> {
     let element = object_to_jvalue!(element);
     call_as_boolean!(env, obj, &self.method_add, &[element], "add()")
   }
 
-  pub fn get<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>, index: usize) -> JObject<'a>
+  pub fn get<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>, index: usize) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -384,8 +376,8 @@ impl JavaArrayList {
     call_as_object!(env, obj, &self.method_get, &[index], "get()")
   }
 
-  pub fn size<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> usize {
-    call_as_int!(env, obj, &self.method_size, &[], "size()") as usize
+  pub fn size<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<usize> {
+    call_as_int!(env, obj, &self.method_size, &[], "size()").map(|size| size as usize)
   }
 }
 
@@ -421,7 +413,7 @@ impl JavaHashMap {
     }
   }
 
-  pub fn construct<'local, 'a>(&self, env: &mut JNIEnv<'local>, initial_capacity: usize) -> JObject<'a>
+  pub fn construct<'local, 'a>(&self, env: &mut JNIEnv<'local>, initial_capacity: usize) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -435,7 +427,7 @@ impl JavaHashMap {
     obj: &JObject<'_>,
     key: &JObject<'_>,
     value: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -465,7 +457,7 @@ impl JavaInteger {
     JavaInteger { class, method_value_of }
   }
 
-  pub fn value_of<'local, 'a>(&self, env: &mut JNIEnv<'local>, i: i32) -> JObject<'a>
+  pub fn value_of<'local, 'a>(&self, env: &mut JNIEnv<'local>, i: i32) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -502,14 +494,14 @@ impl JavaOptional {
     }
   }
 
-  pub fn get<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+  pub fn get<'local, 'a>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
     call_as_object!(env, obj, &self.method_get, &[], "get()")
   }
 
-  pub fn is_present<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> bool {
+  pub fn is_present<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<bool> {
     call_as_boolean!(env, obj, &self.method_is_present, &[], "isPresent()")
   }
 }
@@ -535,8 +527,8 @@ impl JavaURL {
     }
   }
 
-  pub fn to_string<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> String {
-    let url_string = call_as_object!(env, obj, &self.method_to_string, &[], "toString()");
+  pub fn to_string<'local>(&self, env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<String> {
+    let url_string = call_as_object!(env, obj, &self.method_to_string, &[], "toString()")?;
     jstring_to_string!(env, *url_string)
   }
 }
@@ -557,36 +549,36 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
   }
 }
 
-pub fn integer_value_of<'local, 'a>(env: &mut JNIEnv<'local>, i: i32) -> JObject<'a>
+pub fn integer_value_of<'local, 'a>(env: &mut JNIEnv<'local>, i: i32) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
   unsafe { JAVA_INTEGER.as_ref().unwrap() }.value_of(env, i)
 }
 
-pub fn list_add<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> bool {
+pub fn list_add<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> Result<bool> {
   unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.add(env, obj, element)
 }
 
-pub fn list_get<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, index: usize) -> JObject<'a>
+pub fn list_get<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, index: usize) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
   unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.get(env, obj, index)
 }
 
-pub fn list_new<'local, 'a>(env: &mut JNIEnv<'local>, initial_capacity: usize) -> JObject<'a>
+pub fn list_new<'local, 'a>(env: &mut JNIEnv<'local>, initial_capacity: usize) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
   unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.construct(env, initial_capacity)
 }
 
-pub fn list_size<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> usize {
+pub fn list_size<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<usize> {
   unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.size(env, obj)
 }
 
-pub fn map_new<'local, 'a>(env: &mut JNIEnv<'local>, initial_capacity: usize) -> JObject<'a>
+pub fn map_new<'local, 'a>(env: &mut JNIEnv<'local>, initial_capacity: usize) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
@@ -598,24 +590,24 @@ pub fn map_put<'local, 'a>(
   obj: &JObject<'_>,
   key: &JObject<'_>,
   value: &JObject<'_>,
-) -> JObject<'a>
+) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
   unsafe { JAVA_HASH_MAP.as_ref().unwrap() }.put(env, obj, key, value)
 }
 
-pub fn url_to_string<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> String {
+pub fn url_to_string<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<String> {
   unsafe { JAVA_URL.as_ref().unwrap() }.to_string(env, obj)
 }
 
-pub fn optional_get<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> JObject<'a>
+pub fn optional_get<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
   unsafe { JAVA_OPTIONAL.as_ref().unwrap() }.get(env, obj)
 }
 
-pub fn optional_is_present<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> bool {
+pub fn optional_is_present<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<bool> {
   unsafe { JAVA_OPTIONAL.as_ref().unwrap() }.is_present(env, obj)
 }

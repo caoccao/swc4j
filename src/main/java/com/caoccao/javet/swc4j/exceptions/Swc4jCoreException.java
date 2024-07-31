@@ -55,6 +55,17 @@ public final class Swc4jCoreException extends Swc4jException {
     }
 
     /**
+     * Transform error.
+     *
+     * @param message the message
+     * @return the swc4j core exception
+     * @since 1.0.0
+     */
+    public static Swc4jCoreException transformError(String message) {
+        return new Swc4jCoreException(message);
+    }
+
+    /**
      * Transpile error.
      *
      * @param message the message

@@ -15,9 +15,9 @@
 * limitations under the License.
 */
 
+use anyhow::{Error, Result};
 use deno_ast::swc::common::comments::Comment;
 use deno_ast::MultiThreadedComments;
-
 use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::JNIEnv;
 
@@ -25,14 +25,16 @@ use crate::jni_utils::*;
 use crate::span_utils::{ByteToIndexMap, ToJavaWithMap};
 
 impl ToJavaWithMap<ByteToIndexMap> for Comment {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
     let text = &self.text;
-    let java_kind = self.kind.to_java(env);
-    let java_span = map.get_span_ex_by_span(&self.span).to_java(env);
-    let return_value = unsafe { JAVA_COMMENT.as_ref().unwrap() }.construct(env, text, &java_kind, &java_span);
+    let java_kind = self.kind.to_java(env)?;
+    let java_span = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let return_value = unsafe { JAVA_COMMENT.as_ref().unwrap() }
+      .construct(env, text, &java_kind, &java_span)
+      .map_err(Error::msg);
     delete_local_ref!(env, java_kind);
     delete_local_ref!(env, java_span);
     return_value
@@ -40,42 +42,42 @@ impl ToJavaWithMap<ByteToIndexMap> for Comment {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for MultiThreadedComments {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
     let leading = self.leading_map();
     let trailing = self.trailing_map();
-    let java_leading = map_new(env, leading.len());
-    leading.iter().for_each(|(key, value)| {
-      let key_span_ex = map.get_span_ex_by_byte_pos(&key);
-      let java_position = integer_value_of(env, key_span_ex.start as i32);
-      let java_comments = list_new(env, value.len());
-      value.iter().for_each(|comment| {
-        let java_comment = comment.to_java_with_map(env, map);
-        list_add(env, &java_comments, &java_comment);
+    let java_leading = map_new(env, leading.len())?;
+    for (position, comments) in leading.iter() {
+      let key_span_ex = map.get_span_ex_by_byte_pos(&position);
+      let java_position = integer_value_of(env, key_span_ex.start as i32)?;
+      let java_comments = list_new(env, comments.len())?;
+      for comment in comments.iter() {
+        let java_comment = comment.to_java_with_map(env, map)?;
+        list_add(env, &java_comments, &java_comment)?;
         delete_local_ref!(env, java_comment);
-      });
-      let java_return_value = map_put(env, &java_leading, &java_position, &java_comments);
+      };
+      let java_return_value = map_put(env, &java_leading, &java_position, &java_comments)?;
       delete_local_ref!(env, java_position);
       delete_local_ref!(env, java_comments);
       delete_local_ref!(env, java_return_value);
-    });
-    let java_trailing = map_new(env, trailing.len());
-    trailing.iter().for_each(|(key, value)| {
-      let key_span_ex = map.get_span_ex_by_byte_pos(&key);
-      let java_position = integer_value_of(env, key_span_ex.start as i32);
-      let java_comments = list_new(env, value.len());
-      value.iter().for_each(|comment| {
-        let java_comment = comment.to_java_with_map(env, map);
-        list_add(env, &java_comments, &java_comment);
+    };
+    let java_trailing = map_new(env, trailing.len())?;
+    for (position, comments) in trailing.iter() {
+      let key_span_ex = map.get_span_ex_by_byte_pos(&position);
+      let java_position = integer_value_of(env, key_span_ex.start as i32)?;
+      let java_comments = list_new(env, comments.len())?;
+      for comment in comments.iter() {
+        let java_comment = comment.to_java_with_map(env, map)?;
+        list_add(env, &java_comments, &java_comment)?;
         delete_local_ref!(env, java_comment);
-      });
-      let java_return_value = map_put(env, &java_trailing, &java_position, &java_comments);
+      };
+      let java_return_value = map_put(env, &java_trailing, &java_position, &java_comments)?;
       delete_local_ref!(env, java_position);
       delete_local_ref!(env, java_comments);
       delete_local_ref!(env, java_return_value);
-    });
+    };
     let return_value = unsafe { JAVA_COMMENTS.as_ref().unwrap() }.construct(env, &java_leading, &java_trailing);
     delete_local_ref!(env, java_leading);
     delete_local_ref!(env, java_trailing);
@@ -120,7 +122,7 @@ impl JavaSwc4jComment {
     text: &str,
     kind: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -134,9 +136,9 @@ impl JavaSwc4jComment {
         self.method_construct,
         &[text, kind, span],
         "Swc4jComment construct()"
-      );
+      )?;
     delete_local_ref!(env, java_text);
-    return_value
+    Ok(return_value)
   }
 }
 /* JavaSwc4jComment End */
@@ -177,7 +179,7 @@ impl JavaSwc4jComments {
     env: &mut JNIEnv<'local>,
     leading: &JObject<'_>,
     trailing: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -189,8 +191,8 @@ impl JavaSwc4jComments {
         self.method_construct,
         &[leading, trailing],
         "Swc4jComments construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 /* JavaSwc4jComments End */
@@ -209,7 +211,7 @@ pub fn comments_new<'local, 'a>(
   env: &mut JNIEnv<'local>,
   comments: &MultiThreadedComments,
   map: &ByteToIndexMap,
-) -> JObject<'a>
+) -> Result<JObject<'a>>
 where
   'local: 'a,
 {

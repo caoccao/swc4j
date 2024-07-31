@@ -42,14 +42,23 @@ impl<'local> PluginHost<'local> {
     let mut map = ByteToIndexMap::new();
     module.register_with_map(&mut map);
     map.update_by_str(s);
-    let java_module = module.to_java_with_map(&mut self.env, &map);
-    let module = if java_class.process(&mut self.env, &self.host, &java_module) {
-      Module::from_java(&mut self.env, &java_module)
-    } else {
-      module
-    };
-    delete_local_ref!(self.env, java_module);
-    Ok(module)
+    let java_module = module.to_java_with_map(&mut self.env, &map)?;
+    match java_class.process(&mut self.env, &self.host, &java_module) {
+      Ok(result) => {
+        if result {
+          let module = Module::from_java(&mut self.env, &java_module);
+          delete_local_ref!(self.env, java_module);
+          Ok(*module?)
+        } else {
+          delete_local_ref!(self.env, java_module);
+          Ok(module)
+        }
+      }
+      Err(err) => {
+        delete_local_ref!(self.env, java_module);
+        Err(err)
+      }
+    }
   }
 
   pub fn process_program(&mut self, s: &str, program: Program) -> Result<Program> {
@@ -57,14 +66,23 @@ impl<'local> PluginHost<'local> {
     let mut map = ByteToIndexMap::new();
     program.register_with_map(&mut map);
     map.update_by_str(s);
-    let java_program = program.to_java_with_map(&mut self.env, &map);
-    let program = if java_class.process(&mut self.env, &self.host, &java_program) {
-      Program::from_java(&mut self.env, &java_program)
-    } else {
-      program
-    };
-    delete_local_ref!(self.env, java_program);
-    Ok(program)
+    let java_program = program.to_java_with_map(&mut self.env, &map)?;
+    match java_class.process(&mut self.env, &self.host, &java_program) {
+      Ok(result) => {
+        if result {
+          let program = Program::from_java(&mut self.env, &java_program);
+          delete_local_ref!(self.env, java_program);
+          Ok(*program?)
+        } else {
+          delete_local_ref!(self.env, java_program);
+          Ok(program)
+        }
+      }
+      Err(err) => {
+        delete_local_ref!(self.env, java_program);
+        Err(err)
+      }
+    }
   }
 
   pub fn process_script(&mut self, s: &str, script: Script) -> Result<Script> {
@@ -72,14 +90,23 @@ impl<'local> PluginHost<'local> {
     let mut map = ByteToIndexMap::new();
     script.register_with_map(&mut map);
     map.update_by_str(s);
-    let java_script = script.to_java_with_map(&mut self.env, &map);
-    let script = if java_class.process(&mut self.env, &self.host, &java_script) {
-      Script::from_java(&mut self.env, &java_script)
-    } else {
-      script
-    };
-    delete_local_ref!(self.env, java_script);
-    Ok(script)
+    let java_script = script.to_java_with_map(&mut self.env, &map)?;
+    match java_class.process(&mut self.env, &self.host, &java_script) {
+      Ok(result) => {
+        if result {
+          let script = Script::from_java(&mut self.env, &java_script);
+          delete_local_ref!(self.env, java_script);
+          Ok(*script?)
+        } else {
+          delete_local_ref!(self.env, java_script);
+          Ok(script)
+        }
+      }
+      Err(err) => {
+        delete_local_ref!(self.env, java_script);
+        Err(err)
+      }
+    }
   }
 }
 
@@ -128,7 +155,7 @@ impl JavaISwc4jPluginHost {
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
     program: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let program = object_to_jvalue!(program);
     let return_value = call_as_boolean!(
@@ -137,8 +164,8 @@ impl JavaISwc4jPluginHost {
         self.method_process,
         &[program],
         "boolean process()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 /* JavaISwc4jPluginHost End */

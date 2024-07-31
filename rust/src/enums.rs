@@ -15,6 +15,7 @@
 * limitations under the License.
 */
 
+use anyhow::Result;
 use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID};
 use jni::JNIEnv;
 
@@ -68,7 +69,7 @@ macro_rules! declare_identifiable_enum {
         }
       }
 
-      pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> JObject<'a>
+      pub fn parse<'local, 'a>(&self, env: &mut JNIEnv<'local>, id: i32) -> Result<JObject<'a>>
       where
         'local: 'a,
       {
@@ -80,24 +81,25 @@ macro_rules! declare_identifiable_enum {
     static mut $static_name: Option<$struct_name> = None;
 
     impl<'local> FromJava<'local> for $enum_name {
-      fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> $enum_name {
+      fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<$enum_name>> {
         let id = call_as_int!(
           env,
           obj.as_ref(),
           $static_name.as_ref().unwrap().method_get_id,
           &[],
           "getId()"
-        );
-        $enum_name::parse_by_id(id)
+        )?;
+        Ok(Box::new($enum_name::parse_by_id(id)))
       }
     }
 
     impl ToJava for $enum_name {
-      fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+      fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> Result<JObject<'a>>
       where
         'local: 'a,
       {
-        unsafe { $static_name.as_ref().unwrap() }.parse(env, self.get_id())
+        let id = self.get_id();
+        unsafe { $static_name.as_ref().unwrap() }.parse(env, id)
       }
     }
   };

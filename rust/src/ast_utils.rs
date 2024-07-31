@@ -15,6 +15,7 @@
 * limitations under the License.
 */
 
+use anyhow::Result;
 use jni::objects::{GlobalRef, JMethodID, JObject, JString};
 use jni::JNIEnv;
 
@@ -34,12 +35,12 @@ use std::ptr::null_mut;
  */
 
 impl ToJavaWithMap<ByteToIndexMap> for BigInt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_sign = self.value.sign().to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_sign = self.value.sign().to_java(env)?;
     let optional_raw = self.raw.as_ref().map(|node| node.as_str().to_owned());
     let return_value =
       unsafe { JAVA_CLASS_BIG_INT.as_ref().unwrap() }.construct(env, &java_sign, &optional_raw, &java_span_ex);
@@ -51,16 +52,18 @@ impl ToJavaWithMap<ByteToIndexMap> for BigInt {
 
 impl<'local> FromJava<'local> for BigInt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_BIG_INT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_sign = java_class.get_sign(env, &obj);
-    let sign = Sign::from_java(env, &java_sign);
+    let java_sign = java_class.get_sign(env, &obj)?;
+    let sign = Sign::from_java(env, &java_sign)?;
+    let sign = *sign;
     delete_local_ref!(env, java_sign);
-    let java_optional_raw = java_class.get_raw(env, &obj);
-    let optional_raw = if optional_is_present(env, &java_optional_raw) {
-      let java_raw = optional_get(env, &java_optional_raw);
-      let raw = jstring_to_string!(env, java_raw.as_raw());
+    let java_optional_raw = java_class.get_raw(env, &obj)?;
+    let optional_raw = if optional_is_present(env, &java_optional_raw)? {
+      let java_raw = optional_get(env, &java_optional_raw)?;
+      let raw: Result<String> = jstring_to_string!(env, java_raw.as_raw());
+      let raw = raw?;
       delete_local_ref!(env, java_raw);
       Some(raw)
     } else {
@@ -83,12 +86,12 @@ impl<'local> FromJava<'local> for BigInt {
     let value = BigIntValue::from_biguint(sign, data);
     let value = Box::new(value);
     let raw = optional_raw.map(|raw| raw.into());
-    BigInt { span, value, raw }
+    Ok(Box::new(BigInt { span, value, raw }))
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for BindingIdent {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -100,9 +103,13 @@ impl ToJavaWithMap<ByteToIndexMap> for BindingIdent {
     } else {
       self.span()
     };
-    let java_span_ex = map.get_span_ex_by_span(&span).to_java(env);
-    let java_id = self.id.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&span).to_java(env)?;
+    let java_id = self.id.to_java_with_map(env, map)?;
     let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_ann = match java_optional_type_ann {
+      Some(java_optional_type_ann) => Some(java_optional_type_ann?),
+      None=> None,
+    };
     let return_value = unsafe { JAVA_CLASS_BINDING_IDENT.as_ref().unwrap() }.construct(
       env,
       &java_id,
@@ -151,7 +158,7 @@ impl JavaISwc4jAst {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -161,8 +168,8 @@ impl JavaISwc4jAst {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -200,7 +207,7 @@ impl JavaISwc4jAstAssignTarget {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -210,8 +217,8 @@ impl JavaISwc4jAstAssignTarget {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -249,7 +256,7 @@ impl JavaISwc4jAstAssignTargetPat {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -259,8 +266,8 @@ impl JavaISwc4jAstAssignTargetPat {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -298,7 +305,7 @@ impl JavaISwc4jAstBlockStmtOrExpr {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -308,8 +315,8 @@ impl JavaISwc4jAstBlockStmtOrExpr {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -347,7 +354,7 @@ impl JavaISwc4jAstCallee {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -357,8 +364,8 @@ impl JavaISwc4jAstCallee {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -396,7 +403,7 @@ impl JavaISwc4jAstClassMember {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -406,8 +413,8 @@ impl JavaISwc4jAstClassMember {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -445,7 +452,7 @@ impl JavaISwc4jAstDecl {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -455,8 +462,8 @@ impl JavaISwc4jAstDecl {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -494,7 +501,7 @@ impl JavaISwc4jAstDefaultDecl {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -504,8 +511,8 @@ impl JavaISwc4jAstDefaultDecl {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -543,7 +550,7 @@ impl JavaISwc4jAstExportSpecifier {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -553,8 +560,8 @@ impl JavaISwc4jAstExportSpecifier {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -592,7 +599,7 @@ impl JavaISwc4jAstExpr {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -602,8 +609,8 @@ impl JavaISwc4jAstExpr {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -641,7 +648,7 @@ impl JavaISwc4jAstForHead {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -651,8 +658,8 @@ impl JavaISwc4jAstForHead {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -690,7 +697,7 @@ impl JavaISwc4jAstImportSpecifier {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -700,8 +707,8 @@ impl JavaISwc4jAstImportSpecifier {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -739,7 +746,7 @@ impl JavaISwc4jAstJsxAttrName {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -749,8 +756,8 @@ impl JavaISwc4jAstJsxAttrName {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -788,7 +795,7 @@ impl JavaISwc4jAstJsxAttrOrSpread {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -798,8 +805,8 @@ impl JavaISwc4jAstJsxAttrOrSpread {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -837,7 +844,7 @@ impl JavaISwc4jAstJsxAttrValue {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -847,8 +854,8 @@ impl JavaISwc4jAstJsxAttrValue {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -886,7 +893,7 @@ impl JavaISwc4jAstJsxElementChild {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -896,8 +903,8 @@ impl JavaISwc4jAstJsxElementChild {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -935,7 +942,7 @@ impl JavaISwc4jAstJsxElementName {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -945,8 +952,8 @@ impl JavaISwc4jAstJsxElementName {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -984,7 +991,7 @@ impl JavaISwc4jAstJsxExpr {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -994,8 +1001,8 @@ impl JavaISwc4jAstJsxExpr {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1033,7 +1040,7 @@ impl JavaISwc4jAstJsxObject {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1043,8 +1050,8 @@ impl JavaISwc4jAstJsxObject {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1082,7 +1089,7 @@ impl JavaISwc4jAstKey {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1092,8 +1099,8 @@ impl JavaISwc4jAstKey {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1131,7 +1138,7 @@ impl JavaISwc4jAstLit {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1141,8 +1148,8 @@ impl JavaISwc4jAstLit {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1180,7 +1187,7 @@ impl JavaISwc4jAstMemberProp {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1190,8 +1197,8 @@ impl JavaISwc4jAstMemberProp {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1229,7 +1236,7 @@ impl JavaISwc4jAstModuleDecl {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1239,8 +1246,8 @@ impl JavaISwc4jAstModuleDecl {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1278,7 +1285,7 @@ impl JavaISwc4jAstModuleExportName {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1288,8 +1295,8 @@ impl JavaISwc4jAstModuleExportName {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1327,7 +1334,7 @@ impl JavaISwc4jAstModuleItem {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1337,8 +1344,8 @@ impl JavaISwc4jAstModuleItem {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1376,7 +1383,7 @@ impl JavaISwc4jAstObjectPatProp {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1386,8 +1393,8 @@ impl JavaISwc4jAstObjectPatProp {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1425,7 +1432,7 @@ impl JavaISwc4jAstOptChainBase {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1435,8 +1442,8 @@ impl JavaISwc4jAstOptChainBase {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1474,7 +1481,7 @@ impl JavaISwc4jAstParamOrTsParamProp {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1484,8 +1491,8 @@ impl JavaISwc4jAstParamOrTsParamProp {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1523,7 +1530,7 @@ impl JavaISwc4jAstPat {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1533,8 +1540,8 @@ impl JavaISwc4jAstPat {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1572,7 +1579,7 @@ impl JavaISwc4jAstProgram {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1582,8 +1589,8 @@ impl JavaISwc4jAstProgram {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1621,7 +1628,7 @@ impl JavaISwc4jAstProp {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1631,8 +1638,8 @@ impl JavaISwc4jAstProp {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1670,7 +1677,7 @@ impl JavaISwc4jAstPropName {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1680,8 +1687,8 @@ impl JavaISwc4jAstPropName {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1719,7 +1726,7 @@ impl JavaISwc4jAstPropOrSpread {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1729,8 +1736,8 @@ impl JavaISwc4jAstPropOrSpread {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1768,7 +1775,7 @@ impl JavaISwc4jAstSimpleAssignTarget {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1778,8 +1785,8 @@ impl JavaISwc4jAstSimpleAssignTarget {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1817,7 +1824,7 @@ impl JavaISwc4jAstStmt {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1827,8 +1834,8 @@ impl JavaISwc4jAstStmt {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1866,7 +1873,7 @@ impl JavaISwc4jAstSuperProp {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1876,8 +1883,8 @@ impl JavaISwc4jAstSuperProp {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1915,7 +1922,7 @@ impl JavaISwc4jAstTsEntityName {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1925,8 +1932,8 @@ impl JavaISwc4jAstTsEntityName {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -1964,7 +1971,7 @@ impl JavaISwc4jAstTsEnumMemberId {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -1974,8 +1981,8 @@ impl JavaISwc4jAstTsEnumMemberId {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2013,7 +2020,7 @@ impl JavaISwc4jAstTsFnOrConstructorType {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2023,8 +2030,8 @@ impl JavaISwc4jAstTsFnOrConstructorType {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2062,7 +2069,7 @@ impl JavaISwc4jAstTsFnParam {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2072,8 +2079,8 @@ impl JavaISwc4jAstTsFnParam {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2111,7 +2118,7 @@ impl JavaISwc4jAstTsLit {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2121,8 +2128,8 @@ impl JavaISwc4jAstTsLit {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2160,7 +2167,7 @@ impl JavaISwc4jAstTsModuleName {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2170,8 +2177,8 @@ impl JavaISwc4jAstTsModuleName {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2209,7 +2216,7 @@ impl JavaISwc4jAstTsModuleRef {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2219,8 +2226,8 @@ impl JavaISwc4jAstTsModuleRef {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2258,7 +2265,7 @@ impl JavaISwc4jAstTsNamespaceBody {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2268,8 +2275,8 @@ impl JavaISwc4jAstTsNamespaceBody {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2307,7 +2314,7 @@ impl JavaISwc4jAstTsParamPropParam {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2317,8 +2324,8 @@ impl JavaISwc4jAstTsParamPropParam {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2356,7 +2363,7 @@ impl JavaISwc4jAstTsThisTypeOrIdent {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2366,8 +2373,8 @@ impl JavaISwc4jAstTsThisTypeOrIdent {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2405,7 +2412,7 @@ impl JavaISwc4jAstTsType {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2415,8 +2422,8 @@ impl JavaISwc4jAstTsType {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2454,7 +2461,7 @@ impl JavaISwc4jAstTsTypeElement {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2464,8 +2471,8 @@ impl JavaISwc4jAstTsTypeElement {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2503,7 +2510,7 @@ impl JavaISwc4jAstTsTypeQueryExpr {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2513,8 +2520,8 @@ impl JavaISwc4jAstTsTypeQueryExpr {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2552,7 +2559,7 @@ impl JavaISwc4jAstTsUnionOrIntersectionType {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2562,8 +2569,8 @@ impl JavaISwc4jAstTsUnionOrIntersectionType {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2601,7 +2608,7 @@ impl JavaISwc4jAstVarDeclOrExpr {
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2611,8 +2618,8 @@ impl JavaISwc4jAstVarDeclOrExpr {
         self.method_get_type,
         &[],
         "Swc4jAstType get_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2660,7 +2667,7 @@ impl JavaSwc4jAstArrayLit {
     env: &mut JNIEnv<'local>,
     elems: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2672,15 +2679,15 @@ impl JavaSwc4jAstArrayLit {
         self.method_construct,
         &[elems, span],
         "Swc4jAstArrayLit construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_elems<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2690,8 +2697,8 @@ impl JavaSwc4jAstArrayLit {
         self.method_get_elems,
         &[],
         "List get_elems()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2759,7 +2766,7 @@ impl JavaSwc4jAstArrayPat {
     optional: bool,
     type_ann: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2773,15 +2780,15 @@ impl JavaSwc4jAstArrayPat {
         self.method_construct,
         &[elems, optional, type_ann, span],
         "Swc4jAstArrayPat construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_elems<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2791,15 +2798,15 @@ impl JavaSwc4jAstArrayPat {
         self.method_get_elems,
         &[],
         "List get_elems()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2809,15 +2816,15 @@ impl JavaSwc4jAstArrayPat {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_optional<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -2825,8 +2832,8 @@ impl JavaSwc4jAstArrayPat {
         self.method_is_optional,
         &[],
         "boolean is_optional()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -2934,7 +2941,7 @@ impl JavaSwc4jAstArrowExpr {
     type_params: &Option<JObject>,
     return_type: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2953,15 +2960,15 @@ impl JavaSwc4jAstArrowExpr {
         self.method_construct,
         &[ctxt, params, body, is_async, generator, type_params, return_type, span],
         "Swc4jAstArrowExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -2971,15 +2978,15 @@ impl JavaSwc4jAstArrowExpr {
         self.method_get_body,
         &[],
         "ISwc4jAstBlockStmtOrExpr get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ctxt<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -2987,15 +2994,15 @@ impl JavaSwc4jAstArrowExpr {
         self.method_get_ctxt,
         &[],
         "int get_ctxt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3005,15 +3012,15 @@ impl JavaSwc4jAstArrowExpr {
         self.method_get_params,
         &[],
         "List get_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_return_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3023,15 +3030,15 @@ impl JavaSwc4jAstArrowExpr {
         self.method_get_return_type,
         &[],
         "Optional get_return_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3041,15 +3048,15 @@ impl JavaSwc4jAstArrowExpr {
         self.method_get_type_params,
         &[],
         "Optional get_type_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_async<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -3057,15 +3064,15 @@ impl JavaSwc4jAstArrowExpr {
         self.method_is_async,
         &[],
         "boolean is_async()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_generator<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -3073,8 +3080,8 @@ impl JavaSwc4jAstArrowExpr {
         self.method_is_generator,
         &[],
         "boolean is_generator()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -3142,7 +3149,7 @@ impl JavaSwc4jAstAssignExpr {
     left: &JObject<'_>,
     right: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3156,15 +3163,15 @@ impl JavaSwc4jAstAssignExpr {
         self.method_construct,
         &[op, left, right, span],
         "Swc4jAstAssignExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_left<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3174,15 +3181,15 @@ impl JavaSwc4jAstAssignExpr {
         self.method_get_left,
         &[],
         "ISwc4jAstAssignTarget get_left()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_op<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3192,15 +3199,15 @@ impl JavaSwc4jAstAssignExpr {
         self.method_get_op,
         &[],
         "Swc4jAstAssignOp get_op()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_right<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3210,8 +3217,8 @@ impl JavaSwc4jAstAssignExpr {
         self.method_get_right,
         &[],
         "ISwc4jAstExpr get_right()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -3269,7 +3276,7 @@ impl JavaSwc4jAstAssignPat {
     left: &JObject<'_>,
     right: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3282,15 +3289,15 @@ impl JavaSwc4jAstAssignPat {
         self.method_construct,
         &[left, right, span],
         "Swc4jAstAssignPat construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_left<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3300,15 +3307,15 @@ impl JavaSwc4jAstAssignPat {
         self.method_get_left,
         &[],
         "ISwc4jAstPat get_left()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_right<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3318,8 +3325,8 @@ impl JavaSwc4jAstAssignPat {
         self.method_get_right,
         &[],
         "ISwc4jAstExpr get_right()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -3377,7 +3384,7 @@ impl JavaSwc4jAstAssignPatProp {
     key: &JObject<'_>,
     value: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3390,15 +3397,15 @@ impl JavaSwc4jAstAssignPatProp {
         self.method_construct,
         &[key, value, span],
         "Swc4jAstAssignPatProp construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3408,15 +3415,15 @@ impl JavaSwc4jAstAssignPatProp {
         self.method_get_key,
         &[],
         "Swc4jAstBindingIdent get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_value<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3426,8 +3433,8 @@ impl JavaSwc4jAstAssignPatProp {
         self.method_get_value,
         &[],
         "Optional get_value()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -3485,7 +3492,7 @@ impl JavaSwc4jAstAssignProp {
     key: &JObject<'_>,
     value: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3498,15 +3505,15 @@ impl JavaSwc4jAstAssignProp {
         self.method_construct,
         &[key, value, span],
         "Swc4jAstAssignProp construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3516,15 +3523,15 @@ impl JavaSwc4jAstAssignProp {
         self.method_get_key,
         &[],
         "Swc4jAstIdent get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_value<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3534,8 +3541,8 @@ impl JavaSwc4jAstAssignProp {
         self.method_get_value,
         &[],
         "ISwc4jAstExpr get_value()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -3663,7 +3670,7 @@ impl JavaSwc4jAstAutoAccessor {
     is_override: bool,
     definite: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3683,15 +3690,15 @@ impl JavaSwc4jAstAutoAccessor {
         self.method_construct,
         &[key, value, type_ann, is_static, decorators, accessibility, is_abstract, is_override, definite, span],
         "Swc4jAstAutoAccessor construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_accessibility<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3701,15 +3708,15 @@ impl JavaSwc4jAstAutoAccessor {
         self.method_get_accessibility,
         &[],
         "Optional get_accessibility()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_decorators<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3719,15 +3726,15 @@ impl JavaSwc4jAstAutoAccessor {
         self.method_get_decorators,
         &[],
         "List get_decorators()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3737,15 +3744,15 @@ impl JavaSwc4jAstAutoAccessor {
         self.method_get_key,
         &[],
         "ISwc4jAstKey get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3755,15 +3762,15 @@ impl JavaSwc4jAstAutoAccessor {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_value<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3773,15 +3780,15 @@ impl JavaSwc4jAstAutoAccessor {
         self.method_get_value,
         &[],
         "Optional get_value()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_abstract<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -3789,15 +3796,15 @@ impl JavaSwc4jAstAutoAccessor {
         self.method_is_abstract,
         &[],
         "boolean is_abstract()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_definite<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -3805,15 +3812,15 @@ impl JavaSwc4jAstAutoAccessor {
         self.method_is_definite,
         &[],
         "boolean is_definite()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_override<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -3821,15 +3828,15 @@ impl JavaSwc4jAstAutoAccessor {
         self.method_is_override,
         &[],
         "boolean is_override()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_static<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -3837,8 +3844,8 @@ impl JavaSwc4jAstAutoAccessor {
         self.method_is_static,
         &[],
         "boolean is_static()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -3886,7 +3893,7 @@ impl JavaSwc4jAstAwaitExpr {
     env: &mut JNIEnv<'local>,
     arg: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3898,15 +3905,15 @@ impl JavaSwc4jAstAwaitExpr {
         self.method_construct,
         &[arg, span],
         "Swc4jAstAwaitExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_arg<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3916,8 +3923,8 @@ impl JavaSwc4jAstAwaitExpr {
         self.method_get_arg,
         &[],
         "ISwc4jAstExpr get_arg()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -3984,7 +3991,7 @@ impl JavaSwc4jAstBigInt {
     sign: &JObject<'_>,
     raw: &Option<String>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -3998,16 +4005,16 @@ impl JavaSwc4jAstBigInt {
         self.method_construct,
         &[sign, raw, span],
         "Swc4jAstBigInt construct()"
-      );
+      )?;
     delete_local_ref!(env, java_raw);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_raw<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4017,15 +4024,15 @@ impl JavaSwc4jAstBigInt {
         self.method_get_raw,
         &[],
         "Optional get_raw()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_sign<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4035,15 +4042,15 @@ impl JavaSwc4jAstBigInt {
         self.method_get_sign,
         &[],
         "Swc4jAstBigIntSign get_sign()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_value<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4053,8 +4060,8 @@ impl JavaSwc4jAstBigInt {
         self.method_get_value,
         &[],
         "BigInteger get_value()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -4122,7 +4129,7 @@ impl JavaSwc4jAstBinExpr {
     left: &JObject<'_>,
     right: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4136,15 +4143,15 @@ impl JavaSwc4jAstBinExpr {
         self.method_construct,
         &[op, left, right, span],
         "Swc4jAstBinExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_left<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4154,15 +4161,15 @@ impl JavaSwc4jAstBinExpr {
         self.method_get_left,
         &[],
         "ISwc4jAstExpr get_left()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_op<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4172,15 +4179,15 @@ impl JavaSwc4jAstBinExpr {
         self.method_get_op,
         &[],
         "Swc4jAstBinaryOp get_op()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_right<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4190,8 +4197,8 @@ impl JavaSwc4jAstBinExpr {
         self.method_get_right,
         &[],
         "ISwc4jAstExpr get_right()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -4249,7 +4256,7 @@ impl JavaSwc4jAstBindingIdent {
     id: &JObject<'_>,
     type_ann: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4262,15 +4269,15 @@ impl JavaSwc4jAstBindingIdent {
         self.method_construct,
         &[id, type_ann, span],
         "Swc4jAstBindingIdent construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_id<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4280,15 +4287,15 @@ impl JavaSwc4jAstBindingIdent {
         self.method_get_id,
         &[],
         "Swc4jAstIdent get_id()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4298,8 +4305,8 @@ impl JavaSwc4jAstBindingIdent {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -4357,7 +4364,7 @@ impl JavaSwc4jAstBlockStmt {
     ctxt: SyntaxContext,
     stmts: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4371,15 +4378,15 @@ impl JavaSwc4jAstBlockStmt {
         self.method_construct,
         &[ctxt, stmts, span],
         "Swc4jAstBlockStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ctxt<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -4387,15 +4394,15 @@ impl JavaSwc4jAstBlockStmt {
         self.method_get_ctxt,
         &[],
         "int get_ctxt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_stmts<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4405,8 +4412,8 @@ impl JavaSwc4jAstBlockStmt {
         self.method_get_stmts,
         &[],
         "List get_stmts()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -4454,7 +4461,7 @@ impl JavaSwc4jAstBool {
     env: &mut JNIEnv<'local>,
     value: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4466,15 +4473,15 @@ impl JavaSwc4jAstBool {
         self.method_construct,
         &[value, span],
         "Swc4jAstBool construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_value<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -4482,8 +4489,8 @@ impl JavaSwc4jAstBool {
         self.method_is_value,
         &[],
         "boolean is_value()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -4531,7 +4538,7 @@ impl JavaSwc4jAstBreakStmt {
     env: &mut JNIEnv<'local>,
     label: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4543,15 +4550,15 @@ impl JavaSwc4jAstBreakStmt {
         self.method_construct,
         &[label, span],
         "Swc4jAstBreakStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_label<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4561,8 +4568,8 @@ impl JavaSwc4jAstBreakStmt {
         self.method_get_label,
         &[],
         "Optional get_label()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -4640,7 +4647,7 @@ impl JavaSwc4jAstCallExpr {
     args: &JObject<'_>,
     type_args: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4656,15 +4663,15 @@ impl JavaSwc4jAstCallExpr {
         self.method_construct,
         &[ctxt, callee, args, type_args, span],
         "Swc4jAstCallExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_args<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4674,15 +4681,15 @@ impl JavaSwc4jAstCallExpr {
         self.method_get_args,
         &[],
         "List get_args()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_callee<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4692,15 +4699,15 @@ impl JavaSwc4jAstCallExpr {
         self.method_get_callee,
         &[],
         "ISwc4jAstCallee get_callee()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ctxt<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -4708,15 +4715,15 @@ impl JavaSwc4jAstCallExpr {
         self.method_get_ctxt,
         &[],
         "int get_ctxt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_args<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4726,8 +4733,8 @@ impl JavaSwc4jAstCallExpr {
         self.method_get_type_args,
         &[],
         "Optional get_type_args()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -4785,7 +4792,7 @@ impl JavaSwc4jAstCatchClause {
     param: &Option<JObject>,
     body: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4798,15 +4805,15 @@ impl JavaSwc4jAstCatchClause {
         self.method_construct,
         &[param, body, span],
         "Swc4jAstCatchClause construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4816,15 +4823,15 @@ impl JavaSwc4jAstCatchClause {
         self.method_get_body,
         &[],
         "Swc4jAstBlockStmt get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_param<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4834,8 +4841,8 @@ impl JavaSwc4jAstCatchClause {
         self.method_get_param,
         &[],
         "Optional get_param()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -4953,7 +4960,7 @@ impl JavaSwc4jAstClass {
     super_type_params: &Option<JObject>,
     implements: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4973,15 +4980,15 @@ impl JavaSwc4jAstClass {
         self.method_construct,
         &[ctxt, decorators, body, super_class, is_abstract, type_params, super_type_params, implements, span],
         "Swc4jAstClass construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -4991,15 +4998,15 @@ impl JavaSwc4jAstClass {
         self.method_get_body,
         &[],
         "List get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ctxt<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -5007,15 +5014,15 @@ impl JavaSwc4jAstClass {
         self.method_get_ctxt,
         &[],
         "int get_ctxt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_decorators<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5025,15 +5032,15 @@ impl JavaSwc4jAstClass {
         self.method_get_decorators,
         &[],
         "List get_decorators()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_implements<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5043,15 +5050,15 @@ impl JavaSwc4jAstClass {
         self.method_get_implements,
         &[],
         "List get_implements()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_super_class<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5061,15 +5068,15 @@ impl JavaSwc4jAstClass {
         self.method_get_super_class,
         &[],
         "Optional get_super_class()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_super_type_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5079,15 +5086,15 @@ impl JavaSwc4jAstClass {
         self.method_get_super_type_params,
         &[],
         "Optional get_super_type_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5097,15 +5104,15 @@ impl JavaSwc4jAstClass {
         self.method_get_type_params,
         &[],
         "Optional get_type_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_abstract<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -5113,8 +5120,8 @@ impl JavaSwc4jAstClass {
         self.method_is_abstract,
         &[],
         "boolean is_abstract()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -5182,7 +5189,7 @@ impl JavaSwc4jAstClassDecl {
     declare: bool,
     clazz: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5196,15 +5203,15 @@ impl JavaSwc4jAstClassDecl {
         self.method_construct,
         &[ident, declare, clazz, span],
         "Swc4jAstClassDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_clazz<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5214,15 +5221,15 @@ impl JavaSwc4jAstClassDecl {
         self.method_get_clazz,
         &[],
         "Swc4jAstClass get_clazz()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ident<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5232,15 +5239,15 @@ impl JavaSwc4jAstClassDecl {
         self.method_get_ident,
         &[],
         "Swc4jAstIdent get_ident()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_declare<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -5248,8 +5255,8 @@ impl JavaSwc4jAstClassDecl {
         self.method_is_declare,
         &[],
         "boolean is_declare()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -5307,7 +5314,7 @@ impl JavaSwc4jAstClassExpr {
     ident: &Option<JObject>,
     clazz: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5320,15 +5327,15 @@ impl JavaSwc4jAstClassExpr {
         self.method_construct,
         &[ident, clazz, span],
         "Swc4jAstClassExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_clazz<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5338,15 +5345,15 @@ impl JavaSwc4jAstClassExpr {
         self.method_get_clazz,
         &[],
         "Swc4jAstClass get_clazz()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ident<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5356,8 +5363,8 @@ impl JavaSwc4jAstClassExpr {
         self.method_get_ident,
         &[],
         "Optional get_ident()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -5475,7 +5482,7 @@ impl JavaSwc4jAstClassMethod {
     optional: bool,
     is_override: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5494,15 +5501,15 @@ impl JavaSwc4jAstClassMethod {
         self.method_construct,
         &[key, function, kind, is_static, accessibility, is_abstract, optional, is_override, span],
         "Swc4jAstClassMethod construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_accessibility<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5512,15 +5519,15 @@ impl JavaSwc4jAstClassMethod {
         self.method_get_accessibility,
         &[],
         "Optional get_accessibility()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_function<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5530,15 +5537,15 @@ impl JavaSwc4jAstClassMethod {
         self.method_get_function,
         &[],
         "Swc4jAstFunction get_function()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5548,15 +5555,15 @@ impl JavaSwc4jAstClassMethod {
         self.method_get_key,
         &[],
         "ISwc4jAstPropName get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_kind<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5566,15 +5573,15 @@ impl JavaSwc4jAstClassMethod {
         self.method_get_kind,
         &[],
         "Swc4jAstMethodKind get_kind()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_abstract<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -5582,15 +5589,15 @@ impl JavaSwc4jAstClassMethod {
         self.method_is_abstract,
         &[],
         "boolean is_abstract()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_optional<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -5598,15 +5605,15 @@ impl JavaSwc4jAstClassMethod {
         self.method_is_optional,
         &[],
         "boolean is_optional()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_override<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -5614,15 +5621,15 @@ impl JavaSwc4jAstClassMethod {
         self.method_is_override,
         &[],
         "boolean is_override()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_static<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -5630,8 +5637,8 @@ impl JavaSwc4jAstClassMethod {
         self.method_is_static,
         &[],
         "boolean is_static()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -5789,7 +5796,7 @@ impl JavaSwc4jAstClassProp {
     declare: bool,
     definite: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5812,15 +5819,15 @@ impl JavaSwc4jAstClassProp {
         self.method_construct,
         &[key, value, type_ann, is_static, decorators, accessibility, is_abstract, optional, is_override, readonly, declare, definite, span],
         "Swc4jAstClassProp construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_accessibility<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5830,15 +5837,15 @@ impl JavaSwc4jAstClassProp {
         self.method_get_accessibility,
         &[],
         "Optional get_accessibility()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_decorators<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5848,15 +5855,15 @@ impl JavaSwc4jAstClassProp {
         self.method_get_decorators,
         &[],
         "List get_decorators()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5866,15 +5873,15 @@ impl JavaSwc4jAstClassProp {
         self.method_get_key,
         &[],
         "ISwc4jAstPropName get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5884,15 +5891,15 @@ impl JavaSwc4jAstClassProp {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_value<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -5902,15 +5909,15 @@ impl JavaSwc4jAstClassProp {
         self.method_get_value,
         &[],
         "Optional get_value()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_abstract<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -5918,15 +5925,15 @@ impl JavaSwc4jAstClassProp {
         self.method_is_abstract,
         &[],
         "boolean is_abstract()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_declare<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -5934,15 +5941,15 @@ impl JavaSwc4jAstClassProp {
         self.method_is_declare,
         &[],
         "boolean is_declare()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_definite<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -5950,15 +5957,15 @@ impl JavaSwc4jAstClassProp {
         self.method_is_definite,
         &[],
         "boolean is_definite()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_optional<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -5966,15 +5973,15 @@ impl JavaSwc4jAstClassProp {
         self.method_is_optional,
         &[],
         "boolean is_optional()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_override<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -5982,15 +5989,15 @@ impl JavaSwc4jAstClassProp {
         self.method_is_override,
         &[],
         "boolean is_override()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_readonly<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -5998,15 +6005,15 @@ impl JavaSwc4jAstClassProp {
         self.method_is_readonly,
         &[],
         "boolean is_readonly()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_static<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -6014,8 +6021,8 @@ impl JavaSwc4jAstClassProp {
         self.method_is_static,
         &[],
         "boolean is_static()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -6063,7 +6070,7 @@ impl JavaSwc4jAstComputedPropName {
     env: &mut JNIEnv<'local>,
     expr: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6075,15 +6082,15 @@ impl JavaSwc4jAstComputedPropName {
         self.method_construct,
         &[expr, span],
         "Swc4jAstComputedPropName construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6093,8 +6100,8 @@ impl JavaSwc4jAstComputedPropName {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -6162,7 +6169,7 @@ impl JavaSwc4jAstCondExpr {
     cons: &JObject<'_>,
     alt: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6176,15 +6183,15 @@ impl JavaSwc4jAstCondExpr {
         self.method_construct,
         &[test, cons, alt, span],
         "Swc4jAstCondExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_alt<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6194,15 +6201,15 @@ impl JavaSwc4jAstCondExpr {
         self.method_get_alt,
         &[],
         "ISwc4jAstExpr get_alt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_cons<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6212,15 +6219,15 @@ impl JavaSwc4jAstCondExpr {
         self.method_get_cons,
         &[],
         "ISwc4jAstExpr get_cons()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_test<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6230,8 +6237,8 @@ impl JavaSwc4jAstCondExpr {
         self.method_get_test,
         &[],
         "ISwc4jAstExpr get_test()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -6329,7 +6336,7 @@ impl JavaSwc4jAstConstructor {
     accessibility: &Option<JObject>,
     optional: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6347,15 +6354,15 @@ impl JavaSwc4jAstConstructor {
         self.method_construct,
         &[ctxt, key, params, body, accessibility, optional, span],
         "Swc4jAstConstructor construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_accessibility<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6365,15 +6372,15 @@ impl JavaSwc4jAstConstructor {
         self.method_get_accessibility,
         &[],
         "Optional get_accessibility()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6383,15 +6390,15 @@ impl JavaSwc4jAstConstructor {
         self.method_get_body,
         &[],
         "Optional get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ctxt<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -6399,15 +6406,15 @@ impl JavaSwc4jAstConstructor {
         self.method_get_ctxt,
         &[],
         "int get_ctxt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6417,15 +6424,15 @@ impl JavaSwc4jAstConstructor {
         self.method_get_key,
         &[],
         "ISwc4jAstPropName get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6435,15 +6442,15 @@ impl JavaSwc4jAstConstructor {
         self.method_get_params,
         &[],
         "List get_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_optional<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -6451,8 +6458,8 @@ impl JavaSwc4jAstConstructor {
         self.method_is_optional,
         &[],
         "boolean is_optional()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -6500,7 +6507,7 @@ impl JavaSwc4jAstContinueStmt {
     env: &mut JNIEnv<'local>,
     label: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6512,15 +6519,15 @@ impl JavaSwc4jAstContinueStmt {
         self.method_construct,
         &[label, span],
         "Swc4jAstContinueStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_label<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6530,8 +6537,8 @@ impl JavaSwc4jAstContinueStmt {
         self.method_get_label,
         &[],
         "Optional get_label()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -6569,7 +6576,7 @@ impl JavaSwc4jAstDebuggerStmt {
     &self,
     env: &mut JNIEnv<'local>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6580,8 +6587,8 @@ impl JavaSwc4jAstDebuggerStmt {
         self.method_construct,
         &[span],
         "Swc4jAstDebuggerStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -6629,7 +6636,7 @@ impl JavaSwc4jAstDecorator {
     env: &mut JNIEnv<'local>,
     expr: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6641,15 +6648,15 @@ impl JavaSwc4jAstDecorator {
         self.method_construct,
         &[expr, span],
         "Swc4jAstDecorator construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6659,8 +6666,8 @@ impl JavaSwc4jAstDecorator {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -6718,7 +6725,7 @@ impl JavaSwc4jAstDoWhileStmt {
     test: &JObject<'_>,
     body: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6731,15 +6738,15 @@ impl JavaSwc4jAstDoWhileStmt {
         self.method_construct,
         &[test, body, span],
         "Swc4jAstDoWhileStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6749,15 +6756,15 @@ impl JavaSwc4jAstDoWhileStmt {
         self.method_get_body,
         &[],
         "ISwc4jAstStmt get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_test<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6767,8 +6774,8 @@ impl JavaSwc4jAstDoWhileStmt {
         self.method_get_test,
         &[],
         "ISwc4jAstExpr get_test()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -6806,7 +6813,7 @@ impl JavaSwc4jAstEmptyStmt {
     &self,
     env: &mut JNIEnv<'local>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6817,8 +6824,8 @@ impl JavaSwc4jAstEmptyStmt {
         self.method_construct,
         &[span],
         "Swc4jAstEmptyStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -6886,7 +6893,7 @@ impl JavaSwc4jAstExportAll {
     type_only: bool,
     with: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6900,15 +6907,15 @@ impl JavaSwc4jAstExportAll {
         self.method_construct,
         &[src, type_only, with, span],
         "Swc4jAstExportAll construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_src<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6918,15 +6925,15 @@ impl JavaSwc4jAstExportAll {
         self.method_get_src,
         &[],
         "Swc4jAstStr get_src()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_with<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -6936,15 +6943,15 @@ impl JavaSwc4jAstExportAll {
         self.method_get_with,
         &[],
         "Optional get_with()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_type_only<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -6952,8 +6959,8 @@ impl JavaSwc4jAstExportAll {
         self.method_is_type_only,
         &[],
         "boolean is_type_only()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -7001,7 +7008,7 @@ impl JavaSwc4jAstExportDecl {
     env: &mut JNIEnv<'local>,
     decl: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7013,15 +7020,15 @@ impl JavaSwc4jAstExportDecl {
         self.method_construct,
         &[decl, span],
         "Swc4jAstExportDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_decl<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7031,8 +7038,8 @@ impl JavaSwc4jAstExportDecl {
         self.method_get_decl,
         &[],
         "ISwc4jAstDecl get_decl()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -7080,7 +7087,7 @@ impl JavaSwc4jAstExportDefaultDecl {
     env: &mut JNIEnv<'local>,
     decl: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7092,15 +7099,15 @@ impl JavaSwc4jAstExportDefaultDecl {
         self.method_construct,
         &[decl, span],
         "Swc4jAstExportDefaultDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_decl<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7110,8 +7117,8 @@ impl JavaSwc4jAstExportDefaultDecl {
         self.method_get_decl,
         &[],
         "ISwc4jAstDefaultDecl get_decl()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -7159,7 +7166,7 @@ impl JavaSwc4jAstExportDefaultExpr {
     env: &mut JNIEnv<'local>,
     expr: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7171,15 +7178,15 @@ impl JavaSwc4jAstExportDefaultExpr {
         self.method_construct,
         &[expr, span],
         "Swc4jAstExportDefaultExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7189,8 +7196,8 @@ impl JavaSwc4jAstExportDefaultExpr {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -7238,7 +7245,7 @@ impl JavaSwc4jAstExportDefaultSpecifier {
     env: &mut JNIEnv<'local>,
     exported: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7250,15 +7257,15 @@ impl JavaSwc4jAstExportDefaultSpecifier {
         self.method_construct,
         &[exported, span],
         "Swc4jAstExportDefaultSpecifier construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_exported<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7268,8 +7275,8 @@ impl JavaSwc4jAstExportDefaultSpecifier {
         self.method_get_exported,
         &[],
         "Swc4jAstIdent get_exported()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -7337,7 +7344,7 @@ impl JavaSwc4jAstExportNamedSpecifier {
     exported: &Option<JObject>,
     type_only: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7351,15 +7358,15 @@ impl JavaSwc4jAstExportNamedSpecifier {
         self.method_construct,
         &[orig, exported, type_only, span],
         "Swc4jAstExportNamedSpecifier construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_exported<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7369,15 +7376,15 @@ impl JavaSwc4jAstExportNamedSpecifier {
         self.method_get_exported,
         &[],
         "Optional get_exported()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_orig<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7387,15 +7394,15 @@ impl JavaSwc4jAstExportNamedSpecifier {
         self.method_get_orig,
         &[],
         "ISwc4jAstModuleExportName get_orig()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_type_only<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -7403,8 +7410,8 @@ impl JavaSwc4jAstExportNamedSpecifier {
         self.method_is_type_only,
         &[],
         "boolean is_type_only()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -7452,7 +7459,7 @@ impl JavaSwc4jAstExportNamespaceSpecifier {
     env: &mut JNIEnv<'local>,
     name: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7464,15 +7471,15 @@ impl JavaSwc4jAstExportNamespaceSpecifier {
         self.method_construct,
         &[name, span],
         "Swc4jAstExportNamespaceSpecifier construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_name<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7482,8 +7489,8 @@ impl JavaSwc4jAstExportNamespaceSpecifier {
         self.method_get_name,
         &[],
         "ISwc4jAstModuleExportName get_name()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -7541,7 +7548,7 @@ impl JavaSwc4jAstExprOrSpread {
     spread: &Option<JObject>,
     expr: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7554,15 +7561,15 @@ impl JavaSwc4jAstExprOrSpread {
         self.method_construct,
         &[spread, expr, span],
         "Swc4jAstExprOrSpread construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7572,15 +7579,15 @@ impl JavaSwc4jAstExprOrSpread {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_spread<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7590,8 +7597,8 @@ impl JavaSwc4jAstExprOrSpread {
         self.method_get_spread,
         &[],
         "Optional get_spread()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -7639,7 +7646,7 @@ impl JavaSwc4jAstExprStmt {
     env: &mut JNIEnv<'local>,
     expr: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7651,15 +7658,15 @@ impl JavaSwc4jAstExprStmt {
         self.method_construct,
         &[expr, span],
         "Swc4jAstExprStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7669,8 +7676,8 @@ impl JavaSwc4jAstExprStmt {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -7738,7 +7745,7 @@ impl JavaSwc4jAstFnDecl {
     declare: bool,
     function: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7752,15 +7759,15 @@ impl JavaSwc4jAstFnDecl {
         self.method_construct,
         &[ident, declare, function, span],
         "Swc4jAstFnDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_function<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7770,15 +7777,15 @@ impl JavaSwc4jAstFnDecl {
         self.method_get_function,
         &[],
         "Swc4jAstFunction get_function()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ident<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7788,15 +7795,15 @@ impl JavaSwc4jAstFnDecl {
         self.method_get_ident,
         &[],
         "Swc4jAstIdent get_ident()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_declare<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -7804,8 +7811,8 @@ impl JavaSwc4jAstFnDecl {
         self.method_is_declare,
         &[],
         "boolean is_declare()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -7863,7 +7870,7 @@ impl JavaSwc4jAstFnExpr {
     ident: &Option<JObject>,
     function: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7876,15 +7883,15 @@ impl JavaSwc4jAstFnExpr {
         self.method_construct,
         &[ident, function, span],
         "Swc4jAstFnExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_function<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7894,15 +7901,15 @@ impl JavaSwc4jAstFnExpr {
         self.method_get_function,
         &[],
         "Swc4jAstFunction get_function()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ident<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7912,8 +7919,8 @@ impl JavaSwc4jAstFnExpr {
         self.method_get_ident,
         &[],
         "Optional get_ident()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -7981,7 +7988,7 @@ impl JavaSwc4jAstForInStmt {
     right: &JObject<'_>,
     body: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -7995,15 +8002,15 @@ impl JavaSwc4jAstForInStmt {
         self.method_construct,
         &[left, right, body, span],
         "Swc4jAstForInStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8013,15 +8020,15 @@ impl JavaSwc4jAstForInStmt {
         self.method_get_body,
         &[],
         "ISwc4jAstStmt get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_left<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8031,15 +8038,15 @@ impl JavaSwc4jAstForInStmt {
         self.method_get_left,
         &[],
         "ISwc4jAstForHead get_left()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_right<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8049,8 +8056,8 @@ impl JavaSwc4jAstForInStmt {
         self.method_get_right,
         &[],
         "ISwc4jAstExpr get_right()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -8128,7 +8135,7 @@ impl JavaSwc4jAstForOfStmt {
     right: &JObject<'_>,
     body: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8143,15 +8150,15 @@ impl JavaSwc4jAstForOfStmt {
         self.method_construct,
         &[is_await, left, right, body, span],
         "Swc4jAstForOfStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8161,15 +8168,15 @@ impl JavaSwc4jAstForOfStmt {
         self.method_get_body,
         &[],
         "ISwc4jAstStmt get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_left<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8179,15 +8186,15 @@ impl JavaSwc4jAstForOfStmt {
         self.method_get_left,
         &[],
         "ISwc4jAstForHead get_left()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_right<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8197,15 +8204,15 @@ impl JavaSwc4jAstForOfStmt {
         self.method_get_right,
         &[],
         "ISwc4jAstExpr get_right()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_await<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -8213,8 +8220,8 @@ impl JavaSwc4jAstForOfStmt {
         self.method_is_await,
         &[],
         "boolean is_await()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -8292,7 +8299,7 @@ impl JavaSwc4jAstForStmt {
     update: &Option<JObject>,
     body: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8307,15 +8314,15 @@ impl JavaSwc4jAstForStmt {
         self.method_construct,
         &[init, test, update, body, span],
         "Swc4jAstForStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8325,15 +8332,15 @@ impl JavaSwc4jAstForStmt {
         self.method_get_body,
         &[],
         "ISwc4jAstStmt get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_init<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8343,15 +8350,15 @@ impl JavaSwc4jAstForStmt {
         self.method_get_init,
         &[],
         "Optional get_init()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_test<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8361,15 +8368,15 @@ impl JavaSwc4jAstForStmt {
         self.method_get_test,
         &[],
         "Optional get_test()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_update<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8379,8 +8386,8 @@ impl JavaSwc4jAstForStmt {
         self.method_get_update,
         &[],
         "Optional get_update()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -8498,7 +8505,7 @@ impl JavaSwc4jAstFunction {
     type_params: &Option<JObject>,
     return_type: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8518,15 +8525,15 @@ impl JavaSwc4jAstFunction {
         self.method_construct,
         &[ctxt, params, decorators, body, is_generator, is_async, type_params, return_type, span],
         "Swc4jAstFunction construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8536,15 +8543,15 @@ impl JavaSwc4jAstFunction {
         self.method_get_body,
         &[],
         "Optional get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ctxt<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -8552,15 +8559,15 @@ impl JavaSwc4jAstFunction {
         self.method_get_ctxt,
         &[],
         "int get_ctxt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_decorators<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8570,15 +8577,15 @@ impl JavaSwc4jAstFunction {
         self.method_get_decorators,
         &[],
         "List get_decorators()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8588,15 +8595,15 @@ impl JavaSwc4jAstFunction {
         self.method_get_params,
         &[],
         "List get_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_return_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8606,15 +8613,15 @@ impl JavaSwc4jAstFunction {
         self.method_get_return_type,
         &[],
         "Optional get_return_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8624,15 +8631,15 @@ impl JavaSwc4jAstFunction {
         self.method_get_type_params,
         &[],
         "Optional get_type_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_async<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -8640,15 +8647,15 @@ impl JavaSwc4jAstFunction {
         self.method_is_async,
         &[],
         "boolean is_async()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_generator<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -8656,8 +8663,8 @@ impl JavaSwc4jAstFunction {
         self.method_is_generator,
         &[],
         "boolean is_generator()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -8725,7 +8732,7 @@ impl JavaSwc4jAstGetterProp {
     type_ann: &Option<JObject>,
     body: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8739,15 +8746,15 @@ impl JavaSwc4jAstGetterProp {
         self.method_construct,
         &[key, type_ann, body, span],
         "Swc4jAstGetterProp construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8757,15 +8764,15 @@ impl JavaSwc4jAstGetterProp {
         self.method_get_body,
         &[],
         "Optional get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8775,15 +8782,15 @@ impl JavaSwc4jAstGetterProp {
         self.method_get_key,
         &[],
         "ISwc4jAstPropName get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8793,8 +8800,8 @@ impl JavaSwc4jAstGetterProp {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -8862,7 +8869,7 @@ impl JavaSwc4jAstIdent {
     sym: &str,
     optional: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8878,16 +8885,16 @@ impl JavaSwc4jAstIdent {
         self.method_construct,
         &[ctxt, sym, optional, span],
         "Swc4jAstIdent construct()"
-      );
+      )?;
     delete_local_ref!(env, java_sym);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_ctxt<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -8895,15 +8902,15 @@ impl JavaSwc4jAstIdent {
         self.method_get_ctxt,
         &[],
         "int get_ctxt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_sym<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> String
+  ) -> Result<String>
   {
     let return_value = call_as_object!(
         env,
@@ -8911,18 +8918,19 @@ impl JavaSwc4jAstIdent {
         self.method_get_sym,
         &[],
         "String get_sym()"
-      );
+      )?;
     let java_return_value = return_value;
-    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value = return_value?;
     delete_local_ref!(env, java_return_value);
-    return_value
+    Ok(return_value)
   }
 
   pub fn is_optional<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -8930,8 +8938,8 @@ impl JavaSwc4jAstIdent {
         self.method_is_optional,
         &[],
         "boolean is_optional()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -8979,7 +8987,7 @@ impl JavaSwc4jAstIdentName {
     env: &mut JNIEnv<'local>,
     sym: &str,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -8992,16 +9000,16 @@ impl JavaSwc4jAstIdentName {
         self.method_construct,
         &[sym, span],
         "Swc4jAstIdentName construct()"
-      );
+      )?;
     delete_local_ref!(env, java_sym);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_sym<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> String
+  ) -> Result<String>
   {
     let return_value = call_as_object!(
         env,
@@ -9009,11 +9017,12 @@ impl JavaSwc4jAstIdentName {
         self.method_get_sym,
         &[],
         "String get_sym()"
-      );
+      )?;
     let java_return_value = return_value;
-    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value = return_value?;
     delete_local_ref!(env, java_return_value);
-    return_value
+    Ok(return_value)
   }
 }
 
@@ -9081,7 +9090,7 @@ impl JavaSwc4jAstIfStmt {
     cons: &JObject<'_>,
     alt: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9095,15 +9104,15 @@ impl JavaSwc4jAstIfStmt {
         self.method_construct,
         &[test, cons, alt, span],
         "Swc4jAstIfStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_alt<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9113,15 +9122,15 @@ impl JavaSwc4jAstIfStmt {
         self.method_get_alt,
         &[],
         "Optional get_alt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_cons<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9131,15 +9140,15 @@ impl JavaSwc4jAstIfStmt {
         self.method_get_cons,
         &[],
         "ISwc4jAstStmt get_cons()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_test<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9149,8 +9158,8 @@ impl JavaSwc4jAstIfStmt {
         self.method_get_test,
         &[],
         "ISwc4jAstExpr get_test()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -9198,7 +9207,7 @@ impl JavaSwc4jAstImport {
     env: &mut JNIEnv<'local>,
     phase: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9210,15 +9219,15 @@ impl JavaSwc4jAstImport {
         self.method_construct,
         &[phase, span],
         "Swc4jAstImport construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_phase<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9228,8 +9237,8 @@ impl JavaSwc4jAstImport {
         self.method_get_phase,
         &[],
         "Swc4jAstImportPhase get_phase()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -9317,7 +9326,7 @@ impl JavaSwc4jAstImportDecl {
     with: &Option<JObject>,
     phase: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9333,15 +9342,15 @@ impl JavaSwc4jAstImportDecl {
         self.method_construct,
         &[specifiers, src, type_only, with, phase, span],
         "Swc4jAstImportDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_phase<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9351,15 +9360,15 @@ impl JavaSwc4jAstImportDecl {
         self.method_get_phase,
         &[],
         "Swc4jAstImportPhase get_phase()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_specifiers<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9369,15 +9378,15 @@ impl JavaSwc4jAstImportDecl {
         self.method_get_specifiers,
         &[],
         "List get_specifiers()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_src<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9387,15 +9396,15 @@ impl JavaSwc4jAstImportDecl {
         self.method_get_src,
         &[],
         "Swc4jAstStr get_src()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_with<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9405,15 +9414,15 @@ impl JavaSwc4jAstImportDecl {
         self.method_get_with,
         &[],
         "Optional get_with()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_type_only<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -9421,8 +9430,8 @@ impl JavaSwc4jAstImportDecl {
         self.method_is_type_only,
         &[],
         "boolean is_type_only()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -9470,7 +9479,7 @@ impl JavaSwc4jAstImportDefaultSpecifier {
     env: &mut JNIEnv<'local>,
     local: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9482,15 +9491,15 @@ impl JavaSwc4jAstImportDefaultSpecifier {
         self.method_construct,
         &[local, span],
         "Swc4jAstImportDefaultSpecifier construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_local<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9500,8 +9509,8 @@ impl JavaSwc4jAstImportDefaultSpecifier {
         self.method_get_local,
         &[],
         "Swc4jAstIdent get_local()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -9569,7 +9578,7 @@ impl JavaSwc4jAstImportNamedSpecifier {
     imported: &Option<JObject>,
     type_only: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9583,15 +9592,15 @@ impl JavaSwc4jAstImportNamedSpecifier {
         self.method_construct,
         &[local, imported, type_only, span],
         "Swc4jAstImportNamedSpecifier construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_imported<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9601,15 +9610,15 @@ impl JavaSwc4jAstImportNamedSpecifier {
         self.method_get_imported,
         &[],
         "Optional get_imported()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_local<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9619,15 +9628,15 @@ impl JavaSwc4jAstImportNamedSpecifier {
         self.method_get_local,
         &[],
         "Swc4jAstIdent get_local()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_type_only<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -9635,8 +9644,8 @@ impl JavaSwc4jAstImportNamedSpecifier {
         self.method_is_type_only,
         &[],
         "boolean is_type_only()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -9684,7 +9693,7 @@ impl JavaSwc4jAstImportStarAsSpecifier {
     env: &mut JNIEnv<'local>,
     local: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9696,15 +9705,15 @@ impl JavaSwc4jAstImportStarAsSpecifier {
         self.method_construct,
         &[local, span],
         "Swc4jAstImportStarAsSpecifier construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_local<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9714,8 +9723,8 @@ impl JavaSwc4jAstImportStarAsSpecifier {
         self.method_get_local,
         &[],
         "Swc4jAstIdent get_local()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -9753,7 +9762,7 @@ impl JavaSwc4jAstInvalid {
     &self,
     env: &mut JNIEnv<'local>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9764,8 +9773,8 @@ impl JavaSwc4jAstInvalid {
         self.method_construct,
         &[span],
         "Swc4jAstInvalid construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -9823,7 +9832,7 @@ impl JavaSwc4jAstJsxAttr {
     name: &JObject<'_>,
     value: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9836,15 +9845,15 @@ impl JavaSwc4jAstJsxAttr {
         self.method_construct,
         &[name, value, span],
         "Swc4jAstJsxAttr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_name<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9854,15 +9863,15 @@ impl JavaSwc4jAstJsxAttr {
         self.method_get_name,
         &[],
         "ISwc4jAstJsxAttrName get_name()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_value<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9872,8 +9881,8 @@ impl JavaSwc4jAstJsxAttr {
         self.method_get_value,
         &[],
         "Optional get_value()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -9921,7 +9930,7 @@ impl JavaSwc4jAstJsxClosingElement {
     env: &mut JNIEnv<'local>,
     name: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9933,15 +9942,15 @@ impl JavaSwc4jAstJsxClosingElement {
         self.method_construct,
         &[name, span],
         "Swc4jAstJsxClosingElement construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_name<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -9951,8 +9960,8 @@ impl JavaSwc4jAstJsxClosingElement {
         self.method_get_name,
         &[],
         "ISwc4jAstJsxElementName get_name()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -9990,7 +9999,7 @@ impl JavaSwc4jAstJsxClosingFragment {
     &self,
     env: &mut JNIEnv<'local>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10001,8 +10010,8 @@ impl JavaSwc4jAstJsxClosingFragment {
         self.method_construct,
         &[span],
         "Swc4jAstJsxClosingFragment construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -10070,7 +10079,7 @@ impl JavaSwc4jAstJsxElement {
     children: &JObject<'_>,
     closing: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10084,15 +10093,15 @@ impl JavaSwc4jAstJsxElement {
         self.method_construct,
         &[opening, children, closing, span],
         "Swc4jAstJsxElement construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_children<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10102,15 +10111,15 @@ impl JavaSwc4jAstJsxElement {
         self.method_get_children,
         &[],
         "List get_children()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_closing<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10120,15 +10129,15 @@ impl JavaSwc4jAstJsxElement {
         self.method_get_closing,
         &[],
         "Optional get_closing()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_opening<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10138,8 +10147,8 @@ impl JavaSwc4jAstJsxElement {
         self.method_get_opening,
         &[],
         "Swc4jAstJsxOpeningElement get_opening()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -10177,7 +10186,7 @@ impl JavaSwc4jAstJsxEmptyExpr {
     &self,
     env: &mut JNIEnv<'local>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10188,8 +10197,8 @@ impl JavaSwc4jAstJsxEmptyExpr {
         self.method_construct,
         &[span],
         "Swc4jAstJsxEmptyExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -10237,7 +10246,7 @@ impl JavaSwc4jAstJsxExprContainer {
     env: &mut JNIEnv<'local>,
     expr: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10249,15 +10258,15 @@ impl JavaSwc4jAstJsxExprContainer {
         self.method_construct,
         &[expr, span],
         "Swc4jAstJsxExprContainer construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10267,8 +10276,8 @@ impl JavaSwc4jAstJsxExprContainer {
         self.method_get_expr,
         &[],
         "ISwc4jAstJsxExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -10336,7 +10345,7 @@ impl JavaSwc4jAstJsxFragment {
     children: &JObject<'_>,
     closing: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10350,15 +10359,15 @@ impl JavaSwc4jAstJsxFragment {
         self.method_construct,
         &[opening, children, closing, span],
         "Swc4jAstJsxFragment construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_children<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10368,15 +10377,15 @@ impl JavaSwc4jAstJsxFragment {
         self.method_get_children,
         &[],
         "List get_children()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_closing<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10386,15 +10395,15 @@ impl JavaSwc4jAstJsxFragment {
         self.method_get_closing,
         &[],
         "Swc4jAstJsxClosingFragment get_closing()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_opening<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10404,8 +10413,8 @@ impl JavaSwc4jAstJsxFragment {
         self.method_get_opening,
         &[],
         "Swc4jAstJsxOpeningFragment get_opening()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -10463,7 +10472,7 @@ impl JavaSwc4jAstJsxMemberExpr {
     obj: &JObject<'_>,
     prop: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10476,15 +10485,15 @@ impl JavaSwc4jAstJsxMemberExpr {
         self.method_construct,
         &[obj, prop, span],
         "Swc4jAstJsxMemberExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_obj<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10494,15 +10503,15 @@ impl JavaSwc4jAstJsxMemberExpr {
         self.method_get_obj,
         &[],
         "ISwc4jAstJsxObject get_obj()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_prop<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10512,8 +10521,8 @@ impl JavaSwc4jAstJsxMemberExpr {
         self.method_get_prop,
         &[],
         "Swc4jAstIdentName get_prop()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -10571,7 +10580,7 @@ impl JavaSwc4jAstJsxNamespacedName {
     ns: &JObject<'_>,
     name: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10584,15 +10593,15 @@ impl JavaSwc4jAstJsxNamespacedName {
         self.method_construct,
         &[ns, name, span],
         "Swc4jAstJsxNamespacedName construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_name<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10602,15 +10611,15 @@ impl JavaSwc4jAstJsxNamespacedName {
         self.method_get_name,
         &[],
         "Swc4jAstIdentName get_name()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ns<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10620,8 +10629,8 @@ impl JavaSwc4jAstJsxNamespacedName {
         self.method_get_ns,
         &[],
         "Swc4jAstIdentName get_ns()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -10699,7 +10708,7 @@ impl JavaSwc4jAstJsxOpeningElement {
     self_closing: bool,
     type_args: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10714,15 +10723,15 @@ impl JavaSwc4jAstJsxOpeningElement {
         self.method_construct,
         &[name, attrs, self_closing, type_args, span],
         "Swc4jAstJsxOpeningElement construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_attrs<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10732,15 +10741,15 @@ impl JavaSwc4jAstJsxOpeningElement {
         self.method_get_attrs,
         &[],
         "List get_attrs()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_name<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10750,15 +10759,15 @@ impl JavaSwc4jAstJsxOpeningElement {
         self.method_get_name,
         &[],
         "ISwc4jAstJsxElementName get_name()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_args<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10768,15 +10777,15 @@ impl JavaSwc4jAstJsxOpeningElement {
         self.method_get_type_args,
         &[],
         "Optional get_type_args()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_self_closing<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -10784,8 +10793,8 @@ impl JavaSwc4jAstJsxOpeningElement {
         self.method_is_self_closing,
         &[],
         "boolean is_self_closing()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -10823,7 +10832,7 @@ impl JavaSwc4jAstJsxOpeningFragment {
     &self,
     env: &mut JNIEnv<'local>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10834,8 +10843,8 @@ impl JavaSwc4jAstJsxOpeningFragment {
         self.method_construct,
         &[span],
         "Swc4jAstJsxOpeningFragment construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -10883,7 +10892,7 @@ impl JavaSwc4jAstJsxSpreadChild {
     env: &mut JNIEnv<'local>,
     expr: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10895,15 +10904,15 @@ impl JavaSwc4jAstJsxSpreadChild {
         self.method_construct,
         &[expr, span],
         "Swc4jAstJsxSpreadChild construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10913,8 +10922,8 @@ impl JavaSwc4jAstJsxSpreadChild {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -10972,7 +10981,7 @@ impl JavaSwc4jAstJsxText {
     value: &str,
     raw: &str,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -10987,17 +10996,17 @@ impl JavaSwc4jAstJsxText {
         self.method_construct,
         &[value, raw, span],
         "Swc4jAstJsxText construct()"
-      );
+      )?;
     delete_local_ref!(env, java_value);
     delete_local_ref!(env, java_raw);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_raw<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> String
+  ) -> Result<String>
   {
     let return_value = call_as_object!(
         env,
@@ -11005,18 +11014,19 @@ impl JavaSwc4jAstJsxText {
         self.method_get_raw,
         &[],
         "String get_raw()"
-      );
+      )?;
     let java_return_value = return_value;
-    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value = return_value?;
     delete_local_ref!(env, java_return_value);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_value<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> String
+  ) -> Result<String>
   {
     let return_value = call_as_object!(
         env,
@@ -11024,11 +11034,12 @@ impl JavaSwc4jAstJsxText {
         self.method_get_value,
         &[],
         "String get_value()"
-      );
+      )?;
     let java_return_value = return_value;
-    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value = return_value?;
     delete_local_ref!(env, java_return_value);
-    return_value
+    Ok(return_value)
   }
 }
 
@@ -11086,7 +11097,7 @@ impl JavaSwc4jAstKeyValuePatProp {
     key: &JObject<'_>,
     value: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11099,15 +11110,15 @@ impl JavaSwc4jAstKeyValuePatProp {
         self.method_construct,
         &[key, value, span],
         "Swc4jAstKeyValuePatProp construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11117,15 +11128,15 @@ impl JavaSwc4jAstKeyValuePatProp {
         self.method_get_key,
         &[],
         "ISwc4jAstPropName get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_value<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11135,8 +11146,8 @@ impl JavaSwc4jAstKeyValuePatProp {
         self.method_get_value,
         &[],
         "ISwc4jAstPat get_value()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -11194,7 +11205,7 @@ impl JavaSwc4jAstKeyValueProp {
     key: &JObject<'_>,
     value: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11207,15 +11218,15 @@ impl JavaSwc4jAstKeyValueProp {
         self.method_construct,
         &[key, value, span],
         "Swc4jAstKeyValueProp construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11225,15 +11236,15 @@ impl JavaSwc4jAstKeyValueProp {
         self.method_get_key,
         &[],
         "ISwc4jAstPropName get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_value<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11243,8 +11254,8 @@ impl JavaSwc4jAstKeyValueProp {
         self.method_get_value,
         &[],
         "ISwc4jAstExpr get_value()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -11302,7 +11313,7 @@ impl JavaSwc4jAstLabeledStmt {
     label: &JObject<'_>,
     body: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11315,15 +11326,15 @@ impl JavaSwc4jAstLabeledStmt {
         self.method_construct,
         &[label, body, span],
         "Swc4jAstLabeledStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11333,15 +11344,15 @@ impl JavaSwc4jAstLabeledStmt {
         self.method_get_body,
         &[],
         "ISwc4jAstStmt get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_label<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11351,8 +11362,8 @@ impl JavaSwc4jAstLabeledStmt {
         self.method_get_label,
         &[],
         "Swc4jAstIdent get_label()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -11410,7 +11421,7 @@ impl JavaSwc4jAstMemberExpr {
     obj: &JObject<'_>,
     prop: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11423,15 +11434,15 @@ impl JavaSwc4jAstMemberExpr {
         self.method_construct,
         &[obj, prop, span],
         "Swc4jAstMemberExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_obj<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11441,15 +11452,15 @@ impl JavaSwc4jAstMemberExpr {
         self.method_get_obj,
         &[],
         "ISwc4jAstExpr get_obj()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_prop<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11459,8 +11470,8 @@ impl JavaSwc4jAstMemberExpr {
         self.method_get_prop,
         &[],
         "ISwc4jAstMemberProp get_prop()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -11508,7 +11519,7 @@ impl JavaSwc4jAstMetaPropExpr {
     env: &mut JNIEnv<'local>,
     kind: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11520,15 +11531,15 @@ impl JavaSwc4jAstMetaPropExpr {
         self.method_construct,
         &[kind, span],
         "Swc4jAstMetaPropExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_kind<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11538,8 +11549,8 @@ impl JavaSwc4jAstMetaPropExpr {
         self.method_get_kind,
         &[],
         "Swc4jAstMetaPropKind get_kind()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -11597,7 +11608,7 @@ impl JavaSwc4jAstMethodProp {
     key: &JObject<'_>,
     function: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11610,15 +11621,15 @@ impl JavaSwc4jAstMethodProp {
         self.method_construct,
         &[key, function, span],
         "Swc4jAstMethodProp construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_function<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11628,15 +11639,15 @@ impl JavaSwc4jAstMethodProp {
         self.method_get_function,
         &[],
         "Swc4jAstFunction get_function()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11646,8 +11657,8 @@ impl JavaSwc4jAstMethodProp {
         self.method_get_key,
         &[],
         "ISwc4jAstPropName get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -11705,7 +11716,7 @@ impl JavaSwc4jAstModule {
     body: &JObject<'_>,
     shebang: &Option<String>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11719,16 +11730,16 @@ impl JavaSwc4jAstModule {
         self.method_construct,
         &[body, shebang, span],
         "Swc4jAstModule construct()"
-      );
+      )?;
     delete_local_ref!(env, java_shebang);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11738,15 +11749,15 @@ impl JavaSwc4jAstModule {
         self.method_get_body,
         &[],
         "List get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_shebang<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11756,8 +11767,8 @@ impl JavaSwc4jAstModule {
         self.method_get_shebang,
         &[],
         "Optional get_shebang()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -11835,7 +11846,7 @@ impl JavaSwc4jAstNamedExport {
     type_only: bool,
     with: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11850,15 +11861,15 @@ impl JavaSwc4jAstNamedExport {
         self.method_construct,
         &[specifiers, src, type_only, with, span],
         "Swc4jAstNamedExport construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_specifiers<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11868,15 +11879,15 @@ impl JavaSwc4jAstNamedExport {
         self.method_get_specifiers,
         &[],
         "List get_specifiers()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_src<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11886,15 +11897,15 @@ impl JavaSwc4jAstNamedExport {
         self.method_get_src,
         &[],
         "Optional get_src()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_with<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -11904,15 +11915,15 @@ impl JavaSwc4jAstNamedExport {
         self.method_get_with,
         &[],
         "Optional get_with()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_type_only<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -11920,8 +11931,8 @@ impl JavaSwc4jAstNamedExport {
         self.method_is_type_only,
         &[],
         "boolean is_type_only()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -11999,7 +12010,7 @@ impl JavaSwc4jAstNewExpr {
     args: &Option<JObject>,
     type_args: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12015,15 +12026,15 @@ impl JavaSwc4jAstNewExpr {
         self.method_construct,
         &[ctxt, callee, args, type_args, span],
         "Swc4jAstNewExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_args<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12033,15 +12044,15 @@ impl JavaSwc4jAstNewExpr {
         self.method_get_args,
         &[],
         "Optional get_args()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_callee<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12051,15 +12062,15 @@ impl JavaSwc4jAstNewExpr {
         self.method_get_callee,
         &[],
         "ISwc4jAstExpr get_callee()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ctxt<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -12067,15 +12078,15 @@ impl JavaSwc4jAstNewExpr {
         self.method_get_ctxt,
         &[],
         "int get_ctxt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_args<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12085,8 +12096,8 @@ impl JavaSwc4jAstNewExpr {
         self.method_get_type_args,
         &[],
         "Optional get_type_args()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -12124,7 +12135,7 @@ impl JavaSwc4jAstNull {
     &self,
     env: &mut JNIEnv<'local>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12135,8 +12146,8 @@ impl JavaSwc4jAstNull {
         self.method_construct,
         &[span],
         "Swc4jAstNull construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -12194,7 +12205,7 @@ impl JavaSwc4jAstNumber {
     value: f64,
     raw: &Option<String>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12208,16 +12219,16 @@ impl JavaSwc4jAstNumber {
         self.method_construct,
         &[value, raw, span],
         "Swc4jAstNumber construct()"
-      );
+      )?;
     delete_local_ref!(env, java_raw);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_raw<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12227,15 +12238,15 @@ impl JavaSwc4jAstNumber {
         self.method_get_raw,
         &[],
         "Optional get_raw()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_value<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> f64
+  ) -> Result<f64>
   {
     let return_value = call_as_double!(
         env,
@@ -12243,8 +12254,8 @@ impl JavaSwc4jAstNumber {
         self.method_get_value,
         &[],
         "double get_value()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -12292,7 +12303,7 @@ impl JavaSwc4jAstObjectLit {
     env: &mut JNIEnv<'local>,
     props: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12304,15 +12315,15 @@ impl JavaSwc4jAstObjectLit {
         self.method_construct,
         &[props, span],
         "Swc4jAstObjectLit construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_props<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12322,8 +12333,8 @@ impl JavaSwc4jAstObjectLit {
         self.method_get_props,
         &[],
         "List get_props()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -12391,7 +12402,7 @@ impl JavaSwc4jAstObjectPat {
     optional: bool,
     type_ann: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12405,15 +12416,15 @@ impl JavaSwc4jAstObjectPat {
         self.method_construct,
         &[props, optional, type_ann, span],
         "Swc4jAstObjectPat construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_props<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12423,15 +12434,15 @@ impl JavaSwc4jAstObjectPat {
         self.method_get_props,
         &[],
         "List get_props()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12441,15 +12452,15 @@ impl JavaSwc4jAstObjectPat {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_optional<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -12457,8 +12468,8 @@ impl JavaSwc4jAstObjectPat {
         self.method_is_optional,
         &[],
         "boolean is_optional()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -12536,7 +12547,7 @@ impl JavaSwc4jAstOptCall {
     args: &JObject<'_>,
     type_args: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12552,15 +12563,15 @@ impl JavaSwc4jAstOptCall {
         self.method_construct,
         &[ctxt, callee, args, type_args, span],
         "Swc4jAstOptCall construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_args<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12570,15 +12581,15 @@ impl JavaSwc4jAstOptCall {
         self.method_get_args,
         &[],
         "List get_args()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_callee<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12588,15 +12599,15 @@ impl JavaSwc4jAstOptCall {
         self.method_get_callee,
         &[],
         "ISwc4jAstExpr get_callee()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ctxt<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -12604,15 +12615,15 @@ impl JavaSwc4jAstOptCall {
         self.method_get_ctxt,
         &[],
         "int get_ctxt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_args<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12622,8 +12633,8 @@ impl JavaSwc4jAstOptCall {
         self.method_get_type_args,
         &[],
         "Optional get_type_args()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -12681,7 +12692,7 @@ impl JavaSwc4jAstOptChainExpr {
     optional: bool,
     base: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12694,15 +12705,15 @@ impl JavaSwc4jAstOptChainExpr {
         self.method_construct,
         &[optional, base, span],
         "Swc4jAstOptChainExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_base<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12712,15 +12723,15 @@ impl JavaSwc4jAstOptChainExpr {
         self.method_get_base,
         &[],
         "ISwc4jAstOptChainBase get_base()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_optional<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -12728,8 +12739,8 @@ impl JavaSwc4jAstOptChainExpr {
         self.method_is_optional,
         &[],
         "boolean is_optional()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -12787,7 +12798,7 @@ impl JavaSwc4jAstParam {
     decorators: &JObject<'_>,
     pat: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12800,15 +12811,15 @@ impl JavaSwc4jAstParam {
         self.method_construct,
         &[decorators, pat, span],
         "Swc4jAstParam construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_decorators<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12818,15 +12829,15 @@ impl JavaSwc4jAstParam {
         self.method_get_decorators,
         &[],
         "List get_decorators()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_pat<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12836,8 +12847,8 @@ impl JavaSwc4jAstParam {
         self.method_get_pat,
         &[],
         "ISwc4jAstPat get_pat()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -12885,7 +12896,7 @@ impl JavaSwc4jAstParenExpr {
     env: &mut JNIEnv<'local>,
     expr: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12897,15 +12908,15 @@ impl JavaSwc4jAstParenExpr {
         self.method_construct,
         &[expr, span],
         "Swc4jAstParenExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -12915,8 +12926,8 @@ impl JavaSwc4jAstParenExpr {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -13034,7 +13045,7 @@ impl JavaSwc4jAstPrivateMethod {
     optional: bool,
     is_override: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13053,15 +13064,15 @@ impl JavaSwc4jAstPrivateMethod {
         self.method_construct,
         &[key, function, kind, is_static, accessibility, is_abstract, optional, is_override, span],
         "Swc4jAstPrivateMethod construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_accessibility<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13071,15 +13082,15 @@ impl JavaSwc4jAstPrivateMethod {
         self.method_get_accessibility,
         &[],
         "Optional get_accessibility()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_function<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13089,15 +13100,15 @@ impl JavaSwc4jAstPrivateMethod {
         self.method_get_function,
         &[],
         "Swc4jAstFunction get_function()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13107,15 +13118,15 @@ impl JavaSwc4jAstPrivateMethod {
         self.method_get_key,
         &[],
         "Swc4jAstPrivateName get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_kind<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13125,15 +13136,15 @@ impl JavaSwc4jAstPrivateMethod {
         self.method_get_kind,
         &[],
         "Swc4jAstMethodKind get_kind()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_abstract<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -13141,15 +13152,15 @@ impl JavaSwc4jAstPrivateMethod {
         self.method_is_abstract,
         &[],
         "boolean is_abstract()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_optional<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -13157,15 +13168,15 @@ impl JavaSwc4jAstPrivateMethod {
         self.method_is_optional,
         &[],
         "boolean is_optional()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_override<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -13173,15 +13184,15 @@ impl JavaSwc4jAstPrivateMethod {
         self.method_is_override,
         &[],
         "boolean is_override()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_static<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -13189,8 +13200,8 @@ impl JavaSwc4jAstPrivateMethod {
         self.method_is_static,
         &[],
         "boolean is_static()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -13238,7 +13249,7 @@ impl JavaSwc4jAstPrivateName {
     env: &mut JNIEnv<'local>,
     name: &str,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13251,16 +13262,16 @@ impl JavaSwc4jAstPrivateName {
         self.method_construct,
         &[name, span],
         "Swc4jAstPrivateName construct()"
-      );
+      )?;
     delete_local_ref!(env, java_name);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_name<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> String
+  ) -> Result<String>
   {
     let return_value = call_as_object!(
         env,
@@ -13268,11 +13279,12 @@ impl JavaSwc4jAstPrivateName {
         self.method_get_name,
         &[],
         "String get_name()"
-      );
+      )?;
     let java_return_value = return_value;
-    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value = return_value?;
     delete_local_ref!(env, java_return_value);
-    return_value
+    Ok(return_value)
   }
 }
 
@@ -13420,7 +13432,7 @@ impl JavaSwc4jAstPrivateProp {
     readonly: bool,
     definite: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13443,15 +13455,15 @@ impl JavaSwc4jAstPrivateProp {
         self.method_construct,
         &[ctxt, key, value, type_ann, is_static, decorators, accessibility, optional, is_override, readonly, definite, span],
         "Swc4jAstPrivateProp construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_accessibility<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13461,15 +13473,15 @@ impl JavaSwc4jAstPrivateProp {
         self.method_get_accessibility,
         &[],
         "Optional get_accessibility()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ctxt<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -13477,15 +13489,15 @@ impl JavaSwc4jAstPrivateProp {
         self.method_get_ctxt,
         &[],
         "int get_ctxt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_decorators<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13495,15 +13507,15 @@ impl JavaSwc4jAstPrivateProp {
         self.method_get_decorators,
         &[],
         "List get_decorators()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13513,15 +13525,15 @@ impl JavaSwc4jAstPrivateProp {
         self.method_get_key,
         &[],
         "Swc4jAstPrivateName get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13531,15 +13543,15 @@ impl JavaSwc4jAstPrivateProp {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_value<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13549,15 +13561,15 @@ impl JavaSwc4jAstPrivateProp {
         self.method_get_value,
         &[],
         "Optional get_value()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_definite<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -13565,15 +13577,15 @@ impl JavaSwc4jAstPrivateProp {
         self.method_is_definite,
         &[],
         "boolean is_definite()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_optional<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -13581,15 +13593,15 @@ impl JavaSwc4jAstPrivateProp {
         self.method_is_optional,
         &[],
         "boolean is_optional()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_override<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -13597,15 +13609,15 @@ impl JavaSwc4jAstPrivateProp {
         self.method_is_override,
         &[],
         "boolean is_override()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_readonly<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -13613,15 +13625,15 @@ impl JavaSwc4jAstPrivateProp {
         self.method_is_readonly,
         &[],
         "boolean is_readonly()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_static<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -13629,8 +13641,8 @@ impl JavaSwc4jAstPrivateProp {
         self.method_is_static,
         &[],
         "boolean is_static()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -13688,7 +13700,7 @@ impl JavaSwc4jAstRegex {
     exp: &str,
     flags: &str,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13703,17 +13715,17 @@ impl JavaSwc4jAstRegex {
         self.method_construct,
         &[exp, flags, span],
         "Swc4jAstRegex construct()"
-      );
+      )?;
     delete_local_ref!(env, java_exp);
     delete_local_ref!(env, java_flags);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_exp<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> String
+  ) -> Result<String>
   {
     let return_value = call_as_object!(
         env,
@@ -13721,18 +13733,19 @@ impl JavaSwc4jAstRegex {
         self.method_get_exp,
         &[],
         "String get_exp()"
-      );
+      )?;
     let java_return_value = return_value;
-    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value = return_value?;
     delete_local_ref!(env, java_return_value);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_flags<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> String
+  ) -> Result<String>
   {
     let return_value = call_as_object!(
         env,
@@ -13740,11 +13753,12 @@ impl JavaSwc4jAstRegex {
         self.method_get_flags,
         &[],
         "String get_flags()"
-      );
+      )?;
     let java_return_value = return_value;
-    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value = return_value?;
     delete_local_ref!(env, java_return_value);
-    return_value
+    Ok(return_value)
   }
 }
 
@@ -13812,7 +13826,7 @@ impl JavaSwc4jAstRestPat {
     arg: &JObject<'_>,
     type_ann: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13826,15 +13840,15 @@ impl JavaSwc4jAstRestPat {
         self.method_construct,
         &[dot3_token, arg, type_ann, span],
         "Swc4jAstRestPat construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_arg<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13844,15 +13858,15 @@ impl JavaSwc4jAstRestPat {
         self.method_get_arg,
         &[],
         "ISwc4jAstPat get_arg()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_dot3_token<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13862,15 +13876,15 @@ impl JavaSwc4jAstRestPat {
         self.method_get_dot3_token,
         &[],
         "Swc4jSpan get_dot3_token()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13880,8 +13894,8 @@ impl JavaSwc4jAstRestPat {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -13929,7 +13943,7 @@ impl JavaSwc4jAstReturnStmt {
     env: &mut JNIEnv<'local>,
     arg: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13941,15 +13955,15 @@ impl JavaSwc4jAstReturnStmt {
         self.method_construct,
         &[arg, span],
         "Swc4jAstReturnStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_arg<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -13959,8 +13973,8 @@ impl JavaSwc4jAstReturnStmt {
         self.method_get_arg,
         &[],
         "Optional get_arg()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -14018,7 +14032,7 @@ impl JavaSwc4jAstScript {
     body: &JObject<'_>,
     shebang: &Option<String>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14032,16 +14046,16 @@ impl JavaSwc4jAstScript {
         self.method_construct,
         &[body, shebang, span],
         "Swc4jAstScript construct()"
-      );
+      )?;
     delete_local_ref!(env, java_shebang);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14051,15 +14065,15 @@ impl JavaSwc4jAstScript {
         self.method_get_body,
         &[],
         "List get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_shebang<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14069,8 +14083,8 @@ impl JavaSwc4jAstScript {
         self.method_get_shebang,
         &[],
         "Optional get_shebang()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -14118,7 +14132,7 @@ impl JavaSwc4jAstSeqExpr {
     env: &mut JNIEnv<'local>,
     exprs: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14130,15 +14144,15 @@ impl JavaSwc4jAstSeqExpr {
         self.method_construct,
         &[exprs, span],
         "Swc4jAstSeqExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_exprs<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14148,8 +14162,8 @@ impl JavaSwc4jAstSeqExpr {
         self.method_get_exprs,
         &[],
         "List get_exprs()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -14227,7 +14241,7 @@ impl JavaSwc4jAstSetterProp {
     param: &JObject<'_>,
     body: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14242,15 +14256,15 @@ impl JavaSwc4jAstSetterProp {
         self.method_construct,
         &[key, this_param, param, body, span],
         "Swc4jAstSetterProp construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14260,15 +14274,15 @@ impl JavaSwc4jAstSetterProp {
         self.method_get_body,
         &[],
         "Optional get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14278,15 +14292,15 @@ impl JavaSwc4jAstSetterProp {
         self.method_get_key,
         &[],
         "ISwc4jAstPropName get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_param<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14296,15 +14310,15 @@ impl JavaSwc4jAstSetterProp {
         self.method_get_param,
         &[],
         "ISwc4jAstPat get_param()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_this_param<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14314,8 +14328,8 @@ impl JavaSwc4jAstSetterProp {
         self.method_get_this_param,
         &[],
         "Optional get_this_param()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -14373,7 +14387,7 @@ impl JavaSwc4jAstSpreadElement {
     dot3_token: &JObject<'_>,
     expr: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14386,15 +14400,15 @@ impl JavaSwc4jAstSpreadElement {
         self.method_construct,
         &[dot3_token, expr, span],
         "Swc4jAstSpreadElement construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_dot3_token<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14404,15 +14418,15 @@ impl JavaSwc4jAstSpreadElement {
         self.method_get_dot3_token,
         &[],
         "Swc4jSpan get_dot3_token()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14422,8 +14436,8 @@ impl JavaSwc4jAstSpreadElement {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -14471,7 +14485,7 @@ impl JavaSwc4jAstStaticBlock {
     env: &mut JNIEnv<'local>,
     body: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14483,15 +14497,15 @@ impl JavaSwc4jAstStaticBlock {
         self.method_construct,
         &[body, span],
         "Swc4jAstStaticBlock construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14501,8 +14515,8 @@ impl JavaSwc4jAstStaticBlock {
         self.method_get_body,
         &[],
         "Swc4jAstBlockStmt get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -14560,7 +14574,7 @@ impl JavaSwc4jAstStr {
     value: &str,
     raw: &Option<String>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14575,17 +14589,17 @@ impl JavaSwc4jAstStr {
         self.method_construct,
         &[value, raw, span],
         "Swc4jAstStr construct()"
-      );
+      )?;
     delete_local_ref!(env, java_value);
     delete_local_ref!(env, java_raw);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_raw<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14595,15 +14609,15 @@ impl JavaSwc4jAstStr {
         self.method_get_raw,
         &[],
         "Optional get_raw()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_value<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> String
+  ) -> Result<String>
   {
     let return_value = call_as_object!(
         env,
@@ -14611,11 +14625,12 @@ impl JavaSwc4jAstStr {
         self.method_get_value,
         &[],
         "String get_value()"
-      );
+      )?;
     let java_return_value = return_value;
-    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value = return_value?;
     delete_local_ref!(env, java_return_value);
-    return_value
+    Ok(return_value)
   }
 }
 
@@ -14653,7 +14668,7 @@ impl JavaSwc4jAstSuper {
     &self,
     env: &mut JNIEnv<'local>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14664,8 +14679,8 @@ impl JavaSwc4jAstSuper {
         self.method_construct,
         &[span],
         "Swc4jAstSuper construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -14723,7 +14738,7 @@ impl JavaSwc4jAstSuperPropExpr {
     obj: &JObject<'_>,
     prop: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14736,15 +14751,15 @@ impl JavaSwc4jAstSuperPropExpr {
         self.method_construct,
         &[obj, prop, span],
         "Swc4jAstSuperPropExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_obj<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14754,15 +14769,15 @@ impl JavaSwc4jAstSuperPropExpr {
         self.method_get_obj,
         &[],
         "Swc4jAstSuper get_obj()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_prop<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14772,8 +14787,8 @@ impl JavaSwc4jAstSuperPropExpr {
         self.method_get_prop,
         &[],
         "ISwc4jAstSuperProp get_prop()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -14831,7 +14846,7 @@ impl JavaSwc4jAstSwitchCase {
     test: &Option<JObject>,
     cons: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14844,15 +14859,15 @@ impl JavaSwc4jAstSwitchCase {
         self.method_construct,
         &[test, cons, span],
         "Swc4jAstSwitchCase construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_cons<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14862,15 +14877,15 @@ impl JavaSwc4jAstSwitchCase {
         self.method_get_cons,
         &[],
         "List get_cons()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_test<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14880,8 +14895,8 @@ impl JavaSwc4jAstSwitchCase {
         self.method_get_test,
         &[],
         "Optional get_test()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -14939,7 +14954,7 @@ impl JavaSwc4jAstSwitchStmt {
     discriminant: &JObject<'_>,
     cases: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14952,15 +14967,15 @@ impl JavaSwc4jAstSwitchStmt {
         self.method_construct,
         &[discriminant, cases, span],
         "Swc4jAstSwitchStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_cases<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14970,15 +14985,15 @@ impl JavaSwc4jAstSwitchStmt {
         self.method_get_cases,
         &[],
         "List get_cases()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_discriminant<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -14988,8 +15003,8 @@ impl JavaSwc4jAstSwitchStmt {
         self.method_get_discriminant,
         &[],
         "ISwc4jAstExpr get_discriminant()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -15067,7 +15082,7 @@ impl JavaSwc4jAstTaggedTpl {
     type_params: &Option<JObject>,
     tpl: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15083,15 +15098,15 @@ impl JavaSwc4jAstTaggedTpl {
         self.method_construct,
         &[ctxt, tag, type_params, tpl, span],
         "Swc4jAstTaggedTpl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ctxt<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -15099,15 +15114,15 @@ impl JavaSwc4jAstTaggedTpl {
         self.method_get_ctxt,
         &[],
         "int get_ctxt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_tag<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15117,15 +15132,15 @@ impl JavaSwc4jAstTaggedTpl {
         self.method_get_tag,
         &[],
         "ISwc4jAstExpr get_tag()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_tpl<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15135,15 +15150,15 @@ impl JavaSwc4jAstTaggedTpl {
         self.method_get_tpl,
         &[],
         "Swc4jAstTpl get_tpl()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15153,8 +15168,8 @@ impl JavaSwc4jAstTaggedTpl {
         self.method_get_type_params,
         &[],
         "Optional get_type_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -15192,7 +15207,7 @@ impl JavaSwc4jAstThisExpr {
     &self,
     env: &mut JNIEnv<'local>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15203,8 +15218,8 @@ impl JavaSwc4jAstThisExpr {
         self.method_construct,
         &[span],
         "Swc4jAstThisExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -15252,7 +15267,7 @@ impl JavaSwc4jAstThrowStmt {
     env: &mut JNIEnv<'local>,
     arg: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15264,15 +15279,15 @@ impl JavaSwc4jAstThrowStmt {
         self.method_construct,
         &[arg, span],
         "Swc4jAstThrowStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_arg<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15282,8 +15297,8 @@ impl JavaSwc4jAstThrowStmt {
         self.method_get_arg,
         &[],
         "ISwc4jAstExpr get_arg()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -15341,7 +15356,7 @@ impl JavaSwc4jAstTpl {
     exprs: &JObject<'_>,
     quasis: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15354,15 +15369,15 @@ impl JavaSwc4jAstTpl {
         self.method_construct,
         &[exprs, quasis, span],
         "Swc4jAstTpl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_exprs<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15372,15 +15387,15 @@ impl JavaSwc4jAstTpl {
         self.method_get_exprs,
         &[],
         "List get_exprs()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_quasis<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15390,8 +15405,8 @@ impl JavaSwc4jAstTpl {
         self.method_get_quasis,
         &[],
         "List get_quasis()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -15459,7 +15474,7 @@ impl JavaSwc4jAstTplElement {
     cooked: &Option<String>,
     raw: &str,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15475,17 +15490,17 @@ impl JavaSwc4jAstTplElement {
         self.method_construct,
         &[tail, cooked, raw, span],
         "Swc4jAstTplElement construct()"
-      );
+      )?;
     delete_local_ref!(env, java_cooked);
     delete_local_ref!(env, java_raw);
-    return_value
+    Ok(return_value)
   }
 
   pub fn get_cooked<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15495,15 +15510,15 @@ impl JavaSwc4jAstTplElement {
         self.method_get_cooked,
         &[],
         "Optional get_cooked()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_raw<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> String
+  ) -> Result<String>
   {
     let return_value = call_as_object!(
         env,
@@ -15511,18 +15526,19 @@ impl JavaSwc4jAstTplElement {
         self.method_get_raw,
         &[],
         "String get_raw()"
-      );
+      )?;
     let java_return_value = return_value;
-    let return_value = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value = return_value?;
     delete_local_ref!(env, java_return_value);
-    return_value
+    Ok(return_value)
   }
 
   pub fn is_tail<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -15530,8 +15546,8 @@ impl JavaSwc4jAstTplElement {
         self.method_is_tail,
         &[],
         "boolean is_tail()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -15599,7 +15615,7 @@ impl JavaSwc4jAstTryStmt {
     handler: &Option<JObject>,
     finalizer: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15613,15 +15629,15 @@ impl JavaSwc4jAstTryStmt {
         self.method_construct,
         &[block, handler, finalizer, span],
         "Swc4jAstTryStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_block<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15631,15 +15647,15 @@ impl JavaSwc4jAstTryStmt {
         self.method_get_block,
         &[],
         "Swc4jAstBlockStmt get_block()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_finalizer<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15649,15 +15665,15 @@ impl JavaSwc4jAstTryStmt {
         self.method_get_finalizer,
         &[],
         "Optional get_finalizer()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_handler<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15667,8 +15683,8 @@ impl JavaSwc4jAstTryStmt {
         self.method_get_handler,
         &[],
         "Optional get_handler()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -15716,7 +15732,7 @@ impl JavaSwc4jAstTsArrayType {
     env: &mut JNIEnv<'local>,
     elem_type: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15728,15 +15744,15 @@ impl JavaSwc4jAstTsArrayType {
         self.method_construct,
         &[elem_type, span],
         "Swc4jAstTsArrayType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_elem_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15746,8 +15762,8 @@ impl JavaSwc4jAstTsArrayType {
         self.method_get_elem_type,
         &[],
         "ISwc4jAstTsType get_elem_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -15805,7 +15821,7 @@ impl JavaSwc4jAstTsAsExpr {
     expr: &JObject<'_>,
     type_ann: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15818,15 +15834,15 @@ impl JavaSwc4jAstTsAsExpr {
         self.method_construct,
         &[expr, type_ann, span],
         "Swc4jAstTsAsExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15836,15 +15852,15 @@ impl JavaSwc4jAstTsAsExpr {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15854,8 +15870,8 @@ impl JavaSwc4jAstTsAsExpr {
         self.method_get_type_ann,
         &[],
         "ISwc4jAstTsType get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -15923,7 +15939,7 @@ impl JavaSwc4jAstTsCallSignatureDecl {
     type_ann: &Option<JObject>,
     type_params: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15937,15 +15953,15 @@ impl JavaSwc4jAstTsCallSignatureDecl {
         self.method_construct,
         &[params, type_ann, type_params, span],
         "Swc4jAstTsCallSignatureDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15955,15 +15971,15 @@ impl JavaSwc4jAstTsCallSignatureDecl {
         self.method_get_params,
         &[],
         "List get_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15973,15 +15989,15 @@ impl JavaSwc4jAstTsCallSignatureDecl {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -15991,8 +16007,8 @@ impl JavaSwc4jAstTsCallSignatureDecl {
         self.method_get_type_params,
         &[],
         "Optional get_type_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -16070,7 +16086,7 @@ impl JavaSwc4jAstTsConditionalType {
     true_type: &JObject<'_>,
     false_type: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16085,15 +16101,15 @@ impl JavaSwc4jAstTsConditionalType {
         self.method_construct,
         &[check_type, extends_type, true_type, false_type, span],
         "Swc4jAstTsConditionalType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_check_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16103,15 +16119,15 @@ impl JavaSwc4jAstTsConditionalType {
         self.method_get_check_type,
         &[],
         "ISwc4jAstTsType get_check_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_extends_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16121,15 +16137,15 @@ impl JavaSwc4jAstTsConditionalType {
         self.method_get_extends_type,
         &[],
         "ISwc4jAstTsType get_extends_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_false_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16139,15 +16155,15 @@ impl JavaSwc4jAstTsConditionalType {
         self.method_get_false_type,
         &[],
         "ISwc4jAstTsType get_false_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_true_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16157,8 +16173,8 @@ impl JavaSwc4jAstTsConditionalType {
         self.method_get_true_type,
         &[],
         "ISwc4jAstTsType get_true_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -16206,7 +16222,7 @@ impl JavaSwc4jAstTsConstAssertion {
     env: &mut JNIEnv<'local>,
     expr: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16218,15 +16234,15 @@ impl JavaSwc4jAstTsConstAssertion {
         self.method_construct,
         &[expr, span],
         "Swc4jAstTsConstAssertion construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16236,8 +16252,8 @@ impl JavaSwc4jAstTsConstAssertion {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -16305,7 +16321,7 @@ impl JavaSwc4jAstTsConstructSignatureDecl {
     type_ann: &Option<JObject>,
     type_params: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16319,15 +16335,15 @@ impl JavaSwc4jAstTsConstructSignatureDecl {
         self.method_construct,
         &[params, type_ann, type_params, span],
         "Swc4jAstTsConstructSignatureDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16337,15 +16353,15 @@ impl JavaSwc4jAstTsConstructSignatureDecl {
         self.method_get_params,
         &[],
         "List get_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16355,15 +16371,15 @@ impl JavaSwc4jAstTsConstructSignatureDecl {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16373,8 +16389,8 @@ impl JavaSwc4jAstTsConstructSignatureDecl {
         self.method_get_type_params,
         &[],
         "Optional get_type_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -16452,7 +16468,7 @@ impl JavaSwc4jAstTsConstructorType {
     type_ann: &JObject<'_>,
     is_abstract: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16467,15 +16483,15 @@ impl JavaSwc4jAstTsConstructorType {
         self.method_construct,
         &[params, type_params, type_ann, is_abstract, span],
         "Swc4jAstTsConstructorType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16485,15 +16501,15 @@ impl JavaSwc4jAstTsConstructorType {
         self.method_get_params,
         &[],
         "List get_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16503,15 +16519,15 @@ impl JavaSwc4jAstTsConstructorType {
         self.method_get_type_ann,
         &[],
         "Swc4jAstTsTypeAnn get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16521,15 +16537,15 @@ impl JavaSwc4jAstTsConstructorType {
         self.method_get_type_params,
         &[],
         "Optional get_type_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_abstract<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -16537,8 +16553,8 @@ impl JavaSwc4jAstTsConstructorType {
         self.method_is_abstract,
         &[],
         "boolean is_abstract()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -16616,7 +16632,7 @@ impl JavaSwc4jAstTsEnumDecl {
     id: &JObject<'_>,
     members: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16631,15 +16647,15 @@ impl JavaSwc4jAstTsEnumDecl {
         self.method_construct,
         &[declare, is_const, id, members, span],
         "Swc4jAstTsEnumDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_id<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16649,15 +16665,15 @@ impl JavaSwc4jAstTsEnumDecl {
         self.method_get_id,
         &[],
         "Swc4jAstIdent get_id()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_members<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16667,15 +16683,15 @@ impl JavaSwc4jAstTsEnumDecl {
         self.method_get_members,
         &[],
         "List get_members()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_const<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -16683,15 +16699,15 @@ impl JavaSwc4jAstTsEnumDecl {
         self.method_is_const,
         &[],
         "boolean is_const()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_declare<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -16699,8 +16715,8 @@ impl JavaSwc4jAstTsEnumDecl {
         self.method_is_declare,
         &[],
         "boolean is_declare()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -16758,7 +16774,7 @@ impl JavaSwc4jAstTsEnumMember {
     id: &JObject<'_>,
     init: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16771,15 +16787,15 @@ impl JavaSwc4jAstTsEnumMember {
         self.method_construct,
         &[id, init, span],
         "Swc4jAstTsEnumMember construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_id<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16789,15 +16805,15 @@ impl JavaSwc4jAstTsEnumMember {
         self.method_get_id,
         &[],
         "ISwc4jAstTsEnumMemberId get_id()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_init<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16807,8 +16823,8 @@ impl JavaSwc4jAstTsEnumMember {
         self.method_get_init,
         &[],
         "Optional get_init()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -16856,7 +16872,7 @@ impl JavaSwc4jAstTsExportAssignment {
     env: &mut JNIEnv<'local>,
     expr: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16868,15 +16884,15 @@ impl JavaSwc4jAstTsExportAssignment {
         self.method_construct,
         &[expr, span],
         "Swc4jAstTsExportAssignment construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16886,8 +16902,8 @@ impl JavaSwc4jAstTsExportAssignment {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -16945,7 +16961,7 @@ impl JavaSwc4jAstTsExprWithTypeArgs {
     expr: &JObject<'_>,
     type_args: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16958,15 +16974,15 @@ impl JavaSwc4jAstTsExprWithTypeArgs {
         self.method_construct,
         &[expr, type_args, span],
         "Swc4jAstTsExprWithTypeArgs construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16976,15 +16992,15 @@ impl JavaSwc4jAstTsExprWithTypeArgs {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_args<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -16994,8 +17010,8 @@ impl JavaSwc4jAstTsExprWithTypeArgs {
         self.method_get_type_args,
         &[],
         "Optional get_type_args()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -17043,7 +17059,7 @@ impl JavaSwc4jAstTsExternalModuleRef {
     env: &mut JNIEnv<'local>,
     expr: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17055,15 +17071,15 @@ impl JavaSwc4jAstTsExternalModuleRef {
         self.method_construct,
         &[expr, span],
         "Swc4jAstTsExternalModuleRef construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17073,8 +17089,8 @@ impl JavaSwc4jAstTsExternalModuleRef {
         self.method_get_expr,
         &[],
         "Swc4jAstStr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -17142,7 +17158,7 @@ impl JavaSwc4jAstTsFnType {
     type_params: &Option<JObject>,
     type_ann: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17156,15 +17172,15 @@ impl JavaSwc4jAstTsFnType {
         self.method_construct,
         &[params, type_params, type_ann, span],
         "Swc4jAstTsFnType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17174,15 +17190,15 @@ impl JavaSwc4jAstTsFnType {
         self.method_get_params,
         &[],
         "List get_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17192,15 +17208,15 @@ impl JavaSwc4jAstTsFnType {
         self.method_get_type_ann,
         &[],
         "Swc4jAstTsTypeAnn get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17210,8 +17226,8 @@ impl JavaSwc4jAstTsFnType {
         self.method_get_type_params,
         &[],
         "Optional get_type_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -17279,7 +17295,7 @@ impl JavaSwc4jAstTsGetterSignature {
     computed: bool,
     type_ann: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17293,15 +17309,15 @@ impl JavaSwc4jAstTsGetterSignature {
         self.method_construct,
         &[key, computed, type_ann, span],
         "Swc4jAstTsGetterSignature construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17311,15 +17327,15 @@ impl JavaSwc4jAstTsGetterSignature {
         self.method_get_key,
         &[],
         "ISwc4jAstExpr get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17329,15 +17345,15 @@ impl JavaSwc4jAstTsGetterSignature {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_computed<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -17345,8 +17361,8 @@ impl JavaSwc4jAstTsGetterSignature {
         self.method_is_computed,
         &[],
         "boolean is_computed()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -17424,7 +17440,7 @@ impl JavaSwc4jAstTsImportEqualsDecl {
     id: &JObject<'_>,
     module_ref: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17439,15 +17455,15 @@ impl JavaSwc4jAstTsImportEqualsDecl {
         self.method_construct,
         &[export, type_only, id, module_ref, span],
         "Swc4jAstTsImportEqualsDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_id<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17457,15 +17473,15 @@ impl JavaSwc4jAstTsImportEqualsDecl {
         self.method_get_id,
         &[],
         "Swc4jAstIdent get_id()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_module_ref<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17475,15 +17491,15 @@ impl JavaSwc4jAstTsImportEqualsDecl {
         self.method_get_module_ref,
         &[],
         "ISwc4jAstTsModuleRef get_module_ref()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_export<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -17491,15 +17507,15 @@ impl JavaSwc4jAstTsImportEqualsDecl {
         self.method_is_export,
         &[],
         "boolean is_export()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_type_only<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -17507,8 +17523,8 @@ impl JavaSwc4jAstTsImportEqualsDecl {
         self.method_is_type_only,
         &[],
         "boolean is_type_only()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -17576,7 +17592,7 @@ impl JavaSwc4jAstTsImportType {
     qualifier: &Option<JObject>,
     type_args: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17590,15 +17606,15 @@ impl JavaSwc4jAstTsImportType {
         self.method_construct,
         &[arg, qualifier, type_args, span],
         "Swc4jAstTsImportType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_arg<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17608,15 +17624,15 @@ impl JavaSwc4jAstTsImportType {
         self.method_get_arg,
         &[],
         "Swc4jAstStr get_arg()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_qualifier<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17626,15 +17642,15 @@ impl JavaSwc4jAstTsImportType {
         self.method_get_qualifier,
         &[],
         "Optional get_qualifier()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_args<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17644,8 +17660,8 @@ impl JavaSwc4jAstTsImportType {
         self.method_get_type_args,
         &[],
         "Optional get_type_args()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -17723,7 +17739,7 @@ impl JavaSwc4jAstTsIndexSignature {
     readonly: bool,
     is_static: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17738,15 +17754,15 @@ impl JavaSwc4jAstTsIndexSignature {
         self.method_construct,
         &[params, type_ann, readonly, is_static, span],
         "Swc4jAstTsIndexSignature construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17756,15 +17772,15 @@ impl JavaSwc4jAstTsIndexSignature {
         self.method_get_params,
         &[],
         "List get_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17774,15 +17790,15 @@ impl JavaSwc4jAstTsIndexSignature {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_readonly<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -17790,15 +17806,15 @@ impl JavaSwc4jAstTsIndexSignature {
         self.method_is_readonly,
         &[],
         "boolean is_readonly()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_static<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -17806,8 +17822,8 @@ impl JavaSwc4jAstTsIndexSignature {
         self.method_is_static,
         &[],
         "boolean is_static()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -17875,7 +17891,7 @@ impl JavaSwc4jAstTsIndexedAccessType {
     obj_type: &JObject<'_>,
     index_type: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17889,15 +17905,15 @@ impl JavaSwc4jAstTsIndexedAccessType {
         self.method_construct,
         &[readonly, obj_type, index_type, span],
         "Swc4jAstTsIndexedAccessType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_index_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17907,15 +17923,15 @@ impl JavaSwc4jAstTsIndexedAccessType {
         self.method_get_index_type,
         &[],
         "ISwc4jAstTsType get_index_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_obj_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -17925,15 +17941,15 @@ impl JavaSwc4jAstTsIndexedAccessType {
         self.method_get_obj_type,
         &[],
         "ISwc4jAstTsType get_obj_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_readonly<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -17941,8 +17957,8 @@ impl JavaSwc4jAstTsIndexedAccessType {
         self.method_is_readonly,
         &[],
         "boolean is_readonly()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -17990,7 +18006,7 @@ impl JavaSwc4jAstTsInferType {
     env: &mut JNIEnv<'local>,
     type_param: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18002,15 +18018,15 @@ impl JavaSwc4jAstTsInferType {
         self.method_construct,
         &[type_param, span],
         "Swc4jAstTsInferType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_param<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18020,8 +18036,8 @@ impl JavaSwc4jAstTsInferType {
         self.method_get_type_param,
         &[],
         "Swc4jAstTsTypeParam get_type_param()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -18079,7 +18095,7 @@ impl JavaSwc4jAstTsInstantiation {
     expr: &JObject<'_>,
     type_args: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18092,15 +18108,15 @@ impl JavaSwc4jAstTsInstantiation {
         self.method_construct,
         &[expr, type_args, span],
         "Swc4jAstTsInstantiation construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18110,15 +18126,15 @@ impl JavaSwc4jAstTsInstantiation {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_args<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18128,8 +18144,8 @@ impl JavaSwc4jAstTsInstantiation {
         self.method_get_type_args,
         &[],
         "Swc4jAstTsTypeParamInstantiation get_type_args()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -18177,7 +18193,7 @@ impl JavaSwc4jAstTsInterfaceBody {
     env: &mut JNIEnv<'local>,
     body: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18189,15 +18205,15 @@ impl JavaSwc4jAstTsInterfaceBody {
         self.method_construct,
         &[body, span],
         "Swc4jAstTsInterfaceBody construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18207,8 +18223,8 @@ impl JavaSwc4jAstTsInterfaceBody {
         self.method_get_body,
         &[],
         "List get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -18296,7 +18312,7 @@ impl JavaSwc4jAstTsInterfaceDecl {
     extends: &JObject<'_>,
     body: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18312,15 +18328,15 @@ impl JavaSwc4jAstTsInterfaceDecl {
         self.method_construct,
         &[id, declare, type_params, extends, body, span],
         "Swc4jAstTsInterfaceDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18330,15 +18346,15 @@ impl JavaSwc4jAstTsInterfaceDecl {
         self.method_get_body,
         &[],
         "Swc4jAstTsInterfaceBody get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_extends<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18348,15 +18364,15 @@ impl JavaSwc4jAstTsInterfaceDecl {
         self.method_get_extends,
         &[],
         "List get_extends()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_id<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18366,15 +18382,15 @@ impl JavaSwc4jAstTsInterfaceDecl {
         self.method_get_id,
         &[],
         "Swc4jAstIdent get_id()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18384,15 +18400,15 @@ impl JavaSwc4jAstTsInterfaceDecl {
         self.method_get_type_params,
         &[],
         "Optional get_type_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_declare<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -18400,8 +18416,8 @@ impl JavaSwc4jAstTsInterfaceDecl {
         self.method_is_declare,
         &[],
         "boolean is_declare()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -18449,7 +18465,7 @@ impl JavaSwc4jAstTsIntersectionType {
     env: &mut JNIEnv<'local>,
     types: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18461,15 +18477,15 @@ impl JavaSwc4jAstTsIntersectionType {
         self.method_construct,
         &[types, span],
         "Swc4jAstTsIntersectionType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_types<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18479,8 +18495,8 @@ impl JavaSwc4jAstTsIntersectionType {
         self.method_get_types,
         &[],
         "List get_types()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -18528,7 +18544,7 @@ impl JavaSwc4jAstTsKeywordType {
     env: &mut JNIEnv<'local>,
     kind: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18540,15 +18556,15 @@ impl JavaSwc4jAstTsKeywordType {
         self.method_construct,
         &[kind, span],
         "Swc4jAstTsKeywordType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_kind<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18558,8 +18574,8 @@ impl JavaSwc4jAstTsKeywordType {
         self.method_get_kind,
         &[],
         "Swc4jAstTsKeywordTypeKind get_kind()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -18607,7 +18623,7 @@ impl JavaSwc4jAstTsLitType {
     env: &mut JNIEnv<'local>,
     lit: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18619,15 +18635,15 @@ impl JavaSwc4jAstTsLitType {
         self.method_construct,
         &[lit, span],
         "Swc4jAstTsLitType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_lit<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18637,8 +18653,8 @@ impl JavaSwc4jAstTsLitType {
         self.method_get_lit,
         &[],
         "ISwc4jAstTsLit get_lit()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -18726,7 +18742,7 @@ impl JavaSwc4jAstTsMappedType {
     optional: &Option<JObject>,
     type_ann: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18742,15 +18758,15 @@ impl JavaSwc4jAstTsMappedType {
         self.method_construct,
         &[readonly, type_param, name_type, optional, type_ann, span],
         "Swc4jAstTsMappedType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_name_type<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18760,15 +18776,15 @@ impl JavaSwc4jAstTsMappedType {
         self.method_get_name_type,
         &[],
         "Optional get_name_type()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_optional<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18778,15 +18794,15 @@ impl JavaSwc4jAstTsMappedType {
         self.method_get_optional,
         &[],
         "Optional get_optional()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_readonly<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18796,15 +18812,15 @@ impl JavaSwc4jAstTsMappedType {
         self.method_get_readonly,
         &[],
         "Optional get_readonly()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18814,15 +18830,15 @@ impl JavaSwc4jAstTsMappedType {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_param<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18832,8 +18848,8 @@ impl JavaSwc4jAstTsMappedType {
         self.method_get_type_param,
         &[],
         "Swc4jAstTsTypeParam get_type_param()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -18931,7 +18947,7 @@ impl JavaSwc4jAstTsMethodSignature {
     type_ann: &Option<JObject>,
     type_params: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18948,15 +18964,15 @@ impl JavaSwc4jAstTsMethodSignature {
         self.method_construct,
         &[key, computed, optional, params, type_ann, type_params, span],
         "Swc4jAstTsMethodSignature construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18966,15 +18982,15 @@ impl JavaSwc4jAstTsMethodSignature {
         self.method_get_key,
         &[],
         "ISwc4jAstExpr get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -18984,15 +19000,15 @@ impl JavaSwc4jAstTsMethodSignature {
         self.method_get_params,
         &[],
         "List get_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19002,15 +19018,15 @@ impl JavaSwc4jAstTsMethodSignature {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19020,15 +19036,15 @@ impl JavaSwc4jAstTsMethodSignature {
         self.method_get_type_params,
         &[],
         "Optional get_type_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_computed<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -19036,15 +19052,15 @@ impl JavaSwc4jAstTsMethodSignature {
         self.method_is_computed,
         &[],
         "boolean is_computed()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_optional<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -19052,8 +19068,8 @@ impl JavaSwc4jAstTsMethodSignature {
         self.method_is_optional,
         &[],
         "boolean is_optional()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -19101,7 +19117,7 @@ impl JavaSwc4jAstTsModuleBlock {
     env: &mut JNIEnv<'local>,
     body: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19113,15 +19129,15 @@ impl JavaSwc4jAstTsModuleBlock {
         self.method_construct,
         &[body, span],
         "Swc4jAstTsModuleBlock construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19131,8 +19147,8 @@ impl JavaSwc4jAstTsModuleBlock {
         self.method_get_body,
         &[],
         "List get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -19210,7 +19226,7 @@ impl JavaSwc4jAstTsModuleDecl {
     id: &JObject<'_>,
     body: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19225,15 +19241,15 @@ impl JavaSwc4jAstTsModuleDecl {
         self.method_construct,
         &[declare, global, id, body, span],
         "Swc4jAstTsModuleDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19243,15 +19259,15 @@ impl JavaSwc4jAstTsModuleDecl {
         self.method_get_body,
         &[],
         "Optional get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_id<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19261,15 +19277,15 @@ impl JavaSwc4jAstTsModuleDecl {
         self.method_get_id,
         &[],
         "ISwc4jAstTsModuleName get_id()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_declare<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -19277,15 +19293,15 @@ impl JavaSwc4jAstTsModuleDecl {
         self.method_is_declare,
         &[],
         "boolean is_declare()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_global<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -19293,8 +19309,8 @@ impl JavaSwc4jAstTsModuleDecl {
         self.method_is_global,
         &[],
         "boolean is_global()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -19372,7 +19388,7 @@ impl JavaSwc4jAstTsNamespaceDecl {
     id: &JObject<'_>,
     body: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19387,15 +19403,15 @@ impl JavaSwc4jAstTsNamespaceDecl {
         self.method_construct,
         &[declare, global, id, body, span],
         "Swc4jAstTsNamespaceDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19405,15 +19421,15 @@ impl JavaSwc4jAstTsNamespaceDecl {
         self.method_get_body,
         &[],
         "ISwc4jAstTsNamespaceBody get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_id<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19423,15 +19439,15 @@ impl JavaSwc4jAstTsNamespaceDecl {
         self.method_get_id,
         &[],
         "Swc4jAstIdent get_id()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_declare<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -19439,15 +19455,15 @@ impl JavaSwc4jAstTsNamespaceDecl {
         self.method_is_declare,
         &[],
         "boolean is_declare()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_global<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -19455,8 +19471,8 @@ impl JavaSwc4jAstTsNamespaceDecl {
         self.method_is_global,
         &[],
         "boolean is_global()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -19504,7 +19520,7 @@ impl JavaSwc4jAstTsNamespaceExportDecl {
     env: &mut JNIEnv<'local>,
     id: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19516,15 +19532,15 @@ impl JavaSwc4jAstTsNamespaceExportDecl {
         self.method_construct,
         &[id, span],
         "Swc4jAstTsNamespaceExportDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_id<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19534,8 +19550,8 @@ impl JavaSwc4jAstTsNamespaceExportDecl {
         self.method_get_id,
         &[],
         "Swc4jAstIdent get_id()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -19583,7 +19599,7 @@ impl JavaSwc4jAstTsNonNullExpr {
     env: &mut JNIEnv<'local>,
     expr: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19595,15 +19611,15 @@ impl JavaSwc4jAstTsNonNullExpr {
         self.method_construct,
         &[expr, span],
         "Swc4jAstTsNonNullExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19613,8 +19629,8 @@ impl JavaSwc4jAstTsNonNullExpr {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -19662,7 +19678,7 @@ impl JavaSwc4jAstTsOptionalType {
     env: &mut JNIEnv<'local>,
     type_ann: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19674,15 +19690,15 @@ impl JavaSwc4jAstTsOptionalType {
         self.method_construct,
         &[type_ann, span],
         "Swc4jAstTsOptionalType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19692,8 +19708,8 @@ impl JavaSwc4jAstTsOptionalType {
         self.method_get_type_ann,
         &[],
         "ISwc4jAstTsType get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -19781,7 +19797,7 @@ impl JavaSwc4jAstTsParamProp {
     readonly: bool,
     param: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19797,15 +19813,15 @@ impl JavaSwc4jAstTsParamProp {
         self.method_construct,
         &[decorators, accessibility, is_override, readonly, param, span],
         "Swc4jAstTsParamProp construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_accessibility<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19815,15 +19831,15 @@ impl JavaSwc4jAstTsParamProp {
         self.method_get_accessibility,
         &[],
         "Optional get_accessibility()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_decorators<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19833,15 +19849,15 @@ impl JavaSwc4jAstTsParamProp {
         self.method_get_decorators,
         &[],
         "List get_decorators()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_param<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19851,15 +19867,15 @@ impl JavaSwc4jAstTsParamProp {
         self.method_get_param,
         &[],
         "ISwc4jAstTsParamPropParam get_param()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_override<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -19867,15 +19883,15 @@ impl JavaSwc4jAstTsParamProp {
         self.method_is_override,
         &[],
         "boolean is_override()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_readonly<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -19883,8 +19899,8 @@ impl JavaSwc4jAstTsParamProp {
         self.method_is_readonly,
         &[],
         "boolean is_readonly()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -19932,7 +19948,7 @@ impl JavaSwc4jAstTsParenthesizedType {
     env: &mut JNIEnv<'local>,
     type_ann: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19944,15 +19960,15 @@ impl JavaSwc4jAstTsParenthesizedType {
         self.method_construct,
         &[type_ann, span],
         "Swc4jAstTsParenthesizedType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -19962,8 +19978,8 @@ impl JavaSwc4jAstTsParenthesizedType {
         self.method_get_type_ann,
         &[],
         "ISwc4jAstTsType get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -20051,7 +20067,7 @@ impl JavaSwc4jAstTsPropertySignature {
     optional: bool,
     type_ann: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20067,15 +20083,15 @@ impl JavaSwc4jAstTsPropertySignature {
         self.method_construct,
         &[readonly, key, computed, optional, type_ann, span],
         "Swc4jAstTsPropertySignature construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20085,15 +20101,15 @@ impl JavaSwc4jAstTsPropertySignature {
         self.method_get_key,
         &[],
         "ISwc4jAstExpr get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20103,15 +20119,15 @@ impl JavaSwc4jAstTsPropertySignature {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_computed<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -20119,15 +20135,15 @@ impl JavaSwc4jAstTsPropertySignature {
         self.method_is_computed,
         &[],
         "boolean is_computed()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_optional<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -20135,15 +20151,15 @@ impl JavaSwc4jAstTsPropertySignature {
         self.method_is_optional,
         &[],
         "boolean is_optional()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_readonly<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -20151,8 +20167,8 @@ impl JavaSwc4jAstTsPropertySignature {
         self.method_is_readonly,
         &[],
         "boolean is_readonly()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -20210,7 +20226,7 @@ impl JavaSwc4jAstTsQualifiedName {
     left: &JObject<'_>,
     right: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20223,15 +20239,15 @@ impl JavaSwc4jAstTsQualifiedName {
         self.method_construct,
         &[left, right, span],
         "Swc4jAstTsQualifiedName construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_left<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20241,15 +20257,15 @@ impl JavaSwc4jAstTsQualifiedName {
         self.method_get_left,
         &[],
         "ISwc4jAstTsEntityName get_left()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_right<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20259,8 +20275,8 @@ impl JavaSwc4jAstTsQualifiedName {
         self.method_get_right,
         &[],
         "Swc4jAstIdentName get_right()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -20308,7 +20324,7 @@ impl JavaSwc4jAstTsRestType {
     env: &mut JNIEnv<'local>,
     type_ann: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20320,15 +20336,15 @@ impl JavaSwc4jAstTsRestType {
         self.method_construct,
         &[type_ann, span],
         "Swc4jAstTsRestType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20338,8 +20354,8 @@ impl JavaSwc4jAstTsRestType {
         self.method_get_type_ann,
         &[],
         "ISwc4jAstTsType get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -20397,7 +20413,7 @@ impl JavaSwc4jAstTsSatisfiesExpr {
     expr: &JObject<'_>,
     type_ann: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20410,15 +20426,15 @@ impl JavaSwc4jAstTsSatisfiesExpr {
         self.method_construct,
         &[expr, type_ann, span],
         "Swc4jAstTsSatisfiesExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20428,15 +20444,15 @@ impl JavaSwc4jAstTsSatisfiesExpr {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20446,8 +20462,8 @@ impl JavaSwc4jAstTsSatisfiesExpr {
         self.method_get_type_ann,
         &[],
         "ISwc4jAstTsType get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -20515,7 +20531,7 @@ impl JavaSwc4jAstTsSetterSignature {
     computed: bool,
     param: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20529,15 +20545,15 @@ impl JavaSwc4jAstTsSetterSignature {
         self.method_construct,
         &[key, computed, param, span],
         "Swc4jAstTsSetterSignature construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_key<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20547,15 +20563,15 @@ impl JavaSwc4jAstTsSetterSignature {
         self.method_get_key,
         &[],
         "ISwc4jAstExpr get_key()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_param<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20565,15 +20581,15 @@ impl JavaSwc4jAstTsSetterSignature {
         self.method_get_param,
         &[],
         "ISwc4jAstTsFnParam get_param()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_computed<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -20581,8 +20597,8 @@ impl JavaSwc4jAstTsSetterSignature {
         self.method_is_computed,
         &[],
         "boolean is_computed()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -20620,7 +20636,7 @@ impl JavaSwc4jAstTsThisType {
     &self,
     env: &mut JNIEnv<'local>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20631,8 +20647,8 @@ impl JavaSwc4jAstTsThisType {
         self.method_construct,
         &[span],
         "Swc4jAstTsThisType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -20690,7 +20706,7 @@ impl JavaSwc4jAstTsTplLitType {
     types: &JObject<'_>,
     quasis: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20703,15 +20719,15 @@ impl JavaSwc4jAstTsTplLitType {
         self.method_construct,
         &[types, quasis, span],
         "Swc4jAstTsTplLitType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_quasis<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20721,15 +20737,15 @@ impl JavaSwc4jAstTsTplLitType {
         self.method_get_quasis,
         &[],
         "List get_quasis()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_types<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20739,8 +20755,8 @@ impl JavaSwc4jAstTsTplLitType {
         self.method_get_types,
         &[],
         "List get_types()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -20798,7 +20814,7 @@ impl JavaSwc4jAstTsTupleElement {
     label: &Option<JObject>,
     ty: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20811,15 +20827,15 @@ impl JavaSwc4jAstTsTupleElement {
         self.method_construct,
         &[label, ty, span],
         "Swc4jAstTsTupleElement construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_label<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20829,15 +20845,15 @@ impl JavaSwc4jAstTsTupleElement {
         self.method_get_label,
         &[],
         "Optional get_label()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ty<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20847,8 +20863,8 @@ impl JavaSwc4jAstTsTupleElement {
         self.method_get_ty,
         &[],
         "ISwc4jAstTsType get_ty()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -20896,7 +20912,7 @@ impl JavaSwc4jAstTsTupleType {
     env: &mut JNIEnv<'local>,
     elem_types: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20908,15 +20924,15 @@ impl JavaSwc4jAstTsTupleType {
         self.method_construct,
         &[elem_types, span],
         "Swc4jAstTsTupleType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_elem_types<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -20926,8 +20942,8 @@ impl JavaSwc4jAstTsTupleType {
         self.method_get_elem_types,
         &[],
         "List get_elem_types()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -21005,7 +21021,7 @@ impl JavaSwc4jAstTsTypeAliasDecl {
     type_params: &Option<JObject>,
     type_ann: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21020,15 +21036,15 @@ impl JavaSwc4jAstTsTypeAliasDecl {
         self.method_construct,
         &[id, declare, type_params, type_ann, span],
         "Swc4jAstTsTypeAliasDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_id<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21038,15 +21054,15 @@ impl JavaSwc4jAstTsTypeAliasDecl {
         self.method_get_id,
         &[],
         "Swc4jAstIdent get_id()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21056,15 +21072,15 @@ impl JavaSwc4jAstTsTypeAliasDecl {
         self.method_get_type_ann,
         &[],
         "ISwc4jAstTsType get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21074,15 +21090,15 @@ impl JavaSwc4jAstTsTypeAliasDecl {
         self.method_get_type_params,
         &[],
         "Optional get_type_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_declare<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -21090,8 +21106,8 @@ impl JavaSwc4jAstTsTypeAliasDecl {
         self.method_is_declare,
         &[],
         "boolean is_declare()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -21139,7 +21155,7 @@ impl JavaSwc4jAstTsTypeAnn {
     env: &mut JNIEnv<'local>,
     type_ann: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21151,15 +21167,15 @@ impl JavaSwc4jAstTsTypeAnn {
         self.method_construct,
         &[type_ann, span],
         "Swc4jAstTsTypeAnn construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21169,8 +21185,8 @@ impl JavaSwc4jAstTsTypeAnn {
         self.method_get_type_ann,
         &[],
         "ISwc4jAstTsType get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -21228,7 +21244,7 @@ impl JavaSwc4jAstTsTypeAssertion {
     expr: &JObject<'_>,
     type_ann: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21241,15 +21257,15 @@ impl JavaSwc4jAstTsTypeAssertion {
         self.method_construct,
         &[expr, type_ann, span],
         "Swc4jAstTsTypeAssertion construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21259,15 +21275,15 @@ impl JavaSwc4jAstTsTypeAssertion {
         self.method_get_expr,
         &[],
         "ISwc4jAstExpr get_expr()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21277,8 +21293,8 @@ impl JavaSwc4jAstTsTypeAssertion {
         self.method_get_type_ann,
         &[],
         "ISwc4jAstTsType get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -21326,7 +21342,7 @@ impl JavaSwc4jAstTsTypeLit {
     env: &mut JNIEnv<'local>,
     members: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21338,15 +21354,15 @@ impl JavaSwc4jAstTsTypeLit {
         self.method_construct,
         &[members, span],
         "Swc4jAstTsTypeLit construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_members<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21356,8 +21372,8 @@ impl JavaSwc4jAstTsTypeLit {
         self.method_get_members,
         &[],
         "List get_members()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -21415,7 +21431,7 @@ impl JavaSwc4jAstTsTypeOperator {
     op: &JObject<'_>,
     type_ann: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21428,15 +21444,15 @@ impl JavaSwc4jAstTsTypeOperator {
         self.method_construct,
         &[op, type_ann, span],
         "Swc4jAstTsTypeOperator construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_op<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21446,15 +21462,15 @@ impl JavaSwc4jAstTsTypeOperator {
         self.method_get_op,
         &[],
         "Swc4jAstTsTypeOperatorOp get_op()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21464,8 +21480,8 @@ impl JavaSwc4jAstTsTypeOperator {
         self.method_get_type_ann,
         &[],
         "ISwc4jAstTsType get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -21563,7 +21579,7 @@ impl JavaSwc4jAstTsTypeParam {
     constraint: &Option<JObject>,
     default: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21580,15 +21596,15 @@ impl JavaSwc4jAstTsTypeParam {
         self.method_construct,
         &[name, is_in, is_out, is_count, constraint, default, span],
         "Swc4jAstTsTypeParam construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_constraint<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21598,15 +21614,15 @@ impl JavaSwc4jAstTsTypeParam {
         self.method_get_constraint,
         &[],
         "Optional get_constraint()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_default<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21616,15 +21632,15 @@ impl JavaSwc4jAstTsTypeParam {
         self.method_get_default,
         &[],
         "Optional get_default()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_name<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21634,15 +21650,15 @@ impl JavaSwc4jAstTsTypeParam {
         self.method_get_name,
         &[],
         "Swc4jAstIdent get_name()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_const<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -21650,15 +21666,15 @@ impl JavaSwc4jAstTsTypeParam {
         self.method_is_const,
         &[],
         "boolean is_const()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_in<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -21666,15 +21682,15 @@ impl JavaSwc4jAstTsTypeParam {
         self.method_is_in,
         &[],
         "boolean is_in()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_out<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -21682,8 +21698,8 @@ impl JavaSwc4jAstTsTypeParam {
         self.method_is_out,
         &[],
         "boolean is_out()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -21731,7 +21747,7 @@ impl JavaSwc4jAstTsTypeParamDecl {
     env: &mut JNIEnv<'local>,
     params: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21743,15 +21759,15 @@ impl JavaSwc4jAstTsTypeParamDecl {
         self.method_construct,
         &[params, span],
         "Swc4jAstTsTypeParamDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21761,8 +21777,8 @@ impl JavaSwc4jAstTsTypeParamDecl {
         self.method_get_params,
         &[],
         "List get_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -21810,7 +21826,7 @@ impl JavaSwc4jAstTsTypeParamInstantiation {
     env: &mut JNIEnv<'local>,
     params: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21822,15 +21838,15 @@ impl JavaSwc4jAstTsTypeParamInstantiation {
         self.method_construct,
         &[params, span],
         "Swc4jAstTsTypeParamInstantiation construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21840,8 +21856,8 @@ impl JavaSwc4jAstTsTypeParamInstantiation {
         self.method_get_params,
         &[],
         "List get_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -21909,7 +21925,7 @@ impl JavaSwc4jAstTsTypePredicate {
     param_name: &JObject<'_>,
     type_ann: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21923,15 +21939,15 @@ impl JavaSwc4jAstTsTypePredicate {
         self.method_construct,
         &[asserts, param_name, type_ann, span],
         "Swc4jAstTsTypePredicate construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_param_name<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21941,15 +21957,15 @@ impl JavaSwc4jAstTsTypePredicate {
         self.method_get_param_name,
         &[],
         "ISwc4jAstTsThisTypeOrIdent get_param_name()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_ann<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -21959,15 +21975,15 @@ impl JavaSwc4jAstTsTypePredicate {
         self.method_get_type_ann,
         &[],
         "Optional get_type_ann()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_asserts<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -21975,8 +21991,8 @@ impl JavaSwc4jAstTsTypePredicate {
         self.method_is_asserts,
         &[],
         "boolean is_asserts()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -22034,7 +22050,7 @@ impl JavaSwc4jAstTsTypeQuery {
     expr_name: &JObject<'_>,
     type_args: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22047,15 +22063,15 @@ impl JavaSwc4jAstTsTypeQuery {
         self.method_construct,
         &[expr_name, type_args, span],
         "Swc4jAstTsTypeQuery construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_expr_name<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22065,15 +22081,15 @@ impl JavaSwc4jAstTsTypeQuery {
         self.method_get_expr_name,
         &[],
         "ISwc4jAstTsTypeQueryExpr get_expr_name()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_args<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22083,8 +22099,8 @@ impl JavaSwc4jAstTsTypeQuery {
         self.method_get_type_args,
         &[],
         "Optional get_type_args()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -22142,7 +22158,7 @@ impl JavaSwc4jAstTsTypeRef {
     type_name: &JObject<'_>,
     type_params: &Option<JObject>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22155,15 +22171,15 @@ impl JavaSwc4jAstTsTypeRef {
         self.method_construct,
         &[type_name, type_params, span],
         "Swc4jAstTsTypeRef construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_name<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22173,15 +22189,15 @@ impl JavaSwc4jAstTsTypeRef {
         self.method_get_type_name,
         &[],
         "ISwc4jAstTsEntityName get_type_name()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_type_params<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22191,8 +22207,8 @@ impl JavaSwc4jAstTsTypeRef {
         self.method_get_type_params,
         &[],
         "Optional get_type_params()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -22240,7 +22256,7 @@ impl JavaSwc4jAstTsUnionType {
     env: &mut JNIEnv<'local>,
     types: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22252,15 +22268,15 @@ impl JavaSwc4jAstTsUnionType {
         self.method_construct,
         &[types, span],
         "Swc4jAstTsUnionType construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_types<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22270,8 +22286,8 @@ impl JavaSwc4jAstTsUnionType {
         self.method_get_types,
         &[],
         "List get_types()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -22329,7 +22345,7 @@ impl JavaSwc4jAstUnaryExpr {
     op: &JObject<'_>,
     arg: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22342,15 +22358,15 @@ impl JavaSwc4jAstUnaryExpr {
         self.method_construct,
         &[op, arg, span],
         "Swc4jAstUnaryExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_arg<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22360,15 +22376,15 @@ impl JavaSwc4jAstUnaryExpr {
         self.method_get_arg,
         &[],
         "ISwc4jAstExpr get_arg()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_op<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22378,8 +22394,8 @@ impl JavaSwc4jAstUnaryExpr {
         self.method_get_op,
         &[],
         "Swc4jAstUnaryOp get_op()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -22447,7 +22463,7 @@ impl JavaSwc4jAstUpdateExpr {
     prefix: bool,
     arg: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22461,15 +22477,15 @@ impl JavaSwc4jAstUpdateExpr {
         self.method_construct,
         &[op, prefix, arg, span],
         "Swc4jAstUpdateExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_arg<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22479,15 +22495,15 @@ impl JavaSwc4jAstUpdateExpr {
         self.method_get_arg,
         &[],
         "ISwc4jAstExpr get_arg()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_op<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22497,15 +22513,15 @@ impl JavaSwc4jAstUpdateExpr {
         self.method_get_op,
         &[],
         "Swc4jAstUpdateOp get_op()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_prefix<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -22513,8 +22529,8 @@ impl JavaSwc4jAstUpdateExpr {
         self.method_is_prefix,
         &[],
         "boolean is_prefix()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -22572,7 +22588,7 @@ impl JavaSwc4jAstUsingDecl {
     is_await: bool,
     decls: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22585,15 +22601,15 @@ impl JavaSwc4jAstUsingDecl {
         self.method_construct,
         &[is_await, decls, span],
         "Swc4jAstUsingDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_decls<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22603,15 +22619,15 @@ impl JavaSwc4jAstUsingDecl {
         self.method_get_decls,
         &[],
         "List get_decls()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_await<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -22619,8 +22635,8 @@ impl JavaSwc4jAstUsingDecl {
         self.method_is_await,
         &[],
         "boolean is_await()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -22698,7 +22714,7 @@ impl JavaSwc4jAstVarDecl {
     declare: bool,
     decls: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22714,15 +22730,15 @@ impl JavaSwc4jAstVarDecl {
         self.method_construct,
         &[ctxt, kind, declare, decls, span],
         "Swc4jAstVarDecl construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_ctxt<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> i32
+  ) -> Result<i32>
   {
     let return_value = call_as_int!(
         env,
@@ -22730,15 +22746,15 @@ impl JavaSwc4jAstVarDecl {
         self.method_get_ctxt,
         &[],
         "int get_ctxt()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_decls<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22748,15 +22764,15 @@ impl JavaSwc4jAstVarDecl {
         self.method_get_decls,
         &[],
         "List get_decls()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_kind<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22766,15 +22782,15 @@ impl JavaSwc4jAstVarDecl {
         self.method_get_kind,
         &[],
         "Swc4jAstVarDeclKind get_kind()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_declare<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -22782,8 +22798,8 @@ impl JavaSwc4jAstVarDecl {
         self.method_is_declare,
         &[],
         "boolean is_declare()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -22851,7 +22867,7 @@ impl JavaSwc4jAstVarDeclarator {
     init: &Option<JObject>,
     definite: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22865,15 +22881,15 @@ impl JavaSwc4jAstVarDeclarator {
         self.method_construct,
         &[name, init, definite, span],
         "Swc4jAstVarDeclarator construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_init<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22883,15 +22899,15 @@ impl JavaSwc4jAstVarDeclarator {
         self.method_get_init,
         &[],
         "Optional get_init()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_name<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22901,15 +22917,15 @@ impl JavaSwc4jAstVarDeclarator {
         self.method_get_name,
         &[],
         "ISwc4jAstPat get_name()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_definite<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -22917,8 +22933,8 @@ impl JavaSwc4jAstVarDeclarator {
         self.method_is_definite,
         &[],
         "boolean is_definite()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -22976,7 +22992,7 @@ impl JavaSwc4jAstWhileStmt {
     test: &JObject<'_>,
     body: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -22989,15 +23005,15 @@ impl JavaSwc4jAstWhileStmt {
         self.method_construct,
         &[test, body, span],
         "Swc4jAstWhileStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -23007,15 +23023,15 @@ impl JavaSwc4jAstWhileStmt {
         self.method_get_body,
         &[],
         "ISwc4jAstStmt get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_test<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -23025,8 +23041,8 @@ impl JavaSwc4jAstWhileStmt {
         self.method_get_test,
         &[],
         "ISwc4jAstExpr get_test()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -23084,7 +23100,7 @@ impl JavaSwc4jAstWithStmt {
     obj: &JObject<'_>,
     body: &JObject<'_>,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -23097,15 +23113,15 @@ impl JavaSwc4jAstWithStmt {
         self.method_construct,
         &[obj, body, span],
         "Swc4jAstWithStmt construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_body<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -23115,15 +23131,15 @@ impl JavaSwc4jAstWithStmt {
         self.method_get_body,
         &[],
         "ISwc4jAstStmt get_body()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_obj<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -23133,8 +23149,8 @@ impl JavaSwc4jAstWithStmt {
         self.method_get_obj,
         &[],
         "ISwc4jAstExpr get_obj()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -23192,7 +23208,7 @@ impl JavaSwc4jAstYieldExpr {
     arg: &Option<JObject>,
     delegate: bool,
     span: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -23205,15 +23221,15 @@ impl JavaSwc4jAstYieldExpr {
         self.method_construct,
         &[arg, delegate, span],
         "Swc4jAstYieldExpr construct()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_arg<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -23223,15 +23239,15 @@ impl JavaSwc4jAstYieldExpr {
         self.method_get_arg,
         &[],
         "Optional get_arg()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 
   pub fn is_delegate<'local>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> bool
+  ) -> Result<bool>
   {
     let return_value = call_as_boolean!(
         env,
@@ -23239,8 +23255,8 @@ impl JavaSwc4jAstYieldExpr {
         self.method_is_delegate,
         &[],
         "boolean is_delegate()"
-      );
-    return_value
+      )?;
+    Ok(return_value)
   }
 }
 
@@ -23706,7 +23722,7 @@ impl RegisterWithMap<ByteToIndexMap> for AssignTarget {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for AssignTarget {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -23719,19 +23735,19 @@ impl ToJavaWithMap<ByteToIndexMap> for AssignTarget {
 
 impl<'local> FromJava<'local> for AssignTarget {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ASSIGN_TARGET_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        AssignTarget::Pat(AssignTargetPat::from_java(env, jobj))
+        AssignTarget::Pat(*AssignTargetPat::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_SIMPLE_ASSIGN_TARGET.as_ref().unwrap()}.class)).unwrap_or(false) {
-        AssignTarget::Simple(SimpleAssignTarget::from_java(env, jobj))
+        AssignTarget::Simple(*SimpleAssignTarget::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by AssignTarget", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -23746,7 +23762,7 @@ impl RegisterWithMap<ByteToIndexMap> for AssignTargetPat {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for AssignTargetPat {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -23760,21 +23776,21 @@ impl ToJavaWithMap<ByteToIndexMap> for AssignTargetPat {
 
 impl<'local> FromJava<'local> for AssignTargetPat {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ARRAY_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        AssignTargetPat::Array(ArrayPat::from_java(env, jobj))
+        AssignTargetPat::Array(*ArrayPat::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_INVALID.as_ref().unwrap()}.class)).unwrap_or(false) {
-        AssignTargetPat::Invalid(Invalid::from_java(env, jobj))
+        AssignTargetPat::Invalid(*Invalid::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_OBJECT_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        AssignTargetPat::Object(ObjectPat::from_java(env, jobj))
+        AssignTargetPat::Object(*ObjectPat::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by AssignTargetPat", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -23788,7 +23804,7 @@ impl RegisterWithMap<ByteToIndexMap> for BlockStmtOrExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for BlockStmtOrExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -23801,19 +23817,19 @@ impl ToJavaWithMap<ByteToIndexMap> for BlockStmtOrExpr {
 
 impl<'local> FromJava<'local> for BlockStmtOrExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BLOCK_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        BlockStmtOrExpr::BlockStmt(BlockStmt::from_java(env, jobj))
+        BlockStmtOrExpr::BlockStmt(*BlockStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        BlockStmtOrExpr::Expr(Box::new(Expr::from_java(env, jobj)))
+        BlockStmtOrExpr::Expr(Expr::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by BlockStmtOrExpr", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -23828,7 +23844,7 @@ impl RegisterWithMap<ByteToIndexMap> for Callee {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Callee {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -23842,21 +23858,21 @@ impl ToJavaWithMap<ByteToIndexMap> for Callee {
 
 impl<'local> FromJava<'local> for Callee {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Callee::Expr(Box::new(Expr::from_java(env, jobj)))
+        Callee::Expr(Expr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IMPORT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Callee::Import(Import::from_java(env, jobj))
+        Callee::Import(*Import::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_SUPER.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Callee::Super(Super::from_java(env, jobj))
+        Callee::Super(*Super::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by Callee", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -23877,7 +23893,7 @@ impl RegisterWithMap<ByteToIndexMap> for ClassMember {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ClassMember {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -23897,33 +23913,33 @@ impl ToJavaWithMap<ByteToIndexMap> for ClassMember {
 
 impl<'local> FromJava<'local> for ClassMember {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_AUTO_ACCESSOR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ClassMember::AutoAccessor(AutoAccessor::from_java(env, jobj))
+        ClassMember::AutoAccessor(*AutoAccessor::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_CLASS_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ClassMember::ClassProp(ClassProp::from_java(env, jobj))
+        ClassMember::ClassProp(*ClassProp::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_CONSTRUCTOR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ClassMember::Constructor(Constructor::from_java(env, jobj))
+        ClassMember::Constructor(*Constructor::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EMPTY_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ClassMember::Empty(EmptyStmt::from_java(env, jobj))
+        ClassMember::Empty(*EmptyStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_CLASS_METHOD.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ClassMember::Method(ClassMethod::from_java(env, jobj))
+        ClassMember::Method(*ClassMethod::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PRIVATE_METHOD.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ClassMember::PrivateMethod(PrivateMethod::from_java(env, jobj))
+        ClassMember::PrivateMethod(*PrivateMethod::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PRIVATE_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ClassMember::PrivateProp(PrivateProp::from_java(env, jobj))
+        ClassMember::PrivateProp(*PrivateProp::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_STATIC_BLOCK.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ClassMember::StaticBlock(StaticBlock::from_java(env, jobj))
+        ClassMember::StaticBlock(*StaticBlock::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_INDEX_SIGNATURE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ClassMember::TsIndexSignature(TsIndexSignature::from_java(env, jobj))
+        ClassMember::TsIndexSignature(*TsIndexSignature::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by ClassMember", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -23943,7 +23959,7 @@ impl RegisterWithMap<ByteToIndexMap> for Decl {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Decl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -23962,31 +23978,31 @@ impl ToJavaWithMap<ByteToIndexMap> for Decl {
 
 impl<'local> FromJava<'local> for Decl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_CLASS_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Decl::Class(ClassDecl::from_java(env, jobj))
+        Decl::Class(*ClassDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_FN_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Decl::Fn(FnDecl::from_java(env, jobj))
+        Decl::Fn(*FnDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_ENUM_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Decl::TsEnum(Box::new(TsEnumDecl::from_java(env, jobj)))
+        Decl::TsEnum(TsEnumDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_INTERFACE_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Decl::TsInterface(Box::new(TsInterfaceDecl::from_java(env, jobj)))
+        Decl::TsInterface(TsInterfaceDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_MODULE_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Decl::TsModule(Box::new(TsModuleDecl::from_java(env, jobj)))
+        Decl::TsModule(TsModuleDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_TYPE_ALIAS_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Decl::TsTypeAlias(Box::new(TsTypeAliasDecl::from_java(env, jobj)))
+        Decl::TsTypeAlias(TsTypeAliasDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_USING_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Decl::Using(Box::new(UsingDecl::from_java(env, jobj)))
+        Decl::Using(UsingDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_VAR_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Decl::Var(Box::new(VarDecl::from_java(env, jobj)))
+        Decl::Var(VarDecl::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by Decl", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24001,7 +24017,7 @@ impl RegisterWithMap<ByteToIndexMap> for DefaultDecl {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for DefaultDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24015,21 +24031,21 @@ impl ToJavaWithMap<ByteToIndexMap> for DefaultDecl {
 
 impl<'local> FromJava<'local> for DefaultDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_CLASS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        DefaultDecl::Class(ClassExpr::from_java(env, jobj))
+        DefaultDecl::Class(*ClassExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_FN_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        DefaultDecl::Fn(FnExpr::from_java(env, jobj))
+        DefaultDecl::Fn(*FnExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_INTERFACE_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        DefaultDecl::TsInterfaceDecl(Box::new(TsInterfaceDecl::from_java(env, jobj)))
+        DefaultDecl::TsInterfaceDecl(TsInterfaceDecl::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by DefaultDecl", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24044,7 +24060,7 @@ impl RegisterWithMap<ByteToIndexMap> for ExportSpecifier {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ExportSpecifier {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24058,21 +24074,21 @@ impl ToJavaWithMap<ByteToIndexMap> for ExportSpecifier {
 
 impl<'local> FromJava<'local> for ExportSpecifier {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPORT_DEFAULT_SPECIFIER.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ExportSpecifier::Default(ExportDefaultSpecifier::from_java(env, jobj))
+        ExportSpecifier::Default(*ExportDefaultSpecifier::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPORT_NAMED_SPECIFIER.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ExportSpecifier::Named(ExportNamedSpecifier::from_java(env, jobj))
+        ExportSpecifier::Named(*ExportNamedSpecifier::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPORT_NAMESPACE_SPECIFIER.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ExportSpecifier::Namespace(ExportNamespaceSpecifier::from_java(env, jobj))
+        ExportSpecifier::Namespace(*ExportNamespaceSpecifier::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by ExportSpecifier", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24122,7 +24138,7 @@ impl RegisterWithMap<ByteToIndexMap> for Expr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Expr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24171,91 +24187,91 @@ impl ToJavaWithMap<ByteToIndexMap> for Expr {
 
 impl<'local> FromJava<'local> for Expr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ARRAY_LIT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Array(ArrayLit::from_java(env, jobj))
+        Expr::Array(*ArrayLit::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ARROW_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Arrow(ArrowExpr::from_java(env, jobj))
+        Expr::Arrow(*ArrowExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ASSIGN_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Assign(AssignExpr::from_java(env, jobj))
+        Expr::Assign(*AssignExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_AWAIT_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Await(AwaitExpr::from_java(env, jobj))
+        Expr::Await(*AwaitExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BIN_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Bin(BinExpr::from_java(env, jobj))
+        Expr::Bin(*BinExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_CALL_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Call(CallExpr::from_java(env, jobj))
+        Expr::Call(*CallExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_CLASS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Class(ClassExpr::from_java(env, jobj))
+        Expr::Class(*ClassExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_COND_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Cond(CondExpr::from_java(env, jobj))
+        Expr::Cond(*CondExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_FN_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Fn(FnExpr::from_java(env, jobj))
+        Expr::Fn(*FnExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Ident(Ident::from_java(env, jobj))
+        Expr::Ident(*Ident::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_INVALID.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Invalid(Invalid::from_java(env, jobj))
+        Expr::Invalid(*Invalid::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_ELEMENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::JSXElement(Box::new(JSXElement::from_java(env, jobj)))
+        Expr::JSXElement(JSXElement::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_EMPTY_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::JSXEmpty(JSXEmptyExpr::from_java(env, jobj))
+        Expr::JSXEmpty(*JSXEmptyExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_FRAGMENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::JSXFragment(JSXFragment::from_java(env, jobj))
+        Expr::JSXFragment(*JSXFragment::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_MEMBER_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::JSXMember(JSXMemberExpr::from_java(env, jobj))
+        Expr::JSXMember(*JSXMemberExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_NAMESPACED_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::JSXNamespacedName(JSXNamespacedName::from_java(env, jobj))
+        Expr::JSXNamespacedName(*JSXNamespacedName::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_LIT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Lit(Lit::from_java(env, jobj))
+        Expr::Lit(*Lit::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_MEMBER_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Member(MemberExpr::from_java(env, jobj))
+        Expr::Member(*MemberExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_META_PROP_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::MetaProp(MetaPropExpr::from_java(env, jobj))
+        Expr::MetaProp(*MetaPropExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_NEW_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::New(NewExpr::from_java(env, jobj))
+        Expr::New(*NewExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_OBJECT_LIT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Object(ObjectLit::from_java(env, jobj))
+        Expr::Object(*ObjectLit::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_OPT_CHAIN_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::OptChain(OptChainExpr::from_java(env, jobj))
+        Expr::OptChain(*OptChainExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PAREN_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Paren(ParenExpr::from_java(env, jobj))
+        Expr::Paren(*ParenExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::PrivateName(PrivateName::from_java(env, jobj))
+        Expr::PrivateName(*PrivateName::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_SEQ_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Seq(SeqExpr::from_java(env, jobj))
+        Expr::Seq(*SeqExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_SUPER_PROP_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::SuperProp(SuperPropExpr::from_java(env, jobj))
+        Expr::SuperProp(*SuperPropExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TAGGED_TPL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::TaggedTpl(TaggedTpl::from_java(env, jobj))
+        Expr::TaggedTpl(*TaggedTpl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_THIS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::This(ThisExpr::from_java(env, jobj))
+        Expr::This(*ThisExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TPL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Tpl(Tpl::from_java(env, jobj))
+        Expr::Tpl(*Tpl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_AS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::TsAs(TsAsExpr::from_java(env, jobj))
+        Expr::TsAs(*TsAsExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_CONST_ASSERTION.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::TsConstAssertion(TsConstAssertion::from_java(env, jobj))
+        Expr::TsConstAssertion(*TsConstAssertion::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_INSTANTIATION.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::TsInstantiation(TsInstantiation::from_java(env, jobj))
+        Expr::TsInstantiation(*TsInstantiation::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_NON_NULL_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::TsNonNull(TsNonNullExpr::from_java(env, jobj))
+        Expr::TsNonNull(*TsNonNullExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_SATISFIES_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::TsSatisfies(TsSatisfiesExpr::from_java(env, jobj))
+        Expr::TsSatisfies(*TsSatisfiesExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_TYPE_ASSERTION.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::TsTypeAssertion(TsTypeAssertion::from_java(env, jobj))
+        Expr::TsTypeAssertion(*TsTypeAssertion::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_UNARY_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Unary(UnaryExpr::from_java(env, jobj))
+        Expr::Unary(*UnaryExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_UPDATE_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Update(UpdateExpr::from_java(env, jobj))
+        Expr::Update(*UpdateExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_YIELD_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Expr::Yield(YieldExpr::from_java(env, jobj))
+        Expr::Yield(*YieldExpr::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by Expr", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24270,7 +24286,7 @@ impl RegisterWithMap<ByteToIndexMap> for ForHead {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ForHead {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24284,21 +24300,21 @@ impl ToJavaWithMap<ByteToIndexMap> for ForHead {
 
 impl<'local> FromJava<'local> for ForHead {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ForHead::Pat(Box::new(Pat::from_java(env, jobj)))
+        ForHead::Pat(Pat::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_USING_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ForHead::UsingDecl(Box::new(UsingDecl::from_java(env, jobj)))
+        ForHead::UsingDecl(UsingDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_VAR_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ForHead::VarDecl(Box::new(VarDecl::from_java(env, jobj)))
+        ForHead::VarDecl(VarDecl::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by ForHead", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24313,7 +24329,7 @@ impl RegisterWithMap<ByteToIndexMap> for ImportSpecifier {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ImportSpecifier {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24327,21 +24343,21 @@ impl ToJavaWithMap<ByteToIndexMap> for ImportSpecifier {
 
 impl<'local> FromJava<'local> for ImportSpecifier {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IMPORT_DEFAULT_SPECIFIER.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ImportSpecifier::Default(ImportDefaultSpecifier::from_java(env, jobj))
+        ImportSpecifier::Default(*ImportDefaultSpecifier::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IMPORT_NAMED_SPECIFIER.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ImportSpecifier::Named(ImportNamedSpecifier::from_java(env, jobj))
+        ImportSpecifier::Named(*ImportNamedSpecifier::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IMPORT_STAR_AS_SPECIFIER.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ImportSpecifier::Namespace(ImportStarAsSpecifier::from_java(env, jobj))
+        ImportSpecifier::Namespace(*ImportStarAsSpecifier::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by ImportSpecifier", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24355,7 +24371,7 @@ impl RegisterWithMap<ByteToIndexMap> for JSXAttrName {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXAttrName {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24368,19 +24384,19 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXAttrName {
 
 impl<'local> FromJava<'local> for JSXAttrName {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXAttrName::Ident(IdentName::from_java(env, jobj))
+        JSXAttrName::Ident(*IdentName::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_NAMESPACED_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXAttrName::JSXNamespacedName(JSXNamespacedName::from_java(env, jobj))
+        JSXAttrName::JSXNamespacedName(*JSXNamespacedName::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by JSXAttrName", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24394,7 +24410,7 @@ impl RegisterWithMap<ByteToIndexMap> for JSXAttrOrSpread {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXAttrOrSpread {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24407,19 +24423,19 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXAttrOrSpread {
 
 impl<'local> FromJava<'local> for JSXAttrOrSpread {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_ATTR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXAttrOrSpread::JSXAttr(JSXAttr::from_java(env, jobj))
+        JSXAttrOrSpread::JSXAttr(*JSXAttr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_SPREAD_ELEMENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXAttrOrSpread::SpreadElement(SpreadElement::from_java(env, jobj))
+        JSXAttrOrSpread::SpreadElement(*SpreadElement::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by JSXAttrOrSpread", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24435,7 +24451,7 @@ impl RegisterWithMap<ByteToIndexMap> for JSXAttrValue {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXAttrValue {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24450,23 +24466,23 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXAttrValue {
 
 impl<'local> FromJava<'local> for JSXAttrValue {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_ELEMENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXAttrValue::JSXElement(Box::new(JSXElement::from_java(env, jobj)))
+        JSXAttrValue::JSXElement(JSXElement::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_EXPR_CONTAINER.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXAttrValue::JSXExprContainer(JSXExprContainer::from_java(env, jobj))
+        JSXAttrValue::JSXExprContainer(*JSXExprContainer::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_FRAGMENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXAttrValue::JSXFragment(JSXFragment::from_java(env, jobj))
+        JSXAttrValue::JSXFragment(*JSXFragment::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_LIT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXAttrValue::Lit(Lit::from_java(env, jobj))
+        JSXAttrValue::Lit(*Lit::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by JSXAttrValue", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24483,7 +24499,7 @@ impl RegisterWithMap<ByteToIndexMap> for JSXElementChild {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXElementChild {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24499,25 +24515,25 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXElementChild {
 
 impl<'local> FromJava<'local> for JSXElementChild {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_ELEMENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXElementChild::JSXElement(Box::new(JSXElement::from_java(env, jobj)))
+        JSXElementChild::JSXElement(JSXElement::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_EXPR_CONTAINER.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXElementChild::JSXExprContainer(JSXExprContainer::from_java(env, jobj))
+        JSXElementChild::JSXExprContainer(*JSXExprContainer::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_FRAGMENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXElementChild::JSXFragment(JSXFragment::from_java(env, jobj))
+        JSXElementChild::JSXFragment(*JSXFragment::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_SPREAD_CHILD.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXElementChild::JSXSpreadChild(JSXSpreadChild::from_java(env, jobj))
+        JSXElementChild::JSXSpreadChild(*JSXSpreadChild::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_TEXT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXElementChild::JSXText(JSXText::from_java(env, jobj))
+        JSXElementChild::JSXText(*JSXText::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by JSXElementChild", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24532,7 +24548,7 @@ impl RegisterWithMap<ByteToIndexMap> for JSXElementName {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXElementName {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24546,21 +24562,21 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXElementName {
 
 impl<'local> FromJava<'local> for JSXElementName {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXElementName::Ident(Ident::from_java(env, jobj))
+        JSXElementName::Ident(*Ident::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_MEMBER_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXElementName::JSXMemberExpr(JSXMemberExpr::from_java(env, jobj))
+        JSXElementName::JSXMemberExpr(*JSXMemberExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_NAMESPACED_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXElementName::JSXNamespacedName(JSXNamespacedName::from_java(env, jobj))
+        JSXElementName::JSXNamespacedName(*JSXNamespacedName::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by JSXElementName", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24574,7 +24590,7 @@ impl RegisterWithMap<ByteToIndexMap> for JSXExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24587,19 +24603,19 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXExpr {
 
 impl<'local> FromJava<'local> for JSXExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXExpr::Expr(Box::new(Expr::from_java(env, jobj)))
+        JSXExpr::Expr(Expr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_EMPTY_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXExpr::JSXEmptyExpr(JSXEmptyExpr::from_java(env, jobj))
+        JSXExpr::JSXEmptyExpr(*JSXEmptyExpr::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by JSXExpr", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24613,7 +24629,7 @@ impl RegisterWithMap<ByteToIndexMap> for JSXObject {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXObject {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24626,19 +24642,19 @@ impl ToJavaWithMap<ByteToIndexMap> for JSXObject {
 
 impl<'local> FromJava<'local> for JSXObject {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXObject::Ident(Ident::from_java(env, jobj))
+        JSXObject::Ident(*Ident::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_MEMBER_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        JSXObject::JSXMemberExpr(Box::new(JSXMemberExpr::from_java(env, jobj)))
+        JSXObject::JSXMemberExpr(JSXMemberExpr::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by JSXObject", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24652,7 +24668,7 @@ impl RegisterWithMap<ByteToIndexMap> for Key {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Key {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24665,19 +24681,19 @@ impl ToJavaWithMap<ByteToIndexMap> for Key {
 
 impl<'local> FromJava<'local> for Key {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Key::Private(PrivateName::from_java(env, jobj))
+        Key::Private(*PrivateName::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PROP_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Key::Public(PropName::from_java(env, jobj))
+        Key::Public(*PropName::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by Key", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24696,7 +24712,7 @@ impl RegisterWithMap<ByteToIndexMap> for Lit {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Lit {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24714,29 +24730,29 @@ impl ToJavaWithMap<ByteToIndexMap> for Lit {
 
 impl<'local> FromJava<'local> for Lit {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BIG_INT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Lit::BigInt(BigInt::from_java(env, jobj))
+        Lit::BigInt(*BigInt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BOOL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Lit::Bool(Bool::from_java(env, jobj))
+        Lit::Bool(*Bool::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_JSX_TEXT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Lit::JSXText(JSXText::from_java(env, jobj))
+        Lit::JSXText(*JSXText::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_NULL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Lit::Null(Null::from_java(env, jobj))
+        Lit::Null(*Null::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_NUMBER.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Lit::Num(Number::from_java(env, jobj))
+        Lit::Num(*Number::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_REGEX.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Lit::Regex(Regex::from_java(env, jobj))
+        Lit::Regex(*Regex::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_STR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Lit::Str(Str::from_java(env, jobj))
+        Lit::Str(*Str::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by Lit", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24751,7 +24767,7 @@ impl RegisterWithMap<ByteToIndexMap> for MemberProp {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for MemberProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24765,21 +24781,21 @@ impl ToJavaWithMap<ByteToIndexMap> for MemberProp {
 
 impl<'local> FromJava<'local> for MemberProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        MemberProp::Computed(ComputedPropName::from_java(env, jobj))
+        MemberProp::Computed(*ComputedPropName::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        MemberProp::Ident(IdentName::from_java(env, jobj))
+        MemberProp::Ident(*IdentName::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        MemberProp::PrivateName(PrivateName::from_java(env, jobj))
+        MemberProp::PrivateName(*PrivateName::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by MemberProp", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24800,7 +24816,7 @@ impl RegisterWithMap<ByteToIndexMap> for ModuleDecl {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ModuleDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24820,33 +24836,33 @@ impl ToJavaWithMap<ByteToIndexMap> for ModuleDecl {
 
 impl<'local> FromJava<'local> for ModuleDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPORT_ALL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ModuleDecl::ExportAll(ExportAll::from_java(env, jobj))
+        ModuleDecl::ExportAll(*ExportAll::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPORT_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ModuleDecl::ExportDecl(ExportDecl::from_java(env, jobj))
+        ModuleDecl::ExportDecl(*ExportDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPORT_DEFAULT_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ModuleDecl::ExportDefaultDecl(ExportDefaultDecl::from_java(env, jobj))
+        ModuleDecl::ExportDefaultDecl(*ExportDefaultDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPORT_DEFAULT_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ModuleDecl::ExportDefaultExpr(ExportDefaultExpr::from_java(env, jobj))
+        ModuleDecl::ExportDefaultExpr(*ExportDefaultExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_NAMED_EXPORT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ModuleDecl::ExportNamed(NamedExport::from_java(env, jobj))
+        ModuleDecl::ExportNamed(*NamedExport::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IMPORT_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ModuleDecl::Import(ImportDecl::from_java(env, jobj))
+        ModuleDecl::Import(*ImportDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_EXPORT_ASSIGNMENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ModuleDecl::TsExportAssignment(TsExportAssignment::from_java(env, jobj))
+        ModuleDecl::TsExportAssignment(*TsExportAssignment::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_IMPORT_EQUALS_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ModuleDecl::TsImportEquals(Box::new(TsImportEqualsDecl::from_java(env, jobj)))
+        ModuleDecl::TsImportEquals(TsImportEqualsDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_NAMESPACE_EXPORT_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ModuleDecl::TsNamespaceExport(TsNamespaceExportDecl::from_java(env, jobj))
+        ModuleDecl::TsNamespaceExport(*TsNamespaceExportDecl::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by ModuleDecl", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24860,7 +24876,7 @@ impl RegisterWithMap<ByteToIndexMap> for ModuleExportName {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ModuleExportName {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24873,19 +24889,19 @@ impl ToJavaWithMap<ByteToIndexMap> for ModuleExportName {
 
 impl<'local> FromJava<'local> for ModuleExportName {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ModuleExportName::Ident(Ident::from_java(env, jobj))
+        ModuleExportName::Ident(*Ident::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_STR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ModuleExportName::Str(Str::from_java(env, jobj))
+        ModuleExportName::Str(*Str::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by ModuleExportName", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24899,7 +24915,7 @@ impl RegisterWithMap<ByteToIndexMap> for ModuleItem {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ModuleItem {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24912,19 +24928,19 @@ impl ToJavaWithMap<ByteToIndexMap> for ModuleItem {
 
 impl<'local> FromJava<'local> for ModuleItem {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_MODULE_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ModuleItem::ModuleDecl(ModuleDecl::from_java(env, jobj))
+        ModuleItem::ModuleDecl(*ModuleDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ModuleItem::Stmt(Stmt::from_java(env, jobj))
+        ModuleItem::Stmt(*Stmt::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by ModuleItem", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24939,7 +24955,7 @@ impl RegisterWithMap<ByteToIndexMap> for ObjectPatProp {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ObjectPatProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24953,21 +24969,21 @@ impl ToJavaWithMap<ByteToIndexMap> for ObjectPatProp {
 
 impl<'local> FromJava<'local> for ObjectPatProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ASSIGN_PAT_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ObjectPatProp::Assign(AssignPatProp::from_java(env, jobj))
+        ObjectPatProp::Assign(*AssignPatProp::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_KEY_VALUE_PAT_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ObjectPatProp::KeyValue(KeyValuePatProp::from_java(env, jobj))
+        ObjectPatProp::KeyValue(*KeyValuePatProp::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_REST_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ObjectPatProp::Rest(RestPat::from_java(env, jobj))
+        ObjectPatProp::Rest(*RestPat::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by ObjectPatProp", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -24981,7 +24997,7 @@ impl RegisterWithMap<ByteToIndexMap> for OptChainBase {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for OptChainBase {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -24994,19 +25010,19 @@ impl ToJavaWithMap<ByteToIndexMap> for OptChainBase {
 
 impl<'local> FromJava<'local> for OptChainBase {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_OPT_CALL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        OptChainBase::Call(OptCall::from_java(env, jobj))
+        OptChainBase::Call(*OptCall::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_MEMBER_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        OptChainBase::Member(MemberExpr::from_java(env, jobj))
+        OptChainBase::Member(*MemberExpr::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by OptChainBase", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25020,7 +25036,7 @@ impl RegisterWithMap<ByteToIndexMap> for ParamOrTsParamProp {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ParamOrTsParamProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25033,19 +25049,19 @@ impl ToJavaWithMap<ByteToIndexMap> for ParamOrTsParamProp {
 
 impl<'local> FromJava<'local> for ParamOrTsParamProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PARAM.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ParamOrTsParamProp::Param(Param::from_java(env, jobj))
+        ParamOrTsParamProp::Param(*Param::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_PARAM_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
-        ParamOrTsParamProp::TsParamProp(TsParamProp::from_java(env, jobj))
+        ParamOrTsParamProp::TsParamProp(*TsParamProp::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by ParamOrTsParamProp", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25064,7 +25080,7 @@ impl RegisterWithMap<ByteToIndexMap> for Pat {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Pat {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25082,29 +25098,29 @@ impl ToJavaWithMap<ByteToIndexMap> for Pat {
 
 impl<'local> FromJava<'local> for Pat {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ARRAY_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Pat::Array(ArrayPat::from_java(env, jobj))
+        Pat::Array(*ArrayPat::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ASSIGN_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Pat::Assign(AssignPat::from_java(env, jobj))
+        Pat::Assign(*AssignPat::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Pat::Expr(Box::new(Expr::from_java(env, jobj)))
+        Pat::Expr(Expr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BINDING_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Pat::Ident(BindingIdent::from_java(env, jobj))
+        Pat::Ident(*BindingIdent::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_INVALID.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Pat::Invalid(Invalid::from_java(env, jobj))
+        Pat::Invalid(*Invalid::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_OBJECT_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Pat::Object(ObjectPat::from_java(env, jobj))
+        Pat::Object(*ObjectPat::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_REST_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Pat::Rest(RestPat::from_java(env, jobj))
+        Pat::Rest(*RestPat::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by Pat", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25118,7 +25134,7 @@ impl RegisterWithMap<ByteToIndexMap> for Program {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Program {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25131,19 +25147,19 @@ impl ToJavaWithMap<ByteToIndexMap> for Program {
 
 impl<'local> FromJava<'local> for Program {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_MODULE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Program::Module(Module::from_java(env, jobj))
+        Program::Module(*Module::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_SCRIPT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Program::Script(Script::from_java(env, jobj))
+        Program::Script(*Script::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by Program", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25161,7 +25177,7 @@ impl RegisterWithMap<ByteToIndexMap> for Prop {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Prop {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25178,27 +25194,27 @@ impl ToJavaWithMap<ByteToIndexMap> for Prop {
 
 impl<'local> FromJava<'local> for Prop {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ASSIGN_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Prop::Assign(AssignProp::from_java(env, jobj))
+        Prop::Assign(*AssignProp::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_GETTER_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Prop::Getter(GetterProp::from_java(env, jobj))
+        Prop::Getter(*GetterProp::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_KEY_VALUE_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Prop::KeyValue(KeyValueProp::from_java(env, jobj))
+        Prop::KeyValue(*KeyValueProp::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_METHOD_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Prop::Method(MethodProp::from_java(env, jobj))
+        Prop::Method(*MethodProp::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_SETTER_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Prop::Setter(SetterProp::from_java(env, jobj))
+        Prop::Setter(*SetterProp::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Prop::Shorthand(Ident::from_java(env, jobj))
+        Prop::Shorthand(*Ident::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by Prop", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25215,7 +25231,7 @@ impl RegisterWithMap<ByteToIndexMap> for PropName {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for PropName {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25231,25 +25247,25 @@ impl ToJavaWithMap<ByteToIndexMap> for PropName {
 
 impl<'local> FromJava<'local> for PropName {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BIG_INT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        PropName::BigInt(BigInt::from_java(env, jobj))
+        PropName::BigInt(*BigInt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        PropName::Computed(ComputedPropName::from_java(env, jobj))
+        PropName::Computed(*ComputedPropName::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        PropName::Ident(IdentName::from_java(env, jobj))
+        PropName::Ident(*IdentName::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_NUMBER.as_ref().unwrap()}.class)).unwrap_or(false) {
-        PropName::Num(Number::from_java(env, jobj))
+        PropName::Num(*Number::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_STR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        PropName::Str(Str::from_java(env, jobj))
+        PropName::Str(*Str::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by PropName", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25263,7 +25279,7 @@ impl RegisterWithMap<ByteToIndexMap> for PropOrSpread {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for PropOrSpread {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25276,19 +25292,19 @@ impl ToJavaWithMap<ByteToIndexMap> for PropOrSpread {
 
 impl<'local> FromJava<'local> for PropOrSpread {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PROP.as_ref().unwrap()}.class)).unwrap_or(false) {
-        PropOrSpread::Prop(Box::new(Prop::from_java(env, jobj)))
+        PropOrSpread::Prop(Prop::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_SPREAD_ELEMENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        PropOrSpread::Spread(SpreadElement::from_java(env, jobj))
+        PropOrSpread::Spread(*SpreadElement::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by PropOrSpread", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25311,7 +25327,7 @@ impl RegisterWithMap<ByteToIndexMap> for SimpleAssignTarget {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for SimpleAssignTarget {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25333,37 +25349,37 @@ impl ToJavaWithMap<ByteToIndexMap> for SimpleAssignTarget {
 
 impl<'local> FromJava<'local> for SimpleAssignTarget {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BINDING_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SimpleAssignTarget::Ident(BindingIdent::from_java(env, jobj))
+        SimpleAssignTarget::Ident(*BindingIdent::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_INVALID.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SimpleAssignTarget::Invalid(Invalid::from_java(env, jobj))
+        SimpleAssignTarget::Invalid(*Invalid::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_MEMBER_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SimpleAssignTarget::Member(MemberExpr::from_java(env, jobj))
+        SimpleAssignTarget::Member(*MemberExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_OPT_CHAIN_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SimpleAssignTarget::OptChain(OptChainExpr::from_java(env, jobj))
+        SimpleAssignTarget::OptChain(*OptChainExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_PAREN_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SimpleAssignTarget::Paren(ParenExpr::from_java(env, jobj))
+        SimpleAssignTarget::Paren(*ParenExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_SUPER_PROP_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SimpleAssignTarget::SuperProp(SuperPropExpr::from_java(env, jobj))
+        SimpleAssignTarget::SuperProp(*SuperPropExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_AS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SimpleAssignTarget::TsAs(TsAsExpr::from_java(env, jobj))
+        SimpleAssignTarget::TsAs(*TsAsExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_INSTANTIATION.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SimpleAssignTarget::TsInstantiation(TsInstantiation::from_java(env, jobj))
+        SimpleAssignTarget::TsInstantiation(*TsInstantiation::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_NON_NULL_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SimpleAssignTarget::TsNonNull(TsNonNullExpr::from_java(env, jobj))
+        SimpleAssignTarget::TsNonNull(*TsNonNullExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_SATISFIES_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SimpleAssignTarget::TsSatisfies(TsSatisfiesExpr::from_java(env, jobj))
+        SimpleAssignTarget::TsSatisfies(*TsSatisfiesExpr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_TYPE_ASSERTION.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SimpleAssignTarget::TsTypeAssertion(TsTypeAssertion::from_java(env, jobj))
+        SimpleAssignTarget::TsTypeAssertion(*TsTypeAssertion::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by SimpleAssignTarget", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25394,7 +25410,7 @@ impl RegisterWithMap<ByteToIndexMap> for Stmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Stmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25424,53 +25440,53 @@ impl ToJavaWithMap<ByteToIndexMap> for Stmt {
 
 impl<'local> FromJava<'local> for Stmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BLOCK_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::Block(BlockStmt::from_java(env, jobj))
+        Stmt::Block(*BlockStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BREAK_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::Break(BreakStmt::from_java(env, jobj))
+        Stmt::Break(*BreakStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_CONTINUE_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::Continue(ContinueStmt::from_java(env, jobj))
+        Stmt::Continue(*ContinueStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_DEBUGGER_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::Debugger(DebuggerStmt::from_java(env, jobj))
+        Stmt::Debugger(*DebuggerStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::Decl(Decl::from_java(env, jobj))
+        Stmt::Decl(*Decl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_DO_WHILE_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::DoWhile(DoWhileStmt::from_java(env, jobj))
+        Stmt::DoWhile(*DoWhileStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EMPTY_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::Empty(EmptyStmt::from_java(env, jobj))
+        Stmt::Empty(*EmptyStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPR_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::Expr(ExprStmt::from_java(env, jobj))
+        Stmt::Expr(*ExprStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_FOR_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::For(ForStmt::from_java(env, jobj))
+        Stmt::For(*ForStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_FOR_IN_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::ForIn(ForInStmt::from_java(env, jobj))
+        Stmt::ForIn(*ForInStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_FOR_OF_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::ForOf(ForOfStmt::from_java(env, jobj))
+        Stmt::ForOf(*ForOfStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IF_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::If(IfStmt::from_java(env, jobj))
+        Stmt::If(*IfStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_LABELED_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::Labeled(LabeledStmt::from_java(env, jobj))
+        Stmt::Labeled(*LabeledStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_RETURN_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::Return(ReturnStmt::from_java(env, jobj))
+        Stmt::Return(*ReturnStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_SWITCH_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::Switch(SwitchStmt::from_java(env, jobj))
+        Stmt::Switch(*SwitchStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_THROW_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::Throw(ThrowStmt::from_java(env, jobj))
+        Stmt::Throw(*ThrowStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TRY_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::Try(Box::new(TryStmt::from_java(env, jobj)))
+        Stmt::Try(TryStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_WHILE_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::While(WhileStmt::from_java(env, jobj))
+        Stmt::While(*WhileStmt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_WITH_STMT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        Stmt::With(WithStmt::from_java(env, jobj))
+        Stmt::With(*WithStmt::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by Stmt", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25484,7 +25500,7 @@ impl RegisterWithMap<ByteToIndexMap> for SuperProp {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for SuperProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25497,19 +25513,19 @@ impl ToJavaWithMap<ByteToIndexMap> for SuperProp {
 
 impl<'local> FromJava<'local> for SuperProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SuperProp::Computed(ComputedPropName::from_java(env, jobj))
+        SuperProp::Computed(*ComputedPropName::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        SuperProp::Ident(IdentName::from_java(env, jobj))
+        SuperProp::Ident(*IdentName::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by SuperProp", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25523,7 +25539,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsEntityName {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsEntityName {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25536,19 +25552,19 @@ impl ToJavaWithMap<ByteToIndexMap> for TsEntityName {
 
 impl<'local> FromJava<'local> for TsEntityName {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsEntityName::Ident(Ident::from_java(env, jobj))
+        TsEntityName::Ident(*Ident::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_QUALIFIED_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsEntityName::TsQualifiedName(Box::new(TsQualifiedName::from_java(env, jobj)))
+        TsEntityName::TsQualifiedName(TsQualifiedName::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsEntityName", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25562,7 +25578,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsEnumMemberId {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsEnumMemberId {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25575,19 +25591,19 @@ impl ToJavaWithMap<ByteToIndexMap> for TsEnumMemberId {
 
 impl<'local> FromJava<'local> for TsEnumMemberId {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsEnumMemberId::Ident(Ident::from_java(env, jobj))
+        TsEnumMemberId::Ident(*Ident::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_STR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsEnumMemberId::Str(Str::from_java(env, jobj))
+        TsEnumMemberId::Str(*Str::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsEnumMemberId", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25601,7 +25617,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsFnOrConstructorType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsFnOrConstructorType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25614,19 +25630,19 @@ impl ToJavaWithMap<ByteToIndexMap> for TsFnOrConstructorType {
 
 impl<'local> FromJava<'local> for TsFnOrConstructorType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_CONSTRUCTOR_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsFnOrConstructorType::TsConstructorType(TsConstructorType::from_java(env, jobj))
+        TsFnOrConstructorType::TsConstructorType(*TsConstructorType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_FN_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsFnOrConstructorType::TsFnType(TsFnType::from_java(env, jobj))
+        TsFnOrConstructorType::TsFnType(*TsFnType::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsFnOrConstructorType", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25642,7 +25658,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsFnParam {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsFnParam {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25657,23 +25673,23 @@ impl ToJavaWithMap<ByteToIndexMap> for TsFnParam {
 
 impl<'local> FromJava<'local> for TsFnParam {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ARRAY_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsFnParam::Array(ArrayPat::from_java(env, jobj))
+        TsFnParam::Array(*ArrayPat::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BINDING_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsFnParam::Ident(BindingIdent::from_java(env, jobj))
+        TsFnParam::Ident(*BindingIdent::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_OBJECT_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsFnParam::Object(ObjectPat::from_java(env, jobj))
+        TsFnParam::Object(*ObjectPat::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_REST_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsFnParam::Rest(RestPat::from_java(env, jobj))
+        TsFnParam::Rest(*RestPat::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsFnParam", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25690,7 +25706,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsLit {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsLit {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25706,25 +25722,25 @@ impl ToJavaWithMap<ByteToIndexMap> for TsLit {
 
 impl<'local> FromJava<'local> for TsLit {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BIG_INT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsLit::BigInt(BigInt::from_java(env, jobj))
+        TsLit::BigInt(*BigInt::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BOOL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsLit::Bool(Bool::from_java(env, jobj))
+        TsLit::Bool(*Bool::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_NUMBER.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsLit::Number(Number::from_java(env, jobj))
+        TsLit::Number(*Number::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_STR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsLit::Str(Str::from_java(env, jobj))
+        TsLit::Str(*Str::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_TPL_LIT_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsLit::Tpl(TsTplLitType::from_java(env, jobj))
+        TsLit::Tpl(*TsTplLitType::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsLit", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25738,7 +25754,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsModuleName {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsModuleName {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25751,19 +25767,19 @@ impl ToJavaWithMap<ByteToIndexMap> for TsModuleName {
 
 impl<'local> FromJava<'local> for TsModuleName {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsModuleName::Ident(Ident::from_java(env, jobj))
+        TsModuleName::Ident(*Ident::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_STR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsModuleName::Str(Str::from_java(env, jobj))
+        TsModuleName::Str(*Str::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsModuleName", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25777,7 +25793,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsModuleRef {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsModuleRef {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25790,19 +25806,19 @@ impl ToJavaWithMap<ByteToIndexMap> for TsModuleRef {
 
 impl<'local> FromJava<'local> for TsModuleRef {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_ENTITY_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsModuleRef::TsEntityName(TsEntityName::from_java(env, jobj))
+        TsModuleRef::TsEntityName(*TsEntityName::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_EXTERNAL_MODULE_REF.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsModuleRef::TsExternalModuleRef(TsExternalModuleRef::from_java(env, jobj))
+        TsModuleRef::TsExternalModuleRef(*TsExternalModuleRef::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsModuleRef", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25816,7 +25832,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsNamespaceBody {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsNamespaceBody {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25829,19 +25845,19 @@ impl ToJavaWithMap<ByteToIndexMap> for TsNamespaceBody {
 
 impl<'local> FromJava<'local> for TsNamespaceBody {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_MODULE_BLOCK.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsNamespaceBody::TsModuleBlock(TsModuleBlock::from_java(env, jobj))
+        TsNamespaceBody::TsModuleBlock(*TsModuleBlock::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_NAMESPACE_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsNamespaceBody::TsNamespaceDecl(TsNamespaceDecl::from_java(env, jobj))
+        TsNamespaceBody::TsNamespaceDecl(*TsNamespaceDecl::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsNamespaceBody", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25855,7 +25871,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsParamPropParam {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsParamPropParam {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25868,19 +25884,19 @@ impl ToJavaWithMap<ByteToIndexMap> for TsParamPropParam {
 
 impl<'local> FromJava<'local> for TsParamPropParam {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_ASSIGN_PAT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsParamPropParam::Assign(AssignPat::from_java(env, jobj))
+        TsParamPropParam::Assign(*AssignPat::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_BINDING_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsParamPropParam::Ident(BindingIdent::from_java(env, jobj))
+        TsParamPropParam::Ident(*BindingIdent::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsParamPropParam", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25894,7 +25910,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsThisTypeOrIdent {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsThisTypeOrIdent {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25907,19 +25923,19 @@ impl ToJavaWithMap<ByteToIndexMap> for TsThisTypeOrIdent {
 
 impl<'local> FromJava<'local> for TsThisTypeOrIdent {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_IDENT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsThisTypeOrIdent::Ident(Ident::from_java(env, jobj))
+        TsThisTypeOrIdent::Ident(*Ident::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_THIS_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsThisTypeOrIdent::TsThisType(TsThisType::from_java(env, jobj))
+        TsThisTypeOrIdent::TsThisType(*TsThisType::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsThisTypeOrIdent", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -25951,7 +25967,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -25982,55 +25998,55 @@ impl ToJavaWithMap<ByteToIndexMap> for TsType {
 
 impl<'local> FromJava<'local> for TsType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_ARRAY_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsArrayType(TsArrayType::from_java(env, jobj))
+        TsType::TsArrayType(*TsArrayType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_CONDITIONAL_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsConditionalType(TsConditionalType::from_java(env, jobj))
+        TsType::TsConditionalType(*TsConditionalType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_FN_OR_CONSTRUCTOR_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsFnOrConstructorType(TsFnOrConstructorType::from_java(env, jobj))
+        TsType::TsFnOrConstructorType(*TsFnOrConstructorType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_IMPORT_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsImportType(TsImportType::from_java(env, jobj))
+        TsType::TsImportType(*TsImportType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_INDEXED_ACCESS_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsIndexedAccessType(TsIndexedAccessType::from_java(env, jobj))
+        TsType::TsIndexedAccessType(*TsIndexedAccessType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_INFER_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsInferType(TsInferType::from_java(env, jobj))
+        TsType::TsInferType(*TsInferType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_KEYWORD_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsKeywordType(TsKeywordType::from_java(env, jobj))
+        TsType::TsKeywordType(*TsKeywordType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_LIT_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsLitType(TsLitType::from_java(env, jobj))
+        TsType::TsLitType(*TsLitType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_MAPPED_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsMappedType(TsMappedType::from_java(env, jobj))
+        TsType::TsMappedType(*TsMappedType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_OPTIONAL_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsOptionalType(TsOptionalType::from_java(env, jobj))
+        TsType::TsOptionalType(*TsOptionalType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_PARENTHESIZED_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsParenthesizedType(TsParenthesizedType::from_java(env, jobj))
+        TsType::TsParenthesizedType(*TsParenthesizedType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_REST_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsRestType(TsRestType::from_java(env, jobj))
+        TsType::TsRestType(*TsRestType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_THIS_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsThisType(TsThisType::from_java(env, jobj))
+        TsType::TsThisType(*TsThisType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_TUPLE_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsTupleType(TsTupleType::from_java(env, jobj))
+        TsType::TsTupleType(*TsTupleType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_TYPE_LIT.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsTypeLit(TsTypeLit::from_java(env, jobj))
+        TsType::TsTypeLit(*TsTypeLit::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_TYPE_OPERATOR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsTypeOperator(TsTypeOperator::from_java(env, jobj))
+        TsType::TsTypeOperator(*TsTypeOperator::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_TYPE_PREDICATE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsTypePredicate(TsTypePredicate::from_java(env, jobj))
+        TsType::TsTypePredicate(*TsTypePredicate::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_TYPE_QUERY.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsTypeQuery(TsTypeQuery::from_java(env, jobj))
+        TsType::TsTypeQuery(*TsTypeQuery::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_TYPE_REF.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsTypeRef(TsTypeRef::from_java(env, jobj))
+        TsType::TsTypeRef(*TsTypeRef::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_UNION_OR_INTERSECTION_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsType::TsUnionOrIntersectionType(TsUnionOrIntersectionType::from_java(env, jobj))
+        TsType::TsUnionOrIntersectionType(*TsUnionOrIntersectionType::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsType", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -26049,7 +26065,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsTypeElement {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTypeElement {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -26067,29 +26083,29 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeElement {
 
 impl<'local> FromJava<'local> for TsTypeElement {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_CALL_SIGNATURE_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsTypeElement::TsCallSignatureDecl(TsCallSignatureDecl::from_java(env, jobj))
+        TsTypeElement::TsCallSignatureDecl(*TsCallSignatureDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_CONSTRUCT_SIGNATURE_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsTypeElement::TsConstructSignatureDecl(TsConstructSignatureDecl::from_java(env, jobj))
+        TsTypeElement::TsConstructSignatureDecl(*TsConstructSignatureDecl::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_GETTER_SIGNATURE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsTypeElement::TsGetterSignature(TsGetterSignature::from_java(env, jobj))
+        TsTypeElement::TsGetterSignature(*TsGetterSignature::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_INDEX_SIGNATURE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsTypeElement::TsIndexSignature(TsIndexSignature::from_java(env, jobj))
+        TsTypeElement::TsIndexSignature(*TsIndexSignature::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_METHOD_SIGNATURE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsTypeElement::TsMethodSignature(TsMethodSignature::from_java(env, jobj))
+        TsTypeElement::TsMethodSignature(*TsMethodSignature::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_PROPERTY_SIGNATURE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsTypeElement::TsPropertySignature(TsPropertySignature::from_java(env, jobj))
+        TsTypeElement::TsPropertySignature(*TsPropertySignature::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_SETTER_SIGNATURE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsTypeElement::TsSetterSignature(TsSetterSignature::from_java(env, jobj))
+        TsTypeElement::TsSetterSignature(*TsSetterSignature::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsTypeElement", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -26103,7 +26119,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsTypeQueryExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTypeQueryExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -26116,19 +26132,19 @@ impl ToJavaWithMap<ByteToIndexMap> for TsTypeQueryExpr {
 
 impl<'local> FromJava<'local> for TsTypeQueryExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_IMPORT_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsTypeQueryExpr::Import(TsImportType::from_java(env, jobj))
+        TsTypeQueryExpr::Import(*TsImportType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_ENTITY_NAME.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsTypeQueryExpr::TsEntityName(TsEntityName::from_java(env, jobj))
+        TsTypeQueryExpr::TsEntityName(*TsEntityName::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsTypeQueryExpr", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -26142,7 +26158,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsUnionOrIntersectionType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsUnionOrIntersectionType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -26155,19 +26171,19 @@ impl ToJavaWithMap<ByteToIndexMap> for TsUnionOrIntersectionType {
 
 impl<'local> FromJava<'local> for TsUnionOrIntersectionType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_INTERSECTION_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsUnionOrIntersectionType::TsIntersectionType(TsIntersectionType::from_java(env, jobj))
+        TsUnionOrIntersectionType::TsIntersectionType(*TsIntersectionType::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_TS_UNION_TYPE.as_ref().unwrap()}.class)).unwrap_or(false) {
-        TsUnionOrIntersectionType::TsUnionType(TsUnionType::from_java(env, jobj))
+        TsUnionOrIntersectionType::TsUnionType(*TsUnionType::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by TsUnionOrIntersectionType", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 
@@ -26181,7 +26197,7 @@ impl RegisterWithMap<ByteToIndexMap> for VarDeclOrExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for VarDeclOrExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -26194,19 +26210,19 @@ impl ToJavaWithMap<ByteToIndexMap> for VarDeclOrExpr {
 
 impl<'local> FromJava<'local> for VarDeclOrExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let return_value = 
       if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_EXPR.as_ref().unwrap()}.class)).unwrap_or(false) {
-        VarDeclOrExpr::Expr(Box::new(Expr::from_java(env, jobj)))
+        VarDeclOrExpr::Expr(Expr::from_java(env, jobj)?)
       } else if env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_VAR_DECL.as_ref().unwrap()}.class)).unwrap_or(false) {
-        VarDeclOrExpr::VarDecl(Box::new(VarDecl::from_java(env, jobj)))
+        VarDeclOrExpr::VarDecl(VarDecl::from_java(env, jobj)?)
       } else {
-        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj);
+        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;
         let ast_type = AstType::from_java(env, &java_ast_type);
         delete_local_ref!(env, java_ast_type);
         panic!("Type {:?} is not supported by VarDeclOrExpr", ast_type);
       };
-    return_value
+    Ok(Box::new(return_value))
   }
 }
 /* Enum End */
@@ -26215,121 +26231,128 @@ impl<'local> FromJava<'local> for VarDeclOrExpr {
 impl RegisterWithMap<ByteToIndexMap> for ArrayLit {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.elems.iter().for_each(|node| {
+    for node in self.elems.iter() {
       node.as_ref().map(|node| node.register_with_map(map));
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ArrayLit {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_elems = list_new(env, self.elems.len());
-    self.elems.iter().for_each(|node| {
-      let java_node = node.as_ref().map_or_else(
-        || Default::default(),
-        |node| node.to_java_with_map(env, map));
-    list_add(env, &java_elems, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_elems = list_new(env, self.elems.len())?;
+    for node in self.elems.iter() {
+      let java_node = match node.as_ref() {
+        Some(node) => node.to_java_with_map(env, map)?,
+        None => Default::default(),
+      };
+      list_add(env, &java_elems, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_ARRAY_LIT.as_ref().unwrap() }
-      .construct(env, &java_elems, &java_span_ex);
+      .construct(env, &java_elems, &java_span_ex)?;
     delete_local_ref!(env, java_elems);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ArrayLit {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_ARRAY_LIT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_elems = java_class.get_elems(env, jobj);
-    let length = list_size(env, &java_elems);
-    let elems = (0..length).map(|i| {
-      let java_item = list_get(env, &java_elems, i);
-      let elems = if optional_is_present(env, &java_item) {
-        let java_inner_item = optional_get(env, &java_item);
-        let elems = ExprOrSpread::from_java(env, &java_inner_item);
+    let java_elems = java_class.get_elems(env, jobj)?;
+    let length = list_size(env, &java_elems)?;
+    let mut elems: Vec<Option<ExprOrSpread>> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_elems, i)?;
+      let element = if optional_is_present(env, &java_item)? {
+        let java_inner_item = optional_get(env, &java_item)?;
+        let element = *ExprOrSpread::from_java(env, &java_inner_item)?;
         delete_local_ref!(env, java_inner_item);
-        Some(elems)
+        Some(element)
       } else {
         None
       };
       delete_local_ref!(env, java_item);
-      elems
-    }).collect();
-    ArrayLit {
+      elems.push(element)
+    }
+    Ok(Box::new(ArrayLit {
       span,
       elems,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ArrayPat {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.elems.iter().for_each(|node| {
+    for node in self.elems.iter() {
       node.as_ref().map(|node| node.register_with_map(map));
-    });
+    }
     self.type_ann.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ArrayPat {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_elems = list_new(env, self.elems.len());
-    self.elems.iter().for_each(|node| {
-      let java_node = node.as_ref().map_or_else(
-        || Default::default(),
-        |node| node.to_java_with_map(env, map));
-    list_add(env, &java_elems, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_elems = list_new(env, self.elems.len())?;
+    for node in self.elems.iter() {
+      let java_node = match node.as_ref() {
+        Some(node) => node.to_java_with_map(env, map)?,
+        None => Default::default(),
+      };
+      list_add(env, &java_elems, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let optional = self.optional;
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_ARRAY_PAT.as_ref().unwrap() }
-      .construct(env, &java_elems, optional, &java_optional_type_ann, &java_span_ex);
+      .construct(env, &java_elems, optional, &java_optional_type_ann, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_elems);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ArrayPat {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_ARRAY_PAT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_elems = java_class.get_elems(env, jobj);
-    let length = list_size(env, &java_elems);
-    let elems = (0..length).map(|i| {
-      let java_item = list_get(env, &java_elems, i);
-      let elems = if optional_is_present(env, &java_item) {
-        let java_inner_item = optional_get(env, &java_item);
-        let elems = Pat::from_java(env, &java_inner_item);
+    let java_elems = java_class.get_elems(env, jobj)?;
+    let length = list_size(env, &java_elems)?;
+    let mut elems: Vec<Option<Pat>> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_elems, i)?;
+      let element = if optional_is_present(env, &java_item)? {
+        let java_inner_item = optional_get(env, &java_item)?;
+        let element = *Pat::from_java(env, &java_inner_item)?;
         delete_local_ref!(env, java_inner_item);
-        Some(elems)
+        Some(element)
       } else {
         None
       };
       delete_local_ref!(env, java_item);
-      elems
-    }).collect();
-    let optional = java_class.is_optional(env, jobj);
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+      elems.push(element)
+    }
+    let optional = java_class.is_optional(env, jobj)?;
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -26337,21 +26360,21 @@ impl<'local> FromJava<'local> for ArrayPat {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    ArrayPat {
+    Ok(Box::new(ArrayPat {
       span,
       elems,
       optional,
       type_ann,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ArrowExpr {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.params.iter().for_each(|node| {
+    for node in self.params.iter() {
       node.register_with_map(map);
-    });
+    }
     self.body.register_with_map(map);
     self.type_params.as_ref().map(|node| node.register_with_map(map));
     self.return_type.as_ref().map(|node| node.register_with_map(map));
@@ -26359,59 +26382,66 @@ impl RegisterWithMap<ByteToIndexMap> for ArrowExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ArrowExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let ctxt = self.ctxt;
-    let java_params = list_new(env, self.params.len());
-    self.params.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_params, &java_node);
+    let java_params = list_new(env, self.params.len())?;
+    for node in self.params.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_params, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_body = self.body.to_java_with_map(env, map);
+    }
+    let java_body = self.body.to_java_with_map(env, map)?;
     let is_async = self.is_async;
     let is_generator = self.is_generator;
-    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_return_type = self.return_type.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_params = match self.type_params.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_return_type = match self.return_type.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_ARROW_EXPR.as_ref().unwrap() }
-      .construct(env, ctxt, &java_params, &java_body, is_async, is_generator, &java_optional_type_params, &java_optional_return_type, &java_span_ex);
+      .construct(env, ctxt, &java_params, &java_body, is_async, is_generator, &java_optional_type_params, &java_optional_return_type, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_optional_ref!(env, java_optional_return_type);
     delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ArrowExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_ARROW_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = java_class.get_ctxt(env, jobj)?;
     let ctxt = SyntaxContext::from_u32(ctxt as u32);
-    let java_params = java_class.get_params(env, jobj);
-    let length = list_size(env, &java_params);
-    let params = (0..length).map(|i| {
-      let java_item = list_get(env, &java_params, i);
-      let params = Pat::from_java(env, &java_item);
+    let java_params = java_class.get_params(env, jobj)?;
+    let length = list_size(env, &java_params)?;
+    let mut params: Vec<Pat> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_params, i)?;
+      let element = *Pat::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      params
-    }).collect();
-    let java_body = java_class.get_body(env, jobj);
-    let body = BlockStmtOrExpr::from_java(env, &java_body);
+      params.push(element)
+    }
+    let java_body = java_class.get_body(env, jobj)?;
+    let body = *BlockStmtOrExpr::from_java(env, &java_body)?;
     delete_local_ref!(env, java_body);
     let body = Box::new(body);
-    let is_async = java_class.is_async(env, jobj);
-    let is_generator = java_class.is_generator(env, jobj);
-    let java_optional_type_params = java_class.get_type_params(env, jobj);
-    let type_params = if optional_is_present(env, &java_optional_type_params) {
-      let java_type_params = optional_get(env, &java_optional_type_params);
-      let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
+    let is_async = java_class.is_async(env, jobj)?;
+    let is_generator = java_class.is_generator(env, jobj)?;
+    let java_optional_type_params = java_class.get_type_params(env, jobj)?;
+    let type_params = if optional_is_present(env, &java_optional_type_params)? {
+      let java_type_params = optional_get(env, &java_optional_type_params)?;
+      let type_params = *TsTypeParamDecl::from_java(env, &java_type_params)?;
       delete_local_ref!(env, java_type_params);
       Some(type_params)
     } else {
@@ -26419,10 +26449,10 @@ impl<'local> FromJava<'local> for ArrowExpr {
     };
     delete_local_ref!(env, java_optional_type_params);
     let type_params = type_params.map(|type_params| Box::new(type_params));
-    let java_optional_return_type = java_class.get_return_type(env, jobj);
-    let return_type = if optional_is_present(env, &java_optional_return_type) {
-      let java_return_type = optional_get(env, &java_optional_return_type);
-      let return_type = TsTypeAnn::from_java(env, &java_return_type);
+    let java_optional_return_type = java_class.get_return_type(env, jobj)?;
+    let return_type = if optional_is_present(env, &java_optional_return_type)? {
+      let java_return_type = optional_get(env, &java_optional_return_type)?;
+      let return_type = *TsTypeAnn::from_java(env, &java_return_type)?;
       delete_local_ref!(env, java_return_type);
       Some(return_type)
     } else {
@@ -26430,7 +26460,7 @@ impl<'local> FromJava<'local> for ArrowExpr {
     };
     delete_local_ref!(env, java_optional_return_type);
     let return_type = return_type.map(|return_type| Box::new(return_type));
-    ArrowExpr {
+    Ok(Box::new(ArrowExpr {
       span,
       ctxt,
       params,
@@ -26439,7 +26469,7 @@ impl<'local> FromJava<'local> for ArrowExpr {
       is_generator,
       type_params,
       return_type,
-    }
+    }))
   }
 }
 
@@ -26452,45 +26482,45 @@ impl RegisterWithMap<ByteToIndexMap> for AssignExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for AssignExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_op = self.op.to_java(env);
-    let java_left = self.left.to_java_with_map(env, map);
-    let java_right = self.right.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_op = self.op.to_java(env)?;
+    let java_left = self.left.to_java_with_map(env, map)?;
+    let java_right = self.right.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_ASSIGN_EXPR.as_ref().unwrap() }
-      .construct(env, &java_op, &java_left, &java_right, &java_span_ex);
+      .construct(env, &java_op, &java_left, &java_right, &java_span_ex)?;
     delete_local_ref!(env, java_op);
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for AssignExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_ASSIGN_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_op = java_class.get_op(env, jobj);
-    let op = AssignOp::from_java(env, &java_op);
+    let java_op = java_class.get_op(env, jobj)?;
+    let op = *AssignOp::from_java(env, &java_op)?;
     delete_local_ref!(env, java_op);
-    let java_left = java_class.get_left(env, jobj);
-    let left = AssignTarget::from_java(env, &java_left);
+    let java_left = java_class.get_left(env, jobj)?;
+    let left = *AssignTarget::from_java(env, &java_left)?;
     delete_local_ref!(env, java_left);
-    let java_right = java_class.get_right(env, jobj);
-    let right = Expr::from_java(env, &java_right);
+    let java_right = java_class.get_right(env, jobj)?;
+    let right = *Expr::from_java(env, &java_right)?;
     delete_local_ref!(env, java_right);
     let right = Box::new(right);
-    AssignExpr {
+    Ok(Box::new(AssignExpr {
       span,
       op,
       left,
       right,
-    }
+    }))
   }
 }
 
@@ -26503,40 +26533,40 @@ impl RegisterWithMap<ByteToIndexMap> for AssignPat {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for AssignPat {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_left = self.left.to_java_with_map(env, map);
-    let java_right = self.right.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_left = self.left.to_java_with_map(env, map)?;
+    let java_right = self.right.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_ASSIGN_PAT.as_ref().unwrap() }
-      .construct(env, &java_left, &java_right, &java_span_ex);
+      .construct(env, &java_left, &java_right, &java_span_ex)?;
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for AssignPat {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_ASSIGN_PAT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_left = java_class.get_left(env, jobj);
-    let left = Pat::from_java(env, &java_left);
+    let java_left = java_class.get_left(env, jobj)?;
+    let left = *Pat::from_java(env, &java_left)?;
     delete_local_ref!(env, java_left);
     let left = Box::new(left);
-    let java_right = java_class.get_right(env, jobj);
-    let right = Expr::from_java(env, &java_right);
+    let java_right = java_class.get_right(env, jobj)?;
+    let right = *Expr::from_java(env, &java_right)?;
     delete_local_ref!(env, java_right);
     let right = Box::new(right);
-    AssignPat {
+    Ok(Box::new(AssignPat {
       span,
       left,
       right,
-    }
+    }))
   }
 }
 
@@ -26549,34 +26579,37 @@ impl RegisterWithMap<ByteToIndexMap> for AssignPatProp {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for AssignPatProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
-    let java_optional_value = self.value.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
+    let java_optional_value = match self.value.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_ASSIGN_PAT_PROP.as_ref().unwrap() }
-      .construct(env, &java_key, &java_optional_value, &java_span_ex);
+      .construct(env, &java_key, &java_optional_value, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_value);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for AssignPatProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_ASSIGN_PAT_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_key = java_class.get_key(env, jobj);
-    let key = BindingIdent::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *BindingIdent::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
-    let java_optional_value = java_class.get_value(env, jobj);
-    let value = if optional_is_present(env, &java_optional_value) {
-      let java_value = optional_get(env, &java_optional_value);
-      let value = Expr::from_java(env, &java_value);
+    let java_optional_value = java_class.get_value(env, jobj)?;
+    let value = if optional_is_present(env, &java_optional_value)? {
+      let java_value = optional_get(env, &java_optional_value)?;
+      let value = *Expr::from_java(env, &java_value)?;
       delete_local_ref!(env, java_value);
       Some(value)
     } else {
@@ -26584,11 +26617,11 @@ impl<'local> FromJava<'local> for AssignPatProp {
     };
     delete_local_ref!(env, java_optional_value);
     let value = value.map(|value| Box::new(value));
-    AssignPatProp {
+    Ok(Box::new(AssignPatProp {
       span,
       key,
       value,
-    }
+    }))
   }
 }
 
@@ -26601,39 +26634,39 @@ impl RegisterWithMap<ByteToIndexMap> for AssignProp {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for AssignProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
-    let java_value = self.value.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
+    let java_value = self.value.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_ASSIGN_PROP.as_ref().unwrap() }
-      .construct(env, &java_key, &java_value, &java_span_ex);
+      .construct(env, &java_key, &java_value, &java_span_ex)?;
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_value);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for AssignProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_ASSIGN_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_key = java_class.get_key(env, jobj);
-    let key = Ident::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *Ident::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
-    let java_value = java_class.get_value(env, jobj);
-    let value = Expr::from_java(env, &java_value);
+    let java_value = java_class.get_value(env, jobj)?;
+    let value = *Expr::from_java(env, &java_value)?;
     delete_local_ref!(env, java_value);
     let value = Box::new(value);
-    AssignProp {
+    Ok(Box::new(AssignProp {
       span,
       key,
       value,
-    }
+    }))
   }
 }
 
@@ -26643,56 +26676,65 @@ impl RegisterWithMap<ByteToIndexMap> for AutoAccessor {
     self.key.register_with_map(map);
     self.value.as_ref().map(|node| node.register_with_map(map));
     self.type_ann.as_ref().map(|node| node.register_with_map(map));
-    self.decorators.iter().for_each(|node| {
+    for node in self.decorators.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for AutoAccessor {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
-    let java_optional_value = self.value.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
+    let java_optional_value = match self.value.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let is_static = self.is_static;
-    let java_decorators = list_new(env, self.decorators.len());
-    self.decorators.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_decorators, &java_node);
+    let java_decorators = list_new(env, self.decorators.len())?;
+    for node in self.decorators.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_decorators, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    }
+    let java_optional_accessibility = match self.accessibility.as_ref() {
+      Some(node) => Some(node.to_java(env)?),
+      None => None,
+    };
     let is_abstract = self.is_abstract;
     let is_override = self.is_override;
     let definite = self.definite;
     let return_value = unsafe { JAVA_CLASS_AUTO_ACCESSOR.as_ref().unwrap() }
-      .construct(env, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_abstract, is_override, definite, &java_span_ex);
+      .construct(env, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_abstract, is_override, definite, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_value);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_accessibility);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_decorators);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for AutoAccessor {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_AUTO_ACCESSOR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_key = java_class.get_key(env, jobj);
-    let key = Key::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *Key::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
-    let java_optional_value = java_class.get_value(env, jobj);
-    let value = if optional_is_present(env, &java_optional_value) {
-      let java_value = optional_get(env, &java_optional_value);
-      let value = Expr::from_java(env, &java_value);
+    let java_optional_value = java_class.get_value(env, jobj)?;
+    let value = if optional_is_present(env, &java_optional_value)? {
+      let java_value = optional_get(env, &java_optional_value)?;
+      let value = *Expr::from_java(env, &java_value)?;
       delete_local_ref!(env, java_value);
       Some(value)
     } else {
@@ -26700,10 +26742,10 @@ impl<'local> FromJava<'local> for AutoAccessor {
     };
     delete_local_ref!(env, java_optional_value);
     let value = value.map(|value| Box::new(value));
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -26711,29 +26753,30 @@ impl<'local> FromJava<'local> for AutoAccessor {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    let is_static = java_class.is_static(env, jobj);
-    let java_decorators = java_class.get_decorators(env, jobj);
-    let length = list_size(env, &java_decorators);
-    let decorators = (0..length).map(|i| {
-      let java_item = list_get(env, &java_decorators, i);
-      let decorators = Decorator::from_java(env, &java_item);
+    let is_static = java_class.is_static(env, jobj)?;
+    let java_decorators = java_class.get_decorators(env, jobj)?;
+    let length = list_size(env, &java_decorators)?;
+    let mut decorators: Vec<Decorator> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_decorators, i)?;
+      let element = *Decorator::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      decorators
-    }).collect();
-    let java_optional_accessibility = java_class.get_accessibility(env, jobj);
-    let accessibility = if optional_is_present(env, &java_optional_accessibility) {
-      let java_accessibility = optional_get(env, &java_optional_accessibility);
-      let accessibility = Accessibility::from_java(env, &java_accessibility);
+      decorators.push(element)
+    }
+    let java_optional_accessibility = java_class.get_accessibility(env, jobj)?;
+    let accessibility = if optional_is_present(env, &java_optional_accessibility)? {
+      let java_accessibility = optional_get(env, &java_optional_accessibility)?;
+      let accessibility = *Accessibility::from_java(env, &java_accessibility)?;
       delete_local_ref!(env, java_accessibility);
       Some(accessibility)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_accessibility);
-    let is_abstract = java_class.is_abstract(env, jobj);
-    let is_override = java_class.is_override(env, jobj);
-    let definite = java_class.is_definite(env, jobj);
-    AutoAccessor {
+    let is_abstract = java_class.is_abstract(env, jobj)?;
+    let is_override = java_class.is_override(env, jobj)?;
+    let definite = java_class.is_definite(env, jobj)?;
+    Ok(Box::new(AutoAccessor {
       span,
       key,
       value,
@@ -26744,7 +26787,7 @@ impl<'local> FromJava<'local> for AutoAccessor {
       is_abstract,
       is_override,
       definite,
-    }
+    }))
   }
 }
 
@@ -26756,33 +26799,33 @@ impl RegisterWithMap<ByteToIndexMap> for AwaitExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for AwaitExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_arg = self.arg.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_arg = self.arg.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_AWAIT_EXPR.as_ref().unwrap() }
-      .construct(env, &java_arg, &java_span_ex);
+      .construct(env, &java_arg, &java_span_ex)?;
     delete_local_ref!(env, java_arg);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for AwaitExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_AWAIT_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_arg = java_class.get_arg(env, jobj);
-    let arg = Expr::from_java(env, &java_arg);
+    let java_arg = java_class.get_arg(env, jobj)?;
+    let arg = *Expr::from_java(env, &java_arg)?;
     delete_local_ref!(env, java_arg);
     let arg = Box::new(arg);
-    AwaitExpr {
+    Ok(Box::new(AwaitExpr {
       span,
       arg,
-    }
+    }))
   }
 }
 
@@ -26801,46 +26844,46 @@ impl RegisterWithMap<ByteToIndexMap> for BinExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for BinExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_op = self.op.to_java(env);
-    let java_left = self.left.to_java_with_map(env, map);
-    let java_right = self.right.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_op = self.op.to_java(env)?;
+    let java_left = self.left.to_java_with_map(env, map)?;
+    let java_right = self.right.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_BIN_EXPR.as_ref().unwrap() }
-      .construct(env, &java_op, &java_left, &java_right, &java_span_ex);
+      .construct(env, &java_op, &java_left, &java_right, &java_span_ex)?;
     delete_local_ref!(env, java_op);
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for BinExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_BIN_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_op = java_class.get_op(env, jobj);
-    let op = BinaryOp::from_java(env, &java_op);
+    let java_op = java_class.get_op(env, jobj)?;
+    let op = *BinaryOp::from_java(env, &java_op)?;
     delete_local_ref!(env, java_op);
-    let java_left = java_class.get_left(env, jobj);
-    let left = Expr::from_java(env, &java_left);
+    let java_left = java_class.get_left(env, jobj)?;
+    let left = *Expr::from_java(env, &java_left)?;
     delete_local_ref!(env, java_left);
     let left = Box::new(left);
-    let java_right = java_class.get_right(env, jobj);
-    let right = Expr::from_java(env, &java_right);
+    let java_right = java_class.get_right(env, jobj)?;
+    let right = *Expr::from_java(env, &java_right)?;
     delete_local_ref!(env, java_right);
     let right = Box::new(right);
-    BinExpr {
+    Ok(Box::new(BinExpr {
       span,
       op,
       left,
       right,
-    }
+    }))
   }
 }
 
@@ -26854,15 +26897,15 @@ impl RegisterWithMap<ByteToIndexMap> for BindingIdent {
 
 impl<'local> FromJava<'local> for BindingIdent {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_BINDING_IDENT.as_ref().unwrap() };
-    let java_id = java_class.get_id(env, jobj);
-    let id = Ident::from_java(env, &java_id);
+    let java_id = java_class.get_id(env, jobj)?;
+    let id = *Ident::from_java(env, &java_id)?;
     delete_local_ref!(env, java_id);
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -26870,63 +26913,64 @@ impl<'local> FromJava<'local> for BindingIdent {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    BindingIdent {
+    Ok(Box::new(BindingIdent {
       id,
       type_ann,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for BlockStmt {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.stmts.iter().for_each(|node| {
+    for node in self.stmts.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for BlockStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let ctxt = self.ctxt;
-    let java_stmts = list_new(env, self.stmts.len());
-    self.stmts.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_stmts, &java_node);
+    let java_stmts = list_new(env, self.stmts.len())?;
+    for node in self.stmts.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_stmts, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_BLOCK_STMT.as_ref().unwrap() }
-      .construct(env, ctxt, &java_stmts, &java_span_ex);
+      .construct(env, ctxt, &java_stmts, &java_span_ex)?;
     delete_local_ref!(env, java_stmts);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for BlockStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_BLOCK_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = java_class.get_ctxt(env, jobj)?;
     let ctxt = SyntaxContext::from_u32(ctxt as u32);
-    let java_stmts = java_class.get_stmts(env, jobj);
-    let length = list_size(env, &java_stmts);
-    let stmts = (0..length).map(|i| {
-      let java_item = list_get(env, &java_stmts, i);
-      let stmts = Stmt::from_java(env, &java_item);
+    let java_stmts = java_class.get_stmts(env, jobj)?;
+    let length = list_size(env, &java_stmts)?;
+    let mut stmts: Vec<Stmt> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_stmts, i)?;
+      let element = *Stmt::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      stmts
-    }).collect();
-    BlockStmt {
+      stmts.push(element)
+    }
+    Ok(Box::new(BlockStmt {
       span,
       ctxt,
       stmts,
-    }
+    }))
   }
 }
 
@@ -26937,29 +26981,29 @@ impl RegisterWithMap<ByteToIndexMap> for Bool {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Bool {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let value = self.value;
     let return_value = unsafe { JAVA_CLASS_BOOL.as_ref().unwrap() }
-      .construct(env, value, &java_span_ex);
+      .construct(env, value, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Bool {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_BOOL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let value = java_class.is_value(env, jobj);
-    Bool {
+    let value = java_class.is_value(env, jobj)?;
+    Ok(Box::new(Bool {
       span,
       value,
-    }
+    }))
   }
 }
 
@@ -26971,39 +27015,42 @@ impl RegisterWithMap<ByteToIndexMap> for BreakStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for BreakStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_optional_label = self.label.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_optional_label = match self.label.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_BREAK_STMT.as_ref().unwrap() }
-      .construct(env, &java_optional_label, &java_span_ex);
+      .construct(env, &java_optional_label, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_label);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for BreakStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_BREAK_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_optional_label = java_class.get_label(env, jobj);
-    let label = if optional_is_present(env, &java_optional_label) {
-      let java_label = optional_get(env, &java_optional_label);
-      let label = Ident::from_java(env, &java_label);
+    let java_optional_label = java_class.get_label(env, jobj)?;
+    let label = if optional_is_present(env, &java_optional_label)? {
+      let java_label = optional_get(env, &java_optional_label)?;
+      let label = *Ident::from_java(env, &java_label)?;
       delete_local_ref!(env, java_label);
       Some(label)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_label);
-    BreakStmt {
+    Ok(Box::new(BreakStmt {
       span,
       label,
-    }
+    }))
   }
 }
 
@@ -27011,60 +27058,64 @@ impl RegisterWithMap<ByteToIndexMap> for CallExpr {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.callee.register_with_map(map);
-    self.args.iter().for_each(|node| {
+    for node in self.args.iter() {
       node.register_with_map(map);
-    });
+    }
     self.type_args.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for CallExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let ctxt = self.ctxt;
-    let java_callee = self.callee.to_java_with_map(env, map);
-    let java_args = list_new(env, self.args.len());
-    self.args.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_args, &java_node);
+    let java_callee = self.callee.to_java_with_map(env, map)?;
+    let java_args = list_new(env, self.args.len())?;
+    for node in self.args.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_args, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    }
+    let java_optional_type_args = match self.type_args.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_CALL_EXPR.as_ref().unwrap() }
-      .construct(env, ctxt, &java_callee, &java_args, &java_optional_type_args, &java_span_ex);
+      .construct(env, ctxt, &java_callee, &java_args, &java_optional_type_args, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_args);
     delete_local_ref!(env, java_callee);
     delete_local_ref!(env, java_args);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for CallExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_CALL_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = java_class.get_ctxt(env, jobj)?;
     let ctxt = SyntaxContext::from_u32(ctxt as u32);
-    let java_callee = java_class.get_callee(env, jobj);
-    let callee = Callee::from_java(env, &java_callee);
+    let java_callee = java_class.get_callee(env, jobj)?;
+    let callee = *Callee::from_java(env, &java_callee)?;
     delete_local_ref!(env, java_callee);
-    let java_args = java_class.get_args(env, jobj);
-    let length = list_size(env, &java_args);
-    let args = (0..length).map(|i| {
-      let java_item = list_get(env, &java_args, i);
-      let args = ExprOrSpread::from_java(env, &java_item);
+    let java_args = java_class.get_args(env, jobj)?;
+    let length = list_size(env, &java_args)?;
+    let mut args: Vec<ExprOrSpread> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_args, i)?;
+      let element = *ExprOrSpread::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      args
-    }).collect();
-    let java_optional_type_args = java_class.get_type_args(env, jobj);
-    let type_args = if optional_is_present(env, &java_optional_type_args) {
-      let java_type_args = optional_get(env, &java_optional_type_args);
-      let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
+      args.push(element)
+    }
+    let java_optional_type_args = java_class.get_type_args(env, jobj)?;
+    let type_args = if optional_is_present(env, &java_optional_type_args)? {
+      let java_type_args = optional_get(env, &java_optional_type_args)?;
+      let type_args = *TsTypeParamInstantiation::from_java(env, &java_type_args)?;
       delete_local_ref!(env, java_type_args);
       Some(type_args)
     } else {
@@ -27072,13 +27123,13 @@ impl<'local> FromJava<'local> for CallExpr {
     };
     delete_local_ref!(env, java_optional_type_args);
     let type_args = type_args.map(|type_args| Box::new(type_args));
-    CallExpr {
+    Ok(Box::new(CallExpr {
       span,
       ctxt,
       callee,
       args,
       type_args,
-    }
+    }))
   }
 }
 
@@ -27091,97 +27142,109 @@ impl RegisterWithMap<ByteToIndexMap> for CatchClause {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for CatchClause {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_optional_param = self.param.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_body = self.body.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_optional_param = match self.param.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_body = self.body.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_CATCH_CLAUSE.as_ref().unwrap() }
-      .construct(env, &java_optional_param, &java_body, &java_span_ex);
+      .construct(env, &java_optional_param, &java_body, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_param);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for CatchClause {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_CATCH_CLAUSE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_optional_param = java_class.get_param(env, jobj);
-    let param = if optional_is_present(env, &java_optional_param) {
-      let java_param = optional_get(env, &java_optional_param);
-      let param = Pat::from_java(env, &java_param);
+    let java_optional_param = java_class.get_param(env, jobj)?;
+    let param = if optional_is_present(env, &java_optional_param)? {
+      let java_param = optional_get(env, &java_optional_param)?;
+      let param = *Pat::from_java(env, &java_param)?;
       delete_local_ref!(env, java_param);
       Some(param)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_param);
-    let java_body = java_class.get_body(env, jobj);
-    let body = BlockStmt::from_java(env, &java_body);
+    let java_body = java_class.get_body(env, jobj)?;
+    let body = *BlockStmt::from_java(env, &java_body)?;
     delete_local_ref!(env, java_body);
-    CatchClause {
+    Ok(Box::new(CatchClause {
       span,
       param,
       body,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Class {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.decorators.iter().for_each(|node| {
+    for node in self.decorators.iter() {
       node.register_with_map(map);
-    });
-    self.body.iter().for_each(|node| {
+    }
+    for node in self.body.iter() {
       node.register_with_map(map);
-    });
+    }
     self.super_class.as_ref().map(|node| node.register_with_map(map));
     self.type_params.as_ref().map(|node| node.register_with_map(map));
     self.super_type_params.as_ref().map(|node| node.register_with_map(map));
-    self.implements.iter().for_each(|node| {
+    for node in self.implements.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Class {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let ctxt = self.ctxt;
-    let java_decorators = list_new(env, self.decorators.len());
-    self.decorators.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_decorators, &java_node);
+    let java_decorators = list_new(env, self.decorators.len())?;
+    for node in self.decorators.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_decorators, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_body = list_new(env, self.body.len());
-    self.body.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_body, &java_node);
+    }
+    let java_body = list_new(env, self.body.len())?;
+    for node in self.body.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_body, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_super_class = self.super_class.as_ref().map(|node| node.to_java_with_map(env, map));
+    }
+    let java_optional_super_class = match self.super_class.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let is_abstract = self.is_abstract;
-    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_super_type_params = self.super_type_params.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_implements = list_new(env, self.implements.len());
-    self.implements.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_implements, &java_node);
+    let java_optional_type_params = match self.type_params.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_super_type_params = match self.super_type_params.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_implements = list_new(env, self.implements.len())?;
+    for node in self.implements.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_implements, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_CLASS.as_ref().unwrap() }
-      .construct(env, ctxt, &java_decorators, &java_body, &java_optional_super_class, is_abstract, &java_optional_type_params, &java_optional_super_type_params, &java_implements, &java_span_ex);
+      .construct(env, ctxt, &java_decorators, &java_body, &java_optional_super_class, is_abstract, &java_optional_type_params, &java_optional_super_type_params, &java_implements, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_super_class);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_optional_ref!(env, java_optional_super_type_params);
@@ -27189,37 +27252,39 @@ impl ToJavaWithMap<ByteToIndexMap> for Class {
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_implements);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Class {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_CLASS.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = java_class.get_ctxt(env, jobj)?;
     let ctxt = SyntaxContext::from_u32(ctxt as u32);
-    let java_decorators = java_class.get_decorators(env, jobj);
-    let length = list_size(env, &java_decorators);
-    let decorators = (0..length).map(|i| {
-      let java_item = list_get(env, &java_decorators, i);
-      let decorators = Decorator::from_java(env, &java_item);
+    let java_decorators = java_class.get_decorators(env, jobj)?;
+    let length = list_size(env, &java_decorators)?;
+    let mut decorators: Vec<Decorator> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_decorators, i)?;
+      let element = *Decorator::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      decorators
-    }).collect();
-    let java_body = java_class.get_body(env, jobj);
-    let length = list_size(env, &java_body);
-    let body = (0..length).map(|i| {
-      let java_item = list_get(env, &java_body, i);
-      let body = ClassMember::from_java(env, &java_item);
+      decorators.push(element)
+    }
+    let java_body = java_class.get_body(env, jobj)?;
+    let length = list_size(env, &java_body)?;
+    let mut body: Vec<ClassMember> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_body, i)?;
+      let element = *ClassMember::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      body
-    }).collect();
-    let java_optional_super_class = java_class.get_super_class(env, jobj);
-    let super_class = if optional_is_present(env, &java_optional_super_class) {
-      let java_super_class = optional_get(env, &java_optional_super_class);
-      let super_class = Expr::from_java(env, &java_super_class);
+      body.push(element)
+    }
+    let java_optional_super_class = java_class.get_super_class(env, jobj)?;
+    let super_class = if optional_is_present(env, &java_optional_super_class)? {
+      let java_super_class = optional_get(env, &java_optional_super_class)?;
+      let super_class = *Expr::from_java(env, &java_super_class)?;
       delete_local_ref!(env, java_super_class);
       Some(super_class)
     } else {
@@ -27227,11 +27292,11 @@ impl<'local> FromJava<'local> for Class {
     };
     delete_local_ref!(env, java_optional_super_class);
     let super_class = super_class.map(|super_class| Box::new(super_class));
-    let is_abstract = java_class.is_abstract(env, jobj);
-    let java_optional_type_params = java_class.get_type_params(env, jobj);
-    let type_params = if optional_is_present(env, &java_optional_type_params) {
-      let java_type_params = optional_get(env, &java_optional_type_params);
-      let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
+    let is_abstract = java_class.is_abstract(env, jobj)?;
+    let java_optional_type_params = java_class.get_type_params(env, jobj)?;
+    let type_params = if optional_is_present(env, &java_optional_type_params)? {
+      let java_type_params = optional_get(env, &java_optional_type_params)?;
+      let type_params = *TsTypeParamDecl::from_java(env, &java_type_params)?;
       delete_local_ref!(env, java_type_params);
       Some(type_params)
     } else {
@@ -27239,10 +27304,10 @@ impl<'local> FromJava<'local> for Class {
     };
     delete_local_ref!(env, java_optional_type_params);
     let type_params = type_params.map(|type_params| Box::new(type_params));
-    let java_optional_super_type_params = java_class.get_super_type_params(env, jobj);
-    let super_type_params = if optional_is_present(env, &java_optional_super_type_params) {
-      let java_super_type_params = optional_get(env, &java_optional_super_type_params);
-      let super_type_params = TsTypeParamInstantiation::from_java(env, &java_super_type_params);
+    let java_optional_super_type_params = java_class.get_super_type_params(env, jobj)?;
+    let super_type_params = if optional_is_present(env, &java_optional_super_type_params)? {
+      let java_super_type_params = optional_get(env, &java_optional_super_type_params)?;
+      let super_type_params = *TsTypeParamInstantiation::from_java(env, &java_super_type_params)?;
       delete_local_ref!(env, java_super_type_params);
       Some(super_type_params)
     } else {
@@ -27250,15 +27315,16 @@ impl<'local> FromJava<'local> for Class {
     };
     delete_local_ref!(env, java_optional_super_type_params);
     let super_type_params = super_type_params.map(|super_type_params| Box::new(super_type_params));
-    let java_implements = java_class.get_implements(env, jobj);
-    let length = list_size(env, &java_implements);
-    let implements = (0..length).map(|i| {
-      let java_item = list_get(env, &java_implements, i);
-      let implements = TsExprWithTypeArgs::from_java(env, &java_item);
+    let java_implements = java_class.get_implements(env, jobj)?;
+    let length = list_size(env, &java_implements)?;
+    let mut implements: Vec<TsExprWithTypeArgs> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_implements, i)?;
+      let element = *TsExprWithTypeArgs::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      implements
-    }).collect();
-    Class {
+      implements.push(element)
+    }
+    Ok(Box::new(Class {
       span,
       ctxt,
       decorators,
@@ -27268,7 +27334,7 @@ impl<'local> FromJava<'local> for Class {
       type_params,
       super_type_params,
       implements,
-    }
+    }))
   }
 }
 
@@ -27281,40 +27347,40 @@ impl RegisterWithMap<ByteToIndexMap> for ClassDecl {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ClassDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
-    let java_ident = self.ident.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env)?;
+    let java_ident = self.ident.to_java_with_map(env, map)?;
     let declare = self.declare;
-    let java_class = self.class.to_java_with_map(env, map);
+    let java_class = self.class.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_CLASS_DECL.as_ref().unwrap() }
-      .construct(env, &java_ident, declare, &java_class, &java_span_ex);
+      .construct(env, &java_ident, declare, &java_class, &java_span_ex)?;
     delete_local_ref!(env, java_ident);
     delete_local_ref!(env, java_class);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ClassDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_CLASS_DECL.as_ref().unwrap() };
-    let java_ident = java_class.get_ident(env, jobj);
-    let ident = Ident::from_java(env, &java_ident);
+    let java_ident = java_class.get_ident(env, jobj)?;
+    let ident = *Ident::from_java(env, &java_ident)?;
     delete_local_ref!(env, java_ident);
-    let declare = java_class.is_declare(env, jobj);
-    let java_class = java_class.get_clazz(env, jobj);
-    let class = Class::from_java(env, &java_class);
+    let declare = java_class.is_declare(env, jobj)?;
+    let java_class = java_class.get_clazz(env, jobj)?;
+    let class = *Class::from_java(env, &java_class)?;
     delete_local_ref!(env, java_class);
     let class = Box::new(class);
-    ClassDecl {
+    Ok(Box::new(ClassDecl {
       ident,
       declare,
       class,
-    }
+    }))
   }
 }
 
@@ -27327,44 +27393,47 @@ impl RegisterWithMap<ByteToIndexMap> for ClassExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ClassExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
-    let java_optional_ident = self.ident.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_class = self.class.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env)?;
+    let java_optional_ident = match self.ident.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_class = self.class.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_CLASS_EXPR.as_ref().unwrap() }
-      .construct(env, &java_optional_ident, &java_class, &java_span_ex);
+      .construct(env, &java_optional_ident, &java_class, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_ident);
     delete_local_ref!(env, java_class);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ClassExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_CLASS_EXPR.as_ref().unwrap() };
-    let java_optional_ident = java_class.get_ident(env, jobj);
-    let ident = if optional_is_present(env, &java_optional_ident) {
-      let java_ident = optional_get(env, &java_optional_ident);
-      let ident = Ident::from_java(env, &java_ident);
+    let java_optional_ident = java_class.get_ident(env, jobj)?;
+    let ident = if optional_is_present(env, &java_optional_ident)? {
+      let java_ident = optional_get(env, &java_optional_ident)?;
+      let ident = *Ident::from_java(env, &java_ident)?;
       delete_local_ref!(env, java_ident);
       Some(ident)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_ident);
-    let java_class = java_class.get_clazz(env, jobj);
-    let class = Class::from_java(env, &java_class);
+    let java_class = java_class.get_clazz(env, jobj)?;
+    let class = *Class::from_java(env, &java_class)?;
     delete_local_ref!(env, java_class);
     let class = Box::new(class);
-    ClassExpr {
+    Ok(Box::new(ClassExpr {
       ident,
       class,
-    }
+    }))
   }
 }
 
@@ -27377,60 +27446,63 @@ impl RegisterWithMap<ByteToIndexMap> for ClassMethod {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ClassMethod {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
-    let java_function = self.function.to_java_with_map(env, map);
-    let java_kind = self.kind.to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
+    let java_function = self.function.to_java_with_map(env, map)?;
+    let java_kind = self.kind.to_java(env)?;
     let is_static = self.is_static;
-    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    let java_optional_accessibility = match self.accessibility.as_ref() {
+      Some(node) => Some(node.to_java(env)?),
+      None => None,
+    };
     let is_abstract = self.is_abstract;
     let is_optional = self.is_optional;
     let is_override = self.is_override;
     let return_value = unsafe { JAVA_CLASS_CLASS_METHOD.as_ref().unwrap() }
-      .construct(env, &java_key, &java_function, &java_kind, is_static, &java_optional_accessibility, is_abstract, is_optional, is_override, &java_span_ex);
+      .construct(env, &java_key, &java_function, &java_kind, is_static, &java_optional_accessibility, is_abstract, is_optional, is_override, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_accessibility);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_function);
     delete_local_ref!(env, java_kind);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ClassMethod {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_CLASS_METHOD.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_key = java_class.get_key(env, jobj);
-    let key = PropName::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *PropName::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
-    let java_function = java_class.get_function(env, jobj);
-    let function = Function::from_java(env, &java_function);
+    let java_function = java_class.get_function(env, jobj)?;
+    let function = *Function::from_java(env, &java_function)?;
     delete_local_ref!(env, java_function);
     let function = Box::new(function);
-    let java_kind = java_class.get_kind(env, jobj);
-    let kind = MethodKind::from_java(env, &java_kind);
+    let java_kind = java_class.get_kind(env, jobj)?;
+    let kind = *MethodKind::from_java(env, &java_kind)?;
     delete_local_ref!(env, java_kind);
-    let is_static = java_class.is_static(env, jobj);
-    let java_optional_accessibility = java_class.get_accessibility(env, jobj);
-    let accessibility = if optional_is_present(env, &java_optional_accessibility) {
-      let java_accessibility = optional_get(env, &java_optional_accessibility);
-      let accessibility = Accessibility::from_java(env, &java_accessibility);
+    let is_static = java_class.is_static(env, jobj)?;
+    let java_optional_accessibility = java_class.get_accessibility(env, jobj)?;
+    let accessibility = if optional_is_present(env, &java_optional_accessibility)? {
+      let java_accessibility = optional_get(env, &java_optional_accessibility)?;
+      let accessibility = *Accessibility::from_java(env, &java_accessibility)?;
       delete_local_ref!(env, java_accessibility);
       Some(accessibility)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_accessibility);
-    let is_abstract = java_class.is_abstract(env, jobj);
-    let is_optional = java_class.is_optional(env, jobj);
-    let is_override = java_class.is_override(env, jobj);
-    ClassMethod {
+    let is_abstract = java_class.is_abstract(env, jobj)?;
+    let is_optional = java_class.is_optional(env, jobj)?;
+    let is_override = java_class.is_override(env, jobj)?;
+    Ok(Box::new(ClassMethod {
       span,
       key,
       function,
@@ -27440,7 +27512,7 @@ impl<'local> FromJava<'local> for ClassMethod {
       is_abstract,
       is_optional,
       is_override,
-    }
+    }))
   }
 }
 
@@ -27450,29 +27522,38 @@ impl RegisterWithMap<ByteToIndexMap> for ClassProp {
     self.key.register_with_map(map);
     self.value.as_ref().map(|node| node.register_with_map(map));
     self.type_ann.as_ref().map(|node| node.register_with_map(map));
-    self.decorators.iter().for_each(|node| {
+    for node in self.decorators.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ClassProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
-    let java_optional_value = self.value.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
+    let java_optional_value = match self.value.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let is_static = self.is_static;
-    let java_decorators = list_new(env, self.decorators.len());
-    self.decorators.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_decorators, &java_node);
+    let java_decorators = list_new(env, self.decorators.len())?;
+    for node in self.decorators.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_decorators, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    }
+    let java_optional_accessibility = match self.accessibility.as_ref() {
+      Some(node) => Some(node.to_java(env)?),
+      None => None,
+    };
     let is_abstract = self.is_abstract;
     let is_optional = self.is_optional;
     let is_override = self.is_override;
@@ -27480,29 +27561,29 @@ impl ToJavaWithMap<ByteToIndexMap> for ClassProp {
     let declare = self.declare;
     let definite = self.definite;
     let return_value = unsafe { JAVA_CLASS_CLASS_PROP.as_ref().unwrap() }
-      .construct(env, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_abstract, is_optional, is_override, readonly, declare, definite, &java_span_ex);
+      .construct(env, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_abstract, is_optional, is_override, readonly, declare, definite, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_value);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_accessibility);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_decorators);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ClassProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_CLASS_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_key = java_class.get_key(env, jobj);
-    let key = PropName::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *PropName::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
-    let java_optional_value = java_class.get_value(env, jobj);
-    let value = if optional_is_present(env, &java_optional_value) {
-      let java_value = optional_get(env, &java_optional_value);
-      let value = Expr::from_java(env, &java_value);
+    let java_optional_value = java_class.get_value(env, jobj)?;
+    let value = if optional_is_present(env, &java_optional_value)? {
+      let java_value = optional_get(env, &java_optional_value)?;
+      let value = *Expr::from_java(env, &java_value)?;
       delete_local_ref!(env, java_value);
       Some(value)
     } else {
@@ -27510,10 +27591,10 @@ impl<'local> FromJava<'local> for ClassProp {
     };
     delete_local_ref!(env, java_optional_value);
     let value = value.map(|value| Box::new(value));
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -27521,32 +27602,33 @@ impl<'local> FromJava<'local> for ClassProp {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    let is_static = java_class.is_static(env, jobj);
-    let java_decorators = java_class.get_decorators(env, jobj);
-    let length = list_size(env, &java_decorators);
-    let decorators = (0..length).map(|i| {
-      let java_item = list_get(env, &java_decorators, i);
-      let decorators = Decorator::from_java(env, &java_item);
+    let is_static = java_class.is_static(env, jobj)?;
+    let java_decorators = java_class.get_decorators(env, jobj)?;
+    let length = list_size(env, &java_decorators)?;
+    let mut decorators: Vec<Decorator> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_decorators, i)?;
+      let element = *Decorator::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      decorators
-    }).collect();
-    let java_optional_accessibility = java_class.get_accessibility(env, jobj);
-    let accessibility = if optional_is_present(env, &java_optional_accessibility) {
-      let java_accessibility = optional_get(env, &java_optional_accessibility);
-      let accessibility = Accessibility::from_java(env, &java_accessibility);
+      decorators.push(element)
+    }
+    let java_optional_accessibility = java_class.get_accessibility(env, jobj)?;
+    let accessibility = if optional_is_present(env, &java_optional_accessibility)? {
+      let java_accessibility = optional_get(env, &java_optional_accessibility)?;
+      let accessibility = *Accessibility::from_java(env, &java_accessibility)?;
       delete_local_ref!(env, java_accessibility);
       Some(accessibility)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_accessibility);
-    let is_abstract = java_class.is_abstract(env, jobj);
-    let is_optional = java_class.is_optional(env, jobj);
-    let is_override = java_class.is_override(env, jobj);
-    let readonly = java_class.is_readonly(env, jobj);
-    let declare = java_class.is_declare(env, jobj);
-    let definite = java_class.is_definite(env, jobj);
-    ClassProp {
+    let is_abstract = java_class.is_abstract(env, jobj)?;
+    let is_optional = java_class.is_optional(env, jobj)?;
+    let is_override = java_class.is_override(env, jobj)?;
+    let readonly = java_class.is_readonly(env, jobj)?;
+    let declare = java_class.is_declare(env, jobj)?;
+    let definite = java_class.is_definite(env, jobj)?;
+    Ok(Box::new(ClassProp {
       span,
       key,
       value,
@@ -27560,7 +27642,7 @@ impl<'local> FromJava<'local> for ClassProp {
       readonly,
       declare,
       definite,
-    }
+    }))
   }
 }
 
@@ -27572,33 +27654,33 @@ impl RegisterWithMap<ByteToIndexMap> for ComputedPropName {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ComputedPropName {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_span_ex);
+      .construct(env, &java_expr, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ComputedPropName {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_COMPUTED_PROP_NAME.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    ComputedPropName {
+    Ok(Box::new(ComputedPropName {
       span,
       expr,
-    }
+    }))
   }
 }
 
@@ -27612,47 +27694,47 @@ impl RegisterWithMap<ByteToIndexMap> for CondExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for CondExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_test = self.test.to_java_with_map(env, map);
-    let java_cons = self.cons.to_java_with_map(env, map);
-    let java_alt = self.alt.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_test = self.test.to_java_with_map(env, map)?;
+    let java_cons = self.cons.to_java_with_map(env, map)?;
+    let java_alt = self.alt.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_COND_EXPR.as_ref().unwrap() }
-      .construct(env, &java_test, &java_cons, &java_alt, &java_span_ex);
+      .construct(env, &java_test, &java_cons, &java_alt, &java_span_ex)?;
     delete_local_ref!(env, java_test);
     delete_local_ref!(env, java_cons);
     delete_local_ref!(env, java_alt);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for CondExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_COND_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_test = java_class.get_test(env, jobj);
-    let test = Expr::from_java(env, &java_test);
+    let java_test = java_class.get_test(env, jobj)?;
+    let test = *Expr::from_java(env, &java_test)?;
     delete_local_ref!(env, java_test);
     let test = Box::new(test);
-    let java_cons = java_class.get_cons(env, jobj);
-    let cons = Expr::from_java(env, &java_cons);
+    let java_cons = java_class.get_cons(env, jobj)?;
+    let cons = *Expr::from_java(env, &java_cons)?;
     delete_local_ref!(env, java_cons);
     let cons = Box::new(cons);
-    let java_alt = java_class.get_alt(env, jobj);
-    let alt = Expr::from_java(env, &java_alt);
+    let java_alt = java_class.get_alt(env, jobj)?;
+    let alt = *Expr::from_java(env, &java_alt)?;
     delete_local_ref!(env, java_alt);
     let alt = Box::new(alt);
-    CondExpr {
+    Ok(Box::new(CondExpr {
       span,
       test,
       cons,
       alt,
-    }
+    }))
   }
 }
 
@@ -27660,81 +27742,88 @@ impl RegisterWithMap<ByteToIndexMap> for Constructor {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
-    self.params.iter().for_each(|node| {
+    for node in self.params.iter() {
       node.register_with_map(map);
-    });
+    }
     self.body.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Constructor {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let ctxt = self.ctxt;
-    let java_key = self.key.to_java_with_map(env, map);
-    let java_params = list_new(env, self.params.len());
-    self.params.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_params, &java_node);
+    let java_key = self.key.to_java_with_map(env, map)?;
+    let java_params = list_new(env, self.params.len())?;
+    for node in self.params.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_params, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_body = self.body.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    }
+    let java_optional_body = match self.body.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_accessibility = match self.accessibility.as_ref() {
+      Some(node) => Some(node.to_java(env)?),
+      None => None,
+    };
     let is_optional = self.is_optional;
     let return_value = unsafe { JAVA_CLASS_CONSTRUCTOR.as_ref().unwrap() }
-      .construct(env, ctxt, &java_key, &java_params, &java_optional_body, &java_optional_accessibility, is_optional, &java_span_ex);
+      .construct(env, ctxt, &java_key, &java_params, &java_optional_body, &java_optional_accessibility, is_optional, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_body);
     delete_local_optional_ref!(env, java_optional_accessibility);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Constructor {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_CONSTRUCTOR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = java_class.get_ctxt(env, jobj)?;
     let ctxt = SyntaxContext::from_u32(ctxt as u32);
-    let java_key = java_class.get_key(env, jobj);
-    let key = PropName::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *PropName::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
-    let java_params = java_class.get_params(env, jobj);
-    let length = list_size(env, &java_params);
-    let params = (0..length).map(|i| {
-      let java_item = list_get(env, &java_params, i);
-      let params = ParamOrTsParamProp::from_java(env, &java_item);
+    let java_params = java_class.get_params(env, jobj)?;
+    let length = list_size(env, &java_params)?;
+    let mut params: Vec<ParamOrTsParamProp> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_params, i)?;
+      let element = *ParamOrTsParamProp::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      params
-    }).collect();
-    let java_optional_body = java_class.get_body(env, jobj);
-    let body = if optional_is_present(env, &java_optional_body) {
-      let java_body = optional_get(env, &java_optional_body);
-      let body = BlockStmt::from_java(env, &java_body);
+      params.push(element)
+    }
+    let java_optional_body = java_class.get_body(env, jobj)?;
+    let body = if optional_is_present(env, &java_optional_body)? {
+      let java_body = optional_get(env, &java_optional_body)?;
+      let body = *BlockStmt::from_java(env, &java_body)?;
       delete_local_ref!(env, java_body);
       Some(body)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_body);
-    let java_optional_accessibility = java_class.get_accessibility(env, jobj);
-    let accessibility = if optional_is_present(env, &java_optional_accessibility) {
-      let java_accessibility = optional_get(env, &java_optional_accessibility);
-      let accessibility = Accessibility::from_java(env, &java_accessibility);
+    let java_optional_accessibility = java_class.get_accessibility(env, jobj)?;
+    let accessibility = if optional_is_present(env, &java_optional_accessibility)? {
+      let java_accessibility = optional_get(env, &java_optional_accessibility)?;
+      let accessibility = *Accessibility::from_java(env, &java_accessibility)?;
       delete_local_ref!(env, java_accessibility);
       Some(accessibility)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_accessibility);
-    let is_optional = java_class.is_optional(env, jobj);
-    Constructor {
+    let is_optional = java_class.is_optional(env, jobj)?;
+    Ok(Box::new(Constructor {
       span,
       ctxt,
       key,
@@ -27742,7 +27831,7 @@ impl<'local> FromJava<'local> for Constructor {
       body,
       accessibility,
       is_optional,
-    }
+    }))
   }
 }
 
@@ -27754,39 +27843,42 @@ impl RegisterWithMap<ByteToIndexMap> for ContinueStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ContinueStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_optional_label = self.label.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_optional_label = match self.label.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_CONTINUE_STMT.as_ref().unwrap() }
-      .construct(env, &java_optional_label, &java_span_ex);
+      .construct(env, &java_optional_label, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_label);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ContinueStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_CONTINUE_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_optional_label = java_class.get_label(env, jobj);
-    let label = if optional_is_present(env, &java_optional_label) {
-      let java_label = optional_get(env, &java_optional_label);
-      let label = Ident::from_java(env, &java_label);
+    let java_optional_label = java_class.get_label(env, jobj)?;
+    let label = if optional_is_present(env, &java_optional_label)? {
+      let java_label = optional_get(env, &java_optional_label)?;
+      let label = *Ident::from_java(env, &java_label)?;
       delete_local_ref!(env, java_label);
       Some(label)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_label);
-    ContinueStmt {
+    Ok(Box::new(ContinueStmt {
       span,
       label,
-    }
+    }))
   }
 }
 
@@ -27797,25 +27889,25 @@ impl RegisterWithMap<ByteToIndexMap> for DebuggerStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for DebuggerStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_DEBUGGER_STMT.as_ref().unwrap() }
-      .construct(env, &java_span_ex);
+      .construct(env, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for DebuggerStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let span = DUMMY_SP;
-    DebuggerStmt {
+    Ok(Box::new(DebuggerStmt {
       span,
-    }
+    }))
   }
 }
 
@@ -27827,33 +27919,33 @@ impl RegisterWithMap<ByteToIndexMap> for Decorator {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Decorator {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_DECORATOR.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_span_ex);
+      .construct(env, &java_expr, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Decorator {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_DECORATOR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    Decorator {
+    Ok(Box::new(Decorator {
       span,
       expr,
-    }
+    }))
   }
 }
 
@@ -27866,40 +27958,40 @@ impl RegisterWithMap<ByteToIndexMap> for DoWhileStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for DoWhileStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_test = self.test.to_java_with_map(env, map);
-    let java_body = self.body.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_test = self.test.to_java_with_map(env, map)?;
+    let java_body = self.body.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_DO_WHILE_STMT.as_ref().unwrap() }
-      .construct(env, &java_test, &java_body, &java_span_ex);
+      .construct(env, &java_test, &java_body, &java_span_ex)?;
     delete_local_ref!(env, java_test);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for DoWhileStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_DO_WHILE_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_test = java_class.get_test(env, jobj);
-    let test = Expr::from_java(env, &java_test);
+    let java_test = java_class.get_test(env, jobj)?;
+    let test = *Expr::from_java(env, &java_test)?;
     delete_local_ref!(env, java_test);
     let test = Box::new(test);
-    let java_body = java_class.get_body(env, jobj);
-    let body = Stmt::from_java(env, &java_body);
+    let java_body = java_class.get_body(env, jobj)?;
+    let body = *Stmt::from_java(env, &java_body)?;
     delete_local_ref!(env, java_body);
     let body = Box::new(body);
-    DoWhileStmt {
+    Ok(Box::new(DoWhileStmt {
       span,
       test,
       body,
-    }
+    }))
   }
 }
 
@@ -27910,25 +28002,25 @@ impl RegisterWithMap<ByteToIndexMap> for EmptyStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for EmptyStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_EMPTY_STMT.as_ref().unwrap() }
-      .construct(env, &java_span_ex);
+      .construct(env, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for EmptyStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let span = DUMMY_SP;
-    EmptyStmt {
+    Ok(Box::new(EmptyStmt {
       span,
-    }
+    }))
   }
 }
 
@@ -27941,37 +28033,40 @@ impl RegisterWithMap<ByteToIndexMap> for ExportAll {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ExportAll {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_src = self.src.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_src = self.src.to_java_with_map(env, map)?;
     let type_only = self.type_only;
-    let java_optional_with = self.with.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_with = match self.with.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_EXPORT_ALL.as_ref().unwrap() }
-      .construct(env, &java_src, type_only, &java_optional_with, &java_span_ex);
+      .construct(env, &java_src, type_only, &java_optional_with, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_with);
     delete_local_ref!(env, java_src);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ExportAll {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_EXPORT_ALL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_src = java_class.get_src(env, jobj);
-    let src = Str::from_java(env, &java_src);
+    let java_src = java_class.get_src(env, jobj)?;
+    let src = *Str::from_java(env, &java_src)?;
     delete_local_ref!(env, java_src);
     let src = Box::new(src);
-    let type_only = java_class.is_type_only(env, jobj);
-    let java_optional_with = java_class.get_with(env, jobj);
-    let with = if optional_is_present(env, &java_optional_with) {
-      let java_with = optional_get(env, &java_optional_with);
-      let with = ObjectLit::from_java(env, &java_with);
+    let type_only = java_class.is_type_only(env, jobj)?;
+    let java_optional_with = java_class.get_with(env, jobj)?;
+    let with = if optional_is_present(env, &java_optional_with)? {
+      let java_with = optional_get(env, &java_optional_with)?;
+      let with = *ObjectLit::from_java(env, &java_with)?;
       delete_local_ref!(env, java_with);
       Some(with)
     } else {
@@ -27979,12 +28074,12 @@ impl<'local> FromJava<'local> for ExportAll {
     };
     delete_local_ref!(env, java_optional_with);
     let with = with.map(|with| Box::new(with));
-    ExportAll {
+    Ok(Box::new(ExportAll {
       span,
       src,
       type_only,
       with,
-    }
+    }))
   }
 }
 
@@ -27996,32 +28091,32 @@ impl RegisterWithMap<ByteToIndexMap> for ExportDecl {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ExportDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_decl = self.decl.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_decl = self.decl.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_EXPORT_DECL.as_ref().unwrap() }
-      .construct(env, &java_decl, &java_span_ex);
+      .construct(env, &java_decl, &java_span_ex)?;
     delete_local_ref!(env, java_decl);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ExportDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_EXPORT_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_decl = java_class.get_decl(env, jobj);
-    let decl = Decl::from_java(env, &java_decl);
+    let java_decl = java_class.get_decl(env, jobj)?;
+    let decl = *Decl::from_java(env, &java_decl)?;
     delete_local_ref!(env, java_decl);
-    ExportDecl {
+    Ok(Box::new(ExportDecl {
       span,
       decl,
-    }
+    }))
   }
 }
 
@@ -28033,32 +28128,32 @@ impl RegisterWithMap<ByteToIndexMap> for ExportDefaultDecl {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ExportDefaultDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_decl = self.decl.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_decl = self.decl.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_EXPORT_DEFAULT_DECL.as_ref().unwrap() }
-      .construct(env, &java_decl, &java_span_ex);
+      .construct(env, &java_decl, &java_span_ex)?;
     delete_local_ref!(env, java_decl);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ExportDefaultDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_EXPORT_DEFAULT_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_decl = java_class.get_decl(env, jobj);
-    let decl = DefaultDecl::from_java(env, &java_decl);
+    let java_decl = java_class.get_decl(env, jobj)?;
+    let decl = *DefaultDecl::from_java(env, &java_decl)?;
     delete_local_ref!(env, java_decl);
-    ExportDefaultDecl {
+    Ok(Box::new(ExportDefaultDecl {
       span,
       decl,
-    }
+    }))
   }
 }
 
@@ -28070,33 +28165,33 @@ impl RegisterWithMap<ByteToIndexMap> for ExportDefaultExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ExportDefaultExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_EXPORT_DEFAULT_EXPR.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_span_ex);
+      .construct(env, &java_expr, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ExportDefaultExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_EXPORT_DEFAULT_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    ExportDefaultExpr {
+    Ok(Box::new(ExportDefaultExpr {
       span,
       expr,
-    }
+    }))
   }
 }
 
@@ -28108,30 +28203,30 @@ impl RegisterWithMap<ByteToIndexMap> for ExportDefaultSpecifier {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ExportDefaultSpecifier {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
-    let java_exported = self.exported.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env)?;
+    let java_exported = self.exported.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_EXPORT_DEFAULT_SPECIFIER.as_ref().unwrap() }
-      .construct(env, &java_exported, &java_span_ex);
+      .construct(env, &java_exported, &java_span_ex)?;
     delete_local_ref!(env, java_exported);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ExportDefaultSpecifier {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_EXPORT_DEFAULT_SPECIFIER.as_ref().unwrap() };
-    let java_exported = java_class.get_exported(env, jobj);
-    let exported = Ident::from_java(env, &java_exported);
+    let java_exported = java_class.get_exported(env, jobj)?;
+    let exported = *Ident::from_java(env, &java_exported)?;
     delete_local_ref!(env, java_exported);
-    ExportDefaultSpecifier {
+    Ok(Box::new(ExportDefaultSpecifier {
       exported,
-    }
+    }))
   }
 }
 
@@ -28144,48 +28239,51 @@ impl RegisterWithMap<ByteToIndexMap> for ExportNamedSpecifier {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ExportNamedSpecifier {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_orig = self.orig.to_java_with_map(env, map);
-    let java_optional_exported = self.exported.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_orig = self.orig.to_java_with_map(env, map)?;
+    let java_optional_exported = match self.exported.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let is_type_only = self.is_type_only;
     let return_value = unsafe { JAVA_CLASS_EXPORT_NAMED_SPECIFIER.as_ref().unwrap() }
-      .construct(env, &java_orig, &java_optional_exported, is_type_only, &java_span_ex);
+      .construct(env, &java_orig, &java_optional_exported, is_type_only, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_exported);
     delete_local_ref!(env, java_orig);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ExportNamedSpecifier {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_EXPORT_NAMED_SPECIFIER.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_orig = java_class.get_orig(env, jobj);
-    let orig = ModuleExportName::from_java(env, &java_orig);
+    let java_orig = java_class.get_orig(env, jobj)?;
+    let orig = *ModuleExportName::from_java(env, &java_orig)?;
     delete_local_ref!(env, java_orig);
-    let java_optional_exported = java_class.get_exported(env, jobj);
-    let exported = if optional_is_present(env, &java_optional_exported) {
-      let java_exported = optional_get(env, &java_optional_exported);
-      let exported = ModuleExportName::from_java(env, &java_exported);
+    let java_optional_exported = java_class.get_exported(env, jobj)?;
+    let exported = if optional_is_present(env, &java_optional_exported)? {
+      let java_exported = optional_get(env, &java_optional_exported)?;
+      let exported = *ModuleExportName::from_java(env, &java_exported)?;
       delete_local_ref!(env, java_exported);
       Some(exported)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_exported);
-    let is_type_only = java_class.is_type_only(env, jobj);
-    ExportNamedSpecifier {
+    let is_type_only = java_class.is_type_only(env, jobj)?;
+    Ok(Box::new(ExportNamedSpecifier {
       span,
       orig,
       exported,
       is_type_only,
-    }
+    }))
   }
 }
 
@@ -28197,32 +28295,32 @@ impl RegisterWithMap<ByteToIndexMap> for ExportNamespaceSpecifier {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ExportNamespaceSpecifier {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_name = self.name.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_name = self.name.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_EXPORT_NAMESPACE_SPECIFIER.as_ref().unwrap() }
-      .construct(env, &java_name, &java_span_ex);
+      .construct(env, &java_name, &java_span_ex)?;
     delete_local_ref!(env, java_name);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ExportNamespaceSpecifier {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_EXPORT_NAMESPACE_SPECIFIER.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_name = java_class.get_name(env, jobj);
-    let name = ModuleExportName::from_java(env, &java_name);
+    let java_name = java_class.get_name(env, jobj)?;
+    let name = *ModuleExportName::from_java(env, &java_name)?;
     delete_local_ref!(env, java_name);
-    ExportNamespaceSpecifier {
+    Ok(Box::new(ExportNamespaceSpecifier {
       span,
       name,
-    }
+    }))
   }
 }
 
@@ -28234,41 +28332,44 @@ impl RegisterWithMap<ByteToIndexMap> for ExprOrSpread {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ExprOrSpread {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
-    let java_optional_spread = self.spread.as_ref().map(|node| map.get_span_ex_by_span(node).to_java(env));
-    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env)?;
+    let java_optional_spread = match self.spread.as_ref() {
+      Some(node) => Some(map.get_span_ex_by_span(node).to_java(env)?),
+      None => None,
+    };
+    let java_expr = self.expr.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_EXPR_OR_SPREAD.as_ref().unwrap() }
-      .construct(env, &java_optional_spread, &java_expr, &java_span_ex);
+      .construct(env, &java_optional_spread, &java_expr, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_spread);
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ExprOrSpread {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_EXPR_OR_SPREAD.as_ref().unwrap() };
-    let java_optional_spread = java_class.get_spread(env, jobj);
-    let spread = if optional_is_present(env, &java_optional_spread) {
+    let java_optional_spread = java_class.get_spread(env, jobj)?;
+    let spread = if optional_is_present(env, &java_optional_spread)? {
       Some(DUMMY_SP)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_spread);
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    ExprOrSpread {
+    Ok(Box::new(ExprOrSpread {
       spread,
       expr,
-    }
+    }))
   }
 }
 
@@ -28280,33 +28381,33 @@ impl RegisterWithMap<ByteToIndexMap> for ExprStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ExprStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_EXPR_STMT.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_span_ex);
+      .construct(env, &java_expr, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ExprStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_EXPR_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    ExprStmt {
+    Ok(Box::new(ExprStmt {
       span,
       expr,
-    }
+    }))
   }
 }
 
@@ -28319,40 +28420,40 @@ impl RegisterWithMap<ByteToIndexMap> for FnDecl {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for FnDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
-    let java_ident = self.ident.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env)?;
+    let java_ident = self.ident.to_java_with_map(env, map)?;
     let declare = self.declare;
-    let java_function = self.function.to_java_with_map(env, map);
+    let java_function = self.function.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_FN_DECL.as_ref().unwrap() }
-      .construct(env, &java_ident, declare, &java_function, &java_span_ex);
+      .construct(env, &java_ident, declare, &java_function, &java_span_ex)?;
     delete_local_ref!(env, java_ident);
     delete_local_ref!(env, java_function);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for FnDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_FN_DECL.as_ref().unwrap() };
-    let java_ident = java_class.get_ident(env, jobj);
-    let ident = Ident::from_java(env, &java_ident);
+    let java_ident = java_class.get_ident(env, jobj)?;
+    let ident = *Ident::from_java(env, &java_ident)?;
     delete_local_ref!(env, java_ident);
-    let declare = java_class.is_declare(env, jobj);
-    let java_function = java_class.get_function(env, jobj);
-    let function = Function::from_java(env, &java_function);
+    let declare = java_class.is_declare(env, jobj)?;
+    let java_function = java_class.get_function(env, jobj)?;
+    let function = *Function::from_java(env, &java_function)?;
     delete_local_ref!(env, java_function);
     let function = Box::new(function);
-    FnDecl {
+    Ok(Box::new(FnDecl {
       ident,
       declare,
       function,
-    }
+    }))
   }
 }
 
@@ -28365,44 +28466,47 @@ impl RegisterWithMap<ByteToIndexMap> for FnExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for FnExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
-    let java_optional_ident = self.ident.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_function = self.function.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env)?;
+    let java_optional_ident = match self.ident.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_function = self.function.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_FN_EXPR.as_ref().unwrap() }
-      .construct(env, &java_optional_ident, &java_function, &java_span_ex);
+      .construct(env, &java_optional_ident, &java_function, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_ident);
     delete_local_ref!(env, java_function);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for FnExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_FN_EXPR.as_ref().unwrap() };
-    let java_optional_ident = java_class.get_ident(env, jobj);
-    let ident = if optional_is_present(env, &java_optional_ident) {
-      let java_ident = optional_get(env, &java_optional_ident);
-      let ident = Ident::from_java(env, &java_ident);
+    let java_optional_ident = java_class.get_ident(env, jobj)?;
+    let ident = if optional_is_present(env, &java_optional_ident)? {
+      let java_ident = optional_get(env, &java_optional_ident)?;
+      let ident = *Ident::from_java(env, &java_ident)?;
       delete_local_ref!(env, java_ident);
       Some(ident)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_ident);
-    let java_function = java_class.get_function(env, jobj);
-    let function = Function::from_java(env, &java_function);
+    let java_function = java_class.get_function(env, jobj)?;
+    let function = *Function::from_java(env, &java_function)?;
     delete_local_ref!(env, java_function);
     let function = Box::new(function);
-    FnExpr {
+    Ok(Box::new(FnExpr {
       ident,
       function,
-    }
+    }))
   }
 }
 
@@ -28416,46 +28520,46 @@ impl RegisterWithMap<ByteToIndexMap> for ForInStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ForInStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_left = self.left.to_java_with_map(env, map);
-    let java_right = self.right.to_java_with_map(env, map);
-    let java_body = self.body.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_left = self.left.to_java_with_map(env, map)?;
+    let java_right = self.right.to_java_with_map(env, map)?;
+    let java_body = self.body.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_FOR_IN_STMT.as_ref().unwrap() }
-      .construct(env, &java_left, &java_right, &java_body, &java_span_ex);
+      .construct(env, &java_left, &java_right, &java_body, &java_span_ex)?;
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ForInStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_FOR_IN_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_left = java_class.get_left(env, jobj);
-    let left = ForHead::from_java(env, &java_left);
+    let java_left = java_class.get_left(env, jobj)?;
+    let left = *ForHead::from_java(env, &java_left)?;
     delete_local_ref!(env, java_left);
-    let java_right = java_class.get_right(env, jobj);
-    let right = Expr::from_java(env, &java_right);
+    let java_right = java_class.get_right(env, jobj)?;
+    let right = *Expr::from_java(env, &java_right)?;
     delete_local_ref!(env, java_right);
     let right = Box::new(right);
-    let java_body = java_class.get_body(env, jobj);
-    let body = Stmt::from_java(env, &java_body);
+    let java_body = java_class.get_body(env, jobj)?;
+    let body = *Stmt::from_java(env, &java_body)?;
     delete_local_ref!(env, java_body);
     let body = Box::new(body);
-    ForInStmt {
+    Ok(Box::new(ForInStmt {
       span,
       left,
       right,
       body,
-    }
+    }))
   }
 }
 
@@ -28469,49 +28573,49 @@ impl RegisterWithMap<ByteToIndexMap> for ForOfStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ForOfStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let is_await = self.is_await;
-    let java_left = self.left.to_java_with_map(env, map);
-    let java_right = self.right.to_java_with_map(env, map);
-    let java_body = self.body.to_java_with_map(env, map);
+    let java_left = self.left.to_java_with_map(env, map)?;
+    let java_right = self.right.to_java_with_map(env, map)?;
+    let java_body = self.body.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_FOR_OF_STMT.as_ref().unwrap() }
-      .construct(env, is_await, &java_left, &java_right, &java_body, &java_span_ex);
+      .construct(env, is_await, &java_left, &java_right, &java_body, &java_span_ex)?;
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ForOfStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_FOR_OF_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let is_await = java_class.is_await(env, jobj);
-    let java_left = java_class.get_left(env, jobj);
-    let left = ForHead::from_java(env, &java_left);
+    let is_await = java_class.is_await(env, jobj)?;
+    let java_left = java_class.get_left(env, jobj)?;
+    let left = *ForHead::from_java(env, &java_left)?;
     delete_local_ref!(env, java_left);
-    let java_right = java_class.get_right(env, jobj);
-    let right = Expr::from_java(env, &java_right);
+    let java_right = java_class.get_right(env, jobj)?;
+    let right = *Expr::from_java(env, &java_right)?;
     delete_local_ref!(env, java_right);
     let right = Box::new(right);
-    let java_body = java_class.get_body(env, jobj);
-    let body = Stmt::from_java(env, &java_body);
+    let java_body = java_class.get_body(env, jobj)?;
+    let body = *Stmt::from_java(env, &java_body)?;
     delete_local_ref!(env, java_body);
     let body = Box::new(body);
-    ForOfStmt {
+    Ok(Box::new(ForOfStmt {
       span,
       is_await,
       left,
       right,
       body,
-    }
+    }))
   }
 }
 
@@ -28526,45 +28630,54 @@ impl RegisterWithMap<ByteToIndexMap> for ForStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ForStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_optional_init = self.init.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_test = self.test.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_update = self.update.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_body = self.body.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_optional_init = match self.init.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_test = match self.test.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_update = match self.update.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_body = self.body.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_FOR_STMT.as_ref().unwrap() }
-      .construct(env, &java_optional_init, &java_optional_test, &java_optional_update, &java_body, &java_span_ex);
+      .construct(env, &java_optional_init, &java_optional_test, &java_optional_update, &java_body, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_init);
     delete_local_optional_ref!(env, java_optional_test);
     delete_local_optional_ref!(env, java_optional_update);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ForStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_FOR_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_optional_init = java_class.get_init(env, jobj);
-    let init = if optional_is_present(env, &java_optional_init) {
-      let java_init = optional_get(env, &java_optional_init);
-      let init = VarDeclOrExpr::from_java(env, &java_init);
+    let java_optional_init = java_class.get_init(env, jobj)?;
+    let init = if optional_is_present(env, &java_optional_init)? {
+      let java_init = optional_get(env, &java_optional_init)?;
+      let init = *VarDeclOrExpr::from_java(env, &java_init)?;
       delete_local_ref!(env, java_init);
       Some(init)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_init);
-    let java_optional_test = java_class.get_test(env, jobj);
-    let test = if optional_is_present(env, &java_optional_test) {
-      let java_test = optional_get(env, &java_optional_test);
-      let test = Expr::from_java(env, &java_test);
+    let java_optional_test = java_class.get_test(env, jobj)?;
+    let test = if optional_is_present(env, &java_optional_test)? {
+      let java_test = optional_get(env, &java_optional_test)?;
+      let test = *Expr::from_java(env, &java_test)?;
       delete_local_ref!(env, java_test);
       Some(test)
     } else {
@@ -28572,10 +28685,10 @@ impl<'local> FromJava<'local> for ForStmt {
     };
     delete_local_ref!(env, java_optional_test);
     let test = test.map(|test| Box::new(test));
-    let java_optional_update = java_class.get_update(env, jobj);
-    let update = if optional_is_present(env, &java_optional_update) {
-      let java_update = optional_get(env, &java_optional_update);
-      let update = Expr::from_java(env, &java_update);
+    let java_optional_update = java_class.get_update(env, jobj)?;
+    let update = if optional_is_present(env, &java_optional_update)? {
+      let java_update = optional_get(env, &java_optional_update)?;
+      let update = *Expr::from_java(env, &java_update)?;
       delete_local_ref!(env, java_update);
       Some(update)
     } else {
@@ -28583,29 +28696,29 @@ impl<'local> FromJava<'local> for ForStmt {
     };
     delete_local_ref!(env, java_optional_update);
     let update = update.map(|update| Box::new(update));
-    let java_body = java_class.get_body(env, jobj);
-    let body = Stmt::from_java(env, &java_body);
+    let java_body = java_class.get_body(env, jobj)?;
+    let body = *Stmt::from_java(env, &java_body)?;
     delete_local_ref!(env, java_body);
     let body = Box::new(body);
-    ForStmt {
+    Ok(Box::new(ForStmt {
       span,
       init,
       test,
       update,
       body,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Function {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.params.iter().for_each(|node| {
+    for node in self.params.iter() {
       node.register_with_map(map);
-    });
-    self.decorators.iter().for_each(|node| {
+    }
+    for node in self.decorators.iter() {
       node.register_with_map(map);
-    });
+    }
     self.body.as_ref().map(|node| node.register_with_map(map));
     self.type_params.as_ref().map(|node| node.register_with_map(map));
     self.return_type.as_ref().map(|node| node.register_with_map(map));
@@ -28613,80 +28726,91 @@ impl RegisterWithMap<ByteToIndexMap> for Function {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Function {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let ctxt = self.ctxt;
-    let java_params = list_new(env, self.params.len());
-    self.params.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_params, &java_node);
+    let java_params = list_new(env, self.params.len())?;
+    for node in self.params.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_params, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_decorators = list_new(env, self.decorators.len());
-    self.decorators.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_decorators, &java_node);
+    }
+    let java_decorators = list_new(env, self.decorators.len())?;
+    for node in self.decorators.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_decorators, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_body = self.body.as_ref().map(|node| node.to_java_with_map(env, map));
+    }
+    let java_optional_body = match self.body.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let is_generator = self.is_generator;
     let is_async = self.is_async;
-    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_return_type = self.return_type.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_params = match self.type_params.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_return_type = match self.return_type.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_FUNCTION.as_ref().unwrap() }
-      .construct(env, ctxt, &java_params, &java_decorators, &java_optional_body, is_generator, is_async, &java_optional_type_params, &java_optional_return_type, &java_span_ex);
+      .construct(env, ctxt, &java_params, &java_decorators, &java_optional_body, is_generator, is_async, &java_optional_type_params, &java_optional_return_type, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_body);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_optional_ref!(env, java_optional_return_type);
     delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_decorators);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Function {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_FUNCTION.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = java_class.get_ctxt(env, jobj)?;
     let ctxt = SyntaxContext::from_u32(ctxt as u32);
-    let java_params = java_class.get_params(env, jobj);
-    let length = list_size(env, &java_params);
-    let params = (0..length).map(|i| {
-      let java_item = list_get(env, &java_params, i);
-      let params = Param::from_java(env, &java_item);
+    let java_params = java_class.get_params(env, jobj)?;
+    let length = list_size(env, &java_params)?;
+    let mut params: Vec<Param> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_params, i)?;
+      let element = *Param::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      params
-    }).collect();
-    let java_decorators = java_class.get_decorators(env, jobj);
-    let length = list_size(env, &java_decorators);
-    let decorators = (0..length).map(|i| {
-      let java_item = list_get(env, &java_decorators, i);
-      let decorators = Decorator::from_java(env, &java_item);
+      params.push(element)
+    }
+    let java_decorators = java_class.get_decorators(env, jobj)?;
+    let length = list_size(env, &java_decorators)?;
+    let mut decorators: Vec<Decorator> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_decorators, i)?;
+      let element = *Decorator::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      decorators
-    }).collect();
-    let java_optional_body = java_class.get_body(env, jobj);
-    let body = if optional_is_present(env, &java_optional_body) {
-      let java_body = optional_get(env, &java_optional_body);
-      let body = BlockStmt::from_java(env, &java_body);
+      decorators.push(element)
+    }
+    let java_optional_body = java_class.get_body(env, jobj)?;
+    let body = if optional_is_present(env, &java_optional_body)? {
+      let java_body = optional_get(env, &java_optional_body)?;
+      let body = *BlockStmt::from_java(env, &java_body)?;
       delete_local_ref!(env, java_body);
       Some(body)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_body);
-    let is_generator = java_class.is_generator(env, jobj);
-    let is_async = java_class.is_async(env, jobj);
-    let java_optional_type_params = java_class.get_type_params(env, jobj);
-    let type_params = if optional_is_present(env, &java_optional_type_params) {
-      let java_type_params = optional_get(env, &java_optional_type_params);
-      let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
+    let is_generator = java_class.is_generator(env, jobj)?;
+    let is_async = java_class.is_async(env, jobj)?;
+    let java_optional_type_params = java_class.get_type_params(env, jobj)?;
+    let type_params = if optional_is_present(env, &java_optional_type_params)? {
+      let java_type_params = optional_get(env, &java_optional_type_params)?;
+      let type_params = *TsTypeParamDecl::from_java(env, &java_type_params)?;
       delete_local_ref!(env, java_type_params);
       Some(type_params)
     } else {
@@ -28694,10 +28818,10 @@ impl<'local> FromJava<'local> for Function {
     };
     delete_local_ref!(env, java_optional_type_params);
     let type_params = type_params.map(|type_params| Box::new(type_params));
-    let java_optional_return_type = java_class.get_return_type(env, jobj);
-    let return_type = if optional_is_present(env, &java_optional_return_type) {
-      let java_return_type = optional_get(env, &java_optional_return_type);
-      let return_type = TsTypeAnn::from_java(env, &java_return_type);
+    let java_optional_return_type = java_class.get_return_type(env, jobj)?;
+    let return_type = if optional_is_present(env, &java_optional_return_type)? {
+      let java_return_type = optional_get(env, &java_optional_return_type)?;
+      let return_type = *TsTypeAnn::from_java(env, &java_return_type)?;
       delete_local_ref!(env, java_return_type);
       Some(return_type)
     } else {
@@ -28705,7 +28829,7 @@ impl<'local> FromJava<'local> for Function {
     };
     delete_local_ref!(env, java_optional_return_type);
     let return_type = return_type.map(|return_type| Box::new(return_type));
-    Function {
+    Ok(Box::new(Function {
       span,
       ctxt,
       params,
@@ -28715,7 +28839,7 @@ impl<'local> FromJava<'local> for Function {
       is_async,
       type_params,
       return_type,
-    }
+    }))
   }
 }
 
@@ -28729,36 +28853,42 @@ impl RegisterWithMap<ByteToIndexMap> for GetterProp {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for GetterProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_body = self.body.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_body = match self.body.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_GETTER_PROP.as_ref().unwrap() }
-      .construct(env, &java_key, &java_optional_type_ann, &java_optional_body, &java_span_ex);
+      .construct(env, &java_key, &java_optional_type_ann, &java_optional_body, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_body);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for GetterProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_GETTER_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_key = java_class.get_key(env, jobj);
-    let key = PropName::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *PropName::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -28766,22 +28896,22 @@ impl<'local> FromJava<'local> for GetterProp {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    let java_optional_body = java_class.get_body(env, jobj);
-    let body = if optional_is_present(env, &java_optional_body) {
-      let java_body = optional_get(env, &java_optional_body);
-      let body = BlockStmt::from_java(env, &java_body);
+    let java_optional_body = java_class.get_body(env, jobj)?;
+    let body = if optional_is_present(env, &java_optional_body)? {
+      let java_body = optional_get(env, &java_optional_body)?;
+      let body = *BlockStmt::from_java(env, &java_body)?;
       delete_local_ref!(env, java_body);
       Some(body)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_body);
-    GetterProp {
+    Ok(Box::new(GetterProp {
       span,
       key,
       type_ann,
       body,
-    }
+    }))
   }
 }
 
@@ -28792,37 +28922,37 @@ impl RegisterWithMap<ByteToIndexMap> for Ident {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Ident {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let ctxt = self.ctxt;
     let sym = self.sym.as_str();
     let optional = self.optional;
     let return_value = unsafe { JAVA_CLASS_IDENT.as_ref().unwrap() }
-      .construct(env, ctxt, sym, optional, &java_span_ex);
+      .construct(env, ctxt, sym, optional, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Ident {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_IDENT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = java_class.get_ctxt(env, jobj)?;
     let ctxt = SyntaxContext::from_u32(ctxt as u32);
-    let sym = java_class.get_sym(env, jobj);
+    let sym = java_class.get_sym(env, jobj)?;
     let sym = sym.into();
-    let optional = java_class.is_optional(env, jobj);
-    Ident {
+    let optional = java_class.is_optional(env, jobj)?;
+    Ok(Box::new(Ident {
       span,
       ctxt,
       sym,
       optional,
-    }
+    }))
   }
 }
 
@@ -28833,30 +28963,30 @@ impl RegisterWithMap<ByteToIndexMap> for IdentName {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for IdentName {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let sym = self.sym.as_str();
     let return_value = unsafe { JAVA_CLASS_IDENT_NAME.as_ref().unwrap() }
-      .construct(env, sym, &java_span_ex);
+      .construct(env, sym, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for IdentName {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_IDENT_NAME.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let sym = java_class.get_sym(env, jobj);
+    let sym = java_class.get_sym(env, jobj)?;
     let sym = sym.into();
-    IdentName {
+    Ok(Box::new(IdentName {
       span,
       sym,
-    }
+    }))
   }
 }
 
@@ -28870,41 +29000,44 @@ impl RegisterWithMap<ByteToIndexMap> for IfStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for IfStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_test = self.test.to_java_with_map(env, map);
-    let java_cons = self.cons.to_java_with_map(env, map);
-    let java_optional_alt = self.alt.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_test = self.test.to_java_with_map(env, map)?;
+    let java_cons = self.cons.to_java_with_map(env, map)?;
+    let java_optional_alt = match self.alt.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_IF_STMT.as_ref().unwrap() }
-      .construct(env, &java_test, &java_cons, &java_optional_alt, &java_span_ex);
+      .construct(env, &java_test, &java_cons, &java_optional_alt, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_alt);
     delete_local_ref!(env, java_test);
     delete_local_ref!(env, java_cons);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for IfStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_IF_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_test = java_class.get_test(env, jobj);
-    let test = Expr::from_java(env, &java_test);
+    let java_test = java_class.get_test(env, jobj)?;
+    let test = *Expr::from_java(env, &java_test)?;
     delete_local_ref!(env, java_test);
     let test = Box::new(test);
-    let java_cons = java_class.get_cons(env, jobj);
-    let cons = Stmt::from_java(env, &java_cons);
+    let java_cons = java_class.get_cons(env, jobj)?;
+    let cons = *Stmt::from_java(env, &java_cons)?;
     delete_local_ref!(env, java_cons);
     let cons = Box::new(cons);
-    let java_optional_alt = java_class.get_alt(env, jobj);
-    let alt = if optional_is_present(env, &java_optional_alt) {
-      let java_alt = optional_get(env, &java_optional_alt);
-      let alt = Stmt::from_java(env, &java_alt);
+    let java_optional_alt = java_class.get_alt(env, jobj)?;
+    let alt = if optional_is_present(env, &java_optional_alt)? {
+      let java_alt = optional_get(env, &java_optional_alt)?;
+      let alt = *Stmt::from_java(env, &java_alt)?;
       delete_local_ref!(env, java_alt);
       Some(alt)
     } else {
@@ -28912,12 +29045,12 @@ impl<'local> FromJava<'local> for IfStmt {
     };
     delete_local_ref!(env, java_optional_alt);
     let alt = alt.map(|alt| Box::new(alt));
-    IfStmt {
+    Ok(Box::new(IfStmt {
       span,
       test,
       cons,
       alt,
-    }
+    }))
   }
 }
 
@@ -28928,95 +29061,99 @@ impl RegisterWithMap<ByteToIndexMap> for Import {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Import {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_phase = self.phase.to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_phase = self.phase.to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_IMPORT.as_ref().unwrap() }
-      .construct(env, &java_phase, &java_span_ex);
+      .construct(env, &java_phase, &java_span_ex)?;
     delete_local_ref!(env, java_phase);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Import {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_IMPORT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_phase = java_class.get_phase(env, jobj);
-    let phase = ImportPhase::from_java(env, &java_phase);
+    let java_phase = java_class.get_phase(env, jobj)?;
+    let phase = *ImportPhase::from_java(env, &java_phase)?;
     delete_local_ref!(env, java_phase);
-    Import {
+    Ok(Box::new(Import {
       span,
       phase,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ImportDecl {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.specifiers.iter().for_each(|node| {
+    for node in self.specifiers.iter() {
       node.register_with_map(map);
-    });
+    }
     self.src.register_with_map(map);
     self.with.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ImportDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_specifiers = list_new(env, self.specifiers.len());
-    self.specifiers.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_specifiers, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_specifiers = list_new(env, self.specifiers.len())?;
+    for node in self.specifiers.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_specifiers, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_src = self.src.to_java_with_map(env, map);
+    }
+    let java_src = self.src.to_java_with_map(env, map)?;
     let type_only = self.type_only;
-    let java_optional_with = self.with.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_phase = self.phase.to_java(env);
+    let java_optional_with = match self.with.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_phase = self.phase.to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_IMPORT_DECL.as_ref().unwrap() }
-      .construct(env, &java_specifiers, &java_src, type_only, &java_optional_with, &java_phase, &java_span_ex);
+      .construct(env, &java_specifiers, &java_src, type_only, &java_optional_with, &java_phase, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_with);
     delete_local_ref!(env, java_specifiers);
     delete_local_ref!(env, java_src);
     delete_local_ref!(env, java_phase);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ImportDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_IMPORT_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_specifiers = java_class.get_specifiers(env, jobj);
-    let length = list_size(env, &java_specifiers);
-    let specifiers = (0..length).map(|i| {
-      let java_item = list_get(env, &java_specifiers, i);
-      let specifiers = ImportSpecifier::from_java(env, &java_item);
+    let java_specifiers = java_class.get_specifiers(env, jobj)?;
+    let length = list_size(env, &java_specifiers)?;
+    let mut specifiers: Vec<ImportSpecifier> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_specifiers, i)?;
+      let element = *ImportSpecifier::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      specifiers
-    }).collect();
-    let java_src = java_class.get_src(env, jobj);
-    let src = Str::from_java(env, &java_src);
+      specifiers.push(element)
+    }
+    let java_src = java_class.get_src(env, jobj)?;
+    let src = *Str::from_java(env, &java_src)?;
     delete_local_ref!(env, java_src);
     let src = Box::new(src);
-    let type_only = java_class.is_type_only(env, jobj);
-    let java_optional_with = java_class.get_with(env, jobj);
-    let with = if optional_is_present(env, &java_optional_with) {
-      let java_with = optional_get(env, &java_optional_with);
-      let with = ObjectLit::from_java(env, &java_with);
+    let type_only = java_class.is_type_only(env, jobj)?;
+    let java_optional_with = java_class.get_with(env, jobj)?;
+    let with = if optional_is_present(env, &java_optional_with)? {
+      let java_with = optional_get(env, &java_optional_with)?;
+      let with = *ObjectLit::from_java(env, &java_with)?;
       delete_local_ref!(env, java_with);
       Some(with)
     } else {
@@ -29024,17 +29161,17 @@ impl<'local> FromJava<'local> for ImportDecl {
     };
     delete_local_ref!(env, java_optional_with);
     let with = with.map(|with| Box::new(with));
-    let java_phase = java_class.get_phase(env, jobj);
-    let phase = ImportPhase::from_java(env, &java_phase);
+    let java_phase = java_class.get_phase(env, jobj)?;
+    let phase = *ImportPhase::from_java(env, &java_phase)?;
     delete_local_ref!(env, java_phase);
-    ImportDecl {
+    Ok(Box::new(ImportDecl {
       span,
       specifiers,
       src,
       type_only,
       with,
       phase,
-    }
+    }))
   }
 }
 
@@ -29046,32 +29183,32 @@ impl RegisterWithMap<ByteToIndexMap> for ImportDefaultSpecifier {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ImportDefaultSpecifier {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_local = self.local.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_local = self.local.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_IMPORT_DEFAULT_SPECIFIER.as_ref().unwrap() }
-      .construct(env, &java_local, &java_span_ex);
+      .construct(env, &java_local, &java_span_ex)?;
     delete_local_ref!(env, java_local);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ImportDefaultSpecifier {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_IMPORT_DEFAULT_SPECIFIER.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_local = java_class.get_local(env, jobj);
-    let local = Ident::from_java(env, &java_local);
+    let java_local = java_class.get_local(env, jobj)?;
+    let local = *Ident::from_java(env, &java_local)?;
     delete_local_ref!(env, java_local);
-    ImportDefaultSpecifier {
+    Ok(Box::new(ImportDefaultSpecifier {
       span,
       local,
-    }
+    }))
   }
 }
 
@@ -29084,48 +29221,51 @@ impl RegisterWithMap<ByteToIndexMap> for ImportNamedSpecifier {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ImportNamedSpecifier {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_local = self.local.to_java_with_map(env, map);
-    let java_optional_imported = self.imported.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_local = self.local.to_java_with_map(env, map)?;
+    let java_optional_imported = match self.imported.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let is_type_only = self.is_type_only;
     let return_value = unsafe { JAVA_CLASS_IMPORT_NAMED_SPECIFIER.as_ref().unwrap() }
-      .construct(env, &java_local, &java_optional_imported, is_type_only, &java_span_ex);
+      .construct(env, &java_local, &java_optional_imported, is_type_only, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_imported);
     delete_local_ref!(env, java_local);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ImportNamedSpecifier {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_IMPORT_NAMED_SPECIFIER.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_local = java_class.get_local(env, jobj);
-    let local = Ident::from_java(env, &java_local);
+    let java_local = java_class.get_local(env, jobj)?;
+    let local = *Ident::from_java(env, &java_local)?;
     delete_local_ref!(env, java_local);
-    let java_optional_imported = java_class.get_imported(env, jobj);
-    let imported = if optional_is_present(env, &java_optional_imported) {
-      let java_imported = optional_get(env, &java_optional_imported);
-      let imported = ModuleExportName::from_java(env, &java_imported);
+    let java_optional_imported = java_class.get_imported(env, jobj)?;
+    let imported = if optional_is_present(env, &java_optional_imported)? {
+      let java_imported = optional_get(env, &java_optional_imported)?;
+      let imported = *ModuleExportName::from_java(env, &java_imported)?;
       delete_local_ref!(env, java_imported);
       Some(imported)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_imported);
-    let is_type_only = java_class.is_type_only(env, jobj);
-    ImportNamedSpecifier {
+    let is_type_only = java_class.is_type_only(env, jobj)?;
+    Ok(Box::new(ImportNamedSpecifier {
       span,
       local,
       imported,
       is_type_only,
-    }
+    }))
   }
 }
 
@@ -29137,32 +29277,32 @@ impl RegisterWithMap<ByteToIndexMap> for ImportStarAsSpecifier {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ImportStarAsSpecifier {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_local = self.local.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_local = self.local.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_IMPORT_STAR_AS_SPECIFIER.as_ref().unwrap() }
-      .construct(env, &java_local, &java_span_ex);
+      .construct(env, &java_local, &java_span_ex)?;
     delete_local_ref!(env, java_local);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ImportStarAsSpecifier {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_IMPORT_STAR_AS_SPECIFIER.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_local = java_class.get_local(env, jobj);
-    let local = Ident::from_java(env, &java_local);
+    let java_local = java_class.get_local(env, jobj)?;
+    let local = *Ident::from_java(env, &java_local)?;
     delete_local_ref!(env, java_local);
-    ImportStarAsSpecifier {
+    Ok(Box::new(ImportStarAsSpecifier {
       span,
       local,
-    }
+    }))
   }
 }
 
@@ -29173,25 +29313,25 @@ impl RegisterWithMap<ByteToIndexMap> for Invalid {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Invalid {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_INVALID.as_ref().unwrap() }
-      .construct(env, &java_span_ex);
+      .construct(env, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Invalid {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let span = DUMMY_SP;
-    Invalid {
+    Ok(Box::new(Invalid {
       span,
-    }
+    }))
   }
 }
 
@@ -29204,45 +29344,48 @@ impl RegisterWithMap<ByteToIndexMap> for JSXAttr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXAttr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_name = self.name.to_java_with_map(env, map);
-    let java_optional_value = self.value.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_name = self.name.to_java_with_map(env, map)?;
+    let java_optional_value = match self.value.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_JSX_ATTR.as_ref().unwrap() }
-      .construct(env, &java_name, &java_optional_value, &java_span_ex);
+      .construct(env, &java_name, &java_optional_value, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_value);
     delete_local_ref!(env, java_name);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for JSXAttr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_JSX_ATTR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_name = java_class.get_name(env, jobj);
-    let name = JSXAttrName::from_java(env, &java_name);
+    let java_name = java_class.get_name(env, jobj)?;
+    let name = *JSXAttrName::from_java(env, &java_name)?;
     delete_local_ref!(env, java_name);
-    let java_optional_value = java_class.get_value(env, jobj);
-    let value = if optional_is_present(env, &java_optional_value) {
-      let java_value = optional_get(env, &java_optional_value);
-      let value = JSXAttrValue::from_java(env, &java_value);
+    let java_optional_value = java_class.get_value(env, jobj)?;
+    let value = if optional_is_present(env, &java_optional_value)? {
+      let java_value = optional_get(env, &java_optional_value)?;
+      let value = *JSXAttrValue::from_java(env, &java_value)?;
       delete_local_ref!(env, java_value);
       Some(value)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_value);
-    JSXAttr {
+    Ok(Box::new(JSXAttr {
       span,
       name,
       value,
-    }
+    }))
   }
 }
 
@@ -29254,32 +29397,32 @@ impl RegisterWithMap<ByteToIndexMap> for JSXClosingElement {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXClosingElement {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_name = self.name.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_name = self.name.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_JSX_CLOSING_ELEMENT.as_ref().unwrap() }
-      .construct(env, &java_name, &java_span_ex);
+      .construct(env, &java_name, &java_span_ex)?;
     delete_local_ref!(env, java_name);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for JSXClosingElement {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_JSX_CLOSING_ELEMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_name = java_class.get_name(env, jobj);
-    let name = JSXElementName::from_java(env, &java_name);
+    let java_name = java_class.get_name(env, jobj)?;
+    let name = *JSXElementName::from_java(env, &java_name)?;
     delete_local_ref!(env, java_name);
-    JSXClosingElement {
+    Ok(Box::new(JSXClosingElement {
       span,
       name,
-    }
+    }))
   }
 }
 
@@ -29290,25 +29433,25 @@ impl RegisterWithMap<ByteToIndexMap> for JSXClosingFragment {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXClosingFragment {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_JSX_CLOSING_FRAGMENT.as_ref().unwrap() }
-      .construct(env, &java_span_ex);
+      .construct(env, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for JSXClosingFragment {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let span = DUMMY_SP;
-    JSXClosingFragment {
+    Ok(Box::new(JSXClosingFragment {
       span,
-    }
+    }))
   }
 }
 
@@ -29316,69 +29459,73 @@ impl RegisterWithMap<ByteToIndexMap> for JSXElement {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.opening.register_with_map(map);
-    self.children.iter().for_each(|node| {
+    for node in self.children.iter() {
       node.register_with_map(map);
-    });
+    }
     self.closing.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXElement {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_opening = self.opening.to_java_with_map(env, map);
-    let java_children = list_new(env, self.children.len());
-    self.children.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_children, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_opening = self.opening.to_java_with_map(env, map)?;
+    let java_children = list_new(env, self.children.len())?;
+    for node in self.children.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_children, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_closing = self.closing.as_ref().map(|node| node.to_java_with_map(env, map));
+    }
+    let java_optional_closing = match self.closing.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_JSX_ELEMENT.as_ref().unwrap() }
-      .construct(env, &java_opening, &java_children, &java_optional_closing, &java_span_ex);
+      .construct(env, &java_opening, &java_children, &java_optional_closing, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_closing);
     delete_local_ref!(env, java_opening);
     delete_local_ref!(env, java_children);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for JSXElement {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_JSX_ELEMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_opening = java_class.get_opening(env, jobj);
-    let opening = JSXOpeningElement::from_java(env, &java_opening);
+    let java_opening = java_class.get_opening(env, jobj)?;
+    let opening = *JSXOpeningElement::from_java(env, &java_opening)?;
     delete_local_ref!(env, java_opening);
-    let java_children = java_class.get_children(env, jobj);
-    let length = list_size(env, &java_children);
-    let children = (0..length).map(|i| {
-      let java_item = list_get(env, &java_children, i);
-      let children = JSXElementChild::from_java(env, &java_item);
+    let java_children = java_class.get_children(env, jobj)?;
+    let length = list_size(env, &java_children)?;
+    let mut children: Vec<JSXElementChild> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_children, i)?;
+      let element = *JSXElementChild::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      children
-    }).collect();
-    let java_optional_closing = java_class.get_closing(env, jobj);
-    let closing = if optional_is_present(env, &java_optional_closing) {
-      let java_closing = optional_get(env, &java_optional_closing);
-      let closing = JSXClosingElement::from_java(env, &java_closing);
+      children.push(element)
+    }
+    let java_optional_closing = java_class.get_closing(env, jobj)?;
+    let closing = if optional_is_present(env, &java_optional_closing)? {
+      let java_closing = optional_get(env, &java_optional_closing)?;
+      let closing = *JSXClosingElement::from_java(env, &java_closing)?;
       delete_local_ref!(env, java_closing);
       Some(closing)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_closing);
-    JSXElement {
+    Ok(Box::new(JSXElement {
       span,
       opening,
       children,
       closing,
-    }
+    }))
   }
 }
 
@@ -29389,25 +29536,25 @@ impl RegisterWithMap<ByteToIndexMap> for JSXEmptyExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXEmptyExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_JSX_EMPTY_EXPR.as_ref().unwrap() }
-      .construct(env, &java_span_ex);
+      .construct(env, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for JSXEmptyExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let span = DUMMY_SP;
-    JSXEmptyExpr {
+    Ok(Box::new(JSXEmptyExpr {
       span,
-    }
+    }))
   }
 }
 
@@ -29419,32 +29566,32 @@ impl RegisterWithMap<ByteToIndexMap> for JSXExprContainer {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXExprContainer {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_JSX_EXPR_CONTAINER.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_span_ex);
+      .construct(env, &java_expr, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for JSXExprContainer {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_JSX_EXPR_CONTAINER.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = JSXExpr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *JSXExpr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
-    JSXExprContainer {
+    Ok(Box::new(JSXExprContainer {
       span,
       expr,
-    }
+    }))
   }
 }
 
@@ -29452,62 +29599,63 @@ impl RegisterWithMap<ByteToIndexMap> for JSXFragment {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.opening.register_with_map(map);
-    self.children.iter().for_each(|node| {
+    for node in self.children.iter() {
       node.register_with_map(map);
-    });
+    }
     self.closing.register_with_map(map);
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXFragment {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_opening = self.opening.to_java_with_map(env, map);
-    let java_children = list_new(env, self.children.len());
-    self.children.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_children, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_opening = self.opening.to_java_with_map(env, map)?;
+    let java_children = list_new(env, self.children.len())?;
+    for node in self.children.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_children, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_closing = self.closing.to_java_with_map(env, map);
+    }
+    let java_closing = self.closing.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_JSX_FRAGMENT.as_ref().unwrap() }
-      .construct(env, &java_opening, &java_children, &java_closing, &java_span_ex);
+      .construct(env, &java_opening, &java_children, &java_closing, &java_span_ex)?;
     delete_local_ref!(env, java_opening);
     delete_local_ref!(env, java_children);
     delete_local_ref!(env, java_closing);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for JSXFragment {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_JSX_FRAGMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_opening = java_class.get_opening(env, jobj);
-    let opening = JSXOpeningFragment::from_java(env, &java_opening);
+    let java_opening = java_class.get_opening(env, jobj)?;
+    let opening = *JSXOpeningFragment::from_java(env, &java_opening)?;
     delete_local_ref!(env, java_opening);
-    let java_children = java_class.get_children(env, jobj);
-    let length = list_size(env, &java_children);
-    let children = (0..length).map(|i| {
-      let java_item = list_get(env, &java_children, i);
-      let children = JSXElementChild::from_java(env, &java_item);
+    let java_children = java_class.get_children(env, jobj)?;
+    let length = list_size(env, &java_children)?;
+    let mut children: Vec<JSXElementChild> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_children, i)?;
+      let element = *JSXElementChild::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      children
-    }).collect();
-    let java_closing = java_class.get_closing(env, jobj);
-    let closing = JSXClosingFragment::from_java(env, &java_closing);
+      children.push(element)
+    }
+    let java_closing = java_class.get_closing(env, jobj)?;
+    let closing = *JSXClosingFragment::from_java(env, &java_closing)?;
     delete_local_ref!(env, java_closing);
-    JSXFragment {
+    Ok(Box::new(JSXFragment {
       span,
       opening,
       children,
       closing,
-    }
+    }))
   }
 }
 
@@ -29520,38 +29668,38 @@ impl RegisterWithMap<ByteToIndexMap> for JSXMemberExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXMemberExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_obj = self.obj.to_java_with_map(env, map);
-    let java_prop = self.prop.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_obj = self.obj.to_java_with_map(env, map)?;
+    let java_prop = self.prop.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_JSX_MEMBER_EXPR.as_ref().unwrap() }
-      .construct(env, &java_obj, &java_prop, &java_span_ex);
+      .construct(env, &java_obj, &java_prop, &java_span_ex)?;
     delete_local_ref!(env, java_obj);
     delete_local_ref!(env, java_prop);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for JSXMemberExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_JSX_MEMBER_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_obj = java_class.get_obj(env, jobj);
-    let obj = JSXObject::from_java(env, &java_obj);
+    let java_obj = java_class.get_obj(env, jobj)?;
+    let obj = *JSXObject::from_java(env, &java_obj)?;
     delete_local_ref!(env, java_obj);
-    let java_prop = java_class.get_prop(env, jobj);
-    let prop = IdentName::from_java(env, &java_prop);
+    let java_prop = java_class.get_prop(env, jobj)?;
+    let prop = *IdentName::from_java(env, &java_prop)?;
     delete_local_ref!(env, java_prop);
-    JSXMemberExpr {
+    Ok(Box::new(JSXMemberExpr {
       span,
       obj,
       prop,
-    }
+    }))
   }
 }
 
@@ -29564,38 +29712,38 @@ impl RegisterWithMap<ByteToIndexMap> for JSXNamespacedName {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXNamespacedName {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_ns = self.ns.to_java_with_map(env, map);
-    let java_name = self.name.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_ns = self.ns.to_java_with_map(env, map)?;
+    let java_name = self.name.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_JSX_NAMESPACED_NAME.as_ref().unwrap() }
-      .construct(env, &java_ns, &java_name, &java_span_ex);
+      .construct(env, &java_ns, &java_name, &java_span_ex)?;
     delete_local_ref!(env, java_ns);
     delete_local_ref!(env, java_name);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for JSXNamespacedName {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_JSX_NAMESPACED_NAME.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_ns = java_class.get_ns(env, jobj);
-    let ns = IdentName::from_java(env, &java_ns);
+    let java_ns = java_class.get_ns(env, jobj)?;
+    let ns = *IdentName::from_java(env, &java_ns)?;
     delete_local_ref!(env, java_ns);
-    let java_name = java_class.get_name(env, jobj);
-    let name = IdentName::from_java(env, &java_name);
+    let java_name = java_class.get_name(env, jobj)?;
+    let name = *IdentName::from_java(env, &java_name)?;
     delete_local_ref!(env, java_name);
-    JSXNamespacedName {
+    Ok(Box::new(JSXNamespacedName {
       span,
       ns,
       name,
-    }
+    }))
   }
 }
 
@@ -29603,59 +29751,63 @@ impl RegisterWithMap<ByteToIndexMap> for JSXOpeningElement {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.name.register_with_map(map);
-    self.attrs.iter().for_each(|node| {
+    for node in self.attrs.iter() {
       node.register_with_map(map);
-    });
+    }
     self.type_args.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXOpeningElement {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_name = self.name.to_java_with_map(env, map);
-    let java_attrs = list_new(env, self.attrs.len());
-    self.attrs.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_attrs, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_name = self.name.to_java_with_map(env, map)?;
+    let java_attrs = list_new(env, self.attrs.len())?;
+    for node in self.attrs.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_attrs, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let self_closing = self.self_closing;
-    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_args = match self.type_args.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_JSX_OPENING_ELEMENT.as_ref().unwrap() }
-      .construct(env, &java_name, &java_attrs, self_closing, &java_optional_type_args, &java_span_ex);
+      .construct(env, &java_name, &java_attrs, self_closing, &java_optional_type_args, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_args);
     delete_local_ref!(env, java_name);
     delete_local_ref!(env, java_attrs);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for JSXOpeningElement {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_JSX_OPENING_ELEMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_name = java_class.get_name(env, jobj);
-    let name = JSXElementName::from_java(env, &java_name);
+    let java_name = java_class.get_name(env, jobj)?;
+    let name = *JSXElementName::from_java(env, &java_name)?;
     delete_local_ref!(env, java_name);
-    let java_attrs = java_class.get_attrs(env, jobj);
-    let length = list_size(env, &java_attrs);
-    let attrs = (0..length).map(|i| {
-      let java_item = list_get(env, &java_attrs, i);
-      let attrs = JSXAttrOrSpread::from_java(env, &java_item);
+    let java_attrs = java_class.get_attrs(env, jobj)?;
+    let length = list_size(env, &java_attrs)?;
+    let mut attrs: Vec<JSXAttrOrSpread> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_attrs, i)?;
+      let element = *JSXAttrOrSpread::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      attrs
-    }).collect();
-    let self_closing = java_class.is_self_closing(env, jobj);
-    let java_optional_type_args = java_class.get_type_args(env, jobj);
-    let type_args = if optional_is_present(env, &java_optional_type_args) {
-      let java_type_args = optional_get(env, &java_optional_type_args);
-      let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
+      attrs.push(element)
+    }
+    let self_closing = java_class.is_self_closing(env, jobj)?;
+    let java_optional_type_args = java_class.get_type_args(env, jobj)?;
+    let type_args = if optional_is_present(env, &java_optional_type_args)? {
+      let java_type_args = optional_get(env, &java_optional_type_args)?;
+      let type_args = *TsTypeParamInstantiation::from_java(env, &java_type_args)?;
       delete_local_ref!(env, java_type_args);
       Some(type_args)
     } else {
@@ -29663,13 +29815,13 @@ impl<'local> FromJava<'local> for JSXOpeningElement {
     };
     delete_local_ref!(env, java_optional_type_args);
     let type_args = type_args.map(|type_args| Box::new(type_args));
-    JSXOpeningElement {
+    Ok(Box::new(JSXOpeningElement {
       span,
       name,
       attrs,
       self_closing,
       type_args,
-    }
+    }))
   }
 }
 
@@ -29680,25 +29832,25 @@ impl RegisterWithMap<ByteToIndexMap> for JSXOpeningFragment {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXOpeningFragment {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_JSX_OPENING_FRAGMENT.as_ref().unwrap() }
-      .construct(env, &java_span_ex);
+      .construct(env, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for JSXOpeningFragment {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let span = DUMMY_SP;
-    JSXOpeningFragment {
+    Ok(Box::new(JSXOpeningFragment {
       span,
-    }
+    }))
   }
 }
 
@@ -29710,33 +29862,33 @@ impl RegisterWithMap<ByteToIndexMap> for JSXSpreadChild {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXSpreadChild {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_JSX_SPREAD_CHILD.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_span_ex);
+      .construct(env, &java_expr, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for JSXSpreadChild {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_JSX_SPREAD_CHILD.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    JSXSpreadChild {
+    Ok(Box::new(JSXSpreadChild {
       span,
       expr,
-    }
+    }))
   }
 }
 
@@ -29747,34 +29899,34 @@ impl RegisterWithMap<ByteToIndexMap> for JSXText {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for JSXText {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let value = self.value.as_str();
     let raw = self.raw.as_str();
     let return_value = unsafe { JAVA_CLASS_JSX_TEXT.as_ref().unwrap() }
-      .construct(env, value, raw, &java_span_ex);
+      .construct(env, value, raw, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for JSXText {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_JSX_TEXT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let value = java_class.get_value(env, jobj);
+    let value = java_class.get_value(env, jobj)?;
     let value = value.into();
-    let raw = java_class.get_raw(env, jobj);
+    let raw = java_class.get_raw(env, jobj)?;
     let raw = raw.into();
-    JSXText {
+    Ok(Box::new(JSXText {
       span,
       value,
       raw,
-    }
+    }))
   }
 }
 
@@ -29787,37 +29939,37 @@ impl RegisterWithMap<ByteToIndexMap> for KeyValuePatProp {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for KeyValuePatProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
-    let java_value = self.value.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
+    let java_value = self.value.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_KEY_VALUE_PAT_PROP.as_ref().unwrap() }
-      .construct(env, &java_key, &java_value, &java_span_ex);
+      .construct(env, &java_key, &java_value, &java_span_ex)?;
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_value);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for KeyValuePatProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_KEY_VALUE_PAT_PROP.as_ref().unwrap() };
-    let java_key = java_class.get_key(env, jobj);
-    let key = PropName::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *PropName::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
-    let java_value = java_class.get_value(env, jobj);
-    let value = Pat::from_java(env, &java_value);
+    let java_value = java_class.get_value(env, jobj)?;
+    let value = *Pat::from_java(env, &java_value)?;
     delete_local_ref!(env, java_value);
     let value = Box::new(value);
-    KeyValuePatProp {
+    Ok(Box::new(KeyValuePatProp {
       key,
       value,
-    }
+    }))
   }
 }
 
@@ -29830,37 +29982,37 @@ impl RegisterWithMap<ByteToIndexMap> for KeyValueProp {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for KeyValueProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
-    let java_value = self.value.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
+    let java_value = self.value.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_KEY_VALUE_PROP.as_ref().unwrap() }
-      .construct(env, &java_key, &java_value, &java_span_ex);
+      .construct(env, &java_key, &java_value, &java_span_ex)?;
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_value);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for KeyValueProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_KEY_VALUE_PROP.as_ref().unwrap() };
-    let java_key = java_class.get_key(env, jobj);
-    let key = PropName::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *PropName::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
-    let java_value = java_class.get_value(env, jobj);
-    let value = Expr::from_java(env, &java_value);
+    let java_value = java_class.get_value(env, jobj)?;
+    let value = *Expr::from_java(env, &java_value)?;
     delete_local_ref!(env, java_value);
     let value = Box::new(value);
-    KeyValueProp {
+    Ok(Box::new(KeyValueProp {
       key,
       value,
-    }
+    }))
   }
 }
 
@@ -29873,39 +30025,39 @@ impl RegisterWithMap<ByteToIndexMap> for LabeledStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for LabeledStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_label = self.label.to_java_with_map(env, map);
-    let java_body = self.body.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_label = self.label.to_java_with_map(env, map)?;
+    let java_body = self.body.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_LABELED_STMT.as_ref().unwrap() }
-      .construct(env, &java_label, &java_body, &java_span_ex);
+      .construct(env, &java_label, &java_body, &java_span_ex)?;
     delete_local_ref!(env, java_label);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for LabeledStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_LABELED_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_label = java_class.get_label(env, jobj);
-    let label = Ident::from_java(env, &java_label);
+    let java_label = java_class.get_label(env, jobj)?;
+    let label = *Ident::from_java(env, &java_label)?;
     delete_local_ref!(env, java_label);
-    let java_body = java_class.get_body(env, jobj);
-    let body = Stmt::from_java(env, &java_body);
+    let java_body = java_class.get_body(env, jobj)?;
+    let body = *Stmt::from_java(env, &java_body)?;
     delete_local_ref!(env, java_body);
     let body = Box::new(body);
-    LabeledStmt {
+    Ok(Box::new(LabeledStmt {
       span,
       label,
       body,
-    }
+    }))
   }
 }
 
@@ -29918,39 +30070,39 @@ impl RegisterWithMap<ByteToIndexMap> for MemberExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for MemberExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_obj = self.obj.to_java_with_map(env, map);
-    let java_prop = self.prop.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_obj = self.obj.to_java_with_map(env, map)?;
+    let java_prop = self.prop.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_MEMBER_EXPR.as_ref().unwrap() }
-      .construct(env, &java_obj, &java_prop, &java_span_ex);
+      .construct(env, &java_obj, &java_prop, &java_span_ex)?;
     delete_local_ref!(env, java_obj);
     delete_local_ref!(env, java_prop);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for MemberExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_MEMBER_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_obj = java_class.get_obj(env, jobj);
-    let obj = Expr::from_java(env, &java_obj);
+    let java_obj = java_class.get_obj(env, jobj)?;
+    let obj = *Expr::from_java(env, &java_obj)?;
     delete_local_ref!(env, java_obj);
     let obj = Box::new(obj);
-    let java_prop = java_class.get_prop(env, jobj);
-    let prop = MemberProp::from_java(env, &java_prop);
+    let java_prop = java_class.get_prop(env, jobj)?;
+    let prop = *MemberProp::from_java(env, &java_prop)?;
     delete_local_ref!(env, java_prop);
-    MemberExpr {
+    Ok(Box::new(MemberExpr {
       span,
       obj,
       prop,
-    }
+    }))
   }
 }
 
@@ -29961,32 +30113,32 @@ impl RegisterWithMap<ByteToIndexMap> for MetaPropExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for MetaPropExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_kind = self.kind.to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_kind = self.kind.to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_META_PROP_EXPR.as_ref().unwrap() }
-      .construct(env, &java_kind, &java_span_ex);
+      .construct(env, &java_kind, &java_span_ex)?;
     delete_local_ref!(env, java_kind);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for MetaPropExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_META_PROP_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_kind = java_class.get_kind(env, jobj);
-    let kind = MetaPropKind::from_java(env, &java_kind);
+    let java_kind = java_class.get_kind(env, jobj)?;
+    let kind = *MetaPropKind::from_java(env, &java_kind)?;
     delete_local_ref!(env, java_kind);
-    MetaPropExpr {
+    Ok(Box::new(MetaPropExpr {
       span,
       kind,
-    }
+    }))
   }
 }
 
@@ -29999,87 +30151,89 @@ impl RegisterWithMap<ByteToIndexMap> for MethodProp {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for MethodProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
-    let java_function = self.function.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
+    let java_function = self.function.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_METHOD_PROP.as_ref().unwrap() }
-      .construct(env, &java_key, &java_function, &java_span_ex);
+      .construct(env, &java_key, &java_function, &java_span_ex)?;
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_function);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for MethodProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_METHOD_PROP.as_ref().unwrap() };
-    let java_key = java_class.get_key(env, jobj);
-    let key = PropName::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *PropName::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
-    let java_function = java_class.get_function(env, jobj);
-    let function = Function::from_java(env, &java_function);
+    let java_function = java_class.get_function(env, jobj)?;
+    let function = *Function::from_java(env, &java_function)?;
     delete_local_ref!(env, java_function);
     let function = Box::new(function);
-    MethodProp {
+    Ok(Box::new(MethodProp {
       key,
       function,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Module {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.body.iter().for_each(|node| {
+    for node in self.body.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Module {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_body = list_new(env, self.body.len());
-    self.body.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_body, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_body = list_new(env, self.body.len())?;
+    for node in self.body.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_body, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let optional_shebang = self.shebang.as_ref().map(|node| node.to_string());
     let return_value = unsafe { JAVA_CLASS_MODULE.as_ref().unwrap() }
-      .construct(env, &java_body, &optional_shebang, &java_span_ex);
+      .construct(env, &java_body, &optional_shebang, &java_span_ex)?;
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Module {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_MODULE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_body = java_class.get_body(env, jobj);
-    let length = list_size(env, &java_body);
-    let body = (0..length).map(|i| {
-      let java_item = list_get(env, &java_body, i);
-      let body = ModuleItem::from_java(env, &java_item);
+    let java_body = java_class.get_body(env, jobj)?;
+    let length = list_size(env, &java_body)?;
+    let mut body: Vec<ModuleItem> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_body, i)?;
+      let element = *ModuleItem::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      body
-    }).collect();
-    let java_optional_shebang = java_class.get_shebang(env, jobj);
-    let shebang = if optional_is_present(env, &java_optional_shebang) {
-      let java_shebang = optional_get(env, &java_optional_shebang);
-      let shebang = jstring_to_string!(env, java_shebang.as_raw());
+      body.push(element)
+    }
+    let java_optional_shebang = java_class.get_shebang(env, jobj)?;
+    let shebang = if optional_is_present(env, &java_optional_shebang)? {
+      let java_shebang = optional_get(env, &java_optional_shebang)?;
+      let shebang: Result<String> = jstring_to_string!(env, java_shebang.as_raw());
+      let shebang = shebang?;
       delete_local_ref!(env, java_shebang);
       Some(shebang)
     } else {
@@ -30087,67 +30241,74 @@ impl<'local> FromJava<'local> for Module {
     };
     delete_local_ref!(env, java_optional_shebang);
     let shebang = shebang.map(|shebang| shebang.into());
-    Module {
+    Ok(Box::new(Module {
       span,
       body,
       shebang,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for NamedExport {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.specifiers.iter().for_each(|node| {
+    for node in self.specifiers.iter() {
       node.register_with_map(map);
-    });
+    }
     self.src.as_ref().map(|node| node.register_with_map(map));
     self.with.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for NamedExport {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_specifiers = list_new(env, self.specifiers.len());
-    self.specifiers.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_specifiers, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_specifiers = list_new(env, self.specifiers.len())?;
+    for node in self.specifiers.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_specifiers, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_src = self.src.as_ref().map(|node| node.to_java_with_map(env, map));
+    }
+    let java_optional_src = match self.src.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let type_only = self.type_only;
-    let java_optional_with = self.with.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_with = match self.with.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_NAMED_EXPORT.as_ref().unwrap() }
-      .construct(env, &java_specifiers, &java_optional_src, type_only, &java_optional_with, &java_span_ex);
+      .construct(env, &java_specifiers, &java_optional_src, type_only, &java_optional_with, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_src);
     delete_local_optional_ref!(env, java_optional_with);
     delete_local_ref!(env, java_specifiers);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for NamedExport {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_NAMED_EXPORT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_specifiers = java_class.get_specifiers(env, jobj);
-    let length = list_size(env, &java_specifiers);
-    let specifiers = (0..length).map(|i| {
-      let java_item = list_get(env, &java_specifiers, i);
-      let specifiers = ExportSpecifier::from_java(env, &java_item);
+    let java_specifiers = java_class.get_specifiers(env, jobj)?;
+    let length = list_size(env, &java_specifiers)?;
+    let mut specifiers: Vec<ExportSpecifier> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_specifiers, i)?;
+      let element = *ExportSpecifier::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      specifiers
-    }).collect();
-    let java_optional_src = java_class.get_src(env, jobj);
-    let src = if optional_is_present(env, &java_optional_src) {
-      let java_src = optional_get(env, &java_optional_src);
-      let src = Str::from_java(env, &java_src);
+      specifiers.push(element)
+    }
+    let java_optional_src = java_class.get_src(env, jobj)?;
+    let src = if optional_is_present(env, &java_optional_src)? {
+      let java_src = optional_get(env, &java_optional_src)?;
+      let src = *Str::from_java(env, &java_src)?;
       delete_local_ref!(env, java_src);
       Some(src)
     } else {
@@ -30155,11 +30316,11 @@ impl<'local> FromJava<'local> for NamedExport {
     };
     delete_local_ref!(env, java_optional_src);
     let src = src.map(|src| Box::new(src));
-    let type_only = java_class.is_type_only(env, jobj);
-    let java_optional_with = java_class.get_with(env, jobj);
-    let with = if optional_is_present(env, &java_optional_with) {
-      let java_with = optional_get(env, &java_optional_with);
-      let with = ObjectLit::from_java(env, &java_with);
+    let type_only = java_class.is_type_only(env, jobj)?;
+    let java_optional_with = java_class.get_with(env, jobj)?;
+    let with = if optional_is_present(env, &java_optional_with)? {
+      let java_with = optional_get(env, &java_optional_with)?;
+      let with = *ObjectLit::from_java(env, &java_with)?;
       delete_local_ref!(env, java_with);
       Some(with)
     } else {
@@ -30167,13 +30328,13 @@ impl<'local> FromJava<'local> for NamedExport {
     };
     delete_local_ref!(env, java_optional_with);
     let with = with.map(|with| Box::new(with));
-    NamedExport {
+    Ok(Box::new(NamedExport {
       span,
       specifiers,
       src,
       type_only,
       with,
-    }
+    }))
   }
 }
 
@@ -30187,63 +30348,70 @@ impl RegisterWithMap<ByteToIndexMap> for NewExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for NewExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let ctxt = self.ctxt;
-    let java_callee = self.callee.to_java_with_map(env, map);
-    let java_optional_args = self.args.as_ref().map(|nodes| {
-      let java_args = list_new(env, nodes.len());
-      nodes.iter().for_each(|node| {
-        let java_node = node.to_java_with_map(env, map);
-        list_add(env, &java_args, &java_node);
-        delete_local_ref!(env, java_node);
-      });
-      java_args
-    });
-    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_callee = self.callee.to_java_with_map(env, map)?;
+    let java_optional_args = match self.args.as_ref() {
+      Some(nodes) => {
+        let java_args = list_new(env, nodes.len())?;
+        for node in nodes.iter() {
+          let java_node = node.to_java_with_map(env, map)?;
+          list_add(env, &java_args, &java_node)?;
+          delete_local_ref!(env, java_node);
+        }
+        Some(java_args)
+      }
+      None => None,
+    };
+    let java_optional_type_args = match self.type_args.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_NEW_EXPR.as_ref().unwrap() }
-      .construct(env, ctxt, &java_callee, &java_optional_args, &java_optional_type_args, &java_span_ex);
+      .construct(env, ctxt, &java_callee, &java_optional_args, &java_optional_type_args, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_args);
     delete_local_optional_ref!(env, java_optional_type_args);
     delete_local_ref!(env, java_callee);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for NewExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_NEW_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = java_class.get_ctxt(env, jobj)?;
     let ctxt = SyntaxContext::from_u32(ctxt as u32);
-    let java_callee = java_class.get_callee(env, jobj);
-    let callee = Expr::from_java(env, &java_callee);
+    let java_callee = java_class.get_callee(env, jobj)?;
+    let callee = *Expr::from_java(env, &java_callee)?;
     delete_local_ref!(env, java_callee);
     let callee = Box::new(callee);
-    let java_optional_args = java_class.get_args(env, jobj);
-    let args = if optional_is_present(env, &java_optional_args) {
-      let java_args = optional_get(env, &java_optional_args);
-      let length = list_size(env, &java_args);
-      let args = (0..length).map(|i| {
-        let java_item = list_get(env, &java_args, i);
-        let args = ExprOrSpread::from_java(env, &java_item);
+    let java_optional_args = java_class.get_args(env, jobj)?;
+    let args = if optional_is_present(env, &java_optional_args)? {
+      let java_args = optional_get(env, &java_optional_args)?;
+      let length = list_size(env, &java_args)?;
+      let mut args: Vec<ExprOrSpread> = Vec::with_capacity(length);
+      for i in 0..length {
+        let java_item = list_get(env, &java_args, i)?;
+        let element = *ExprOrSpread::from_java(env, &java_item)?;
         delete_local_ref!(env, java_item);
-        args
-      }).collect();
+      args.push(element);
+      }
       Some(args)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_args);
-    let java_optional_type_args = java_class.get_type_args(env, jobj);
-    let type_args = if optional_is_present(env, &java_optional_type_args) {
-      let java_type_args = optional_get(env, &java_optional_type_args);
-      let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
+    let java_optional_type_args = java_class.get_type_args(env, jobj)?;
+    let type_args = if optional_is_present(env, &java_optional_type_args)? {
+      let java_type_args = optional_get(env, &java_optional_type_args)?;
+      let type_args = *TsTypeParamInstantiation::from_java(env, &java_type_args)?;
       delete_local_ref!(env, java_type_args);
       Some(type_args)
     } else {
@@ -30251,13 +30419,13 @@ impl<'local> FromJava<'local> for NewExpr {
     };
     delete_local_ref!(env, java_optional_type_args);
     let type_args = type_args.map(|type_args| Box::new(type_args));
-    NewExpr {
+    Ok(Box::new(NewExpr {
       span,
       ctxt,
       callee,
       args,
       type_args,
-    }
+    }))
   }
 }
 
@@ -30268,25 +30436,25 @@ impl RegisterWithMap<ByteToIndexMap> for Null {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Null {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_NULL.as_ref().unwrap() }
-      .construct(env, &java_span_ex);
+      .construct(env, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Null {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let span = DUMMY_SP;
-    Null {
+    Ok(Box::new(Null {
       span,
-    }
+    }))
   }
 }
 
@@ -30297,30 +30465,31 @@ impl RegisterWithMap<ByteToIndexMap> for Number {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Number {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let value = self.value;
     let optional_raw = self.raw.as_ref().map(|node| node.to_string());
     let return_value = unsafe { JAVA_CLASS_NUMBER.as_ref().unwrap() }
-      .construct(env, value, &optional_raw, &java_span_ex);
+      .construct(env, value, &optional_raw, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Number {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_NUMBER.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let value = java_class.get_value(env, jobj);
-    let java_optional_raw = java_class.get_raw(env, jobj);
-    let raw = if optional_is_present(env, &java_optional_raw) {
-      let java_raw = optional_get(env, &java_optional_raw);
-      let raw = jstring_to_string!(env, java_raw.as_raw());
+    let value = java_class.get_value(env, jobj)?;
+    let java_optional_raw = java_class.get_raw(env, jobj)?;
+    let raw = if optional_is_present(env, &java_optional_raw)? {
+      let java_raw = optional_get(env, &java_optional_raw)?;
+      let raw: Result<String> = jstring_to_string!(env, java_raw.as_raw());
+      let raw = raw?;
       delete_local_ref!(env, java_raw);
       Some(raw)
     } else {
@@ -30328,114 +30497,119 @@ impl<'local> FromJava<'local> for Number {
     };
     delete_local_ref!(env, java_optional_raw);
     let raw = raw.map(|raw| raw.into());
-    Number {
+    Ok(Box::new(Number {
       span,
       value,
       raw,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ObjectLit {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.props.iter().for_each(|node| {
+    for node in self.props.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ObjectLit {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_props = list_new(env, self.props.len());
-    self.props.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_props, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_props = list_new(env, self.props.len())?;
+    for node in self.props.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_props, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_OBJECT_LIT.as_ref().unwrap() }
-      .construct(env, &java_props, &java_span_ex);
+      .construct(env, &java_props, &java_span_ex)?;
     delete_local_ref!(env, java_props);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ObjectLit {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_OBJECT_LIT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_props = java_class.get_props(env, jobj);
-    let length = list_size(env, &java_props);
-    let props = (0..length).map(|i| {
-      let java_item = list_get(env, &java_props, i);
-      let props = PropOrSpread::from_java(env, &java_item);
+    let java_props = java_class.get_props(env, jobj)?;
+    let length = list_size(env, &java_props)?;
+    let mut props: Vec<PropOrSpread> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_props, i)?;
+      let element = *PropOrSpread::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      props
-    }).collect();
-    ObjectLit {
+      props.push(element)
+    }
+    Ok(Box::new(ObjectLit {
       span,
       props,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for ObjectPat {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.props.iter().for_each(|node| {
+    for node in self.props.iter() {
       node.register_with_map(map);
-    });
+    }
     self.type_ann.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ObjectPat {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_props = list_new(env, self.props.len());
-    self.props.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_props, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_props = list_new(env, self.props.len())?;
+    for node in self.props.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_props, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let optional = self.optional;
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_OBJECT_PAT.as_ref().unwrap() }
-      .construct(env, &java_props, optional, &java_optional_type_ann, &java_span_ex);
+      .construct(env, &java_props, optional, &java_optional_type_ann, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_props);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ObjectPat {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_OBJECT_PAT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_props = java_class.get_props(env, jobj);
-    let length = list_size(env, &java_props);
-    let props = (0..length).map(|i| {
-      let java_item = list_get(env, &java_props, i);
-      let props = ObjectPatProp::from_java(env, &java_item);
+    let java_props = java_class.get_props(env, jobj)?;
+    let length = list_size(env, &java_props)?;
+    let mut props: Vec<ObjectPatProp> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_props, i)?;
+      let element = *ObjectPatProp::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      props
-    }).collect();
-    let optional = java_class.is_optional(env, jobj);
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+      props.push(element)
+    }
+    let optional = java_class.is_optional(env, jobj)?;
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -30443,12 +30617,12 @@ impl<'local> FromJava<'local> for ObjectPat {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    ObjectPat {
+    Ok(Box::new(ObjectPat {
       span,
       props,
       optional,
       type_ann,
-    }
+    }))
   }
 }
 
@@ -30456,61 +30630,65 @@ impl RegisterWithMap<ByteToIndexMap> for OptCall {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.callee.register_with_map(map);
-    self.args.iter().for_each(|node| {
+    for node in self.args.iter() {
       node.register_with_map(map);
-    });
+    }
     self.type_args.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for OptCall {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let ctxt = self.ctxt;
-    let java_callee = self.callee.to_java_with_map(env, map);
-    let java_args = list_new(env, self.args.len());
-    self.args.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_args, &java_node);
+    let java_callee = self.callee.to_java_with_map(env, map)?;
+    let java_args = list_new(env, self.args.len())?;
+    for node in self.args.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_args, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    }
+    let java_optional_type_args = match self.type_args.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_OPT_CALL.as_ref().unwrap() }
-      .construct(env, ctxt, &java_callee, &java_args, &java_optional_type_args, &java_span_ex);
+      .construct(env, ctxt, &java_callee, &java_args, &java_optional_type_args, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_args);
     delete_local_ref!(env, java_callee);
     delete_local_ref!(env, java_args);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for OptCall {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_OPT_CALL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = java_class.get_ctxt(env, jobj)?;
     let ctxt = SyntaxContext::from_u32(ctxt as u32);
-    let java_callee = java_class.get_callee(env, jobj);
-    let callee = Expr::from_java(env, &java_callee);
+    let java_callee = java_class.get_callee(env, jobj)?;
+    let callee = *Expr::from_java(env, &java_callee)?;
     delete_local_ref!(env, java_callee);
     let callee = Box::new(callee);
-    let java_args = java_class.get_args(env, jobj);
-    let length = list_size(env, &java_args);
-    let args = (0..length).map(|i| {
-      let java_item = list_get(env, &java_args, i);
-      let args = ExprOrSpread::from_java(env, &java_item);
+    let java_args = java_class.get_args(env, jobj)?;
+    let length = list_size(env, &java_args)?;
+    let mut args: Vec<ExprOrSpread> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_args, i)?;
+      let element = *ExprOrSpread::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      args
-    }).collect();
-    let java_optional_type_args = java_class.get_type_args(env, jobj);
-    let type_args = if optional_is_present(env, &java_optional_type_args) {
-      let java_type_args = optional_get(env, &java_optional_type_args);
-      let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
+      args.push(element)
+    }
+    let java_optional_type_args = java_class.get_type_args(env, jobj)?;
+    let type_args = if optional_is_present(env, &java_optional_type_args)? {
+      let java_type_args = optional_get(env, &java_optional_type_args)?;
+      let type_args = *TsTypeParamInstantiation::from_java(env, &java_type_args)?;
       delete_local_ref!(env, java_type_args);
       Some(type_args)
     } else {
@@ -30518,13 +30696,13 @@ impl<'local> FromJava<'local> for OptCall {
     };
     delete_local_ref!(env, java_optional_type_args);
     let type_args = type_args.map(|type_args| Box::new(type_args));
-    OptCall {
+    Ok(Box::new(OptCall {
       span,
       ctxt,
       callee,
       args,
       type_args,
-    }
+    }))
   }
 }
 
@@ -30536,92 +30714,93 @@ impl RegisterWithMap<ByteToIndexMap> for OptChainExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for OptChainExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let optional = self.optional;
-    let java_base = self.base.to_java_with_map(env, map);
+    let java_base = self.base.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_OPT_CHAIN_EXPR.as_ref().unwrap() }
-      .construct(env, optional, &java_base, &java_span_ex);
+      .construct(env, optional, &java_base, &java_span_ex)?;
     delete_local_ref!(env, java_base);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for OptChainExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_OPT_CHAIN_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let optional = java_class.is_optional(env, jobj);
-    let java_base = java_class.get_base(env, jobj);
-    let base = OptChainBase::from_java(env, &java_base);
+    let optional = java_class.is_optional(env, jobj)?;
+    let java_base = java_class.get_base(env, jobj)?;
+    let base = *OptChainBase::from_java(env, &java_base)?;
     delete_local_ref!(env, java_base);
     let base = Box::new(base);
-    OptChainExpr {
+    Ok(Box::new(OptChainExpr {
       span,
       optional,
       base,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Param {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.decorators.iter().for_each(|node| {
+    for node in self.decorators.iter() {
       node.register_with_map(map);
-    });
+    }
     self.pat.register_with_map(map);
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Param {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_decorators = list_new(env, self.decorators.len());
-    self.decorators.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_decorators, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_decorators = list_new(env, self.decorators.len())?;
+    for node in self.decorators.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_decorators, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_pat = self.pat.to_java_with_map(env, map);
+    }
+    let java_pat = self.pat.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_PARAM.as_ref().unwrap() }
-      .construct(env, &java_decorators, &java_pat, &java_span_ex);
+      .construct(env, &java_decorators, &java_pat, &java_span_ex)?;
     delete_local_ref!(env, java_decorators);
     delete_local_ref!(env, java_pat);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Param {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_PARAM.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_decorators = java_class.get_decorators(env, jobj);
-    let length = list_size(env, &java_decorators);
-    let decorators = (0..length).map(|i| {
-      let java_item = list_get(env, &java_decorators, i);
-      let decorators = Decorator::from_java(env, &java_item);
+    let java_decorators = java_class.get_decorators(env, jobj)?;
+    let length = list_size(env, &java_decorators)?;
+    let mut decorators: Vec<Decorator> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_decorators, i)?;
+      let element = *Decorator::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      decorators
-    }).collect();
-    let java_pat = java_class.get_pat(env, jobj);
-    let pat = Pat::from_java(env, &java_pat);
+      decorators.push(element)
+    }
+    let java_pat = java_class.get_pat(env, jobj)?;
+    let pat = *Pat::from_java(env, &java_pat)?;
     delete_local_ref!(env, java_pat);
-    Param {
+    Ok(Box::new(Param {
       span,
       decorators,
       pat,
-    }
+    }))
   }
 }
 
@@ -30633,33 +30812,33 @@ impl RegisterWithMap<ByteToIndexMap> for ParenExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ParenExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_PAREN_EXPR.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_span_ex);
+      .construct(env, &java_expr, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ParenExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_PAREN_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    ParenExpr {
+    Ok(Box::new(ParenExpr {
       span,
       expr,
-    }
+    }))
   }
 }
 
@@ -30672,60 +30851,63 @@ impl RegisterWithMap<ByteToIndexMap> for PrivateMethod {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for PrivateMethod {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
-    let java_function = self.function.to_java_with_map(env, map);
-    let java_kind = self.kind.to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
+    let java_function = self.function.to_java_with_map(env, map)?;
+    let java_kind = self.kind.to_java(env)?;
     let is_static = self.is_static;
-    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    let java_optional_accessibility = match self.accessibility.as_ref() {
+      Some(node) => Some(node.to_java(env)?),
+      None => None,
+    };
     let is_abstract = self.is_abstract;
     let is_optional = self.is_optional;
     let is_override = self.is_override;
     let return_value = unsafe { JAVA_CLASS_PRIVATE_METHOD.as_ref().unwrap() }
-      .construct(env, &java_key, &java_function, &java_kind, is_static, &java_optional_accessibility, is_abstract, is_optional, is_override, &java_span_ex);
+      .construct(env, &java_key, &java_function, &java_kind, is_static, &java_optional_accessibility, is_abstract, is_optional, is_override, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_accessibility);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_function);
     delete_local_ref!(env, java_kind);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for PrivateMethod {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_PRIVATE_METHOD.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_key = java_class.get_key(env, jobj);
-    let key = PrivateName::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *PrivateName::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
-    let java_function = java_class.get_function(env, jobj);
-    let function = Function::from_java(env, &java_function);
+    let java_function = java_class.get_function(env, jobj)?;
+    let function = *Function::from_java(env, &java_function)?;
     delete_local_ref!(env, java_function);
     let function = Box::new(function);
-    let java_kind = java_class.get_kind(env, jobj);
-    let kind = MethodKind::from_java(env, &java_kind);
+    let java_kind = java_class.get_kind(env, jobj)?;
+    let kind = *MethodKind::from_java(env, &java_kind)?;
     delete_local_ref!(env, java_kind);
-    let is_static = java_class.is_static(env, jobj);
-    let java_optional_accessibility = java_class.get_accessibility(env, jobj);
-    let accessibility = if optional_is_present(env, &java_optional_accessibility) {
-      let java_accessibility = optional_get(env, &java_optional_accessibility);
-      let accessibility = Accessibility::from_java(env, &java_accessibility);
+    let is_static = java_class.is_static(env, jobj)?;
+    let java_optional_accessibility = java_class.get_accessibility(env, jobj)?;
+    let accessibility = if optional_is_present(env, &java_optional_accessibility)? {
+      let java_accessibility = optional_get(env, &java_optional_accessibility)?;
+      let accessibility = *Accessibility::from_java(env, &java_accessibility)?;
       delete_local_ref!(env, java_accessibility);
       Some(accessibility)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_accessibility);
-    let is_abstract = java_class.is_abstract(env, jobj);
-    let is_optional = java_class.is_optional(env, jobj);
-    let is_override = java_class.is_override(env, jobj);
-    PrivateMethod {
+    let is_abstract = java_class.is_abstract(env, jobj)?;
+    let is_optional = java_class.is_optional(env, jobj)?;
+    let is_override = java_class.is_override(env, jobj)?;
+    Ok(Box::new(PrivateMethod {
       span,
       key,
       function,
@@ -30735,7 +30917,7 @@ impl<'local> FromJava<'local> for PrivateMethod {
       is_abstract,
       is_optional,
       is_override,
-    }
+    }))
   }
 }
 
@@ -30746,30 +30928,30 @@ impl RegisterWithMap<ByteToIndexMap> for PrivateName {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for PrivateName {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let name = self.name.as_str();
     let return_value = unsafe { JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap() }
-      .construct(env, name, &java_span_ex);
+      .construct(env, name, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for PrivateName {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_PRIVATE_NAME.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let name = java_class.get_name(env, jobj);
+    let name = java_class.get_name(env, jobj)?;
     let name = name.into();
-    PrivateName {
+    Ok(Box::new(PrivateName {
       span,
       name,
-    }
+    }))
   }
 }
 
@@ -30779,60 +30961,69 @@ impl RegisterWithMap<ByteToIndexMap> for PrivateProp {
     self.key.register_with_map(map);
     self.value.as_ref().map(|node| node.register_with_map(map));
     self.type_ann.as_ref().map(|node| node.register_with_map(map));
-    self.decorators.iter().for_each(|node| {
+    for node in self.decorators.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for PrivateProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let ctxt = self.ctxt;
-    let java_key = self.key.to_java_with_map(env, map);
-    let java_optional_value = self.value.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_key = self.key.to_java_with_map(env, map)?;
+    let java_optional_value = match self.value.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let is_static = self.is_static;
-    let java_decorators = list_new(env, self.decorators.len());
-    self.decorators.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_decorators, &java_node);
+    let java_decorators = list_new(env, self.decorators.len())?;
+    for node in self.decorators.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_decorators, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    }
+    let java_optional_accessibility = match self.accessibility.as_ref() {
+      Some(node) => Some(node.to_java(env)?),
+      None => None,
+    };
     let is_optional = self.is_optional;
     let is_override = self.is_override;
     let readonly = self.readonly;
     let definite = self.definite;
     let return_value = unsafe { JAVA_CLASS_PRIVATE_PROP.as_ref().unwrap() }
-      .construct(env, ctxt, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_optional, is_override, readonly, definite, &java_span_ex);
+      .construct(env, ctxt, &java_key, &java_optional_value, &java_optional_type_ann, is_static, &java_decorators, &java_optional_accessibility, is_optional, is_override, readonly, definite, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_value);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_accessibility);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_decorators);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for PrivateProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_PRIVATE_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = java_class.get_ctxt(env, jobj)?;
     let ctxt = SyntaxContext::from_u32(ctxt as u32);
-    let java_key = java_class.get_key(env, jobj);
-    let key = PrivateName::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *PrivateName::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
-    let java_optional_value = java_class.get_value(env, jobj);
-    let value = if optional_is_present(env, &java_optional_value) {
-      let java_value = optional_get(env, &java_optional_value);
-      let value = Expr::from_java(env, &java_value);
+    let java_optional_value = java_class.get_value(env, jobj)?;
+    let value = if optional_is_present(env, &java_optional_value)? {
+      let java_value = optional_get(env, &java_optional_value)?;
+      let value = *Expr::from_java(env, &java_value)?;
       delete_local_ref!(env, java_value);
       Some(value)
     } else {
@@ -30840,10 +31031,10 @@ impl<'local> FromJava<'local> for PrivateProp {
     };
     delete_local_ref!(env, java_optional_value);
     let value = value.map(|value| Box::new(value));
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -30851,30 +31042,31 @@ impl<'local> FromJava<'local> for PrivateProp {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    let is_static = java_class.is_static(env, jobj);
-    let java_decorators = java_class.get_decorators(env, jobj);
-    let length = list_size(env, &java_decorators);
-    let decorators = (0..length).map(|i| {
-      let java_item = list_get(env, &java_decorators, i);
-      let decorators = Decorator::from_java(env, &java_item);
+    let is_static = java_class.is_static(env, jobj)?;
+    let java_decorators = java_class.get_decorators(env, jobj)?;
+    let length = list_size(env, &java_decorators)?;
+    let mut decorators: Vec<Decorator> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_decorators, i)?;
+      let element = *Decorator::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      decorators
-    }).collect();
-    let java_optional_accessibility = java_class.get_accessibility(env, jobj);
-    let accessibility = if optional_is_present(env, &java_optional_accessibility) {
-      let java_accessibility = optional_get(env, &java_optional_accessibility);
-      let accessibility = Accessibility::from_java(env, &java_accessibility);
+      decorators.push(element)
+    }
+    let java_optional_accessibility = java_class.get_accessibility(env, jobj)?;
+    let accessibility = if optional_is_present(env, &java_optional_accessibility)? {
+      let java_accessibility = optional_get(env, &java_optional_accessibility)?;
+      let accessibility = *Accessibility::from_java(env, &java_accessibility)?;
       delete_local_ref!(env, java_accessibility);
       Some(accessibility)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_accessibility);
-    let is_optional = java_class.is_optional(env, jobj);
-    let is_override = java_class.is_override(env, jobj);
-    let readonly = java_class.is_readonly(env, jobj);
-    let definite = java_class.is_definite(env, jobj);
-    PrivateProp {
+    let is_optional = java_class.is_optional(env, jobj)?;
+    let is_override = java_class.is_override(env, jobj)?;
+    let readonly = java_class.is_readonly(env, jobj)?;
+    let definite = java_class.is_definite(env, jobj)?;
+    Ok(Box::new(PrivateProp {
       span,
       ctxt,
       key,
@@ -30887,7 +31079,7 @@ impl<'local> FromJava<'local> for PrivateProp {
       is_override,
       readonly,
       definite,
-    }
+    }))
   }
 }
 
@@ -30898,34 +31090,34 @@ impl RegisterWithMap<ByteToIndexMap> for Regex {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Regex {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let exp = self.exp.as_str();
     let flags = self.flags.as_str();
     let return_value = unsafe { JAVA_CLASS_REGEX.as_ref().unwrap() }
-      .construct(env, exp, flags, &java_span_ex);
+      .construct(env, exp, flags, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Regex {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_REGEX.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let exp = java_class.get_exp(env, jobj);
+    let exp = java_class.get_exp(env, jobj)?;
     let exp = exp.into();
-    let flags = java_class.get_flags(env, jobj);
+    let flags = java_class.get_flags(env, jobj)?;
     let flags = flags.into();
-    Regex {
+    Ok(Box::new(Regex {
       span,
       exp,
       flags,
-    }
+    }))
   }
 }
 
@@ -30939,38 +31131,41 @@ impl RegisterWithMap<ByteToIndexMap> for RestPat {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for RestPat {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_dot3_token = map.get_span_ex_by_span(&self.dot3_token).to_java(env);
-    let java_arg = self.arg.to_java_with_map(env, map);
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_dot3_token = map.get_span_ex_by_span(&self.dot3_token).to_java(env)?;
+    let java_arg = self.arg.to_java_with_map(env, map)?;
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_REST_PAT.as_ref().unwrap() }
-      .construct(env, &java_dot3_token, &java_arg, &java_optional_type_ann, &java_span_ex);
+      .construct(env, &java_dot3_token, &java_arg, &java_optional_type_ann, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_dot3_token);
     delete_local_ref!(env, java_arg);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for RestPat {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_REST_PAT.as_ref().unwrap() };
     let span = DUMMY_SP;
     let dot3_token = DUMMY_SP;
-    let java_arg = java_class.get_arg(env, jobj);
-    let arg = Pat::from_java(env, &java_arg);
+    let java_arg = java_class.get_arg(env, jobj)?;
+    let arg = *Pat::from_java(env, &java_arg)?;
     delete_local_ref!(env, java_arg);
     let arg = Box::new(arg);
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -30978,12 +31173,12 @@ impl<'local> FromJava<'local> for RestPat {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    RestPat {
+    Ok(Box::new(RestPat {
       span,
       dot3_token,
       arg,
       type_ann,
-    }
+    }))
   }
 }
 
@@ -30995,29 +31190,32 @@ impl RegisterWithMap<ByteToIndexMap> for ReturnStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ReturnStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_optional_arg = self.arg.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_optional_arg = match self.arg.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_RETURN_STMT.as_ref().unwrap() }
-      .construct(env, &java_optional_arg, &java_span_ex);
+      .construct(env, &java_optional_arg, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_arg);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ReturnStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_RETURN_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_optional_arg = java_class.get_arg(env, jobj);
-    let arg = if optional_is_present(env, &java_optional_arg) {
-      let java_arg = optional_get(env, &java_optional_arg);
-      let arg = Expr::from_java(env, &java_arg);
+    let java_optional_arg = java_class.get_arg(env, jobj)?;
+    let arg = if optional_is_present(env, &java_optional_arg)? {
+      let java_arg = optional_get(env, &java_optional_arg)?;
+      let arg = *Expr::from_java(env, &java_arg)?;
       delete_local_ref!(env, java_arg);
       Some(arg)
     } else {
@@ -31025,60 +31223,62 @@ impl<'local> FromJava<'local> for ReturnStmt {
     };
     delete_local_ref!(env, java_optional_arg);
     let arg = arg.map(|arg| Box::new(arg));
-    ReturnStmt {
+    Ok(Box::new(ReturnStmt {
       span,
       arg,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Script {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.body.iter().for_each(|node| {
+    for node in self.body.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Script {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_body = list_new(env, self.body.len());
-    self.body.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_body, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_body = list_new(env, self.body.len())?;
+    for node in self.body.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_body, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let optional_shebang = self.shebang.as_ref().map(|node| node.to_string());
     let return_value = unsafe { JAVA_CLASS_SCRIPT.as_ref().unwrap() }
-      .construct(env, &java_body, &optional_shebang, &java_span_ex);
+      .construct(env, &java_body, &optional_shebang, &java_span_ex)?;
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Script {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_SCRIPT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_body = java_class.get_body(env, jobj);
-    let length = list_size(env, &java_body);
-    let body = (0..length).map(|i| {
-      let java_item = list_get(env, &java_body, i);
-      let body = Stmt::from_java(env, &java_item);
+    let java_body = java_class.get_body(env, jobj)?;
+    let length = list_size(env, &java_body)?;
+    let mut body: Vec<Stmt> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_body, i)?;
+      let element = *Stmt::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      body
-    }).collect();
-    let java_optional_shebang = java_class.get_shebang(env, jobj);
-    let shebang = if optional_is_present(env, &java_optional_shebang) {
-      let java_shebang = optional_get(env, &java_optional_shebang);
-      let shebang = jstring_to_string!(env, java_shebang.as_raw());
+      body.push(element)
+    }
+    let java_optional_shebang = java_class.get_shebang(env, jobj)?;
+    let shebang = if optional_is_present(env, &java_optional_shebang)? {
+      let java_shebang = optional_get(env, &java_optional_shebang)?;
+      let shebang: Result<String> = jstring_to_string!(env, java_shebang.as_raw());
+      let shebang = shebang?;
       delete_local_ref!(env, java_shebang);
       Some(shebang)
     } else {
@@ -31086,60 +31286,62 @@ impl<'local> FromJava<'local> for Script {
     };
     delete_local_ref!(env, java_optional_shebang);
     let shebang = shebang.map(|shebang| shebang.into());
-    Script {
+    Ok(Box::new(Script {
       span,
       body,
       shebang,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for SeqExpr {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.exprs.iter().for_each(|node| {
+    for node in self.exprs.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for SeqExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_exprs = list_new(env, self.exprs.len());
-    self.exprs.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_exprs, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_exprs = list_new(env, self.exprs.len())?;
+    for node in self.exprs.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_exprs, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_SEQ_EXPR.as_ref().unwrap() }
-      .construct(env, &java_exprs, &java_span_ex);
+      .construct(env, &java_exprs, &java_span_ex)?;
     delete_local_ref!(env, java_exprs);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for SeqExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_SEQ_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_exprs = java_class.get_exprs(env, jobj);
-    let length = list_size(env, &java_exprs);
-    let exprs = (0..length).map(|i| {
-      let java_item = list_get(env, &java_exprs, i);
-      let exprs = Expr::from_java(env, &java_item);
+    let java_exprs = java_class.get_exprs(env, jobj)?;
+    let length = list_size(env, &java_exprs)?;
+    let mut exprs: Vec<Expr> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_exprs, i)?;
+      let element = *Expr::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      Box::new(exprs)
-    }).collect();
-    SeqExpr {
+      exprs.push(element)
+    }
+    let exprs = exprs.into_iter().map(|exprs| Box::new(exprs)).collect();
+    Ok(Box::new(SeqExpr {
       span,
       exprs,
-    }
+    }))
   }
 }
 
@@ -31154,65 +31356,71 @@ impl RegisterWithMap<ByteToIndexMap> for SetterProp {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for SetterProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
-    let java_optional_this_param = self.this_param.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_param = self.param.to_java_with_map(env, map);
-    let java_optional_body = self.body.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
+    let java_optional_this_param = match self.this_param.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_param = self.param.to_java_with_map(env, map)?;
+    let java_optional_body = match self.body.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_SETTER_PROP.as_ref().unwrap() }
-      .construct(env, &java_key, &java_optional_this_param, &java_param, &java_optional_body, &java_span_ex);
+      .construct(env, &java_key, &java_optional_this_param, &java_param, &java_optional_body, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_this_param);
     delete_local_optional_ref!(env, java_optional_body);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_param);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for SetterProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_SETTER_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_key = java_class.get_key(env, jobj);
-    let key = PropName::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *PropName::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
-    let java_optional_this_param = java_class.get_this_param(env, jobj);
-    let this_param = if optional_is_present(env, &java_optional_this_param) {
-      let java_this_param = optional_get(env, &java_optional_this_param);
-      let this_param = Pat::from_java(env, &java_this_param);
+    let java_optional_this_param = java_class.get_this_param(env, jobj)?;
+    let this_param = if optional_is_present(env, &java_optional_this_param)? {
+      let java_this_param = optional_get(env, &java_optional_this_param)?;
+      let this_param = *Pat::from_java(env, &java_this_param)?;
       delete_local_ref!(env, java_this_param);
       Some(this_param)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_this_param);
-    let java_param = java_class.get_param(env, jobj);
-    let param = Pat::from_java(env, &java_param);
+    let java_param = java_class.get_param(env, jobj)?;
+    let param = *Pat::from_java(env, &java_param)?;
     delete_local_ref!(env, java_param);
     let param = Box::new(param);
-    let java_optional_body = java_class.get_body(env, jobj);
-    let body = if optional_is_present(env, &java_optional_body) {
-      let java_body = optional_get(env, &java_optional_body);
-      let body = BlockStmt::from_java(env, &java_body);
+    let java_optional_body = java_class.get_body(env, jobj)?;
+    let body = if optional_is_present(env, &java_optional_body)? {
+      let java_body = optional_get(env, &java_optional_body)?;
+      let body = *BlockStmt::from_java(env, &java_body)?;
       delete_local_ref!(env, java_body);
       Some(body)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_body);
-    SetterProp {
+    Ok(Box::new(SetterProp {
       span,
       key,
       this_param,
       param,
       body,
-    }
+    }))
   }
 }
 
@@ -31225,35 +31433,35 @@ impl RegisterWithMap<ByteToIndexMap> for SpreadElement {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for SpreadElement {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env);
-    let java_dot3_token = map.get_span_ex_by_span(&self.dot3_token).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span()).to_java(env)?;
+    let java_dot3_token = map.get_span_ex_by_span(&self.dot3_token).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_SPREAD_ELEMENT.as_ref().unwrap() }
-      .construct(env, &java_dot3_token, &java_expr, &java_span_ex);
+      .construct(env, &java_dot3_token, &java_expr, &java_span_ex)?;
     delete_local_ref!(env, java_dot3_token);
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for SpreadElement {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_SPREAD_ELEMENT.as_ref().unwrap() };
     let dot3_token = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    SpreadElement {
+    Ok(Box::new(SpreadElement {
       dot3_token,
       expr,
-    }
+    }))
   }
 }
 
@@ -31265,32 +31473,32 @@ impl RegisterWithMap<ByteToIndexMap> for StaticBlock {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for StaticBlock {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_body = self.body.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_body = self.body.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_STATIC_BLOCK.as_ref().unwrap() }
-      .construct(env, &java_body, &java_span_ex);
+      .construct(env, &java_body, &java_span_ex)?;
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for StaticBlock {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_STATIC_BLOCK.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_body = java_class.get_body(env, jobj);
-    let body = BlockStmt::from_java(env, &java_body);
+    let java_body = java_class.get_body(env, jobj)?;
+    let body = *BlockStmt::from_java(env, &java_body)?;
     delete_local_ref!(env, java_body);
-    StaticBlock {
+    Ok(Box::new(StaticBlock {
       span,
       body,
-    }
+    }))
   }
 }
 
@@ -31301,31 +31509,32 @@ impl RegisterWithMap<ByteToIndexMap> for Str {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Str {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let value = self.value.as_str();
     let optional_raw = self.raw.as_ref().map(|node| node.to_string());
     let return_value = unsafe { JAVA_CLASS_STR.as_ref().unwrap() }
-      .construct(env, value, &optional_raw, &java_span_ex);
+      .construct(env, value, &optional_raw, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Str {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_STR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let value = java_class.get_value(env, jobj);
+    let value = java_class.get_value(env, jobj)?;
     let value = value.into();
-    let java_optional_raw = java_class.get_raw(env, jobj);
-    let raw = if optional_is_present(env, &java_optional_raw) {
-      let java_raw = optional_get(env, &java_optional_raw);
-      let raw = jstring_to_string!(env, java_raw.as_raw());
+    let java_optional_raw = java_class.get_raw(env, jobj)?;
+    let raw = if optional_is_present(env, &java_optional_raw)? {
+      let java_raw = optional_get(env, &java_optional_raw)?;
+      let raw: Result<String> = jstring_to_string!(env, java_raw.as_raw());
+      let raw = raw?;
       delete_local_ref!(env, java_raw);
       Some(raw)
     } else {
@@ -31333,11 +31542,11 @@ impl<'local> FromJava<'local> for Str {
     };
     delete_local_ref!(env, java_optional_raw);
     let raw = raw.map(|raw| raw.into());
-    Str {
+    Ok(Box::new(Str {
       span,
       value,
       raw,
-    }
+    }))
   }
 }
 
@@ -31348,25 +31557,25 @@ impl RegisterWithMap<ByteToIndexMap> for Super {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Super {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_SUPER.as_ref().unwrap() }
-      .construct(env, &java_span_ex);
+      .construct(env, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Super {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let span = DUMMY_SP;
-    Super {
+    Ok(Box::new(Super {
       span,
-    }
+    }))
   }
 }
 
@@ -31379,38 +31588,38 @@ impl RegisterWithMap<ByteToIndexMap> for SuperPropExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for SuperPropExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_obj = self.obj.to_java_with_map(env, map);
-    let java_prop = self.prop.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_obj = self.obj.to_java_with_map(env, map)?;
+    let java_prop = self.prop.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_SUPER_PROP_EXPR.as_ref().unwrap() }
-      .construct(env, &java_obj, &java_prop, &java_span_ex);
+      .construct(env, &java_obj, &java_prop, &java_span_ex)?;
     delete_local_ref!(env, java_obj);
     delete_local_ref!(env, java_prop);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for SuperPropExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_SUPER_PROP_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_obj = java_class.get_obj(env, jobj);
-    let obj = Super::from_java(env, &java_obj);
+    let java_obj = java_class.get_obj(env, jobj)?;
+    let obj = *Super::from_java(env, &java_obj)?;
     delete_local_ref!(env, java_obj);
-    let java_prop = java_class.get_prop(env, jobj);
-    let prop = SuperProp::from_java(env, &java_prop);
+    let java_prop = java_class.get_prop(env, jobj)?;
+    let prop = *SuperProp::from_java(env, &java_prop)?;
     delete_local_ref!(env, java_prop);
-    SuperPropExpr {
+    Ok(Box::new(SuperPropExpr {
       span,
       obj,
       prop,
-    }
+    }))
   }
 }
 
@@ -31418,43 +31627,46 @@ impl RegisterWithMap<ByteToIndexMap> for SwitchCase {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.test.as_ref().map(|node| node.register_with_map(map));
-    self.cons.iter().for_each(|node| {
+    for node in self.cons.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for SwitchCase {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_optional_test = self.test.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_cons = list_new(env, self.cons.len());
-    self.cons.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_cons, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_optional_test = match self.test.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_cons = list_new(env, self.cons.len())?;
+    for node in self.cons.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_cons, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_SWITCH_CASE.as_ref().unwrap() }
-      .construct(env, &java_optional_test, &java_cons, &java_span_ex);
+      .construct(env, &java_optional_test, &java_cons, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_test);
     delete_local_ref!(env, java_cons);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for SwitchCase {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_SWITCH_CASE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_optional_test = java_class.get_test(env, jobj);
-    let test = if optional_is_present(env, &java_optional_test) {
-      let java_test = optional_get(env, &java_optional_test);
-      let test = Expr::from_java(env, &java_test);
+    let java_optional_test = java_class.get_test(env, jobj)?;
+    let test = if optional_is_present(env, &java_optional_test)? {
+      let java_test = optional_get(env, &java_optional_test)?;
+      let test = *Expr::from_java(env, &java_test)?;
       delete_local_ref!(env, java_test);
       Some(test)
     } else {
@@ -31462,19 +31674,20 @@ impl<'local> FromJava<'local> for SwitchCase {
     };
     delete_local_ref!(env, java_optional_test);
     let test = test.map(|test| Box::new(test));
-    let java_cons = java_class.get_cons(env, jobj);
-    let length = list_size(env, &java_cons);
-    let cons = (0..length).map(|i| {
-      let java_item = list_get(env, &java_cons, i);
-      let cons = Stmt::from_java(env, &java_item);
+    let java_cons = java_class.get_cons(env, jobj)?;
+    let length = list_size(env, &java_cons)?;
+    let mut cons: Vec<Stmt> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_cons, i)?;
+      let element = *Stmt::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      cons
-    }).collect();
-    SwitchCase {
+      cons.push(element)
+    }
+    Ok(Box::new(SwitchCase {
       span,
       test,
       cons,
-    }
+    }))
   }
 }
 
@@ -31482,56 +31695,57 @@ impl RegisterWithMap<ByteToIndexMap> for SwitchStmt {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.discriminant.register_with_map(map);
-    self.cases.iter().for_each(|node| {
+    for node in self.cases.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for SwitchStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_discriminant = self.discriminant.to_java_with_map(env, map);
-    let java_cases = list_new(env, self.cases.len());
-    self.cases.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_cases, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_discriminant = self.discriminant.to_java_with_map(env, map)?;
+    let java_cases = list_new(env, self.cases.len())?;
+    for node in self.cases.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_cases, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_SWITCH_STMT.as_ref().unwrap() }
-      .construct(env, &java_discriminant, &java_cases, &java_span_ex);
+      .construct(env, &java_discriminant, &java_cases, &java_span_ex)?;
     delete_local_ref!(env, java_discriminant);
     delete_local_ref!(env, java_cases);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for SwitchStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_SWITCH_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_discriminant = java_class.get_discriminant(env, jobj);
-    let discriminant = Expr::from_java(env, &java_discriminant);
+    let java_discriminant = java_class.get_discriminant(env, jobj)?;
+    let discriminant = *Expr::from_java(env, &java_discriminant)?;
     delete_local_ref!(env, java_discriminant);
     let discriminant = Box::new(discriminant);
-    let java_cases = java_class.get_cases(env, jobj);
-    let length = list_size(env, &java_cases);
-    let cases = (0..length).map(|i| {
-      let java_item = list_get(env, &java_cases, i);
-      let cases = SwitchCase::from_java(env, &java_item);
+    let java_cases = java_class.get_cases(env, jobj)?;
+    let length = list_size(env, &java_cases)?;
+    let mut cases: Vec<SwitchCase> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_cases, i)?;
+      let element = *SwitchCase::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      cases
-    }).collect();
-    SwitchStmt {
+      cases.push(element)
+    }
+    Ok(Box::new(SwitchStmt {
       span,
       discriminant,
       cases,
-    }
+    }))
   }
 }
 
@@ -31545,40 +31759,43 @@ impl RegisterWithMap<ByteToIndexMap> for TaggedTpl {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TaggedTpl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let ctxt = self.ctxt;
-    let java_tag = self.tag.to_java_with_map(env, map);
-    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_tpl = self.tpl.to_java_with_map(env, map);
+    let java_tag = self.tag.to_java_with_map(env, map)?;
+    let java_optional_type_params = match self.type_params.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_tpl = self.tpl.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TAGGED_TPL.as_ref().unwrap() }
-      .construct(env, ctxt, &java_tag, &java_optional_type_params, &java_tpl, &java_span_ex);
+      .construct(env, ctxt, &java_tag, &java_optional_type_params, &java_tpl, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_tag);
     delete_local_ref!(env, java_tpl);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TaggedTpl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TAGGED_TPL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = java_class.get_ctxt(env, jobj)?;
     let ctxt = SyntaxContext::from_u32(ctxt as u32);
-    let java_tag = java_class.get_tag(env, jobj);
-    let tag = Expr::from_java(env, &java_tag);
+    let java_tag = java_class.get_tag(env, jobj)?;
+    let tag = *Expr::from_java(env, &java_tag)?;
     delete_local_ref!(env, java_tag);
     let tag = Box::new(tag);
-    let java_optional_type_params = java_class.get_type_params(env, jobj);
-    let type_params = if optional_is_present(env, &java_optional_type_params) {
-      let java_type_params = optional_get(env, &java_optional_type_params);
-      let type_params = TsTypeParamInstantiation::from_java(env, &java_type_params);
+    let java_optional_type_params = java_class.get_type_params(env, jobj)?;
+    let type_params = if optional_is_present(env, &java_optional_type_params)? {
+      let java_type_params = optional_get(env, &java_optional_type_params)?;
+      let type_params = *TsTypeParamInstantiation::from_java(env, &java_type_params)?;
       delete_local_ref!(env, java_type_params);
       Some(type_params)
     } else {
@@ -31586,17 +31803,17 @@ impl<'local> FromJava<'local> for TaggedTpl {
     };
     delete_local_ref!(env, java_optional_type_params);
     let type_params = type_params.map(|type_params| Box::new(type_params));
-    let java_tpl = java_class.get_tpl(env, jobj);
-    let tpl = Tpl::from_java(env, &java_tpl);
+    let java_tpl = java_class.get_tpl(env, jobj)?;
+    let tpl = *Tpl::from_java(env, &java_tpl)?;
     delete_local_ref!(env, java_tpl);
     let tpl = Box::new(tpl);
-    TaggedTpl {
+    Ok(Box::new(TaggedTpl {
       span,
       ctxt,
       tag,
       type_params,
       tpl,
-    }
+    }))
   }
 }
 
@@ -31607,25 +31824,25 @@ impl RegisterWithMap<ByteToIndexMap> for ThisExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ThisExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_THIS_EXPR.as_ref().unwrap() }
-      .construct(env, &java_span_ex);
+      .construct(env, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ThisExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let span = DUMMY_SP;
-    ThisExpr {
+    Ok(Box::new(ThisExpr {
       span,
-    }
+    }))
   }
 }
 
@@ -31637,101 +31854,104 @@ impl RegisterWithMap<ByteToIndexMap> for ThrowStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for ThrowStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_arg = self.arg.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_arg = self.arg.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_THROW_STMT.as_ref().unwrap() }
-      .construct(env, &java_arg, &java_span_ex);
+      .construct(env, &java_arg, &java_span_ex)?;
     delete_local_ref!(env, java_arg);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for ThrowStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_THROW_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_arg = java_class.get_arg(env, jobj);
-    let arg = Expr::from_java(env, &java_arg);
+    let java_arg = java_class.get_arg(env, jobj)?;
+    let arg = *Expr::from_java(env, &java_arg)?;
     delete_local_ref!(env, java_arg);
     let arg = Box::new(arg);
-    ThrowStmt {
+    Ok(Box::new(ThrowStmt {
       span,
       arg,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for Tpl {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.exprs.iter().for_each(|node| {
+    for node in self.exprs.iter() {
       node.register_with_map(map);
-    });
-    self.quasis.iter().for_each(|node| {
+    }
+    for node in self.quasis.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for Tpl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_exprs = list_new(env, self.exprs.len());
-    self.exprs.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_exprs, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_exprs = list_new(env, self.exprs.len())?;
+    for node in self.exprs.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_exprs, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_quasis = list_new(env, self.quasis.len());
-    self.quasis.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_quasis, &java_node);
+    }
+    let java_quasis = list_new(env, self.quasis.len())?;
+    for node in self.quasis.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_quasis, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_TPL.as_ref().unwrap() }
-      .construct(env, &java_exprs, &java_quasis, &java_span_ex);
+      .construct(env, &java_exprs, &java_quasis, &java_span_ex)?;
     delete_local_ref!(env, java_exprs);
     delete_local_ref!(env, java_quasis);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for Tpl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TPL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_exprs = java_class.get_exprs(env, jobj);
-    let length = list_size(env, &java_exprs);
-    let exprs = (0..length).map(|i| {
-      let java_item = list_get(env, &java_exprs, i);
-      let exprs = Expr::from_java(env, &java_item);
+    let java_exprs = java_class.get_exprs(env, jobj)?;
+    let length = list_size(env, &java_exprs)?;
+    let mut exprs: Vec<Expr> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_exprs, i)?;
+      let element = *Expr::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      Box::new(exprs)
-    }).collect();
-    let java_quasis = java_class.get_quasis(env, jobj);
-    let length = list_size(env, &java_quasis);
-    let quasis = (0..length).map(|i| {
-      let java_item = list_get(env, &java_quasis, i);
-      let quasis = TplElement::from_java(env, &java_item);
+      exprs.push(element)
+    }
+    let exprs = exprs.into_iter().map(|exprs| Box::new(exprs)).collect();
+    let java_quasis = java_class.get_quasis(env, jobj)?;
+    let length = list_size(env, &java_quasis)?;
+    let mut quasis: Vec<TplElement> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_quasis, i)?;
+      let element = *TplElement::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      quasis
-    }).collect();
-    Tpl {
+      quasis.push(element)
+    }
+    Ok(Box::new(Tpl {
       span,
       exprs,
       quasis,
-    }
+    }))
   }
 }
 
@@ -31742,31 +31962,32 @@ impl RegisterWithMap<ByteToIndexMap> for TplElement {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TplElement {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let tail = self.tail;
     let optional_cooked = self.cooked.as_ref().map(|node| node.to_string());
     let raw = self.raw.as_str();
     let return_value = unsafe { JAVA_CLASS_TPL_ELEMENT.as_ref().unwrap() }
-      .construct(env, tail, &optional_cooked, raw, &java_span_ex);
+      .construct(env, tail, &optional_cooked, raw, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TplElement {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TPL_ELEMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let tail = java_class.is_tail(env, jobj);
-    let java_optional_cooked = java_class.get_cooked(env, jobj);
-    let cooked = if optional_is_present(env, &java_optional_cooked) {
-      let java_cooked = optional_get(env, &java_optional_cooked);
-      let cooked = jstring_to_string!(env, java_cooked.as_raw());
+    let tail = java_class.is_tail(env, jobj)?;
+    let java_optional_cooked = java_class.get_cooked(env, jobj)?;
+    let cooked = if optional_is_present(env, &java_optional_cooked)? {
+      let java_cooked = optional_get(env, &java_optional_cooked)?;
+      let cooked: Result<String> = jstring_to_string!(env, java_cooked.as_raw());
+      let cooked = cooked?;
       delete_local_ref!(env, java_cooked);
       Some(cooked)
     } else {
@@ -31774,14 +31995,14 @@ impl<'local> FromJava<'local> for TplElement {
     };
     delete_local_ref!(env, java_optional_cooked);
     let cooked = cooked.map(|cooked| cooked.into());
-    let raw = java_class.get_raw(env, jobj);
+    let raw = java_class.get_raw(env, jobj)?;
     let raw = raw.into();
-    TplElement {
+    Ok(Box::new(TplElement {
       span,
       tail,
       cooked,
       raw,
-    }
+    }))
   }
 }
 
@@ -31795,58 +32016,64 @@ impl RegisterWithMap<ByteToIndexMap> for TryStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TryStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_block = self.block.to_java_with_map(env, map);
-    let java_optional_handler = self.handler.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_finalizer = self.finalizer.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_block = self.block.to_java_with_map(env, map)?;
+    let java_optional_handler = match self.handler.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_finalizer = match self.finalizer.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TRY_STMT.as_ref().unwrap() }
-      .construct(env, &java_block, &java_optional_handler, &java_optional_finalizer, &java_span_ex);
+      .construct(env, &java_block, &java_optional_handler, &java_optional_finalizer, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_handler);
     delete_local_optional_ref!(env, java_optional_finalizer);
     delete_local_ref!(env, java_block);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TryStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TRY_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_block = java_class.get_block(env, jobj);
-    let block = BlockStmt::from_java(env, &java_block);
+    let java_block = java_class.get_block(env, jobj)?;
+    let block = *BlockStmt::from_java(env, &java_block)?;
     delete_local_ref!(env, java_block);
-    let java_optional_handler = java_class.get_handler(env, jobj);
-    let handler = if optional_is_present(env, &java_optional_handler) {
-      let java_handler = optional_get(env, &java_optional_handler);
-      let handler = CatchClause::from_java(env, &java_handler);
+    let java_optional_handler = java_class.get_handler(env, jobj)?;
+    let handler = if optional_is_present(env, &java_optional_handler)? {
+      let java_handler = optional_get(env, &java_optional_handler)?;
+      let handler = *CatchClause::from_java(env, &java_handler)?;
       delete_local_ref!(env, java_handler);
       Some(handler)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_handler);
-    let java_optional_finalizer = java_class.get_finalizer(env, jobj);
-    let finalizer = if optional_is_present(env, &java_optional_finalizer) {
-      let java_finalizer = optional_get(env, &java_optional_finalizer);
-      let finalizer = BlockStmt::from_java(env, &java_finalizer);
+    let java_optional_finalizer = java_class.get_finalizer(env, jobj)?;
+    let finalizer = if optional_is_present(env, &java_optional_finalizer)? {
+      let java_finalizer = optional_get(env, &java_optional_finalizer)?;
+      let finalizer = *BlockStmt::from_java(env, &java_finalizer)?;
       delete_local_ref!(env, java_finalizer);
       Some(finalizer)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_finalizer);
-    TryStmt {
+    Ok(Box::new(TryStmt {
       span,
       block,
       handler,
       finalizer,
-    }
+    }))
   }
 }
 
@@ -31858,33 +32085,33 @@ impl RegisterWithMap<ByteToIndexMap> for TsArrayType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsArrayType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_elem_type = self.elem_type.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_elem_type = self.elem_type.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_ARRAY_TYPE.as_ref().unwrap() }
-      .construct(env, &java_elem_type, &java_span_ex);
+      .construct(env, &java_elem_type, &java_span_ex)?;
     delete_local_ref!(env, java_elem_type);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsArrayType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_ARRAY_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_elem_type = java_class.get_elem_type(env, jobj);
-    let elem_type = TsType::from_java(env, &java_elem_type);
+    let java_elem_type = java_class.get_elem_type(env, jobj)?;
+    let elem_type = *TsType::from_java(env, &java_elem_type)?;
     delete_local_ref!(env, java_elem_type);
     let elem_type = Box::new(elem_type);
-    TsArrayType {
+    Ok(Box::new(TsArrayType {
       span,
       elem_type,
-    }
+    }))
   }
 }
 
@@ -31897,95 +32124,102 @@ impl RegisterWithMap<ByteToIndexMap> for TsAsExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsAsExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
-    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
+    let java_type_ann = self.type_ann.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_AS_EXPR.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_type_ann, &java_span_ex);
+      .construct(env, &java_expr, &java_type_ann, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsAsExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_AS_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    let java_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = TsType::from_java(env, &java_type_ann);
+    let java_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = *TsType::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
     let type_ann = Box::new(type_ann);
-    TsAsExpr {
+    Ok(Box::new(TsAsExpr {
       span,
       expr,
       type_ann,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsCallSignatureDecl {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.params.iter().for_each(|node| {
+    for node in self.params.iter() {
       node.register_with_map(map);
-    });
+    }
     self.type_ann.as_ref().map(|node| node.register_with_map(map));
     self.type_params.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsCallSignatureDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_params = list_new(env, self.params.len());
-    self.params.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_params, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_params = list_new(env, self.params.len())?;
+    for node in self.params.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_params, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    }
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_type_params = match self.type_params.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_CALL_SIGNATURE_DECL.as_ref().unwrap() }
-      .construct(env, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
+      .construct(env, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsCallSignatureDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_CALL_SIGNATURE_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_params = java_class.get_params(env, jobj);
-    let length = list_size(env, &java_params);
-    let params = (0..length).map(|i| {
-      let java_item = list_get(env, &java_params, i);
-      let params = TsFnParam::from_java(env, &java_item);
+    let java_params = java_class.get_params(env, jobj)?;
+    let length = list_size(env, &java_params)?;
+    let mut params: Vec<TsFnParam> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_params, i)?;
+      let element = *TsFnParam::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      params
-    }).collect();
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+      params.push(element)
+    }
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -31993,10 +32227,10 @@ impl<'local> FromJava<'local> for TsCallSignatureDecl {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    let java_optional_type_params = java_class.get_type_params(env, jobj);
-    let type_params = if optional_is_present(env, &java_optional_type_params) {
-      let java_type_params = optional_get(env, &java_optional_type_params);
-      let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
+    let java_optional_type_params = java_class.get_type_params(env, jobj)?;
+    let type_params = if optional_is_present(env, &java_optional_type_params)? {
+      let java_type_params = optional_get(env, &java_optional_type_params)?;
+      let type_params = *TsTypeParamDecl::from_java(env, &java_type_params)?;
       delete_local_ref!(env, java_type_params);
       Some(type_params)
     } else {
@@ -32004,12 +32238,12 @@ impl<'local> FromJava<'local> for TsCallSignatureDecl {
     };
     delete_local_ref!(env, java_optional_type_params);
     let type_params = type_params.map(|type_params| Box::new(type_params));
-    TsCallSignatureDecl {
+    Ok(Box::new(TsCallSignatureDecl {
       span,
       params,
       type_ann,
       type_params,
-    }
+    }))
   }
 }
 
@@ -32024,54 +32258,54 @@ impl RegisterWithMap<ByteToIndexMap> for TsConditionalType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsConditionalType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_check_type = self.check_type.to_java_with_map(env, map);
-    let java_extends_type = self.extends_type.to_java_with_map(env, map);
-    let java_true_type = self.true_type.to_java_with_map(env, map);
-    let java_false_type = self.false_type.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_check_type = self.check_type.to_java_with_map(env, map)?;
+    let java_extends_type = self.extends_type.to_java_with_map(env, map)?;
+    let java_true_type = self.true_type.to_java_with_map(env, map)?;
+    let java_false_type = self.false_type.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_CONDITIONAL_TYPE.as_ref().unwrap() }
-      .construct(env, &java_check_type, &java_extends_type, &java_true_type, &java_false_type, &java_span_ex);
+      .construct(env, &java_check_type, &java_extends_type, &java_true_type, &java_false_type, &java_span_ex)?;
     delete_local_ref!(env, java_check_type);
     delete_local_ref!(env, java_extends_type);
     delete_local_ref!(env, java_true_type);
     delete_local_ref!(env, java_false_type);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsConditionalType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_CONDITIONAL_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_check_type = java_class.get_check_type(env, jobj);
-    let check_type = TsType::from_java(env, &java_check_type);
+    let java_check_type = java_class.get_check_type(env, jobj)?;
+    let check_type = *TsType::from_java(env, &java_check_type)?;
     delete_local_ref!(env, java_check_type);
     let check_type = Box::new(check_type);
-    let java_extends_type = java_class.get_extends_type(env, jobj);
-    let extends_type = TsType::from_java(env, &java_extends_type);
+    let java_extends_type = java_class.get_extends_type(env, jobj)?;
+    let extends_type = *TsType::from_java(env, &java_extends_type)?;
     delete_local_ref!(env, java_extends_type);
     let extends_type = Box::new(extends_type);
-    let java_true_type = java_class.get_true_type(env, jobj);
-    let true_type = TsType::from_java(env, &java_true_type);
+    let java_true_type = java_class.get_true_type(env, jobj)?;
+    let true_type = *TsType::from_java(env, &java_true_type)?;
     delete_local_ref!(env, java_true_type);
     let true_type = Box::new(true_type);
-    let java_false_type = java_class.get_false_type(env, jobj);
-    let false_type = TsType::from_java(env, &java_false_type);
+    let java_false_type = java_class.get_false_type(env, jobj)?;
+    let false_type = *TsType::from_java(env, &java_false_type)?;
     delete_local_ref!(env, java_false_type);
     let false_type = Box::new(false_type);
-    TsConditionalType {
+    Ok(Box::new(TsConditionalType {
       span,
       check_type,
       extends_type,
       true_type,
       false_type,
-    }
+    }))
   }
 }
 
@@ -32083,88 +32317,95 @@ impl RegisterWithMap<ByteToIndexMap> for TsConstAssertion {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsConstAssertion {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_CONST_ASSERTION.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_span_ex);
+      .construct(env, &java_expr, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsConstAssertion {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_CONST_ASSERTION.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    TsConstAssertion {
+    Ok(Box::new(TsConstAssertion {
       span,
       expr,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsConstructSignatureDecl {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.params.iter().for_each(|node| {
+    for node in self.params.iter() {
       node.register_with_map(map);
-    });
+    }
     self.type_ann.as_ref().map(|node| node.register_with_map(map));
     self.type_params.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsConstructSignatureDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_params = list_new(env, self.params.len());
-    self.params.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_params, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_params = list_new(env, self.params.len())?;
+    for node in self.params.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_params, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    }
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_type_params = match self.type_params.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_CONSTRUCT_SIGNATURE_DECL.as_ref().unwrap() }
-      .construct(env, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
+      .construct(env, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsConstructSignatureDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_CONSTRUCT_SIGNATURE_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_params = java_class.get_params(env, jobj);
-    let length = list_size(env, &java_params);
-    let params = (0..length).map(|i| {
-      let java_item = list_get(env, &java_params, i);
-      let params = TsFnParam::from_java(env, &java_item);
+    let java_params = java_class.get_params(env, jobj)?;
+    let length = list_size(env, &java_params)?;
+    let mut params: Vec<TsFnParam> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_params, i)?;
+      let element = *TsFnParam::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      params
-    }).collect();
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+      params.push(element)
+    }
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -32172,10 +32413,10 @@ impl<'local> FromJava<'local> for TsConstructSignatureDecl {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    let java_optional_type_params = java_class.get_type_params(env, jobj);
-    let type_params = if optional_is_present(env, &java_optional_type_params) {
-      let java_type_params = optional_get(env, &java_optional_type_params);
-      let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
+    let java_optional_type_params = java_class.get_type_params(env, jobj)?;
+    let type_params = if optional_is_present(env, &java_optional_type_params)? {
+      let java_type_params = optional_get(env, &java_optional_type_params)?;
+      let type_params = *TsTypeParamDecl::from_java(env, &java_type_params)?;
       delete_local_ref!(env, java_type_params);
       Some(type_params)
     } else {
@@ -32183,68 +32424,72 @@ impl<'local> FromJava<'local> for TsConstructSignatureDecl {
     };
     delete_local_ref!(env, java_optional_type_params);
     let type_params = type_params.map(|type_params| Box::new(type_params));
-    TsConstructSignatureDecl {
+    Ok(Box::new(TsConstructSignatureDecl {
       span,
       params,
       type_ann,
       type_params,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsConstructorType {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.params.iter().for_each(|node| {
+    for node in self.params.iter() {
       node.register_with_map(map);
-    });
+    }
     self.type_params.as_ref().map(|node| node.register_with_map(map));
     self.type_ann.register_with_map(map);
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsConstructorType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_params = list_new(env, self.params.len());
-    self.params.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_params, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_params = list_new(env, self.params.len())?;
+    for node in self.params.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_params, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    }
+    let java_optional_type_params = match self.type_params.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_type_ann = self.type_ann.to_java_with_map(env, map)?;
     let is_abstract = self.is_abstract;
     let return_value = unsafe { JAVA_CLASS_TS_CONSTRUCTOR_TYPE.as_ref().unwrap() }
-      .construct(env, &java_params, &java_optional_type_params, &java_type_ann, is_abstract, &java_span_ex);
+      .construct(env, &java_params, &java_optional_type_params, &java_type_ann, is_abstract, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsConstructorType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_CONSTRUCTOR_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_params = java_class.get_params(env, jobj);
-    let length = list_size(env, &java_params);
-    let params = (0..length).map(|i| {
-      let java_item = list_get(env, &java_params, i);
-      let params = TsFnParam::from_java(env, &java_item);
+    let java_params = java_class.get_params(env, jobj)?;
+    let length = list_size(env, &java_params)?;
+    let mut params: Vec<TsFnParam> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_params, i)?;
+      let element = *TsFnParam::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      params
-    }).collect();
-    let java_optional_type_params = java_class.get_type_params(env, jobj);
-    let type_params = if optional_is_present(env, &java_optional_type_params) {
-      let java_type_params = optional_get(env, &java_optional_type_params);
-      let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
+      params.push(element)
+    }
+    let java_optional_type_params = java_class.get_type_params(env, jobj)?;
+    let type_params = if optional_is_present(env, &java_optional_type_params)? {
+      let java_type_params = optional_get(env, &java_optional_type_params)?;
+      let type_params = *TsTypeParamDecl::from_java(env, &java_type_params)?;
       delete_local_ref!(env, java_type_params);
       Some(type_params)
     } else {
@@ -32252,18 +32497,18 @@ impl<'local> FromJava<'local> for TsConstructorType {
     };
     delete_local_ref!(env, java_optional_type_params);
     let type_params = type_params.map(|type_params| Box::new(type_params));
-    let java_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+    let java_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
     let type_ann = Box::new(type_ann);
-    let is_abstract = java_class.is_abstract(env, jobj);
-    TsConstructorType {
+    let is_abstract = java_class.is_abstract(env, jobj)?;
+    Ok(Box::new(TsConstructorType {
       span,
       params,
       type_params,
       type_ann,
       is_abstract,
-    }
+    }))
   }
 }
 
@@ -32271,61 +32516,62 @@ impl RegisterWithMap<ByteToIndexMap> for TsEnumDecl {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.id.register_with_map(map);
-    self.members.iter().for_each(|node| {
+    for node in self.members.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsEnumDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let declare = self.declare;
     let is_const = self.is_const;
-    let java_id = self.id.to_java_with_map(env, map);
-    let java_members = list_new(env, self.members.len());
-    self.members.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_members, &java_node);
+    let java_id = self.id.to_java_with_map(env, map)?;
+    let java_members = list_new(env, self.members.len())?;
+    for node in self.members.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_members, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_TS_ENUM_DECL.as_ref().unwrap() }
-      .construct(env, declare, is_const, &java_id, &java_members, &java_span_ex);
+      .construct(env, declare, is_const, &java_id, &java_members, &java_span_ex)?;
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_members);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsEnumDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_ENUM_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let declare = java_class.is_declare(env, jobj);
-    let is_const = java_class.is_const(env, jobj);
-    let java_id = java_class.get_id(env, jobj);
-    let id = Ident::from_java(env, &java_id);
+    let declare = java_class.is_declare(env, jobj)?;
+    let is_const = java_class.is_const(env, jobj)?;
+    let java_id = java_class.get_id(env, jobj)?;
+    let id = *Ident::from_java(env, &java_id)?;
     delete_local_ref!(env, java_id);
-    let java_members = java_class.get_members(env, jobj);
-    let length = list_size(env, &java_members);
-    let members = (0..length).map(|i| {
-      let java_item = list_get(env, &java_members, i);
-      let members = TsEnumMember::from_java(env, &java_item);
+    let java_members = java_class.get_members(env, jobj)?;
+    let length = list_size(env, &java_members)?;
+    let mut members: Vec<TsEnumMember> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_members, i)?;
+      let element = *TsEnumMember::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      members
-    }).collect();
-    TsEnumDecl {
+      members.push(element)
+    }
+    Ok(Box::new(TsEnumDecl {
       span,
       declare,
       is_const,
       id,
       members,
-    }
+    }))
   }
 }
 
@@ -32338,34 +32584,37 @@ impl RegisterWithMap<ByteToIndexMap> for TsEnumMember {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsEnumMember {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_id = self.id.to_java_with_map(env, map);
-    let java_optional_init = self.init.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_id = self.id.to_java_with_map(env, map)?;
+    let java_optional_init = match self.init.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_ENUM_MEMBER.as_ref().unwrap() }
-      .construct(env, &java_id, &java_optional_init, &java_span_ex);
+      .construct(env, &java_id, &java_optional_init, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_init);
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsEnumMember {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_ENUM_MEMBER.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_id = java_class.get_id(env, jobj);
-    let id = TsEnumMemberId::from_java(env, &java_id);
+    let java_id = java_class.get_id(env, jobj)?;
+    let id = *TsEnumMemberId::from_java(env, &java_id)?;
     delete_local_ref!(env, java_id);
-    let java_optional_init = java_class.get_init(env, jobj);
-    let init = if optional_is_present(env, &java_optional_init) {
-      let java_init = optional_get(env, &java_optional_init);
-      let init = Expr::from_java(env, &java_init);
+    let java_optional_init = java_class.get_init(env, jobj)?;
+    let init = if optional_is_present(env, &java_optional_init)? {
+      let java_init = optional_get(env, &java_optional_init)?;
+      let init = *Expr::from_java(env, &java_init)?;
       delete_local_ref!(env, java_init);
       Some(init)
     } else {
@@ -32373,11 +32622,11 @@ impl<'local> FromJava<'local> for TsEnumMember {
     };
     delete_local_ref!(env, java_optional_init);
     let init = init.map(|init| Box::new(init));
-    TsEnumMember {
+    Ok(Box::new(TsEnumMember {
       span,
       id,
       init,
-    }
+    }))
   }
 }
 
@@ -32389,33 +32638,33 @@ impl RegisterWithMap<ByteToIndexMap> for TsExportAssignment {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsExportAssignment {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_EXPORT_ASSIGNMENT.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_span_ex);
+      .construct(env, &java_expr, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsExportAssignment {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_EXPORT_ASSIGNMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    TsExportAssignment {
+    Ok(Box::new(TsExportAssignment {
       span,
       expr,
-    }
+    }))
   }
 }
 
@@ -32428,35 +32677,38 @@ impl RegisterWithMap<ByteToIndexMap> for TsExprWithTypeArgs {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsExprWithTypeArgs {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
-    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
+    let java_optional_type_args = match self.type_args.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_EXPR_WITH_TYPE_ARGS.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_optional_type_args, &java_span_ex);
+      .construct(env, &java_expr, &java_optional_type_args, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_args);
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsExprWithTypeArgs {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_EXPR_WITH_TYPE_ARGS.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    let java_optional_type_args = java_class.get_type_args(env, jobj);
-    let type_args = if optional_is_present(env, &java_optional_type_args) {
-      let java_type_args = optional_get(env, &java_optional_type_args);
-      let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
+    let java_optional_type_args = java_class.get_type_args(env, jobj)?;
+    let type_args = if optional_is_present(env, &java_optional_type_args)? {
+      let java_type_args = optional_get(env, &java_optional_type_args)?;
+      let type_args = *TsTypeParamInstantiation::from_java(env, &java_type_args)?;
       delete_local_ref!(env, java_type_args);
       Some(type_args)
     } else {
@@ -32464,11 +32716,11 @@ impl<'local> FromJava<'local> for TsExprWithTypeArgs {
     };
     delete_local_ref!(env, java_optional_type_args);
     let type_args = type_args.map(|type_args| Box::new(type_args));
-    TsExprWithTypeArgs {
+    Ok(Box::new(TsExprWithTypeArgs {
       span,
       expr,
       type_args,
-    }
+    }))
   }
 }
 
@@ -32480,87 +32732,91 @@ impl RegisterWithMap<ByteToIndexMap> for TsExternalModuleRef {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsExternalModuleRef {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_EXTERNAL_MODULE_REF.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_span_ex);
+      .construct(env, &java_expr, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsExternalModuleRef {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_EXTERNAL_MODULE_REF.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Str::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Str::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
-    TsExternalModuleRef {
+    Ok(Box::new(TsExternalModuleRef {
       span,
       expr,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsFnType {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.params.iter().for_each(|node| {
+    for node in self.params.iter() {
       node.register_with_map(map);
-    });
+    }
     self.type_params.as_ref().map(|node| node.register_with_map(map));
     self.type_ann.register_with_map(map);
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsFnType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_params = list_new(env, self.params.len());
-    self.params.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_params, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_params = list_new(env, self.params.len())?;
+    for node in self.params.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_params, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    }
+    let java_optional_type_params = match self.type_params.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_type_ann = self.type_ann.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_FN_TYPE.as_ref().unwrap() }
-      .construct(env, &java_params, &java_optional_type_params, &java_type_ann, &java_span_ex);
+      .construct(env, &java_params, &java_optional_type_params, &java_type_ann, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsFnType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_FN_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_params = java_class.get_params(env, jobj);
-    let length = list_size(env, &java_params);
-    let params = (0..length).map(|i| {
-      let java_item = list_get(env, &java_params, i);
-      let params = TsFnParam::from_java(env, &java_item);
+    let java_params = java_class.get_params(env, jobj)?;
+    let length = list_size(env, &java_params)?;
+    let mut params: Vec<TsFnParam> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_params, i)?;
+      let element = *TsFnParam::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      params
-    }).collect();
-    let java_optional_type_params = java_class.get_type_params(env, jobj);
-    let type_params = if optional_is_present(env, &java_optional_type_params) {
-      let java_type_params = optional_get(env, &java_optional_type_params);
-      let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
+      params.push(element)
+    }
+    let java_optional_type_params = java_class.get_type_params(env, jobj)?;
+    let type_params = if optional_is_present(env, &java_optional_type_params)? {
+      let java_type_params = optional_get(env, &java_optional_type_params)?;
+      let type_params = *TsTypeParamDecl::from_java(env, &java_type_params)?;
       delete_local_ref!(env, java_type_params);
       Some(type_params)
     } else {
@@ -32568,16 +32824,16 @@ impl<'local> FromJava<'local> for TsFnType {
     };
     delete_local_ref!(env, java_optional_type_params);
     let type_params = type_params.map(|type_params| Box::new(type_params));
-    let java_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+    let java_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
     let type_ann = Box::new(type_ann);
-    TsFnType {
+    Ok(Box::new(TsFnType {
       span,
       params,
       type_params,
       type_ann,
-    }
+    }))
   }
 }
 
@@ -32590,37 +32846,40 @@ impl RegisterWithMap<ByteToIndexMap> for TsGetterSignature {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsGetterSignature {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
     let computed = self.computed;
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_GETTER_SIGNATURE.as_ref().unwrap() }
-      .construct(env, &java_key, computed, &java_optional_type_ann, &java_span_ex);
+      .construct(env, &java_key, computed, &java_optional_type_ann, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsGetterSignature {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_GETTER_SIGNATURE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_key = java_class.get_key(env, jobj);
-    let key = Expr::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *Expr::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
     let key = Box::new(key);
-    let computed = java_class.is_computed(env, jobj);
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+    let computed = java_class.is_computed(env, jobj)?;
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -32628,12 +32887,12 @@ impl<'local> FromJava<'local> for TsGetterSignature {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    TsGetterSignature {
+    Ok(Box::new(TsGetterSignature {
       span,
       key,
       computed,
       type_ann,
-    }
+    }))
   }
 }
 
@@ -32646,44 +32905,44 @@ impl RegisterWithMap<ByteToIndexMap> for TsImportEqualsDecl {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsImportEqualsDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let is_export = self.is_export;
     let is_type_only = self.is_type_only;
-    let java_id = self.id.to_java_with_map(env, map);
-    let java_module_ref = self.module_ref.to_java_with_map(env, map);
+    let java_id = self.id.to_java_with_map(env, map)?;
+    let java_module_ref = self.module_ref.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_IMPORT_EQUALS_DECL.as_ref().unwrap() }
-      .construct(env, is_export, is_type_only, &java_id, &java_module_ref, &java_span_ex);
+      .construct(env, is_export, is_type_only, &java_id, &java_module_ref, &java_span_ex)?;
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_module_ref);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsImportEqualsDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_IMPORT_EQUALS_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let is_export = java_class.is_export(env, jobj);
-    let is_type_only = java_class.is_type_only(env, jobj);
-    let java_id = java_class.get_id(env, jobj);
-    let id = Ident::from_java(env, &java_id);
+    let is_export = java_class.is_export(env, jobj)?;
+    let is_type_only = java_class.is_type_only(env, jobj)?;
+    let java_id = java_class.get_id(env, jobj)?;
+    let id = *Ident::from_java(env, &java_id)?;
     delete_local_ref!(env, java_id);
-    let java_module_ref = java_class.get_module_ref(env, jobj);
-    let module_ref = TsModuleRef::from_java(env, &java_module_ref);
+    let java_module_ref = java_class.get_module_ref(env, jobj)?;
+    let module_ref = *TsModuleRef::from_java(env, &java_module_ref)?;
     delete_local_ref!(env, java_module_ref);
-    TsImportEqualsDecl {
+    Ok(Box::new(TsImportEqualsDecl {
       span,
       is_export,
       is_type_only,
       id,
       module_ref,
-    }
+    }))
   }
 }
 
@@ -32697,46 +32956,52 @@ impl RegisterWithMap<ByteToIndexMap> for TsImportType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsImportType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_arg = self.arg.to_java_with_map(env, map);
-    let java_optional_qualifier = self.qualifier.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_arg = self.arg.to_java_with_map(env, map)?;
+    let java_optional_qualifier = match self.qualifier.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_type_args = match self.type_args.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_IMPORT_TYPE.as_ref().unwrap() }
-      .construct(env, &java_arg, &java_optional_qualifier, &java_optional_type_args, &java_span_ex);
+      .construct(env, &java_arg, &java_optional_qualifier, &java_optional_type_args, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_qualifier);
     delete_local_optional_ref!(env, java_optional_type_args);
     delete_local_ref!(env, java_arg);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsImportType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_IMPORT_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_arg = java_class.get_arg(env, jobj);
-    let arg = Str::from_java(env, &java_arg);
+    let java_arg = java_class.get_arg(env, jobj)?;
+    let arg = *Str::from_java(env, &java_arg)?;
     delete_local_ref!(env, java_arg);
-    let java_optional_qualifier = java_class.get_qualifier(env, jobj);
-    let qualifier = if optional_is_present(env, &java_optional_qualifier) {
-      let java_qualifier = optional_get(env, &java_optional_qualifier);
-      let qualifier = TsEntityName::from_java(env, &java_qualifier);
+    let java_optional_qualifier = java_class.get_qualifier(env, jobj)?;
+    let qualifier = if optional_is_present(env, &java_optional_qualifier)? {
+      let java_qualifier = optional_get(env, &java_optional_qualifier)?;
+      let qualifier = *TsEntityName::from_java(env, &java_qualifier)?;
       delete_local_ref!(env, java_qualifier);
       Some(qualifier)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_qualifier);
-    let java_optional_type_args = java_class.get_type_args(env, jobj);
-    let type_args = if optional_is_present(env, &java_optional_type_args) {
-      let java_type_args = optional_get(env, &java_optional_type_args);
-      let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
+    let java_optional_type_args = java_class.get_type_args(env, jobj)?;
+    let type_args = if optional_is_present(env, &java_optional_type_args)? {
+      let java_type_args = optional_get(env, &java_optional_type_args)?;
+      let type_args = *TsTypeParamInstantiation::from_java(env, &java_type_args)?;
       delete_local_ref!(env, java_type_args);
       Some(type_args)
     } else {
@@ -32744,66 +33009,70 @@ impl<'local> FromJava<'local> for TsImportType {
     };
     delete_local_ref!(env, java_optional_type_args);
     let type_args = type_args.map(|type_args| Box::new(type_args));
-    TsImportType {
+    Ok(Box::new(TsImportType {
       span,
       arg,
       qualifier,
       type_args,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsIndexSignature {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.params.iter().for_each(|node| {
+    for node in self.params.iter() {
       node.register_with_map(map);
-    });
+    }
     self.type_ann.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsIndexSignature {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_params = list_new(env, self.params.len());
-    self.params.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_params, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_params = list_new(env, self.params.len())?;
+    for node in self.params.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_params, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    }
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let readonly = self.readonly;
     let is_static = self.is_static;
     let return_value = unsafe { JAVA_CLASS_TS_INDEX_SIGNATURE.as_ref().unwrap() }
-      .construct(env, &java_params, &java_optional_type_ann, readonly, is_static, &java_span_ex);
+      .construct(env, &java_params, &java_optional_type_ann, readonly, is_static, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsIndexSignature {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_INDEX_SIGNATURE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_params = java_class.get_params(env, jobj);
-    let length = list_size(env, &java_params);
-    let params = (0..length).map(|i| {
-      let java_item = list_get(env, &java_params, i);
-      let params = TsFnParam::from_java(env, &java_item);
+    let java_params = java_class.get_params(env, jobj)?;
+    let length = list_size(env, &java_params)?;
+    let mut params: Vec<TsFnParam> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_params, i)?;
+      let element = *TsFnParam::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      params
-    }).collect();
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+      params.push(element)
+    }
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -32811,15 +33080,15 @@ impl<'local> FromJava<'local> for TsIndexSignature {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    let readonly = java_class.is_readonly(env, jobj);
-    let is_static = java_class.is_static(env, jobj);
-    TsIndexSignature {
+    let readonly = java_class.is_readonly(env, jobj)?;
+    let is_static = java_class.is_static(env, jobj)?;
+    Ok(Box::new(TsIndexSignature {
       span,
       params,
       type_ann,
       readonly,
       is_static,
-    }
+    }))
   }
 }
 
@@ -32832,43 +33101,43 @@ impl RegisterWithMap<ByteToIndexMap> for TsIndexedAccessType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsIndexedAccessType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let readonly = self.readonly;
-    let java_obj_type = self.obj_type.to_java_with_map(env, map);
-    let java_index_type = self.index_type.to_java_with_map(env, map);
+    let java_obj_type = self.obj_type.to_java_with_map(env, map)?;
+    let java_index_type = self.index_type.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_INDEXED_ACCESS_TYPE.as_ref().unwrap() }
-      .construct(env, readonly, &java_obj_type, &java_index_type, &java_span_ex);
+      .construct(env, readonly, &java_obj_type, &java_index_type, &java_span_ex)?;
     delete_local_ref!(env, java_obj_type);
     delete_local_ref!(env, java_index_type);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsIndexedAccessType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_INDEXED_ACCESS_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let readonly = java_class.is_readonly(env, jobj);
-    let java_obj_type = java_class.get_obj_type(env, jobj);
-    let obj_type = TsType::from_java(env, &java_obj_type);
+    let readonly = java_class.is_readonly(env, jobj)?;
+    let java_obj_type = java_class.get_obj_type(env, jobj)?;
+    let obj_type = *TsType::from_java(env, &java_obj_type)?;
     delete_local_ref!(env, java_obj_type);
     let obj_type = Box::new(obj_type);
-    let java_index_type = java_class.get_index_type(env, jobj);
-    let index_type = TsType::from_java(env, &java_index_type);
+    let java_index_type = java_class.get_index_type(env, jobj)?;
+    let index_type = *TsType::from_java(env, &java_index_type)?;
     delete_local_ref!(env, java_index_type);
     let index_type = Box::new(index_type);
-    TsIndexedAccessType {
+    Ok(Box::new(TsIndexedAccessType {
       span,
       readonly,
       obj_type,
       index_type,
-    }
+    }))
   }
 }
 
@@ -32880,32 +33149,32 @@ impl RegisterWithMap<ByteToIndexMap> for TsInferType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsInferType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_type_param = self.type_param.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_type_param = self.type_param.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_INFER_TYPE.as_ref().unwrap() }
-      .construct(env, &java_type_param, &java_span_ex);
+      .construct(env, &java_type_param, &java_span_ex)?;
     delete_local_ref!(env, java_type_param);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsInferType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_INFER_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_type_param = java_class.get_type_param(env, jobj);
-    let type_param = TsTypeParam::from_java(env, &java_type_param);
+    let java_type_param = java_class.get_type_param(env, jobj)?;
+    let type_param = *TsTypeParam::from_java(env, &java_type_param)?;
     delete_local_ref!(env, java_type_param);
-    TsInferType {
+    Ok(Box::new(TsInferType {
       span,
       type_param,
-    }
+    }))
   }
 }
 
@@ -32918,89 +33187,90 @@ impl RegisterWithMap<ByteToIndexMap> for TsInstantiation {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsInstantiation {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
-    let java_type_args = self.type_args.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
+    let java_type_args = self.type_args.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_INSTANTIATION.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_type_args, &java_span_ex);
+      .construct(env, &java_expr, &java_type_args, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_type_args);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsInstantiation {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_INSTANTIATION.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    let java_type_args = java_class.get_type_args(env, jobj);
-    let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
+    let java_type_args = java_class.get_type_args(env, jobj)?;
+    let type_args = *TsTypeParamInstantiation::from_java(env, &java_type_args)?;
     delete_local_ref!(env, java_type_args);
     let type_args = Box::new(type_args);
-    TsInstantiation {
+    Ok(Box::new(TsInstantiation {
       span,
       expr,
       type_args,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsInterfaceBody {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.body.iter().for_each(|node| {
+    for node in self.body.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsInterfaceBody {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_body = list_new(env, self.body.len());
-    self.body.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_body, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_body = list_new(env, self.body.len())?;
+    for node in self.body.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_body, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_TS_INTERFACE_BODY.as_ref().unwrap() }
-      .construct(env, &java_body, &java_span_ex);
+      .construct(env, &java_body, &java_span_ex)?;
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsInterfaceBody {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_INTERFACE_BODY.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_body = java_class.get_body(env, jobj);
-    let length = list_size(env, &java_body);
-    let body = (0..length).map(|i| {
-      let java_item = list_get(env, &java_body, i);
-      let body = TsTypeElement::from_java(env, &java_item);
+    let java_body = java_class.get_body(env, jobj)?;
+    let length = list_size(env, &java_body)?;
+    let mut body: Vec<TsTypeElement> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_body, i)?;
+      let element = *TsTypeElement::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      body
-    }).collect();
-    TsInterfaceBody {
+      body.push(element)
+    }
+    Ok(Box::new(TsInterfaceBody {
       span,
       body,
-    }
+    }))
   }
 }
 
@@ -33009,53 +33279,56 @@ impl RegisterWithMap<ByteToIndexMap> for TsInterfaceDecl {
     map.register_by_span(&self.span);
     self.id.register_with_map(map);
     self.type_params.as_ref().map(|node| node.register_with_map(map));
-    self.extends.iter().for_each(|node| {
+    for node in self.extends.iter() {
       node.register_with_map(map);
-    });
+    }
     self.body.register_with_map(map);
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsInterfaceDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_id = self.id.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_id = self.id.to_java_with_map(env, map)?;
     let declare = self.declare;
-    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_extends = list_new(env, self.extends.len());
-    self.extends.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_extends, &java_node);
+    let java_optional_type_params = match self.type_params.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_extends = list_new(env, self.extends.len())?;
+    for node in self.extends.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_extends, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_body = self.body.to_java_with_map(env, map);
+    }
+    let java_body = self.body.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_INTERFACE_DECL.as_ref().unwrap() }
-      .construct(env, &java_id, declare, &java_optional_type_params, &java_extends, &java_body, &java_span_ex);
+      .construct(env, &java_id, declare, &java_optional_type_params, &java_extends, &java_body, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_extends);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsInterfaceDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_INTERFACE_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_id = java_class.get_id(env, jobj);
-    let id = Ident::from_java(env, &java_id);
+    let java_id = java_class.get_id(env, jobj)?;
+    let id = *Ident::from_java(env, &java_id)?;
     delete_local_ref!(env, java_id);
-    let declare = java_class.is_declare(env, jobj);
-    let java_optional_type_params = java_class.get_type_params(env, jobj);
-    let type_params = if optional_is_present(env, &java_optional_type_params) {
-      let java_type_params = optional_get(env, &java_optional_type_params);
-      let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
+    let declare = java_class.is_declare(env, jobj)?;
+    let java_optional_type_params = java_class.get_type_params(env, jobj)?;
+    let type_params = if optional_is_present(env, &java_optional_type_params)? {
+      let java_type_params = optional_get(env, &java_optional_type_params)?;
+      let type_params = *TsTypeParamDecl::from_java(env, &java_type_params)?;
       delete_local_ref!(env, java_type_params);
       Some(type_params)
     } else {
@@ -33063,74 +33336,77 @@ impl<'local> FromJava<'local> for TsInterfaceDecl {
     };
     delete_local_ref!(env, java_optional_type_params);
     let type_params = type_params.map(|type_params| Box::new(type_params));
-    let java_extends = java_class.get_extends(env, jobj);
-    let length = list_size(env, &java_extends);
-    let extends = (0..length).map(|i| {
-      let java_item = list_get(env, &java_extends, i);
-      let extends = TsExprWithTypeArgs::from_java(env, &java_item);
+    let java_extends = java_class.get_extends(env, jobj)?;
+    let length = list_size(env, &java_extends)?;
+    let mut extends: Vec<TsExprWithTypeArgs> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_extends, i)?;
+      let element = *TsExprWithTypeArgs::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      extends
-    }).collect();
-    let java_body = java_class.get_body(env, jobj);
-    let body = TsInterfaceBody::from_java(env, &java_body);
+      extends.push(element)
+    }
+    let java_body = java_class.get_body(env, jobj)?;
+    let body = *TsInterfaceBody::from_java(env, &java_body)?;
     delete_local_ref!(env, java_body);
-    TsInterfaceDecl {
+    Ok(Box::new(TsInterfaceDecl {
       span,
       id,
       declare,
       type_params,
       extends,
       body,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsIntersectionType {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.types.iter().for_each(|node| {
+    for node in self.types.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsIntersectionType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_types = list_new(env, self.types.len());
-    self.types.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_types, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_types = list_new(env, self.types.len())?;
+    for node in self.types.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_types, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_TS_INTERSECTION_TYPE.as_ref().unwrap() }
-      .construct(env, &java_types, &java_span_ex);
+      .construct(env, &java_types, &java_span_ex)?;
     delete_local_ref!(env, java_types);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsIntersectionType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_INTERSECTION_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_types = java_class.get_types(env, jobj);
-    let length = list_size(env, &java_types);
-    let types = (0..length).map(|i| {
-      let java_item = list_get(env, &java_types, i);
-      let types = TsType::from_java(env, &java_item);
+    let java_types = java_class.get_types(env, jobj)?;
+    let length = list_size(env, &java_types)?;
+    let mut types: Vec<TsType> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_types, i)?;
+      let element = *TsType::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      Box::new(types)
-    }).collect();
-    TsIntersectionType {
+      types.push(element)
+    }
+    let types = types.into_iter().map(|types| Box::new(types)).collect();
+    Ok(Box::new(TsIntersectionType {
       span,
       types,
-    }
+    }))
   }
 }
 
@@ -33141,32 +33417,32 @@ impl RegisterWithMap<ByteToIndexMap> for TsKeywordType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsKeywordType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_kind = self.kind.to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_kind = self.kind.to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_TS_KEYWORD_TYPE.as_ref().unwrap() }
-      .construct(env, &java_kind, &java_span_ex);
+      .construct(env, &java_kind, &java_span_ex)?;
     delete_local_ref!(env, java_kind);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsKeywordType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_KEYWORD_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_kind = java_class.get_kind(env, jobj);
-    let kind = TsKeywordTypeKind::from_java(env, &java_kind);
+    let java_kind = java_class.get_kind(env, jobj)?;
+    let kind = *TsKeywordTypeKind::from_java(env, &java_kind)?;
     delete_local_ref!(env, java_kind);
-    TsKeywordType {
+    Ok(Box::new(TsKeywordType {
       span,
       kind,
-    }
+    }))
   }
 }
 
@@ -33178,32 +33454,32 @@ impl RegisterWithMap<ByteToIndexMap> for TsLitType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsLitType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_lit = self.lit.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_lit = self.lit.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_LIT_TYPE.as_ref().unwrap() }
-      .construct(env, &java_lit, &java_span_ex);
+      .construct(env, &java_lit, &java_span_ex)?;
     delete_local_ref!(env, java_lit);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsLitType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_LIT_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_lit = java_class.get_lit(env, jobj);
-    let lit = TsLit::from_java(env, &java_lit);
+    let java_lit = java_class.get_lit(env, jobj)?;
+    let lit = *TsLit::from_java(env, &java_lit)?;
     delete_local_ref!(env, java_lit);
-    TsLitType {
+    Ok(Box::new(TsLitType {
       span,
       lit,
-    }
+    }))
   }
 }
 
@@ -33217,50 +33493,62 @@ impl RegisterWithMap<ByteToIndexMap> for TsMappedType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsMappedType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_optional_readonly = self.readonly.as_ref().map(|node| node.to_java(env));
-    let java_type_param = self.type_param.to_java_with_map(env, map);
-    let java_optional_name_type = self.name_type.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_optional = self.optional.as_ref().map(|node| node.to_java(env));
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_optional_readonly = match self.readonly.as_ref() {
+      Some(node) => Some(node.to_java(env)?),
+      None => None,
+    };
+    let java_type_param = self.type_param.to_java_with_map(env, map)?;
+    let java_optional_name_type = match self.name_type.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_optional = match self.optional.as_ref() {
+      Some(node) => Some(node.to_java(env)?),
+      None => None,
+    };
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_MAPPED_TYPE.as_ref().unwrap() }
-      .construct(env, &java_optional_readonly, &java_type_param, &java_optional_name_type, &java_optional_optional, &java_optional_type_ann, &java_span_ex);
+      .construct(env, &java_optional_readonly, &java_type_param, &java_optional_name_type, &java_optional_optional, &java_optional_type_ann, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_readonly);
     delete_local_optional_ref!(env, java_optional_name_type);
     delete_local_optional_ref!(env, java_optional_optional);
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_type_param);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsMappedType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_MAPPED_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_optional_readonly = java_class.get_readonly(env, jobj);
-    let readonly = if optional_is_present(env, &java_optional_readonly) {
-      let java_readonly = optional_get(env, &java_optional_readonly);
-      let readonly = TruePlusMinus::from_java(env, &java_readonly);
+    let java_optional_readonly = java_class.get_readonly(env, jobj)?;
+    let readonly = if optional_is_present(env, &java_optional_readonly)? {
+      let java_readonly = optional_get(env, &java_optional_readonly)?;
+      let readonly = *TruePlusMinus::from_java(env, &java_readonly)?;
       delete_local_ref!(env, java_readonly);
       Some(readonly)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_readonly);
-    let java_type_param = java_class.get_type_param(env, jobj);
-    let type_param = TsTypeParam::from_java(env, &java_type_param);
+    let java_type_param = java_class.get_type_param(env, jobj)?;
+    let type_param = *TsTypeParam::from_java(env, &java_type_param)?;
     delete_local_ref!(env, java_type_param);
-    let java_optional_name_type = java_class.get_name_type(env, jobj);
-    let name_type = if optional_is_present(env, &java_optional_name_type) {
-      let java_name_type = optional_get(env, &java_optional_name_type);
-      let name_type = TsType::from_java(env, &java_name_type);
+    let java_optional_name_type = java_class.get_name_type(env, jobj)?;
+    let name_type = if optional_is_present(env, &java_optional_name_type)? {
+      let java_name_type = optional_get(env, &java_optional_name_type)?;
+      let name_type = *TsType::from_java(env, &java_name_type)?;
       delete_local_ref!(env, java_name_type);
       Some(name_type)
     } else {
@@ -33268,20 +33556,20 @@ impl<'local> FromJava<'local> for TsMappedType {
     };
     delete_local_ref!(env, java_optional_name_type);
     let name_type = name_type.map(|name_type| Box::new(name_type));
-    let java_optional_optional = java_class.get_optional(env, jobj);
-    let optional = if optional_is_present(env, &java_optional_optional) {
-      let java_optional = optional_get(env, &java_optional_optional);
-      let optional = TruePlusMinus::from_java(env, &java_optional);
+    let java_optional_optional = java_class.get_optional(env, jobj)?;
+    let optional = if optional_is_present(env, &java_optional_optional)? {
+      let java_optional = optional_get(env, &java_optional_optional)?;
+      let optional = *TruePlusMinus::from_java(env, &java_optional)?;
       delete_local_ref!(env, java_optional);
       Some(optional)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_optional);
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsType::from_java(env, &java_type_ann);
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsType::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -33289,14 +33577,14 @@ impl<'local> FromJava<'local> for TsMappedType {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    TsMappedType {
+    Ok(Box::new(TsMappedType {
       span,
       readonly,
       type_param,
       name_type,
       optional,
       type_ann,
-    }
+    }))
   }
 }
 
@@ -33304,65 +33592,72 @@ impl RegisterWithMap<ByteToIndexMap> for TsMethodSignature {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
     self.key.register_with_map(map);
-    self.params.iter().for_each(|node| {
+    for node in self.params.iter() {
       node.register_with_map(map);
-    });
+    }
     self.type_ann.as_ref().map(|node| node.register_with_map(map));
     self.type_params.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsMethodSignature {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
     let computed = self.computed;
     let optional = self.optional;
-    let java_params = list_new(env, self.params.len());
-    self.params.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_params, &java_node);
+    let java_params = list_new(env, self.params.len())?;
+    for node in self.params.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_params, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    }
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_type_params = match self.type_params.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_METHOD_SIGNATURE.as_ref().unwrap() }
-      .construct(env, &java_key, computed, optional, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex);
+      .construct(env, &java_key, computed, optional, &java_params, &java_optional_type_ann, &java_optional_type_params, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsMethodSignature {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_METHOD_SIGNATURE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_key = java_class.get_key(env, jobj);
-    let key = Expr::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *Expr::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
     let key = Box::new(key);
-    let computed = java_class.is_computed(env, jobj);
-    let optional = java_class.is_optional(env, jobj);
-    let java_params = java_class.get_params(env, jobj);
-    let length = list_size(env, &java_params);
-    let params = (0..length).map(|i| {
-      let java_item = list_get(env, &java_params, i);
-      let params = TsFnParam::from_java(env, &java_item);
+    let computed = java_class.is_computed(env, jobj)?;
+    let optional = java_class.is_optional(env, jobj)?;
+    let java_params = java_class.get_params(env, jobj)?;
+    let length = list_size(env, &java_params)?;
+    let mut params: Vec<TsFnParam> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_params, i)?;
+      let element = *TsFnParam::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      params
-    }).collect();
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+      params.push(element)
+    }
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -33370,10 +33665,10 @@ impl<'local> FromJava<'local> for TsMethodSignature {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    let java_optional_type_params = java_class.get_type_params(env, jobj);
-    let type_params = if optional_is_present(env, &java_optional_type_params) {
-      let java_type_params = optional_get(env, &java_optional_type_params);
-      let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
+    let java_optional_type_params = java_class.get_type_params(env, jobj)?;
+    let type_params = if optional_is_present(env, &java_optional_type_params)? {
+      let java_type_params = optional_get(env, &java_optional_type_params)?;
+      let type_params = *TsTypeParamDecl::from_java(env, &java_type_params)?;
       delete_local_ref!(env, java_type_params);
       Some(type_params)
     } else {
@@ -33381,7 +33676,7 @@ impl<'local> FromJava<'local> for TsMethodSignature {
     };
     delete_local_ref!(env, java_optional_type_params);
     let type_params = type_params.map(|type_params| Box::new(type_params));
-    TsMethodSignature {
+    Ok(Box::new(TsMethodSignature {
       span,
       key,
       computed,
@@ -33389,56 +33684,57 @@ impl<'local> FromJava<'local> for TsMethodSignature {
       params,
       type_ann,
       type_params,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsModuleBlock {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.body.iter().for_each(|node| {
+    for node in self.body.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsModuleBlock {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_body = list_new(env, self.body.len());
-    self.body.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_body, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_body = list_new(env, self.body.len())?;
+    for node in self.body.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_body, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_TS_MODULE_BLOCK.as_ref().unwrap() }
-      .construct(env, &java_body, &java_span_ex);
+      .construct(env, &java_body, &java_span_ex)?;
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsModuleBlock {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_MODULE_BLOCK.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_body = java_class.get_body(env, jobj);
-    let length = list_size(env, &java_body);
-    let body = (0..length).map(|i| {
-      let java_item = list_get(env, &java_body, i);
-      let body = ModuleItem::from_java(env, &java_item);
+    let java_body = java_class.get_body(env, jobj)?;
+    let length = list_size(env, &java_body)?;
+    let mut body: Vec<ModuleItem> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_body, i)?;
+      let element = *ModuleItem::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      body
-    }).collect();
-    TsModuleBlock {
+      body.push(element)
+    }
+    Ok(Box::new(TsModuleBlock {
       span,
       body,
-    }
+    }))
   }
 }
 
@@ -33451,51 +33747,54 @@ impl RegisterWithMap<ByteToIndexMap> for TsModuleDecl {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsModuleDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let declare = self.declare;
     let global = self.global;
-    let java_id = self.id.to_java_with_map(env, map);
-    let java_optional_body = self.body.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_id = self.id.to_java_with_map(env, map)?;
+    let java_optional_body = match self.body.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_MODULE_DECL.as_ref().unwrap() }
-      .construct(env, declare, global, &java_id, &java_optional_body, &java_span_ex);
+      .construct(env, declare, global, &java_id, &java_optional_body, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_body);
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsModuleDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_MODULE_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let declare = java_class.is_declare(env, jobj);
-    let global = java_class.is_global(env, jobj);
-    let java_id = java_class.get_id(env, jobj);
-    let id = TsModuleName::from_java(env, &java_id);
+    let declare = java_class.is_declare(env, jobj)?;
+    let global = java_class.is_global(env, jobj)?;
+    let java_id = java_class.get_id(env, jobj)?;
+    let id = *TsModuleName::from_java(env, &java_id)?;
     delete_local_ref!(env, java_id);
-    let java_optional_body = java_class.get_body(env, jobj);
-    let body = if optional_is_present(env, &java_optional_body) {
-      let java_body = optional_get(env, &java_optional_body);
-      let body = TsNamespaceBody::from_java(env, &java_body);
+    let java_optional_body = java_class.get_body(env, jobj)?;
+    let body = if optional_is_present(env, &java_optional_body)? {
+      let java_body = optional_get(env, &java_optional_body)?;
+      let body = *TsNamespaceBody::from_java(env, &java_body)?;
       delete_local_ref!(env, java_body);
       Some(body)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_body);
-    TsModuleDecl {
+    Ok(Box::new(TsModuleDecl {
       span,
       declare,
       global,
       id,
       body,
-    }
+    }))
   }
 }
 
@@ -33508,45 +33807,45 @@ impl RegisterWithMap<ByteToIndexMap> for TsNamespaceDecl {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsNamespaceDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let declare = self.declare;
     let global = self.global;
-    let java_id = self.id.to_java_with_map(env, map);
-    let java_body = self.body.to_java_with_map(env, map);
+    let java_id = self.id.to_java_with_map(env, map)?;
+    let java_body = self.body.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_NAMESPACE_DECL.as_ref().unwrap() }
-      .construct(env, declare, global, &java_id, &java_body, &java_span_ex);
+      .construct(env, declare, global, &java_id, &java_body, &java_span_ex)?;
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsNamespaceDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_NAMESPACE_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let declare = java_class.is_declare(env, jobj);
-    let global = java_class.is_global(env, jobj);
-    let java_id = java_class.get_id(env, jobj);
-    let id = Ident::from_java(env, &java_id);
+    let declare = java_class.is_declare(env, jobj)?;
+    let global = java_class.is_global(env, jobj)?;
+    let java_id = java_class.get_id(env, jobj)?;
+    let id = *Ident::from_java(env, &java_id)?;
     delete_local_ref!(env, java_id);
-    let java_body = java_class.get_body(env, jobj);
-    let body = TsNamespaceBody::from_java(env, &java_body);
+    let java_body = java_class.get_body(env, jobj)?;
+    let body = *TsNamespaceBody::from_java(env, &java_body)?;
     delete_local_ref!(env, java_body);
     let body = Box::new(body);
-    TsNamespaceDecl {
+    Ok(Box::new(TsNamespaceDecl {
       span,
       declare,
       global,
       id,
       body,
-    }
+    }))
   }
 }
 
@@ -33558,32 +33857,32 @@ impl RegisterWithMap<ByteToIndexMap> for TsNamespaceExportDecl {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsNamespaceExportDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_id = self.id.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_id = self.id.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_NAMESPACE_EXPORT_DECL.as_ref().unwrap() }
-      .construct(env, &java_id, &java_span_ex);
+      .construct(env, &java_id, &java_span_ex)?;
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsNamespaceExportDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_NAMESPACE_EXPORT_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_id = java_class.get_id(env, jobj);
-    let id = Ident::from_java(env, &java_id);
+    let java_id = java_class.get_id(env, jobj)?;
+    let id = *Ident::from_java(env, &java_id)?;
     delete_local_ref!(env, java_id);
-    TsNamespaceExportDecl {
+    Ok(Box::new(TsNamespaceExportDecl {
       span,
       id,
-    }
+    }))
   }
 }
 
@@ -33595,33 +33894,33 @@ impl RegisterWithMap<ByteToIndexMap> for TsNonNullExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsNonNullExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_NON_NULL_EXPR.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_span_ex);
+      .construct(env, &java_expr, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsNonNullExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_NON_NULL_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    TsNonNullExpr {
+    Ok(Box::new(TsNonNullExpr {
       span,
       expr,
-    }
+    }))
   }
 }
 
@@ -33633,108 +33932,112 @@ impl RegisterWithMap<ByteToIndexMap> for TsOptionalType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsOptionalType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_type_ann = self.type_ann.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_OPTIONAL_TYPE.as_ref().unwrap() }
-      .construct(env, &java_type_ann, &java_span_ex);
+      .construct(env, &java_type_ann, &java_span_ex)?;
     delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsOptionalType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_OPTIONAL_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = TsType::from_java(env, &java_type_ann);
+    let java_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = *TsType::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
     let type_ann = Box::new(type_ann);
-    TsOptionalType {
+    Ok(Box::new(TsOptionalType {
       span,
       type_ann,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsParamProp {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.decorators.iter().for_each(|node| {
+    for node in self.decorators.iter() {
       node.register_with_map(map);
-    });
+    }
     self.param.register_with_map(map);
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsParamProp {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_decorators = list_new(env, self.decorators.len());
-    self.decorators.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_decorators, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_decorators = list_new(env, self.decorators.len())?;
+    for node in self.decorators.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_decorators, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_optional_accessibility = self.accessibility.as_ref().map(|node| node.to_java(env));
+    }
+    let java_optional_accessibility = match self.accessibility.as_ref() {
+      Some(node) => Some(node.to_java(env)?),
+      None => None,
+    };
     let is_override = self.is_override;
     let readonly = self.readonly;
-    let java_param = self.param.to_java_with_map(env, map);
+    let java_param = self.param.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_PARAM_PROP.as_ref().unwrap() }
-      .construct(env, &java_decorators, &java_optional_accessibility, is_override, readonly, &java_param, &java_span_ex);
+      .construct(env, &java_decorators, &java_optional_accessibility, is_override, readonly, &java_param, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_accessibility);
     delete_local_ref!(env, java_decorators);
     delete_local_ref!(env, java_param);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsParamProp {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_PARAM_PROP.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_decorators = java_class.get_decorators(env, jobj);
-    let length = list_size(env, &java_decorators);
-    let decorators = (0..length).map(|i| {
-      let java_item = list_get(env, &java_decorators, i);
-      let decorators = Decorator::from_java(env, &java_item);
+    let java_decorators = java_class.get_decorators(env, jobj)?;
+    let length = list_size(env, &java_decorators)?;
+    let mut decorators: Vec<Decorator> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_decorators, i)?;
+      let element = *Decorator::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      decorators
-    }).collect();
-    let java_optional_accessibility = java_class.get_accessibility(env, jobj);
-    let accessibility = if optional_is_present(env, &java_optional_accessibility) {
-      let java_accessibility = optional_get(env, &java_optional_accessibility);
-      let accessibility = Accessibility::from_java(env, &java_accessibility);
+      decorators.push(element)
+    }
+    let java_optional_accessibility = java_class.get_accessibility(env, jobj)?;
+    let accessibility = if optional_is_present(env, &java_optional_accessibility)? {
+      let java_accessibility = optional_get(env, &java_optional_accessibility)?;
+      let accessibility = *Accessibility::from_java(env, &java_accessibility)?;
       delete_local_ref!(env, java_accessibility);
       Some(accessibility)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_accessibility);
-    let is_override = java_class.is_override(env, jobj);
-    let readonly = java_class.is_readonly(env, jobj);
-    let java_param = java_class.get_param(env, jobj);
-    let param = TsParamPropParam::from_java(env, &java_param);
+    let is_override = java_class.is_override(env, jobj)?;
+    let readonly = java_class.is_readonly(env, jobj)?;
+    let java_param = java_class.get_param(env, jobj)?;
+    let param = *TsParamPropParam::from_java(env, &java_param)?;
     delete_local_ref!(env, java_param);
-    TsParamProp {
+    Ok(Box::new(TsParamProp {
       span,
       decorators,
       accessibility,
       is_override,
       readonly,
       param,
-    }
+    }))
   }
 }
 
@@ -33746,33 +34049,33 @@ impl RegisterWithMap<ByteToIndexMap> for TsParenthesizedType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsParenthesizedType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_type_ann = self.type_ann.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_PARENTHESIZED_TYPE.as_ref().unwrap() }
-      .construct(env, &java_type_ann, &java_span_ex);
+      .construct(env, &java_type_ann, &java_span_ex)?;
     delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsParenthesizedType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_PARENTHESIZED_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = TsType::from_java(env, &java_type_ann);
+    let java_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = *TsType::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
     let type_ann = Box::new(type_ann);
-    TsParenthesizedType {
+    Ok(Box::new(TsParenthesizedType {
       span,
       type_ann,
-    }
+    }))
   }
 }
 
@@ -33785,41 +34088,44 @@ impl RegisterWithMap<ByteToIndexMap> for TsPropertySignature {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsPropertySignature {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let readonly = self.readonly;
-    let java_key = self.key.to_java_with_map(env, map);
+    let java_key = self.key.to_java_with_map(env, map)?;
     let computed = self.computed;
     let optional = self.optional;
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_PROPERTY_SIGNATURE.as_ref().unwrap() }
-      .construct(env, readonly, &java_key, computed, optional, &java_optional_type_ann, &java_span_ex);
+      .construct(env, readonly, &java_key, computed, optional, &java_optional_type_ann, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsPropertySignature {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_PROPERTY_SIGNATURE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let readonly = java_class.is_readonly(env, jobj);
-    let java_key = java_class.get_key(env, jobj);
-    let key = Expr::from_java(env, &java_key);
+    let readonly = java_class.is_readonly(env, jobj)?;
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *Expr::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
     let key = Box::new(key);
-    let computed = java_class.is_computed(env, jobj);
-    let optional = java_class.is_optional(env, jobj);
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+    let computed = java_class.is_computed(env, jobj)?;
+    let optional = java_class.is_optional(env, jobj)?;
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -33827,14 +34133,14 @@ impl<'local> FromJava<'local> for TsPropertySignature {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    TsPropertySignature {
+    Ok(Box::new(TsPropertySignature {
       span,
       readonly,
       key,
       computed,
       optional,
       type_ann,
-    }
+    }))
   }
 }
 
@@ -33847,38 +34153,38 @@ impl RegisterWithMap<ByteToIndexMap> for TsQualifiedName {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsQualifiedName {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_left = self.left.to_java_with_map(env, map);
-    let java_right = self.right.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_left = self.left.to_java_with_map(env, map)?;
+    let java_right = self.right.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_QUALIFIED_NAME.as_ref().unwrap() }
-      .construct(env, &java_left, &java_right, &java_span_ex);
+      .construct(env, &java_left, &java_right, &java_span_ex)?;
     delete_local_ref!(env, java_left);
     delete_local_ref!(env, java_right);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsQualifiedName {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_QUALIFIED_NAME.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_left = java_class.get_left(env, jobj);
-    let left = TsEntityName::from_java(env, &java_left);
+    let java_left = java_class.get_left(env, jobj)?;
+    let left = *TsEntityName::from_java(env, &java_left)?;
     delete_local_ref!(env, java_left);
-    let java_right = java_class.get_right(env, jobj);
-    let right = IdentName::from_java(env, &java_right);
+    let java_right = java_class.get_right(env, jobj)?;
+    let right = *IdentName::from_java(env, &java_right)?;
     delete_local_ref!(env, java_right);
-    TsQualifiedName {
+    Ok(Box::new(TsQualifiedName {
       span,
       left,
       right,
-    }
+    }))
   }
 }
 
@@ -33890,33 +34196,33 @@ impl RegisterWithMap<ByteToIndexMap> for TsRestType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsRestType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_type_ann = self.type_ann.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_REST_TYPE.as_ref().unwrap() }
-      .construct(env, &java_type_ann, &java_span_ex);
+      .construct(env, &java_type_ann, &java_span_ex)?;
     delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsRestType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_REST_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = TsType::from_java(env, &java_type_ann);
+    let java_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = *TsType::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
     let type_ann = Box::new(type_ann);
-    TsRestType {
+    Ok(Box::new(TsRestType {
       span,
       type_ann,
-    }
+    }))
   }
 }
 
@@ -33929,40 +34235,40 @@ impl RegisterWithMap<ByteToIndexMap> for TsSatisfiesExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsSatisfiesExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
-    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
+    let java_type_ann = self.type_ann.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_SATISFIES_EXPR.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_type_ann, &java_span_ex);
+      .construct(env, &java_expr, &java_type_ann, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsSatisfiesExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_SATISFIES_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    let java_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = TsType::from_java(env, &java_type_ann);
+    let java_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = *TsType::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
     let type_ann = Box::new(type_ann);
-    TsSatisfiesExpr {
+    Ok(Box::new(TsSatisfiesExpr {
       span,
       expr,
       type_ann,
-    }
+    }))
   }
 }
 
@@ -33975,42 +34281,42 @@ impl RegisterWithMap<ByteToIndexMap> for TsSetterSignature {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsSetterSignature {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_key = self.key.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_key = self.key.to_java_with_map(env, map)?;
     let computed = self.computed;
-    let java_param = self.param.to_java_with_map(env, map);
+    let java_param = self.param.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_SETTER_SIGNATURE.as_ref().unwrap() }
-      .construct(env, &java_key, computed, &java_param, &java_span_ex);
+      .construct(env, &java_key, computed, &java_param, &java_span_ex)?;
     delete_local_ref!(env, java_key);
     delete_local_ref!(env, java_param);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsSetterSignature {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_SETTER_SIGNATURE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_key = java_class.get_key(env, jobj);
-    let key = Expr::from_java(env, &java_key);
+    let java_key = java_class.get_key(env, jobj)?;
+    let key = *Expr::from_java(env, &java_key)?;
     delete_local_ref!(env, java_key);
     let key = Box::new(key);
-    let computed = java_class.is_computed(env, jobj);
-    let java_param = java_class.get_param(env, jobj);
-    let param = TsFnParam::from_java(env, &java_param);
+    let computed = java_class.is_computed(env, jobj)?;
+    let java_param = java_class.get_param(env, jobj)?;
+    let param = *TsFnParam::from_java(env, &java_param)?;
     delete_local_ref!(env, java_param);
-    TsSetterSignature {
+    Ok(Box::new(TsSetterSignature {
       span,
       key,
       computed,
       param,
-    }
+    }))
   }
 }
 
@@ -34021,93 +34327,96 @@ impl RegisterWithMap<ByteToIndexMap> for TsThisType {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsThisType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let return_value = unsafe { JAVA_CLASS_TS_THIS_TYPE.as_ref().unwrap() }
-      .construct(env, &java_span_ex);
+      .construct(env, &java_span_ex)?;
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsThisType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let span = DUMMY_SP;
-    TsThisType {
+    Ok(Box::new(TsThisType {
       span,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTplLitType {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.types.iter().for_each(|node| {
+    for node in self.types.iter() {
       node.register_with_map(map);
-    });
-    self.quasis.iter().for_each(|node| {
+    }
+    for node in self.quasis.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTplLitType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_types = list_new(env, self.types.len());
-    self.types.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_types, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_types = list_new(env, self.types.len())?;
+    for node in self.types.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_types, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
-    let java_quasis = list_new(env, self.quasis.len());
-    self.quasis.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_quasis, &java_node);
+    }
+    let java_quasis = list_new(env, self.quasis.len())?;
+    for node in self.quasis.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_quasis, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_TS_TPL_LIT_TYPE.as_ref().unwrap() }
-      .construct(env, &java_types, &java_quasis, &java_span_ex);
+      .construct(env, &java_types, &java_quasis, &java_span_ex)?;
     delete_local_ref!(env, java_types);
     delete_local_ref!(env, java_quasis);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTplLitType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TPL_LIT_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_types = java_class.get_types(env, jobj);
-    let length = list_size(env, &java_types);
-    let types = (0..length).map(|i| {
-      let java_item = list_get(env, &java_types, i);
-      let types = TsType::from_java(env, &java_item);
+    let java_types = java_class.get_types(env, jobj)?;
+    let length = list_size(env, &java_types)?;
+    let mut types: Vec<TsType> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_types, i)?;
+      let element = *TsType::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      Box::new(types)
-    }).collect();
-    let java_quasis = java_class.get_quasis(env, jobj);
-    let length = list_size(env, &java_quasis);
-    let quasis = (0..length).map(|i| {
-      let java_item = list_get(env, &java_quasis, i);
-      let quasis = TplElement::from_java(env, &java_item);
+      types.push(element)
+    }
+    let types = types.into_iter().map(|types| Box::new(types)).collect();
+    let java_quasis = java_class.get_quasis(env, jobj)?;
+    let length = list_size(env, &java_quasis)?;
+    let mut quasis: Vec<TplElement> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_quasis, i)?;
+      let element = *TplElement::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      quasis
-    }).collect();
-    TsTplLitType {
+      quasis.push(element)
+    }
+    Ok(Box::new(TsTplLitType {
       span,
       types,
       quasis,
-    }
+    }))
   }
 }
 
@@ -34120,95 +34429,99 @@ impl RegisterWithMap<ByteToIndexMap> for TsTupleElement {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTupleElement {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_optional_label = self.label.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_ty = self.ty.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_optional_label = match self.label.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_ty = self.ty.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_TUPLE_ELEMENT.as_ref().unwrap() }
-      .construct(env, &java_optional_label, &java_ty, &java_span_ex);
+      .construct(env, &java_optional_label, &java_ty, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_label);
     delete_local_ref!(env, java_ty);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTupleElement {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TUPLE_ELEMENT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_optional_label = java_class.get_label(env, jobj);
-    let label = if optional_is_present(env, &java_optional_label) {
-      let java_label = optional_get(env, &java_optional_label);
-      let label = Pat::from_java(env, &java_label);
+    let java_optional_label = java_class.get_label(env, jobj)?;
+    let label = if optional_is_present(env, &java_optional_label)? {
+      let java_label = optional_get(env, &java_optional_label)?;
+      let label = *Pat::from_java(env, &java_label)?;
       delete_local_ref!(env, java_label);
       Some(label)
     } else {
       None
     };
     delete_local_ref!(env, java_optional_label);
-    let java_ty = java_class.get_ty(env, jobj);
-    let ty = TsType::from_java(env, &java_ty);
+    let java_ty = java_class.get_ty(env, jobj)?;
+    let ty = *TsType::from_java(env, &java_ty)?;
     delete_local_ref!(env, java_ty);
     let ty = Box::new(ty);
-    TsTupleElement {
+    Ok(Box::new(TsTupleElement {
       span,
       label,
       ty,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTupleType {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.elem_types.iter().for_each(|node| {
+    for node in self.elem_types.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTupleType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_elem_types = list_new(env, self.elem_types.len());
-    self.elem_types.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_elem_types, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_elem_types = list_new(env, self.elem_types.len())?;
+    for node in self.elem_types.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_elem_types, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_TS_TUPLE_TYPE.as_ref().unwrap() }
-      .construct(env, &java_elem_types, &java_span_ex);
+      .construct(env, &java_elem_types, &java_span_ex)?;
     delete_local_ref!(env, java_elem_types);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTupleType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TUPLE_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_elem_types = java_class.get_elem_types(env, jobj);
-    let length = list_size(env, &java_elem_types);
-    let elem_types = (0..length).map(|i| {
-      let java_item = list_get(env, &java_elem_types, i);
-      let elem_types = TsTupleElement::from_java(env, &java_item);
+    let java_elem_types = java_class.get_elem_types(env, jobj)?;
+    let length = list_size(env, &java_elem_types)?;
+    let mut elem_types: Vec<TsTupleElement> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_elem_types, i)?;
+      let element = *TsTupleElement::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      elem_types
-    }).collect();
-    TsTupleType {
+      elem_types.push(element)
+    }
+    Ok(Box::new(TsTupleType {
       span,
       elem_types,
-    }
+    }))
   }
 }
 
@@ -34222,38 +34535,41 @@ impl RegisterWithMap<ByteToIndexMap> for TsTypeAliasDecl {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTypeAliasDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_id = self.id.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_id = self.id.to_java_with_map(env, map)?;
     let declare = self.declare;
-    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let java_optional_type_params = match self.type_params.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_type_ann = self.type_ann.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_TYPE_ALIAS_DECL.as_ref().unwrap() }
-      .construct(env, &java_id, declare, &java_optional_type_params, &java_type_ann, &java_span_ex);
+      .construct(env, &java_id, declare, &java_optional_type_params, &java_type_ann, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTypeAliasDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_ALIAS_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_id = java_class.get_id(env, jobj);
-    let id = Ident::from_java(env, &java_id);
+    let java_id = java_class.get_id(env, jobj)?;
+    let id = *Ident::from_java(env, &java_id)?;
     delete_local_ref!(env, java_id);
-    let declare = java_class.is_declare(env, jobj);
-    let java_optional_type_params = java_class.get_type_params(env, jobj);
-    let type_params = if optional_is_present(env, &java_optional_type_params) {
-      let java_type_params = optional_get(env, &java_optional_type_params);
-      let type_params = TsTypeParamDecl::from_java(env, &java_type_params);
+    let declare = java_class.is_declare(env, jobj)?;
+    let java_optional_type_params = java_class.get_type_params(env, jobj)?;
+    let type_params = if optional_is_present(env, &java_optional_type_params)? {
+      let java_type_params = optional_get(env, &java_optional_type_params)?;
+      let type_params = *TsTypeParamDecl::from_java(env, &java_type_params)?;
       delete_local_ref!(env, java_type_params);
       Some(type_params)
     } else {
@@ -34261,17 +34577,17 @@ impl<'local> FromJava<'local> for TsTypeAliasDecl {
     };
     delete_local_ref!(env, java_optional_type_params);
     let type_params = type_params.map(|type_params| Box::new(type_params));
-    let java_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = TsType::from_java(env, &java_type_ann);
+    let java_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = *TsType::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
     let type_ann = Box::new(type_ann);
-    TsTypeAliasDecl {
+    Ok(Box::new(TsTypeAliasDecl {
       span,
       id,
       declare,
       type_params,
       type_ann,
-    }
+    }))
   }
 }
 
@@ -34283,33 +34599,33 @@ impl RegisterWithMap<ByteToIndexMap> for TsTypeAnn {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTypeAnn {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_type_ann = self.type_ann.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_TYPE_ANN.as_ref().unwrap() }
-      .construct(env, &java_type_ann, &java_span_ex);
+      .construct(env, &java_type_ann, &java_span_ex)?;
     delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTypeAnn {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_ANN.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = TsType::from_java(env, &java_type_ann);
+    let java_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = *TsType::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
     let type_ann = Box::new(type_ann);
-    TsTypeAnn {
+    Ok(Box::new(TsTypeAnn {
       span,
       type_ann,
-    }
+    }))
   }
 }
 
@@ -34322,89 +34638,90 @@ impl RegisterWithMap<ByteToIndexMap> for TsTypeAssertion {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTypeAssertion {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr = self.expr.to_java_with_map(env, map);
-    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr = self.expr.to_java_with_map(env, map)?;
+    let java_type_ann = self.type_ann.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_TYPE_ASSERTION.as_ref().unwrap() }
-      .construct(env, &java_expr, &java_type_ann, &java_span_ex);
+      .construct(env, &java_expr, &java_type_ann, &java_span_ex)?;
     delete_local_ref!(env, java_expr);
     delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTypeAssertion {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_ASSERTION.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr = java_class.get_expr(env, jobj);
-    let expr = Expr::from_java(env, &java_expr);
+    let java_expr = java_class.get_expr(env, jobj)?;
+    let expr = *Expr::from_java(env, &java_expr)?;
     delete_local_ref!(env, java_expr);
     let expr = Box::new(expr);
-    let java_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = TsType::from_java(env, &java_type_ann);
+    let java_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = *TsType::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
     let type_ann = Box::new(type_ann);
-    TsTypeAssertion {
+    Ok(Box::new(TsTypeAssertion {
       span,
       expr,
       type_ann,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeLit {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.members.iter().for_each(|node| {
+    for node in self.members.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTypeLit {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_members = list_new(env, self.members.len());
-    self.members.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_members, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_members = list_new(env, self.members.len())?;
+    for node in self.members.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_members, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_TS_TYPE_LIT.as_ref().unwrap() }
-      .construct(env, &java_members, &java_span_ex);
+      .construct(env, &java_members, &java_span_ex)?;
     delete_local_ref!(env, java_members);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTypeLit {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_LIT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_members = java_class.get_members(env, jobj);
-    let length = list_size(env, &java_members);
-    let members = (0..length).map(|i| {
-      let java_item = list_get(env, &java_members, i);
-      let members = TsTypeElement::from_java(env, &java_item);
+    let java_members = java_class.get_members(env, jobj)?;
+    let length = list_size(env, &java_members)?;
+    let mut members: Vec<TsTypeElement> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_members, i)?;
+      let element = *TsTypeElement::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      members
-    }).collect();
-    TsTypeLit {
+      members.push(element)
+    }
+    Ok(Box::new(TsTypeLit {
       span,
       members,
-    }
+    }))
   }
 }
 
@@ -34416,39 +34733,39 @@ impl RegisterWithMap<ByteToIndexMap> for TsTypeOperator {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTypeOperator {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_op = self.op.to_java(env);
-    let java_type_ann = self.type_ann.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_op = self.op.to_java(env)?;
+    let java_type_ann = self.type_ann.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_TS_TYPE_OPERATOR.as_ref().unwrap() }
-      .construct(env, &java_op, &java_type_ann, &java_span_ex);
+      .construct(env, &java_op, &java_type_ann, &java_span_ex)?;
     delete_local_ref!(env, java_op);
     delete_local_ref!(env, java_type_ann);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTypeOperator {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_OPERATOR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_op = java_class.get_op(env, jobj);
-    let op = TsTypeOperatorOp::from_java(env, &java_op);
+    let java_op = java_class.get_op(env, jobj)?;
+    let op = *TsTypeOperatorOp::from_java(env, &java_op)?;
     delete_local_ref!(env, java_op);
-    let java_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = TsType::from_java(env, &java_type_ann);
+    let java_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = *TsType::from_java(env, &java_type_ann)?;
     delete_local_ref!(env, java_type_ann);
     let type_ann = Box::new(type_ann);
-    TsTypeOperator {
+    Ok(Box::new(TsTypeOperator {
       span,
       op,
       type_ann,
-    }
+    }))
   }
 }
 
@@ -34462,42 +34779,48 @@ impl RegisterWithMap<ByteToIndexMap> for TsTypeParam {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTypeParam {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_name = self.name.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_name = self.name.to_java_with_map(env, map)?;
     let is_in = self.is_in;
     let is_out = self.is_out;
     let is_const = self.is_const;
-    let java_optional_constraint = self.constraint.as_ref().map(|node| node.to_java_with_map(env, map));
-    let java_optional_default = self.default.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_optional_constraint = match self.constraint.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
+    let java_optional_default = match self.default.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_TYPE_PARAM.as_ref().unwrap() }
-      .construct(env, &java_name, is_in, is_out, is_const, &java_optional_constraint, &java_optional_default, &java_span_ex);
+      .construct(env, &java_name, is_in, is_out, is_const, &java_optional_constraint, &java_optional_default, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_constraint);
     delete_local_optional_ref!(env, java_optional_default);
     delete_local_ref!(env, java_name);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTypeParam {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_PARAM.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_name = java_class.get_name(env, jobj);
-    let name = Ident::from_java(env, &java_name);
+    let java_name = java_class.get_name(env, jobj)?;
+    let name = *Ident::from_java(env, &java_name)?;
     delete_local_ref!(env, java_name);
-    let is_in = java_class.is_in(env, jobj);
-    let is_out = java_class.is_out(env, jobj);
-    let is_const = java_class.is_const(env, jobj);
-    let java_optional_constraint = java_class.get_constraint(env, jobj);
-    let constraint = if optional_is_present(env, &java_optional_constraint) {
-      let java_constraint = optional_get(env, &java_optional_constraint);
-      let constraint = TsType::from_java(env, &java_constraint);
+    let is_in = java_class.is_in(env, jobj)?;
+    let is_out = java_class.is_out(env, jobj)?;
+    let is_const = java_class.is_const(env, jobj)?;
+    let java_optional_constraint = java_class.get_constraint(env, jobj)?;
+    let constraint = if optional_is_present(env, &java_optional_constraint)? {
+      let java_constraint = optional_get(env, &java_optional_constraint)?;
+      let constraint = *TsType::from_java(env, &java_constraint)?;
       delete_local_ref!(env, java_constraint);
       Some(constraint)
     } else {
@@ -34505,10 +34828,10 @@ impl<'local> FromJava<'local> for TsTypeParam {
     };
     delete_local_ref!(env, java_optional_constraint);
     let constraint = constraint.map(|constraint| Box::new(constraint));
-    let java_optional_default = java_class.get_default(env, jobj);
-    let default = if optional_is_present(env, &java_optional_default) {
-      let java_default = optional_get(env, &java_optional_default);
-      let default = TsType::from_java(env, &java_default);
+    let java_optional_default = java_class.get_default(env, jobj)?;
+    let default = if optional_is_present(env, &java_optional_default)? {
+      let java_default = optional_get(env, &java_optional_default)?;
+      let default = *TsType::from_java(env, &java_default)?;
       delete_local_ref!(env, java_default);
       Some(default)
     } else {
@@ -34516,7 +34839,7 @@ impl<'local> FromJava<'local> for TsTypeParam {
     };
     delete_local_ref!(env, java_optional_default);
     let default = default.map(|default| Box::new(default));
-    TsTypeParam {
+    Ok(Box::new(TsTypeParam {
       span,
       name,
       is_in,
@@ -34524,105 +34847,108 @@ impl<'local> FromJava<'local> for TsTypeParam {
       is_const,
       constraint,
       default,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeParamDecl {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.params.iter().for_each(|node| {
+    for node in self.params.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTypeParamDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_params = list_new(env, self.params.len());
-    self.params.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_params, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_params = list_new(env, self.params.len())?;
+    for node in self.params.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_params, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_TS_TYPE_PARAM_DECL.as_ref().unwrap() }
-      .construct(env, &java_params, &java_span_ex);
+      .construct(env, &java_params, &java_span_ex)?;
     delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTypeParamDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_PARAM_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_params = java_class.get_params(env, jobj);
-    let length = list_size(env, &java_params);
-    let params = (0..length).map(|i| {
-      let java_item = list_get(env, &java_params, i);
-      let params = TsTypeParam::from_java(env, &java_item);
+    let java_params = java_class.get_params(env, jobj)?;
+    let length = list_size(env, &java_params)?;
+    let mut params: Vec<TsTypeParam> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_params, i)?;
+      let element = *TsTypeParam::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      params
-    }).collect();
-    TsTypeParamDecl {
+      params.push(element)
+    }
+    Ok(Box::new(TsTypeParamDecl {
       span,
       params,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsTypeParamInstantiation {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.params.iter().for_each(|node| {
+    for node in self.params.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTypeParamInstantiation {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_params = list_new(env, self.params.len());
-    self.params.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_params, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_params = list_new(env, self.params.len())?;
+    for node in self.params.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_params, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_TS_TYPE_PARAM_INSTANTIATION.as_ref().unwrap() }
-      .construct(env, &java_params, &java_span_ex);
+      .construct(env, &java_params, &java_span_ex)?;
     delete_local_ref!(env, java_params);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTypeParamInstantiation {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_PARAM_INSTANTIATION.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_params = java_class.get_params(env, jobj);
-    let length = list_size(env, &java_params);
-    let params = (0..length).map(|i| {
-      let java_item = list_get(env, &java_params, i);
-      let params = TsType::from_java(env, &java_item);
+    let java_params = java_class.get_params(env, jobj)?;
+    let length = list_size(env, &java_params)?;
+    let mut params: Vec<TsType> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_params, i)?;
+      let element = *TsType::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      Box::new(params)
-    }).collect();
-    TsTypeParamInstantiation {
+      params.push(element)
+    }
+    let params = params.into_iter().map(|params| Box::new(params)).collect();
+    Ok(Box::new(TsTypeParamInstantiation {
       span,
       params,
-    }
+    }))
   }
 }
 
@@ -34635,36 +34961,39 @@ impl RegisterWithMap<ByteToIndexMap> for TsTypePredicate {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTypePredicate {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let asserts = self.asserts;
-    let java_param_name = self.param_name.to_java_with_map(env, map);
-    let java_optional_type_ann = self.type_ann.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_param_name = self.param_name.to_java_with_map(env, map)?;
+    let java_optional_type_ann = match self.type_ann.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_TYPE_PREDICATE.as_ref().unwrap() }
-      .construct(env, asserts, &java_param_name, &java_optional_type_ann, &java_span_ex);
+      .construct(env, asserts, &java_param_name, &java_optional_type_ann, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_ann);
     delete_local_ref!(env, java_param_name);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTypePredicate {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_PREDICATE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let asserts = java_class.is_asserts(env, jobj);
-    let java_param_name = java_class.get_param_name(env, jobj);
-    let param_name = TsThisTypeOrIdent::from_java(env, &java_param_name);
+    let asserts = java_class.is_asserts(env, jobj)?;
+    let java_param_name = java_class.get_param_name(env, jobj)?;
+    let param_name = *TsThisTypeOrIdent::from_java(env, &java_param_name)?;
     delete_local_ref!(env, java_param_name);
-    let java_optional_type_ann = java_class.get_type_ann(env, jobj);
-    let type_ann = if optional_is_present(env, &java_optional_type_ann) {
-      let java_type_ann = optional_get(env, &java_optional_type_ann);
-      let type_ann = TsTypeAnn::from_java(env, &java_type_ann);
+    let java_optional_type_ann = java_class.get_type_ann(env, jobj)?;
+    let type_ann = if optional_is_present(env, &java_optional_type_ann)? {
+      let java_type_ann = optional_get(env, &java_optional_type_ann)?;
+      let type_ann = *TsTypeAnn::from_java(env, &java_type_ann)?;
       delete_local_ref!(env, java_type_ann);
       Some(type_ann)
     } else {
@@ -34672,12 +35001,12 @@ impl<'local> FromJava<'local> for TsTypePredicate {
     };
     delete_local_ref!(env, java_optional_type_ann);
     let type_ann = type_ann.map(|type_ann| Box::new(type_ann));
-    TsTypePredicate {
+    Ok(Box::new(TsTypePredicate {
       span,
       asserts,
       param_name,
       type_ann,
-    }
+    }))
   }
 }
 
@@ -34690,34 +35019,37 @@ impl RegisterWithMap<ByteToIndexMap> for TsTypeQuery {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTypeQuery {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_expr_name = self.expr_name.to_java_with_map(env, map);
-    let java_optional_type_args = self.type_args.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_expr_name = self.expr_name.to_java_with_map(env, map)?;
+    let java_optional_type_args = match self.type_args.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_TYPE_QUERY.as_ref().unwrap() }
-      .construct(env, &java_expr_name, &java_optional_type_args, &java_span_ex);
+      .construct(env, &java_expr_name, &java_optional_type_args, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_args);
     delete_local_ref!(env, java_expr_name);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTypeQuery {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_QUERY.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_expr_name = java_class.get_expr_name(env, jobj);
-    let expr_name = TsTypeQueryExpr::from_java(env, &java_expr_name);
+    let java_expr_name = java_class.get_expr_name(env, jobj)?;
+    let expr_name = *TsTypeQueryExpr::from_java(env, &java_expr_name)?;
     delete_local_ref!(env, java_expr_name);
-    let java_optional_type_args = java_class.get_type_args(env, jobj);
-    let type_args = if optional_is_present(env, &java_optional_type_args) {
-      let java_type_args = optional_get(env, &java_optional_type_args);
-      let type_args = TsTypeParamInstantiation::from_java(env, &java_type_args);
+    let java_optional_type_args = java_class.get_type_args(env, jobj)?;
+    let type_args = if optional_is_present(env, &java_optional_type_args)? {
+      let java_type_args = optional_get(env, &java_optional_type_args)?;
+      let type_args = *TsTypeParamInstantiation::from_java(env, &java_type_args)?;
       delete_local_ref!(env, java_type_args);
       Some(type_args)
     } else {
@@ -34725,11 +35057,11 @@ impl<'local> FromJava<'local> for TsTypeQuery {
     };
     delete_local_ref!(env, java_optional_type_args);
     let type_args = type_args.map(|type_args| Box::new(type_args));
-    TsTypeQuery {
+    Ok(Box::new(TsTypeQuery {
       span,
       expr_name,
       type_args,
-    }
+    }))
   }
 }
 
@@ -34742,34 +35074,37 @@ impl RegisterWithMap<ByteToIndexMap> for TsTypeRef {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsTypeRef {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_type_name = self.type_name.to_java_with_map(env, map);
-    let java_optional_type_params = self.type_params.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_type_name = self.type_name.to_java_with_map(env, map)?;
+    let java_optional_type_params = match self.type_params.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_TYPE_REF.as_ref().unwrap() }
-      .construct(env, &java_type_name, &java_optional_type_params, &java_span_ex);
+      .construct(env, &java_type_name, &java_optional_type_params, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_type_params);
     delete_local_ref!(env, java_type_name);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsTypeRef {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_TYPE_REF.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_type_name = java_class.get_type_name(env, jobj);
-    let type_name = TsEntityName::from_java(env, &java_type_name);
+    let java_type_name = java_class.get_type_name(env, jobj)?;
+    let type_name = *TsEntityName::from_java(env, &java_type_name)?;
     delete_local_ref!(env, java_type_name);
-    let java_optional_type_params = java_class.get_type_params(env, jobj);
-    let type_params = if optional_is_present(env, &java_optional_type_params) {
-      let java_type_params = optional_get(env, &java_optional_type_params);
-      let type_params = TsTypeParamInstantiation::from_java(env, &java_type_params);
+    let java_optional_type_params = java_class.get_type_params(env, jobj)?;
+    let type_params = if optional_is_present(env, &java_optional_type_params)? {
+      let java_type_params = optional_get(env, &java_optional_type_params)?;
+      let type_params = *TsTypeParamInstantiation::from_java(env, &java_type_params)?;
       delete_local_ref!(env, java_type_params);
       Some(type_params)
     } else {
@@ -34777,60 +35112,62 @@ impl<'local> FromJava<'local> for TsTypeRef {
     };
     delete_local_ref!(env, java_optional_type_params);
     let type_params = type_params.map(|type_params| Box::new(type_params));
-    TsTypeRef {
+    Ok(Box::new(TsTypeRef {
       span,
       type_name,
       type_params,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for TsUnionType {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.types.iter().for_each(|node| {
+    for node in self.types.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for TsUnionType {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_types = list_new(env, self.types.len());
-    self.types.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_types, &java_node);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_types = list_new(env, self.types.len())?;
+    for node in self.types.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_types, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_TS_UNION_TYPE.as_ref().unwrap() }
-      .construct(env, &java_types, &java_span_ex);
+      .construct(env, &java_types, &java_span_ex)?;
     delete_local_ref!(env, java_types);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for TsUnionType {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_TS_UNION_TYPE.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_types = java_class.get_types(env, jobj);
-    let length = list_size(env, &java_types);
-    let types = (0..length).map(|i| {
-      let java_item = list_get(env, &java_types, i);
-      let types = TsType::from_java(env, &java_item);
+    let java_types = java_class.get_types(env, jobj)?;
+    let length = list_size(env, &java_types)?;
+    let mut types: Vec<TsType> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_types, i)?;
+      let element = *TsType::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      Box::new(types)
-    }).collect();
-    TsUnionType {
+      types.push(element)
+    }
+    let types = types.into_iter().map(|types| Box::new(types)).collect();
+    Ok(Box::new(TsUnionType {
       span,
       types,
-    }
+    }))
   }
 }
 
@@ -34842,39 +35179,39 @@ impl RegisterWithMap<ByteToIndexMap> for UnaryExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for UnaryExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_op = self.op.to_java(env);
-    let java_arg = self.arg.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_op = self.op.to_java(env)?;
+    let java_arg = self.arg.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_UNARY_EXPR.as_ref().unwrap() }
-      .construct(env, &java_op, &java_arg, &java_span_ex);
+      .construct(env, &java_op, &java_arg, &java_span_ex)?;
     delete_local_ref!(env, java_op);
     delete_local_ref!(env, java_arg);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for UnaryExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_UNARY_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_op = java_class.get_op(env, jobj);
-    let op = UnaryOp::from_java(env, &java_op);
+    let java_op = java_class.get_op(env, jobj)?;
+    let op = *UnaryOp::from_java(env, &java_op)?;
     delete_local_ref!(env, java_op);
-    let java_arg = java_class.get_arg(env, jobj);
-    let arg = Expr::from_java(env, &java_arg);
+    let java_arg = java_class.get_arg(env, jobj)?;
+    let arg = *Expr::from_java(env, &java_arg)?;
     delete_local_ref!(env, java_arg);
     let arg = Box::new(arg);
-    UnaryExpr {
+    Ok(Box::new(UnaryExpr {
       span,
       op,
       arg,
-    }
+    }))
   }
 }
 
@@ -34886,156 +35223,158 @@ impl RegisterWithMap<ByteToIndexMap> for UpdateExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for UpdateExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_op = self.op.to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_op = self.op.to_java(env)?;
     let prefix = self.prefix;
-    let java_arg = self.arg.to_java_with_map(env, map);
+    let java_arg = self.arg.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_UPDATE_EXPR.as_ref().unwrap() }
-      .construct(env, &java_op, prefix, &java_arg, &java_span_ex);
+      .construct(env, &java_op, prefix, &java_arg, &java_span_ex)?;
     delete_local_ref!(env, java_op);
     delete_local_ref!(env, java_arg);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for UpdateExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_UPDATE_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_op = java_class.get_op(env, jobj);
-    let op = UpdateOp::from_java(env, &java_op);
+    let java_op = java_class.get_op(env, jobj)?;
+    let op = *UpdateOp::from_java(env, &java_op)?;
     delete_local_ref!(env, java_op);
-    let prefix = java_class.is_prefix(env, jobj);
-    let java_arg = java_class.get_arg(env, jobj);
-    let arg = Expr::from_java(env, &java_arg);
+    let prefix = java_class.is_prefix(env, jobj)?;
+    let java_arg = java_class.get_arg(env, jobj)?;
+    let arg = *Expr::from_java(env, &java_arg)?;
     delete_local_ref!(env, java_arg);
     let arg = Box::new(arg);
-    UpdateExpr {
+    Ok(Box::new(UpdateExpr {
       span,
       op,
       prefix,
       arg,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for UsingDecl {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.decls.iter().for_each(|node| {
+    for node in self.decls.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for UsingDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let is_await = self.is_await;
-    let java_decls = list_new(env, self.decls.len());
-    self.decls.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_decls, &java_node);
+    let java_decls = list_new(env, self.decls.len())?;
+    for node in self.decls.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_decls, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_USING_DECL.as_ref().unwrap() }
-      .construct(env, is_await, &java_decls, &java_span_ex);
+      .construct(env, is_await, &java_decls, &java_span_ex)?;
     delete_local_ref!(env, java_decls);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for UsingDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_USING_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let is_await = java_class.is_await(env, jobj);
-    let java_decls = java_class.get_decls(env, jobj);
-    let length = list_size(env, &java_decls);
-    let decls = (0..length).map(|i| {
-      let java_item = list_get(env, &java_decls, i);
-      let decls = VarDeclarator::from_java(env, &java_item);
+    let is_await = java_class.is_await(env, jobj)?;
+    let java_decls = java_class.get_decls(env, jobj)?;
+    let length = list_size(env, &java_decls)?;
+    let mut decls: Vec<VarDeclarator> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_decls, i)?;
+      let element = *VarDeclarator::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      decls
-    }).collect();
-    UsingDecl {
+      decls.push(element)
+    }
+    Ok(Box::new(UsingDecl {
       span,
       is_await,
       decls,
-    }
+    }))
   }
 }
 
 impl RegisterWithMap<ByteToIndexMap> for VarDecl {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
-    self.decls.iter().for_each(|node| {
+    for node in self.decls.iter() {
       node.register_with_map(map);
-    });
+    }
   }
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for VarDecl {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let ctxt = self.ctxt;
-    let java_kind = self.kind.to_java(env);
+    let java_kind = self.kind.to_java(env)?;
     let declare = self.declare;
-    let java_decls = list_new(env, self.decls.len());
-    self.decls.iter().for_each(|node| {
-      let java_node = node.to_java_with_map(env, map);
-      list_add(env, &java_decls, &java_node);
+    let java_decls = list_new(env, self.decls.len())?;
+    for node in self.decls.iter() {
+      let java_node = node.to_java_with_map(env, map)?;
+      list_add(env, &java_decls, &java_node)?;
       delete_local_ref!(env, java_node);
-    });
+    }
     let return_value = unsafe { JAVA_CLASS_VAR_DECL.as_ref().unwrap() }
-      .construct(env, ctxt, &java_kind, declare, &java_decls, &java_span_ex);
+      .construct(env, ctxt, &java_kind, declare, &java_decls, &java_span_ex)?;
     delete_local_ref!(env, java_kind);
     delete_local_ref!(env, java_decls);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for VarDecl {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_VAR_DECL.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let ctxt = java_class.get_ctxt(env, jobj);
+    let ctxt = java_class.get_ctxt(env, jobj)?;
     let ctxt = SyntaxContext::from_u32(ctxt as u32);
-    let java_kind = java_class.get_kind(env, jobj);
-    let kind = VarDeclKind::from_java(env, &java_kind);
+    let java_kind = java_class.get_kind(env, jobj)?;
+    let kind = *VarDeclKind::from_java(env, &java_kind)?;
     delete_local_ref!(env, java_kind);
-    let declare = java_class.is_declare(env, jobj);
-    let java_decls = java_class.get_decls(env, jobj);
-    let length = list_size(env, &java_decls);
-    let decls = (0..length).map(|i| {
-      let java_item = list_get(env, &java_decls, i);
-      let decls = VarDeclarator::from_java(env, &java_item);
+    let declare = java_class.is_declare(env, jobj)?;
+    let java_decls = java_class.get_decls(env, jobj)?;
+    let length = list_size(env, &java_decls)?;
+    let mut decls: Vec<VarDeclarator> = Vec::with_capacity(length);
+    for i in 0..length {
+      let java_item = list_get(env, &java_decls, i)?;
+      let element = *VarDeclarator::from_java(env, &java_item)?;
       delete_local_ref!(env, java_item);
-      decls
-    }).collect();
-    VarDecl {
+      decls.push(element)
+    }
+    Ok(Box::new(VarDecl {
       span,
       ctxt,
       kind,
       declare,
       decls,
-    }
+    }))
   }
 }
 
@@ -35048,35 +35387,38 @@ impl RegisterWithMap<ByteToIndexMap> for VarDeclarator {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for VarDeclarator {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_name = self.name.to_java_with_map(env, map);
-    let java_optional_init = self.init.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_name = self.name.to_java_with_map(env, map)?;
+    let java_optional_init = match self.init.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let definite = self.definite;
     let return_value = unsafe { JAVA_CLASS_VAR_DECLARATOR.as_ref().unwrap() }
-      .construct(env, &java_name, &java_optional_init, definite, &java_span_ex);
+      .construct(env, &java_name, &java_optional_init, definite, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_init);
     delete_local_ref!(env, java_name);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for VarDeclarator {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_VAR_DECLARATOR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_name = java_class.get_name(env, jobj);
-    let name = Pat::from_java(env, &java_name);
+    let java_name = java_class.get_name(env, jobj)?;
+    let name = *Pat::from_java(env, &java_name)?;
     delete_local_ref!(env, java_name);
-    let java_optional_init = java_class.get_init(env, jobj);
-    let init = if optional_is_present(env, &java_optional_init) {
-      let java_init = optional_get(env, &java_optional_init);
-      let init = Expr::from_java(env, &java_init);
+    let java_optional_init = java_class.get_init(env, jobj)?;
+    let init = if optional_is_present(env, &java_optional_init)? {
+      let java_init = optional_get(env, &java_optional_init)?;
+      let init = *Expr::from_java(env, &java_init)?;
       delete_local_ref!(env, java_init);
       Some(init)
     } else {
@@ -35084,13 +35426,13 @@ impl<'local> FromJava<'local> for VarDeclarator {
     };
     delete_local_ref!(env, java_optional_init);
     let init = init.map(|init| Box::new(init));
-    let definite = java_class.is_definite(env, jobj);
-    VarDeclarator {
+    let definite = java_class.is_definite(env, jobj)?;
+    Ok(Box::new(VarDeclarator {
       span,
       name,
       init,
       definite,
-    }
+    }))
   }
 }
 
@@ -35103,40 +35445,40 @@ impl RegisterWithMap<ByteToIndexMap> for WhileStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for WhileStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_test = self.test.to_java_with_map(env, map);
-    let java_body = self.body.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_test = self.test.to_java_with_map(env, map)?;
+    let java_body = self.body.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_WHILE_STMT.as_ref().unwrap() }
-      .construct(env, &java_test, &java_body, &java_span_ex);
+      .construct(env, &java_test, &java_body, &java_span_ex)?;
     delete_local_ref!(env, java_test);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for WhileStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_WHILE_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_test = java_class.get_test(env, jobj);
-    let test = Expr::from_java(env, &java_test);
+    let java_test = java_class.get_test(env, jobj)?;
+    let test = *Expr::from_java(env, &java_test)?;
     delete_local_ref!(env, java_test);
     let test = Box::new(test);
-    let java_body = java_class.get_body(env, jobj);
-    let body = Stmt::from_java(env, &java_body);
+    let java_body = java_class.get_body(env, jobj)?;
+    let body = *Stmt::from_java(env, &java_body)?;
     delete_local_ref!(env, java_body);
     let body = Box::new(body);
-    WhileStmt {
+    Ok(Box::new(WhileStmt {
       span,
       test,
       body,
-    }
+    }))
   }
 }
 
@@ -35149,40 +35491,40 @@ impl RegisterWithMap<ByteToIndexMap> for WithStmt {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for WithStmt {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_obj = self.obj.to_java_with_map(env, map);
-    let java_body = self.body.to_java_with_map(env, map);
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_obj = self.obj.to_java_with_map(env, map)?;
+    let java_body = self.body.to_java_with_map(env, map)?;
     let return_value = unsafe { JAVA_CLASS_WITH_STMT.as_ref().unwrap() }
-      .construct(env, &java_obj, &java_body, &java_span_ex);
+      .construct(env, &java_obj, &java_body, &java_span_ex)?;
     delete_local_ref!(env, java_obj);
     delete_local_ref!(env, java_body);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for WithStmt {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_WITH_STMT.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_obj = java_class.get_obj(env, jobj);
-    let obj = Expr::from_java(env, &java_obj);
+    let java_obj = java_class.get_obj(env, jobj)?;
+    let obj = *Expr::from_java(env, &java_obj)?;
     delete_local_ref!(env, java_obj);
     let obj = Box::new(obj);
-    let java_body = java_class.get_body(env, jobj);
-    let body = Stmt::from_java(env, &java_body);
+    let java_body = java_class.get_body(env, jobj)?;
+    let body = *Stmt::from_java(env, &java_body)?;
     delete_local_ref!(env, java_body);
     let body = Box::new(body);
-    WithStmt {
+    Ok(Box::new(WithStmt {
       span,
       obj,
       body,
-    }
+    }))
   }
 }
 
@@ -35194,30 +35536,33 @@ impl RegisterWithMap<ByteToIndexMap> for YieldExpr {
 }
 
 impl ToJavaWithMap<ByteToIndexMap> for YieldExpr {
-  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> JObject<'a>
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
-    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env);
-    let java_optional_arg = self.arg.as_ref().map(|node| node.to_java_with_map(env, map));
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_optional_arg = match self.arg.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let delegate = self.delegate;
     let return_value = unsafe { JAVA_CLASS_YIELD_EXPR.as_ref().unwrap() }
-      .construct(env, &java_optional_arg, delegate, &java_span_ex);
+      .construct(env, &java_optional_arg, delegate, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_arg);
     delete_local_ref!(env, java_span_ex);
-    return_value
+    Ok(return_value)
   }
 }
 
 impl<'local> FromJava<'local> for YieldExpr {
   #[allow(unused_variables)]
-  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Self {
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
     let java_class = unsafe { JAVA_CLASS_YIELD_EXPR.as_ref().unwrap() };
     let span = DUMMY_SP;
-    let java_optional_arg = java_class.get_arg(env, jobj);
-    let arg = if optional_is_present(env, &java_optional_arg) {
-      let java_arg = optional_get(env, &java_optional_arg);
-      let arg = Expr::from_java(env, &java_arg);
+    let java_optional_arg = java_class.get_arg(env, jobj)?;
+    let arg = if optional_is_present(env, &java_optional_arg)? {
+      let java_arg = optional_get(env, &java_optional_arg)?;
+      let arg = *Expr::from_java(env, &java_arg)?;
       delete_local_ref!(env, java_arg);
       Some(arg)
     } else {
@@ -35225,12 +35570,12 @@ impl<'local> FromJava<'local> for YieldExpr {
     };
     delete_local_ref!(env, java_optional_arg);
     let arg = arg.map(|arg| Box::new(arg));
-    let delegate = java_class.is_delegate(env, jobj);
-    YieldExpr {
+    let delegate = java_class.is_delegate(env, jobj)?;
+    Ok(Box::new(YieldExpr {
       span,
       arg,
       delegate,
-    }
+    }))
   }
 }
 /* AST End */

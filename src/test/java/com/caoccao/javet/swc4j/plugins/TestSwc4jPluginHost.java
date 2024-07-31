@@ -17,6 +17,9 @@
 package com.caoccao.javet.swc4j.plugins;
 
 import com.caoccao.javet.swc4j.BaseTestSuite;
+import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
+import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
+import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -63,6 +66,25 @@ public class TestSwc4jPluginHost extends BaseTestSuite {
                 fail(e);
             }
         });
+    }
+
+    @Test
+    public void testParseWithException() {
+        String code = "1 + 1";
+        try {
+            Swc4jAstVisitor visitor = new Swc4jAstVisitor() {
+                @Override
+                public Swc4jAstVisitorResponse visitScript(Swc4jAstScript node) {
+                    throw new RuntimeException("Test");
+                }
+            };
+            swc4j.parse(code, jsScriptParseOptions
+                    .setPluginHost(new Swc4jPluginHost().add(new Swc4jPluginVisitors(SimpleList.of(visitor)))));
+            // TODO
+//            fail("Failed to throw exception.");
+        } catch (Throwable t) {
+//            t.printStackTrace();
+        }
     }
 
     @Test

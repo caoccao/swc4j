@@ -15,10 +15,10 @@
 * limitations under the License.
 */
 
+use anyhow::Result;
 use deno_ast::swc::ast::*;
 use deno_ast::swc::parser::token::TokenAndSpan;
 use deno_ast::{MultiThreadedComments, ParsedSource, TranspileResult};
-
 use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::JNIEnv;
 
@@ -71,7 +71,7 @@ impl JavaSwc4jParseOutput {
     source_text: &str,
     tokens: &JObject<'_>,
     comments: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -88,9 +88,9 @@ impl JavaSwc4jParseOutput {
         self.method_construct,
         &[program, media_type, parse_mode, source_text, tokens, comments],
         "Swc4jParseOutput construct()"
-      );
+      )?;
     delete_local_ref!(env, java_source_text);
-    return_value
+    Ok(return_value)
   }
 }
 /* JavaSwc4jParseOutput End */
@@ -133,7 +133,7 @@ impl JavaSwc4jTransformOutput {
     media_type: &JObject<'_>,
     parse_mode: &JObject<'_>,
     source_map: &Option<String>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -149,10 +149,10 @@ impl JavaSwc4jTransformOutput {
         self.method_construct,
         &[code, media_type, parse_mode, source_map],
         "Swc4jTransformOutput construct()"
-      );
+      )?;
     delete_local_ref!(env, java_code);
     delete_local_ref!(env, java_source_map);
-    return_value
+    Ok(return_value)
   }
 }
 /* JavaSwc4jTransformOutput End */
@@ -199,7 +199,7 @@ impl JavaSwc4jTranspileOutput {
     source_text: &str,
     tokens: &JObject<'_>,
     comments: &JObject<'_>,
-  ) -> JObject<'a>
+  ) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -220,11 +220,11 @@ impl JavaSwc4jTranspileOutput {
         self.method_construct,
         &[program, code, media_type, parse_mode, source_map, source_text, tokens, comments],
         "Swc4jTranspileOutput construct()"
-      );
+      )?;
     delete_local_ref!(env, java_code);
     delete_local_ref!(env, java_source_map);
     delete_local_ref!(env, java_source_text);
-    return_value
+    Ok(return_value)
   }
 }
 /* JavaSwc4jTranspileOutput End */
@@ -310,22 +310,22 @@ impl ParseOutput {
 }
 
 impl ToJava for ParseOutput {
-  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
     let byte_to_index_map = self.get_byte_to_index_map();
-    let java_program = self.program.as_ref().map_or(Default::default(), |program| {
+    let java_program = self.program.as_ref().map_or(Ok(Default::default()), |program| {
       program.to_java_with_map(env, &byte_to_index_map)
-    });
-    let java_media_type = self.media_type.to_java(env);
-    let java_parse_mode = self.parse_mode.to_java(env);
+    })?;
+    let java_media_type = self.media_type.to_java(env)?;
+    let java_parse_mode = self.parse_mode.to_java(env)?;
     let source_text = self.source_text.as_str();
     let java_tokens =
-      token_utils::token_and_spans_to_java_list(env, &byte_to_index_map, &source_text, self.tokens.clone());
-    let java_comments = self.comments.as_ref().map_or(Default::default(), |comments| {
+      token_utils::token_and_spans_to_java_list(env, &byte_to_index_map, &source_text, self.tokens.clone())?;
+    let java_comments = self.comments.as_ref().map_or(Ok(Default::default()), |comments| {
       comments_new(env, comments, &byte_to_index_map)
-    });
+    })?;
     let return_value = unsafe { JAVA_PARSE_OUTPUT.as_ref().unwrap() }.construct(
       env,
       &java_program,
@@ -370,13 +370,13 @@ impl TransformOutput {
 }
 
 impl ToJava for TransformOutput {
-  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
     let code = self.code.as_str();
-    let java_media_type = self.media_type.to_java(env);
-    let java_parse_mode = self.parse_mode.to_java(env);
+    let java_media_type = self.media_type.to_java(env)?;
+    let java_parse_mode = self.parse_mode.to_java(env)?;
     let optional_source_map = &self.source_map;
     let return_value = unsafe { JAVA_TRANSFORM_OUTPUT.as_ref().unwrap() }.construct(
       env,
@@ -448,7 +448,7 @@ impl TranspileOutput {
 }
 
 impl ToJava for TranspileOutput {
-  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> JObject<'a>
+  fn to_java<'local, 'a>(&self, env: &mut JNIEnv<'local>) -> Result<JObject<'a>>
   where
     'local: 'a,
   {
@@ -457,12 +457,12 @@ impl ToJava for TranspileOutput {
       .parse_output
       .program
       .as_ref()
-      .map_or(Default::default(), |program| {
+      .map_or(Ok(Default::default()), |program| {
         program.to_java_with_map(env, &byte_to_index_map)
-      });
+      })?;
     let code = self.code.as_str();
-    let java_media_type = self.parse_output.media_type.to_java(env);
-    let java_parse_mode = self.parse_output.parse_mode.to_java(env);
+    let java_media_type = self.parse_output.media_type.to_java(env)?;
+    let java_parse_mode = self.parse_output.parse_mode.to_java(env)?;
     let optional_source_map = &self.source_map;
     let source_text = self.parse_output.source_text.as_str();
     let java_tokens = token_utils::token_and_spans_to_java_list(
@@ -470,14 +470,14 @@ impl ToJava for TranspileOutput {
       &byte_to_index_map,
       &source_text,
       self.parse_output.tokens.clone(),
-    );
+    )?;
     let java_comments = self
       .parse_output
       .comments
       .as_ref()
-      .map_or(Default::default(), |comments| {
+      .map_or(Ok(Default::default()), |comments| {
         comments_new(env, comments, &byte_to_index_map)
-      });
+      })?;
     let return_value = unsafe { JAVA_TRANSPILE_OUTPUT.as_ref().unwrap() }.construct(
       env,
       &java_program,
