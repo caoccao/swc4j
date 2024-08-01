@@ -80,10 +80,11 @@ public class TestSwc4jPluginHost extends BaseTestSuite {
             };
             swc4j.parse(code, jsScriptParseOptions
                     .setPluginHost(new Swc4jPluginHost().add(new Swc4jPluginVisitors(SimpleList.of(visitor)))));
-            // TODO
-//            fail("Failed to throw exception.");
-        } catch (Throwable t) {
-//            t.printStackTrace();
+            fail("Failed to throw exception.");
+        } catch (Swc4jCoreException e) {
+            assertEquals("Couldn't call boolean process() because Java exception was thrown", e.getMessage());
+            assertInstanceOf(RuntimeException.class, e.getCause());
+            assertEquals("Test", e.getCause().getMessage());
         }
     }
 
@@ -132,6 +133,26 @@ public class TestSwc4jPluginHost extends BaseTestSuite {
     }
 
     @Test
+    public void testTransformWithException() {
+        String code = "1 + 1";
+        try {
+            Swc4jAstVisitor visitor = new Swc4jAstVisitor() {
+                @Override
+                public Swc4jAstVisitorResponse visitScript(Swc4jAstScript node) {
+                    throw new RuntimeException("Test");
+                }
+            };
+            swc4j.transform(code, jsScriptTransformOptions
+                    .setPluginHost(new Swc4jPluginHost().add(new Swc4jPluginVisitors(SimpleList.of(visitor)))));
+            fail("Failed to throw exception.");
+        } catch (Swc4jCoreException e) {
+            assertEquals("Couldn't call boolean process() because Java exception was thrown", e.getMessage());
+            assertInstanceOf(RuntimeException.class, e.getCause());
+            assertEquals("Test", e.getCause().getMessage());
+        }
+    }
+
+    @Test
     public void testTranspileModuleCount() {
         String code = "import a from 'a'; a + 1;";
         String expectedCode = "import a from 'a';\na + 1;\n";
@@ -173,5 +194,25 @@ public class TestSwc4jPluginHost extends BaseTestSuite {
                 fail(e);
             }
         });
+    }
+
+    @Test
+    public void testTranspileWithException() {
+        String code = "1 + 1";
+        try {
+            Swc4jAstVisitor visitor = new Swc4jAstVisitor() {
+                @Override
+                public Swc4jAstVisitorResponse visitScript(Swc4jAstScript node) {
+                    throw new RuntimeException("Test");
+                }
+            };
+            swc4j.transpile(code, jsScriptTranspileOptions
+                    .setPluginHost(new Swc4jPluginHost().add(new Swc4jPluginVisitors(SimpleList.of(visitor)))));
+            fail("Failed to throw exception.");
+        } catch (Swc4jCoreException e) {
+            assertEquals("Couldn't call boolean process() because Java exception was thrown", e.getMessage());
+            assertInstanceOf(RuntimeException.class, e.getCause());
+            assertEquals("Test", e.getCause().getMessage());
+        }
     }
 }

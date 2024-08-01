@@ -36,20 +36,15 @@ public class Swc4jPluginHostJsFuckDecoder implements ISwc4jPluginHost {
 
     @Override
     public boolean process(ISwc4jAstProgram<?> program) {
-        try {
-            Swc4jPluginVisitorJsFuckDecoder jsFuckDecoder = new Swc4jPluginVisitorJsFuckDecoder();
-            for (int i = 0; i < maxIteration; i++) {
-                jsFuckDecoder.reset();
-                program.visit(jsFuckDecoder);
-                if (jsFuckDecoder.getCount() == 0) {
-                    break;
-                }
+        Swc4jPluginVisitorJsFuckDecoder jsFuckDecoder = new Swc4jPluginVisitorJsFuckDecoder();
+        for (int i = 0; i < maxIteration; i++) {
+            jsFuckDecoder.reset();
+            program.visit(jsFuckDecoder);
+            if (jsFuckDecoder.getCount() == 0) {
+                break;
             }
-            return true;
-        } catch (Throwable t) {
-            t.printStackTrace(System.err);
-            return false;
         }
+        return true;
     }
 
     public void setMaxIteration(int maxIteration) {

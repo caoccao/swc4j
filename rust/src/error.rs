@@ -16,7 +16,7 @@
 */
 
 use jni::objects::{GlobalRef, JStaticMethodID, JThrowable};
-use jni::sys::jobject;
+use jni::sys::{jobject, jvalue};
 use jni::JNIEnv;
 use std::ptr::null_mut;
 
@@ -43,21 +43,21 @@ impl JavaCoreException {
       .get_static_method_id(
         &class,
         "parseError",
-        "(Ljava/lang/String;)Lcom/caoccao/javet/swc4j/exceptions/Swc4jCoreException;",
+        "(Ljava/lang/String;Ljava/lang/Throwable;)Lcom/caoccao/javet/swc4j/exceptions/Swc4jCoreException;",
       )
       .expect("Couldn't find static method Swc4jCoreException.parseError");
     let method_transform_error = env
       .get_static_method_id(
         &class,
         "transformError",
-        "(Ljava/lang/String;)Lcom/caoccao/javet/swc4j/exceptions/Swc4jCoreException;",
+        "(Ljava/lang/String;Ljava/lang/Throwable;)Lcom/caoccao/javet/swc4j/exceptions/Swc4jCoreException;",
       )
       .expect("Couldn't find static method Swc4jCoreException.transformError");
     let method_transpile_error = env
       .get_static_method_id(
         &class,
         "transpileError",
-        "(Ljava/lang/String;)Lcom/caoccao/javet/swc4j/exceptions/Swc4jCoreException;",
+        "(Ljava/lang/String;Ljava/lang/Throwable;)Lcom/caoccao/javet/swc4j/exceptions/Swc4jCoreException;",
       )
       .expect("Couldn't find static method Swc4jCoreException.transpileError");
     JavaCoreException {
@@ -68,43 +68,79 @@ impl JavaCoreException {
     }
   }
 
-  pub fn throw_parse_error<'local, 'a>(&self, env: &mut JNIEnv<'local>, message: &'a str) {
+  pub fn throw_parse_error<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    message: &'a str,
+    cause: Option<JThrowable<'a>>,
+  ) {
     let java_message = string_to_jstring!(env, message);
     let message = object_to_jvalue!(java_message);
-    let exception = call_static_as_object!(env, &self.class, &self.method_parse_error, &[message], "parseError()")
-      .expect("Couldn't call static method Swc4jCoreException.parseError()");
+    let cause = if let Some(cause) = cause {
+      object_to_jvalue!(cause)
+    } else {
+      jvalue { l: null_mut() }
+    };
+    let exception = call_static_as_object!(
+      env,
+      &self.class,
+      &self.method_parse_error,
+      &[message, cause],
+      "parseError()"
+    )
+    .expect("Couldn't call static method Swc4jCoreException.parseError()");
     let exception = unsafe { JThrowable::from_raw(exception.as_raw()) };
-    let _ = env.throw(exception);
+    env.throw(exception).expect("Couldn't call throw parse error");
   }
 
-  pub fn throw_transform_error<'local, 'a>(&self, env: &mut JNIEnv<'local>, message: &'a str) {
+  pub fn throw_transform_error<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    message: &'a str,
+    cause: Option<JThrowable<'a>>,
+  ) {
     let java_message = string_to_jstring!(env, message);
     let message = object_to_jvalue!(java_message);
+    let cause = if let Some(cause) = cause {
+      object_to_jvalue!(cause)
+    } else {
+      jvalue { l: null_mut() }
+    };
     let exception = call_static_as_object!(
       env,
       &self.class,
       &self.method_transform_error,
-      &[message],
+      &[message, cause],
       "transformError()"
     )
     .expect("Couldn't call static method Swc4jCoreException.transformError()");
     let exception = unsafe { JThrowable::from_raw(exception.as_raw()) };
-    let _ = env.throw(exception);
+    env.throw(exception).expect("Couldn't call throw transform error");
   }
 
-  pub fn throw_transpile_error<'local, 'a>(&self, env: &mut JNIEnv<'local>, message: &'a str) {
+  pub fn throw_transpile_error<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    message: &'a str,
+    cause: Option<JThrowable<'a>>,
+  ) {
     let java_message = string_to_jstring!(env, message);
     let message = object_to_jvalue!(java_message);
+    let cause = if let Some(cause) = cause {
+      object_to_jvalue!(cause)
+    } else {
+      jvalue { l: null_mut() }
+    };
     let exception = call_static_as_object!(
       env,
       &self.class,
       &self.method_transpile_error,
-      &[message],
+      &[message, cause],
       "transpileError()"
     )
     .expect("Couldn't call static method Swc4jCoreException.transpileError()");
     let exception = unsafe { JThrowable::from_raw(exception.as_raw()) };
-    let _ = env.throw(exception);
+    env.throw(exception).expect("Couldn't call throw transpile error");
   }
 }
 
@@ -117,28 +153,43 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 }
 
 pub fn throw_parse_error<'local, 'a>(env: &mut JNIEnv<'local>, message: &'a str) -> jobject {
-  unsafe {
-    JAVA_CORE_EXCEPTION.as_ref().unwrap().throw_parse_error(env, message);
-  }
+  let java_core_exception = unsafe { JAVA_CORE_EXCEPTION.as_ref().unwrap() };
+  let has_exception = env.exception_check();
+  let cause = if has_exception.is_ok() && has_exception.unwrap() {
+    let cause = env.exception_occurred().expect("Couldn't get exception occurred");
+    env.exception_clear().expect("Could'n clear exception occurred");
+    Some(cause)
+  } else {
+    None
+  };
+  java_core_exception.throw_parse_error(env, message, cause);
   null_mut()
 }
 
 pub fn throw_transform_error<'local, 'a>(env: &mut JNIEnv<'local>, message: &'a str) -> jobject {
-  unsafe {
-    JAVA_CORE_EXCEPTION
-      .as_ref()
-      .unwrap()
-      .throw_transform_error(env, message);
-  }
+  let java_core_exception = unsafe { JAVA_CORE_EXCEPTION.as_ref().unwrap() };
+  let has_exception = env.exception_check();
+  let cause = if has_exception.is_ok() && has_exception.unwrap() {
+    let cause = env.exception_occurred().expect("Couldn't get exception occurred");
+    env.exception_clear().expect("Could'n clear exception occurred");
+    Some(cause)
+  } else {
+    None
+  };
+  java_core_exception.throw_transform_error(env, message, cause);
   null_mut()
 }
 
 pub fn throw_transpile_error<'local, 'a>(env: &mut JNIEnv<'local>, message: &'a str) -> jobject {
-  unsafe {
-    JAVA_CORE_EXCEPTION
-      .as_ref()
-      .unwrap()
-      .throw_transpile_error(env, message);
-  }
+  let java_core_exception = unsafe { JAVA_CORE_EXCEPTION.as_ref().unwrap() };
+  let has_exception = env.exception_check();
+  let cause = if has_exception.is_ok() && has_exception.unwrap() {
+    let cause = env.exception_occurred().expect("Couldn't get exception occurred");
+    env.exception_clear().expect("Could'n clear exception occurred");
+    Some(cause)
+  } else {
+    None
+  };
+  java_core_exception.throw_transpile_error(env, message, cause);
   null_mut()
 }

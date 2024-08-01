@@ -44,10 +44,10 @@ public final class Swc4jCoreException extends Swc4jException {
     }
 
     /**
-     * Parse error.
+     * Creates a new parse error with the given message.
      *
-     * @param message the message
-     * @return the swc4j core exception
+     * @param message the error message
+     * @return a new Swc4jCoreException with the given message
      * @since 0.1.0
      */
     public static Swc4jCoreException parseError(String message) {
@@ -55,9 +55,21 @@ public final class Swc4jCoreException extends Swc4jException {
     }
 
     /**
-     * Transform error.
+     * Creates a new parse error with the given message and cause.
      *
-     * @param message the message
+     * @param message the error message
+     * @param cause   the cause of the error
+     * @return a new Swc4jCoreException with the given message and cause
+     * @since 1.0.0
+     */
+    public static Swc4jCoreException parseError(String message, Throwable cause) {
+        return new Swc4jCoreException(message, cause);
+    }
+
+    /**
+     * Creates a new transform error with the given message.
+     *
+     * @param message the error message
      * @return the swc4j core exception
      * @since 1.0.0
      */
@@ -66,13 +78,37 @@ public final class Swc4jCoreException extends Swc4jException {
     }
 
     /**
-     * Transpile error.
+     * Creates a new transform error with the given message and cause.
      *
-     * @param message the message
+     * @param message the error message
+     * @param cause   the cause of the error
+     * @return a new Swc4jCoreException with the given message and cause
+     * @since 1.0.0
+     */
+    public static Swc4jCoreException transformError(String message, Throwable cause) {
+        return new Swc4jCoreException(message, cause);
+    }
+
+    /**
+     * Creates a new transpile error with the given message.
+     *
+     * @param message the error message
      * @return the swc4j core exception
      * @since 0.1.0
      */
     public static Swc4jCoreException transpileError(String message) {
         return new Swc4jCoreException(message);
+    }
+
+    /**
+     * Creates a new transpile error with the given message and cause.
+     *
+     * @param message the error message
+     * @param cause   the cause of the error
+     * @return a new Swc4jCoreException with the given message and cause
+     * @since 1.0.0
+     */
+    public static Swc4jCoreException transpileError(String message, Throwable cause) {
+        return new Swc4jCoreException(message, cause);
     }
 }

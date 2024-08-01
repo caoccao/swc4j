@@ -45,17 +45,12 @@ public class Swc4jPluginHost implements ISwc4jPluginHost {
 
     @Override
     public boolean process(ISwc4jAstProgram<?> program) {
-        try {
-            for (ISwc4jPlugin plugin : plugins) {
-                if (plugin.process(program) != Swc4jPluginResponse.OkAndContinue) {
-                    return false;
-                }
+        for (ISwc4jPlugin plugin : plugins) {
+            if (plugin.process(program) != Swc4jPluginResponse.OkAndContinue) {
+                return false;
             }
-            return true;
-        } catch (Throwable t) {
-            t.printStackTrace(System.err);
-            return false;
         }
+        return true;
     }
 
     public Swc4jPluginHost remove(ISwc4jPlugin... plugins) {
