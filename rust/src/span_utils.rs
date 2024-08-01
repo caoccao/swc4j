@@ -300,6 +300,7 @@ impl JavaSwc4jSpan {
 static mut JAVA_CLASS_SPAN: Option<JavaSwc4jSpan> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
+  log::debug!("init()");
   unsafe {
     JAVA_CLASS_SPAN = Some(JavaSwc4jSpan::new(env));
   }

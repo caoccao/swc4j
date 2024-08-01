@@ -2,7 +2,8 @@
 
 ## 1.0.0
 
-* Revised internal error handling to relay exception in `transform()`
+* Revised internal error handling by relaying exception in `parse()`, `transform()`, `transpile()`
+* Enhanced logging in rust lib
 
 ## 0.11.0
 

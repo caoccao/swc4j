@@ -147,6 +147,7 @@ impl JavaCoreException {
 static mut JAVA_CORE_EXCEPTION: Option<JavaCoreException> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
+  log::debug!("init()");
   unsafe {
     JAVA_CORE_EXCEPTION = Some(JavaCoreException::new(env));
   }
@@ -154,10 +155,10 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
 
 pub fn throw_parse_error<'local, 'a>(env: &mut JNIEnv<'local>, message: &'a str) -> jobject {
   let java_core_exception = unsafe { JAVA_CORE_EXCEPTION.as_ref().unwrap() };
-  let has_exception = env.exception_check();
-  let cause = if has_exception.is_ok() && has_exception.unwrap() {
-    let cause = env.exception_occurred().expect("Couldn't get exception occurred");
-    env.exception_clear().expect("Could'n clear exception occurred");
+  let cause = if env.exception_check().unwrap_or(false) {
+    log::error!("Exception occurred in parse()");
+    let cause = env.exception_occurred().expect("Couldn't get exception occurred in parse()");
+    env.exception_clear().expect("Could'n clear exception occurred in parse()");
     Some(cause)
   } else {
     None
@@ -168,10 +169,10 @@ pub fn throw_parse_error<'local, 'a>(env: &mut JNIEnv<'local>, message: &'a str)
 
 pub fn throw_transform_error<'local, 'a>(env: &mut JNIEnv<'local>, message: &'a str) -> jobject {
   let java_core_exception = unsafe { JAVA_CORE_EXCEPTION.as_ref().unwrap() };
-  let has_exception = env.exception_check();
-  let cause = if has_exception.is_ok() && has_exception.unwrap() {
-    let cause = env.exception_occurred().expect("Couldn't get exception occurred");
-    env.exception_clear().expect("Could'n clear exception occurred");
+  let cause = if env.exception_check().unwrap_or(false) {
+    log::error!("Exception occurred in transform()");
+    let cause = env.exception_occurred().expect("Couldn't get exception occurred in transform()");
+    env.exception_clear().expect("Could'n clear exception occurred in transform()");
     Some(cause)
   } else {
     None
@@ -182,10 +183,10 @@ pub fn throw_transform_error<'local, 'a>(env: &mut JNIEnv<'local>, message: &'a 
 
 pub fn throw_transpile_error<'local, 'a>(env: &mut JNIEnv<'local>, message: &'a str) -> jobject {
   let java_core_exception = unsafe { JAVA_CORE_EXCEPTION.as_ref().unwrap() };
-  let has_exception = env.exception_check();
-  let cause = if has_exception.is_ok() && has_exception.unwrap() {
-    let cause = env.exception_occurred().expect("Couldn't get exception occurred");
-    env.exception_clear().expect("Could'n clear exception occurred");
+  let cause = if env.exception_check().unwrap_or(false) {
+    log::error!("Exception occurred in transpile()");
+    let cause = env.exception_occurred().expect("Couldn't get exception occurred in transpile()");
+    env.exception_clear().expect("Could'n clear exception occurred in transpile()");
     Some(cause)
   } else {
     None

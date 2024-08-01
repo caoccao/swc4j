@@ -23484,6 +23484,7 @@ static mut JAVA_CLASS_WITH_STMT: Option<JavaSwc4jAstWithStmt> = None;
 static mut JAVA_CLASS_YIELD_EXPR: Option<JavaSwc4jAstYieldExpr> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
+  log::debug!("init()");
   unsafe {
     JAVA_CLASS_ = Some(JavaISwc4jAst::new(env));
     JAVA_CLASS_ASSIGN_TARGET = Some(JavaISwc4jAstAssignTarget::new(env));

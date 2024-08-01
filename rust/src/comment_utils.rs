@@ -201,6 +201,7 @@ static mut JAVA_COMMENT: Option<JavaSwc4jComment> = None;
 static mut JAVA_COMMENTS: Option<JavaSwc4jComments> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
+  log::debug!("init()");
   unsafe {
     JAVA_COMMENT = Some(JavaSwc4jComment::new(env));
     JAVA_COMMENTS = Some(JavaSwc4jComments::new(env));

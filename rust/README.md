@@ -90,3 +90,14 @@ export CXX=aarch64-linux-android24-clang++
 export RUSTFLAGS="-L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/14.0.6/lib/linux/aarch64 -L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/24 -C target-feature=+crt-static"
 cargo build --release --target aarch64-linux-android && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm64
 ```
+
+## Logging
+
+The debug log can be turned on as follows.
+
+```sh
+# Linux / MacOS
+export RUST_LOG=debug
+# Windows
+set RUST_LOG=debug
+```

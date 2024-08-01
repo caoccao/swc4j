@@ -32,6 +32,7 @@ fn parse_by_mode(
   parse_mode: enums::ParseMode,
   plugin_host: &mut Option<plugin_utils::PluginHost>,
 ) -> Result<ParsedSource> {
+  log::debug!("parse_by_mode({:?})", parse_mode);
   let result = if let Some(plugin_host) = plugin_host {
     let code: &str = &parse_params.text.to_owned();
     let mut error: Option<Error> = None;
@@ -80,6 +81,8 @@ fn parse_by_mode(
 }
 
 pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<outputs::ParseOutput> {
+  log::debug!("parse()");
+  log::debug!("{:?}", options);
   let specifier = options.get_specifier()?;
   let parse_params = ParseParams {
     specifier,
@@ -95,6 +98,8 @@ pub fn parse<'local>(code: String, options: options::ParseOptions) -> Result<out
 }
 
 pub fn transform<'local>(code: String, options: options::TransformOptions) -> Result<outputs::TransformOutput> {
+  log::debug!("transform()");
+  log::debug!("{:?}", options);
   let specifier = options.get_specifier()?;
   let parse_params = ParseParams {
     specifier: specifier.clone(),
@@ -170,6 +175,8 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
 }
 
 pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Result<outputs::TranspileOutput> {
+  log::debug!("transpile()");
+  log::debug!("{:?}", options);
   let specifier = options.get_specifier()?;
   let parse_params = ParseParams {
     specifier,

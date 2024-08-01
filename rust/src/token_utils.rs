@@ -713,6 +713,7 @@ impl JavaSwc4jTokenFactory {
 static mut JAVA_TOKEN_FACTORY: Option<JavaSwc4jTokenFactory> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
+  log::debug!("init()");
   unsafe {
     JAVA_TOKEN_FACTORY = Some(JavaSwc4jTokenFactory::new(env));
   }

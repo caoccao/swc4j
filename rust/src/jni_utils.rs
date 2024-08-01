@@ -540,6 +540,7 @@ static mut JAVA_OPTIONAL: Option<JavaOptional> = None;
 static mut JAVA_URL: Option<JavaURL> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
+  log::debug!("init()");
   unsafe {
     JAVA_ARRAY_LIST = Some(JavaArrayList::new(env));
     JAVA_HASH_MAP = Some(JavaHashMap::new(env));

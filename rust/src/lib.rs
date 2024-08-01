@@ -60,6 +60,7 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion<'
   env: JNIEnv<'local>,
   _: JClass<'local>,
 ) -> jstring {
+  log::debug!("Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion()");
   string_to_jstring!(env, core::get_version()).as_raw()
 }
 
@@ -70,6 +71,7 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse<'local
   code: jstring,
   options: jobject,
 ) -> jobject {
+  log::debug!("Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse()");
   match core_parse(&mut env, code, options) {
     Ok(output) => output,
     Err(err) => error::throw_parse_error(&mut env, err.to_string().as_str()),
@@ -83,6 +85,7 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTransform<'l
   code: jstring,
   options: jobject,
 ) -> jobject {
+  log::debug!("Java_com_caoccao_javet_swc4j_Swc4jNative_coreTransform()");
   match core_transform(&mut env, code, options) {
     Ok(output) => output,
     Err(err) => error::throw_transform_error(&mut env, err.to_string().as_str()),
@@ -96,6 +99,7 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'l
   code: jstring,
   options: jobject,
 ) -> jobject {
+  log::debug!("Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile()");
   match core_transpile(&mut env, code, options) {
     Ok(output) => output,
     Err(err) => error::throw_transpile_error(&mut env, err.to_string().as_str()),

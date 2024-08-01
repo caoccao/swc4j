@@ -268,6 +268,7 @@ declare_identifiable_enum!(
 );
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
+  log::debug!("init()");
   unsafe {
     JAVA_CLASS_ACCESSIBILITY = Some(JavaAccessibility::new(env));
     JAVA_CLASS_ASSIGN_OP = Some(JavaAssignOp::new(env));

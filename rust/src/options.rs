@@ -1298,6 +1298,7 @@ static mut JAVA_TRANSFORM_OPTIONS: Option<JavaSwc4jTransformOptions> = None;
 static mut JAVA_TRANSPILE_OPTIONS: Option<JavaSwc4jTranspileOptions> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
+  log::debug!("init()");
   unsafe {
     JAVA_PARSE_OPTIONS = Some(JavaSwc4jParseOptions::new(env));
     JAVA_TRANSFORM_OPTIONS = Some(JavaSwc4jTransformOptions::new(env));

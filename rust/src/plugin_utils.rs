@@ -38,6 +38,7 @@ impl<'local> PluginHost<'local> {
   }
 
   pub fn process_module(&mut self, s: &str, module: Module) -> Result<Module> {
+    log::debug!("process_module()");
     let java_class = unsafe { JAVA_CLASS_I_PLUGIN_HOST.as_ref().unwrap() };
     let mut map = ByteToIndexMap::new();
     module.register_with_map(&mut map);
@@ -62,6 +63,7 @@ impl<'local> PluginHost<'local> {
   }
 
   pub fn process_program(&mut self, s: &str, program: Program) -> Result<Program> {
+    log::debug!("process_program()");
     let java_class = unsafe { JAVA_CLASS_I_PLUGIN_HOST.as_ref().unwrap() };
     let mut map = ByteToIndexMap::new();
     program.register_with_map(&mut map);
@@ -86,6 +88,7 @@ impl<'local> PluginHost<'local> {
   }
 
   pub fn process_script(&mut self, s: &str, script: Script) -> Result<Script> {
+    log::debug!("process_script()");
     let java_class = unsafe { JAVA_CLASS_I_PLUGIN_HOST.as_ref().unwrap() };
     let mut map = ByteToIndexMap::new();
     script.register_with_map(&mut map);
@@ -173,6 +176,7 @@ impl JavaISwc4jPluginHost {
 static mut JAVA_CLASS_I_PLUGIN_HOST: Option<JavaISwc4jPluginHost> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
+  log::debug!("init()");
   unsafe {
     JAVA_CLASS_I_PLUGIN_HOST = Some(JavaISwc4jPluginHost::new(env));
   }

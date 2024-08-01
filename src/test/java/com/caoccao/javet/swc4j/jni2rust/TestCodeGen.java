@@ -225,6 +225,7 @@ public class TestCodeGen {
         assertTrue(structCounter.get() > 0);
         lines.addAll(declarationLines);
         lines.add("\npub fn init<'local>(env: &mut JNIEnv<'local>) {");
+        lines.add("  log::debug!(\"init()\");");
         lines.add("  unsafe {");
         lines.addAll(initLines);
         lines.add("  }");

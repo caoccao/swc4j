@@ -234,6 +234,7 @@ static mut JAVA_TRANSFORM_OUTPUT: Option<JavaSwc4jTransformOutput> = None;
 static mut JAVA_TRANSPILE_OUTPUT: Option<JavaSwc4jTranspileOutput> = None;
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
+  log::debug!("init()");
   unsafe {
     JAVA_PARSE_OUTPUT = Some(JavaSwc4jParseOutput::new(env));
     JAVA_TRANSFORM_OUTPUT = Some(JavaSwc4jTransformOutput::new(env));
