@@ -75,6 +75,11 @@ jobs:
         distribution: corretto
         java-version: 8
 
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: 8.5
+
     - name: Build and Test
       run: |
         gradle build test generatePomFileForGeneratePomPublication --debug
@@ -141,6 +146,11 @@ jobs:
       with:
         distribution: corretto
         java-version: 8
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: 8.5
 
     - name: Build and Test
       run: |
