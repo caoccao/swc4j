@@ -17,7 +17,11 @@
 
 use anyhow::Result;
 use jni::objects::{JClass, JObject, JString};
-use jni::sys::{jint, jobject, jstring, JNI_VERSION_1_8};
+#[cfg(target_os = "android")]
+use jni::sys::JNI_VERSION_1_6;
+#[cfg(not(target_os = "android"))]
+use jni::sys::JNI_VERSION_1_8;
+use jni::sys::{jint, jobject, jstring};
 use jni::{JNIEnv, JavaVM};
 use jni_utils::FromJava;
 
@@ -52,7 +56,11 @@ pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
   plugin_utils::init(&mut env);
   span_utils::init(&mut env);
   token_utils::init(&mut env);
-  JNI_VERSION_1_8
+  #[cfg(target_os = "android")]
+  let jni_version = JNI_VERSION_1_6;
+  #[cfg(not(target_os = "android"))]
+  let jni_version = JNI_VERSION_1_8;
+  jni_version
 }
 
 #[no_mangle]
