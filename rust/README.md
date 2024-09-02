@@ -40,7 +40,14 @@ rustup target add aarch64-linux-android
 
 ### Install Android NDK
 
-Install a proper Android NDK.
+* Install a proper Android NDK.
+* `export ANDROID_NDK_HOME=${where-ndk-is-installed}`
+
+### Install cargo-ndk on Linux
+
+```sh
+cargo install cargo-ndk
+```
 
 ## Build
 
@@ -67,28 +74,10 @@ cargo build --release --target x86_64-apple-darwin && deno run --allow-all ../sc
 cargo build --release --target aarch64-apple-darwin && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o macos -a arm64
 
 # Android Cross-compile
-export PATH=${PATH}:${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/bin
-export AR=llvm-ar
-
-export CC=i686-linux-android24-clang
-export CXX=i686-linux-android24-clang++
-export RUSTFLAGS="-L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/14.0.6/lib/linux/i386 -L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/24 -C target-feature=+crt-static"
-cargo build --release --target i686-linux-android && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86
-
-export CC=x86_64-linux-android24-clang
-export CXX=x86_64-linux-android24-clang++
-export RUSTFLAGS="-L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/14.0.6/lib/linux/x86_64 -L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/24 -C target-feature=+crt-static"
-cargo build --release --target x86_64-linux-android && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86_64
-
-export CC=armv7a-linux-android24-clang
-export CXX=armv7a-linux-android24-clang++
-export RUSTFLAGS="-L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/14.0.6/lib/linux/arm -L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-android/24 -C target-feature=+crt-static"
-cargo build --release --target armv7-linux-androideabi && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm
-
-export CC=aarch64-linux-android24-clang
-export CXX=aarch64-linux-android24-clang++
-export RUSTFLAGS="-L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/14.0.6/lib/linux/aarch64 -L ${ANDROID_NDK_ROOT}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/24 -C target-feature=+crt-static"
-cargo build --release --target aarch64-linux-android && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm64
+cargo ndk --target i686-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86
+cargo ndk --target x86_64-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86_64
+cargo ndk --target armv7-linux-androideabi build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm
+cargo ndk --target aarch64-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm64
 ```
 
 ## Logging
