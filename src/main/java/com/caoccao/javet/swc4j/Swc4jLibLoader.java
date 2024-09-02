@@ -20,7 +20,6 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jLibException;
 import com.caoccao.javet.swc4j.interfaces.ISwc4jLogger;
 import com.caoccao.javet.swc4j.utils.ArrayUtils;
 import com.caoccao.javet.swc4j.utils.OSUtils;
-import com.caoccao.javet.swc4j.utils.StringUtils;
 import com.caoccao.javet.swc4j.utils.Swc4jDefaultLogger;
 
 import java.io.File;
@@ -44,13 +43,11 @@ final class Swc4jLibLoader {
     private static final String ARCH_X86_64 = "x86_64";
     private static final int BUFFER_LENGTH = 4096;
     private static final String CHMOD = "chmod";
-    private static final String LIB_FILE_EXTENSION_ANDROID = "so";
+    private static final String LIB_FILE_EXTENSION_ANDROID = "so.android";
     private static final String LIB_FILE_EXTENSION_LINUX = "so";
     private static final String LIB_FILE_EXTENSION_MACOS = "dylib";
     private static final String LIB_FILE_EXTENSION_WINDOWS = "dll";
     private static final String LIB_FILE_NAME_FORMAT = "libswc4j-{0}-{1}.v.{2}.{3}";
-    private static final String LIB_FILE_NAME_FOR_ANDROID_FORMAT = "libswc4j-{0}.v.{1}.{2}";
-    private static final String LIB_FILE_NAME_PREFIX = "lib";
     private static final String LIB_NAME = "swc4j";
     private static final String LIB_VERSION = "1.0.0";
     private static final ISwc4jLogger LOGGER = new Swc4jDefaultLogger(Swc4jLibLoader.class.getName());
@@ -144,20 +141,12 @@ final class Swc4jLibLoader {
         if (osArch == null) {
             throw Swc4jLibException.archNotSupported(OSUtils.OS_ARCH);
         }
-        if (OSUtils.IS_ANDROID) {
-            return MessageFormat.format(
-                    LIB_FILE_NAME_FOR_ANDROID_FORMAT,
-                    osName,
-                    LIB_VERSION,
-                    fileExtension);
-        } else {
-            return MessageFormat.format(
-                    LIB_FILE_NAME_FORMAT,
-                    osName,
-                    osArch,
-                    LIB_VERSION,
-                    fileExtension);
-        }
+        return MessageFormat.format(
+                LIB_FILE_NAME_FORMAT,
+                osName,
+                osArch,
+                LIB_VERSION,
+                fileExtension);
     }
 
     private String getOSArch() {
@@ -195,9 +184,7 @@ final class Swc4jLibLoader {
     }
 
     private String getResourceFileName() throws Swc4jLibException {
-        String resourceFileName = MessageFormat.format(RESOURCE_NAME_FORMAT, OSUtils.IS_ANDROID
-                ? StringUtils.join("/", LIB_FILE_NAME_PREFIX, getAndroidABI(), getLibFileName())
-                : getLibFileName());
+        String resourceFileName = MessageFormat.format(RESOURCE_NAME_FORMAT, getLibFileName());
         if (Swc4jNative.class.getResource(resourceFileName) == null) {
             throw Swc4jLibException.libNotFound(resourceFileName);
         }
