@@ -77,6 +77,7 @@ class ChangeSwc4jVersion {
   change() {
     this._change('README.md', [
       /swc4j:(?<version>\d+\.\d+\.\d+)/ig,
+      /swc4j-android:(?<version>\d+\.\d+\.\d+)/ig,
       /<version>(?<version>\d+\.\d+\.\d+)<\/version>/ig,
     ], false)
     this._change('build.gradle.kts', [
@@ -112,5 +113,5 @@ class ChangeSwc4jVersion {
   }
 }
 
-const changeSwc4jVersion = new ChangeSwc4jVersion('0.11.0', '1.0.0');
+const changeSwc4jVersion = new ChangeSwc4jVersion('1.0.0', '1.0.0');
 changeSwc4jVersion.change()
