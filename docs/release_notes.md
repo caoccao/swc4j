@@ -2,6 +2,7 @@
 
 ## 1.0.0
 
+* Upgraded deno_ast to v0.42.0
 * Revised internal error handling by relaying exception in `parse()`, `transform()`, `transpile()`
 * Enhanced logging in rust lib
 * Supported Android
