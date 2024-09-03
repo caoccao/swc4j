@@ -10,8 +10,6 @@ This doc is a guide to how to build this library.
 
 Follow the [Cross-compilation](https://rust-lang.github.io/rustup/cross-compilation.html) to add the following [supported platforms](https://doc.rust-lang.org/nightly/rustc/platform-support.html).
 
-Note: The Android build hasn't been implemented yet.
-
 ```sh
 # 64-bit MSVC (Windows 10+)
 rustup target add x86_64-pc-windows-msvc

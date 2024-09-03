@@ -4,6 +4,7 @@
 
 * Revised internal error handling by relaying exception in `parse()`, `transform()`, `transpile()`
 * Enhanced logging in rust lib
+* Supported Android
 
 ## 0.11.0
 

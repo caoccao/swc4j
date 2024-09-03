@@ -23,7 +23,7 @@ deno run --allow-all scripts/ts/copy_swc4j_lib.ts -o macos -a arm64
 deno run --allow-all scripts/ts/copy_swc4j_lib.ts -d -o macos -a arm64
 */
 
-import * as flags from "https://deno.land/std/flags/mod.ts";
+import * as cli from "https://deno.land/std/cli/mod.ts";
 import * as fs from "https://deno.land/std/fs/mod.ts";
 import * as path from "https://deno.land/std/path/mod.ts";
 
@@ -136,7 +136,7 @@ function copy(
   return 0;
 }
 
-const args = flags.parse(Deno.args, {
+const args = cli.parseArgs(Deno.args, {
   alias: {
     arch: "a",
     debug: "d",
