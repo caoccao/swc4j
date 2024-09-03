@@ -43,7 +43,7 @@ final class Swc4jLibLoader {
     private static final String ARCH_X86_64 = "x86_64";
     private static final int BUFFER_LENGTH = 4096;
     private static final String CHMOD = "chmod";
-    private static final String LIB_FILE_EXTENSION_ANDROID = "so.android";
+    private static final String LIB_FILE_EXTENSION_ANDROID = "soso";
     private static final String LIB_FILE_EXTENSION_LINUX = "so";
     private static final String LIB_FILE_EXTENSION_MACOS = "dylib";
     private static final String LIB_FILE_EXTENSION_WINDOWS = "dll";

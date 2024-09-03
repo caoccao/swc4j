@@ -62,7 +62,7 @@ const OS_CONFIG_MAP: Record<string, Config> = {
     sourceName: `lib${NAME}`,
     targetName: `lib${NAME}`,
     sourceExt: ".so",
-    targetExt: ".so.android",
+    targetExt: ".soso",
     targets: {
       x86: "i686-linux-android",
       x86_64: "x86_64-linux-android",
