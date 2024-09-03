@@ -10,7 +10,7 @@
 
 ## Features
 
-* Linux + MacOS + Windows
+* Android + Linux + MacOS + Windows
 * JavaScript, TypeScript, JSX, TSX, etc.
 * [Parse](docs/parse.md)
   * [AST](docs/features/ast.md)
@@ -53,13 +53,17 @@
 
 ```kotlin
 // Gradle Kotlin DSL
+// Linux + MacOS + Windows
 implementation("com.caoccao.javet:swc4j:1.0.0")
+// Android
 implementation("com.caoccao.javet:swc4j-android:1.0.0")
 ```
 
 ```groovy
 // Gradle Groovy DSL
+// Linux + MacOS + Windows
 implementation 'com.caoccao.javet:swc4j:1.0.0'
+// Android
 implementation 'com.caoccao.javet:swc4j-android:1.0.0'
 ```
 
