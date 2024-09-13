@@ -65,9 +65,9 @@ object Config {
 
     object Versions {
         const val JAVA_VERSION = "1.8"
-        const val JAVET = "3.1.4"
+        const val JAVET = "3.1.7"
         const val JUNIT = "5.10.1"
-        const val SWC4J = "1.0.0"
+        const val SWC4J = "1.1.0"
     }
 }
 

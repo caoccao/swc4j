@@ -99,7 +99,7 @@ class ChangeSwc4jVersion {
       /, "(?<version>\d+\.\d+\.\d+)"\)/ig,
     ])
     this._change('scripts/ts/copy_swc4j_lib.ts', [
-      /VERSION = '(?<version>\d+\.\d+\.\d+)'/ig,
+      /VERSION = "(?<version>\d+\.\d+\.\d+)"/ig,
     ])
     this._change('src/main/java/com/caoccao/javet/swc4j/Swc4jLibLoader.java', [
       /LIB_VERSION = "(?<version>\d+\.\d+\.\d+)"/ig,
@@ -113,5 +113,5 @@ class ChangeSwc4jVersion {
   }
 }
 
-const changeSwc4jVersion = new ChangeSwc4jVersion('1.0.0', '1.0.0');
+const changeSwc4jVersion = new ChangeSwc4jVersion('1.0.0', '1.1.0');
 changeSwc4jVersion.change()
