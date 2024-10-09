@@ -26,7 +26,7 @@ use swc4j::*;
 
 #[test]
 fn test_get_version() {
-  assert_eq!(core::get_version(), "1.1.0");
+  assert_eq!(core::get_version(), "1.2.0");
 }
 
 #[test]
