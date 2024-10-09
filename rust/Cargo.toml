@@ -12,7 +12,7 @@ crate-type = ["cdylib", "rlib"]
 base64 = "0.22.1"
 log = "0.4.22"
 env_logger = "0.11.5"
-deno_ast = { version = "0.42.0", features = [
+deno_ast = { version = "0.42.2", features = [
   "bundler",
   "cjs",
   "codegen",
@@ -32,4 +32,4 @@ deno_ast = { version = "0.42.0", features = [
 ] }
 jni = "0.21.1"
 num-bigint = "0.4.6"
-anyhow = "1.0.86"
+anyhow = "1.0.89"
