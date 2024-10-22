@@ -49,24 +49,22 @@ object Config {
     }
 
     object Projects {
-        const val JAVET = "com.caoccao.javet:javet:${Versions.JAVET}"
-        const val JAVET_LINUX_ARM64 = "com.caoccao.javet:javet-linux-arm64:${Versions.JAVET}"
-        const val JAVET_MACOS = "com.caoccao.javet:javet-macos:${Versions.JAVET}"
-
-        // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
-        const val JUNIT_JUPITER_API = "org.junit.jupiter:junit-jupiter-api:${Versions.JUNIT}"
-
-        // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
-        const val JUNIT_JUPITER_ENGINE = "org.junit.jupiter:junit-jupiter-engine:${Versions.JUNIT}"
-
-        // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-params
-        const val JUNIT_JUPITER_PARAMS = "org.junit.jupiter:junit-jupiter-params:${Versions.JUNIT}"
+        const val JAVET = "com.caoccao.javet:javet-core:${Versions.JAVET}"
+        val JAVET_BINARY = {
+            val os = OperatingSystem.current()
+            val arch = System.getProperty("os.arch")
+            val osType = if (os.isWindows) "windows" else
+                if (os.isMacOsX) "macos" else
+                    if (os.isLinux) "linux" else ""
+            val archType = if (arch == "aarch64" || arch == "arm64") "arm64" else "x86_64"
+            "com.caoccao.javet:javet-v8-$osType-$archType:${Versions.JAVET}"
+        }
     }
 
     object Versions {
         const val JAVA_VERSION = "1.8"
-        const val JAVET = "3.1.8"
-        const val JUNIT = "5.10.1"
+        const val JAVET = "4.0.0"
+        const val JUNIT = "5.11.3"
         const val SWC4J = "1.2.0"
     }
 }
@@ -95,17 +93,17 @@ java {
 
 dependencies {
     val os = OperatingSystem.current()
-    val cpuArch = System.getProperty("os.arch")
-    if (os.isMacOsX) {
-        testImplementation(Config.Projects.JAVET_MACOS)
-    } else if (os.isLinux && (cpuArch == "aarch64" || cpuArch == "arm64")) {
-        testImplementation(Config.Projects.JAVET_LINUX_ARM64)
-    } else {
-        testImplementation(Config.Projects.JAVET)
-    }
-    testImplementation(Config.Projects.JUNIT_JUPITER_API)
-    testImplementation(Config.Projects.JUNIT_JUPITER_PARAMS)
-    testRuntimeOnly(Config.Projects.JUNIT_JUPITER_ENGINE)
+    val arch = System.getProperty("os.arch")
+    val isI18n = false
+    val isNode = false
+    val i18nType = if (isI18n) "-i18n" else ""
+    val jsRuntimeTimeType = if (isNode) "node" else "v8"
+    val osType = if (os.isWindows) "windows" else
+        if (os.isMacOsX) "macos" else
+            if (os.isLinux) "linux" else ""
+    val archType = if (arch == "aarch64" || arch == "arm64") "arm64" else "x86_64"
+    testImplementation(Config.Projects.JAVET)
+    testImplementation(Config.Projects.JAVET_BINARY())
 }
 
 afterEvaluate {
@@ -134,6 +132,16 @@ task<Exec>("buildJNIHeaders") {
 tasks.jar {
     manifest {
         attributes["Automatic-Module-Name"] = Config.MODULE_NAME
+    }
+}
+
+testing {
+    suites {
+        // Configure the built-in test suite
+        val test by getting(JvmTestSuite::class) {
+            // Use JUnit Jupiter test framework
+            useJUnitJupiter(Config.Versions.JUNIT)
+        }
     }
 }
 
