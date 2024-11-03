@@ -62,6 +62,10 @@ When transforming JSX, what value should be used for the JSX fragment factory. D
 
 The string module specifier to implicitly import JSX factories from when transpiling JSX.
 
+### Module Kind
+
+The kind of module being transpiled. Defaults to being derived from the media type of the parsed source.
+
 ### Precompile JSX
 
 Should JSX be precompiled into static strings that need to be concatenated with dynamic content. Defaults to `false`, mutually exclusive with `transform_jsx`.
@@ -89,3 +93,7 @@ TypeScript experimental decorators.
 ### Var Decl Imports
 
 Should import declarations be transformed to variable declarations using a dynamic import. This is useful for import and export declaration support in script contexts such as the Deno REPL. Defaults to `false`.
+
+### Verbatim Module Syntax
+
+`true` changes type stripping behavior so that _only_ `type` imports are stripped.

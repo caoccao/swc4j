@@ -747,6 +747,7 @@ public class JavetSanitizerOptions {
      * Sets shebang enabled.
      *
      * @param shebangEnabled the shebang enabled
+     * @return the shebang enabled
      * @since 0.8.0
      */
     public JavetSanitizerOptions setShebangEnabled(boolean shebangEnabled) {

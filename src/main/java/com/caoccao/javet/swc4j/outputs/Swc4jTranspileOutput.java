@@ -59,6 +59,7 @@ public class Swc4jTranspileOutput extends Swc4jParseOutput {
      * @param sourceMap  the source map
      * @param sourceText the source text
      * @param tokens     the tokens
+     * @param comments   the comments
      * @since 0.1.0
      */
     @Jni2RustMethod
