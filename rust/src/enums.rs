@@ -180,6 +180,14 @@ declare_identifiable_enum!(
 );
 
 declare_identifiable_enum!(
+  JavaModuleKind,
+  JAVA_CLASS_MODULE_KIND,
+  ModuleKind,
+  "enums/",
+  "Swc4jModuleKind"
+);
+
+declare_identifiable_enum!(
   JavaMetaPropKind,
   JAVA_CLASS_META_PROP_KIND,
   MetaPropKind,
@@ -282,6 +290,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
     JAVA_CLASS_MEDIA_TYPE = Some(JavaMediaType::new(env));
     JAVA_CLASS_META_PROP_KIND = Some(JavaMetaPropKind::new(env));
     JAVA_CLASS_METHOD_KIND = Some(JavaMethodKind::new(env));
+    JAVA_CLASS_MODULE_KIND = Some(JavaModuleKind::new(env));
     JAVA_CLASS_PARSE_MODE = Some(JavaParseMode::new(env));
     JAVA_CLASS_SOURCE_MAP_OPTION = Some(JavaSourceMapOption::new(env));
     JAVA_CLASS_TOKEN_TYPE = Some(JavaTokenType::new(env));
@@ -1062,8 +1071,8 @@ impl IdentifiableEnum<MediaType> for MediaType {
       MediaType::Dcts => 9,
       MediaType::Tsx => 10,
       MediaType::Json => 11,
-      MediaType::Wasm => 12,
-      MediaType::TsBuildInfo => 13,
+      MediaType::Css => 12,
+      MediaType::Wasm => 13,
       MediaType::SourceMap => 14,
       MediaType::Unknown => 15,
     }
@@ -1082,8 +1091,8 @@ impl IdentifiableEnum<MediaType> for MediaType {
       9 => MediaType::Dcts,
       10 => MediaType::Tsx,
       11 => MediaType::Json,
-      12 => MediaType::Wasm,
-      13 => MediaType::TsBuildInfo,
+      12 => MediaType::Css,
+      13 => MediaType::Wasm,
       14 => MediaType::SourceMap,
       15 => MediaType::Unknown,
       _ => MediaType::Unknown,
@@ -1105,6 +1114,32 @@ impl IdentifiableEnum<MethodKind> for MethodKind {
       1 => MethodKind::Getter,
       2 => MethodKind::Setter,
       _ => MethodKind::Method,
+    }
+  }
+}
+
+#[derive(Default, Debug, Copy, Clone)]
+pub enum ModuleKind {
+  #[default]
+  Auto,
+  Esm,
+  Cjs,
+}
+
+impl IdentifiableEnum<ModuleKind> for ModuleKind {
+  fn get_id(&self) -> i32 {
+    match self {
+      ModuleKind::Auto => 0,
+      ModuleKind::Esm => 1,
+      ModuleKind::Cjs => 2,
+    }
+  }
+  fn parse_by_id(id: i32) -> ModuleKind {
+    match id {
+      0 => ModuleKind::Auto,
+      1 => ModuleKind::Esm,
+      2 => ModuleKind::Cjs,
+      _ => ModuleKind::Auto,
     }
   }
 }

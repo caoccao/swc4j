@@ -260,10 +260,10 @@ impl ParseOutput {
       None
     };
     let media_type = parsed_source.media_type();
-    let parse_mode = if parsed_source.is_module() {
-      ParseMode::Module
-    } else {
+    let parse_mode = if parsed_source.compute_is_script() {
       ParseMode::Script
+    } else {
+      ParseMode::Module
     };
     let program = if parse_options.capture_ast {
       Some(parsed_source.program())
@@ -356,10 +356,10 @@ pub struct TransformOutput {
 impl TransformOutput {
   pub fn new(parsed_source: &ParsedSource, code: String, source_map: Option<String>) -> Self {
     let media_type = parsed_source.media_type();
-    let parse_mode = if parsed_source.is_module() {
-      ParseMode::Module
-    } else {
+    let parse_mode = if parsed_source.compute_is_script() {
       ParseMode::Script
+    } else {
+      ParseMode::Module
     };
     TransformOutput {
       code,
@@ -411,21 +411,19 @@ impl TranspileOutput {
       None
     };
     let emitted_source = transpile_result.clone().into_source();
-    let code = String::from_utf8(emitted_source.source).unwrap_or_default();
+    let code = emitted_source.text.clone();
     let media_type = parsed_source.media_type();
-    let parse_mode = if parsed_source.is_module() {
-      ParseMode::Module
-    } else {
+    let parse_mode = if parsed_source.compute_is_script() {
       ParseMode::Script
+    } else {
+      ParseMode::Module
     };
     let program = if transpile_options.capture_ast {
       Some(parsed_source.program())
     } else {
       None
     };
-    let source_map = emitted_source
-      .source_map
-      .map(|source_map| String::from_utf8(source_map).unwrap_or_default());
+    let source_map = emitted_source.source_map.clone();
     let source_text = parsed_source.text().to_string();
     let tokens = if transpile_options.capture_tokens {
       Some(Arc::new(parsed_source.tokens().to_vec()))

@@ -1,5 +1,13 @@
 # Release Notes
 
+## 1.2.0
+
+* Upgraded deno_ast to v0.43.3
+* Removed `TsBuildInfo` from `Swc4jMediaType`
+* Added `Css` to `Swc4jMediaType`
+* Added `verbatimModuleSyntax` to `Swc4jTranspileOptions`
+* Added `Swc4jModuleKind` to `Swc4jTranspileOptions`
+
 ## 1.1.0
 
 * Upgraded deno_ast to v0.42.2

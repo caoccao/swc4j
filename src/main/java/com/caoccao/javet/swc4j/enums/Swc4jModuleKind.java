@@ -21,31 +21,34 @@ import com.caoccao.javet.swc4j.interfaces.ISwc4jEnumId;
 import java.util.stream.Stream;
 
 /**
- * The enum Swc4j media type.
+ * The kind of module being transpiled.
+ * Defaults to being derived from the media type of the parsed source.
  *
- * @since 0.1.0
+ * @since 1.2.0
  */
-public enum Swc4jMediaType implements ISwc4jEnumId {
-    JavaScript(0),
-    Jsx(1),
-    Mjs(2),
-    Cjs(3),
-    TypeScript(4),
-    Mts(5),
-    Cts(6),
-    Dts(7),
-    Dmts(8),
-    Dcts(9),
-    Tsx(10),
-    Json(11),
-    Css(12),
-    Wasm(13),
-    SourceMap(14),
-    Unknown(15),
+public enum Swc4jModuleKind implements ISwc4jEnumId {
+    /**
+     * Auto.
+     *
+     * @since 1.2.0
+     */
+    Auto(0),
+    /**
+     * Es Module.
+     *
+     * @since 1.2.0
+     */
+    Esm(1),
+    /**
+     * CommonJS Module.
+     *
+     * @since 1.2.0
+     */
+    Cjs(2),
     ;
 
     private static final int LENGTH = values().length;
-    private static final Swc4jMediaType[] TYPES = new Swc4jMediaType[LENGTH];
+    private static final Swc4jModuleKind[] TYPES = new Swc4jModuleKind[LENGTH];
 
     static {
         Stream.of(values()).forEach(v -> TYPES[v.getId()] = v);
@@ -53,19 +56,19 @@ public enum Swc4jMediaType implements ISwc4jEnumId {
 
     private final int id;
 
-    Swc4jMediaType(int id) {
+    Swc4jModuleKind(int id) {
         this.id = id;
     }
 
     /**
-     * Parse swc4j media type.
+     * Parse swc4j module kind.
      *
      * @param id the id
-     * @return the swc4j media type
-     * @since 0.1.0
+     * @return the swc4j module kind
+     * @since 1.2.0
      */
-    public static Swc4jMediaType parse(int id) {
-        return id >= 0 && id < LENGTH ? TYPES[id] : Unknown;
+    public static Swc4jModuleKind parse(int id) {
+        return id >= 0 && id < LENGTH ? TYPES[id] : Auto;
     }
 
     @Override

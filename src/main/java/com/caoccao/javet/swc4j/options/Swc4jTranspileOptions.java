@@ -16,10 +16,7 @@
 
 package com.caoccao.javet.swc4j.options;
 
-import com.caoccao.javet.swc4j.enums.Swc4jImportsNotUsedAsValues;
-import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
-import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
-import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
+import com.caoccao.javet.swc4j.enums.*;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustClass;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustFilePath;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
@@ -113,6 +110,13 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     protected boolean keepComments;
     /**
+     * The kind of module being transpiled.
+     * Defaults to being derived from the media type of the parsed source.
+     *
+     * @since 1.2.0
+     */
+    protected Swc4jModuleKind moduleKind;
+    /**
      * Should JSX be precompiled into static strings that need to be concatenated
      * with dynamic content. Defaults to `false`, mutually exclusive with
      * `transform_jsx`.
@@ -164,6 +168,12 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      * @since 0.1.0
      */
     protected boolean varDeclImports;
+    /**
+     * `true` changes type stripping behaviour so that _only_ `type` imports are stripped.
+     *
+     * @since 1.2.0
+     */
+    protected boolean verbatimModuleSyntax;
 
     /**
      * Instantiates a new Swc4j transpile options.
@@ -181,12 +191,14 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
         setJsxImportSource(null);
         setInlineSources(true);
         setKeepComments(false);
+        setModuleKind(Swc4jModuleKind.Auto);
         setPrecompileJsx(false);
         setPrecompileJsxDynamicProps(null);
         setPrecompileJsxSkipElements(null);
         setSourceMap(Swc4jSourceMapOption.Inline);
         setTransformJsx(true);
         setVarDeclImports(false);
+        setVerbatimModuleSyntax(false);
         setUseTsDecorators(false);
     }
 
@@ -232,6 +244,17 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     @Jni2RustMethod(optional = true)
     public String getJsxImportSource() {
         return jsxImportSource;
+    }
+
+    /**
+     * Gets module kind.
+     *
+     * @return the module kind
+     * @since 1.2.0
+     */
+    @Jni2RustMethod
+    public Swc4jModuleKind getModuleKind() {
+        return moduleKind;
     }
 
     /**
@@ -377,6 +400,17 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
         return varDeclImports;
     }
 
+    /**
+     * Is verbatim module syntax.
+     *
+     * @return true : yes, false : no
+     * @since 1.2.0
+     */
+    @Jni2RustMethod
+    public boolean isVerbatimModuleSyntax() {
+        return verbatimModuleSyntax;
+    }
+
     @Override
     public Swc4jTranspileOptions setCaptureAst(boolean captureAst) {
         super.setCaptureAst(captureAst);
@@ -516,6 +550,18 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
+     * Sets module kind.
+     *
+     * @param moduleKind the module kind
+     * @return the self
+     * @since 1.2.0
+     */
+    public Swc4jTranspileOptions setModuleKind(Swc4jModuleKind moduleKind) {
+        this.moduleKind = AssertionUtils.notNull(moduleKind, "Module kind");
+        return this;
+    }
+
+    /**
      * Sets parse mode.
      *
      * @param parseMode the parse mode
@@ -648,6 +694,18 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     public Swc4jTranspileOptions setVarDeclImports(boolean varDeclImports) {
         this.varDeclImports = varDeclImports;
+        return this;
+    }
+
+    /**
+     * Sets verbatim module syntax.
+     *
+     * @param verbatimModuleSyntax the verbatim module syntax
+     * @return the self
+     * @since 1.2.0
+     */
+    public Swc4jTranspileOptions setVerbatimModuleSyntax(boolean verbatimModuleSyntax) {
+        this.verbatimModuleSyntax = verbatimModuleSyntax;
         return this;
     }
 }

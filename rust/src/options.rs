@@ -611,6 +611,7 @@ struct JavaSwc4jTranspileOptions {
   method_get_jsx_fragment_factory: JMethodID,
   method_get_jsx_import_source: JMethodID,
   method_get_media_type: JMethodID,
+  method_get_module_kind: JMethodID,
   method_get_parse_mode: JMethodID,
   method_get_plugin_host: JMethodID,
   method_get_precompile_jsx_dynamic_props: JMethodID,
@@ -631,6 +632,7 @@ struct JavaSwc4jTranspileOptions {
   method_is_use_decorators_proposal: JMethodID,
   method_is_use_ts_decorators: JMethodID,
   method_is_var_decl_imports: JMethodID,
+  method_is_verbatim_module_syntax: JMethodID,
 }
 unsafe impl Send for JavaSwc4jTranspileOptions {}
 unsafe impl Sync for JavaSwc4jTranspileOptions {}
@@ -679,6 +681,13 @@ impl JavaSwc4jTranspileOptions {
         "()Lcom/caoccao/javet/swc4j/enums/Swc4jMediaType;",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getMediaType");
+    let method_get_module_kind = env
+      .get_method_id(
+        &class,
+        "getModuleKind",
+        "()Lcom/caoccao/javet/swc4j/enums/Swc4jModuleKind;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getModuleKind");
     let method_get_parse_mode = env
       .get_method_id(
         &class,
@@ -819,6 +828,13 @@ impl JavaSwc4jTranspileOptions {
         "()Z",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isVarDeclImports");
+    let method_is_verbatim_module_syntax = env
+      .get_method_id(
+        &class,
+        "isVerbatimModuleSyntax",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.isVerbatimModuleSyntax");
     JavaSwc4jTranspileOptions {
       class,
       method_get_imports_not_used_as_values,
@@ -826,6 +842,7 @@ impl JavaSwc4jTranspileOptions {
       method_get_jsx_fragment_factory,
       method_get_jsx_import_source,
       method_get_media_type,
+      method_get_module_kind,
       method_get_parse_mode,
       method_get_plugin_host,
       method_get_precompile_jsx_dynamic_props,
@@ -846,6 +863,7 @@ impl JavaSwc4jTranspileOptions {
       method_is_use_decorators_proposal,
       method_is_use_ts_decorators,
       method_is_var_decl_imports,
+      method_is_verbatim_module_syntax,
     }
   }
 
@@ -940,6 +958,24 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_media_type,
         &[],
         "Swc4jMediaType get_media_type()"
+      )?;
+    Ok(return_value)
+  }
+
+  pub fn get_module_kind<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<JObject<'a>>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_module_kind,
+        &[],
+        "Swc4jModuleKind get_module_kind()"
       )?;
     Ok(return_value)
   }
@@ -1290,6 +1326,22 @@ impl JavaSwc4jTranspileOptions {
       )?;
     Ok(return_value)
   }
+
+  pub fn is_verbatim_module_syntax<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<bool>
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_verbatim_module_syntax,
+        &[],
+        "boolean is_verbatim_module_syntax()"
+      )?;
+    Ok(return_value)
+  }
 }
 /* JavaSwc4jTranspileOptions End */
 
@@ -1532,6 +1584,8 @@ pub struct TranspileOptions<'a> {
   pub keep_comments: bool,
   /// Media type of the source text.
   pub media_type: MediaType,
+  /// Module kind.
+  pub module_kind: ModuleKind,
   /// Should the code to be parsed as Module or Script,
   pub parse_mode: ParseMode,
   /// AST plugin host.
@@ -1562,6 +1616,9 @@ pub struct TranspileOptions<'a> {
   /// a dynamic import. This is useful for import & export declaration support
   /// in script contexts such as the Deno REPL.  Defaults to `false`.
   pub var_decl_imports: bool,
+  /// `true` changes type stripping behaviour so that _only_ `type` imports
+  /// are stripped.
+  pub verbatim_module_syntax: bool,
 }
 
 impl<'a> TranspileOptions<'a> {
@@ -1586,6 +1643,7 @@ impl<'a> Default for TranspileOptions<'a> {
       jsx_import_source: None,
       keep_comments: false,
       media_type: MediaType::TypeScript,
+      module_kind: ModuleKind::Auto,
       parse_mode: ParseMode::Program,
       plugin_host: None,
       precompile_jsx: false,
@@ -1596,6 +1654,7 @@ impl<'a> Default for TranspileOptions<'a> {
       specifier: "file:///main.js".to_owned(),
       transform_jsx: true,
       var_decl_imports: false,
+      verbatim_module_syntax: false,
       use_decorators_proposal: false,
       use_ts_decorators: false,
     }
@@ -1622,6 +1681,9 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
     let java_media_type = java_transpile_options.get_media_type(env, obj)?;
     let media_type = *MediaType::from_java(env, &java_media_type)?;
     delete_local_ref!(env, java_media_type);
+    let java_module_kind = java_transpile_options.get_module_kind(env, obj)?;
+    let module_kind = *ModuleKind::from_java(env, &java_module_kind)?;
+    delete_local_ref!(env, java_module_kind);
     let java_parse_mode = java_transpile_options.get_parse_mode(env, obj)?;
     let parse_mode = *ParseMode::from_java(env, &java_parse_mode)?;
     delete_local_ref!(env, java_parse_mode);
@@ -1673,6 +1735,7 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
     let specifier = url_to_string(env, &specifier)?;
     let transform_jsx = java_transpile_options.is_transform_jsx(env, obj)?;
     let var_decl_imports = java_transpile_options.is_var_decl_imports(env, obj)?;
+    let verbatim_module_syntax = java_transpile_options.is_verbatim_module_syntax(env, obj)?;
     let use_decorators_proposal = java_transpile_options.is_use_decorators_proposal(env, obj)?;
     let use_ts_decorators = java_transpile_options.is_use_ts_decorators(env, obj)?;
     delete_local_ref!(env, java_source_map);
@@ -1690,6 +1753,7 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
       jsx_import_source,
       keep_comments,
       media_type,
+      module_kind,
       parse_mode,
       plugin_host,
       precompile_jsx,
@@ -1700,6 +1764,7 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
       specifier,
       transform_jsx,
       var_decl_imports,
+      verbatim_module_syntax,
       use_decorators_proposal,
       use_ts_decorators,
     }))

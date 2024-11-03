@@ -142,8 +142,8 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
     wr: writer,
   };
   match parsed_source.program_ref() {
-    Program::Module(module) => emitter.emit_module(module)?,
-    Program::Script(script) => emitter.emit_script(script)?,
+    ProgramRef::Module(module) => emitter.emit_module(module)?,
+    ProgramRef::Script(script) => emitter.emit_script(script)?,
   };
   let mut code = String::from_utf8(buffer.to_vec()).map_err(Error::msg)?;
   if options.omit_last_semi && code.ends_with(";") {
@@ -201,8 +201,16 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
     precompile_jsx_skip_elements: options.precompile_jsx_skip_elements.to_owned(),
     transform_jsx: options.transform_jsx,
     var_decl_imports: options.var_decl_imports,
+    verbatim_module_syntax: options.verbatim_module_syntax,
     use_decorators_proposal: options.use_decorators_proposal,
     use_ts_decorators: options.use_ts_decorators,
+  };
+  let transpile_module_options = TranspileModuleOptions {
+    module_kind: match options.module_kind {
+      enums::ModuleKind::Auto => None,
+      enums::ModuleKind::Esm => Some(ModuleKind::Esm),
+      enums::ModuleKind::Cjs => Some(ModuleKind::Cjs),
+    },
   };
   let emit_options = EmitOptions {
     inline_sources: options.inline_sources,
@@ -213,7 +221,7 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
   };
   parsed_source
     .clone()
-    .transpile(&transpile_options, &emit_options)
+    .transpile(&transpile_options, &transpile_module_options, &emit_options)
     .map(|transpile_result| outputs::TranspileOutput::new(&options, &parsed_source, &transpile_result))
     .map_err(Error::msg)
 }
