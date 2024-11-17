@@ -18,6 +18,8 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.visitors.ISwc4jAstVisitor;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
@@ -74,6 +76,20 @@ public class Swc4jAstNumber
 
     public static Swc4jAstNumber createNaN() {
         return create(Double.NaN, null);
+    }
+
+    protected static int getMinusCount(ISwc4jAst ast) {
+        switch (ast.getType()) {
+            case ParenExpr:
+                return getMinusCount(ast.getParent());
+            case UnaryExpr:
+                if (ast.as(Swc4jAstUnaryExpr.class).getOp() == Swc4jAstUnaryOp.Minus) {
+                    return getMinusCount(ast.getParent()) + 1;
+                }
+                return 0;
+            default:
+                return 0;
+        }
     }
 
     protected static String normalize(String raw) {
@@ -174,6 +190,10 @@ public class Swc4jAstNumber
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;
+    }
+
+    public int getMinusCount() {
+        return getMinusCount(getParent());
     }
 
     @Jni2RustMethod

@@ -18,11 +18,16 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
+import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -69,6 +74,27 @@ public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
         assertEquals(12.34D, number.getValue(), 0.0001D);
         assertEquals("12.34", number.getRaw().get());
         assertSpan(code, script);
+    }
+
+    @Test
+    public void testGetMinusCount() throws Swc4jCoreException {
+        Map<String, Integer> testCaseMap = SimpleMap.of(
+                "12345", 0,
+                "-12345", 1,
+                "(-12345)", 1,
+                "-(-12345)", 2,
+                "-(-(-12345))", 3);
+        for (Map.Entry<String, Integer> entry : testCaseMap.entrySet()) {
+            String code = entry.getKey();
+            int minusCount = entry.getValue();
+            Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
+            List<ISwc4jAst> nodes = output.getProgram().find(Swc4jAstNumber.class);
+            assertEquals(1, nodes.size());
+            Swc4jAstNumber number = nodes.get(0).as(Swc4jAstNumber.class);
+            assertEquals(12345, number.asInt());
+            assertEquals("12345", number.getRaw().get());
+            assertEquals(minusCount, number.getMinusCount());
+        }
     }
 
     @Test

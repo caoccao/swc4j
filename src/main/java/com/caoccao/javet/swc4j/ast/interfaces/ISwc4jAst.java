@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitorResponse;
 import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
+import com.caoccao.javet.swc4j.utils.SimpleList;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +54,42 @@ public interface ISwc4jAst {
      */
     default Optional<ISwc4jAst> eval() {
         return Optional.empty();
+    }
+
+    /**
+     * Find by class without depth limit.
+     *
+     * @param <T>   the type parameter
+     * @param clazz the class
+     * @return the list of AST nodes
+     * @since 1.3.0
+     */
+    default <T extends ISwc4jAst> List<ISwc4jAst> find(Class<T> clazz) {
+        return find(clazz, -1);
+    }
+
+    /**
+     * Find by class with depth limit.
+     *
+     * @param <T>   the type parameter
+     * @param clazz the class
+     * @param depth the depth
+     * @return the list of AST nodes
+     * @since 1.3.0
+     */
+    default <T extends ISwc4jAst> List<ISwc4jAst> find(Class<T> clazz, int depth) {
+        AssertionUtils.notNull(clazz, "Class");
+        List<ISwc4jAst> nodes = SimpleList.of();
+        getChildNodes().forEach((childNode) -> {
+            if (clazz.isAssignableFrom(childNode.getClass())) {
+                nodes.add(childNode);
+            }
+            if (depth != 0) {
+                final int newDepth = depth > 0 ? depth - 1 : depth;
+                nodes.addAll(childNode.find(clazz, newDepth));
+            }
+        });
+        return nodes;
     }
 
     /**
@@ -163,6 +200,7 @@ public interface ISwc4jAst {
 
     /**
      * Update parent.
+     *
      * @since 0.8.0
      */
     void updateParent();

@@ -1,5 +1,10 @@
 # Release Notes
 
+## 1.3.0
+
+* Added `find()` to `ISwc4jAst`
+* Added `getMinusCount()` to `Swc4jAstNumber`
+
 ## 1.2.0
 
 * Upgraded deno_ast to v0.43.3
