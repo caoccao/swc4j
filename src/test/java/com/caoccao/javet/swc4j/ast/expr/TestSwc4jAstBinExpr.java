@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.expr;
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.ast.visitors.Swc4jAstVisitor;
@@ -29,6 +30,7 @@ import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -76,6 +78,26 @@ public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
             return true;
         };
         assertTransformJs(testCaseMap, pluginHost);
+    }
+
+    @Test
+    public void testGetBangCount() throws Swc4jCoreException {
+        Map<String, Integer> testCaseMap = SimpleMap.of(
+                "a>b", 0,
+                "!(a>b)", 1,
+                "!(!(a>b))", 2,
+                "!(!(!(a>b)))", 3);
+        for (Map.Entry<String, Integer> entry : testCaseMap.entrySet()) {
+            String code = entry.getKey();
+            int bangCount = entry.getValue();
+            Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
+            List<ISwc4jAst> nodes = output.getProgram().find(Swc4jAstBinExpr.class);
+            assertEquals(1, nodes.size());
+            Swc4jAstBinExpr binExpr = nodes.get(0).as(Swc4jAstBinExpr.class);
+            assertEquals("a", binExpr.getLeft().as(Swc4jAstIdent.class).getSym());
+            assertEquals("b", binExpr.getRight().as(Swc4jAstIdent.class).getSym());
+            assertEquals(bangCount, binExpr.getBangCount());
+        }
     }
 
     @Test

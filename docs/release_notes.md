@@ -4,6 +4,7 @@
 
 * Added `find()` to `ISwc4jAst`
 * Added `getMinusCount()` to `Swc4jAstNumber`
+* Added `getBangCount()` to `Swc4jAstBinExpr`
 
 ## 1.2.0
 

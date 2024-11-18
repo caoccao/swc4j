@@ -19,6 +19,7 @@ package com.caoccao.javet.swc4j.ast.expr;
 import com.caoccao.javet.swc4j.ast.Swc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
@@ -63,6 +64,25 @@ public class Swc4jAstBinExpr
 
     public static Swc4jAstBinExpr create(Swc4jAstBinaryOp op, ISwc4jAstExpr left, ISwc4jAstExpr right) {
         return new Swc4jAstBinExpr(op, left, right, Swc4jSpan.DUMMY);
+    }
+
+    protected static int getBangCount(ISwc4jAst ast) {
+        switch (ast.getType()) {
+            case BinExpr:
+                if (ast.as(Swc4jAstBinExpr.class).getOp().isLogicalOperator()) {
+                    return getBangCount(ast.getParent());
+                }
+                return 0;
+            case ParenExpr:
+                return getBangCount(ast.getParent());
+            case UnaryExpr:
+                if (ast.as(Swc4jAstUnaryExpr.class).getOp() == Swc4jAstUnaryOp.Bang) {
+                    return getBangCount(ast.getParent()) + 1;
+                }
+                return 0;
+            default:
+                return 0;
+        }
     }
 
     @Override
@@ -208,6 +228,10 @@ public class Swc4jAstBinExpr
                 break;
         }
         return super.eval();
+    }
+
+    public int getBangCount() {
+        return getBangCount(getParent());
     }
 
     @Override

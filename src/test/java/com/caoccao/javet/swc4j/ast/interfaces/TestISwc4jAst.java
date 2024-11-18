@@ -34,8 +34,8 @@ public class TestISwc4jAst extends BaseTestSuiteSwc4jAst {
         Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
         IntStream.range(0, 7).forEach(i ->
                 assertTrue(output.getProgram().find(Swc4jAstNumber.class, i).isEmpty()));
-        assertEquals(1, output.getProgram().find(Swc4jAstNumber.class, 8).size());
-        assertEquals(1, output.getProgram().find(Swc4jAstNumber.class, -1).size());
+        IntStream.of(-2, -1, 8).forEach(i ->
+                assertEquals(1, output.getProgram().find(Swc4jAstNumber.class, i).size()));
         assertEquals(1, output.getProgram().find(Swc4jAstNumber.class).size());
     }
 }
