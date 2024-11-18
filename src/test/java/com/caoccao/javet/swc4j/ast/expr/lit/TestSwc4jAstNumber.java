@@ -18,7 +18,6 @@ package com.caoccao.javet.swc4j.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.BaseTestSuiteSwc4jAst;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstType;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.program.Swc4jAstScript;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
@@ -88,9 +87,9 @@ public class TestSwc4jAstNumber extends BaseTestSuiteSwc4jAst {
             String code = entry.getKey();
             int minusCount = entry.getValue();
             Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
-            List<ISwc4jAst> nodes = output.getProgram().find(Swc4jAstNumber.class);
+            List<Swc4jAstNumber> nodes = output.getProgram().find(Swc4jAstNumber.class);
             assertEquals(1, nodes.size());
-            Swc4jAstNumber number = nodes.get(0).as(Swc4jAstNumber.class);
+            Swc4jAstNumber number = nodes.get(0);
             assertEquals(12345, number.asInt());
             assertEquals("12345", number.getRaw().get());
             assertEquals(minusCount, number.getMinusCount());

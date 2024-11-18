@@ -64,7 +64,7 @@ public interface ISwc4jAst {
      * @return the list of AST nodes
      * @since 1.3.0
      */
-    default <T extends ISwc4jAst> List<ISwc4jAst> find(Class<T> clazz) {
+    default <T extends ISwc4jAst> List<T> find(Class<T> clazz) {
         return find(clazz, -1);
     }
 
@@ -77,12 +77,13 @@ public interface ISwc4jAst {
      * @return the list of AST nodes
      * @since 1.3.0
      */
-    default <T extends ISwc4jAst> List<ISwc4jAst> find(Class<T> clazz, int depth) {
+    @SuppressWarnings("unchecked")
+    default <T extends ISwc4jAst> List<T> find(Class<T> clazz, int depth) {
         AssertionUtils.notNull(clazz, "Class");
-        List<ISwc4jAst> nodes = SimpleList.of();
+        List<T> nodes = SimpleList.of();
         getChildNodes().forEach((childNode) -> {
             if (clazz.isAssignableFrom(childNode.getClass())) {
-                nodes.add(childNode);
+                nodes.add((T) childNode);
             }
             if (depth != 0) {
                 final int newDepth = depth > 0 ? depth - 1 : depth;
