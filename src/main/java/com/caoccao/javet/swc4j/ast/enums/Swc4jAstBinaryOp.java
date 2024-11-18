@@ -52,29 +52,29 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
     private static final Swc4jAstBinaryOp[] TYPES = new Swc4jAstBinaryOp[LENGTH];
 
     static {
-        Add.setArithmeticOperator();
-        BitAnd.setBitOperator();
-        BitOr.setBitOperator();
+        Add.setArithmeticOperator().setOppositeOperator(Sub);
+        BitAnd.setBitOperator().setOppositeOperator(BitOr);
+        BitOr.setBitOperator().setOppositeOperator(BitAnd);
         BitXor.setBitOperator();
-        Div.setArithmeticOperator();
-        EqEq.setLogicalOperator();
-        EqEqEq.setLogicalOperator();
+        Div.setArithmeticOperator().setOppositeOperator(Mul);
+        EqEq.setLogicalOperator().setOppositeOperator(NotEq);
+        EqEqEq.setLogicalOperator().setOppositeOperator(NotEqEq);
         Exp.setArithmeticOperator();
-        Gt.setLogicalOperator();
-        GtEq.setLogicalOperator();
+        Gt.setLogicalOperator().setOppositeOperator(LtEq);
+        GtEq.setLogicalOperator().setOppositeOperator(Lt);
         In.setSpaceRequired();
         InstanceOf.setSpaceRequired();
-        LogicalAnd.setLogicalOperator();
-        LogicalOr.setLogicalOperator();
-        LShift.setArithmeticOperator();
-        Lt.setLogicalOperator();
-        LtEq.setLogicalOperator();
+        LogicalAnd.setLogicalOperator().setOppositeOperator(LogicalOr);
+        LogicalOr.setLogicalOperator().setOppositeOperator(LogicalAnd);
+        LShift.setArithmeticOperator().setOppositeOperator(RShift);
+        Lt.setLogicalOperator().setOppositeOperator(GtEq);
+        LtEq.setLogicalOperator().setOppositeOperator(Gt);
         Mod.setArithmeticOperator();
-        Mul.setArithmeticOperator();
-        NotEq.setLogicalOperator();
-        NotEqEq.setLogicalOperator();
-        RShift.setArithmeticOperator();
-        Sub.setArithmeticOperator();
+        Mul.setArithmeticOperator().setOppositeOperator(Div);
+        NotEq.setLogicalOperator().setOppositeOperator(EqEq);
+        NotEqEq.setLogicalOperator().setOppositeOperator(EqEqEq);
+        RShift.setArithmeticOperator().setOppositeOperator(LShift);
+        Sub.setArithmeticOperator().setOppositeOperator(Add);
         ZeroFillRShift.setArithmeticOperator();
         Stream.of(values()).forEach(v -> TYPES[v.getId()] = v);
     }
@@ -84,6 +84,7 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
     private boolean arithmeticOperator;
     private boolean bitOperator;
     private boolean logicalOperator;
+    private Swc4jAstBinaryOp oppositeOperator;
     private boolean spaceRequired;
 
     Swc4jAstBinaryOp(int id, String name) {
@@ -92,6 +93,7 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
         this.id = id;
         logicalOperator = false;
         this.name = name;
+        oppositeOperator = null;
         spaceRequired = false;
     }
 
@@ -107,6 +109,10 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
     @Override
     public String getName() {
         return name;
+    }
+
+    public Swc4jAstBinaryOp getOppositeOperator() {
+        return oppositeOperator;
     }
 
     public boolean isArithmeticOperator() {
@@ -137,6 +143,11 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
 
     private Swc4jAstBinaryOp setLogicalOperator() {
         this.logicalOperator = true;
+        return this;
+    }
+
+    private Swc4jAstBinaryOp setOppositeOperator(Swc4jAstBinaryOp oppositeOperator) {
+        this.oppositeOperator = oppositeOperator;
         return this;
     }
 
