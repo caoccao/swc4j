@@ -57,22 +57,22 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
         BitOr.setBitOperator().setOppositeOperator(BitAnd);
         BitXor.setBitOperator();
         Div.setArithmeticOperator().setOppositeOperator(Mul);
-        EqEq.setLogicalOperator().setOppositeOperator(NotEq);
-        EqEqEq.setLogicalOperator().setOppositeOperator(NotEqEq);
+        EqEq.setLogicalCompareOperator().setOppositeOperator(NotEq);
+        EqEqEq.setLogicalCompareOperator().setOppositeOperator(NotEqEq);
         Exp.setArithmeticOperator();
-        Gt.setLogicalOperator().setOppositeOperator(LtEq);
-        GtEq.setLogicalOperator().setOppositeOperator(Lt);
+        Gt.setLogicalCompareOperator().setOppositeOperator(LtEq);
+        GtEq.setLogicalCompareOperator().setOppositeOperator(Lt);
         In.setSpaceRequired();
         InstanceOf.setSpaceRequired();
-        LogicalAnd.setLogicalOperator().setOppositeOperator(LogicalOr);
-        LogicalOr.setLogicalOperator().setOppositeOperator(LogicalAnd);
+        LogicalAnd.setLogicalConditionOperator().setOppositeOperator(LogicalOr);
+        LogicalOr.setLogicalConditionOperator().setOppositeOperator(LogicalAnd);
         LShift.setArithmeticOperator().setOppositeOperator(RShift);
-        Lt.setLogicalOperator().setOppositeOperator(GtEq);
-        LtEq.setLogicalOperator().setOppositeOperator(Gt);
+        Lt.setLogicalCompareOperator().setOppositeOperator(GtEq);
+        LtEq.setLogicalCompareOperator().setOppositeOperator(Gt);
         Mod.setArithmeticOperator();
         Mul.setArithmeticOperator().setOppositeOperator(Div);
-        NotEq.setLogicalOperator().setOppositeOperator(EqEq);
-        NotEqEq.setLogicalOperator().setOppositeOperator(EqEqEq);
+        NotEq.setLogicalCompareOperator().setOppositeOperator(EqEq);
+        NotEqEq.setLogicalCompareOperator().setOppositeOperator(EqEqEq);
         RShift.setArithmeticOperator().setOppositeOperator(LShift);
         Sub.setArithmeticOperator().setOppositeOperator(Add);
         ZeroFillRShift.setArithmeticOperator();
@@ -83,7 +83,8 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
     private final String name;
     private boolean arithmeticOperator;
     private boolean bitOperator;
-    private boolean logicalOperator;
+    private boolean logicalCompareOperator;
+    private boolean logicalConditionOperator;
     private Swc4jAstBinaryOp oppositeOperator;
     private boolean spaceRequired;
 
@@ -91,7 +92,8 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
         arithmeticOperator = false;
         bitOperator = false;
         this.id = id;
-        logicalOperator = false;
+        logicalCompareOperator = false;
+        logicalConditionOperator = false;
         this.name = name;
         oppositeOperator = null;
         spaceRequired = false;
@@ -123,8 +125,16 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
         return bitOperator;
     }
 
+    public boolean isLogicalCompareOperator() {
+        return logicalCompareOperator;
+    }
+
+    public boolean isLogicalConditionOperator() {
+        return logicalConditionOperator;
+    }
+
     public boolean isLogicalOperator() {
-        return logicalOperator;
+        return isLogicalConditionOperator() || isLogicalCompareOperator();
     }
 
     public boolean isSpaceRequired() {
@@ -141,8 +151,13 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
         return this;
     }
 
-    private Swc4jAstBinaryOp setLogicalOperator() {
-        this.logicalOperator = true;
+    private Swc4jAstBinaryOp setLogicalCompareOperator() {
+        logicalCompareOperator = true;
+        return this;
+    }
+
+    private Swc4jAstBinaryOp setLogicalConditionOperator() {
+        logicalConditionOperator = true;
         return this;
     }
 
@@ -152,7 +167,7 @@ public enum Swc4jAstBinaryOp implements ISwc4jEnumIdName {
     }
 
     private Swc4jAstBinaryOp setSpaceRequired() {
-        this.spaceRequired = true;
+        spaceRequired = true;
         return this;
     }
 }

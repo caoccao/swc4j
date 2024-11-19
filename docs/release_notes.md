@@ -5,7 +5,7 @@
 * Added `find()` to `ISwc4jAst`
 * Added `getMinusCount()` to `Swc4jAstNumber`
 * Added `getBangCount()` to `Swc4jAstBinExpr`
-* Added `getOppositeOperator()` to `Swc4jAstBinaryOp`
+* Added `getOppositeOperator()`, `isLogicalOperator()`, `isLogicalCompareOperator()`, `isLogicalConditionOperator()` to `Swc4jAstBinaryOp`
 
 ## 1.2.0
 
