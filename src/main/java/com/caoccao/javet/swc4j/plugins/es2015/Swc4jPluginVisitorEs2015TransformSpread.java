@@ -200,15 +200,20 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
             Swc4jAstExprOrSpread thisArg;
             if (callee instanceof Swc4jAstMemberExpr) {
                 Swc4jAstMemberExpr childMemberExpr = callee.as(Swc4jAstMemberExpr.class);
-                ISwc4jAstStmt stmt = node.getParent(ISwc4jAstStmt.class);
-                Swc4jAstVarDeclarator varDeclarator = Swc4jAstVarDeclarator.create(
-                        Swc4jAstIdent.createDummy(),
-                        childMemberExpr.getObj());
-                Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var, SimpleList.of(varDeclarator));
-                Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create(SimpleList.of(varDecl, Swc4jAstExprStmt.create(node)));
-                stmt.getParent().replaceNode(stmt, blockStmt);
-                childMemberExpr.setObj(Swc4jAstIdent.createDummy());
-                thisArg = Swc4jAstExprOrSpread.create(Swc4jAstIdent.createDummy());
+                Optional<ISwc4jAstStmt> optionalStmt = node.getParent(ISwc4jAstStmt.class);
+                if (optionalStmt.isPresent()) {
+                    ISwc4jAstStmt stmt = optionalStmt.get();
+                    Swc4jAstVarDeclarator varDeclarator = Swc4jAstVarDeclarator.create(
+                            Swc4jAstIdent.createDummy(),
+                            childMemberExpr.getObj());
+                    Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var, SimpleList.of(varDeclarator));
+                    Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create(SimpleList.of(varDecl, Swc4jAstExprStmt.create(node)));
+                    stmt.getParent().replaceNode(stmt, blockStmt);
+                    childMemberExpr.setObj(Swc4jAstIdent.createDummy());
+                    thisArg = Swc4jAstExprOrSpread.create(Swc4jAstIdent.createDummy());
+                } else {
+                    throw new IllegalArgumentException("Parent statement not found.");
+                }
             } else {
                 thisArg = Swc4jAstExprOrSpread.create(Swc4jAstNull.create());
             }
@@ -247,23 +252,28 @@ public class Swc4jPluginVisitorEs2015TransformSpread extends Swc4jAstVisitor {
                 Swc4jAstMemberExpr memberExpr = Swc4jAstMemberExpr.create(callee, Swc4jAstIdentName.createApply());
                 node.setCallee(memberExpr);
                 Swc4jAstMemberExpr childMemberExpr = callee.getBase().as(Swc4jAstMemberExpr.class);
-                ISwc4jAstStmt stmt = node.getParent(ISwc4jAstStmt.class);
-                Swc4jAstVarDeclarator varDeclarator = Swc4jAstVarDeclarator.create(
-                        Swc4jAstIdent.createDummy(),
-                        childMemberExpr.getObj());
-                Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var, SimpleList.of(varDeclarator));
-                Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create(SimpleList.of(
-                        varDecl, Swc4jAstExprStmt.create(node.getParent().as(ISwc4jAstExpr.class))));
-                stmt.getParent().replaceNode(stmt, blockStmt);
-                childMemberExpr.setObj(Swc4jAstIdent.createDummy());
-                List<Swc4jAstExprOrSpread> args = node.getArgs();
-                Swc4jAstExprOrSpread arg = getConcatNode(args);
-                args.clear();
-                Swc4jAstExprOrSpread dummyExprOrSpread = Swc4jAstExprOrSpread.create(Swc4jAstIdent.createDummy());
-                dummyExprOrSpread.setParent(node);
-                arg.setParent(node);
-                args.add(dummyExprOrSpread);
-                args.add(arg);
+                Optional<ISwc4jAstStmt> optionalStmt = node.getParent(ISwc4jAstStmt.class);
+                if (optionalStmt.isPresent()) {
+                    ISwc4jAstStmt stmt = optionalStmt.get();
+                    Swc4jAstVarDeclarator varDeclarator = Swc4jAstVarDeclarator.create(
+                            Swc4jAstIdent.createDummy(),
+                            childMemberExpr.getObj());
+                    Swc4jAstVarDecl varDecl = Swc4jAstVarDecl.create(Swc4jAstVarDeclKind.Var, SimpleList.of(varDeclarator));
+                    Swc4jAstBlockStmt blockStmt = Swc4jAstBlockStmt.create(SimpleList.of(
+                            varDecl, Swc4jAstExprStmt.create(node.getParent().as(ISwc4jAstExpr.class))));
+                    stmt.getParent().replaceNode(stmt, blockStmt);
+                    childMemberExpr.setObj(Swc4jAstIdent.createDummy());
+                    List<Swc4jAstExprOrSpread> args = node.getArgs();
+                    Swc4jAstExprOrSpread arg = getConcatNode(args);
+                    args.clear();
+                    Swc4jAstExprOrSpread dummyExprOrSpread = Swc4jAstExprOrSpread.create(Swc4jAstIdent.createDummy());
+                    dummyExprOrSpread.setParent(node);
+                    arg.setParent(node);
+                    args.add(dummyExprOrSpread);
+                    args.add(arg);
+                } else {
+                    throw new IllegalArgumentException("Parent statement not found.");
+                }
             }
         }
         return super.visitOptCall(node);

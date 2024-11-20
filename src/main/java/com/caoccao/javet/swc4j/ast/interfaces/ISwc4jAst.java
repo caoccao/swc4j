@@ -117,12 +117,15 @@ public interface ISwc4jAst {
      * @since 0.2.0
      */
     @SuppressWarnings("unchecked")
-    default <T extends ISwc4jAst> T getParent(Class<T> clazz) {
+    default <T extends ISwc4jAst> Optional<T> getParent(Class<T> clazz) {
         ISwc4jAst parent = getParent();
-        while (parent != null && !clazz.isAssignableFrom(parent.getClass())) {
-            parent = parent.getParent();
+        if (parent == null) {
+            return Optional.empty();
         }
-        return (T) parent;
+        if (clazz.isAssignableFrom(parent.getClass())) {
+            return Optional.of((T) parent);
+        }
+        return parent.getParent(clazz);
     }
 
     /**
