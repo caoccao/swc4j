@@ -44,6 +44,13 @@ import java.util.Optional;
 public class Swc4jAstBinExpr
         extends Swc4jAst
         implements ISwc4jAstExpr {
+    /**
+     * The Bang count is a local cache of the bang count through the AST.
+     *
+     * @since 1.3.0
+     */
+    @Jni2RustField(ignore = true)
+    protected Optional<Integer> bangCount;
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr left;
     protected Swc4jAstBinaryOp op;
@@ -57,6 +64,7 @@ public class Swc4jAstBinExpr
             ISwc4jAstExpr right,
             Swc4jSpan span) {
         super(span);
+        resetBangCount();
         setLeft(left);
         setOp(op);
         setRight(right);
@@ -64,25 +72,6 @@ public class Swc4jAstBinExpr
 
     public static Swc4jAstBinExpr create(Swc4jAstBinaryOp op, ISwc4jAstExpr left, ISwc4jAstExpr right) {
         return new Swc4jAstBinExpr(op, left, right, Swc4jSpan.DUMMY);
-    }
-
-    protected static int getBangCount(ISwc4jAst ast) {
-        switch (ast.getType()) {
-            case BinExpr:
-                if (ast.as(Swc4jAstBinExpr.class).getOp().isLogicalOperator()) {
-                    return getBangCount(ast.getParent());
-                }
-                return 0;
-            case ParenExpr:
-                return getBangCount(ast.getParent());
-            case UnaryExpr:
-                if (ast.as(Swc4jAstUnaryExpr.class).getOp() == Swc4jAstUnaryOp.Bang) {
-                    return getBangCount(ast.getParent()) + 1;
-                }
-                return 0;
-            default:
-                return 0;
-        }
     }
 
     @Override
@@ -230,8 +219,31 @@ public class Swc4jAstBinExpr
         return super.eval();
     }
 
+    protected int getBangCount(ISwc4jAst ast) {
+        switch (ast.getType()) {
+            case BinExpr:
+                Swc4jAstBinExpr binExpr = ast.as(Swc4jAstBinExpr.class);
+                if (binExpr.getOp().isLogicalOperator()) {
+                    return binExpr.getBangCount();
+                }
+                return 0;
+            case ParenExpr:
+                return getBangCount(ast.getParent());
+            case UnaryExpr:
+                if (ast.as(Swc4jAstUnaryExpr.class).getOp() == Swc4jAstUnaryOp.Bang) {
+                    return getBangCount(ast.getParent()) + 1;
+                }
+                return 0;
+            default:
+                return 0;
+        }
+    }
+
     public int getBangCount() {
-        return getBangCount(getParent());
+        if (!bangCount.isPresent()) {
+            bangCount = Optional.of(getBangCount(getParent()));
+        }
+        return bangCount.get();
     }
 
     @Override
@@ -270,6 +282,11 @@ public class Swc4jAstBinExpr
             return true;
         }
         return false;
+    }
+
+    public Swc4jAstBinExpr resetBangCount() {
+        bangCount = Optional.empty();
+        return this;
     }
 
     public Swc4jAstBinExpr setLeft(ISwc4jAstExpr left) {

@@ -78,20 +78,6 @@ public class Swc4jAstNumber
         return create(Double.NaN, null);
     }
 
-    protected static int getMinusCount(ISwc4jAst ast) {
-        switch (ast.getType()) {
-            case ParenExpr:
-                return getMinusCount(ast.getParent());
-            case UnaryExpr:
-                if (ast.as(Swc4jAstUnaryExpr.class).getOp() == Swc4jAstUnaryOp.Minus) {
-                    return getMinusCount(ast.getParent()) + 1;
-                }
-                return 0;
-            default:
-                return 0;
-        }
-    }
-
     protected static String normalize(String raw) {
         Matcher matcher = PATTERN_SCIENTIFIC_NOTATION_WITH_FRACTION.matcher(raw);
         if (matcher.matches()) {
@@ -190,6 +176,20 @@ public class Swc4jAstNumber
     @Override
     public List<ISwc4jAst> getChildNodes() {
         return EMPTY_CHILD_NODES;
+    }
+
+    protected int getMinusCount(ISwc4jAst ast) {
+        switch (ast.getType()) {
+            case ParenExpr:
+                return getMinusCount(ast.getParent());
+            case UnaryExpr:
+                if (ast.as(Swc4jAstUnaryExpr.class).getOp() == Swc4jAstUnaryOp.Minus) {
+                    return getMinusCount(ast.getParent()) + 1;
+                }
+                return 0;
+            default:
+                return 0;
+        }
     }
 
     public int getMinusCount() {
