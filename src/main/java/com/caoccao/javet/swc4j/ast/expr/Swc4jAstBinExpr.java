@@ -53,6 +53,13 @@ public class Swc4jAstBinExpr
     protected Optional<Integer> bangCount;
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr left;
+    /**
+     * The Logical operator count is a local cache of the logical operator count through the AST.
+     *
+     * @since 1.3.0
+     */
+    @Jni2RustField(ignore = true)
+    protected Optional<Integer> logicalOperatorCount;
     protected Swc4jAstBinaryOp op;
     @Jni2RustField(box = true)
     protected ISwc4jAstExpr right;
@@ -65,6 +72,7 @@ public class Swc4jAstBinExpr
             Swc4jSpan span) {
         super(span);
         resetBangCount();
+        resetLogicalOperatorCount();
         setLeft(left);
         setOp(op);
         setRight(right);
@@ -256,6 +264,28 @@ public class Swc4jAstBinExpr
         return left;
     }
 
+    public int getLogicalOperatorCount() {
+        if (!logicalOperatorCount.isPresent()) {
+            logicalOperatorCount = Optional.of(getLogicalOperatorCount(getParent()));
+        }
+        return logicalOperatorCount.get();
+    }
+
+    protected int getLogicalOperatorCount(ISwc4jAst ast) {
+        switch (ast.getType()) {
+            case BinExpr:
+                Swc4jAstBinExpr binExpr = ast.as(Swc4jAstBinExpr.class);
+                if (binExpr.getOp().isLogicalOperator()) {
+                    return binExpr.getLogicalOperatorCount() + 1;
+                }
+                return 0;
+            case ParenExpr:
+                return getLogicalOperatorCount(ast.getParent());
+            default:
+                return 0;
+        }
+    }
+
     @Jni2RustMethod
     public Swc4jAstBinaryOp getOp() {
         return op;
@@ -286,6 +316,11 @@ public class Swc4jAstBinExpr
 
     public Swc4jAstBinExpr resetBangCount() {
         bangCount = Optional.empty();
+        return this;
+    }
+
+    public Swc4jAstBinExpr resetLogicalOperatorCount() {
+        logicalOperatorCount = Optional.empty();
         return this;
     }
 
