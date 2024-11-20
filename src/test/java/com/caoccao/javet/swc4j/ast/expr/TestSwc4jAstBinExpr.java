@@ -34,8 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
     @Test
@@ -133,6 +132,16 @@ public class TestSwc4jAstBinExpr extends BaseTestSuiteSwc4jAst {
                 assertEquals(entry.getValue().get(index), binExpr.getLogicalOperatorCount());
             }
         }
+    }
+
+    @Test
+    public void testGetParentBinExpr() throws Swc4jCoreException {
+        Swc4jParseOutput output = swc4j.parse("a==b&&(c==d)", tsScriptParseOptions);
+        List<Swc4jAstBinExpr> nodes = output.getProgram().find(Swc4jAstBinExpr.class);
+        assertEquals(3, nodes.size());
+        assertNull(nodes.get(0).getParentBinExpr());
+        assertEquals(nodes.get(0), nodes.get(1).getParentBinExpr());
+        assertEquals(nodes.get(0), nodes.get(2).getParentBinExpr());
     }
 
     @Test

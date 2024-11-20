@@ -291,6 +291,21 @@ public class Swc4jAstBinExpr
         return op;
     }
 
+    public Swc4jAstBinExpr getParentBinExpr() {
+        return getParentBinExpr(getParent());
+    }
+
+    protected Swc4jAstBinExpr getParentBinExpr(ISwc4jAst ast) {
+        switch (ast.getType()) {
+            case BinExpr:
+                return ast.as(Swc4jAstBinExpr.class);
+            case ParenExpr:
+                return getParentBinExpr(ast.getParent());
+            default:
+                return null;
+        }
+    }
+
     @Jni2RustMethod
     public ISwc4jAstExpr getRight() {
         return right;
