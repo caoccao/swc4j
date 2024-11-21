@@ -49,7 +49,7 @@ object Config {
     }
 
     object Projects {
-        const val JAVET = "com.caoccao.javet:javet-core:${Versions.JAVET}"
+        const val JAVET = "com.caoccao.javet:javet:${Versions.JAVET}"
         val JAVET_BINARY = {
             val os = OperatingSystem.current()
             val arch = System.getProperty("os.arch")
@@ -63,7 +63,7 @@ object Config {
 
     object Versions {
         const val JAVA_VERSION = "1.8"
-        const val JAVET = "4.0.0"
+        const val JAVET = "4.1.0"
         const val JUNIT = "5.11.3"
         const val SWC4J = "1.3.0"
     }
@@ -92,16 +92,6 @@ java {
 }
 
 dependencies {
-    val os = OperatingSystem.current()
-    val arch = System.getProperty("os.arch")
-    val isI18n = false
-    val isNode = false
-    val i18nType = if (isI18n) "-i18n" else ""
-    val jsRuntimeTimeType = if (isNode) "node" else "v8"
-    val osType = if (os.isWindows) "windows" else
-        if (os.isMacOsX) "macos" else
-            if (os.isLinux) "linux" else ""
-    val archType = if (arch == "aarch64" || arch == "arm64") "arm64" else "x86_64"
     testImplementation(Config.Projects.JAVET)
     testImplementation(Config.Projects.JAVET_BINARY())
 }

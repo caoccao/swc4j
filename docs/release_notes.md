@@ -2,6 +2,7 @@
 
 ## 1.3.0
 
+* Upgraded rust toolchain to v1.82.0
 * Added `find()` to `ISwc4jAst`
 * Added `getMinusCount()` to `Swc4jAstNumber`
 * Added `getBangCount()`, `getLogicalOperatorCount()`, `getParentBinExpr()` to `Swc4jAstBinExpr`
