@@ -15,6 +15,8 @@
 * limitations under the License.
 */
 
+use std::sync::OnceLock;
+
 use anyhow::{Error, Result};
 use deno_ast::ModuleSpecifier;
 use jni::objects::{GlobalRef, JMethodID, JObject, JString};
@@ -1345,16 +1347,22 @@ impl JavaSwc4jTranspileOptions {
 }
 /* JavaSwc4jTranspileOptions End */
 
-static mut JAVA_PARSE_OPTIONS: Option<JavaSwc4jParseOptions> = None;
-static mut JAVA_TRANSFORM_OPTIONS: Option<JavaSwc4jTransformOptions> = None;
-static mut JAVA_TRANSPILE_OPTIONS: Option<JavaSwc4jTranspileOptions> = None;
+static JAVA_PARSE_OPTIONS: OnceLock<JavaSwc4jParseOptions> = OnceLock::new();
+static JAVA_TRANSFORM_OPTIONS: OnceLock<JavaSwc4jTransformOptions> = OnceLock::new();
+static JAVA_TRANSPILE_OPTIONS: OnceLock<JavaSwc4jTranspileOptions> = OnceLock::new();
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   log::debug!("init()");
   unsafe {
-    JAVA_PARSE_OPTIONS = Some(JavaSwc4jParseOptions::new(env));
-    JAVA_TRANSFORM_OPTIONS = Some(JavaSwc4jTransformOptions::new(env));
-    JAVA_TRANSPILE_OPTIONS = Some(JavaSwc4jTranspileOptions::new(env));
+    JAVA_PARSE_OPTIONS
+      .set(JavaSwc4jParseOptions::new(env))
+      .unwrap_unchecked();
+    JAVA_TRANSFORM_OPTIONS
+      .set(JavaSwc4jTransformOptions::new(env))
+      .unwrap_unchecked();
+    JAVA_TRANSPILE_OPTIONS
+      .set(JavaSwc4jTranspileOptions::new(env))
+      .unwrap_unchecked();
   }
 }
 
@@ -1401,7 +1409,7 @@ impl<'a> Default for ParseOptions<'a> {
 
 impl<'local> FromJava<'local> for ParseOptions<'local> {
   fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<ParseOptions<'local>>> {
-    let java_parse_options = unsafe { JAVA_PARSE_OPTIONS.as_ref().unwrap() };
+    let java_parse_options = JAVA_PARSE_OPTIONS.get().unwrap();
     let capture_ast = java_parse_options.is_capture_ast(env, obj)?;
     let capture_comments = java_parse_options.is_capture_comments(env, obj)?;
     let capture_tokens = java_parse_options.is_capture_tokens(env, obj)?;
@@ -1501,7 +1509,7 @@ impl<'a> Default for TransformOptions<'a> {
 
 impl<'local> FromJava<'local> for TransformOptions<'local> {
   fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<TransformOptions<'local>>> {
-    let java_transform_options = unsafe { JAVA_TRANSFORM_OPTIONS.as_ref().unwrap() };
+    let java_transform_options = JAVA_TRANSFORM_OPTIONS.get().unwrap();
     let ascii_only = java_transform_options.is_ascii_only(env, obj)?;
     let emit_assert_for_import_attributes = java_transform_options.is_emit_assert_for_import_attributes(env, obj)?;
     let inline_sources = java_transform_options.is_inline_sources(env, obj)?;
@@ -1663,7 +1671,7 @@ impl<'a> Default for TranspileOptions<'a> {
 
 impl<'local> FromJava<'local> for TranspileOptions<'local> {
   fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<TranspileOptions<'local>>> {
-    let java_transpile_options = unsafe { JAVA_TRANSPILE_OPTIONS.as_ref().unwrap() };
+    let java_transpile_options = JAVA_TRANSPILE_OPTIONS.get().unwrap();
     let capture_ast = java_transpile_options.is_capture_ast(env, obj)?;
     let capture_comments = java_transpile_options.is_capture_comments(env, obj)?;
     let capture_tokens = java_transpile_options.is_capture_tokens(env, obj)?;

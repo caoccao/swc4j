@@ -78,14 +78,14 @@ macro_rules! declare_identifiable_enum {
       }
     }
 
-    static mut $static_name: Option<$struct_name> = None;
+    static $static_name: std::sync::OnceLock<$struct_name> = std::sync::OnceLock::new();
 
     impl<'local> FromJava<'local> for $enum_name {
       fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<$enum_name>> {
         let id = call_as_int!(
           env,
           obj.as_ref(),
-          $static_name.as_ref().unwrap().method_get_id,
+          $static_name.get().unwrap().method_get_id,
           &[],
           "getId()"
         )?;
@@ -99,7 +99,7 @@ macro_rules! declare_identifiable_enum {
         'local: 'a,
       {
         let id = self.get_id();
-        unsafe { $static_name.as_ref().unwrap() }.parse(env, id)
+        $static_name.get().unwrap().parse(env, id)
       }
     }
   };
@@ -278,28 +278,48 @@ declare_identifiable_enum!(
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   log::debug!("init()");
   unsafe {
-    JAVA_CLASS_ACCESSIBILITY = Some(JavaAccessibility::new(env));
-    JAVA_CLASS_ASSIGN_OP = Some(JavaAssignOp::new(env));
-    JAVA_CLASS_AST_TYPE = Some(JavaAstType::new(env));
-    JAVA_CLASS_BIG_INT_SIGN = Some(JavaBigIntSign::new(env));
-    JAVA_CLASS_BINARY_OP = Some(JavaBinaryOp::new(env));
-    JAVA_CLASS_COMMENT_KIND = Some(JavaCommentKind::new(env));
-    JAVA_CLASS_ES_VERSION = Some(JavaEsVersion::new(env));
-    JAVA_CLASS_IMPORT_PHASE = Some(JavaImportPhase::new(env));
-    JAVA_CLASS_IMPORTS_NOT_USED_AS_VALUES = Some(JavaImportsNotUsedAsValues::new(env));
-    JAVA_CLASS_MEDIA_TYPE = Some(JavaMediaType::new(env));
-    JAVA_CLASS_META_PROP_KIND = Some(JavaMetaPropKind::new(env));
-    JAVA_CLASS_METHOD_KIND = Some(JavaMethodKind::new(env));
-    JAVA_CLASS_MODULE_KIND = Some(JavaModuleKind::new(env));
-    JAVA_CLASS_PARSE_MODE = Some(JavaParseMode::new(env));
-    JAVA_CLASS_SOURCE_MAP_OPTION = Some(JavaSourceMapOption::new(env));
-    JAVA_CLASS_TOKEN_TYPE = Some(JavaTokenType::new(env));
-    JAVA_CLASS_TRUE_PLUS_MINUS = Some(JavaTruePlusMinus::new(env));
-    JAVA_CLASS_TS_KEYWORD_TYPE_KIND = Some(JavaTsKeywordTypeKind::new(env));
-    JAVA_CLASS_TS_TYPE_OPERATOR_OP = Some(JavaTsTypeOperatorOp::new(env));
-    JAVA_CLASS_UNARY_OP = Some(JavaUnaryOp::new(env));
-    JAVA_CLASS_UPDATE_OP = Some(JavaUpdateOp::new(env));
-    JAVA_CLASS_VAR_DECL_KIND = Some(JavaVarDeclKind::new(env));
+    JAVA_CLASS_ACCESSIBILITY
+      .set(JavaAccessibility::new(env))
+      .unwrap_unchecked();
+    JAVA_CLASS_ASSIGN_OP.set(JavaAssignOp::new(env)).unwrap_unchecked();
+    JAVA_CLASS_AST_TYPE.set(JavaAstType::new(env)).unwrap_unchecked();
+    JAVA_CLASS_BIG_INT_SIGN.set(JavaBigIntSign::new(env)).unwrap_unchecked();
+    JAVA_CLASS_BINARY_OP.set(JavaBinaryOp::new(env)).unwrap_unchecked();
+    JAVA_CLASS_COMMENT_KIND
+      .set(JavaCommentKind::new(env))
+      .unwrap_unchecked();
+    JAVA_CLASS_ES_VERSION.set(JavaEsVersion::new(env)).unwrap_unchecked();
+    JAVA_CLASS_IMPORT_PHASE
+      .set(JavaImportPhase::new(env))
+      .unwrap_unchecked();
+    JAVA_CLASS_IMPORTS_NOT_USED_AS_VALUES
+      .set(JavaImportsNotUsedAsValues::new(env))
+      .unwrap_unchecked();
+    JAVA_CLASS_MEDIA_TYPE.set(JavaMediaType::new(env)).unwrap_unchecked();
+    JAVA_CLASS_META_PROP_KIND
+      .set(JavaMetaPropKind::new(env))
+      .unwrap_unchecked();
+    JAVA_CLASS_METHOD_KIND.set(JavaMethodKind::new(env)).unwrap_unchecked();
+    JAVA_CLASS_MODULE_KIND.set(JavaModuleKind::new(env)).unwrap_unchecked();
+    JAVA_CLASS_PARSE_MODE.set(JavaParseMode::new(env)).unwrap_unchecked();
+    JAVA_CLASS_SOURCE_MAP_OPTION
+      .set(JavaSourceMapOption::new(env))
+      .unwrap_unchecked();
+    JAVA_CLASS_TOKEN_TYPE.set(JavaTokenType::new(env)).unwrap_unchecked();
+    JAVA_CLASS_TRUE_PLUS_MINUS
+      .set(JavaTruePlusMinus::new(env))
+      .unwrap_unchecked();
+    JAVA_CLASS_TS_KEYWORD_TYPE_KIND
+      .set(JavaTsKeywordTypeKind::new(env))
+      .unwrap_unchecked();
+    JAVA_CLASS_TS_TYPE_OPERATOR_OP
+      .set(JavaTsTypeOperatorOp::new(env))
+      .unwrap_unchecked();
+    JAVA_CLASS_UNARY_OP.set(JavaUnaryOp::new(env)).unwrap_unchecked();
+    JAVA_CLASS_UPDATE_OP.set(JavaUpdateOp::new(env)).unwrap_unchecked();
+    JAVA_CLASS_VAR_DECL_KIND
+      .set(JavaVarDeclKind::new(env))
+      .unwrap_unchecked();
   }
 }
 

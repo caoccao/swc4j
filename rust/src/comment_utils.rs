@@ -15,6 +15,8 @@
 * limitations under the License.
 */
 
+use std::sync::OnceLock;
+
 use anyhow::{Error, Result};
 use deno_ast::swc::common::comments::Comment;
 use deno_ast::MultiThreadedComments;
@@ -32,7 +34,9 @@ impl ToJavaWithMap<ByteToIndexMap> for Comment {
     let text = &self.text;
     let java_kind = self.kind.to_java(env)?;
     let java_span = map.get_span_ex_by_span(&self.span).to_java(env)?;
-    let return_value = unsafe { JAVA_COMMENT.as_ref().unwrap() }
+    let return_value = JAVA_COMMENT
+      .get()
+      .unwrap()
       .construct(env, text, &java_kind, &java_span)
       .map_err(Error::msg);
     delete_local_ref!(env, java_kind);
@@ -57,12 +61,12 @@ impl ToJavaWithMap<ByteToIndexMap> for MultiThreadedComments {
         let java_comment = comment.to_java_with_map(env, map)?;
         list_add(env, &java_comments, &java_comment)?;
         delete_local_ref!(env, java_comment);
-      };
+      }
       let java_return_value = map_put(env, &java_leading, &java_position, &java_comments)?;
       delete_local_ref!(env, java_position);
       delete_local_ref!(env, java_comments);
       delete_local_ref!(env, java_return_value);
-    };
+    }
     let java_trailing = map_new(env, trailing.len())?;
     for (position, comments) in trailing.iter() {
       let key_span_ex = map.get_span_ex_by_byte_pos(&position);
@@ -72,13 +76,16 @@ impl ToJavaWithMap<ByteToIndexMap> for MultiThreadedComments {
         let java_comment = comment.to_java_with_map(env, map)?;
         list_add(env, &java_comments, &java_comment)?;
         delete_local_ref!(env, java_comment);
-      };
+      }
       let java_return_value = map_put(env, &java_trailing, &java_position, &java_comments)?;
       delete_local_ref!(env, java_position);
       delete_local_ref!(env, java_comments);
       delete_local_ref!(env, java_return_value);
-    };
-    let return_value = unsafe { JAVA_COMMENTS.as_ref().unwrap() }.construct(env, &java_leading, &java_trailing);
+    }
+    let return_value = JAVA_COMMENTS
+      .get()
+      .unwrap()
+      .construct(env, &java_leading, &java_trailing);
     delete_local_ref!(env, java_leading);
     delete_local_ref!(env, java_trailing);
     return_value
@@ -197,14 +204,14 @@ impl JavaSwc4jComments {
 }
 /* JavaSwc4jComments End */
 
-static mut JAVA_COMMENT: Option<JavaSwc4jComment> = None;
-static mut JAVA_COMMENTS: Option<JavaSwc4jComments> = None;
+static JAVA_COMMENT: OnceLock<JavaSwc4jComment> = OnceLock::new();
+static JAVA_COMMENTS: OnceLock<JavaSwc4jComments> = OnceLock::new();
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   log::debug!("init()");
   unsafe {
-    JAVA_COMMENT = Some(JavaSwc4jComment::new(env));
-    JAVA_COMMENTS = Some(JavaSwc4jComments::new(env));
+    JAVA_COMMENT.set(JavaSwc4jComment::new(env)).unwrap_unchecked();
+    JAVA_COMMENTS.set(JavaSwc4jComments::new(env)).unwrap_unchecked();
   }
 }
 

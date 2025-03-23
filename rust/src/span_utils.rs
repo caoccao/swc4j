@@ -15,12 +15,14 @@
 * limitations under the License.
 */
 
+use std::collections::BTreeMap;
+use std::sync::OnceLock;
+
 use anyhow::Result;
 use deno_ast::swc::common::source_map::SmallPos;
 use deno_ast::swc::common::{BytePos, Span};
 use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::JNIEnv;
-use std::collections::BTreeMap;
 
 use crate::jni_utils::*;
 
@@ -48,7 +50,7 @@ impl ToJava for SpanEx {
   where
     'local: 'a,
   {
-    unsafe { JAVA_CLASS_SPAN.as_ref().unwrap() }.construct(
+    JAVA_CLASS_SPAN.get().unwrap().construct(
       env,
       self.start as i32,
       self.end as i32,
@@ -297,11 +299,11 @@ impl JavaSwc4jSpan {
 }
 /* JavaSwc4jSpan End */
 
-static mut JAVA_CLASS_SPAN: Option<JavaSwc4jSpan> = None;
+static JAVA_CLASS_SPAN: OnceLock<JavaSwc4jSpan> = OnceLock::new();
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   log::debug!("init()");
   unsafe {
-    JAVA_CLASS_SPAN = Some(JavaSwc4jSpan::new(env));
+    JAVA_CLASS_SPAN.set(JavaSwc4jSpan::new(env)).unwrap_unchecked();
   }
 }

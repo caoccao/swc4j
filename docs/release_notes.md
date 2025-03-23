@@ -1,5 +1,11 @@
 # Release Notes
 
+## 1.4.0
+
+* Upgraded deno_ast to v0.46.2
+* Upgraded rust toolchain to v1.85.1
+* Replaced mutable static with `OnceLock`
+
 ## 1.3.0
 
 * Upgraded deno_ast to v0.44.0

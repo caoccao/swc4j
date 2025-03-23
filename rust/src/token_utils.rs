@@ -15,6 +15,9 @@
 * limitations under the License.
 */
 
+use std::ops::Range;
+use std::sync::{Arc, OnceLock};
+
 use anyhow::Result;
 use deno_ast::swc::atoms::Atom;
 use deno_ast::swc::common::source_map::SmallPos;
@@ -26,9 +29,6 @@ use jni::JNIEnv;
 use crate::enums::*;
 use crate::jni_utils::*;
 use crate::span_utils::ByteToIndexMap;
-
-use std::ops::Range;
-use std::sync::Arc;
 
 /* JavaSwc4jTokenFactory Begin */
 #[allow(dead_code)]
@@ -710,12 +710,14 @@ impl JavaSwc4jTokenFactory {
 }
 /* JavaSwc4jTokenFactory End */
 
-static mut JAVA_TOKEN_FACTORY: Option<JavaSwc4jTokenFactory> = None;
+static JAVA_TOKEN_FACTORY: OnceLock<JavaSwc4jTokenFactory> = OnceLock::new();
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   log::debug!("init()");
   unsafe {
-    JAVA_TOKEN_FACTORY = Some(JavaSwc4jTokenFactory::new(env));
+    JAVA_TOKEN_FACTORY
+      .set(JavaSwc4jTokenFactory::new(env))
+      .unwrap_unchecked();
   }
 }
 
@@ -730,7 +732,7 @@ where
 {
   match token_and_spans {
     Some(token_and_spans) => {
-      let java_token_factory = unsafe { JAVA_TOKEN_FACTORY.as_ref().unwrap() };
+      let java_token_factory = JAVA_TOKEN_FACTORY.get().unwrap();
       let list = list_new(env, token_and_spans.len())?;
       for token_and_span in token_and_spans.iter() {
         let line_break_ahead = token_and_span.had_line_break;

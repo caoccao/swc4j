@@ -15,6 +15,8 @@
 * limitations under the License.
 */
 
+use std::sync::OnceLock;
+
 use anyhow::Result;
 use jni::objects::{GlobalRef, JMethodID, JObject, JStaticMethodID, JString};
 use jni::JNIEnv;
@@ -537,20 +539,20 @@ impl JavaURL {
   }
 }
 
-static mut JAVA_ARRAY_LIST: Option<JavaArrayList> = None;
-static mut JAVA_HASH_MAP: Option<JavaHashMap> = None;
-static mut JAVA_INTEGER: Option<JavaInteger> = None;
-static mut JAVA_OPTIONAL: Option<JavaOptional> = None;
-static mut JAVA_URL: Option<JavaURL> = None;
+static JAVA_ARRAY_LIST: OnceLock<JavaArrayList> = OnceLock::new();
+static JAVA_HASH_MAP: OnceLock<JavaHashMap> = OnceLock::new();
+static JAVA_INTEGER: OnceLock<JavaInteger> = OnceLock::new();
+static JAVA_OPTIONAL: OnceLock<JavaOptional> = OnceLock::new();
+static JAVA_URL: OnceLock<JavaURL> = OnceLock::new();
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   log::debug!("init()");
   unsafe {
-    JAVA_ARRAY_LIST = Some(JavaArrayList::new(env));
-    JAVA_HASH_MAP = Some(JavaHashMap::new(env));
-    JAVA_INTEGER = Some(JavaInteger::new(env));
-    JAVA_OPTIONAL = Some(JavaOptional::new(env));
-    JAVA_URL = Some(JavaURL::new(env));
+    JAVA_ARRAY_LIST.set(JavaArrayList::new(env)).unwrap_unchecked();
+    JAVA_HASH_MAP.set(JavaHashMap::new(env)).unwrap_unchecked();
+    JAVA_INTEGER.set(JavaInteger::new(env)).unwrap_unchecked();
+    JAVA_OPTIONAL.set(JavaOptional::new(env)).unwrap_unchecked();
+    JAVA_URL.set(JavaURL::new(env)).unwrap_unchecked();
   }
 }
 
@@ -558,36 +560,36 @@ pub fn integer_value_of<'local, 'a>(env: &mut JNIEnv<'local>, i: i32) -> Result<
 where
   'local: 'a,
 {
-  unsafe { JAVA_INTEGER.as_ref().unwrap() }.value_of(env, i)
+  JAVA_INTEGER.get().unwrap().value_of(env, i)
 }
 
 pub fn list_add<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, element: &JObject<'_>) -> Result<bool> {
-  unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.add(env, obj, element)
+  JAVA_ARRAY_LIST.get().unwrap().add(env, obj, element)
 }
 
 pub fn list_get<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>, index: usize) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
-  unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.get(env, obj, index)
+  JAVA_ARRAY_LIST.get().unwrap().get(env, obj, index)
 }
 
 pub fn list_new<'local, 'a>(env: &mut JNIEnv<'local>, initial_capacity: usize) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
-  unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.construct(env, initial_capacity)
+  JAVA_ARRAY_LIST.get().unwrap().construct(env, initial_capacity)
 }
 
 pub fn list_size<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<usize> {
-  unsafe { JAVA_ARRAY_LIST.as_ref().unwrap() }.size(env, obj)
+  JAVA_ARRAY_LIST.get().unwrap().size(env, obj)
 }
 
 pub fn map_new<'local, 'a>(env: &mut JNIEnv<'local>, initial_capacity: usize) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
-  unsafe { JAVA_HASH_MAP.as_ref().unwrap() }.construct(env, initial_capacity)
+  JAVA_HASH_MAP.get().unwrap().construct(env, initial_capacity)
 }
 
 pub fn map_put<'local, 'a>(
@@ -599,20 +601,20 @@ pub fn map_put<'local, 'a>(
 where
   'local: 'a,
 {
-  unsafe { JAVA_HASH_MAP.as_ref().unwrap() }.put(env, obj, key, value)
+  JAVA_HASH_MAP.get().unwrap().put(env, obj, key, value)
 }
 
 pub fn url_to_string<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<String> {
-  unsafe { JAVA_URL.as_ref().unwrap() }.to_string(env, obj)
+  JAVA_URL.get().unwrap().to_string(env, obj)
 }
 
 pub fn optional_get<'local, 'a>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<JObject<'a>>
 where
   'local: 'a,
 {
-  unsafe { JAVA_OPTIONAL.as_ref().unwrap() }.get(env, obj)
+  JAVA_OPTIONAL.get().unwrap().get(env, obj)
 }
 
 pub fn optional_is_present<'local>(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<bool> {
-  unsafe { JAVA_OPTIONAL.as_ref().unwrap() }.is_present(env, obj)
+  JAVA_OPTIONAL.get().unwrap().is_present(env, obj)
 }

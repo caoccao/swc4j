@@ -22,7 +22,7 @@ use deno_ast::{MultiThreadedComments, ParsedSource, TranspileResult};
 use jni::objects::{GlobalRef, JMethodID, JObject};
 use jni::JNIEnv;
 
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 
 use crate::comment_utils::*;
 use crate::enums::*;
@@ -229,16 +229,20 @@ impl JavaSwc4jTranspileOutput {
 }
 /* JavaSwc4jTranspileOutput End */
 
-static mut JAVA_PARSE_OUTPUT: Option<JavaSwc4jParseOutput> = None;
-static mut JAVA_TRANSFORM_OUTPUT: Option<JavaSwc4jTransformOutput> = None;
-static mut JAVA_TRANSPILE_OUTPUT: Option<JavaSwc4jTranspileOutput> = None;
+static JAVA_PARSE_OUTPUT: OnceLock<JavaSwc4jParseOutput> = OnceLock::new();
+static JAVA_TRANSFORM_OUTPUT: OnceLock<JavaSwc4jTransformOutput> = OnceLock::new();
+static JAVA_TRANSPILE_OUTPUT: OnceLock<JavaSwc4jTranspileOutput> = OnceLock::new();
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   log::debug!("init()");
   unsafe {
-    JAVA_PARSE_OUTPUT = Some(JavaSwc4jParseOutput::new(env));
-    JAVA_TRANSFORM_OUTPUT = Some(JavaSwc4jTransformOutput::new(env));
-    JAVA_TRANSPILE_OUTPUT = Some(JavaSwc4jTranspileOutput::new(env));
+    JAVA_PARSE_OUTPUT.set(JavaSwc4jParseOutput::new(env)).unwrap_unchecked();
+    JAVA_TRANSFORM_OUTPUT
+      .set(JavaSwc4jTransformOutput::new(env))
+      .unwrap_unchecked();
+    JAVA_TRANSPILE_OUTPUT
+      .set(JavaSwc4jTranspileOutput::new(env))
+      .unwrap_unchecked();
   }
 }
 
@@ -327,7 +331,7 @@ impl ToJava for ParseOutput {
     let java_comments = self.comments.as_ref().map_or(Ok(Default::default()), |comments| {
       comments_new(env, comments, &byte_to_index_map)
     })?;
-    let return_value = unsafe { JAVA_PARSE_OUTPUT.as_ref().unwrap() }.construct(
+    let return_value = JAVA_PARSE_OUTPUT.get().unwrap().construct(
       env,
       &java_program,
       &java_media_type,
@@ -379,7 +383,7 @@ impl ToJava for TransformOutput {
     let java_media_type = self.media_type.to_java(env)?;
     let java_parse_mode = self.parse_mode.to_java(env)?;
     let optional_source_map = &self.source_map;
-    let return_value = unsafe { JAVA_TRANSFORM_OUTPUT.as_ref().unwrap() }.construct(
+    let return_value = JAVA_TRANSFORM_OUTPUT.get().unwrap().construct(
       env,
       code,
       &java_media_type,
@@ -477,7 +481,7 @@ impl ToJava for TranspileOutput {
       .map_or(Ok(Default::default()), |comments| {
         comments_new(env, comments, &byte_to_index_map)
       })?;
-    let return_value = unsafe { JAVA_TRANSPILE_OUTPUT.as_ref().unwrap() }.construct(
+    let return_value = JAVA_TRANSPILE_OUTPUT.get().unwrap().construct(
       env,
       &java_program,
       code,

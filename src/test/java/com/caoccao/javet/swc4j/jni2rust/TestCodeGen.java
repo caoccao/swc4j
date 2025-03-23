@@ -111,7 +111,7 @@ public class TestCodeGen {
                                 if (mappingCounter.getAndIncrement() > 0) {
                                     prefix = "} else ";
                                 }
-                                fromJavaLines.add(String.format("      %sif env.is_instance_of(jobj, &(unsafe {JAVA_CLASS_%s.as_ref().unwrap()}.class)).unwrap_or(false) {",
+                                fromJavaLines.add(String.format("      %sif env.is_instance_of(jobj, &(JAVA_CLASS_%s.get().unwrap().class)).unwrap_or(false) {",
                                         prefix,
                                         StringUtils.toSnakeCase(rawMappingName).toUpperCase()));
                                 if (mapping.box()) {
@@ -127,7 +127,7 @@ public class TestCodeGen {
                                 }
                             });
                     fromJavaLines.add("      } else {");
-                    fromJavaLines.add("        let java_ast_type = unsafe { JAVA_CLASS_.as_ref().unwrap() }.get_type(env, jobj)?;");
+                    fromJavaLines.add("        let java_ast_type = JAVA_CLASS_.get().unwrap().get_type(env, jobj)?;");
                     fromJavaLines.add("        let ast_type = AstType::from_java(env, &java_ast_type);");
                     fromJavaLines.add("        delete_local_ref!(env, java_ast_type);");
                     fromJavaLines.add(String.format("        panic!(\"Type {:?} is not supported by %s\", ast_type);", enumName));
@@ -196,10 +196,10 @@ public class TestCodeGen {
             Jni2Rust<?> jni2Rust = new Jni2Rust<>(clazz);
             lines.addAll(jni2Rust.getLines());
             lines.add("");
-            declarationLines.add(String.format("static mut JAVA_CLASS_%s: Option<Java%s> = None;",
+            declarationLines.add(String.format("static JAVA_CLASS_%s: OnceLock<Java%s> = OnceLock::new();",
                     StringUtils.toSnakeCase(enumName).toUpperCase(),
                     className));
-            initLines.add(String.format("    JAVA_CLASS_%s = Some(Java%s::new(env));",
+            initLines.add(String.format("    JAVA_CLASS_%s.set(Java%s::new(env)).unwrap_unchecked();",
                     StringUtils.toSnakeCase(enumName).toUpperCase(),
                     className));
             enumCounter.incrementAndGet();
@@ -214,10 +214,10 @@ public class TestCodeGen {
                     Jni2Rust<?> jni2Rust = new Jni2Rust<>(clazz);
                     lines.addAll(jni2Rust.getLines());
                     lines.add("");
-                    declarationLines.add(String.format("static mut JAVA_CLASS_%s: Option<Java%s> = None;",
+                    declarationLines.add(String.format("static JAVA_CLASS_%s: OnceLock<Java%s> = OnceLock::new();",
                             StringUtils.toSnakeCase(structName).toUpperCase(),
                             className));
-                    initLines.add(String.format("    JAVA_CLASS_%s = Some(Java%s::new(env));",
+                    initLines.add(String.format("    JAVA_CLASS_%s.set(Java%s::new(env)).unwrap_unchecked();",
                             StringUtils.toSnakeCase(structName).toUpperCase(),
                             className));
                     structCounter.incrementAndGet();
@@ -500,7 +500,7 @@ public class TestCodeGen {
                                 });
                         args.add("&java_span_ex");
                         javaVars.add("java_span_ex");
-                        lines.add(String.format("    let return_value = unsafe { JAVA_CLASS_%s.as_ref().unwrap() }",
+                        lines.add(String.format("    let return_value = JAVA_CLASS_%s.get().unwrap()",
                                 StringUtils.toSnakeCase(jni2RustClassUtils.getName()).toUpperCase()));
                         lines.add(String.format("      .construct(env, %s)?;",
                                 StringUtils.join(", ", args)));
@@ -522,7 +522,7 @@ public class TestCodeGen {
                         final List<String> processLines = new ArrayList<>();
                         final List<String> initLines = new ArrayList<>();
                         if (!fields.isEmpty()) {
-                            lines.add(String.format("    let java_class = unsafe { JAVA_CLASS_%s.as_ref().unwrap() };",
+                            lines.add(String.format("    let java_class = JAVA_CLASS_%s.get().unwrap();",
                                     StringUtils.toSnakeCase(rawName).toUpperCase()));
                         }
                         if (jni2RustClassUtils.isSpan()) {
