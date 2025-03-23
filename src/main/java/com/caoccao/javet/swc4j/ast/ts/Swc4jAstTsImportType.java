@@ -38,6 +38,7 @@ public class Swc4jAstTsImportType
         extends Swc4jAst
         implements ISwc4jAstTsType, ISwc4jAstTsTypeQueryExpr {
     protected Swc4jAstStr arg;
+    protected Optional<Swc4jAstTsImportCallOptions> attributes;
     protected Optional<ISwc4jAstTsEntityName> qualifier;
     @Jni2RustField(componentBox = true)
     protected Optional<Swc4jAstTsTypeParamInstantiation> typeArgs;
@@ -47,9 +48,11 @@ public class Swc4jAstTsImportType
             Swc4jAstStr arg,
             @Jni2RustParam(optional = true) ISwc4jAstTsEntityName qualifier,
             @Jni2RustParam(optional = true) Swc4jAstTsTypeParamInstantiation typeArgs,
+            @Jni2RustParam(optional = true) Swc4jAstTsImportCallOptions attributes,
             Swc4jSpan span) {
         super(span);
         setArg(arg);
+        setAttributes(attributes);
         setQualifier(qualifier);
         setTypeArgs(typeArgs);
     }
@@ -70,7 +73,15 @@ public class Swc4jAstTsImportType
             Swc4jAstStr arg,
             ISwc4jAstTsEntityName qualifier,
             Swc4jAstTsTypeParamInstantiation typeArgs) {
-        return new Swc4jAstTsImportType(arg, qualifier, typeArgs, Swc4jSpan.DUMMY);
+        return create(arg, qualifier, typeArgs, null);
+    }
+
+    public static Swc4jAstTsImportType create(
+            Swc4jAstStr arg,
+            ISwc4jAstTsEntityName qualifier,
+            Swc4jAstTsTypeParamInstantiation typeArgs,
+            Swc4jAstTsImportCallOptions attributes) {
+        return new Swc4jAstTsImportType(arg, qualifier, typeArgs, attributes, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod
@@ -78,9 +89,15 @@ public class Swc4jAstTsImportType
         return arg;
     }
 
+    @Jni2RustMethod
+    public Optional<Swc4jAstTsImportCallOptions> getAttributes() {
+        return attributes;
+    }
+
     @Override
     public List<ISwc4jAst> getChildNodes() {
         List<ISwc4jAst> childNodes = SimpleList.of(arg);
+        attributes.ifPresent(childNodes::add);
         qualifier.ifPresent(childNodes::add);
         typeArgs.ifPresent(childNodes::add);
         return childNodes;
@@ -107,6 +124,10 @@ public class Swc4jAstTsImportType
             setArg((Swc4jAstStr) newNode);
             return true;
         }
+        if (attributes.isPresent() && attributes.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsImportCallOptions)) {
+            setAttributes((Swc4jAstTsImportCallOptions) newNode);
+            return true;
+        }
         if (qualifier.isPresent() && qualifier.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstTsEntityName)) {
             setQualifier((ISwc4jAstTsEntityName) newNode);
             return true;
@@ -121,6 +142,12 @@ public class Swc4jAstTsImportType
     public Swc4jAstTsImportType setArg(Swc4jAstStr arg) {
         this.arg = AssertionUtils.notNull(arg, "Arg");
         this.arg.setParent(this);
+        return this;
+    }
+
+    public Swc4jAstTsImportType setAttributes(Swc4jAstTsImportCallOptions attributes) {
+        this.attributes = Optional.ofNullable(attributes);
+        this.attributes.ifPresent(node -> node.setParent(this));
         return this;
     }
 

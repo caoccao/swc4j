@@ -50,7 +50,7 @@ It determines whether the code generator to emit the latest semicolon. Defaults 
 It determines how and if source maps should be generated. Defaults to `Inline`. The values are as follows:
 
 | Source Map Option | Description                                             |
-|-------------------|---------------------------------------------------------|
+| ----------------- | ------------------------------------------------------- |
 | Inline            | Source map should be inlined into the source. (Default) |
 | Separate          | Source map should be generated as a separate file.      |
 | None              | Source map should not be generated at all.              |
@@ -64,7 +64,7 @@ Note: This does not verify if output is valid for the target runtime. e.g. `cons
 The values are as follows:
 
 | ES Version | Name   |
-|------------|--------|
+| ---------- | ------ |
 | ES3        | es3    |
 | ES5        | es5    |
 | ES2015     | es2015 |
@@ -75,4 +75,6 @@ The values are as follows:
 | ES2020     | es2020 |
 | ES2021     | es2021 |
 | ES2022     | es2022 |
+| ES2023     | es2023 |
+| ES2024     | es2024 |
 | ESNext     | esnext |

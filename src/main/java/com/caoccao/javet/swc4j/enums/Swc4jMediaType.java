@@ -37,11 +37,13 @@ public enum Swc4jMediaType implements ISwc4jEnumId {
     Dmts(8),
     Dcts(9),
     Tsx(10),
-    Json(11),
-    Css(12),
-    Wasm(13),
-    SourceMap(14),
-    Unknown(15),
+    Css(11),
+    Json(12),
+    Html(13),
+    Sql(14),
+    Wasm(15),
+    SourceMap(16),
+    Unknown(17),
     ;
 
     private static final int LENGTH = values().length;

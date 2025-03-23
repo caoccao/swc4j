@@ -37,7 +37,7 @@ It determines when emit a legacy decorator, whether also emit experimental decor
 What to do with import statements that only import types i.e. whether to remove them (`Remove`), keep them as side-effect imports (`Preserve`) or error (`Error`). Defaults to `Remove`. The values are as follows:
 
 | Value    |
-|----------|
+| -------- |
 | Remove   |
 | Preserve |
 | Error    |

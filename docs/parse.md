@@ -15,31 +15,33 @@
 
 Media type of the source text contains the following values:
 
-| Media Type  | Extension    |
-|-------------|--------------|
-| JavaScript  | .js          |
-| Jsx         | .jsx         |
-| Mjs         | .mjs         |
-| Cjs         | .cjs         |
-| TypeScript  | .ts          |
-| Mts         | .mts         |
-| Cts         | .cts         |
-| Dts         | .d.ts        |
-| Dmts        | .d.mts       |
-| Dcts        | .d.cts       |
-| Tsx         | .tsx         |
-| Json        | .json        |
-| Wasm        | .wasm        |
-| TsBuildInfo | .tsbuildinfo |
-| SourceMap   | .map         |
-| Unknown     | N/A          |
+| Media Type | Extension |
+| ---------- | --------- |
+| JavaScript | .js       |
+| Jsx        | .jsx      |
+| Mjs        | .mjs      |
+| Cjs        | .cjs      |
+| TypeScript | .ts       |
+| Mts        | .mts      |
+| Cts        | .cts      |
+| Dts        | .d.ts     |
+| Dmts       | .d.mts    |
+| Dcts       | .d.cts    |
+| Tsx        | .tsx      |
+| Css        | .css      |
+| Json       | .json     |
+| Html       | .html     |
+| Sql        | .sql      |
+| Wasm       | .wasm     |
+| SourceMap  | .map      |
+| Unknown    | N/A       |
 
 ### Parse Mode (Shared)
 
 Parse mode tells SWC to parse the code as Module or Script. Default is `Program` that lets SWC to determine the actual parse mode. The values are as follows:
 
 | Parse Mode |
-|------------|
+| ---------- |
 | Program    |
 | Module     |
 | Script     |

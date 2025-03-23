@@ -31,6 +31,8 @@ public enum Swc4jEsVersion implements ISwc4jEnumIdName {
     ES2020(8, "es2020"),
     ES2021(9, "es2021"),
     ES2022(10, "es2022"),
+    ES2023(11, "es2023"),
+    ES2024(12, "es2024"),
     ESNext(0, "esnext"),
     ;
 

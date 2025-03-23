@@ -270,6 +270,8 @@ public interface ISwc4jAstVisitor {
 
     Swc4jAstVisitorResponse visitTsGetterSignature(Swc4jAstTsGetterSignature node);
 
+    Swc4jAstVisitorResponse visitTsImportCallOptions(Swc4jAstTsImportCallOptions node);
+
     Swc4jAstVisitorResponse visitTsImportEqualsDecl(Swc4jAstTsImportEqualsDecl node);
 
     Swc4jAstVisitorResponse visitTsImportType(Swc4jAstTsImportType node);

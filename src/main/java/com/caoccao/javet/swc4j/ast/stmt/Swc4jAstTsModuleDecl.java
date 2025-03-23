@@ -43,11 +43,13 @@ public class Swc4jAstTsModuleDecl
     protected boolean declare;
     protected boolean global;
     protected ISwc4jAstTsModuleName id;
+    protected boolean namespace;
 
     @Jni2RustMethod
     public Swc4jAstTsModuleDecl(
             boolean declare,
             boolean global,
+            boolean namespace,
             ISwc4jAstTsModuleName id,
             @Jni2RustParam(optional = true) ISwc4jAstTsNamespaceBody body,
             Swc4jSpan span) {
@@ -78,7 +80,16 @@ public class Swc4jAstTsModuleDecl
             boolean global,
             ISwc4jAstTsModuleName id,
             ISwc4jAstTsNamespaceBody body) {
-        return new Swc4jAstTsModuleDecl(declare, global, id, body, Swc4jSpan.DUMMY);
+        return create(declare, global, false, id, body);
+    }
+
+    public static Swc4jAstTsModuleDecl create(
+            boolean declare,
+            boolean global,
+            boolean namespace,
+            ISwc4jAstTsModuleName id,
+            ISwc4jAstTsNamespaceBody body) {
+        return new Swc4jAstTsModuleDecl(declare, global, namespace, id, body, Swc4jSpan.DUMMY);
     }
 
     @Jni2RustMethod
@@ -113,6 +124,11 @@ public class Swc4jAstTsModuleDecl
         return global;
     }
 
+    @Jni2RustMethod
+    public boolean isNamespace() {
+        return namespace;
+    }
+
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
         if (body.isPresent() && body.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstTsNamespaceBody)) {
@@ -145,6 +161,11 @@ public class Swc4jAstTsModuleDecl
     public Swc4jAstTsModuleDecl setId(ISwc4jAstTsModuleName id) {
         this.id = AssertionUtils.notNull(id, "Id");
         this.id.setParent(this);
+        return this;
+    }
+
+    public Swc4jAstTsModuleDecl setNamespace(boolean namespace) {
+        this.namespace = namespace;
         return this;
     }
 

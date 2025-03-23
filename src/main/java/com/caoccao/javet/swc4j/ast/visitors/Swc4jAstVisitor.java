@@ -634,6 +634,11 @@ public abstract class Swc4jAstVisitor implements ISwc4jAstVisitor {
     }
 
     @Override
+    public Swc4jAstVisitorResponse visitTsImportCallOptions(Swc4jAstTsImportCallOptions node) {
+        return Swc4jAstVisitorResponse.OkAndContinue;
+    }
+
+    @Override
     public Swc4jAstVisitorResponse visitTsImportEqualsDecl(Swc4jAstTsImportEqualsDecl node) {
         return Swc4jAstVisitorResponse.OkAndContinue;
     }

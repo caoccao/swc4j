@@ -16,7 +16,7 @@
 */
 
 use deno_ast::swc::{
-  atoms::JsWord,
+  atoms::Atom,
   common::{comments::CommentKind, BytePos, Span, Spanned},
   parser::token::{IdentLike, Keyword, Token, Word},
 };
@@ -90,9 +90,9 @@ fn test_parse_typescript_with_capture_tokens() {
   let t3 = &tokens[3];
   let t12 = &tokens[12];
   assert_eq!(Token::Word(Word::Keyword(Keyword::Function)), t0.token);
-  assert_eq!(Token::Word(Word::Ident(IdentLike::Other(JsWord::new("add")))), t1.token);
+  assert_eq!(Token::Word(Word::Ident(IdentLike::Other(Atom::new("add")))), t1.token);
   assert_eq!(Token::LParen, t2.token);
-  assert_eq!(Token::Word(Word::Ident(IdentLike::Other(JsWord::new("a")))), t3.token);
+  assert_eq!(Token::Word(Word::Ident(IdentLike::Other(Atom::new("a")))), t3.token);
   assert_eq!(Token::Word(Word::Keyword(Keyword::Return)), t12.token);
   assert!(t0.had_line_break);
   assert!(!t1.had_line_break);

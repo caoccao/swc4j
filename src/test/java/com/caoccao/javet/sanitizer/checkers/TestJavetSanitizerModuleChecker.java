@@ -86,11 +86,11 @@ public class TestJavetSanitizerModuleChecker extends BaseTestSuiteCheckers {
                 "await using a = b;",
                 JavetSanitizerError.KeywordNotAllowed,
                 "Keyword await is not allowed.\n" +
-                        "Source: await using a = b\n" +
+                        "Source: await using a = b;\n" +
                         "Line: 1\n" +
                         "Column: 1\n" +
                         "Start: 0\n" +
-                        "End: 17");
+                        "End: 18");
         assertException(
                 "import a from 'a'; a;",
                 JavetSanitizerError.KeywordNotAllowed,

@@ -17367,6 +17367,85 @@ impl JavaSwc4jAstTsGetterSignature {
 }
 
 #[allow(dead_code)]
+struct JavaSwc4jAstTsImportCallOptions {
+  class: GlobalRef,
+  method_construct: JMethodID,
+  method_get_with: JMethodID,
+}
+unsafe impl Send for JavaSwc4jAstTsImportCallOptions {}
+unsafe impl Sync for JavaSwc4jAstTsImportCallOptions {}
+
+#[allow(dead_code)]
+impl JavaSwc4jAstTsImportCallOptions {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/ast/ts/Swc4jAstTsImportCallOptions")
+      .expect("Couldn't find class Swc4jAstTsImportCallOptions");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jAstTsImportCallOptions");
+    let method_construct = env
+      .get_method_id(
+        &class,
+        "<init>",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+      )
+      .expect("Couldn't find method Swc4jAstTsImportCallOptions::new");
+    let method_get_with = env
+      .get_method_id(
+        &class,
+        "getWith",
+        "()Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit;",
+      )
+      .expect("Couldn't find method Swc4jAstTsImportCallOptions.getWith");
+    JavaSwc4jAstTsImportCallOptions {
+      class,
+      method_construct,
+      method_get_with,
+    }
+  }
+
+  pub fn construct<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    with: &JObject<'_>,
+    span: &JObject<'_>,
+  ) -> Result<JObject<'a>>
+  where
+    'local: 'a,
+  {
+    let with = object_to_jvalue!(with);
+    let span = object_to_jvalue!(span);
+    let return_value = call_as_construct!(
+        env,
+        &self.class,
+        self.method_construct,
+        &[with, span],
+        "Swc4jAstTsImportCallOptions construct()"
+      )?;
+    Ok(return_value)
+  }
+
+  pub fn get_with<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<JObject<'a>>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_with,
+        &[],
+        "Swc4jAstObjectLit get_with()"
+      )?;
+    Ok(return_value)
+  }
+}
+
+#[allow(dead_code)]
 struct JavaSwc4jAstTsImportEqualsDecl {
   class: GlobalRef,
   method_construct: JMethodID,
@@ -17533,6 +17612,7 @@ struct JavaSwc4jAstTsImportType {
   class: GlobalRef,
   method_construct: JMethodID,
   method_get_arg: JMethodID,
+  method_get_attributes: JMethodID,
   method_get_qualifier: JMethodID,
   method_get_type_args: JMethodID,
 }
@@ -17552,7 +17632,7 @@ impl JavaSwc4jAstTsImportType {
       .get_method_id(
         &class,
         "<init>",
-        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsEntityName;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsTypeParamInstantiation;Lcom/caoccao/javet/swc4j/ast/ts/Swc4jAstTsImportCallOptions;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTsImportType::new");
     let method_get_arg = env
@@ -17562,6 +17642,13 @@ impl JavaSwc4jAstTsImportType {
         "()Lcom/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstStr;",
       )
       .expect("Couldn't find method Swc4jAstTsImportType.getArg");
+    let method_get_attributes = env
+      .get_method_id(
+        &class,
+        "getAttributes",
+        "()Ljava/util/Optional;",
+      )
+      .expect("Couldn't find method Swc4jAstTsImportType.getAttributes");
     let method_get_qualifier = env
       .get_method_id(
         &class,
@@ -17580,6 +17667,7 @@ impl JavaSwc4jAstTsImportType {
       class,
       method_construct,
       method_get_arg,
+      method_get_attributes,
       method_get_qualifier,
       method_get_type_args,
     }
@@ -17591,6 +17679,7 @@ impl JavaSwc4jAstTsImportType {
     arg: &JObject<'_>,
     qualifier: &Option<JObject>,
     type_args: &Option<JObject>,
+    attributes: &Option<JObject>,
     span: &JObject<'_>,
   ) -> Result<JObject<'a>>
   where
@@ -17599,12 +17688,13 @@ impl JavaSwc4jAstTsImportType {
     let arg = object_to_jvalue!(arg);
     let qualifier = optional_object_to_jvalue!(qualifier);
     let type_args = optional_object_to_jvalue!(type_args);
+    let attributes = optional_object_to_jvalue!(attributes);
     let span = object_to_jvalue!(span);
     let return_value = call_as_construct!(
         env,
         &self.class,
         self.method_construct,
-        &[arg, qualifier, type_args, span],
+        &[arg, qualifier, type_args, attributes, span],
         "Swc4jAstTsImportType construct()"
       )?;
     Ok(return_value)
@@ -17624,6 +17714,24 @@ impl JavaSwc4jAstTsImportType {
         self.method_get_arg,
         &[],
         "Swc4jAstStr get_arg()"
+      )?;
+    Ok(return_value)
+  }
+
+  pub fn get_attributes<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<JObject<'a>>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_attributes,
+        &[],
+        "Optional get_attributes()"
       )?;
     Ok(return_value)
   }
@@ -19160,6 +19268,7 @@ struct JavaSwc4jAstTsModuleDecl {
   method_get_id: JMethodID,
   method_is_declare: JMethodID,
   method_is_global: JMethodID,
+  method_is_namespace: JMethodID,
 }
 unsafe impl Send for JavaSwc4jAstTsModuleDecl {}
 unsafe impl Sync for JavaSwc4jAstTsModuleDecl {}
@@ -19177,7 +19286,7 @@ impl JavaSwc4jAstTsModuleDecl {
       .get_method_id(
         &class,
         "<init>",
-        "(ZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsNamespaceBody;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
+        "(ZZZLcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsModuleName;Lcom/caoccao/javet/swc4j/ast/interfaces/ISwc4jAstTsNamespaceBody;Lcom/caoccao/javet/swc4j/span/Swc4jSpan;)V",
       )
       .expect("Couldn't find method Swc4jAstTsModuleDecl::new");
     let method_get_body = env
@@ -19208,6 +19317,13 @@ impl JavaSwc4jAstTsModuleDecl {
         "()Z",
       )
       .expect("Couldn't find method Swc4jAstTsModuleDecl.isGlobal");
+    let method_is_namespace = env
+      .get_method_id(
+        &class,
+        "isNamespace",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jAstTsModuleDecl.isNamespace");
     JavaSwc4jAstTsModuleDecl {
       class,
       method_construct,
@@ -19215,6 +19331,7 @@ impl JavaSwc4jAstTsModuleDecl {
       method_get_id,
       method_is_declare,
       method_is_global,
+      method_is_namespace,
     }
   }
 
@@ -19223,6 +19340,7 @@ impl JavaSwc4jAstTsModuleDecl {
     env: &mut JNIEnv<'local>,
     declare: bool,
     global: bool,
+    namespace: bool,
     id: &JObject<'_>,
     body: &Option<JObject>,
     span: &JObject<'_>,
@@ -19232,6 +19350,7 @@ impl JavaSwc4jAstTsModuleDecl {
   {
     let declare = boolean_to_jvalue!(declare);
     let global = boolean_to_jvalue!(global);
+    let namespace = boolean_to_jvalue!(namespace);
     let id = object_to_jvalue!(id);
     let body = optional_object_to_jvalue!(body);
     let span = object_to_jvalue!(span);
@@ -19239,7 +19358,7 @@ impl JavaSwc4jAstTsModuleDecl {
         env,
         &self.class,
         self.method_construct,
-        &[declare, global, id, body, span],
+        &[declare, global, namespace, id, body, span],
         "Swc4jAstTsModuleDecl construct()"
       )?;
     Ok(return_value)
@@ -19309,6 +19428,22 @@ impl JavaSwc4jAstTsModuleDecl {
         self.method_is_global,
         &[],
         "boolean is_global()"
+      )?;
+    Ok(return_value)
+  }
+
+  pub fn is_namespace<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<bool>
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_namespace,
+        &[],
+        "boolean is_namespace()"
       )?;
     Ok(return_value)
   }
@@ -23432,6 +23567,7 @@ static mut JAVA_CLASS_TS_EXPR_WITH_TYPE_ARGS: Option<JavaSwc4jAstTsExprWithTypeA
 static mut JAVA_CLASS_TS_EXTERNAL_MODULE_REF: Option<JavaSwc4jAstTsExternalModuleRef> = None;
 static mut JAVA_CLASS_TS_FN_TYPE: Option<JavaSwc4jAstTsFnType> = None;
 static mut JAVA_CLASS_TS_GETTER_SIGNATURE: Option<JavaSwc4jAstTsGetterSignature> = None;
+static mut JAVA_CLASS_TS_IMPORT_CALL_OPTIONS: Option<JavaSwc4jAstTsImportCallOptions> = None;
 static mut JAVA_CLASS_TS_IMPORT_EQUALS_DECL: Option<JavaSwc4jAstTsImportEqualsDecl> = None;
 static mut JAVA_CLASS_TS_IMPORT_TYPE: Option<JavaSwc4jAstTsImportType> = None;
 static mut JAVA_CLASS_TS_INDEX_SIGNATURE: Option<JavaSwc4jAstTsIndexSignature> = None;
@@ -23658,6 +23794,7 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
     JAVA_CLASS_TS_EXTERNAL_MODULE_REF = Some(JavaSwc4jAstTsExternalModuleRef::new(env));
     JAVA_CLASS_TS_FN_TYPE = Some(JavaSwc4jAstTsFnType::new(env));
     JAVA_CLASS_TS_GETTER_SIGNATURE = Some(JavaSwc4jAstTsGetterSignature::new(env));
+    JAVA_CLASS_TS_IMPORT_CALL_OPTIONS = Some(JavaSwc4jAstTsImportCallOptions::new(env));
     JAVA_CLASS_TS_IMPORT_EQUALS_DECL = Some(JavaSwc4jAstTsImportEqualsDecl::new(env));
     JAVA_CLASS_TS_IMPORT_TYPE = Some(JavaSwc4jAstTsImportType::new(env));
     JAVA_CLASS_TS_INDEX_SIGNATURE = Some(JavaSwc4jAstTsIndexSignature::new(env));
@@ -32897,6 +33034,44 @@ impl<'local> FromJava<'local> for TsGetterSignature {
   }
 }
 
+impl RegisterWithMap<ByteToIndexMap> for TsImportCallOptions {
+  fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
+    map.register_by_span(&self.span);
+    self.with.register_with_map(map);
+  }
+}
+
+impl ToJavaWithMap<ByteToIndexMap> for TsImportCallOptions {
+  fn to_java_with_map<'local, 'a>(&self, env: &mut JNIEnv<'local>, map: &'_ ByteToIndexMap) -> Result<JObject<'a>>
+  where
+    'local: 'a,
+  {
+    let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
+    let java_with = self.with.to_java_with_map(env, map)?;
+    let return_value = unsafe { JAVA_CLASS_TS_IMPORT_CALL_OPTIONS.as_ref().unwrap() }
+      .construct(env, &java_with, &java_span_ex)?;
+    delete_local_ref!(env, java_with);
+    delete_local_ref!(env, java_span_ex);
+    Ok(return_value)
+  }
+}
+
+impl<'local> FromJava<'local> for TsImportCallOptions {
+  #[allow(unused_variables)]
+  fn from_java(env: &mut JNIEnv<'local>, jobj: &JObject<'_>) -> Result<Box<Self>> {
+    let java_class = unsafe { JAVA_CLASS_TS_IMPORT_CALL_OPTIONS.as_ref().unwrap() };
+    let span = DUMMY_SP;
+    let java_with = java_class.get_with(env, jobj)?;
+    let with = *ObjectLit::from_java(env, &java_with)?;
+    delete_local_ref!(env, java_with);
+    let with = Box::new(with);
+    Ok(Box::new(TsImportCallOptions {
+      span,
+      with,
+    }))
+  }
+}
+
 impl RegisterWithMap<ByteToIndexMap> for TsImportEqualsDecl {
   fn register_with_map<'local>(&self, map: &'_ mut ByteToIndexMap) {
     map.register_by_span(&self.span);
@@ -32953,6 +33128,7 @@ impl RegisterWithMap<ByteToIndexMap> for TsImportType {
     self.arg.register_with_map(map);
     self.qualifier.as_ref().map(|node| node.register_with_map(map));
     self.type_args.as_ref().map(|node| node.register_with_map(map));
+    self.attributes.as_ref().map(|node| node.register_with_map(map));
   }
 }
 
@@ -32971,10 +33147,15 @@ impl ToJavaWithMap<ByteToIndexMap> for TsImportType {
       Some(node) => Some(node.to_java_with_map(env, map)?),
       None => None,
     };
+    let java_optional_attributes = match self.attributes.as_ref() {
+      Some(node) => Some(node.to_java_with_map(env, map)?),
+      None => None,
+    };
     let return_value = unsafe { JAVA_CLASS_TS_IMPORT_TYPE.as_ref().unwrap() }
-      .construct(env, &java_arg, &java_optional_qualifier, &java_optional_type_args, &java_span_ex)?;
+      .construct(env, &java_arg, &java_optional_qualifier, &java_optional_type_args, &java_optional_attributes, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_qualifier);
     delete_local_optional_ref!(env, java_optional_type_args);
+    delete_local_optional_ref!(env, java_optional_attributes);
     delete_local_ref!(env, java_arg);
     delete_local_ref!(env, java_span_ex);
     Ok(return_value)
@@ -33010,11 +33191,22 @@ impl<'local> FromJava<'local> for TsImportType {
     };
     delete_local_ref!(env, java_optional_type_args);
     let type_args = type_args.map(|type_args| Box::new(type_args));
+    let java_optional_attributes = java_class.get_attributes(env, jobj)?;
+    let attributes = if optional_is_present(env, &java_optional_attributes)? {
+      let java_attributes = optional_get(env, &java_optional_attributes)?;
+      let attributes = *TsImportCallOptions::from_java(env, &java_attributes)?;
+      delete_local_ref!(env, java_attributes);
+      Some(attributes)
+    } else {
+      None
+    };
+    delete_local_ref!(env, java_optional_attributes);
     Ok(Box::new(TsImportType {
       span,
       arg,
       qualifier,
       type_args,
+      attributes,
     }))
   }
 }
@@ -33755,13 +33947,14 @@ impl ToJavaWithMap<ByteToIndexMap> for TsModuleDecl {
     let java_span_ex = map.get_span_ex_by_span(&self.span).to_java(env)?;
     let declare = self.declare;
     let global = self.global;
+    let namespace = self.namespace;
     let java_id = self.id.to_java_with_map(env, map)?;
     let java_optional_body = match self.body.as_ref() {
       Some(node) => Some(node.to_java_with_map(env, map)?),
       None => None,
     };
     let return_value = unsafe { JAVA_CLASS_TS_MODULE_DECL.as_ref().unwrap() }
-      .construct(env, declare, global, &java_id, &java_optional_body, &java_span_ex)?;
+      .construct(env, declare, global, namespace, &java_id, &java_optional_body, &java_span_ex)?;
     delete_local_optional_ref!(env, java_optional_body);
     delete_local_ref!(env, java_id);
     delete_local_ref!(env, java_span_ex);
@@ -33776,6 +33969,7 @@ impl<'local> FromJava<'local> for TsModuleDecl {
     let span = DUMMY_SP;
     let declare = java_class.is_declare(env, jobj)?;
     let global = java_class.is_global(env, jobj)?;
+    let namespace = java_class.is_namespace(env, jobj)?;
     let java_id = java_class.get_id(env, jobj)?;
     let id = *TsModuleName::from_java(env, &java_id)?;
     delete_local_ref!(env, java_id);
@@ -33793,6 +33987,7 @@ impl<'local> FromJava<'local> for TsModuleDecl {
       span,
       declare,
       global,
+      namespace,
       id,
       body,
     }))
