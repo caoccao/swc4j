@@ -65,7 +65,7 @@ object Config {
         const val JAVA_VERSION = "1.8"
         const val JAVET = "4.1.0"
         const val JUNIT = "5.11.3"
-        const val SWC4J = "1.3.0"
+        const val SWC4J = "1.4.0"
     }
 }
 
@@ -106,7 +106,7 @@ afterEvaluate {
 
 task<Exec>("buildJNIHeaders") {
     mkdir("$buildDir/generated/tmp/jni")
-    project.exec {
+    providers.exec {
         workingDir("$projectDir")
         commandLine(
             "javac",
