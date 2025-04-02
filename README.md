@@ -47,24 +47,24 @@
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
 </dependency>
 ```
 
 ```kotlin
 // Gradle Kotlin DSL
 // Linux + MacOS + Windows
-implementation("com.caoccao.javet:swc4j:1.3.0")
+implementation("com.caoccao.javet:swc4j:1.4.0")
 // Android
-implementation("com.caoccao.javet:swc4j-android:1.3.0")
+implementation("com.caoccao.javet:swc4j-android:1.4.0")
 ```
 
 ```groovy
 // Gradle Groovy DSL
 // Linux + MacOS + Windows
-implementation 'com.caoccao.javet:swc4j:1.3.0'
+implementation 'com.caoccao.javet:swc4j:1.4.0'
 // Android
-implementation 'com.caoccao.javet:swc4j-android:1.3.0'
+implementation 'com.caoccao.javet:swc4j-android:1.4.0'
 ```
 
 ### Transpile
