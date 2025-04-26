@@ -12,7 +12,7 @@ crate-type = ["cdylib", "rlib"]
 base64 = "0.22.1"
 log = "0.4.26"
 env_logger = "0.11.7"
-deno_ast = { version = "0.46.5", features = [
+deno_ast = { version = "0.46.6", features = [
   "bundler",
   "cjs",
   "codegen",
