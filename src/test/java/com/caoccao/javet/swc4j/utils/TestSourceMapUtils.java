@@ -24,7 +24,8 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class TestSourceMapUtils extends BaseTestSuite {
     @Test
@@ -43,5 +44,15 @@ public class TestSourceMapUtils extends BaseTestSuite {
         assertNotNull(output.getSourceMap());
         SourceMapUtils sourceMapUtils = SourceMapUtils.from(output.getSourceMap());
         assertNotNull(sourceMapUtils);
+        assertEquals(
+                SimpleList.of("file:///main.js"),
+                sourceMapUtils.getSourceFilePaths());
+        assertEquals(
+                SimpleList.of("function add(a:number, b:number)\n{ return a+b; }"),
+                sourceMapUtils.getSourceContents());
+        assertEquals(SimpleList.of(), sourceMapUtils.getNames());
+        assertEquals(
+                "AAAA,SAAS,IAAI,GAAE,MAAM,EAAE,GAAE,MAAM;EAC7B,OAAO,IAAE;AAAG",
+                sourceMapUtils.getMappings());
     }
 }

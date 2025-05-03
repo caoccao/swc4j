@@ -17,7 +17,7 @@
 package com.caoccao.javet.swc4j.tokens;
 
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
-import com.caoccao.javet.swc4j.utils.JsonUtils;
+import com.caoccao.javet.swc4j.utils.SimpleJsonUtils;
 
 /**
  * The type Swc4j token text value flags.
@@ -70,9 +70,9 @@ public class Swc4jTokenTextValueFlags<T> extends Swc4jTokenTextValue<T> {
         sb.append(", \"start\": ").append(span.getStart());
         sb.append(", \"end\": ").append(span.getEnd());
         sb.append(", \"type\": \"").append(type.name()).append("\"");
-        sb.append(", \"text\": \"").append(JsonUtils.escape(getText())).append("\"");
-        sb.append(", \"value\": \"").append(JsonUtils.escape(String.valueOf(getValue()))).append("\"");
-        sb.append(", \"flags\": \"").append(JsonUtils.escape(String.valueOf(getFlags()))).append("\"");
+        sb.append(", \"text\": \"").append(SimpleJsonUtils.escape(getText())).append("\"");
+        sb.append(", \"value\": \"").append(SimpleJsonUtils.escape(String.valueOf(getValue()))).append("\"");
+        sb.append(", \"flags\": \"").append(SimpleJsonUtils.escape(String.valueOf(getFlags()))).append("\"");
         sb.append(" }");
         return sb.toString();
     }

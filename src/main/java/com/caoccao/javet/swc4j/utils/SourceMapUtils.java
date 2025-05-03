@@ -19,51 +19,118 @@ package com.caoccao.javet.swc4j.utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class SourceMapUtils {
     private static final String MAPPINGS = "mappings";
     private static final String NAMES = "names";
     private static final String SOURCES = "sources";
     private static final String SOURCES_CONTENT = "sourcesContent";
+    private static final Set<String> SUPPORTED_VERSION_SET = SimpleSet.of("3");
     private static final String VERSION = "version";
     private final String mappings;
+    private final List<String> names;
     private final List<SourceNode> nodes;
     private final List<String> sourceContents;
     private final List<String> sourceFilePaths;
     private int segmentOffset;
 
-    public SourceMapUtils(List<String> sourceFilePaths, List<String> sourceContents, String mappings) {
+    public SourceMapUtils(
+            List<String> sourceFilePaths,
+            List<String> sourceContents,
+            List<String> names,
+            String mappings) {
         this.mappings = Objects.requireNonNull(mappings);
+        this.names = SimpleList.immutableCopyOf(Objects.requireNonNull(names));
         nodes = new ArrayList<>();
         segmentOffset = 0;
-        this.sourceContents = SimpleList.immutableCopyOf(sourceContents);
-        this.sourceFilePaths = SimpleList.immutableCopyOf(sourceFilePaths);
+        this.sourceContents = SimpleList.immutableCopyOf(Objects.requireNonNull(sourceContents));
+        this.sourceFilePaths = SimpleList.immutableCopyOf(Objects.requireNonNull(sourceFilePaths));
     }
 
     public static SourceMapUtils from(String sourceMapString) {
         SimpleJsonUtils.JsonNode jsonNode = SimpleJsonUtils.parse(sourceMapString);
-        List<String> sourceFilePaths = SimpleList.of();
-        List<String> sourceContents = SimpleList.of();
-        String mappings = StringUtils.EMPTY;
         if (!jsonNode.isObject()) {
             throw new IllegalArgumentException(
                     "Invalid JSON string: " + sourceMapString);
         }
         SimpleJsonUtils.JsonObjectNode jsonObjectNode = jsonNode.asObject();
-        if (!jsonObjectNode.getNodeMap().containsKey(VERSION)) {
+        SimpleJsonUtils.JsonNode versionJsonNode = jsonObjectNode.getNodeMap().get(VERSION);
+        if (versionJsonNode == null) {
             throw new IllegalArgumentException(
                     "Invalid JSON string: version is not found");
         }
-        SimpleJsonUtils.JsonNode versionJsonNode = jsonObjectNode.getNodeMap().get(VERSION);
-        if (!versionJsonNode.isNumber() || !"3".equals(versionJsonNode.asNumber().getValue())) {
+        if (!versionJsonNode.isNumber()) {
+            throw new IllegalArgumentException("Invalid JSON string: version is not a number");
+        }
+        if (!SUPPORTED_VERSION_SET.contains(versionJsonNode.asNumber().getValue())) {
             throw new IllegalArgumentException(
                     "Invalid JSON string: version " + versionJsonNode.asNumber().getValue() + " is not found");
         }
-        return new SourceMapUtils(sourceFilePaths, sourceContents, mappings);
+        SimpleJsonUtils.JsonNode sourcesJsonNode = jsonObjectNode.getNodeMap().get(SOURCES);
+        if (sourcesJsonNode == null) {
+            throw new IllegalArgumentException(
+                    "Invalid JSON string: sources is not found");
+        }
+        if (!sourcesJsonNode.isArray()) {
+            throw new IllegalArgumentException("Invalid JSON string: sources is not an array");
+        }
+        List<String> sources = sourcesJsonNode.asArray().getNodes().stream()
+                .filter(SimpleJsonUtils.JsonNode::isText)
+                .map(SimpleJsonUtils.JsonNode::asText)
+                .map(SimpleJsonUtils.JsonTextNode::getValue)
+                .collect(Collectors.toList());
+        if (sources.isEmpty()) {
+            throw new IllegalArgumentException("Invalid JSON string: sources is empty");
+        }
+        SimpleJsonUtils.JsonNode sourcesContentJsonNode = jsonObjectNode.getNodeMap().get(SOURCES_CONTENT);
+        if (sourcesContentJsonNode == null) {
+            throw new IllegalArgumentException(
+                    "Invalid JSON string: sourcesContent is not found");
+        }
+        if (!sourcesContentJsonNode.isArray()) {
+            throw new IllegalArgumentException("Invalid JSON string: sourcesContent is not an array");
+        }
+        List<String> sourcesContent = sourcesContentJsonNode.asArray().getNodes().stream()
+                .filter(SimpleJsonUtils.JsonNode::isText)
+                .map(SimpleJsonUtils.JsonNode::asText)
+                .map(SimpleJsonUtils.JsonTextNode::getValue)
+                .collect(Collectors.toList());
+        if (sourcesContent.isEmpty()) {
+            throw new IllegalArgumentException("Invalid JSON string: sourcesContent is empty");
+        }
+        SimpleJsonUtils.JsonNode namesJsonNode = jsonObjectNode.getNodeMap().get(NAMES);
+        if (namesJsonNode == null) {
+            throw new IllegalArgumentException(
+                    "Invalid JSON string: names is not found");
+        }
+        if (!namesJsonNode.isArray()) {
+            throw new IllegalArgumentException("Invalid JSON string: names is not an array");
+        }
+        List<String> names = namesJsonNode.asArray().getNodes().stream()
+                .filter(SimpleJsonUtils.JsonNode::isText)
+                .map(SimpleJsonUtils.JsonNode::asText)
+                .map(SimpleJsonUtils.JsonTextNode::getValue)
+                .collect(Collectors.toList());
+        SimpleJsonUtils.JsonNode mappingsJsonNode = jsonObjectNode.getNodeMap().get(MAPPINGS);
+        if (mappingsJsonNode == null) {
+            throw new IllegalArgumentException(
+                    "Invalid JSON string: mappings is not found");
+        }
+        if (!mappingsJsonNode.isText()) {
+            throw new IllegalArgumentException("Invalid JSON string: mappings is not a text");
+        }
+        String mappings = mappingsJsonNode.asText().getValue();
+        return new SourceMapUtils(sources, sourcesContent, names, mappings);
     }
 
     public String getMappings() {
         return mappings;
+    }
+
+    public List<String> getNames() {
+        return names;
     }
 
     /**

@@ -20,8 +20,41 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * The type Simple JSON utils is a minimal implementation of a JSON parser.
+ *
+ * @since 1.6.0
+ */
 public final class SimpleJsonUtils {
     private static final Pattern PATTERN_NUMBER = Pattern.compile("^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?");
+
+    /**
+     * Escape the string.
+     *
+     * @param str the string
+     * @return the escaped Json string
+     * @since 0.2.0
+     */
+    public static String escape(String str) {
+        if (StringUtils.isEmpty(str)) {
+            return str;
+        }
+        StringBuilder sb = new StringBuilder(str.length());
+        for (char c : str.toCharArray()) {
+            switch (c) {
+                case '\\':
+                    sb.append("\\\\");
+                    break;
+                case '"':
+                    sb.append("\\\"");
+                    break;
+                default:
+                    sb.append(c);
+                    break;
+            }
+        }
+        return sb.toString();
+    }
 
     private static JsonToken extractNextToken(String jsonString, JsonParserContext context) {
         if (context.getOffset() >= jsonString.length()) {
@@ -34,13 +67,11 @@ public final class SimpleJsonUtils {
             case '\t':
             case '\r':
             case '\n':
-                String whiteSpaces = extractWhiteSpaces(jsonString, context.getOffset());
-                context.addOffset(whiteSpaces.length());
+                skipWhiteSpaces(jsonString, context);
                 jsonToken = extractNextToken(jsonString, context);
                 break;
             case '"':
-                jsonToken = JsonToken.fromString(extractString(jsonString, context.getOffset()));
-                context.addOffset(jsonToken.getLength() + 2);
+                jsonToken = extractString(jsonString, context);
                 break;
             case '-':
             case '0':
@@ -53,8 +84,7 @@ public final class SimpleJsonUtils {
             case '7':
             case '8':
             case '9':
-                jsonToken = JsonToken.fromNumber(extractNumber(jsonString, context.getOffset()));
-                context.addOffset(jsonToken.getLength());
+                jsonToken = extractNumber(jsonString, context);
                 break;
             case '{':
                 jsonToken = JsonToken.OBJECT_START;
@@ -87,24 +117,27 @@ public final class SimpleJsonUtils {
         return jsonToken;
     }
 
-    private static String extractNumber(String jsonString, int offset) {
-        Matcher matcher = PATTERN_NUMBER.matcher(jsonString.substring(offset));
+    private static JsonToken extractNumber(String jsonString, JsonParserContext context) {
+        Matcher matcher = PATTERN_NUMBER.matcher(jsonString.substring(context.getOffset()));
         if (!matcher.find()) {
-            throw new IllegalArgumentException("Invalid JSON string: expect number at " + offset);
+            throw new IllegalArgumentException("Invalid JSON string: expect number at " + context.getOffset());
         }
-        return matcher.group();
+        JsonToken jsonToken = JsonToken.fromNumber(matcher.group());
+        context.addOffset(jsonToken.getLength());
+        return jsonToken;
     }
 
-    private static String extractString(String jsonString, int offset) {
+    private static JsonToken extractString(String jsonString, JsonParserContext context) {
         // Skip the first char.
-        ++offset;
+        context.addOffset(1);
         StringBuilder sb = new StringBuilder();
         final int length = jsonString.length();
-        while (offset < length) {
-            char c = jsonString.charAt(offset);
+        while (context.getOffset() < length) {
+            char c = jsonString.charAt(context.getOffset());
             if ('\\' == c) {
-                if (offset + 1 < length) {
-                    char next = jsonString.charAt(++offset);
+                if (context.getOffset() + 1 < length) {
+                    context.addOffset(1);
+                    char next = jsonString.charAt(context.getOffset());
                     switch (next) {
                         case '"':
                             sb.append('"');
@@ -131,63 +164,42 @@ public final class SimpleJsonUtils {
                             sb.append('\t');
                             break;
                         case 'u':
-                            if (offset + 4 < length) {
-                                String hex = jsonString.substring(offset + 1, offset + 5);
+                            if (context.getOffset() + 5 < length) {
+                                String hex = jsonString.substring(context.getOffset() + 1, context.getOffset() + 5);
                                 try {
                                     int codePoint = Integer.parseInt(hex, 16);
                                     sb.append((char) codePoint);
-                                    offset += 4;
+                                    context.addOffset(4);
                                 } catch (NumberFormatException e) {
                                     throw new IllegalArgumentException(
-                                            "Invalid JSON string: invalid unicode escape \\u" + hex + " at " + offset);
+                                            "Invalid JSON string: invalid unicode escape \\u" + hex + " at " + context.getOffset());
                                 }
                             } else {
                                 throw new IllegalArgumentException(
-                                        "Invalid JSON string: incomplete unicode escape sequence at end of string at " + offset);
+                                        "Invalid JSON string: incomplete unicode escape sequence at end of string at " + context.getOffset());
                             }
                             break;
                         default:
                             throw new IllegalArgumentException(
-                                    "Invalid JSON string: invalid escape sequence \\" + next + " at " + offset);
+                                    "Invalid JSON string: invalid escape sequence \\" + next + " at " + context.getOffset());
                     }
+                    context.addOffset(1);
                 } else {
                     throw new IllegalArgumentException(
-                            "Invalid JSON string: invalid escape sequence \\ at " + offset);
+                            "Invalid JSON string: invalid escape sequence \\ at " + context.getOffset());
                 }
             } else if ('"' == c) {
-                ++offset;
+                context.addOffset(1);
                 break;
             } else {
-                ++offset;
+                context.addOffset(1);
                 sb.append(c);
             }
         }
-        if (offset > length) {
-            throw new IllegalArgumentException("Invalid JSON string: expect \" at " + offset);
+        if (context.getOffset() > length) {
+            throw new IllegalArgumentException("Invalid JSON string: expect \" at " + (context.getOffset() - 1));
         }
-        return sb.toString();
-    }
-
-    private static String extractWhiteSpaces(String jsonString, int offset) {
-        final int length = jsonString.length();
-        StringBuilder sb = new StringBuilder();
-        boolean hasMore = true;
-        while (hasMore && offset < length) {
-            char c = jsonString.charAt(offset);
-            ++offset;
-            switch (c) {
-                case ' ':
-                case '\t':
-                case '\r':
-                case '\n':
-                    sb.append(c);
-                    break;
-                default:
-                    hasMore = false;
-                    break;
-            }
-        }
-        return sb.toString();
+        return JsonToken.fromString(sb.toString());
     }
 
     public static JsonNode parse(String jsonString) {
@@ -289,6 +301,27 @@ public final class SimpleJsonUtils {
             }
         }
         return jsonObjectNode;
+    }
+
+    private static void skipWhiteSpaces(String jsonString, JsonParserContext context) {
+        final int length = jsonString.length();
+        boolean hasMore = true;
+        // Skip the first white space.
+        context.addOffset(1);
+        while (hasMore && context.getOffset() < length) {
+            char c = jsonString.charAt(context.getOffset());
+            switch (c) {
+                case ' ':
+                case '\t':
+                case '\r':
+                case '\n':
+                    context.addOffset(1);
+                    break;
+                default:
+                    hasMore = false;
+                    break;
+            }
+        }
     }
 
     public enum JsonTokenType {
