@@ -18,9 +18,31 @@ package com.caoccao.javet.swc4j.utils;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestSimpleJsonUtils {
+    @Test
+    public void testArrayWithBoolean() {
+        SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonArrayNode.of(
+                SimpleJsonUtils.JsonBooleanNode.of(true),
+                SimpleJsonUtils.JsonBooleanNode.of(false));
+        assertEquals(expectedJsonNode, SimpleJsonUtils.parse("[true,false]"));
+    }
+
+    @Test
+    public void testBoolean() {
+        Stream.of(true, false).forEach(b -> {
+            SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonBooleanNode.of(b);
+            assertEquals(expectedJsonNode, SimpleJsonUtils.parse(Boolean.toString(b)));
+            assertEquals(expectedJsonNode, SimpleJsonUtils.parse("  " + b + "  "));
+        });
+    }
+
     @Test
     public void testEmptyArray() {
         SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonArrayNode.of();
@@ -46,6 +68,25 @@ public class TestSimpleJsonUtils {
     }
 
     @Test
+    public void testNumber() {
+        IntStream.of(123, -123, Integer.MAX_VALUE, Integer.MIN_VALUE, 0).forEach(i -> {
+            SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonNumberNode.of(i);
+            assertEquals(expectedJsonNode, SimpleJsonUtils.parse(Integer.toString(i)));
+            assertEquals(expectedJsonNode, SimpleJsonUtils.parse("  " + i + "  "));
+        });
+        LongStream.of(Long.MAX_VALUE / 2, Long.MIN_VALUE / 2, Long.MAX_VALUE, Long.MIN_VALUE).forEach(l -> {
+            SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonNumberNode.of(l);
+            assertEquals(expectedJsonNode, SimpleJsonUtils.parse(Long.toString(l)));
+            assertEquals(expectedJsonNode, SimpleJsonUtils.parse("  " + l + "  "));
+        });
+        DoubleStream.of(Double.MAX_VALUE / 2, Double.MIN_VALUE / 2, Double.MAX_VALUE, Double.MIN_VALUE).forEach(d -> {
+            SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonNumberNode.of(d);
+            assertEquals(expectedJsonNode, SimpleJsonUtils.parse(Double.toString(d)));
+            assertEquals(expectedJsonNode, SimpleJsonUtils.parse("  " + d + "  "));
+        });
+    }
+
+    @Test
     public void testSourceMap() {
         SimpleJsonUtils.JsonObjectNode expectedJsonNode = SimpleJsonUtils.JsonObjectNode.of();
         expectedJsonNode.getNodeMap().put("version", SimpleJsonUtils.JsonNumberNode.of("3"));
@@ -61,5 +102,14 @@ public class TestSimpleJsonUtils {
                 "  \"mappings\" : \"AAAA,SAAS,IAAI,GAAE,MAAM,EAAE,GAAE,MAAM;EAC7B,OAAO,IAAE;AAAG\"\n" +
                 "}");
         assertEquals(expectedJsonNode, jsonNode);
+    }
+
+    @Test
+    public void testText() {
+        Stream.of("abc", "abc def", "\b\f\\\r\n\t\"").forEach(s -> {
+            SimpleJsonUtils.JsonNode expectedJsonNode = SimpleJsonUtils.JsonTextNode.of(s);
+            assertEquals(expectedJsonNode, SimpleJsonUtils.parse("\"" + SimpleJsonUtils.escape(s) + "\""));
+            assertEquals(expectedJsonNode, SimpleJsonUtils.parse("  \"" + SimpleJsonUtils.escape(s) + "\"  "));
+        });
     }
 }
