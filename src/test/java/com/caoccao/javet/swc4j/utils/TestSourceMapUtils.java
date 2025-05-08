@@ -42,7 +42,7 @@ public class TestSourceMapUtils extends BaseTestSuite {
         assertEquals(Swc4jMediaType.TypeScript, output.getMediaType());
         assertEquals(expectedCode, output.getCode());
         assertNotNull(output.getSourceMap());
-        SourceMapUtils sourceMapUtils = SourceMapUtils.from(output.getSourceMap());
+        SourceMapUtils sourceMapUtils = SourceMapUtils.of(output.getSourceMap());
         assertNotNull(sourceMapUtils);
         assertEquals(
                 SimpleList.of("file:///main.js"),
