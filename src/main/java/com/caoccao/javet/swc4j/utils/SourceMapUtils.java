@@ -135,13 +135,13 @@ public final class SourceMapUtils {
     }
 
     private void decodeLine(String lineString) {
-        SourceNode lastNode = new SourceNode();
+        SourceNode lastNode = SourceNode.of();
         if (!nodesInLines.isEmpty()) {
             List<SourceNode> lastNodesInLine = nodesInLines.get(nodesInLines.size() - 1);
-            lastNode.copyFrom(lastNodesInLine.get(lastNodesInLine.size() - 1));
-            lastNode.generatedColumnNumber = 0;
+            lastNode = SourceNode.of(lastNodesInLine.get(lastNodesInLine.size() - 1));
+            lastNode.generatedPosition.column = 0;
         }
-        lastNode.generatedLineNumber = nodesInLines.size();
+        lastNode.generatedPosition.line = nodesInLines.size();
         List<SourceNode> nodes = new ArrayList<>();
         List<Integer> fields = new ArrayList<>();
         for (String segment : lineString.split(",")) {
@@ -175,12 +175,11 @@ public final class SourceMapUtils {
             if (fields.size() < 4) {
                 continue;
             }
-            lastNode.generatedColumnNumber += fields.get(0);
+            lastNode.generatedPosition.column += fields.get(0);
             lastNode.sourceFileIndex += fields.get(1);
-            lastNode.originalLineNumber += fields.get(2);
-            lastNode.originalColumnNumber += fields.get(3);
-            SourceNode sourceNode = new SourceNode(lastNode);
-            nodes.add(sourceNode);
+            lastNode.originalPosition.line += fields.get(2);
+            lastNode.originalPosition.column += fields.get(3);
+            nodes.add(SourceNode.of(lastNode));
         }
         nodesInLines.add(nodes);
     }
@@ -193,25 +192,54 @@ public final class SourceMapUtils {
         return names;
     }
 
+
     /**
-     * Gets node by 1-based line and 1-based column.
+     * Gets node by 0-based position.
      *
-     * @param line   the 1-based line
-     * @param column the 1-based column
-     * @return the mapping entry or null if not found
+     * @param position the 0-based position
+     * @return the node or null if not found
+     */
+    public SourceNode getNode(SourcePosition position) {
+        return getNode(position.line, position.column);
+    }
+
+    /**
+     * Gets node by 0-based line and 0-based column.
+     *
+     * @param line   the 0-based line
+     * @param column the 0-based column
+     * @return the node or null if not found
      */
     public SourceNode getNode(int line, int column) {
-        if (line > 0 && column > 0) {
-            line--;
-            column--;
-            while (line >= nodesInLines.size()) {
+        SourceNode node = null;
+        if (line >= 0 && column >= 0) {
+            while (line <= nodesInLines.size()) {
                 if (isParsed()) {
                     break;
                 }
                 parseNextSegment();
             }
+            if (line < nodesInLines.size()) {
+                List<SourceNode> nodes = nodesInLines.get(line);
+                if (!nodes.isEmpty()) {
+                    SourceNode lastNode = nodes.get(0);
+                    final int length = nodes.size();
+                    for (int i = 1; i < length; ++i) {
+                        SourceNode currentNode = nodes.get(i);
+                        if (column < currentNode.generatedPosition.column) {
+                            break;
+                        }
+                        lastNode = currentNode;
+                    }
+                    if (column >= lastNode.generatedPosition.column) {
+                        node = SourceNode.of(lastNode);
+                        node.generatedPosition.column = column;
+                        node.originalPosition.column += column - lastNode.generatedPosition.column;
+                    }
+                }
+            }
         }
-        return null;
+        return node;
     }
 
     public List<String> getSourceContents() {
@@ -242,43 +270,104 @@ public final class SourceMapUtils {
     }
 
     public static class SourceNode {
-        public int generatedColumnNumber;
-        // Zero-based line and column in the generated code.
-        public int generatedLineNumber;
-        public int originalColumnNumber;
-        // Zero-based line and column in the original source code file.
-        public int originalLineNumber;
+        public SourcePosition generatedPosition;
+        public SourcePosition originalPosition;
         // Zero-based index into the source code array.
         public int sourceFileIndex;
 
-        public SourceNode() {
-            this(0, 0, 0, 0, 0);
-        }
-
-        public SourceNode(SourceNode lastNode) {
-            copyFrom(lastNode);
-        }
-
-        public SourceNode(
-                int generatedLineNumber,
-                int generatedColumnNumber,
-                int originalLineNumber,
-                int originalColumnNumber,
+        private SourceNode(
+                SourcePosition originalPosition,
+                SourcePosition generatedPosition,
                 int sourceFileIndex) {
-            this.generatedColumnNumber = generatedColumnNumber;
-            this.generatedLineNumber = generatedLineNumber;
-            this.originalColumnNumber = originalColumnNumber;
-            this.originalLineNumber = originalLineNumber;
+            this.generatedPosition = SourcePosition.of(generatedPosition);
+            this.originalPosition = SourcePosition.of(originalPosition);
             this.sourceFileIndex = sourceFileIndex;
         }
 
-        public SourceNode copyFrom(SourceNode lastNode) {
-            generatedColumnNumber = lastNode.generatedColumnNumber;
-            generatedLineNumber = lastNode.generatedLineNumber;
-            originalColumnNumber = lastNode.originalColumnNumber;
-            originalLineNumber = lastNode.originalLineNumber;
-            sourceFileIndex = lastNode.sourceFileIndex;
-            return this;
+        public static SourceNode of() {
+            return of(SourcePosition.of(), SourcePosition.of(), 0);
+        }
+
+        public static SourceNode of(SourceNode node) {
+            return of(node.originalPosition, node.generatedPosition, node.sourceFileIndex);
+        }
+
+        public static SourceNode of(SourcePosition originalPosition, SourcePosition generatedPosition) {
+            return new SourceNode(originalPosition, generatedPosition, 0);
+        }
+
+        public static SourceNode of(
+                SourcePosition originalPosition,
+                SourcePosition generatedPosition,
+                int sourceFileIndex) {
+            return new SourceNode(originalPosition, generatedPosition, sourceFileIndex);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) return false;
+            SourceNode that = (SourceNode) o;
+            return sourceFileIndex == that.sourceFileIndex
+                    && Objects.equals(generatedPosition, that.generatedPosition)
+                    && Objects.equals(originalPosition, that.originalPosition);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(generatedPosition, originalPosition, sourceFileIndex);
+        }
+
+        @Override
+        public String toString() {
+            return "SourceNode{" +
+                    "generatedPosition=" + generatedPosition +
+                    ", originalPosition=" + originalPosition +
+                    ", sourceFileIndex=" + sourceFileIndex +
+                    '}';
+        }
+    }
+
+    public static class SourcePosition {
+        // Zero-based
+        public int column;
+        // Zero-based
+        public int line;
+
+        private SourcePosition(int line, int column) {
+            this.column = column;
+            this.line = line;
+        }
+
+        public static SourcePosition of() {
+            return of(0, 0);
+        }
+
+        public static SourcePosition of(int line, int column) {
+            return new SourcePosition(line, column);
+        }
+
+        public static SourcePosition of(SourcePosition position) {
+            return new SourcePosition(position.line, position.column);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) return false;
+            SourcePosition that = (SourcePosition) o;
+            return column == that.column && line == that.line;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(column, line);
+        }
+
+        @Override
+        public String toString() {
+            return "SourcePosition{" +
+                    "column=" + column +
+                    ", line=" + line +
+                    '}';
         }
     }
 }

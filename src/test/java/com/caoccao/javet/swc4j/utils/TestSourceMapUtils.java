@@ -24,8 +24,10 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSourceMapUtils extends BaseTestSuite {
     @Test
@@ -54,5 +56,27 @@ public class TestSourceMapUtils extends BaseTestSuite {
         assertEquals(
                 "AAAA,SAAS,IAAI,GAAE,MAAM,EAAE,GAAE,MAAM;EAC7B,OAAO,IAAE;AAAG",
                 sourceMapUtils.getMappings());
+        SimpleMap.of(0, 0, -1, 0, 0, -1, -1, -1)
+                .forEach((line, column) -> assertNull(sourceMapUtils.getNode(line, column)));
+        Map<SourceMapUtils.SourceNode, SourceMapUtils.SourceNode> testCaseMap = new LinkedHashMap<>();
+        testCaseMap.put(sourceMapUtils.getNode(SourceMapUtils.SourcePosition.of()), SourceMapUtils.SourceNode.of());
+        testCaseMap.put(sourceMapUtils.getNode(SourceMapUtils.SourcePosition.of(0, 1)),
+                SourceMapUtils.SourceNode.of(
+                        SourceMapUtils.SourcePosition.of(0, 1),
+                        SourceMapUtils.SourcePosition.of(0, 1)));
+        testCaseMap.put(sourceMapUtils.getNode(0, 31),
+                SourceMapUtils.SourceNode.of(
+                        SourceMapUtils.SourcePosition.of(0, 29),
+                        SourceMapUtils.SourcePosition.of(0, 31)));
+        testCaseMap.put(sourceMapUtils.getNode(1, 13),
+                SourceMapUtils.SourceNode.of(
+                        SourceMapUtils.SourcePosition.of(1, 11),
+                        SourceMapUtils.SourcePosition.of(1, 13)));
+        testCaseMap.put(sourceMapUtils.getNode(1, 2),
+                SourceMapUtils.SourceNode.of(
+                        SourceMapUtils.SourcePosition.of(1, 2),
+                        SourceMapUtils.SourcePosition.of(1, 2)));
+        testCaseMap.forEach((node, expectedNode) ->
+                assertEquals(expectedNode, node, "Expected " + expectedNode + " doesn't match " + node));
     }
 }
