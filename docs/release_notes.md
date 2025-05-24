@@ -3,6 +3,7 @@
 ## 1.6.0
 
 * Upgraded deno_ast to v0.46.7
+* Support 16K page size for Android
 
 ## 1.5.0
 
