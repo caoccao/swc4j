@@ -186,7 +186,7 @@ jobs:
       id: setup-ndk
       uses: nttld/setup-ndk@v1
       with:
-        ndk-version: r27
+        ndk-version: r27c
 
     - name: Setup Deno
       uses: denoland/setup-deno@v1
