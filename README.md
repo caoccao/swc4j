@@ -100,6 +100,8 @@
 </dependency>
 ```
 
+#### Gradle Kotlin DSL
+
 ```kotlin
 implementation("com.caoccao.javet:swc4j:1.6.0") // Must Have
 implementation("com.caoccao.javet:swc4j-android-arm:1.6.0")
@@ -113,6 +115,8 @@ implementation("com.caoccao.javet:swc4j-macos-x86_64:1.6.0")
 implementation("com.caoccao.javet:swc4j-windows-arm64:1.6.0")
 implementation("com.caoccao.javet:swc4j-windows-x86_64:1.6.0")
 ```
+
+#### Gradle Groovy DSL
 
 ```groovy
 implementation 'com.caoccao.javet:swc4j:1.6.0' // Must Have
