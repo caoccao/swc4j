@@ -40,31 +40,92 @@
 
 ### Dependency
 
-* Add the following dependency to your project or download a snapshot build from the [Actions](https://github.com/caoccao/swc4j/actions).
+#### Maven
 
 ```xml
-<!-- Maven -->
 <dependency>
     <groupId>com.caoccao.javet</groupId>
-    <artifactId>swc4j</artifactId>
-    <version>1.5.0</version>
+    <artifactId>swc4j</artifactId> <!-- Must Have -->
+    <version>1.6.0</version>
+</dependency>
+<dependency>
+    <groupId>com.caoccao.javet</groupId>
+    <artifactId>swc4j-android-arm</artifactId>
+    <version>1.6.0</version>
+</dependency>
+<dependency>
+    <groupId>com.caoccao.javet</groupId>
+    <artifactId>swc4j-android-arm64</artifactId>
+    <version>1.6.0</version>
+</dependency>
+<dependency>
+    <groupId>com.caoccao.javet</groupId>
+    <artifactId>swc4j-android-x86</artifactId>
+    <version>1.6.0</version>
+</dependency>
+<dependency>
+    <groupId>com.caoccao.javet</groupId>
+    <artifactId>swc4j-android-x86_64</artifactId>
+    <version>1.6.0</version>
+</dependency>
+<dependency>
+    <groupId>com.caoccao.javet</groupId>
+    <artifactId>swc4j-linux-arm64</artifactId>
+    <version>1.6.0</version>
+</dependency>
+<dependency>
+    <groupId>com.caoccao.javet</groupId>
+    <artifactId>swc4j-linux-x86_64</artifactId>
+    <version>1.6.0</version>
+</dependency>
+<dependency>
+    <groupId>com.caoccao.javet</groupId>
+    <artifactId>swc4j-macos-arm64</artifactId>
+    <version>1.6.0</version>
+</dependency>
+<dependency>
+    <groupId>com.caoccao.javet</groupId>
+    <artifactId>swc4j-macos-x86_64</artifactId>
+    <version>1.6.0</version>
+</dependency>
+<dependency>
+    <groupId>com.caoccao.javet</groupId>
+    <artifactId>swc4j-windows-arm64</artifactId>
+    <version>1.6.0</version>
+</dependency>
+<dependency>
+    <groupId>com.caoccao.javet</groupId>
+    <artifactId>swc4j-windows-x86_64</artifactId>
+    <version>1.6.0</version>
 </dependency>
 ```
 
 ```kotlin
-// Gradle Kotlin DSL
-// Linux + MacOS + Windows
-implementation("com.caoccao.javet:swc4j:1.5.0")
-// Android
-implementation("com.caoccao.javet:swc4j-android:1.5.0")
+implementation("com.caoccao.javet:swc4j:1.6.0") // Must Have
+implementation("com.caoccao.javet:swc4j-android-arm:1.6.0")
+implementation("com.caoccao.javet:swc4j-android-arm64:1.6.0")
+implementation("com.caoccao.javet:swc4j-android-x86:1.6.0")
+implementation("com.caoccao.javet:swc4j-android-x86_64:1.6.0")
+implementation("com.caoccao.javet:swc4j-linux-arm64:1.6.0")
+implementation("com.caoccao.javet:swc4j-linux-x86_64:1.6.0")
+implementation("com.caoccao.javet:swc4j-macos-arm64:1.6.0")
+implementation("com.caoccao.javet:swc4j-macos-x86_64:1.6.0")
+implementation("com.caoccao.javet:swc4j-windows-arm64:1.6.0")
+implementation("com.caoccao.javet:swc4j-windows-x86_64:1.6.0")
 ```
 
 ```groovy
-// Gradle Groovy DSL
-// Linux + MacOS + Windows
-implementation 'com.caoccao.javet:swc4j:1.5.0'
-// Android
-implementation 'com.caoccao.javet:swc4j-android:1.5.0'
+implementation 'com.caoccao.javet:swc4j:1.6.0' // Must Have
+implementation 'com.caoccao.javet:swc4j-android-arm:1.6.0'
+implementation 'com.caoccao.javet:swc4j-android-arm64:1.6.0'
+implementation 'com.caoccao.javet:swc4j-android-x86:1.6.0'
+implementation 'com.caoccao.javet:swc4j-android-x86_64:1.6.0'
+implementation 'com.caoccao.javet:swc4j-linux-arm64:1.6.0'
+implementation 'com.caoccao.javet:swc4j-linux-x86_64:1.6.0'
+implementation 'com.caoccao.javet:swc4j-macos-arm64:1.6.0'
+implementation 'com.caoccao.javet:swc4j-macos-x86_64:1.6.0'
+implementation 'com.caoccao.javet:swc4j-windows-arm64:1.6.0'
+implementation 'com.caoccao.javet:swc4j-windows-x86_64:1.6.0'
 ```
 
 ### Transpile
