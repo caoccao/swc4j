@@ -5,7 +5,7 @@
 * Upgraded deno_ast to v0.47.0
 * Upgraded Android NDK to r27c
 * Supported 16K page size for Android
-* Changes library packaging process.
+* Changed library packaging process.
 
 ## 1.5.0
 
