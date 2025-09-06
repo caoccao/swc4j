@@ -101,6 +101,7 @@ public final class Swc4jJsxRuntimeOptionPrecompile extends Swc4jJsxRuntimeOption
      * Sets automatic.
      *
      * @param automatic the automatic
+     * @return the self
      * @since 1.7.0
      */
     public Swc4jJsxRuntimeOptionPrecompile setAutomatic(Swc4jJsxRuntimeOptionAutomatic automatic) {
