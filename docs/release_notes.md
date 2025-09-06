@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.7.0
+
+* Upgraded rust toolchain to v1.89.0
+
 ## 1.6.0
 
 * Upgraded deno_ast to v0.47.0

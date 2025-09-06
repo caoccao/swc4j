@@ -23,6 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestSwc4j extends BaseTestSuite {
     @Test
     public void testGetVersion() {
-        assertEquals("1.6.0", swc4j.getVersion());
+        assertEquals("1.7.0", swc4j.getVersion());
     }
 }
