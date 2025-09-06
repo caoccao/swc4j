@@ -18,7 +18,9 @@
 use std::sync::OnceLock;
 
 use anyhow::{Error, Result};
-use deno_ast::ModuleSpecifier;
+use deno_ast::{
+  DecoratorsTranspileOption, JsxAutomaticOptions, JsxClassicOptions, JsxPrecompileOptions, JsxRuntime, ModuleSpecifier,
+};
 use jni::objects::{GlobalRef, JMethodID, JObject, JString};
 use jni::JNIEnv;
 
@@ -608,31 +610,21 @@ impl JavaSwc4jTransformOptions {
 #[allow(dead_code)]
 struct JavaSwc4jTranspileOptions {
   class: GlobalRef,
+  method_get_decorators: JMethodID,
   method_get_imports_not_used_as_values: JMethodID,
-  method_get_jsx_factory: JMethodID,
-  method_get_jsx_fragment_factory: JMethodID,
-  method_get_jsx_import_source: JMethodID,
+  method_get_jsx: JMethodID,
   method_get_media_type: JMethodID,
   method_get_module_kind: JMethodID,
   method_get_parse_mode: JMethodID,
   method_get_plugin_host: JMethodID,
-  method_get_precompile_jsx_dynamic_props: JMethodID,
-  method_get_precompile_jsx_skip_elements: JMethodID,
   method_get_source_map: JMethodID,
   method_get_specifier: JMethodID,
   method_is_capture_ast: JMethodID,
   method_is_capture_comments: JMethodID,
   method_is_capture_tokens: JMethodID,
-  method_is_emit_metadata: JMethodID,
   method_is_inline_sources: JMethodID,
-  method_is_jsx_automatic: JMethodID,
-  method_is_jsx_development: JMethodID,
   method_is_keep_comments: JMethodID,
-  method_is_precompile_jsx: JMethodID,
   method_is_scope_analysis: JMethodID,
-  method_is_transform_jsx: JMethodID,
-  method_is_use_decorators_proposal: JMethodID,
-  method_is_use_ts_decorators: JMethodID,
   method_is_var_decl_imports: JMethodID,
   method_is_verbatim_module_syntax: JMethodID,
 }
@@ -648,6 +640,13 @@ impl JavaSwc4jTranspileOptions {
     let class = env
       .new_global_ref(class)
       .expect("Couldn't globalize class Swc4jTranspileOptions");
+    let method_get_decorators = env
+      .get_method_id(
+        &class,
+        "getDecorators",
+        "()Lcom/caoccao/javet/swc4j/options/Swc4jDecoratorsTranspileOption;",
+      )
+      .expect("Couldn't find method Swc4jTranspileOptions.getDecorators");
     let method_get_imports_not_used_as_values = env
       .get_method_id(
         &class,
@@ -655,27 +654,13 @@ impl JavaSwc4jTranspileOptions {
         "()Lcom/caoccao/javet/swc4j/enums/Swc4jImportsNotUsedAsValues;",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getImportsNotUsedAsValues");
-    let method_get_jsx_factory = env
+    let method_get_jsx = env
       .get_method_id(
         &class,
-        "getJsxFactory",
-        "()Ljava/lang/String;",
+        "getJsx",
+        "()Lcom/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOption;",
       )
-      .expect("Couldn't find method Swc4jTranspileOptions.getJsxFactory");
-    let method_get_jsx_fragment_factory = env
-      .get_method_id(
-        &class,
-        "getJsxFragmentFactory",
-        "()Ljava/lang/String;",
-      )
-      .expect("Couldn't find method Swc4jTranspileOptions.getJsxFragmentFactory");
-    let method_get_jsx_import_source = env
-      .get_method_id(
-        &class,
-        "getJsxImportSource",
-        "()Ljava/lang/String;",
-      )
-      .expect("Couldn't find method Swc4jTranspileOptions.getJsxImportSource");
+      .expect("Couldn't find method Swc4jTranspileOptions.getJsx");
     let method_get_media_type = env
       .get_method_id(
         &class,
@@ -704,20 +689,6 @@ impl JavaSwc4jTranspileOptions {
         "()Lcom/caoccao/javet/swc4j/plugins/ISwc4jPluginHost;",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.getPluginHost");
-    let method_get_precompile_jsx_dynamic_props = env
-      .get_method_id(
-        &class,
-        "getPrecompileJsxDynamicProps",
-        "()Ljava/util/List;",
-      )
-      .expect("Couldn't find method Swc4jTranspileOptions.getPrecompileJsxDynamicProps");
-    let method_get_precompile_jsx_skip_elements = env
-      .get_method_id(
-        &class,
-        "getPrecompileJsxSkipElements",
-        "()Ljava/util/List;",
-      )
-      .expect("Couldn't find method Swc4jTranspileOptions.getPrecompileJsxSkipElements");
     let method_get_source_map = env
       .get_method_id(
         &class,
@@ -753,13 +724,6 @@ impl JavaSwc4jTranspileOptions {
         "()Z",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isCaptureTokens");
-    let method_is_emit_metadata = env
-      .get_method_id(
-        &class,
-        "isEmitMetadata",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jTranspileOptions.isEmitMetadata");
     let method_is_inline_sources = env
       .get_method_id(
         &class,
@@ -767,20 +731,6 @@ impl JavaSwc4jTranspileOptions {
         "()Z",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isInlineSources");
-    let method_is_jsx_automatic = env
-      .get_method_id(
-        &class,
-        "isJsxAutomatic",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jTranspileOptions.isJsxAutomatic");
-    let method_is_jsx_development = env
-      .get_method_id(
-        &class,
-        "isJsxDevelopment",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jTranspileOptions.isJsxDevelopment");
     let method_is_keep_comments = env
       .get_method_id(
         &class,
@@ -788,13 +738,6 @@ impl JavaSwc4jTranspileOptions {
         "()Z",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isKeepComments");
-    let method_is_precompile_jsx = env
-      .get_method_id(
-        &class,
-        "isPrecompileJsx",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jTranspileOptions.isPrecompileJsx");
     let method_is_scope_analysis = env
       .get_method_id(
         &class,
@@ -802,27 +745,6 @@ impl JavaSwc4jTranspileOptions {
         "()Z",
       )
       .expect("Couldn't find method Swc4jTranspileOptions.isScopeAnalysis");
-    let method_is_transform_jsx = env
-      .get_method_id(
-        &class,
-        "isTransformJsx",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jTranspileOptions.isTransformJsx");
-    let method_is_use_decorators_proposal = env
-      .get_method_id(
-        &class,
-        "isUseDecoratorsProposal",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jTranspileOptions.isUseDecoratorsProposal");
-    let method_is_use_ts_decorators = env
-      .get_method_id(
-        &class,
-        "isUseTsDecorators",
-        "()Z",
-      )
-      .expect("Couldn't find method Swc4jTranspileOptions.isUseTsDecorators");
     let method_is_var_decl_imports = env
       .get_method_id(
         &class,
@@ -839,34 +761,42 @@ impl JavaSwc4jTranspileOptions {
       .expect("Couldn't find method Swc4jTranspileOptions.isVerbatimModuleSyntax");
     JavaSwc4jTranspileOptions {
       class,
+      method_get_decorators,
       method_get_imports_not_used_as_values,
-      method_get_jsx_factory,
-      method_get_jsx_fragment_factory,
-      method_get_jsx_import_source,
+      method_get_jsx,
       method_get_media_type,
       method_get_module_kind,
       method_get_parse_mode,
       method_get_plugin_host,
-      method_get_precompile_jsx_dynamic_props,
-      method_get_precompile_jsx_skip_elements,
       method_get_source_map,
       method_get_specifier,
       method_is_capture_ast,
       method_is_capture_comments,
       method_is_capture_tokens,
-      method_is_emit_metadata,
       method_is_inline_sources,
-      method_is_jsx_automatic,
-      method_is_jsx_development,
       method_is_keep_comments,
-      method_is_precompile_jsx,
       method_is_scope_analysis,
-      method_is_transform_jsx,
-      method_is_use_decorators_proposal,
-      method_is_use_ts_decorators,
       method_is_var_decl_imports,
       method_is_verbatim_module_syntax,
     }
+  }
+
+  pub fn get_decorators<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<JObject<'a>>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_decorators,
+        &[],
+        "Swc4jDecoratorsTranspileOption get_decorators()"
+      )?;
+    Ok(return_value)
   }
 
   pub fn get_imports_not_used_as_values<'local, 'a>(
@@ -887,62 +817,26 @@ impl JavaSwc4jTranspileOptions {
     Ok(return_value)
   }
 
-  pub fn get_jsx_factory<'local>(
+  pub fn get_jsx<'local, 'a>(
     &self,
     env: &mut JNIEnv<'local>,
     obj: &JObject<'_>,
-  ) -> Result<String>
+  ) -> Result<Option<JObject<'a>>>
+  where
+    'local: 'a,
   {
     let return_value = call_as_object!(
         env,
         obj,
-        self.method_get_jsx_factory,
+        self.method_get_jsx,
         &[],
-        "String get_jsx_factory()"
+        "Swc4jJsxRuntimeOption get_jsx()"
       )?;
-    let java_return_value = return_value;
-    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
-    let return_value = return_value?;
-    delete_local_ref!(env, java_return_value);
-    Ok(return_value)
-  }
-
-  pub fn get_jsx_fragment_factory<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> Result<String>
-  {
-    let return_value = call_as_object!(
-        env,
-        obj,
-        self.method_get_jsx_fragment_factory,
-        &[],
-        "String get_jsx_fragment_factory()"
-      )?;
-    let java_return_value = return_value;
-    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
-    let return_value = return_value?;
-    delete_local_ref!(env, java_return_value);
-    Ok(return_value)
-  }
-
-  pub fn get_jsx_import_source<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> Result<Option<String>>
-  {
-    let return_value = call_as_object!(
-        env,
-        obj,
-        self.method_get_jsx_import_source,
-        &[],
-        "String get_jsx_import_source()"
-      )?;
-    let java_return_value = return_value;
-    let return_value = jstring_to_optional_string!(env, java_return_value.as_raw())?;
-    delete_local_ref!(env, java_return_value);
+    let return_value = if return_value.is_null() {
+      None
+    } else {
+      Some(return_value)
+    };
     Ok(return_value)
   }
 
@@ -1014,52 +908,6 @@ impl JavaSwc4jTranspileOptions {
         self.method_get_plugin_host,
         &[],
         "ISwc4jPluginHost get_plugin_host()"
-      )?;
-    let return_value = if return_value.is_null() {
-      None
-    } else {
-      Some(return_value)
-    };
-    Ok(return_value)
-  }
-
-  pub fn get_precompile_jsx_dynamic_props<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> Result<Option<JObject<'a>>>
-  where
-    'local: 'a,
-  {
-    let return_value = call_as_object!(
-        env,
-        obj,
-        self.method_get_precompile_jsx_dynamic_props,
-        &[],
-        "List get_precompile_jsx_dynamic_props()"
-      )?;
-    let return_value = if return_value.is_null() {
-      None
-    } else {
-      Some(return_value)
-    };
-    Ok(return_value)
-  }
-
-  pub fn get_precompile_jsx_skip_elements<'local, 'a>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> Result<Option<JObject<'a>>>
-  where
-    'local: 'a,
-  {
-    let return_value = call_as_object!(
-        env,
-        obj,
-        self.method_get_precompile_jsx_skip_elements,
-        &[],
-        "List get_precompile_jsx_skip_elements()"
       )?;
     let return_value = if return_value.is_null() {
       None
@@ -1153,22 +1001,6 @@ impl JavaSwc4jTranspileOptions {
     Ok(return_value)
   }
 
-  pub fn is_emit_metadata<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> Result<bool>
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_emit_metadata,
-        &[],
-        "boolean is_emit_metadata()"
-      )?;
-    Ok(return_value)
-  }
-
   pub fn is_inline_sources<'local>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -1181,38 +1013,6 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_inline_sources,
         &[],
         "boolean is_inline_sources()"
-      )?;
-    Ok(return_value)
-  }
-
-  pub fn is_jsx_automatic<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> Result<bool>
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_jsx_automatic,
-        &[],
-        "boolean is_jsx_automatic()"
-      )?;
-    Ok(return_value)
-  }
-
-  pub fn is_jsx_development<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> Result<bool>
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_jsx_development,
-        &[],
-        "boolean is_jsx_development()"
       )?;
     Ok(return_value)
   }
@@ -1233,22 +1033,6 @@ impl JavaSwc4jTranspileOptions {
     Ok(return_value)
   }
 
-  pub fn is_precompile_jsx<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> Result<bool>
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_precompile_jsx,
-        &[],
-        "boolean is_precompile_jsx()"
-      )?;
-    Ok(return_value)
-  }
-
   pub fn is_scope_analysis<'local>(
     &self,
     env: &mut JNIEnv<'local>,
@@ -1261,54 +1045,6 @@ impl JavaSwc4jTranspileOptions {
         self.method_is_scope_analysis,
         &[],
         "boolean is_scope_analysis()"
-      )?;
-    Ok(return_value)
-  }
-
-  pub fn is_transform_jsx<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> Result<bool>
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_transform_jsx,
-        &[],
-        "boolean is_transform_jsx()"
-      )?;
-    Ok(return_value)
-  }
-
-  pub fn is_use_decorators_proposal<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> Result<bool>
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_use_decorators_proposal,
-        &[],
-        "boolean is_use_decorators_proposal()"
-      )?;
-    Ok(return_value)
-  }
-
-  pub fn is_use_ts_decorators<'local>(
-    &self,
-    env: &mut JNIEnv<'local>,
-    obj: &JObject<'_>,
-  ) -> Result<bool>
-  {
-    let return_value = call_as_boolean!(
-        env,
-        obj,
-        self.method_is_use_ts_decorators,
-        &[],
-        "boolean is_use_ts_decorators()"
       )?;
     Ok(return_value)
   }
@@ -1347,9 +1083,388 @@ impl JavaSwc4jTranspileOptions {
 }
 /* JavaSwc4jTranspileOptions End */
 
+/* JavaSwc4jDecoratorsTranspileOptionNone Begin */
+#[allow(dead_code)]
+struct JavaSwc4jDecoratorsTranspileOptionNone {
+  class: GlobalRef,
+}
+unsafe impl Send for JavaSwc4jDecoratorsTranspileOptionNone {}
+unsafe impl Sync for JavaSwc4jDecoratorsTranspileOptionNone {}
+
+#[allow(dead_code)]
+impl JavaSwc4jDecoratorsTranspileOptionNone {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/options/Swc4jDecoratorsTranspileOptionNone")
+      .expect("Couldn't find class Swc4jDecoratorsTranspileOptionNone");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jDecoratorsTranspileOptionNone");
+    JavaSwc4jDecoratorsTranspileOptionNone {
+      class,
+    }
+  }
+}
+/* JavaSwc4jDecoratorsTranspileOptionNone End */
+
+/* JavaSwc4jDecoratorsTranspileOptionEcma Begin */
+#[allow(dead_code)]
+struct JavaSwc4jDecoratorsTranspileOptionEcma {
+  class: GlobalRef,
+}
+unsafe impl Send for JavaSwc4jDecoratorsTranspileOptionEcma {}
+unsafe impl Sync for JavaSwc4jDecoratorsTranspileOptionEcma {}
+
+#[allow(dead_code)]
+impl JavaSwc4jDecoratorsTranspileOptionEcma {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/options/Swc4jDecoratorsTranspileOptionEcma")
+      .expect("Couldn't find class Swc4jDecoratorsTranspileOptionEcma");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jDecoratorsTranspileOptionEcma");
+    JavaSwc4jDecoratorsTranspileOptionEcma {
+      class,
+    }
+  }
+}
+/* JavaSwc4jDecoratorsTranspileOptionEcma End */
+
+/* JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript Begin */
+#[allow(dead_code)]
+struct JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript {
+  class: GlobalRef,
+  method_is_emit_metadata: JMethodID,
+}
+unsafe impl Send for JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript {}
+unsafe impl Sync for JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript {}
+
+#[allow(dead_code)]
+impl JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/options/Swc4jDecoratorsTranspileOptionLegacyTypeScript")
+      .expect("Couldn't find class Swc4jDecoratorsTranspileOptionLegacyTypeScript");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jDecoratorsTranspileOptionLegacyTypeScript");
+    let method_is_emit_metadata = env
+      .get_method_id(
+        &class,
+        "isEmitMetadata",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jDecoratorsTranspileOptionLegacyTypeScript.isEmitMetadata");
+    JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript {
+      class,
+      method_is_emit_metadata,
+    }
+  }
+
+  pub fn is_emit_metadata<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<bool>
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_emit_metadata,
+        &[],
+        "boolean is_emit_metadata()"
+      )?;
+    Ok(return_value)
+  }
+}
+/* JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript End */
+
+/* JavaSwc4jJsxRuntimeOptionAutomatic Begin */
+#[allow(dead_code)]
+struct JavaSwc4jJsxRuntimeOptionAutomatic {
+  class: GlobalRef,
+  method_get_import_source: JMethodID,
+  method_is_development: JMethodID,
+}
+unsafe impl Send for JavaSwc4jJsxRuntimeOptionAutomatic {}
+unsafe impl Sync for JavaSwc4jJsxRuntimeOptionAutomatic {}
+
+#[allow(dead_code)]
+impl JavaSwc4jJsxRuntimeOptionAutomatic {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOptionAutomatic")
+      .expect("Couldn't find class Swc4jJsxRuntimeOptionAutomatic");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jJsxRuntimeOptionAutomatic");
+    let method_get_import_source = env
+      .get_method_id(
+        &class,
+        "getImportSource",
+        "()Ljava/lang/String;",
+      )
+      .expect("Couldn't find method Swc4jJsxRuntimeOptionAutomatic.getImportSource");
+    let method_is_development = env
+      .get_method_id(
+        &class,
+        "isDevelopment",
+        "()Z",
+      )
+      .expect("Couldn't find method Swc4jJsxRuntimeOptionAutomatic.isDevelopment");
+    JavaSwc4jJsxRuntimeOptionAutomatic {
+      class,
+      method_get_import_source,
+      method_is_development,
+    }
+  }
+
+  pub fn get_import_source<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<Option<String>>
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_import_source,
+        &[],
+        "String get_import_source()"
+      )?;
+    let java_return_value = return_value;
+    let return_value = jstring_to_optional_string!(env, java_return_value.as_raw())?;
+    delete_local_ref!(env, java_return_value);
+    Ok(return_value)
+  }
+
+  pub fn is_development<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<bool>
+  {
+    let return_value = call_as_boolean!(
+        env,
+        obj,
+        self.method_is_development,
+        &[],
+        "boolean is_development()"
+      )?;
+    Ok(return_value)
+  }
+}
+/* JavaSwc4jJsxRuntimeOptionAutomatic End */
+
+/* JavaSwc4jJsxRuntimeOptionClassic Begin */
+#[allow(dead_code)]
+struct JavaSwc4jJsxRuntimeOptionClassic {
+  class: GlobalRef,
+  method_get_factory: JMethodID,
+  method_get_fragment_factory: JMethodID,
+}
+unsafe impl Send for JavaSwc4jJsxRuntimeOptionClassic {}
+unsafe impl Sync for JavaSwc4jJsxRuntimeOptionClassic {}
+
+#[allow(dead_code)]
+impl JavaSwc4jJsxRuntimeOptionClassic {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOptionClassic")
+      .expect("Couldn't find class Swc4jJsxRuntimeOptionClassic");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jJsxRuntimeOptionClassic");
+    let method_get_factory = env
+      .get_method_id(
+        &class,
+        "getFactory",
+        "()Ljava/lang/String;",
+      )
+      .expect("Couldn't find method Swc4jJsxRuntimeOptionClassic.getFactory");
+    let method_get_fragment_factory = env
+      .get_method_id(
+        &class,
+        "getFragmentFactory",
+        "()Ljava/lang/String;",
+      )
+      .expect("Couldn't find method Swc4jJsxRuntimeOptionClassic.getFragmentFactory");
+    JavaSwc4jJsxRuntimeOptionClassic {
+      class,
+      method_get_factory,
+      method_get_fragment_factory,
+    }
+  }
+
+  pub fn get_factory<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<String>
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_factory,
+        &[],
+        "String get_factory()"
+      )?;
+    let java_return_value = return_value;
+    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value = return_value?;
+    delete_local_ref!(env, java_return_value);
+    Ok(return_value)
+  }
+
+  pub fn get_fragment_factory<'local>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<String>
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_fragment_factory,
+        &[],
+        "String get_fragment_factory()"
+      )?;
+    let java_return_value = return_value;
+    let return_value: Result<String> = jstring_to_string!(env, java_return_value.as_raw());
+    let return_value = return_value?;
+    delete_local_ref!(env, java_return_value);
+    Ok(return_value)
+  }
+}
+/* JavaSwc4jJsxRuntimeOptionClassic End */
+
+/* JavaSwc4jJsxRuntimeOptionPrecompile Begin */
+#[allow(dead_code)]
+struct JavaSwc4jJsxRuntimeOptionPrecompile {
+  class: GlobalRef,
+  method_get_automatic: JMethodID,
+  method_get_dynamic_props: JMethodID,
+  method_get_skip_elements: JMethodID,
+}
+unsafe impl Send for JavaSwc4jJsxRuntimeOptionPrecompile {}
+unsafe impl Sync for JavaSwc4jJsxRuntimeOptionPrecompile {}
+
+#[allow(dead_code)]
+impl JavaSwc4jJsxRuntimeOptionPrecompile {
+  pub fn new<'local>(env: &mut JNIEnv<'local>) -> Self {
+    let class = env
+      .find_class("com/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOptionPrecompile")
+      .expect("Couldn't find class Swc4jJsxRuntimeOptionPrecompile");
+    let class = env
+      .new_global_ref(class)
+      .expect("Couldn't globalize class Swc4jJsxRuntimeOptionPrecompile");
+    let method_get_automatic = env
+      .get_method_id(
+        &class,
+        "getAutomatic",
+        "()Lcom/caoccao/javet/swc4j/options/Swc4jJsxRuntimeOptionAutomatic;",
+      )
+      .expect("Couldn't find method Swc4jJsxRuntimeOptionPrecompile.getAutomatic");
+    let method_get_dynamic_props = env
+      .get_method_id(
+        &class,
+        "getDynamicProps",
+        "()Ljava/util/List;",
+      )
+      .expect("Couldn't find method Swc4jJsxRuntimeOptionPrecompile.getDynamicProps");
+    let method_get_skip_elements = env
+      .get_method_id(
+        &class,
+        "getSkipElements",
+        "()Ljava/util/List;",
+      )
+      .expect("Couldn't find method Swc4jJsxRuntimeOptionPrecompile.getSkipElements");
+    JavaSwc4jJsxRuntimeOptionPrecompile {
+      class,
+      method_get_automatic,
+      method_get_dynamic_props,
+      method_get_skip_elements,
+    }
+  }
+
+  pub fn get_automatic<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<JObject<'a>>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_automatic,
+        &[],
+        "Swc4jJsxRuntimeOptionAutomatic get_automatic()"
+      )?;
+    Ok(return_value)
+  }
+
+  pub fn get_dynamic_props<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<Option<JObject<'a>>>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_dynamic_props,
+        &[],
+        "List get_dynamic_props()"
+      )?;
+    let return_value = if return_value.is_null() {
+      None
+    } else {
+      Some(return_value)
+    };
+    Ok(return_value)
+  }
+
+  pub fn get_skip_elements<'local, 'a>(
+    &self,
+    env: &mut JNIEnv<'local>,
+    obj: &JObject<'_>,
+  ) -> Result<Option<JObject<'a>>>
+  where
+    'local: 'a,
+  {
+    let return_value = call_as_object!(
+        env,
+        obj,
+        self.method_get_skip_elements,
+        &[],
+        "List get_skip_elements()"
+      )?;
+    let return_value = if return_value.is_null() {
+      None
+    } else {
+      Some(return_value)
+    };
+    Ok(return_value)
+  }
+}
+/* JavaSwc4jJsxRuntimeOptionPrecompile End */
+
 static JAVA_PARSE_OPTIONS: OnceLock<JavaSwc4jParseOptions> = OnceLock::new();
 static JAVA_TRANSFORM_OPTIONS: OnceLock<JavaSwc4jTransformOptions> = OnceLock::new();
 static JAVA_TRANSPILE_OPTIONS: OnceLock<JavaSwc4jTranspileOptions> = OnceLock::new();
+static JAVA_DECORATORS_TRANSPILE_OPTION_NONE: OnceLock<JavaSwc4jDecoratorsTranspileOptionNone> = OnceLock::new();
+static JAVA_DECORATORS_TRANSPILE_OPTION_ECMA: OnceLock<JavaSwc4jDecoratorsTranspileOptionEcma> = OnceLock::new();
+static JAVA_DECORATORS_TRANSPILE_OPTION_LEGACY_TYPE_SCRIPT: OnceLock<
+  JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript,
+> = OnceLock::new();
+static JAVA_JSX_RUNTIME_OPTION_AUTOMATIC: OnceLock<JavaSwc4jJsxRuntimeOptionAutomatic> = OnceLock::new();
+static JAVA_JSX_RUNTIME_OPTION_CLASSIC: OnceLock<JavaSwc4jJsxRuntimeOptionClassic> = OnceLock::new();
+static JAVA_JSX_RUNTIME_OPTION_PRECOMPILE: OnceLock<JavaSwc4jJsxRuntimeOptionPrecompile> = OnceLock::new();
 
 pub fn init<'local>(env: &mut JNIEnv<'local>) {
   log::debug!("init()");
@@ -1362,6 +1477,24 @@ pub fn init<'local>(env: &mut JNIEnv<'local>) {
       .unwrap_unchecked();
     JAVA_TRANSPILE_OPTIONS
       .set(JavaSwc4jTranspileOptions::new(env))
+      .unwrap_unchecked();
+    JAVA_DECORATORS_TRANSPILE_OPTION_NONE
+      .set(JavaSwc4jDecoratorsTranspileOptionNone::new(env))
+      .unwrap_unchecked();
+    JAVA_DECORATORS_TRANSPILE_OPTION_ECMA
+      .set(JavaSwc4jDecoratorsTranspileOptionEcma::new(env))
+      .unwrap_unchecked();
+    JAVA_DECORATORS_TRANSPILE_OPTION_LEGACY_TYPE_SCRIPT
+      .set(JavaSwc4jDecoratorsTranspileOptionLegacyTypeScript::new(env))
+      .unwrap_unchecked();
+    JAVA_JSX_RUNTIME_OPTION_AUTOMATIC
+      .set(JavaSwc4jJsxRuntimeOptionAutomatic::new(env))
+      .unwrap_unchecked();
+    JAVA_JSX_RUNTIME_OPTION_CLASSIC
+      .set(JavaSwc4jJsxRuntimeOptionClassic::new(env))
+      .unwrap_unchecked();
+    JAVA_JSX_RUNTIME_OPTION_PRECOMPILE
+      .set(JavaSwc4jJsxRuntimeOptionPrecompile::new(env))
       .unwrap_unchecked();
   }
 }
@@ -1562,32 +1695,16 @@ pub struct TranspileOptions<'a> {
   pub capture_comments: bool,
   /// Whether to capture tokens or not.
   pub capture_tokens: bool,
-  /// When emitting a legacy decorator, also emit experimental decorator meta
-  /// data.  Defaults to `false`.
-  pub emit_metadata: bool,
+  /// Kind of decorators to use.
+  pub decorators: DecoratorsTranspileOption,
   /// What to do with import statements that only import types i.e. whether to
   /// remove them (`Remove`), keep them as side-effect imports (`Preserve`)
   /// or error (`Error`). Defaults to `Remove`.
   pub imports_not_used_as_values: ImportsNotUsedAsValues,
   /// Should the sources be inlined in the source map.  Defaults to `true`.
   pub inline_sources: bool,
-  /// `true` if the program should use an implicit JSX import source/the "new"
-  /// JSX transforms.
-  pub jsx_automatic: bool,
-  /// If JSX is automatic, if it is in development mode, meaning that it should
-  /// import `jsx-dev-runtime` and transform JSX using `jsxDEV` import from the
-  /// JSX import source as well as provide additional debug information to the
-  /// JSX factory.
-  pub jsx_development: bool,
-  /// When transforming JSX, what value should be used for the JSX factory.
-  /// Defaults to `React.createElement`.
-  pub jsx_factory: String,
-  /// When transforming JSX, what value should be used for the JSX fragment
-  /// factory.  Defaults to `React.Fragment`.
-  pub jsx_fragment_factory: String,
-  /// The string module specifier to implicitly import JSX factories from when
-  /// transpiling JSX.
-  pub jsx_import_source: Option<String>,
+  /// Options for transforming JSX. Will not transform when `None`.
+  pub jsx: Option<JsxRuntime>,
   /// Whether to keep comments in the output. Defaults to `false`.
   pub keep_comments: bool,
   /// Media type of the source text.
@@ -1598,28 +1715,12 @@ pub struct TranspileOptions<'a> {
   pub parse_mode: ParseMode,
   /// AST plugin host.
   pub plugin_host: Option<PluginHost<'a>>,
-  /// Should JSX be precompiled into static strings that need to be concatenated
-  /// with dynamic content. Defaults to `false`, mutually exclusive with
-  /// `transform_jsx`.
-  pub precompile_jsx: bool,
-  /// List of properties/attributes that should always be treated as
-  /// dynamic.
-  pub precompile_jsx_dynamic_props: Option<Vec<String>>,
-  /// List of elements that should not be precompiled when the JSX precompile
-  /// transform is used.
-  pub precompile_jsx_skip_elements: Option<Vec<String>>,
   /// Whether to apply swc's scope analysis.
   pub scope_analysis: bool,
   /// How and if source maps should be generated.
   pub source_map: SourceMapOption,
   /// Specifier of the source text.
   pub specifier: String,
-  /// Should JSX be transformed. Defaults to `true`.
-  pub transform_jsx: bool,
-  /// TC39 Decorators Proposal - https://github.com/tc39/proposal-decorators
-  pub use_decorators_proposal: bool,
-  /// TypeScript experimental decorators.
-  pub use_ts_decorators: bool,
   /// Should import declarations be transformed to variable declarations using
   /// a dynamic import. This is useful for import & export declaration support
   /// in script contexts such as the Deno REPL.  Defaults to `false`.
@@ -1641,30 +1742,20 @@ impl<'a> Default for TranspileOptions<'a> {
       capture_ast: false,
       capture_comments: false,
       capture_tokens: false,
-      emit_metadata: false,
+      decorators: DecoratorsTranspileOption::None,
       imports_not_used_as_values: ImportsNotUsedAsValues::Remove,
       inline_sources: true,
-      jsx_automatic: false,
-      jsx_development: false,
-      jsx_factory: "React.createElement".into(),
-      jsx_fragment_factory: "React.Fragment".into(),
-      jsx_import_source: None,
+      jsx: None,
       keep_comments: false,
       media_type: MediaType::TypeScript,
       module_kind: ModuleKind::Auto,
       parse_mode: ParseMode::Program,
       plugin_host: None,
-      precompile_jsx: false,
-      precompile_jsx_dynamic_props: None,
-      precompile_jsx_skip_elements: None,
       scope_analysis: false,
       source_map: SourceMapOption::Inline,
       specifier: "file:///main.js".to_owned(),
-      transform_jsx: true,
       var_decl_imports: false,
       verbatim_module_syntax: false,
-      use_decorators_proposal: false,
-      use_ts_decorators: false,
     }
   }
 }
@@ -1672,19 +1763,101 @@ impl<'a> Default for TranspileOptions<'a> {
 impl<'local> FromJava<'local> for TranspileOptions<'local> {
   fn from_java(env: &mut JNIEnv<'local>, obj: &JObject<'_>) -> Result<Box<TranspileOptions<'local>>> {
     let java_transpile_options = JAVA_TRANSPILE_OPTIONS.get().unwrap();
+    let java_decorators = java_transpile_options.get_decorators(env, obj)?;
+    let java_decorators_transpile_option_ecma = JAVA_DECORATORS_TRANSPILE_OPTION_ECMA.get().unwrap();
+    let java_decorators_transpile_option_legacy_type_script =
+      JAVA_DECORATORS_TRANSPILE_OPTION_LEGACY_TYPE_SCRIPT.get().unwrap();
+    let decorators = if env
+      .is_instance_of(&java_decorators, &(java_decorators_transpile_option_ecma.class))
+      .unwrap_or(false)
+    {
+      DecoratorsTranspileOption::Ecma
+    } else if env
+      .is_instance_of(
+        &java_decorators,
+        &(java_decorators_transpile_option_legacy_type_script.class),
+      )
+      .unwrap_or(false)
+    {
+      let emit_metadata =
+        java_decorators_transpile_option_legacy_type_script.is_emit_metadata(env, &java_decorators)?;
+      DecoratorsTranspileOption::LegacyTypeScript { emit_metadata }
+    } else {
+      DecoratorsTranspileOption::None
+    };
+    delete_local_ref!(env, java_decorators);
     let capture_ast = java_transpile_options.is_capture_ast(env, obj)?;
     let capture_comments = java_transpile_options.is_capture_comments(env, obj)?;
     let capture_tokens = java_transpile_options.is_capture_tokens(env, obj)?;
-    let emit_metadata = java_transpile_options.is_emit_metadata(env, obj)?;
     let java_imports_not_used_as_values = java_transpile_options.get_imports_not_used_as_values(env, obj)?;
     let imports_not_used_as_values = *ImportsNotUsedAsValues::from_java(env, &java_imports_not_used_as_values)?;
     delete_local_ref!(env, java_imports_not_used_as_values);
     let inline_sources = java_transpile_options.is_inline_sources(env, obj)?;
-    let jsx_automatic = java_transpile_options.is_jsx_automatic(env, obj)?;
-    let jsx_development = java_transpile_options.is_jsx_development(env, obj)?;
-    let jsx_factory = java_transpile_options.get_jsx_factory(env, obj)?;
-    let jsx_fragment_factory = java_transpile_options.get_jsx_fragment_factory(env, obj)?;
-    let jsx_import_source = java_transpile_options.get_jsx_import_source(env, obj)?;
+    let java_jsx_runtime_option_automatic = JAVA_JSX_RUNTIME_OPTION_AUTOMATIC.get().unwrap();
+    let java_jsx_runtime_option_classic = JAVA_JSX_RUNTIME_OPTION_CLASSIC.get().unwrap();
+    let java_jsx_runtime_option_precompile = JAVA_JSX_RUNTIME_OPTION_PRECOMPILE.get().unwrap();
+    let optional_java_jsx = java_transpile_options.get_jsx(env, obj)?;
+    let mut jsx: Option<JsxRuntime> = None;
+    if let Some(java_jsx) = optional_java_jsx {
+      if env.is_instance_of(&java_jsx, &(java_jsx_runtime_option_automatic.class))? {
+        let development = java_jsx_runtime_option_automatic.is_development(env, &java_jsx)?;
+        let import_source = java_jsx_runtime_option_automatic.get_import_source(env, &java_jsx)?;
+        jsx = Some(JsxRuntime::Automatic(JsxAutomaticOptions {
+          development,
+          import_source,
+        }));
+      } else if env.is_instance_of(&java_jsx, &(java_jsx_runtime_option_classic.class))? {
+        let factory = java_jsx_runtime_option_classic.get_factory(env, &java_jsx)?;
+        let fragment_factory = java_jsx_runtime_option_classic.get_fragment_factory(env, &java_jsx)?;
+        jsx = Some(JsxRuntime::Classic(JsxClassicOptions {
+          factory,
+          fragment_factory,
+        }));
+      } else if env.is_instance_of(&java_jsx, &(java_jsx_runtime_option_precompile.class))? {
+        let java_automatic = java_jsx_runtime_option_precompile.get_automatic(env, &java_jsx)?;
+        let development = java_jsx_runtime_option_automatic.is_development(env, &java_automatic)?;
+        let import_source = java_jsx_runtime_option_automatic.get_import_source(env, &java_automatic)?;
+        delete_local_ref!(env, java_automatic);
+        let automatic = JsxAutomaticOptions {
+          development,
+          import_source,
+        };
+        let optional_java_dynamic_props = java_jsx_runtime_option_precompile.get_dynamic_props(env, &java_jsx)?;
+        let mut dynamic_props = None;
+        if let Some(java_dynamic_props) = optional_java_dynamic_props {
+          let length = list_size(env, &java_dynamic_props)?;
+          let mut results: Vec<String> = Vec::with_capacity(length);
+          for i in 0..length {
+            let java_item = list_get(env, &java_dynamic_props, i)?;
+            let item: Result<String> = jstring_to_string!(env, java_item.as_raw());
+            results.push(item?);
+            delete_local_ref!(env, java_item);
+          }
+          dynamic_props = Some(results);
+          delete_local_ref!(env, java_dynamic_props);
+        };
+        let optional_java_skip_elements = java_jsx_runtime_option_precompile.get_skip_elements(env, &java_jsx)?;
+        let mut skip_elements = None;
+        if let Some(java_skip_elements) = optional_java_skip_elements {
+          let length = list_size(env, &java_skip_elements)?;
+          let mut results: Vec<String> = Vec::with_capacity(length);
+          for i in 0..length {
+            let java_item = list_get(env, &java_skip_elements, i)?;
+            let item: Result<String> = jstring_to_string!(env, java_item.as_raw());
+            results.push(item?);
+            delete_local_ref!(env, java_item);
+          }
+          skip_elements = Some(results);
+          delete_local_ref!(env, java_skip_elements);
+        }
+        jsx = Some(JsxRuntime::Precompile(JsxPrecompileOptions {
+          automatic,
+          dynamic_props,
+          skip_elements,
+        }));
+      };
+      delete_local_ref!(env, java_jsx);
+    }
     let keep_comments = java_transpile_options.is_keep_comments(env, obj)?;
     let java_media_type = java_transpile_options.get_media_type(env, obj)?;
     let media_type = *MediaType::from_java(env, &java_media_type)?;
@@ -1703,78 +1876,32 @@ impl<'local> FromJava<'local> for TranspileOptions<'local> {
       PluginHost::new(env, host)
     });
     delete_local_optional_ref!(env, java_optional_plugin_host);
-    let precompile_jsx = java_transpile_options.is_precompile_jsx(env, obj)?;
-    let java_optional_precompile_jsx_dynamic_props =
-      java_transpile_options.get_precompile_jsx_dynamic_props(env, obj)?;
-    let precompile_jsx_dynamic_props = if let Some(elements) = java_optional_precompile_jsx_dynamic_props {
-      let length = list_size(env, &elements)?;
-      let mut results: Vec<String> = Vec::with_capacity(length);
-      for i in 0..length {
-        let java_item = list_get(env, &elements, i)?;
-        let element: Result<String> = jstring_to_string!(env, java_item.as_raw());
-        delete_local_ref!(env, java_item);
-        results.push(element?);
-      }
-      delete_local_ref!(env, elements);
-      Some(results)
-    } else {
-      None
-    };
-    let java_optional_precompile_jsx_skip_elements =
-      java_transpile_options.get_precompile_jsx_skip_elements(env, obj)?;
-    let precompile_jsx_skip_elements = if let Some(elements) = java_optional_precompile_jsx_skip_elements {
-      let length = list_size(env, &elements)?;
-      let mut results: Vec<String> = Vec::with_capacity(length);
-      for i in 0..length {
-        let java_item = list_get(env, &elements, i)?;
-        let element: Result<String> = jstring_to_string!(env, java_item.as_raw());
-        delete_local_ref!(env, java_item);
-        results.push(element?);
-      }
-      delete_local_ref!(env, elements);
-      Some(results)
-    } else {
-      None
-    };
     let scope_analysis = java_transpile_options.is_scope_analysis(env, obj)?;
     let java_source_map = java_transpile_options.get_source_map(env, obj)?;
     let source_map = *SourceMapOption::from_java(env, &java_source_map)?;
     let specifier = java_transpile_options.get_specifier(env, obj)?;
     let specifier = url_to_string(env, &specifier)?;
-    let transform_jsx = java_transpile_options.is_transform_jsx(env, obj)?;
     let var_decl_imports = java_transpile_options.is_var_decl_imports(env, obj)?;
     let verbatim_module_syntax = java_transpile_options.is_verbatim_module_syntax(env, obj)?;
-    let use_decorators_proposal = java_transpile_options.is_use_decorators_proposal(env, obj)?;
-    let use_ts_decorators = java_transpile_options.is_use_ts_decorators(env, obj)?;
     delete_local_ref!(env, java_source_map);
     Ok(Box::new(TranspileOptions {
       capture_ast,
       capture_comments,
       capture_tokens,
-      emit_metadata,
+      decorators,
       imports_not_used_as_values,
       inline_sources,
-      jsx_automatic,
-      jsx_development,
-      jsx_factory,
-      jsx_fragment_factory,
-      jsx_import_source,
+      jsx,
       keep_comments,
       media_type,
       module_kind,
       parse_mode,
       plugin_host,
-      precompile_jsx,
-      precompile_jsx_dynamic_props,
-      precompile_jsx_skip_elements,
       scope_analysis,
       source_map,
       specifier,
-      transform_jsx,
       var_decl_imports,
       verbatim_module_syntax,
-      use_decorators_proposal,
-      use_ts_decorators,
     }))
   }
 }

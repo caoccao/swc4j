@@ -24,7 +24,6 @@ import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.net.URL;
-import java.util.List;
 
 /**
  * The type Swc4j transpile options.
@@ -34,24 +33,11 @@ import java.util.List;
 @Jni2RustClass(filePath = Jni2RustFilePath.Options)
 public class Swc4jTranspileOptions extends Swc4jParseOptions {
     /**
-     * The constant DEFAULT_JSX_FACTORY.
+     * Kind of decorators to use.
      *
-     * @since 0.1.0
+     * @since 1.7.0
      */
-    public static final String DEFAULT_JSX_FACTORY = "React.createElement";
-    /**
-     * The constant DEFAULT_JSX_FRAGMENT_FACTORY.
-     *
-     * @since 0.1.0
-     */
-    public static final String DEFAULT_JSX_FRAGMENT_FACTORY = "React.Fragment";
-    /**
-     * When emitting a legacy decorator, whether also emit experimental decorator meta data.
-     * Defaults to `false`.
-     *
-     * @since 0.1.0
-     */
-    protected boolean emitMetadata;
+    protected Swc4jDecoratorsTranspileOption decorators;
     /**
      * What to do with import statements that only import types i.e. whether to
      * remove them (`Remove`), keep them as side-effect imports (`Preserve`)
@@ -68,41 +54,12 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     protected boolean inlineSources;
     /**
-     * `true` if the program should use an implicit JSX import source/the `new` JSX transforms.
-     * Defaults to `false`.
+     * Options for transforming JSX. Will not transform when `None`.
+     * Defaults to null.
      *
-     * @since 0.1.0
+     * @since 1.7.0
      */
-    protected boolean jsxAutomatic;
-    /**
-     * If JSX is automatic, if it is in development mode, meaning that it should
-     * import `jsx-dev-runtime` and transform JSX using `jsxDEV` import from the
-     * JSX import source as well as provide additional debug information to the
-     * JSX factory.
-     *
-     * @since 0.1.0
-     */
-    protected boolean jsxDevelopment;
-    /**
-     * When transforming JSX, what value should be used for the JSX factory.
-     * Defaults to `React.createElement`.
-     *
-     * @since 0.1.0
-     */
-    protected String jsxFactory;
-    /**
-     * When transforming JSX, what value should be used for the JSX fragment factory.
-     * Defaults to `React.Fragment`.
-     *
-     * @since 0.1.0
-     */
-    protected String jsxFragmentFactory;
-    /**
-     * The string module specifier to implicitly import JSX factories from when transpiling JSX.
-     *
-     * @since 0.1.0
-     */
-    protected String jsxImportSource;
+    protected Swc4jJsxRuntimeOption jsx;
     /**
      * Whether to keep comments in the output. Defaults to `false`.
      *
@@ -117,49 +74,11 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     protected Swc4jModuleKind moduleKind;
     /**
-     * Should JSX be precompiled into static strings that need to be concatenated
-     * with dynamic content. Defaults to `false`, mutually exclusive with
-     * `transform_jsx`.
-     *
-     * @since 0.1.0
-     */
-    protected boolean precompileJsx;
-    /**
-     * List of properties/attributes that should always be treated as dynamic.
-     *
-     * @since 0.10.0
-     */
-    protected List<String> precompileJsxDynamicProps;
-    /**
-     * List of elements that should not be precompiled when the JSX precompile transform is used.
-     *
-     * @since 0.7.0
-     */
-    protected List<String> precompileJsxSkipElements;
-    /**
      * How and if source maps should be generated.
      *
      * @since 0.1.0
      */
     protected Swc4jSourceMapOption sourceMap;
-    /**
-     * Should JSX be transformed. Defaults to `true`.
-     *
-     * @since 0.1.0
-     */
-    protected boolean transformJsx;
-    /**
-     * TC39 Decorators Proposal - https://github.com/tc39/proposal-decorators
-     *
-     * @since 0.3.0
-     */
-    protected boolean useDecoratorsProposal;
-    /**
-     * TypeScript experimental decorators.
-     *
-     * @since 0.3.0
-     */
-    protected boolean useTsDecorators;
     /**
      * Should import declarations be transformed to variable declarations using
      * a dynamic import. This is useful for import and export declaration support
@@ -182,24 +101,26 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     public Swc4jTranspileOptions() {
         super();
-        setEmitMetadata(false);
+        setDecorators(Swc4jDecoratorsTranspileOption.None());
         setImportsNotUsedAsValues(Swc4jImportsNotUsedAsValues.Remove);
-        setJsxAutomatic(false);
-        setJsxDevelopment(false);
-        setJsxFactory(DEFAULT_JSX_FACTORY);
-        setJsxFragmentFactory(DEFAULT_JSX_FRAGMENT_FACTORY);
-        setJsxImportSource(null);
+        setJsx(null);
         setInlineSources(true);
         setKeepComments(false);
         setModuleKind(Swc4jModuleKind.Auto);
-        setPrecompileJsx(false);
-        setPrecompileJsxDynamicProps(null);
-        setPrecompileJsxSkipElements(null);
         setSourceMap(Swc4jSourceMapOption.Inline);
-        setTransformJsx(true);
         setVarDeclImports(false);
         setVerbatimModuleSyntax(false);
-        setUseTsDecorators(false);
+    }
+
+    /**
+     * Gets decorators.
+     *
+     * @return the decorators
+     * @since 1.7.0
+     */
+    @Jni2RustMethod
+    public Swc4jDecoratorsTranspileOption getDecorators() {
+        return decorators;
     }
 
     /**
@@ -214,36 +135,14 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * Gets jsx factory.
+     * Gets jsx.
      *
-     * @return the jsx factory
-     * @since 0.1.0
-     */
-    @Jni2RustMethod
-    public String getJsxFactory() {
-        return jsxFactory;
-    }
-
-    /**
-     * Gets jsx fragment factory.
-     *
-     * @return the jsx fragment factory
-     * @since 0.1.0
-     */
-    @Jni2RustMethod
-    public String getJsxFragmentFactory() {
-        return jsxFragmentFactory;
-    }
-
-    /**
-     * Gets jsx import source.
-     *
-     * @return the jsx import source
-     * @since 0.1.0
+     * @return the jsx
+     * @since 1.7.0
      */
     @Jni2RustMethod(optional = true)
-    public String getJsxImportSource() {
-        return jsxImportSource;
+    public Swc4jJsxRuntimeOption getJsx() {
+        return jsx;
     }
 
     /**
@@ -258,28 +157,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * Gets precompile jsx dynamic props.
-     *
-     * @return the precompile jsx dynamic props
-     * @since 0.10.0
-     */
-    @Jni2RustMethod(optional = true)
-    public List<String> getPrecompileJsxDynamicProps() {
-        return precompileJsxDynamicProps;
-    }
-
-    /**
-     * Gets precompile jsx skip elements.
-     *
-     * @return the precompile jsx skip elements
-     * @since 0.7.0
-     */
-    @Jni2RustMethod(optional = true)
-    public List<String> getPrecompileJsxSkipElements() {
-        return precompileJsxSkipElements;
-    }
-
-    /**
      * Gets source map.
      *
      * @return the source map
@@ -288,17 +165,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     @Jni2RustMethod
     public Swc4jSourceMapOption getSourceMap() {
         return sourceMap;
-    }
-
-    /**
-     * Is emit metadata.
-     *
-     * @return true : yes, false : no
-     * @since 0.1.0
-     */
-    @Jni2RustMethod
-    public boolean isEmitMetadata() {
-        return emitMetadata;
     }
 
     /**
@@ -313,28 +179,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * Is jsx automatic.
-     *
-     * @return true : yes, false : no
-     * @since 0.1.0
-     */
-    @Jni2RustMethod
-    public boolean isJsxAutomatic() {
-        return jsxAutomatic;
-    }
-
-    /**
-     * Is jsx development.
-     *
-     * @return true : yes, false : no
-     * @since 0.1.0
-     */
-    @Jni2RustMethod
-    public boolean isJsxDevelopment() {
-        return jsxDevelopment;
-    }
-
-    /**
      * Is keep comments.
      *
      * @return true : yes, false : no
@@ -343,50 +187,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     @Jni2RustMethod
     public boolean isKeepComments() {
         return keepComments;
-    }
-
-    /**
-     * Is precompile jsx.
-     *
-     * @return true : yes, false : no
-     * @since 0.1.0
-     */
-    @Jni2RustMethod
-    public boolean isPrecompileJsx() {
-        return precompileJsx;
-    }
-
-    /**
-     * Is transform jsx.
-     *
-     * @return true : yes, false : no
-     * @since 0.1.0
-     */
-    @Jni2RustMethod
-    public boolean isTransformJsx() {
-        return transformJsx;
-    }
-
-    /**
-     * Is use decorators proposal.
-     *
-     * @return true : yes, false : no
-     * @since 0.3.0
-     */
-    @Jni2RustMethod
-    public boolean isUseDecoratorsProposal() {
-        return useDecoratorsProposal;
-    }
-
-    /**
-     * Is use ts decorators.
-     *
-     * @return true : yes, false : no
-     * @since 0.3.0
-     */
-    @Jni2RustMethod
-    public boolean isUseTsDecorators() {
-        return useTsDecorators;
     }
 
     /**
@@ -430,14 +230,14 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * Sets emit metadata.
+     * Sets decorators.
      *
-     * @param emitMetadata the emit metadata
+     * @param decorators the decorators
      * @return the self
-     * @since 0.1.0
+     * @since 1.7.0
      */
-    public Swc4jTranspileOptions setEmitMetadata(boolean emitMetadata) {
-        this.emitMetadata = emitMetadata;
+    public Swc4jTranspileOptions setDecorators(Swc4jDecoratorsTranspileOption decorators) {
+        this.decorators = decorators;
         return this;
     }
 
@@ -466,62 +266,14 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * Sets jsx automatic.
+     * Sets jsx.
      *
-     * @param jsxAutomatic the jsx automatic
+     * @param jsx the jsx
      * @return the self
-     * @since 0.1.0
+     * @since 1.7.0
      */
-    public Swc4jTranspileOptions setJsxAutomatic(boolean jsxAutomatic) {
-        this.jsxAutomatic = jsxAutomatic;
-        return this;
-    }
-
-    /**
-     * Sets jsx development.
-     *
-     * @param jsxDevelopment the jsx development
-     * @return the self
-     * @since 0.1.0
-     */
-    public Swc4jTranspileOptions setJsxDevelopment(boolean jsxDevelopment) {
-        this.jsxDevelopment = jsxDevelopment;
-        return this;
-    }
-
-    /**
-     * Sets jsx factory.
-     *
-     * @param jsxFactory the jsx factory
-     * @return the self
-     * @since 0.1.0
-     */
-    public Swc4jTranspileOptions setJsxFactory(String jsxFactory) {
-        this.jsxFactory = AssertionUtils.notNull(jsxFactory, "Jsx factory");
-        return this;
-    }
-
-    /**
-     * Sets jsx fragment factory.
-     *
-     * @param jsxFragmentFactory the jsx fragment factory
-     * @return the self
-     * @since 0.1.0
-     */
-    public Swc4jTranspileOptions setJsxFragmentFactory(String jsxFragmentFactory) {
-        this.jsxFragmentFactory = AssertionUtils.notNull(jsxFragmentFactory, "Jsx fragment factory");
-        return this;
-    }
-
-    /**
-     * Sets jsx import source.
-     *
-     * @param jsxImportSource the jsx import source
-     * @return the self
-     * @since 0.1.0
-     */
-    public Swc4jTranspileOptions setJsxImportSource(String jsxImportSource) {
-        this.jsxImportSource = jsxImportSource;
+    public Swc4jTranspileOptions setJsx(Swc4jJsxRuntimeOption jsx) {
+        this.jsx = jsx;
         return this;
     }
 
@@ -580,40 +332,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
     }
 
     /**
-     * Sets precompile jsx.
-     *
-     * @param precompileJsx the precompile jsx
-     * @return the self
-     * @since 0.1.0
-     */
-    public Swc4jTranspileOptions setPrecompileJsx(boolean precompileJsx) {
-        this.precompileJsx = precompileJsx;
-        return this;
-    }
-
-    /**
-     * Sets precompile jsx dynamic props.
-     *
-     * @param precompileJsxDynamicProps the precompile jsx dynamic props
-     * @since 0.10.0
-     */
-    public void setPrecompileJsxDynamicProps(List<String> precompileJsxDynamicProps) {
-        this.precompileJsxDynamicProps = precompileJsxDynamicProps;
-    }
-
-    /**
-     * Sets precompile jsx skip elements.
-     *
-     * @param precompileJsxSkipElements the precompile jsx skip elements
-     * @return the self
-     * @since 0.7.0
-     */
-    public Swc4jTranspileOptions setPrecompileJsxSkipElements(List<String> precompileJsxSkipElements) {
-        this.precompileJsxSkipElements = precompileJsxSkipElements;
-        return this;
-    }
-
-    /**
      * Sets scope analysis.
      *
      * @param scopeAnalysis the scope analysis
@@ -646,42 +364,6 @@ public class Swc4jTranspileOptions extends Swc4jParseOptions {
      */
     public Swc4jTranspileOptions setSpecifier(URL specifier) {
         super.setSpecifier(specifier);
-        return this;
-    }
-
-    /**
-     * Sets transform jsx.
-     *
-     * @param transformJsx the transform jsx
-     * @return the self
-     * @since 0.1.0
-     */
-    public Swc4jTranspileOptions setTransformJsx(boolean transformJsx) {
-        this.transformJsx = transformJsx;
-        return this;
-    }
-
-    /**
-     * Sets use decorator proposal.
-     *
-     * @param useDecoratorsProposal the use decorator proposal
-     * @return the self
-     * @since 0.3.0
-     */
-    public Swc4jTranspileOptions setUseDecoratorsProposal(boolean useDecoratorsProposal) {
-        this.useDecoratorsProposal = useDecoratorsProposal;
-        return this;
-    }
-
-    /**
-     * Sets use ts decorators.
-     *
-     * @param useTsDecorators the use ts decorators
-     * @return the self
-     * @since 0.3.0
-     */
-    public Swc4jTranspileOptions setUseTsDecorators(boolean useTsDecorators) {
-        this.useTsDecorators = useTsDecorators;
         return this;
     }
 

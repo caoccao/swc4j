@@ -20,6 +20,7 @@ use deno_ast::swc::{
   common::{comments::CommentKind, BytePos, Span, Spanned},
   parser::token::{IdentLike, Keyword, Token, Word},
 };
+use deno_ast::{JsxClassicOptions, JsxRuntime};
 
 use enums::*;
 use swc4j::*;
@@ -212,7 +213,10 @@ fn test_transpile_jsx_with_custom_jsx_factory() {
     + "export default App;\n";
   let expected_source_map_prefix = "//# sourceMappingURL=data:application/json;base64,";
   let options = options::TranspileOptions {
-    jsx_factory: "CustomJsxFactory.createElement".into(),
+    jsx: Some(JsxRuntime::Classic(JsxClassicOptions {
+      factory: "CustomJsxFactory.createElement".into(),
+      fragment_factory: "React.Fragment".into(),
+    })),
     media_type: MediaType::Jsx,
     ..Default::default()
   };
@@ -244,6 +248,7 @@ fn test_transpile_jsx_with_default_options() {
   let expected_source_map_prefix = "//# sourceMappingURL=data:application/json;base64,";
   let options = options::TranspileOptions {
     media_type: MediaType::Jsx,
+    jsx: Some(JsxRuntime::default()),
     ..Default::default()
   };
   let output = core::transpile(code.to_owned(), options);

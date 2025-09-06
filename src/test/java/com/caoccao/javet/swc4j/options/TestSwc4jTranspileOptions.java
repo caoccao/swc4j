@@ -56,7 +56,7 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
                 "export default App;\n";
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         Swc4jTranspileOutput output = swc4j.transpile(code, jsxModuleTranspileOptions
-                .setJsxFactory("CustomJsxFactory.createElement"));
+                .setJsx(Swc4jJsxRuntimeOption.Classic().setFactory("CustomJsxFactory.createElement")));
         assertNotNull(output);
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));
         assertEquals(Swc4jParseMode.Module, output.getParseMode());
@@ -85,7 +85,8 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
                 "}\n" +
                 "export default App;\n";
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
-        Swc4jTranspileOutput output = swc4j.transpile(code, jsxModuleTranspileOptions);
+        Swc4jTranspileOutput output = swc4j.transpile(code, jsxModuleTranspileOptions
+                .setJsx(Swc4jJsxRuntimeOption.Classic()));
         assertNotNull(output);
         assertEquals(code, output.getSourceText());
         assertEquals(expectedCode, output.getCode().substring(0, expectedCode.length()));

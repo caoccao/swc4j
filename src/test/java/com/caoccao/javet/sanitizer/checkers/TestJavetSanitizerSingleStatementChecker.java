@@ -52,10 +52,10 @@ public class TestJavetSanitizerSingleStatementChecker extends BaseTestSuiteCheck
         assertException(
                 "1 +",
                 JavetSanitizerError.ParsingError,
-                "Expression expected at file:///main.js:1:3\n" +
+                "Expression expected at file:///main.js:1:4\n" +
                         "\n" +
                         "  1 +\n" +
-                        "    ~");
+                        "     ~");
         assertException(
                 "{ a: 1, b: 2 }",
                 JavetSanitizerError.ParsingError,

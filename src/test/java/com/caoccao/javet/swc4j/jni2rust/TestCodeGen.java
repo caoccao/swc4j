@@ -20,9 +20,7 @@ import com.caoccao.javet.swc4j.ast.Swc4jAstStore;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.comments.Swc4jComment;
 import com.caoccao.javet.swc4j.comments.Swc4jComments;
-import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
-import com.caoccao.javet.swc4j.options.Swc4jTransformOptions;
-import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
+import com.caoccao.javet.swc4j.options.*;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTransformOutput;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
@@ -814,8 +812,17 @@ public class TestCodeGen {
 
     @Test
     public void testSwc4jTranspileOptions() throws IOException {
-        Jni2Rust<Swc4jTranspileOptions> jni2Rust = new Jni2Rust<>(Swc4jTranspileOptions.class);
-        jni2Rust.updateFile();
+        for (Class<?> clazz : SimpleList.of(
+                Swc4jTranspileOptions.class,
+                Swc4jDecoratorsTranspileOptionNone.class,
+                Swc4jDecoratorsTranspileOptionEcma.class,
+                Swc4jDecoratorsTranspileOptionLegacyTypeScript.class,
+                Swc4jJsxRuntimeOptionAutomatic.class,
+                Swc4jJsxRuntimeOptionClassic.class,
+                Swc4jJsxRuntimeOptionPrecompile.class)) {
+            Jni2Rust<?> jni2Rust = new Jni2Rust<>(clazz);
+            jni2Rust.updateFile();
+        }
     }
 
     @Test

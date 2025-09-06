@@ -2,7 +2,31 @@
 
 ## 1.7.0
 
+* Upgraded deno_ast to v0.50.0
 * Upgraded rust toolchain to v1.89.0
+* Refactored `Swc4jTranspileOptions`
+  * Added `Swc4jDecoratorsTranspileOption decorators`
+  * Added `Swc4jJsxRuntimeOption jsx`
+  * Removed `boolean emitMetadata`
+  * Removed `boolean jsxAutomatic`
+  * Removed `boolean jsxDevelopment`
+  * Removed `String jsxFactory`
+  * Removed `String jsxFragmentFactory`
+  * Removed `String jsxImportSource`
+  * Removed `boolean precomileJsx`
+  * Removed `List<String> precomileJsxDynamicProps`
+  * Removed `List<String> precomileJsxSkipElements`
+  * Removed `boolean transformJsx`
+  * Removed `boolean useDecoratorsProposal`
+  * Removed `boolean useTsDecorators`
+* Added `Swc4jDecoratorsTranspileOption`
+  * Added `Swc4jDecoratorsTranspileOptionEcma`
+  * Added `Swc4jDecoratorsTranspileOptionLegacyTypeScript`
+  * Added `Swc4jDecoratorsTranspileOptionNone`
+* Added `Swc4jJsxRuntimeOption`
+  * Added `Swc4jJsxRuntimeOptionAutomatic`
+  * Added `Swc4jJsxRuntimeOptionClassic`
+  * Added `Swc4jJsxRuntimeOptionPrecompile`
 
 ## 1.6.0
 

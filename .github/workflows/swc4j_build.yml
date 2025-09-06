@@ -210,10 +210,10 @@ jobs:
         RUSTFLAGS: -Awarnings
       run: |
         cd rust
-        cargo ndk --target i686-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86
-        cargo ndk --target x86_64-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86_64
-        cargo ndk --target armv7-linux-androideabi build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm
-        cargo ndk --target aarch64-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm64
+        cargo ndk-env --target i686-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86
+        cargo ndk-env --target x86_64-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86_64
+        cargo ndk-env --target armv7-linux-androideabi build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm
+        cargo ndk-env --target aarch64-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm64
 
     - name: Setup JDK 8
       uses: actions/setup-java@v4

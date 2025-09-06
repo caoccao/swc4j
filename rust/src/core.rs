@@ -156,7 +156,7 @@ pub fn transform<'local>(code: String, options: options::TransformOptions) -> Re
       maybe_base: None,
     };
     source_map
-      .build_source_map_with_config(&source_map_buffer, None, source_map_config)
+      .build_source_map(&source_map_buffer, None, source_map_config)
       .to_writer(&mut buffer)?;
     if options.source_map == SourceMapOption::Inline {
       if !code.ends_with("\n") {
@@ -189,21 +189,11 @@ pub fn transpile<'local>(code: String, options: options::TranspileOptions) -> Re
   let mut plugin_host = options.plugin_host.clone();
   let parsed_source = parse_by_mode(parse_params, options.parse_mode, &mut plugin_host)?;
   let transpile_options = TranspileOptions {
-    emit_metadata: options.emit_metadata,
-    imports_not_used_as_values: options.imports_not_used_as_values.to_owned(),
-    jsx_automatic: options.jsx_automatic,
-    jsx_development: options.jsx_development,
-    jsx_factory: options.jsx_factory.to_owned(),
-    jsx_fragment_factory: options.jsx_fragment_factory.to_owned(),
-    jsx_import_source: options.jsx_import_source.to_owned(),
-    precompile_jsx: options.precompile_jsx,
-    precompile_jsx_dynamic_props: options.precompile_jsx_dynamic_props.to_owned(),
-    precompile_jsx_skip_elements: options.precompile_jsx_skip_elements.to_owned(),
-    transform_jsx: options.transform_jsx,
+    decorators: options.decorators.clone(),
+    imports_not_used_as_values: options.imports_not_used_as_values.clone(),
+    jsx: options.jsx.clone(),
     var_decl_imports: options.var_decl_imports,
     verbatim_module_syntax: options.verbatim_module_syntax,
-    use_decorators_proposal: options.use_decorators_proposal,
-    use_ts_decorators: options.use_ts_decorators,
   };
   let transpile_module_options = TranspileModuleOptions {
     module_kind: match options.module_kind {

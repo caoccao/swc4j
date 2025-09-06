@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.enums.Swc4jMediaType;
 import com.caoccao.javet.swc4j.enums.Swc4jParseMode;
 import com.caoccao.javet.swc4j.enums.Swc4jSourceMapOption;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
+import com.caoccao.javet.swc4j.options.Swc4jJsxRuntimeOption;
 import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 
@@ -58,7 +59,7 @@ public class Tutorial02TranspileJsx {
         // Remove the inline source map.
         options.setSourceMap(Swc4jSourceMapOption.None);
         // Customize the Jsx factory.
-        options.setJsxFactory("CustomJsxFactory.createElement");
+        options.setJsx(Swc4jJsxRuntimeOption.Classic().setFactory("CustomJsxFactory.createElement"));
         output = swc4j.transpile(code, options);
         // Print the transpiled code.
         System.out.println("/*********************************************");
