@@ -62,7 +62,7 @@ public class TestSwc4jToken extends BaseTestSuite {
         assertNotNull(output, code + " should be parsed successfully");
         List<Swc4jToken> tokens = output.getTokens();
         assertNotNull(tokens, code + " tokens shouldn't be null");
-        assertEquals(tokenSize, tokens.size(), code + " token size should be 1");
+        assertEquals(tokenSize, tokens.size(), code + " token size should be " + tokenSize);
         Swc4jToken token = tokens.get(tokenIndex);
         assertEquals(type, token.getType(), code + " type should match");
         assertEquals(text, token.getText(), code + " text should match");
@@ -213,7 +213,7 @@ public class TestSwc4jToken extends BaseTestSuite {
         assertTokenValue(BigInteger.valueOf(1), parseAndAssert("a = -1n;", options, Swc4jTokenType.BigInt, "1n", 5, 7, 3, 5));
         assertTokenValue(new BigInteger("1234567890123456789012345678901234567890"), parseAndAssert("a = 1234567890123456789012345678901234567890n;", options, Swc4jTokenType.BigInt, "1234567890123456789012345678901234567890n", 4, 45, 2, 4));
         // TextValueFlags
-        Swc4jTokenTextValueFlags<String> astTokenRegex = (Swc4jTokenTextValueFlags<String>) parseAndAssert("a = /x/ig;", options, Swc4jTokenType.Regex, "x/ig", 5, 9, 3, 5);
+        Swc4jTokenTextValueFlags<String> astTokenRegex = (Swc4jTokenTextValueFlags<String>) parseAndAssert("a = /x/ig;", options, Swc4jTokenType.Regex, "/x/ig", 4, 9, 2, 4);
         assertEquals("x", astTokenRegex.getValue());
         assertEquals("ig", astTokenRegex.getFlags());
         assertTokenValue("a ", parseAndAssert("`a ${b} c`", options, Swc4jTokenType.Template, "a ", 1, 3, 1, 7));

@@ -1,7 +1,8 @@
 # Release Notes
 
-## 1.8.0
+## 1.7.1
 
+* Upgraded deno_ast to v0.50.3
 * Upgraded Rust edition to 2024
 
 ## 1.7.0

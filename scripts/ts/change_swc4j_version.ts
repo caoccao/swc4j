@@ -113,5 +113,5 @@ class ChangeSwc4jVersion {
   }
 }
 
-const changeSwc4jVersion = new ChangeSwc4jVersion('1.7.0', '1.8.0');
+const changeSwc4jVersion = new ChangeSwc4jVersion('1.7.0', '1.7.1');
 changeSwc4jVersion.change()
