@@ -41,7 +41,7 @@ pub mod token_utils;
 
 use crate::jni_utils::{jstring_to_optional_string, jstring_to_string, string_to_jstring, ToJava};
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
   env_logger::init();
   log::debug!("JNI_OnLoad()");
@@ -63,7 +63,7 @@ pub extern "system" fn JNI_OnLoad<'local>(java_vm: JavaVM, _: c_void) -> jint {
   jni_version
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion<'local>(
   env: JNIEnv<'local>,
   _: JClass<'local>,
@@ -72,7 +72,7 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreGetVersion<'
   string_to_jstring!(env, core::get_version()).as_raw()
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse<'local>(
   mut env: JNIEnv<'local>,
   _: JClass<'local>,
@@ -86,7 +86,7 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreParse<'local
   }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTransform<'local>(
   mut env: JNIEnv<'local>,
   _: JClass<'local>,
@@ -100,7 +100,7 @@ pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTransform<'l
   }
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "system" fn Java_com_caoccao_javet_swc4j_Swc4jNative_coreTranspile<'local>(
   mut env: JNIEnv<'local>,
   _: JClass<'local>,
