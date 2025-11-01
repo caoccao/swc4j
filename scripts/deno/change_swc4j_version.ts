@@ -76,8 +76,7 @@ class ChangeSwc4jVersion {
 
   change() {
     this._change('README.md', [
-      /swc4j:(?<version>\d+\.\d+\.\d+)/ig,
-      /swc4j-android:(?<version>\d+\.\d+\.\d+)/ig,
+      /swc4j[\-\w]*:(?<version>\d+\.\d+\.\d+)/ig,
       /<version>(?<version>\d+\.\d+\.\d+)<\/version>/ig,
     ], false)
     this._change('build.gradle.kts', [
