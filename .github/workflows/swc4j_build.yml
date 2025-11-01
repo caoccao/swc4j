@@ -19,6 +19,7 @@ env:
 jobs:
   build_native:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - image: windows-latest
