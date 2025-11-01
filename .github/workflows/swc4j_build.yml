@@ -127,9 +127,9 @@ jobs:
         toolchain: stable
 
     - name: Setup Deno
-      uses: denoland/setup-deno@v1
+      uses: denoland/setup-deno@v2
       with:
-        deno-version: vx.x.x
+        deno-version: v2.x
 
     - name: Cargo Build and Test
       env:
@@ -189,9 +189,9 @@ jobs:
         ndk-version: r27c
 
     - name: Setup Deno
-      uses: denoland/setup-deno@v1
+      uses: denoland/setup-deno@v2
       with:
-        deno-version: vx.x.x
+        deno-version: v2.x
 
     - name: Setup Cargo
       env:
