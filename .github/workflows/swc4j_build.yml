@@ -95,6 +95,7 @@ jobs:
 
   build_cross_platform:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - image: windows-latest
