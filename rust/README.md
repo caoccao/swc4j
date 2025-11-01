@@ -51,31 +51,31 @@ cargo install cargo-ndk
 
 ```sh
 # Windows Native
-cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o windows -a x86_64
-cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o windows -a arm64
+cargo build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o windows -a x86_64
+cargo build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o windows -a arm64
 # Windows Cross-compile
-cargo build --release --target x86_64-pc-windows-msvc && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o windows -a x86_64
-cargo build --release --target aarch64-pc-windows-msvc && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o windows -a arm64
+cargo build --release --target x86_64-pc-windows-msvc && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o windows -a x86_64
+cargo build --release --target aarch64-pc-windows-msvc && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o windows -a arm64
 
 # Linux Native
-cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o linux -a x86_64
-cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o linux -a arm64
+cargo build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o linux -a x86_64
+cargo build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o linux -a arm64
 # Linux Cross-compile
-cargo build --release --target x86_64-unknown-linux-gnu && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o linux -a x86_64
-cargo build --release --target aarch64-unknown-linux-gnu && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o linux -a arm64
+cargo build --release --target x86_64-unknown-linux-gnu && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o linux -a x86_64
+cargo build --release --target aarch64-unknown-linux-gnu && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o linux -a arm64
 
 # MacOS Native
-cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o macos -a x86_64
-cargo build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o macos -a arm64
+cargo build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o macos -a x86_64
+cargo build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o macos -a arm64
 # MacOS Cross-compile
-cargo build --release --target x86_64-apple-darwin && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o macos -a x86_64
-cargo build --release --target aarch64-apple-darwin && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o macos -a arm64
+cargo build --release --target x86_64-apple-darwin && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o macos -a x86_64
+cargo build --release --target aarch64-apple-darwin && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o macos -a arm64
 
 # Android Cross-compile
-cargo ndk --target i686-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86
-cargo ndk --target x86_64-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86_64
-cargo ndk --target armv7-linux-androideabi build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm
-cargo ndk --target aarch64-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm64
+cargo ndk --target i686-linux-android build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o android -a x86
+cargo ndk --target x86_64-linux-android build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o android -a x86_64
+cargo ndk --target armv7-linux-androideabi build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o android -a arm
+cargo ndk --target aarch64-linux-android build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o android -a arm64
 ```
 
 ## Logging

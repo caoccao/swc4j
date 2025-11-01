@@ -172,7 +172,7 @@ Tests are organized by feature:
 Version is defined in `build.gradle.kts` under `Config.Versions.SWC4J`. To change version:
 1. Update `Config.Versions.SWC4J` in `build.gradle.kts`
 2. Update `version` in `rust/Cargo.toml`
-3. Use TypeScript script: `deno run -A scripts/ts/change_swc4j_version.ts <new-version>`
+3. Use TypeScript script: `deno run -A scripts/deno/change_swc4j_version.ts <new-version>`
 
 ## Code Style
 

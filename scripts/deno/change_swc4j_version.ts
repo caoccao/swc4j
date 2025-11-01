@@ -98,7 +98,7 @@ class ChangeSwc4jVersion {
     this._change('rust/tests/test_core.rs', [
       /, "(?<version>\d+\.\d+\.\d+)"\)/ig,
     ])
-    this._change('scripts/ts/copy_swc4j_lib.ts', [
+    this._change('scripts/deno/copy_swc4j_lib.ts', [
       /VERSION = "(?<version>\d+\.\d+\.\d+)"/ig,
     ])
     this._change('src/main/java/com/caoccao/javet/swc4j/Swc4jLibLoader.java', [
