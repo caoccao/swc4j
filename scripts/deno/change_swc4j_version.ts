@@ -15,8 +15,8 @@
 * limitations under the License.
 */
 
-import * as fs from "https://deno.land/std/fs/mod.ts"
-import * as path from "https://deno.land/std/path/mod.ts"
+import * as fs from "@std/fs"
+import * as path from "@std/path"
 
 class ChangeSwc4jVersion {
   private productionVersion: string

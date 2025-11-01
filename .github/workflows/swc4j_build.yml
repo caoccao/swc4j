@@ -67,7 +67,7 @@ jobs:
         cd rust
         cargo build -r
         cargo test -r
-        deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o ${{ matrix.os }} -a ${{ matrix.arch }}
+        deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o ${{ matrix.os }} -a ${{ matrix.arch }}
 
     - name: Setup JDK 8
       uses: actions/setup-java@v4
@@ -139,7 +139,7 @@ jobs:
         ${{ matrix.command }}
         rustup target add ${{ matrix.target }}
         cargo build -r --target ${{ matrix.target }}
-        deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o ${{ matrix.os }} -a ${{ matrix.arch }}
+        deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o ${{ matrix.os }} -a ${{ matrix.arch }}
 
     - name: Setup JDK 8
       uses: actions/setup-java@v4
@@ -210,13 +210,13 @@ jobs:
       run: |
         cd rust
         cargo ndk-env --target i686-linux-android
-        cargo ndk --target i686-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86
+        cargo ndk --target i686-linux-android build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o android -a x86
         cargo ndk-env --target x86_64-linux-android
-        cargo ndk --target x86_64-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a x86_64
+        cargo ndk --target x86_64-linux-android build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o android -a x86_64
         cargo ndk-env --target armv7-linux-androideabi
-        cargo ndk --target armv7-linux-androideabi build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm
+        cargo ndk --target armv7-linux-androideabi build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o android -a arm
         cargo ndk-env --target aarch64-linux-android
-        cargo ndk --target aarch64-linux-android build --release && deno run --allow-all ../scripts/ts/copy_swc4j_lib.ts -o android -a arm64
+        cargo ndk --target aarch64-linux-android build --release && deno run --allow-all ../scripts/deno/copy_swc4j_lib.ts -o android -a arm64
 
     - name: Setup JDK 8
       uses: actions/setup-java@v4

@@ -17,15 +17,15 @@
 
 /*
 Usage:
-deno run --allow-all scripts/ts/copy_swc4j_lib.ts -a x86_64
-deno run --allow-all scripts/ts/copy_swc4j_lib.ts -d -a x86_64
-deno run --allow-all scripts/ts/copy_swc4j_lib.ts -o macos -a arm64
-deno run --allow-all scripts/ts/copy_swc4j_lib.ts -d -o macos -a arm64
+deno run --allow-all scripts/deno/copy_swc4j_lib.ts -a x86_64
+deno run --allow-all scripts/deno/copy_swc4j_lib.ts -d -a x86_64
+deno run --allow-all scripts/deno/copy_swc4j_lib.ts -o macos -a arm64
+deno run --allow-all scripts/deno/copy_swc4j_lib.ts -d -o macos -a arm64
 */
 
-import * as cli from "https://deno.land/std/cli/mod.ts";
-import * as fs from "https://deno.land/std/fs/mod.ts";
-import * as path from "https://deno.land/std/path/mod.ts";
+import * as cli from "@std/cli";
+import * as fs from "@std/fs";
+import * as path from "@std/path";
 
 interface Config {
   sourceName: string;
