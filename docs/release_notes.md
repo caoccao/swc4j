@@ -1,5 +1,10 @@
 # Release Notes
 
+## 1.8.0
+
+* Upgraded deno_ast to v0.51.0
+* Supported new media types: Jsonc and Json5
+
 ## 1.7.1
 
 * Upgraded deno_ast to v0.50.3

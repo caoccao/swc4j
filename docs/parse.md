@@ -30,6 +30,8 @@ Media type of the source text contains the following values:
 | Tsx        | .tsx      |
 | Css        | .css      |
 | Json       | .json     |
+| Jsonc      | .jsonc    |
+| Json5      | .json5    |
 | Html       | .html     |
 | Sql        | .sql      |
 | Wasm       | .wasm     |

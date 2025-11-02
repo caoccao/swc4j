@@ -1099,11 +1099,13 @@ impl IdentifiableEnum<MediaType> for MediaType {
       MediaType::Tsx => 10,
       MediaType::Css => 11,
       MediaType::Json => 12,
-      MediaType::Html => 13,
-      MediaType::Sql => 14,
-      MediaType::Wasm => 15,
-      MediaType::SourceMap => 16,
-      MediaType::Unknown => 17,
+      MediaType::Jsonc => 13,
+      MediaType::Json5 => 14,
+      MediaType::Html => 15,
+      MediaType::Sql => 16,
+      MediaType::Wasm => 17,
+      MediaType::SourceMap => 18,
+      MediaType::Unknown => 19,
     }
   }
   fn parse_by_id(id: i32) -> MediaType {
@@ -1121,11 +1123,13 @@ impl IdentifiableEnum<MediaType> for MediaType {
       10 => MediaType::Tsx,
       11 => MediaType::Css,
       12 => MediaType::Json,
-      13 => MediaType::Html,
-      14 => MediaType::Sql,
-      15 => MediaType::Wasm,
-      16 => MediaType::SourceMap,
-      17 => MediaType::Unknown,
+      13 => MediaType::Jsonc,
+      14 => MediaType::Json5,
+      15 => MediaType::Html,
+      16 => MediaType::Sql,
+      17 => MediaType::Wasm,
+      18 => MediaType::SourceMap,
+      19 => MediaType::Unknown,
       _ => MediaType::Unknown,
     }
   }
