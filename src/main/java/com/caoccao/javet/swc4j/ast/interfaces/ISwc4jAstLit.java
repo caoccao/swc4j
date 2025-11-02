@@ -31,6 +31,5 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
                 @Jni2RustEnumMapping(name = "Str", type = Swc4jAstStr.class),
         }
 )
-public interface ISwc4jAstLit
-        extends ISwc4jAstExpr, ISwc4jAstJsxAttrValue {
+public interface ISwc4jAstLit extends ISwc4jAstExpr, ISwc4jAstJsxAttrValue {
 }

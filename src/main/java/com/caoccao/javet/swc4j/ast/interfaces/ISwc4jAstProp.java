@@ -31,6 +31,5 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustEnumMapping;
                 @Jni2RustEnumMapping(name = "Shorthand", type = Swc4jAstIdent.class),
         }
 )
-public interface ISwc4jAstProp
-        extends ISwc4jAstPropOrSpread {
+public interface ISwc4jAstProp extends ISwc4jAstPropOrSpread {
 }

@@ -82,11 +82,12 @@ public class Swc4jAstCatchClause
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (body == oldNode && newNode instanceof Swc4jAstBlockStmt) {
-            setBody((Swc4jAstBlockStmt) newNode);
+        if (body == oldNode && newNode instanceof Swc4jAstBlockStmt newBody) {
+            setBody(newBody);
             return true;
         }
-        if (param.isPresent() && param.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstPat)) {
+        if (param.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof ISwc4jAstPat)) {
             setParam((ISwc4jAstPat) newNode);
             return true;
         }
@@ -107,13 +108,10 @@ public class Swc4jAstCatchClause
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitCatchClause(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitCatchClause(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

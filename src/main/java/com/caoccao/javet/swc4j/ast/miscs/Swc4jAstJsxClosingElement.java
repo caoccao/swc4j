@@ -65,8 +65,8 @@ public class Swc4jAstJsxClosingElement
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (name == oldNode && newNode instanceof ISwc4jAstJsxElementName) {
-            setName((ISwc4jAstJsxElementName) newNode);
+        if (name == oldNode && newNode instanceof ISwc4jAstJsxElementName newName) {
+            setName(newName);
             return true;
         }
         return false;
@@ -85,13 +85,10 @@ public class Swc4jAstJsxClosingElement
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitJsxClosingElement(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitJsxClosingElement(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }
