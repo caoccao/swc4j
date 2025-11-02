@@ -33,14 +33,15 @@ public class TestSwc4jParseOptions extends BaseTestSuite {
 
     @Test
     public void testJsxWithDefaultOptions() throws Swc4jCoreException {
-        String code = "import React from 'react';\n" +
-                "import './App.css';\n" +
-                "function App() {\n" +
-                "    return (\n" +
-                "        <h1> Hello World! </h1>\n" +
-                "    );\n" +
-                "}\n" +
-                "export default App;";
+        String code = """
+                import React from 'react';
+                import './App.css';
+                function App() {
+                    return (
+                        <h1> Hello World! </h1>
+                    );
+                }
+                export default App;""";
         Swc4jParseOutput output = swc4j.parse(code, jsxModuleParseOptions);
         assertNotNull(output);
         assertEquals(Swc4jParseMode.Module, output.getParseMode());
@@ -88,10 +89,11 @@ public class TestSwc4jParseOptions extends BaseTestSuite {
     public void testWrongMediaType() {
         String code = "function add(a:number, b:number) { return a+b; }";
         assertEquals(
-                "Expected ',', got ':' at file:///main.js:1:15\n" +
-                        "\n" +
-                        "  function add(a:number, b:number) { return a+b; }\n" +
-                        "                ~",
+                """
+                        Expected ',', got ':' at file:///main.js:1:15
+                        
+                          function add(a:number, b:number) { return a+b; }
+                                        ~""",
                 assertThrows(
                         Swc4jCoreException.class,
                         () -> swc4j.parse(code, jsModuleParseOptions))

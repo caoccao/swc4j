@@ -29,11 +29,9 @@ public class TestJavetSanitizerIdentifierMatcher {
     @Test
     public void testInvalidCases() {
         List<String> identifiers = SimpleList.of("asdf", "$123", "_abc");
-        identifiers.forEach(identifier -> {
-            assertFalse(
-                    JavetSanitizerIdentifierMatcher.getInstance().matches(JavetSanitizerOptions.Default, identifier),
-                    identifier + " should not match.");
-        });
+        identifiers.forEach(identifier -> assertFalse(
+                JavetSanitizerIdentifierMatcher.getInstance().matches(JavetSanitizerOptions.Default, identifier),
+                identifier + " should not match."));
     }
 
     @Test

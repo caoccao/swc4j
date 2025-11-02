@@ -48,57 +48,65 @@ public class TestJavetSanitizerModuleFunctionChecker extends BaseTestSuiteChecke
         assertException(
                 "import a from 'a'; a;",
                 JavetSanitizerError.KeywordNotAllowed,
-                "Keyword import is not allowed.\n" +
-                        "Source: import a from 'a';\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 18");
+                """
+                        Keyword import is not allowed.
+                        Source: import a from 'a';
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 18""");
         assertException(
                 "a; import b from 'b';",
                 JavetSanitizerError.KeywordNotAllowed,
-                "Keyword import is not allowed.\n" +
-                        "Source: import b from 'b';\n" +
-                        "Line: 1\n" +
-                        "Column: 4\n" +
-                        "Start: 3\n" +
-                        "End: 21");
+                """
+                        Keyword import is not allowed.
+                        Source: import b from 'b';
+                        Line: 1
+                        Column: 4
+                        Start: 3
+                        End: 21""");
         assertException(
                 "a; export const b = a;",
                 JavetSanitizerError.KeywordNotAllowed,
-                "Keyword export is not allowed.\n" +
-                        "Source: export const b = a;\n" +
-                        "Line: 1\n" +
-                        "Column: 4\n" +
-                        "Start: 3\n" +
-                        "End: 22");
+                """
+                        Keyword export is not allowed.
+                        Source: export const b = a;
+                        Line: 1
+                        Column: 4
+                        Start: 3
+                        End: 22""");
         assertException(
                 "() => {}",
                 JavetSanitizerError.InvalidNode,
-                "Expression Statement is unexpected. Expecting Function Declaration in Module Function.\n" +
-                        "Source: () => {}\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 8");
+                """
+                        Expression Statement is unexpected. Expecting Function Declaration in Module Function.
+                        Source: () => {}
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 8""");
         assertException(
                 "const a = 0;",
                 JavetSanitizerError.InvalidNode,
-                "Var Declaration is unexpected. Expecting Function Declaration in Module Function.\n" +
-                        "Source: const a = 0;\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 12");
+                """
+                        Var Declaration is unexpected. Expecting Function Declaration in Module Function.
+                        Source: const a = 0;
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 12""");
         assertException(
-                "function a() {}\n() => {}",
+                """
+                        function a() {}
+                        () => {}""",
                 JavetSanitizerError.InvalidNode,
-                "Expression Statement is unexpected. Expecting Function Declaration in Module Function.\n" +
-                        "Source: () => {}\n" +
-                        "Line: 2\n" +
-                        "Column: 1\n" +
-                        "Start: 16\n" +
-                        "End: 24");
+                """
+                        Expression Statement is unexpected. Expecting Function Declaration in Module Function.
+                        Source: () => {}
+                        Line: 2
+                        Column: 1
+                        Start: 16
+                        End: 24""");
     }
 
     @Test
@@ -119,7 +127,10 @@ public class TestJavetSanitizerModuleFunctionChecker extends BaseTestSuiteChecke
             }
         }
         {
-            String code = "import a from 'a';\nfunction main() {}\nexport const b = a;";
+            String code = """
+                    import a from 'a';
+                    function main() {}
+                    export const b = a;""";
             try {
                 checker.check(code);
                 assertEquals(1, moduleFunctionChecker.getExportNodes().size());
@@ -165,7 +176,7 @@ public class TestJavetSanitizerModuleFunctionChecker extends BaseTestSuiteChecke
 
     @Test
     public void testValidCases() throws JavetSanitizerException {
-        List<String> statements = SimpleList.of(
+        List<String> statements = List.of(
                 "function a() {}", "function a(b, c) { return b + c; }",
                 "function a() {}\nfunction b() {}");
         for (String statement : statements) {

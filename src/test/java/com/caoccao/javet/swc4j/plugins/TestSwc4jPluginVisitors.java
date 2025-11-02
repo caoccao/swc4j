@@ -64,8 +64,10 @@ public class TestSwc4jPluginVisitors extends BaseTestSuite {
     @Test
     public void testTranspileAssignExpr() throws Swc4jCoreException {
         String code = "a = b; c = d;";
-        String expectedCode = "b = a;\n" +
-                "d = c;\n";
+        String expectedCode = """
+                b = a;
+                d = c;
+                """;
         TestAssignExprVisitor visitor = new TestAssignExprVisitor();
         Swc4jPluginVisitors pluginVisitors = new Swc4jPluginVisitors().add(visitor);
         Swc4jTranspileOutput output = swc4j.transpile(code, jsScriptTranspileOptions
@@ -79,11 +81,13 @@ public class TestSwc4jPluginVisitors extends BaseTestSuite {
     @Test
     public void testTranspileIfStmt() throws Swc4jCoreException {
         String code = "if (a) { b; } else { c; }";
-        String expectedCode = "if (a) {\n" +
-                "  c;\n" +
-                "} else {\n" +
-                "  b;\n" +
-                "}\n";
+        String expectedCode = """
+                if (a) {
+                  c;
+                } else {
+                  b;
+                }
+                """;
         TestIfStmtVisitor visitor = new TestIfStmtVisitor();
         Swc4jPluginVisitors pluginVisitors = new Swc4jPluginVisitors().add(visitor);
         Swc4jTranspileOutput output = swc4j.transpile(code, jsScriptTranspileOptions

@@ -38,30 +38,33 @@ public class TestJavetSanitizerFridge {
         options.seal();
         String codeString = JavetSanitizerFridge.generate(options);
         assertEquals(
-                "/***** Delete 2 object(s). *****/\n" +
-                        "\n" +
-                        "delete globalThis.eval;\n" +
-                        "delete globalThis.Function;\n" +
-                        "\n" +
-                        "/***** Freeze 2 object(s). *****/\n" +
-                        "\n" +
-                        "// Object\n" +
-                        "const Object = (() => {\n" +
-                        "  const _Object = globalThis.Object;\n" +
-                        "  delete globalThis.Object;\n" +
-                        "  return _Object;\n" +
-                        "})();\n" +
-                        "Object.freeze(Object);\n" +
-                        "Object.freeze(Object.prototype);\n" +
-                        "\n" +
-                        "// Array\n" +
-                        "const Array = (() => {\n" +
-                        "  const _Array = globalThis.Array;\n" +
-                        "  delete globalThis.Array;\n" +
-                        "  return _Array;\n" +
-                        "})();\n" +
-                        "Object.freeze(Array);\n" +
-                        "Object.freeze(Array.prototype);\n\n",
+                """
+                        /***** Delete 2 object(s). *****/
+                        
+                        delete globalThis.eval;
+                        delete globalThis.Function;
+                        
+                        /***** Freeze 2 object(s). *****/
+                        
+                        // Object
+                        const Object = (() => {
+                          const _Object = globalThis.Object;
+                          delete globalThis.Object;
+                          return _Object;
+                        })();
+                        Object.freeze(Object);
+                        Object.freeze(Object.prototype);
+                        
+                        // Array
+                        const Array = (() => {
+                          const _Array = globalThis.Array;
+                          delete globalThis.Array;
+                          return _Array;
+                        })();
+                        Object.freeze(Array);
+                        Object.freeze(Array.prototype);
+                        
+                        """,
                 codeString);
         try (V8Runtime v8Runtime = V8Host.getV8Instance().createV8Runtime()) {
             try (V8ValueBuiltInObject v8ValueBuiltInObject = v8Runtime.getGlobalObject().getBuiltInObject()) {

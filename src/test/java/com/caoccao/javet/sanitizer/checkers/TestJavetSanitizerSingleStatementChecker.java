@@ -45,56 +45,62 @@ public class TestJavetSanitizerSingleStatementChecker extends BaseTestSuiteCheck
         assertException(
                 "a?.b.?.c",
                 JavetSanitizerError.ParsingError,
-                "Expected ident at file:///main.js:1:6\n" +
-                        "\n" +
-                        "  a?.b.?.c\n" +
-                        "       ~");
+                """
+                        Expected ident at file:///main.js:1:6
+                        
+                          a?.b.?.c
+                               ~""");
         assertException(
                 "1 +",
                 JavetSanitizerError.ParsingError,
-                "Expression expected at file:///main.js:1:4\n" +
-                        "\n" +
-                        "  1 +\n" +
-                        "     ~");
+                """
+                        Expression expected at file:///main.js:1:4
+                        
+                          1 +
+                             ~""");
         assertException(
                 "{ a: 1, b: 2 }",
                 JavetSanitizerError.ParsingError,
-                "Expected ';', '}' or <eof> at file:///main.js:1:10\n" +
-                        "\n" +
-                        "  { a: 1, b: 2 }\n" +
-                        "           ~");
+                """
+                        Expected ';', '}' or <eof> at file:///main.js:1:10
+                        
+                          { a: 1, b: 2 }
+                                   ~""");
         assertException(
                 ";;;",
                 JavetSanitizerError.NodeCountTooLarge,
-                "AST node count 3 is greater than the maximal AST node count 1.\n" +
-                        "Source: ;;;\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 3");
+                """
+                        AST node count 3 is greater than the maximal AST node count 1.
+                        Source: ;;;
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 3""");
         assertException(
                 "import a from 'a';",
                 JavetSanitizerError.InvalidNode,
-                "Import Declaration is unexpected. Expecting Statement in Single Statement.\n" +
-                        "Source: import a from 'a';\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 18");
+                """
+                        Import Declaration is unexpected. Expecting Statement in Single Statement.
+                        Source: import a from 'a';
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 18""");
         assertException(
                 "export const a = {};",
                 JavetSanitizerError.InvalidNode,
-                "Export Declaration is unexpected. Expecting Statement in Single Statement.\n" +
-                        "Source: export const a = {};\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 20");
+                """
+                        Export Declaration is unexpected. Expecting Statement in Single Statement.
+                        Source: export const a = {};
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 20""");
     }
 
     @Test
     public void testValidCases() throws JavetSanitizerException {
-        List<String> statements = SimpleList.of(
+        List<String> statements = List.of(
                 "() => 1", "() => {}", "(a, b) => {}",
                 "function a() {}", "{ a; b; }", "const a;",
                 "const a = Object;",

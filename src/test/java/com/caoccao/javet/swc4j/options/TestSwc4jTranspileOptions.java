@@ -40,20 +40,23 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestSwc4jTranspileOptions extends BaseTestSuite {
     @Test
     public void testJsxWithCustomJsxFactory() throws Swc4jCoreException {
-        String code = "import React from 'react';\n" +
-                "import './App.css';\n" +
-                "function App() {\n" +
-                "    return (\n" +
-                "        <h1> Hello World! </h1>\n" +
-                "    );\n" +
-                "}\n" +
-                "export default App;";
-        String expectedCode = "import React from 'react';\n" +
-                "import './App.css';\n" +
-                "function App() {\n" +
-                "  return CustomJsxFactory.createElement(\"h1\", null, \" Hello World! \");\n" +
-                "}\n" +
-                "export default App;\n";
+        String code = """
+                import React from 'react';
+                import './App.css';
+                function App() {
+                    return (
+                        <h1> Hello World! </h1>
+                    );
+                }
+                export default App;""";
+        String expectedCode = """
+                import React from 'react';
+                import './App.css';
+                function App() {
+                  return CustomJsxFactory.createElement("h1", null, " Hello World! ");
+                }
+                export default App;
+                """;
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         Swc4jTranspileOutput output = swc4j.transpile(code, jsxModuleTranspileOptions
                 .setJsx(Swc4jJsxRuntimeOption.Classic().setFactory("CustomJsxFactory.createElement")));
@@ -70,20 +73,23 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
 
     @Test
     public void testJsxWithDefaultOptions() throws Swc4jCoreException {
-        String code = "import React from 'react';\n" +
-                "import './App.css';\n" +
-                "function App() {\n" +
-                "    return (\n" +
-                "        <h1> Hello World! </h1>\n" +
-                "    );\n" +
-                "}\n" +
-                "export default App;";
-        String expectedCode = "import React from 'react';\n" +
-                "import './App.css';\n" +
-                "function App() {\n" +
-                "  return React.createElement(\"h1\", null, \" Hello World! \");\n" +
-                "}\n" +
-                "export default App;\n";
+        String code = """
+                import React from 'react';
+                import './App.css';
+                function App() {
+                    return (
+                        <h1> Hello World! </h1>
+                    );
+                }
+                export default App;""";
+        String expectedCode = """
+                import React from 'react';
+                import './App.css';
+                function App() {
+                  return React.createElement("h1", null, " Hello World! ");
+                }
+                export default App;
+                """;
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         Swc4jTranspileOutput output = swc4j.transpile(code, jsxModuleTranspileOptions
                 .setJsx(Swc4jJsxRuntimeOption.Classic()));
@@ -160,9 +166,11 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
     @Test
     public void testTypeScriptWithInlineSourceMap() throws Swc4jCoreException {
         String code = "function add(a:number, b:number) { return a+b; }";
-        String expectedCode = "function add(a, b) {\n" +
-                "  return a + b;\n" +
-                "}\n";
+        String expectedCode = """
+                function add(a, b) {
+                  return a + b;
+                }
+                """;
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         Swc4jTranspileOutput output = swc4j.transpile(code, tsModuleTranspileOptions);
         assertNotNull(output);
@@ -193,9 +201,11 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
     public void testTypeScriptWithoutInlineSourceMap(Swc4jParseMode parseMode)
             throws Swc4jCoreException, MalformedURLException {
         String code = "function add(a:number, b:number) { return a+b; }";
-        String expectedCode = "function add(a, b) {\n" +
-                "  return a + b;\n" +
-                "}\n";
+        String expectedCode = """
+                function add(a, b) {
+                  return a + b;
+                }
+                """;
         String filePath = "file:///abc.ts";
         URL specifier = new URL(filePath);
         String[] expectedProperties = new String[]{
@@ -223,10 +233,11 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
     public void testWrongMediaType() {
         String code = "function add(a:number, b:number) { return a+b; }";
         assertEquals(
-                "Expected ',', got ':' at file:///main.js:1:15\n" +
-                        "\n" +
-                        "  function add(a:number, b:number) { return a+b; }\n" +
-                        "                ~",
+                """
+                        Expected ',', got ':' at file:///main.js:1:15
+                        
+                          function add(a:number, b:number) { return a+b; }
+                                        ~""",
                 assertThrows(
                         Swc4jCoreException.class,
                         () -> swc4j.transpile(code, jsModuleTranspileOptions))

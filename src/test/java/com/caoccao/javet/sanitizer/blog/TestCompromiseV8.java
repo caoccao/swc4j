@@ -300,8 +300,9 @@ public class TestCompromiseV8 {
             assertEquals(
                     2,
                     v8Runtime.getExecutor(
-                                    "Array.prototype.size = function() { return this.length; };" +
-                                            "[1, 2].size();")
+                                    """
+                                            Array.prototype.size = function() { return this.length; };\
+                                            [1, 2].size();""")
                             .executeInteger(),
                     "Array.prototype should be updated.");
         }
@@ -309,8 +310,9 @@ public class TestCompromiseV8 {
             assertEquals(
                     2,
                     v8Runtime.getExecutor(
-                                    "Array['prototype'].size = function() { return this.length; };" +
-                                            "[1, 2].size();")
+                                    """
+                                            Array['prototype'].size = function() { return this.length; };\
+                                            [1, 2].size();""")
                             .executeInteger(),
                     "Array['prototype'] should be updated.");
         }

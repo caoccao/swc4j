@@ -33,9 +33,11 @@ public class TestSourceMapUtils extends BaseTestSuite {
     @Test
     public void test() throws Swc4jCoreException {
         String code = "function add(a:number, b:number)\n{ return a+b; }";
-        String expectedCode = "function add(a: number, b: number) {\n" +
-                "  return a + b;\n" +
-                "}\n";
+        String expectedCode = """
+                function add(a: number, b: number) {
+                  return a + b;
+                }
+                """;
         Swc4jTransformOutput output = swc4j.transform(code, tsModuleTransformOptions
                 .setMinify(false)
                 .setSourceMap(Swc4jSourceMapOption.Separate));

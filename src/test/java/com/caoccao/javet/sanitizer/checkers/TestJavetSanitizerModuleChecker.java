@@ -49,75 +49,83 @@ public class TestJavetSanitizerModuleChecker extends BaseTestSuiteCheckers {
         assertException(
                 "async () => {};",
                 JavetSanitizerError.KeywordNotAllowed,
-                "Keyword async is not allowed.\n" +
-                        "Source: async () => {}\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 14");
+                """
+                        Keyword async is not allowed.
+                        Source: async () => {}
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 14""");
         assertException(
                 "async function a() {};",
                 JavetSanitizerError.KeywordNotAllowed,
-                "Keyword async is not allowed.\n" +
-                        "Source: async function a() {}\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 21");
+                """
+                        Keyword async is not allowed.
+                        Source: async function a() {}
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 21""");
         assertException(
                 "await a;",
                 JavetSanitizerError.KeywordNotAllowed,
-                "Keyword await is not allowed.\n" +
-                        "Source: await a\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 7");
+                """
+                        Keyword await is not allowed.
+                        Source: await a
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 7""");
         assertException(
                 "for await (const a of b) {}",
                 JavetSanitizerError.KeywordNotAllowed,
-                "Keyword await is not allowed.\n" +
-                        "Source: for await (const a of b) {}\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 27");
+                """
+                        Keyword await is not allowed.
+                        Source: for await (const a of b) {}
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 27""");
         assertException(
                 "await using a = b;",
                 JavetSanitizerError.KeywordNotAllowed,
-                "Keyword await is not allowed.\n" +
-                        "Source: await using a = b;\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 18");
+                """
+                        Keyword await is not allowed.
+                        Source: await using a = b;
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 18""");
         assertException(
                 "import a from 'a'; a;",
                 JavetSanitizerError.KeywordNotAllowed,
-                "Keyword import is not allowed.\n" +
-                        "Source: import a from 'a';\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 18");
+                """
+                        Keyword import is not allowed.
+                        Source: import a from 'a';
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 18""");
         assertException(
                 "a; import b from 'b';",
                 JavetSanitizerError.KeywordNotAllowed,
-                "Keyword import is not allowed.\n" +
-                        "Source: import b from 'b';\n" +
-                        "Line: 1\n" +
-                        "Column: 4\n" +
-                        "Start: 3\n" +
-                        "End: 21");
+                """
+                        Keyword import is not allowed.
+                        Source: import b from 'b';
+                        Line: 1
+                        Column: 4
+                        Start: 3
+                        End: 21""");
         assertException(
                 "a; export const b = a;",
                 JavetSanitizerError.KeywordNotAllowed,
-                "Keyword export is not allowed.\n" +
-                        "Source: export const b = a;\n" +
-                        "Line: 1\n" +
-                        "Column: 4\n" +
-                        "Start: 3\n" +
-                        "End: 22");
+                """
+                        Keyword export is not allowed.
+                        Source: export const b = a;
+                        Line: 1
+                        Column: 4
+                        Start: 3
+                        End: 22""");
     }
 
     @Test
@@ -153,7 +161,9 @@ public class TestJavetSanitizerModuleChecker extends BaseTestSuiteCheckers {
             }
         }
         {
-            String code = "import a from 'a';\nexport const b = a;";
+            String code = """
+                    import a from 'a';
+                    export const b = a;""";
             try {
                 checker.check(code);
                 assertEquals(1, moduleChecker.getExportNodes().size());
@@ -175,44 +185,50 @@ public class TestJavetSanitizerModuleChecker extends BaseTestSuiteCheckers {
         assertException(
                 "$a; const $b = 1;",
                 JavetSanitizerError.IdentifierNotAllowed,
-                "Identifier $b is not allowed.\n" +
-                        "Source: $b\n" +
-                        "Line: 1\n" +
-                        "Column: 11\n" +
-                        "Start: 10\n" +
-                        "End: 12");
+                """
+                        Identifier $b is not allowed.
+                        Source: $b
+                        Line: 1
+                        Column: 11
+                        Start: 10
+                        End: 12""");
         assertException(
                 "$b;",
                 JavetSanitizerError.IdentifierNotAllowed,
-                "Identifier $b is not allowed.\n" +
-                        "Source: $b\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 2");
+                """
+                        Identifier $b is not allowed.
+                        Source: $b
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 2""");
         assertException(
                 "const $a = 1;",
                 JavetSanitizerError.IdentifierNotAllowed,
-                "Identifier $a is not allowed.\n" +
-                        "Source: $a\n" +
-                        "Line: 1\n" +
-                        "Column: 7\n" +
-                        "Start: 6\n" +
-                        "End: 8");
+                """
+                        Identifier $a is not allowed.
+                        Source: $a
+                        Line: 1
+                        Column: 7
+                        Start: 6
+                        End: 8""");
     }
 
     @Test
     public void testShebang() throws JavetSanitizerException {
-        String codeString = "#!/bin/node\nconst a;";
+        String codeString = """
+                #!/bin/node
+                const a;""";
         assertException(
                 codeString,
                 JavetSanitizerError.InvalidNode,
-                "Shebang /bin/node is unexpected. Expecting Statement in Module.\n" +
-                        "Source: #!/bin/node\\nconst a;\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 20");
+                """
+                        Shebang /bin/node is unexpected. Expecting Statement in Module.
+                        Source: #!/bin/node\\nconst a;
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 20""");
         JavetSanitizerOptions options = checker.getOptions().toClone()
                 .setShebangEnabled(true)
                 .seal();
@@ -222,7 +238,7 @@ public class TestJavetSanitizerModuleChecker extends BaseTestSuiteCheckers {
 
     @Test
     public void testValidCases() throws JavetSanitizerException {
-        List<String> statements = SimpleList.of(
+        List<String> statements = List.of(
                 "() => 1", "() => {}", "(a, b) => {}",
                 "function a() {}", "{ a; b; }", "const a;",
                 "1", "'a'", "1 + 1", "a == b", "[1,2,3]", "x = { a: 1, b: 2, c: 3 }",

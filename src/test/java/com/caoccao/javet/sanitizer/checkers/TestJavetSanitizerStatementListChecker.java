@@ -45,35 +45,38 @@ public class TestJavetSanitizerStatementListChecker extends BaseTestSuiteChecker
         assertException(
                 "import a from 'a'; a;",
                 JavetSanitizerError.InvalidNode,
-                "Import Declaration is unexpected. Expecting Statement in Statement List.\n" +
-                        "Source: import a from 'a';\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 18");
+                """
+                        Import Declaration is unexpected. Expecting Statement in Statement List.
+                        Source: import a from 'a';
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 18""");
         assertException(
                 "a; import b from 'b';",
                 JavetSanitizerError.InvalidNode,
-                "Import Declaration is unexpected. Expecting Statement in Statement List.\n" +
-                        "Source: import b from 'b';\n" +
-                        "Line: 1\n" +
-                        "Column: 4\n" +
-                        "Start: 3\n" +
-                        "End: 21");
+                """
+                        Import Declaration is unexpected. Expecting Statement in Statement List.
+                        Source: import b from 'b';
+                        Line: 1
+                        Column: 4
+                        Start: 3
+                        End: 21""");
         assertException(
                 "export const a = {};",
                 JavetSanitizerError.InvalidNode,
-                "Export Declaration is unexpected. Expecting Statement in Statement List.\n" +
-                        "Source: export const a = {};\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 20");
+                """
+                        Export Declaration is unexpected. Expecting Statement in Statement List.
+                        Source: export const a = {};
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 20""");
     }
 
     @Test
     public void testValidCases() throws JavetSanitizerException {
-        List<String> statements = SimpleList.of(
+        List<String> statements = List.of(
                 "() => 1", "() => {}", "(a, b) => {}",
                 "function a() {}", "{ a; b; }", "const a;",
                 "1", "'a'", "1 + 1", "a == b", "[1,2,3]", "x = { a: 1, b: 2, c: 3 }",

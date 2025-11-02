@@ -33,14 +33,15 @@ public class Tutorial02TranspileJsx {
         // Create an instance of swc4j.
         Swc4j swc4j = new Swc4j();
         // Prepare a simple React Hello World Jsx code snippet.
-        String code = "import React from 'react';\n" +
-                "import './App.css';\n" +
-                "function App() {\n" +
-                "    return (\n" +
-                "        <h1> Hello World! </h1>\n" +
-                "    );\n" +
-                "}\n" +
-                "export default App;";
+        String code = """
+                import React from 'react';
+                import './App.css';
+                function App() {
+                    return (
+                        <h1> Hello World! </h1>
+                    );
+                }
+                export default App;""";
         // Prepare a script name.
         URL specifier = new URL("file:///abc.ts");
         // Prepare an option with script name and media type.

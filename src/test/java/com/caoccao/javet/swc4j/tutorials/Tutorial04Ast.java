@@ -39,17 +39,18 @@ public class Tutorial04Ast {
         // Create an instance of swc4j.
         Swc4j swc4j = new Swc4j();
         // Prepare a TypeScript code snippet.
-        String code = "import { Validator } from './Validator';\n" +
-                "\n" +
-                "class EmailValidator implements Validator {\n" +
-                "    isValid(s: string): boolean {\n" +
-                "        // This is a regex for email validation.\n" +
-                "        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n" +
-                "        return emailRegex.test(s);\n" +
-                "    }\n" +
-                "}\n" +
-                "\n" +
-                "export { EmailValidator };";
+        String code = """
+                import { Validator } from './Validator';
+                
+                class EmailValidator implements Validator {
+                    isValid(s: string): boolean {
+                        // This is a regex for email validation.
+                        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+                        return emailRegex.test(s);
+                    }
+                }
+                
+                export { EmailValidator };""";
         // Prepare a script name.
         URL specifier = new URL("file:///abc.ts");
         // Prepare an option with script name and media type.

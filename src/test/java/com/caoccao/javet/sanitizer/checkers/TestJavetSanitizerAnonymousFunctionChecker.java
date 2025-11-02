@@ -41,67 +41,74 @@ public class TestJavetSanitizerAnonymousFunctionChecker extends BaseTestSuiteChe
         assertException(
                 "function() {}",
                 JavetSanitizerError.ParsingError,
-                "Expected ident at file:///main.js:1:9\n" +
-                        "\n" +
-                        "  function() {}\n" +
-                        "          ~");
+                """
+                        Expected ident at file:///main.js:1:9
+                        
+                          function() {}
+                                  ~""");
         assertException(
                 "function(a, b) {}",
                 JavetSanitizerError.ParsingError,
-                "Expected ident at file:///main.js:1:9\n" +
-                        "\n" +
-                        "  function(a, b) {}\n" +
-                        "          ~");
+                """
+                        Expected ident at file:///main.js:1:9
+                        
+                          function(a, b) {}
+                                  ~""");
         assertException(
                 "function a() {}",
                 JavetSanitizerError.InvalidNode,
-                "Function Declaration is unexpected. Expecting Expression Statement in Anonymous Function.\n" +
-                        "Source: function a() {}\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 15");
+                """
+                        Function Declaration is unexpected. Expecting Expression Statement in Anonymous Function.
+                        Source: function a() {}
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 15""");
         assertException(
                 "const a;",
                 JavetSanitizerError.InvalidNode,
-                "Var Declaration is unexpected. Expecting Expression Statement in Anonymous Function.\n" +
-                        "Source: const a;\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 8");
+                """
+                        Var Declaration is unexpected. Expecting Expression Statement in Anonymous Function.
+                        Source: const a;
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 8""");
         assertException(
                 "(() => {})()",
                 JavetSanitizerError.InvalidNode,
-                "Call Expression is unexpected. Expecting Arrow Expression in Anonymous Function.\n" +
-                        "Source: (() => {})()\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 12");
+                """
+                        Call Expression is unexpected. Expecting Arrow Expression in Anonymous Function.
+                        Source: (() => {})()
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 12""");
         assertException(
                 "#!/bin/node\n() => {}",
                 JavetSanitizerError.InvalidNode,
-                "Shebang /bin/node is unexpected. Expecting Arrow Expression in Anonymous Function.\n" +
-                        "Source: #!/bin/node\\n() => {}\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 20");
+                """
+                        Shebang /bin/node is unexpected. Expecting Arrow Expression in Anonymous Function.
+                        Source: #!/bin/node\\n() => {}
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 20""");
         assertException(
                 "() => {}; const a;",
                 JavetSanitizerError.NodeCountTooLarge,
-                "AST node count 2 is greater than the maximal AST node count 1.\n" +
-                        "Source: () => {}; const a;\n" +
-                        "Line: 1\n" +
-                        "Column: 1\n" +
-                        "Start: 0\n" +
-                        "End: 18");
+                """
+                        AST node count 2 is greater than the maximal AST node count 1.
+                        Source: () => {}; const a;
+                        Line: 1
+                        Column: 1
+                        Start: 0
+                        End: 18""");
     }
 
     @Test
     public void testValidCases() throws JavetSanitizerException {
-        List<String> statements = SimpleList.of(
+        List<String> statements = List.of(
                 "() => 1", "() => {}", "(a, b) => { a + b; }");
         for (String statement : statements) {
             checker.check(statement);

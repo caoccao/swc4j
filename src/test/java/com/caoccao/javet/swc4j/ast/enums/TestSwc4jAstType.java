@@ -19,7 +19,6 @@ package com.caoccao.javet.swc4j.ast.enums;
 import com.caoccao.javet.swc4j.ast.Swc4jAstStore;
 import org.junit.jupiter.api.Test;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,7 +36,7 @@ public class TestSwc4jAstType {
             String relativeFilePath = clazz.getName().replace(".", "/") + Swc4jAstStore.JAVA_FILE_EXT;
             Path filePath = Swc4jAstStore.SOURCE_PATH.resolve(relativeFilePath);
             try {
-                String content = new String(Files.readAllBytes(filePath), StandardCharsets.UTF_8);
+                String content = Files.readString(filePath);
                 Matcher matcherReturnType = patternReturnType.matcher(content);
                 if (matcherReturnType.find()) {
                     String returnType = matcherReturnType.group(1);

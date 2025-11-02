@@ -72,8 +72,8 @@ public final class Swc4jAstStore {
     }
 
     private void init() {
-        try {
-            Files.walk(SOURCE_PATH.resolve("com/caoccao/javet/swc4j/ast"), FileVisitOption.FOLLOW_LINKS)
+        try (Stream<Path> stream = Files.walk(SOURCE_PATH.resolve("com/caoccao/javet/swc4j/ast"), FileVisitOption.FOLLOW_LINKS)) {
+            stream
                     .filter(p -> p.toFile().isFile())
                     .filter(p -> p.toFile().getName().endsWith(JAVA_FILE_EXT))
                     .map(SOURCE_PATH::relativize)

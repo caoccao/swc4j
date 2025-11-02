@@ -16,13 +16,11 @@
 
 package com.caoccao.javet.swc4j.jni2rust;
 
-import com.caoccao.javet.swc4j.utils.SimpleMap;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public class Jni2RustOptions {
-    protected static final Map<String, String> DEFAULT_JAVA_TYPE_TO_JNI_SIMPLE_TYPE_MAP = SimpleMap.of(
+    protected static final Map<String, String> DEFAULT_JAVA_TYPE_TO_JNI_SIMPLE_TYPE_MAP = Map.of(
             "int", "I",
             "long", "J",
             "short", "S",
@@ -31,7 +29,7 @@ public class Jni2RustOptions {
             "boolean", "Z",
             "float", "F",
             "double", "D");
-    protected static final Map<String, String> DEFAULT_JAVA_TYPE_TO_RUST_TYPE_MAP = SimpleMap.of(
+    protected static final Map<String, String> DEFAULT_JAVA_TYPE_TO_RUST_TYPE_MAP = Map.of(
             "int", "i32",
             "long", "i64",
             "short", "i16",

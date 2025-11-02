@@ -31,25 +31,26 @@ public class Tutorial03Tokens {
         // Create an instance of swc4j.
         Swc4j swc4j = new Swc4j();
         // Prepare a TypeScript code snippet.
-        String code = "function quickSort(arr: number[]): number[] {\n" +
-                "  if (arr.length <= 1) {\n" +
-                "    return arr;\n" +
-                "  }\n" +
-                "\n" +
-                "  const pivot = arr[arr.length - 1];\n" +
-                "  const leftArr = [];\n" +
-                "  const rightArr = [];\n" +
-                "\n" +
-                "  for (let i = 0; i < arr.length - 1; i++) {\n" +
-                "    if (arr[i] < pivot) {\n" +
-                "      leftArr.push(arr[i]);\n" +
-                "    } else {\n" +
-                "      rightArr.push(arr[i]);\n" +
-                "    }\n" +
-                "  }\n" +
-                "\n" +
-                "  return [...quickSort(leftArr), pivot, ...quickSort(rightArr)];\n" +
-                "}";
+        String code = """
+                function quickSort(arr: number[]): number[] {
+                  if (arr.length <= 1) {
+                    return arr;
+                  }
+                
+                  const pivot = arr[arr.length - 1];
+                  const leftArr = [];
+                  const rightArr = [];
+                
+                  for (let i = 0; i < arr.length - 1; i++) {
+                    if (arr[i] < pivot) {
+                      leftArr.push(arr[i]);
+                    } else {
+                      rightArr.push(arr[i]);
+                    }
+                  }
+                
+                  return [...quickSort(leftArr), pivot, ...quickSort(rightArr)];
+                }""";
         // Prepare a script name.
         URL specifier = new URL("file:///abc.ts");
         // Prepare an option with script name and media type.

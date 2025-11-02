@@ -39,7 +39,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -358,8 +357,7 @@ public class TestCodeGen {
                                     if (Optional.class.isAssignableFrom(fieldType)) {
                                         if (field.getGenericType() instanceof ParameterizedType) {
                                             Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                                            if (innerType instanceof Class) {
-                                                Class<?> innerClass = (Class<?>) innerType;
+                                            if (innerType instanceof Class<?> innerClass) {
                                                 if (ISwc4jAst.class.isAssignableFrom(innerClass)) {
                                                     String javaOptionalVar = String.format("java_optional_%s", arg);
                                                     args.add("&" + javaOptionalVar);
@@ -439,8 +437,7 @@ public class TestCodeGen {
                                             lines.add(String.format("    for node in self.%s.iter() {",
                                                     arg));
                                             Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                                            if (innerType instanceof Class) {
-                                                Class<?> innerClass = (Class<?>) innerType;
+                                            if (innerType instanceof Class<?> innerClass) {
                                                 if (ISwc4jAst.class.isAssignableFrom(innerClass)) {
                                                     lines.add("      let java_node = node.to_java_with_map(env, map)?;");
                                                     lines.add(String.format("      list_add(env, &%s, &java_node)?;", javaVar));
@@ -548,8 +545,7 @@ public class TestCodeGen {
                                     processLines.add(String.format("    let %s = if optional_is_present(env, &%s)? {",
                                             arg,
                                             javaOptionalVar));
-                                    if (innerType instanceof Class) {
-                                        Class<?> innerClass = (Class<?>) innerType;
+                                    if (innerType instanceof Class<?> innerClass) {
                                         if (ISwc4jAst.class.isAssignableFrom(innerClass) || innerClass.isEnum()) {
                                             processLines.add(String.format("      let %s = optional_get(env, &%s)?;",
                                                     javaVar,
@@ -633,8 +629,7 @@ public class TestCodeGen {
                                     processLines.add(String.format("    let length = list_size(env, &%s)?;",
                                             javaVar));
                                     Type innerType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                                    if (innerType instanceof Class) {
-                                        Class<?> innerClass = (Class<?>) innerType;
+                                    if (innerType instanceof Class<?> innerClass) {
                                         if (ISwc4jAst.class.isAssignableFrom(innerClass)) {
                                             Jni2RustClassUtils<?> innerJni2RustClassUtils = new Jni2RustClassUtils<>(innerClass);
                                             processLines.add(String.format("    let mut %s: Vec<%s> = Vec::with_capacity(length);",

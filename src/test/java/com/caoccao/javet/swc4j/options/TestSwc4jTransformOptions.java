@@ -30,14 +30,15 @@ public class TestSwc4jTransformOptions extends BaseTestSuite {
 
     @Test
     public void testJsxWithDefaultOptions() throws Swc4jCoreException {
-        String code = "import React from 'react';\n" +
-                "import './App.css';\n" +
-                "function App() {\n" +
-                "    return (\n" +
-                "        <h1> Hello World! </h1>\n" +
-                "    );\n" +
-                "}\n" +
-                "export default App;";
+        String code = """
+                import React from 'react';
+                import './App.css';
+                function App() {
+                    return (
+                        <h1> Hello World! </h1>
+                    );
+                }
+                export default App;""";
         String expectedCode = "import React from\"react\";import\"./App.css\";function App(){return(<h1> Hello World! </h1>);}export default App;\n";
         String expectedSourceMapPrefix = "//# sourceMappingURL=data:application/json;base64,";
         Swc4jTransformOutput output = swc4j.transform(code, jsxModuleTransformOptions);
@@ -72,9 +73,11 @@ public class TestSwc4jTransformOptions extends BaseTestSuite {
     @Test
     public void testTypeScriptWithoutMinifyAndSourceMap() throws Swc4jCoreException {
         String code = "function add(a:number, b:number) { return a+b; }";
-        String expectedCode = "function add(a: number, b: number) {\n" +
-                "  return a + b;\n" +
-                "}\n";
+        String expectedCode = """
+                function add(a: number, b: number) {
+                  return a + b;
+                }
+                """;
         Swc4jTransformOutput output = swc4j.transform(code, tsModuleTransformOptions
                 .setMinify(false)
                 .setSourceMap(Swc4jSourceMapOption.None));
@@ -88,9 +91,11 @@ public class TestSwc4jTransformOptions extends BaseTestSuite {
     @Test
     public void testTypeScriptWithoutMinifyWithSeparateSourceMap() throws Swc4jCoreException {
         String code = "function add(a:number, b:number) { return a+b; }";
-        String expectedCode = "function add(a: number, b: number) {\n" +
-                "  return a + b;\n" +
-                "}\n";
+        String expectedCode = """
+                function add(a: number, b: number) {
+                  return a + b;
+                }
+                """;
         Swc4jTransformOutput output = swc4j.transform(code, tsModuleTransformOptions
                 .setMinify(false)
                 .setSourceMap(Swc4jSourceMapOption.Separate));
@@ -105,10 +110,11 @@ public class TestSwc4jTransformOptions extends BaseTestSuite {
     public void testWrongMediaType() {
         String code = "function add(a:number, b:number) { return a+b; }";
         assertEquals(
-                "Expected ',', got ':' at file:///main.js:1:15\n" +
-                        "\n" +
-                        "  function add(a:number, b:number) { return a+b; }\n" +
-                        "                ~",
+                """
+                        Expected ',', got ':' at file:///main.js:1:15
+                        
+                          function add(a:number, b:number) { return a+b; }
+                                        ~""",
                 assertThrows(
                         Swc4jCoreException.class,
                         () -> swc4j.transform(code, jsModuleTransformOptions))

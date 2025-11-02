@@ -53,12 +53,11 @@ public class TestAstToSvg {
                 });
         File file = new File(OSUtils.WORKING_DIRECTORY, "docs/features/ast.dot");
         byte[] originalBuffer = Files.readAllBytes(file.toPath());
-        StringBuilder sb = new StringBuilder();
-        sb.append("digraph {\n");
-        sb.append("  rankdir=\"LR\"\n");
-        sb.append(StringUtils.join("\n", astToSvg.getLines()));
-        sb.append("\n}");
-        byte[] newBuffer = sb.toString().getBytes(StandardCharsets.UTF_8);
+        String content = "digraph {\n" +
+                "  rankdir=\"LR\"\n" +
+                StringUtils.join("\n", astToSvg.getLines()) +
+                "\n}";
+        byte[] newBuffer = content.getBytes(StandardCharsets.UTF_8);
         if (!Arrays.equals(originalBuffer, newBuffer)) {
             // Only generate document when content is changed.
             Files.write(file.toPath(), newBuffer, StandardOpenOption.TRUNCATE_EXISTING);
