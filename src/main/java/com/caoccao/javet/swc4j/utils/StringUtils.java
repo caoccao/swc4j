@@ -111,41 +111,6 @@ public final class StringUtils {
     }
 
     /**
-     * Join string.
-     *
-     * @param delimiter the delimiter
-     * @param elements  the elements
-     * @return the string
-     * @since 0.1.0
-     */
-    public static String join(CharSequence delimiter, CharSequence... elements) {
-        StringJoiner stringJoiner = new StringJoiner(Objects.requireNonNull(delimiter));
-        for (CharSequence cs : Objects.requireNonNull(elements)) {
-            stringJoiner.add(cs);
-        }
-        return stringJoiner.toString();
-    }
-
-    /**
-     * Repeat string.
-     *
-     * @param str   the str
-     * @param count the count
-     * @return the string
-     * @since 0.2.0
-     */
-    public static String repeat(String str, int count) {
-        if (count <= 0 || isEmpty(str)) {
-            return EMPTY;
-        }
-        StringBuilder sb = new StringBuilder(str.length() * count);
-        for (int i = 0; i < count; ++i) {
-            sb.append(str);
-        }
-        return sb.toString();
-    }
-
-    /**
      * String.prototype.slice()
      * The slice() method of String values extracts a section of this string and returns it as a new string,
      * without modifying the original string.

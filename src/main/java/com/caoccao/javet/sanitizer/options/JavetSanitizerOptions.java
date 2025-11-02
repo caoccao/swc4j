@@ -49,19 +49,19 @@ public class JavetSanitizerOptions {
      *
      * @since 0.7.0
      */
-    public static final Set<String> DEFAULT_RESERVED_FUNCTION_IDENTIFIER_SET = SimpleSet.immutableOf("main");
+    public static final Set<String> DEFAULT_RESERVED_FUNCTION_IDENTIFIER_SET = Set.of("main");
     /**
      * Default reserved identifier set.
      *
      * @since 0.7.0
      */
-    public static final Set<String> DEFAULT_RESERVED_IDENTIFIER_SET = SimpleSet.immutableOf();
+    public static final Set<String> DEFAULT_RESERVED_IDENTIFIER_SET = Set.of();
     /**
      * Default reserved mutable identifier set.
      *
      * @since 0.7.0
      */
-    public static final Set<String> DEFAULT_RESERVED_MUTABLE_IDENTIFIER_SET = SimpleSet.immutableOf();
+    public static final Set<String> DEFAULT_RESERVED_MUTABLE_IDENTIFIER_SET = Set.of();
     /**
      * The Built-in object set.
      *
@@ -74,7 +74,7 @@ public class JavetSanitizerOptions {
      *
      * @since 0.7.0
      */
-    public static final Set<String> DEFAULT_BUILT_IN_OBJECT_SET = SimpleSet.immutableOf(
+    public static final Set<String> DEFAULT_BUILT_IN_OBJECT_SET = Set.of(
             "AbortController", "AbortSignal", "AggregateError", "Array", "ArrayBuffer", "Atomics",
             "BigInt", "BigInt64Array", "BigUint64Array", "Boolean", "Buffer",
             "DataView", "Date", "Decimal",
@@ -122,7 +122,7 @@ public class JavetSanitizerOptions {
      *
      * @since 0.7.0
      */
-    public static final Set<String> DEFAULT_DISALLOWED_IDENTIFIER_SET = SimpleSet.immutableOf(
+    public static final Set<String> DEFAULT_DISALLOWED_IDENTIFIER_SET = Set.of(
             "__proto__",
             "apply", "AsyncFunction", "AsyncGenerator", "AsyncGeneratorFunction",
             "bind",
@@ -158,7 +158,7 @@ public class JavetSanitizerOptions {
      *
      * @since 0.7.0
      */
-    public static final List<String> DEFAULT_TO_BE_DELETED_OBJECT_LIST = SimpleList.immutableOf(
+    public static final List<String> DEFAULT_TO_BE_DELETED_OBJECT_LIST = List.of(
             "eval",
             "Function",
             "WebAssembly");
@@ -167,7 +167,7 @@ public class JavetSanitizerOptions {
      *
      * @since 0.7.0
      */
-    public static final List<String> DEFAULT_TO_BE_FROZEN_OBJECT_LIST = SimpleList.immutableOf(
+    public static final List<String> DEFAULT_TO_BE_FROZEN_OBJECT_LIST = List.of(
             "Object", // Object must be the first.
             "AggregateError",
             "Array",

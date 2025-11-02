@@ -42,30 +42,14 @@ public final class SimpleJsonUtils {
         StringBuilder sb = new StringBuilder(str.length());
         for (char c : str.toCharArray()) {
             switch (c) {
-                case '"':
-                    sb.append("\\\"");
-                    break;
-                case '\\':
-                    sb.append("\\\\");
-                    break;
-                case '\b':
-                    sb.append("\\b");
-                    break;
-                case '\f':
-                    sb.append("\\f");
-                    break;
-                case '\n':
-                    sb.append("\\n");
-                    break;
-                case '\r':
-                    sb.append("\\r");
-                    break;
-                case '\t':
-                    sb.append("\\t");
-                    break;
-                default:
-                    sb.append(c);
-                    break;
+                case '"' -> sb.append("\\\"");
+                case '\\' -> sb.append("\\\\");
+                case '\b' -> sb.append("\\b");
+                case '\f' -> sb.append("\\f");
+                case '\n' -> sb.append("\\n");
+                case '\r' -> sb.append("\\r");
+                case '\t' -> sb.append("\\t");
+                default -> sb.append(c);
             }
         }
         return sb.toString();
@@ -100,62 +84,41 @@ public final class SimpleJsonUtils {
         final char c = jsonString.charAt(context.getOffset());
         final JsonToken jsonToken;
         switch (c) {
-            case ' ':
-            case '\t':
-            case '\r':
-            case '\n':
+            case ' ', '\t', '\r', '\n' -> {
                 skipWhiteSpaces(jsonString, context);
                 jsonToken = extractNextToken(jsonString, context);
-                break;
-            case '"':
-                jsonToken = extractString(jsonString, context);
-                break;
-            case '-':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                jsonToken = extractNumber(jsonString, context);
-                break;
-            case 't':
-                jsonToken = extractBooleanTrue(jsonString, context);
-                break;
-            case 'f':
-                jsonToken = extractBooleanFalse(jsonString, context);
-                break;
-            case '{':
+            }
+            case '"' -> jsonToken = extractString(jsonString, context);
+            case '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->
+                    jsonToken = extractNumber(jsonString, context);
+            case 't' -> jsonToken = extractBooleanTrue(jsonString, context);
+            case 'f' -> jsonToken = extractBooleanFalse(jsonString, context);
+            case '{' -> {
                 jsonToken = JsonToken.OBJECT_START;
                 context.addOffset(jsonToken.getLength());
-                break;
-            case '}':
+            }
+            case '}' -> {
                 jsonToken = JsonToken.OBJECT_END;
                 context.addOffset(jsonToken.getLength());
-                break;
-            case '[':
+            }
+            case '[' -> {
                 jsonToken = JsonToken.ARRAY_START;
                 context.addOffset(jsonToken.getLength());
-                break;
-            case ']':
+            }
+            case ']' -> {
                 jsonToken = JsonToken.ARRAY_END;
                 context.addOffset(jsonToken.getLength());
-                break;
-            case ',':
+            }
+            case ',' -> {
                 jsonToken = JsonToken.COMMA;
                 context.addOffset(jsonToken.getLength());
-                break;
-            case ':':
+            }
+            case ':' -> {
                 jsonToken = JsonToken.COLON;
                 context.addOffset(jsonToken.getLength());
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "Invalid JSON string: unexpected char " + c + " at " + context.getOffset());
+            }
+            default -> throw new IllegalArgumentException(
+                    "Invalid JSON string: unexpected char " + c + " at " + context.getOffset());
         }
         return jsonToken;
     }
@@ -182,31 +145,15 @@ public final class SimpleJsonUtils {
                     context.addOffset(1);
                     char next = jsonString.charAt(context.getOffset());
                     switch (next) {
-                        case '"':
-                            sb.append('"');
-                            break;
-                        case '\\':
-                            sb.append('\\');
-                            break;
-                        case '/':
-                            sb.append('/');
-                            break;
-                        case 'b':
-                            sb.append('\b');
-                            break;
-                        case 'f':
-                            sb.append('\f');
-                            break;
-                        case 'n':
-                            sb.append('\n');
-                            break;
-                        case 'r':
-                            sb.append('\r');
-                            break;
-                        case 't':
-                            sb.append('\t');
-                            break;
-                        case 'u':
+                        case '"' -> sb.append('"');
+                        case '\\' -> sb.append('\\');
+                        case '/' -> sb.append('/');
+                        case 'b' -> sb.append('\b');
+                        case 'f' -> sb.append('\f');
+                        case 'n' -> sb.append('\n');
+                        case 'r' -> sb.append('\r');
+                        case 't' -> sb.append('\t');
+                        case 'u' -> {
                             if (context.getOffset() + 5 < length) {
                                 String hex = jsonString.substring(context.getOffset() + 1, context.getOffset() + 5);
                                 try {
@@ -221,10 +168,9 @@ public final class SimpleJsonUtils {
                                 throw new IllegalArgumentException(
                                         "Invalid JSON string: incomplete unicode escape sequence at end of string at " + context.getOffset());
                             }
-                            break;
-                        default:
-                            throw new IllegalArgumentException(
-                                    "Invalid JSON string: invalid escape sequence \\" + next + " at " + context.getOffset());
+                        }
+                        default -> throw new IllegalArgumentException(
+                                "Invalid JSON string: invalid escape sequence \\" + next + " at " + context.getOffset());
                     }
                     context.addOffset(1);
                 } else {
@@ -251,21 +197,15 @@ public final class SimpleJsonUtils {
 
     private static JsonNode parse(String jsonString, JsonParserContext context) {
         JsonToken jsonToken = extractNextToken(jsonString, context);
-        switch (jsonToken.getType()) {
-            case ArrayStart:
-                return parseArray(jsonString, context);
-            case Boolean:
-                return JsonBooleanNode.of(jsonToken);
-            case Number:
-                return JsonNumberNode.of(jsonToken.getRawString());
-            case ObjectStart:
-                return parseObject(jsonString, context);
-            case Text:
-                return JsonTextNode.of(jsonToken.getRawString());
-            default:
-                throw new IllegalArgumentException(
-                        "Invalid JSON string: expect { or [ at " + context.getOffset());
-        }
+        return switch (jsonToken.getType()) {
+            case ArrayStart -> parseArray(jsonString, context);
+            case Boolean -> JsonBooleanNode.of(jsonToken);
+            case Number -> JsonNumberNode.of(jsonToken.getRawString());
+            case ObjectStart -> parseObject(jsonString, context);
+            case Text -> JsonTextNode.of(jsonToken.getRawString());
+            default -> throw new IllegalArgumentException(
+                    "Invalid JSON string: expect { or [ at " + context.getOffset());
+        };
     }
 
     private static JsonArrayNode parseArray(String jsonString, JsonParserContext context) {
@@ -277,24 +217,13 @@ public final class SimpleJsonUtils {
                 break;
             }
             switch (jsonToken.getType()) {
-                case ArrayStart:
-                    jsonArrayNode.getNodes().add(parseArray(jsonString, context));
-                    break;
-                case Boolean:
-                    jsonArrayNode.getNodes().add(JsonBooleanNode.of(jsonToken));
-                    break;
-                case Number:
-                    jsonArrayNode.getNodes().add(JsonNumberNode.of(jsonToken.getRawString()));
-                    break;
-                case ObjectStart:
-                    jsonArrayNode.getNodes().add(parseObject(jsonString, context));
-                    break;
-                case Text:
-                    jsonArrayNode.getNodes().add(JsonTextNode.of(jsonToken.getRawString()));
-                    break;
-                default:
-                    throw new IllegalArgumentException(
-                            "Invalid JSON string: unexpected " + jsonToken.getRawString() + " at " + context.getOffset());
+                case ArrayStart -> jsonArrayNode.getNodes().add(parseArray(jsonString, context));
+                case Boolean -> jsonArrayNode.getNodes().add(JsonBooleanNode.of(jsonToken));
+                case Number -> jsonArrayNode.getNodes().add(JsonNumberNode.of(jsonToken.getRawString()));
+                case ObjectStart -> jsonArrayNode.getNodes().add(parseObject(jsonString, context));
+                case Text -> jsonArrayNode.getNodes().add(JsonTextNode.of(jsonToken.getRawString()));
+                default -> throw new IllegalArgumentException(
+                        "Invalid JSON string: unexpected " + jsonToken.getRawString() + " at " + context.getOffset());
             }
             jsonToken = extractNextToken(jsonString, context);
             if (jsonToken.getType() == JsonTokenType.ArrayEnd) {
@@ -327,24 +256,14 @@ public final class SimpleJsonUtils {
             }
             jsonToken = extractNextToken(jsonString, context);
             switch (jsonToken.getType()) {
-                case ArrayStart:
-                    jsonObjectNode.getNodeMap().put(propertyName, parseArray(jsonString, context));
-                    break;
-                case Boolean:
-                    jsonObjectNode.getNodeMap().put(propertyName, JsonBooleanNode.of(jsonToken));
-                    break;
-                case Number:
-                    jsonObjectNode.getNodeMap().put(propertyName, JsonNumberNode.of(jsonToken.getRawString()));
-                    break;
-                case ObjectStart:
-                    jsonObjectNode.getNodeMap().put(propertyName, parseObject(jsonString, context));
-                    break;
-                case Text:
-                    jsonObjectNode.getNodeMap().put(propertyName, JsonTextNode.of(jsonToken.getRawString()));
-                    break;
-                default:
-                    throw new IllegalArgumentException(
-                            "Invalid JSON string: unexpected " + jsonToken.getRawString() + " at " + context.getOffset());
+                case ArrayStart -> jsonObjectNode.getNodeMap().put(propertyName, parseArray(jsonString, context));
+                case Boolean -> jsonObjectNode.getNodeMap().put(propertyName, JsonBooleanNode.of(jsonToken));
+                case Number ->
+                        jsonObjectNode.getNodeMap().put(propertyName, JsonNumberNode.of(jsonToken.getRawString()));
+                case ObjectStart -> jsonObjectNode.getNodeMap().put(propertyName, parseObject(jsonString, context));
+                case Text -> jsonObjectNode.getNodeMap().put(propertyName, JsonTextNode.of(jsonToken.getRawString()));
+                default -> throw new IllegalArgumentException(
+                        "Invalid JSON string: unexpected " + jsonToken.getRawString() + " at " + context.getOffset());
             }
             jsonToken = extractNextToken(jsonString, context);
             if (jsonToken.getType() == JsonTokenType.ObjectEnd) {
@@ -366,15 +285,8 @@ public final class SimpleJsonUtils {
         while (hasMore && context.getOffset() < length) {
             char c = jsonString.charAt(context.getOffset());
             switch (c) {
-                case ' ':
-                case '\t':
-                case '\r':
-                case '\n':
-                    context.addOffset(1);
-                    break;
-                default:
-                    hasMore = false;
-                    break;
+                case ' ', '\t', '\r', '\n' -> context.addOffset(1);
+                default -> hasMore = false;
             }
         }
     }

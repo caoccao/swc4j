@@ -71,7 +71,7 @@ public class Swc4jDefaultLogger implements ISwc4jLogger {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             try (PrintStream printStream = new PrintStream(byteArrayOutputStream)) {
                 cause.printStackTrace(printStream);
-                logger.severe(byteArrayOutputStream.toString(StandardCharsets.UTF_8.name()));
+                logger.severe(byteArrayOutputStream.toString(StandardCharsets.UTF_8));
             }
         } catch (IOException ignored) {
         }

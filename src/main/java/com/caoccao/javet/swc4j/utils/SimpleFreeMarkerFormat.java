@@ -54,71 +54,54 @@ public final class SimpleFreeMarkerFormat {
         for (int i = 0; i < length; ++i) {
             final char c = format.charAt(i);
             switch (c) {
-                case CHAR_DOLLAR:
+                case CHAR_DOLLAR -> {
                     switch (state) {
-                        case Text:
-                            state = State.Dollar;
-                            break;
-                        case Dollar:
+                        case Text -> state = State.Dollar;
+                        case Dollar -> {
                             state = State.Text;
                             stringBuilderMessage.append(CHAR_DOLLAR).append(c);
-                            break;
-                        case Variable:
-                            stringBuilderVariable.append(c);
-                            break;
-                    }
-                    break;
-                case CHAR_VARIABLE_OPEN:
-                    switch (state) {
-                        case Dollar:
-                            state = State.Variable;
-                            break;
-                        case Variable:
-                            stringBuilderVariable.append(c);
-                            break;
-                        default:
-                            state = State.Text;
-                            stringBuilderMessage.append(c);
-                            break;
-                    }
-                    break;
-                case CHAR_VARIABLE_CLOSE:
-                    if (state == State.Variable) {
-                        String variableName = stringBuilderVariable.toString();
-                        Object parameter = parameters.get(variableName);
-                        if (parameter == null) {
-                            parameter = STRING_NULL;
                         }
-                        stringBuilderMessage.append(parameter);
-                        stringBuilderVariable.setLength(0);
-                        state = State.Text;
-                    } else {
-                        stringBuilderMessage.append(c);
+                        case Variable -> stringBuilderVariable.append(c);
                     }
-                    break;
-                default:
+                }
+                case CHAR_VARIABLE_OPEN -> {
                     switch (state) {
-                        case Dollar:
+                        case Dollar -> state = State.Variable;
+                        case Variable -> stringBuilderVariable.append(c);
+                        case Text -> stringBuilderMessage.append(c);
+                    }
+                }
+                case CHAR_VARIABLE_CLOSE -> {
+                    switch (state) {
+                        case Variable -> {
+                            String variableName = stringBuilderVariable.toString();
+                            Object parameter = parameters.get(variableName);
+                            if (parameter == null) {
+                                parameter = STRING_NULL;
+                            }
+                            stringBuilderMessage.append(parameter);
+                            stringBuilderVariable.setLength(0);
+                            state = State.Text;
+                        }
+                        default -> stringBuilderMessage.append(c);
+                    }
+                }
+                default -> {
+                    switch (state) {
+                        case Dollar -> {
                             state = State.Text;
                             stringBuilderMessage.append(CHAR_DOLLAR).append(c);
-                            break;
-                        case Variable:
-                            stringBuilderVariable.append(c);
-                            break;
-                        default:
-                            stringBuilderMessage.append(c);
-                            break;
+                        }
+                        case Text -> stringBuilderMessage.append(c);
+                        case Variable -> stringBuilderVariable.append(c);
                     }
-                    break;
+                }
             }
         }
         switch (state) {
-            case Dollar:
-                stringBuilderMessage.append(CHAR_DOLLAR);
-                break;
-            case Variable:
-                stringBuilderMessage.append(CHAR_DOLLAR).append(CHAR_VARIABLE_OPEN).append(stringBuilderVariable);
-                break;
+            case Dollar -> stringBuilderMessage.append(CHAR_DOLLAR);
+            case Variable ->
+                    stringBuilderMessage.append(CHAR_DOLLAR).append(CHAR_VARIABLE_OPEN).append(stringBuilderVariable);
         }
         return stringBuilderMessage.toString();
     }

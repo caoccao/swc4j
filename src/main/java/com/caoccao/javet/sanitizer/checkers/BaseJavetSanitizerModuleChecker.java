@@ -22,7 +22,6 @@ import com.caoccao.javet.sanitizer.options.JavetSanitizerOptions;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstModuleDecl;
 import com.caoccao.javet.swc4j.ast.module.*;
-import com.caoccao.javet.swc4j.utils.SimpleSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +38,7 @@ public abstract class BaseJavetSanitizerModuleChecker extends BaseJavetSanitizer
      *
      * @since 0.7.0
      */
-    protected static final Set<Class<? extends ISwc4jAst>> EXPORT_CLASSES = SimpleSet.immutableOf(
+    protected static final Set<Class<? extends ISwc4jAst>> EXPORT_CLASSES = Set.of(
             Swc4jAstExportAll.class,
             Swc4jAstExportDecl.class,
             Swc4jAstExportDefaultDecl.class,
@@ -52,7 +51,7 @@ public abstract class BaseJavetSanitizerModuleChecker extends BaseJavetSanitizer
      *
      * @since 0.7.0
      */
-    protected static final Set<Class<? extends ISwc4jAst>> IMPORT_CLASSES = SimpleSet.immutableOf(
+    protected static final Set<Class<? extends ISwc4jAst>> IMPORT_CLASSES = Set.of(
             Swc4jAstImportDecl.class,
             Swc4jAstTsImportEqualsDecl.class);
 

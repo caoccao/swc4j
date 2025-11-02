@@ -65,15 +65,13 @@ public class Swc4jTokenTextValueFlags<T> extends Swc4jTokenTextValue<T> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{ \"lineBreakAhead\": ").append(lineBreakAhead);
-        sb.append(", \"start\": ").append(span.getStart());
-        sb.append(", \"end\": ").append(span.getEnd());
-        sb.append(", \"type\": \"").append(type.name()).append("\"");
-        sb.append(", \"text\": \"").append(SimpleJsonUtils.escape(getText())).append("\"");
-        sb.append(", \"value\": \"").append(SimpleJsonUtils.escape(String.valueOf(getValue()))).append("\"");
-        sb.append(", \"flags\": \"").append(SimpleJsonUtils.escape(String.valueOf(getFlags()))).append("\"");
-        sb.append(" }");
-        return sb.toString();
+        return "{ \"lineBreakAhead\": " + lineBreakAhead +
+                ", \"start\": " + span.getStart() +
+                ", \"end\": " + span.getEnd() +
+                ", \"type\": \"" + type.name() + "\"" +
+                ", \"text\": \"" + SimpleJsonUtils.escape(getText()) + "\"" +
+                ", \"value\": \"" + SimpleJsonUtils.escape(String.valueOf(getValue())) + "\"" +
+                ", \"flags\": \"" + SimpleJsonUtils.escape(String.valueOf(getFlags())) + "\"" +
+                " }";
     }
 }

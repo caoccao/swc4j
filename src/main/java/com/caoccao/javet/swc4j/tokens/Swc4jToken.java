@@ -105,12 +105,10 @@ public class Swc4jToken {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{ \"lineBreakAhead\": ").append(lineBreakAhead);
-        sb.append(", \"span\": ").append(span);
-        sb.append(", \"type\": \"").append(type.name()).append("\"");
-        sb.append(", \"text\": \"").append(SimpleJsonUtils.escape(getText())).append("\"");
-        sb.append(" }");
-        return sb.toString();
+        return "{ \"lineBreakAhead\": " + lineBreakAhead +
+                ", \"span\": " + span +
+                ", \"type\": \"" + type.name() + "\"" +
+                ", \"text\": \"" + SimpleJsonUtils.escape(getText()) + "\"" +
+                " }";
     }
 }

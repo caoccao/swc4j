@@ -69,30 +69,6 @@ public final class SimpleList {
     }
 
     /**
-     * Immutable of list.
-     *
-     * @param <T> the type parameter
-     * @return the immutable list
-     * @since 0.2.0
-     */
-    public static <T> List<T> immutableOf() {
-        return immutable(of());
-    }
-
-    /**
-     * Immutable of list.
-     *
-     * @param <T>     the type parameter
-     * @param objects the objects
-     * @return the immutable list
-     * @since 0.2.0
-     */
-    @SafeVarargs
-    public static <T> List<T> immutableOf(T... objects) {
-        return immutable(of(objects));
-    }
-
-    /**
      * Of list.
      *
      * @param <T> the type parameter

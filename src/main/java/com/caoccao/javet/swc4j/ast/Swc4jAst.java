@@ -21,7 +21,6 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustField;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.ReflectionUtils;
-import com.caoccao.javet.swc4j.utils.SimpleList;
 import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.lang.reflect.Modifier;
@@ -41,7 +40,7 @@ public abstract class Swc4jAst implements ISwc4jAst {
      *
      * @since 0.2.0
      */
-    protected static final List<ISwc4jAst> EMPTY_CHILD_NODES = SimpleList.immutableOf();
+    protected static final List<ISwc4jAst> EMPTY_CHILD_NODES = List.of();
     /**
      * The constant INDENT_STRING.
      *
@@ -105,7 +104,7 @@ public abstract class Swc4jAst implements ISwc4jAst {
             name = name.trim() + " ";
         }
         lines.add(String.format("%s%s%s (%d,%d,%d,%d)",
-                StringUtils.repeat(INDENT_STRING, indent),
+                INDENT_STRING.repeat(indent),
                 name,
                 getType().name(),
                 span.getStart(),
@@ -147,21 +146,21 @@ public abstract class Swc4jAst implements ISwc4jAst {
                                     } else {
                                         value = String.valueOf(value);
                                         lines.add(String.format("%s%s[%d]? = %s",
-                                                StringUtils.repeat(INDENT_STRING, newIndent),
+                                                INDENT_STRING.repeat(newIndent),
                                                 field.getName(),
                                                 i,
                                                 value));
                                     }
                                 } else {
                                     lines.add(String.format("%s%s[%d]? = null",
-                                            StringUtils.repeat(INDENT_STRING, newIndent),
+                                            INDENT_STRING.repeat(newIndent),
                                             field.getName(),
                                             i));
                                 }
                             } else {
                                 value = String.valueOf(o);
                                 lines.add(String.format("%s%s[%d] = %s",
-                                        StringUtils.repeat(INDENT_STRING, newIndent),
+                                        INDENT_STRING.repeat(newIndent),
                                         field.getName(),
                                         i,
                                         value));
@@ -184,7 +183,7 @@ public abstract class Swc4jAst implements ISwc4jAst {
                                     } else {
                                         value = String.valueOf(o);
                                         lines.add(String.format("%s%s?[%d] = %s",
-                                                StringUtils.repeat(INDENT_STRING, newIndent),
+                                                INDENT_STRING.repeat(newIndent),
                                                 field.getName(),
                                                 i,
                                                 value));
@@ -193,20 +192,20 @@ public abstract class Swc4jAst implements ISwc4jAst {
                                 }
                             } else {
                                 lines.add(String.format("%s%s? = %s",
-                                        StringUtils.repeat(INDENT_STRING, newIndent),
+                                        INDENT_STRING.repeat(newIndent),
                                         field.getName(),
                                         value));
                             }
                         } else {
                             lines.add(String.format("%s%s? = null",
-                                    StringUtils.repeat(INDENT_STRING, newIndent),
+                                    INDENT_STRING.repeat(newIndent),
                                     field.getName()));
                         }
                     } else if (value instanceof Swc4jAst) {
                         ((Swc4jAst) value).toDebugString(lines, field.getName(), newIndent);
                     } else {
                         lines.add(String.format("%s%s = %s",
-                                StringUtils.repeat(INDENT_STRING, newIndent),
+                                INDENT_STRING.repeat(newIndent),
                                 field.getName(),
                                 value));
                     }
