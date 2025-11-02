@@ -79,12 +79,12 @@ public class Swc4jAstTsInstantiation
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (expr == oldNode && newNode instanceof ISwc4jAstExpr) {
-            setExpr((ISwc4jAstExpr) newNode);
+        if (expr == oldNode && newNode instanceof ISwc4jAstExpr newExpr) {
+            setExpr(newExpr);
             return true;
         }
-        if (typeArgs == oldNode && newNode instanceof Swc4jAstTsTypeParamInstantiation) {
-            setTypeArgs((Swc4jAstTsTypeParamInstantiation) newNode);
+        if (typeArgs == oldNode && newNode instanceof Swc4jAstTsTypeParamInstantiation newTypeArgs) {
+            setTypeArgs(newTypeArgs);
             return true;
         }
         return false;
@@ -104,13 +104,10 @@ public class Swc4jAstTsInstantiation
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsInstantiation(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsInstantiation(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

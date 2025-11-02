@@ -103,22 +103,22 @@ public class Swc4jAstJsxFragment
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (!children.isEmpty() && newNode instanceof ISwc4jAstJsxElementChild) {
+        if (!children.isEmpty() && newNode instanceof ISwc4jAstJsxElementChild newChild) {
             final int size = children.size();
             for (int i = 0; i < size; i++) {
                 if (children.get(i) == oldNode) {
-                    children.set(i, (ISwc4jAstJsxElementChild) newNode);
+                    children.set(i, newChild);
                     newNode.setParent(this);
                     return true;
                 }
             }
         }
-        if (closing == oldNode && newNode instanceof Swc4jAstJsxClosingFragment) {
-            setClosing((Swc4jAstJsxClosingFragment) newNode);
+        if (closing == oldNode && newNode instanceof Swc4jAstJsxClosingFragment newClosing) {
+            setClosing(newClosing);
             return true;
         }
-        if (opening == oldNode && newNode instanceof Swc4jAstJsxOpeningFragment) {
-            setOpening((Swc4jAstJsxOpeningFragment) newNode);
+        if (opening == oldNode && newNode instanceof Swc4jAstJsxOpeningFragment newOpening) {
+            setOpening(newOpening);
             return true;
         }
         return false;
@@ -138,13 +138,10 @@ public class Swc4jAstJsxFragment
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitJsxFragment(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitJsxFragment(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

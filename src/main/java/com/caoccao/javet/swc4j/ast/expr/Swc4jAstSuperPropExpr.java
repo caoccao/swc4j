@@ -77,12 +77,12 @@ public class Swc4jAstSuperPropExpr
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (obj == oldNode && newNode instanceof Swc4jAstSuper) {
-            setObj((Swc4jAstSuper) newNode);
+        if (obj == oldNode && newNode instanceof Swc4jAstSuper newObj) {
+            setObj(newObj);
             return true;
         }
-        if (prop == oldNode && newNode instanceof ISwc4jAstSuperProp) {
-            setProp((ISwc4jAstSuperProp) newNode);
+        if (prop == oldNode && newNode instanceof ISwc4jAstSuperProp newProp) {
+            setProp(newProp);
             return true;
         }
         return false;
@@ -102,13 +102,10 @@ public class Swc4jAstSuperPropExpr
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitSuperPropExpr(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitSuperPropExpr(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

@@ -76,12 +76,12 @@ public class Swc4jAstJsxMemberExpr
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (obj == oldNode && newNode instanceof ISwc4jAstJsxObject) {
-            setObj((ISwc4jAstJsxObject) newNode);
+        if (obj == oldNode && newNode instanceof ISwc4jAstJsxObject newObj) {
+            setObj(newObj);
             return true;
         }
-        if (prop == oldNode && newNode instanceof Swc4jAstIdentName) {
-            setProp((Swc4jAstIdentName) newNode);
+        if (prop == oldNode && newNode instanceof Swc4jAstIdentName newProp) {
+            setProp(newProp);
             return true;
         }
         return false;
@@ -101,13 +101,10 @@ public class Swc4jAstJsxMemberExpr
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitJsxMemberExpr(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitJsxMemberExpr(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

@@ -248,7 +248,7 @@ public class Swc4jAstBinExpr
     }
 
     public int getBangCount() {
-        if (!bangCount.isPresent()) {
+        if (bangCount.isEmpty()) {
             bangCount = Optional.of(getBangCount(getParent()));
         }
         return bangCount.get();
@@ -265,7 +265,7 @@ public class Swc4jAstBinExpr
     }
 
     public int getLogicalOperatorCount() {
-        if (!logicalOperatorCount.isPresent()) {
+        if (logicalOperatorCount.isEmpty()) {
             logicalOperatorCount = Optional.of(getLogicalOperatorCount(getParent()));
         }
         return logicalOperatorCount.get();
@@ -296,14 +296,11 @@ public class Swc4jAstBinExpr
     }
 
     protected Swc4jAstBinExpr getParentBinExpr(ISwc4jAst ast) {
-        switch (ast.getType()) {
-            case BinExpr:
-                return ast.as(Swc4jAstBinExpr.class);
-            case ParenExpr:
-                return getParentBinExpr(ast.getParent());
-            default:
-                return null;
-        }
+        return switch (ast.getType()) {
+            case BinExpr -> ast.as(Swc4jAstBinExpr.class);
+            case ParenExpr -> getParentBinExpr(ast.getParent());
+            default -> null;
+        };
     }
 
     @Jni2RustMethod
@@ -318,12 +315,12 @@ public class Swc4jAstBinExpr
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (left == oldNode && newNode instanceof ISwc4jAstExpr) {
-            setLeft((ISwc4jAstExpr) newNode);
+        if (left == oldNode && newNode instanceof ISwc4jAstExpr newLeft) {
+            setLeft(newLeft);
             return true;
         }
-        if (right == oldNode && newNode instanceof ISwc4jAstExpr) {
-            setRight((ISwc4jAstExpr) newNode);
+        if (right == oldNode && newNode instanceof ISwc4jAstExpr newRight) {
+            setRight(newRight);
             return true;
         }
         return false;
@@ -358,13 +355,10 @@ public class Swc4jAstBinExpr
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitBinExpr(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitBinExpr(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

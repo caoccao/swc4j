@@ -184,8 +184,8 @@ public class Swc4jAstUnaryExpr
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (arg == oldNode && newNode instanceof ISwc4jAstExpr) {
-            setArg((ISwc4jAstExpr) newNode);
+        if (arg == oldNode && newNode instanceof ISwc4jAstExpr newArg) {
+            setArg(newArg);
             return true;
         }
         return false;
@@ -204,13 +204,10 @@ public class Swc4jAstUnaryExpr
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitUnaryExpr(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitUnaryExpr(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

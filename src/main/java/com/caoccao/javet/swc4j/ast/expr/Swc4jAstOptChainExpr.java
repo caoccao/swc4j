@@ -82,8 +82,8 @@ public class Swc4jAstOptChainExpr
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (base == oldNode && newNode instanceof ISwc4jAstOptChainBase) {
-            setBase((ISwc4jAstOptChainBase) newNode);
+        if (base == oldNode && newNode instanceof ISwc4jAstOptChainBase newBase) {
+            setBase(newBase);
             return true;
         }
         return false;
@@ -102,13 +102,10 @@ public class Swc4jAstOptChainExpr
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitOptChainExpr(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitOptChainExpr(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

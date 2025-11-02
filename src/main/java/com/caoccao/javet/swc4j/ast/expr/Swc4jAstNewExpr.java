@@ -121,22 +121,24 @@ public class Swc4jAstNewExpr
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (args.isPresent() && !args.get().isEmpty() && newNode instanceof Swc4jAstExprOrSpread) {
+        if (args.map(nodes -> !nodes.isEmpty()).orElse(false)
+                && newNode instanceof Swc4jAstExprOrSpread newArg) {
             List<Swc4jAstExprOrSpread> nodes = args.get();
             final int size = nodes.size();
             for (int i = 0; i < size; i++) {
                 if (nodes.get(i) == oldNode) {
-                    nodes.set(i, (Swc4jAstExprOrSpread) newNode);
+                    nodes.set(i, newArg);
                     newNode.setParent(this);
                     return true;
                 }
             }
         }
-        if (callee == oldNode && newNode instanceof ISwc4jAstExpr) {
-            setCallee((ISwc4jAstExpr) newNode);
+        if (callee == oldNode && newNode instanceof ISwc4jAstExpr newCallee) {
+            setCallee(newCallee);
             return true;
         }
-        if (typeArgs.isPresent() && typeArgs.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamInstantiation)) {
+        if (typeArgs.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof Swc4jAstTsTypeParamInstantiation)) {
             setTypeArgs((Swc4jAstTsTypeParamInstantiation) newNode);
             return true;
         }
@@ -168,13 +170,10 @@ public class Swc4jAstNewExpr
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitNewExpr(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitNewExpr(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }
