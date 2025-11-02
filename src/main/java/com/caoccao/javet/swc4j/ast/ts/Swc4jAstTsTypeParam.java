@@ -144,16 +144,18 @@ public class Swc4jAstTsTypeParam
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (_default.isPresent() && _default.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstTsType)) {
+        if (_default.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof ISwc4jAstTsType)) {
             setDefault((ISwc4jAstTsType) newNode);
             return true;
         }
-        if (constraint.isPresent() && constraint.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstTsType)) {
+        if (constraint.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof ISwc4jAstTsType)) {
             setConstraint((ISwc4jAstTsType) newNode);
             return true;
         }
-        if (name == oldNode && newNode instanceof Swc4jAstIdent) {
-            setName((Swc4jAstIdent) newNode);
+        if (name == oldNode && newNode instanceof Swc4jAstIdent newName) {
+            setName(newName);
             return true;
         }
         return false;
@@ -194,13 +196,10 @@ public class Swc4jAstTsTypeParam
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsTypeParam(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsTypeParam(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

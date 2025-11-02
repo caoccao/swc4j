@@ -92,12 +92,12 @@ public class Swc4jAstTsIndexedAccessType
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (indexType == oldNode && newNode instanceof ISwc4jAstTsType) {
-            setIndexType((ISwc4jAstTsType) newNode);
+        if (indexType == oldNode && newNode instanceof ISwc4jAstTsType newIndexType) {
+            setIndexType(newIndexType);
             return true;
         }
-        if (objType == oldNode && newNode instanceof ISwc4jAstTsType) {
-            setObjType((ISwc4jAstTsType) newNode);
+        if (objType == oldNode && newNode instanceof ISwc4jAstTsType newObjType) {
+            setObjType(newObjType);
             return true;
         }
         return false;
@@ -122,13 +122,10 @@ public class Swc4jAstTsIndexedAccessType
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsIndexedAccessType(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsIndexedAccessType(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

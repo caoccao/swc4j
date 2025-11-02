@@ -71,11 +71,11 @@ public class Swc4jAstTsTupleType
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (!elemTypes.isEmpty() && newNode instanceof Swc4jAstTsTupleElement) {
+        if (!elemTypes.isEmpty() && newNode instanceof Swc4jAstTsTupleElement newElemType) {
             final int size = elemTypes.size();
             for (int i = 0; i < size; i++) {
                 if (elemTypes.get(i) == oldNode) {
-                    elemTypes.set(i, (Swc4jAstTsTupleElement) newNode);
+                    elemTypes.set(i, newElemType);
                     newNode.setParent(this);
                     return true;
                 }
@@ -86,13 +86,10 @@ public class Swc4jAstTsTupleType
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsTupleType(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsTupleType(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

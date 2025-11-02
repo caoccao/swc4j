@@ -67,8 +67,8 @@ public class Swc4jAstTsTypeAnn
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (typeAnn == oldNode && newNode instanceof ISwc4jAstTsType) {
-            setTypeAnn((ISwc4jAstTsType) newNode);
+        if (typeAnn == oldNode && newNode instanceof ISwc4jAstTsType newTypeAnn) {
+            setTypeAnn(newTypeAnn);
             return true;
         }
         return false;
@@ -82,13 +82,10 @@ public class Swc4jAstTsTypeAnn
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsTypeAnn(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsTypeAnn(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

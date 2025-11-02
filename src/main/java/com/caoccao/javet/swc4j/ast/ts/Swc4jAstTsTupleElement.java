@@ -80,12 +80,13 @@ public class Swc4jAstTsTupleElement
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (label.isPresent() && label.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstPat)) {
+        if (label.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof ISwc4jAstPat)) {
             setLabel((ISwc4jAstPat) newNode);
             return true;
         }
-        if (ty == oldNode && newNode instanceof ISwc4jAstTsType) {
-            setTy((ISwc4jAstTsType) newNode);
+        if (ty == oldNode && newNode instanceof ISwc4jAstTsType newTy) {
+            setTy(newTy);
             return true;
         }
         return false;
@@ -105,13 +106,10 @@ public class Swc4jAstTsTupleElement
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsTupleElement(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsTupleElement(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

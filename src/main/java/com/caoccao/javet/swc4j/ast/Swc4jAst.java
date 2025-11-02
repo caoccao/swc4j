@@ -128,8 +128,7 @@ public abstract class Swc4jAst implements ISwc4jAst {
                     } catch (IllegalAccessException e) {
                         value = e.getMessage();
                     }
-                    if (value instanceof List) {
-                        List<?> listValue = (List<?>) value;
+                    if (value instanceof List<?> listValue) {
                         int i = 0;
                         for (Object o : listValue) {
                             if (o instanceof Swc4jAst) {
@@ -137,8 +136,7 @@ public abstract class Swc4jAst implements ISwc4jAst {
                                         lines,
                                         String.format("%s[%d]", field.getName(), i),
                                         newIndent);
-                            } else if (o instanceof Optional) {
-                                Optional<?> optionalValue = (Optional<?>) o;
+                            } else if (o instanceof Optional<?> optionalValue) {
                                 if (optionalValue.isPresent()) {
                                     value = optionalValue.get();
                                     if (value instanceof Swc4jAst) {
@@ -170,14 +168,12 @@ public abstract class Swc4jAst implements ISwc4jAst {
                             }
                             ++i;
                         }
-                    } else if (value instanceof Optional) {
-                        Optional<?> optionalValue = (Optional<?>) value;
+                    } else if (value instanceof Optional<?> optionalValue) {
                         if (optionalValue.isPresent()) {
                             value = optionalValue.get();
                             if (value instanceof Swc4jAst) {
                                 ((Swc4jAst) value).toDebugString(lines, field.getName() + "?", newIndent);
-                            } else if (value instanceof List) {
-                                List<?> listValue = (List<?>) value;
+                            } else if (value instanceof List<?> listValue) {
                                 int i = 0;
                                 for (Object o : listValue) {
                                     if (o instanceof Swc4jAst) {

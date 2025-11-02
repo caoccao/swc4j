@@ -120,19 +120,22 @@ public class Swc4jAstTsImportType
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (arg == oldNode && newNode instanceof Swc4jAstStr) {
-            setArg((Swc4jAstStr) newNode);
+        if (arg == oldNode && newNode instanceof Swc4jAstStr newArg) {
+            setArg(newArg);
             return true;
         }
-        if (attributes.isPresent() && attributes.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsImportCallOptions)) {
+        if (attributes.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof Swc4jAstTsImportCallOptions)) {
             setAttributes((Swc4jAstTsImportCallOptions) newNode);
             return true;
         }
-        if (qualifier.isPresent() && qualifier.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstTsEntityName)) {
+        if (qualifier.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof ISwc4jAstTsEntityName)) {
             setQualifier((ISwc4jAstTsEntityName) newNode);
             return true;
         }
-        if (typeArgs.isPresent() && typeArgs.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamInstantiation)) {
+        if (typeArgs.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof Swc4jAstTsTypeParamInstantiation)) {
             setTypeArgs((Swc4jAstTsTypeParamInstantiation) newNode);
             return true;
         }
@@ -165,13 +168,10 @@ public class Swc4jAstTsImportType
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsImportType(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsImportType(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

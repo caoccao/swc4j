@@ -99,20 +99,20 @@ public class Swc4jAstTsConditionalType
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (checkType == oldNode && newNode instanceof ISwc4jAstTsType) {
-            setCheckType((ISwc4jAstTsType) newNode);
+        if (checkType == oldNode && newNode instanceof ISwc4jAstTsType newCheckType) {
+            setCheckType(newCheckType);
             return true;
         }
-        if (extendsType == oldNode && newNode instanceof ISwc4jAstTsType) {
-            setExtendsType((ISwc4jAstTsType) newNode);
+        if (extendsType == oldNode && newNode instanceof ISwc4jAstTsType newExtendsType) {
+            setExtendsType(newExtendsType);
             return true;
         }
-        if (falseType == oldNode && newNode instanceof ISwc4jAstTsType) {
-            setFalseType((ISwc4jAstTsType) newNode);
+        if (falseType == oldNode && newNode instanceof ISwc4jAstTsType newFalseType) {
+            setFalseType(newFalseType);
             return true;
         }
-        if (trueType == oldNode && newNode instanceof ISwc4jAstTsType) {
-            setTrueType((ISwc4jAstTsType) newNode);
+        if (trueType == oldNode && newNode instanceof ISwc4jAstTsType newTrueType) {
+            setTrueType(newTrueType);
             return true;
         }
         return false;
@@ -144,13 +144,10 @@ public class Swc4jAstTsConditionalType
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsConditionalType(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsConditionalType(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

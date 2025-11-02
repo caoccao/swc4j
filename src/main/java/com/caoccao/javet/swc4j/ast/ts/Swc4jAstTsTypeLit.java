@@ -72,11 +72,11 @@ public class Swc4jAstTsTypeLit
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (!members.isEmpty() && newNode instanceof ISwc4jAstTsTypeElement) {
+        if (!members.isEmpty() && newNode instanceof ISwc4jAstTsTypeElement newMember) {
             final int size = members.size();
             for (int i = 0; i < size; i++) {
                 if (members.get(i) == oldNode) {
-                    members.set(i, (ISwc4jAstTsTypeElement) newNode);
+                    members.set(i, newMember);
                     newNode.setParent(this);
                     return true;
                 }
@@ -87,13 +87,10 @@ public class Swc4jAstTsTypeLit
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsTypeLit(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsTypeLit(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

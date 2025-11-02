@@ -99,21 +99,22 @@ public class Swc4jAstTsFnType
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (!params.isEmpty() && newNode instanceof ISwc4jAstTsFnParam) {
+        if (!params.isEmpty() && newNode instanceof ISwc4jAstTsFnParam newParam) {
             final int size = params.size();
             for (int i = 0; i < size; i++) {
                 if (params.get(i) == oldNode) {
-                    params.set(i, (ISwc4jAstTsFnParam) newNode);
+                    params.set(i, newParam);
                     newNode.setParent(this);
                     return true;
                 }
             }
         }
-        if (typeAnn == oldNode && newNode instanceof Swc4jAstTsTypeAnn) {
-            setTypeAnn((Swc4jAstTsTypeAnn) newNode);
+        if (typeAnn == oldNode && newNode instanceof Swc4jAstTsTypeAnn newTypeAnn) {
+            setTypeAnn(newTypeAnn);
             return true;
         }
-        if (typeParams.isPresent() && typeParams.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamDecl)) {
+        if (typeParams.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof Swc4jAstTsTypeParamDecl)) {
             setTypeParams((Swc4jAstTsTypeParamDecl) newNode);
             return true;
         }
@@ -134,13 +135,10 @@ public class Swc4jAstTsFnType
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsFnType(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsFnType(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

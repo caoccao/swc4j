@@ -80,11 +80,12 @@ public class Swc4jAstTsEnumMember
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (id == oldNode && newNode instanceof ISwc4jAstTsEnumMemberId) {
-            setId((ISwc4jAstTsEnumMemberId) newNode);
+        if (id == oldNode && newNode instanceof ISwc4jAstTsEnumMemberId newId) {
+            setId(newId);
             return true;
         }
-        if (init.isPresent() && init.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+        if (init.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
             setInit((ISwc4jAstExpr) newNode);
             return true;
         }
@@ -105,13 +106,10 @@ public class Swc4jAstTsEnumMember
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsEnumMember(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsEnumMember(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

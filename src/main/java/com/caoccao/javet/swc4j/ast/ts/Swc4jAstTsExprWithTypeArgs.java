@@ -80,11 +80,12 @@ public class Swc4jAstTsExprWithTypeArgs
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (expr == oldNode && newNode instanceof ISwc4jAstExpr) {
-            setExpr((ISwc4jAstExpr) newNode);
+        if (expr == oldNode && newNode instanceof ISwc4jAstExpr newExpr) {
+            setExpr(newExpr);
             return true;
         }
-        if (typeArgs.isPresent() && typeArgs.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamInstantiation)) {
+        if (typeArgs.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof Swc4jAstTsTypeParamInstantiation)) {
             setTypeArgs((Swc4jAstTsTypeParamInstantiation) newNode);
             return true;
         }
@@ -105,13 +106,10 @@ public class Swc4jAstTsExprWithTypeArgs
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsExprWithTypeArgs(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsExprWithTypeArgs(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

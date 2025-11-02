@@ -68,8 +68,8 @@ public class Swc4jAstTsImportCallOptions
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (with == oldNode && newNode instanceof Swc4jAstObjectLit) {
-            setWith((Swc4jAstObjectLit) newNode);
+        if (with == oldNode && newNode instanceof Swc4jAstObjectLit newWith) {
+            setWith(newWith);
             return true;
         }
         return false;
@@ -83,13 +83,10 @@ public class Swc4jAstTsImportCallOptions
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsImportCallOptions(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsImportCallOptions(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }
