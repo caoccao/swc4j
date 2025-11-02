@@ -1,5 +1,9 @@
 # Release Notes
 
+## 2.0.0
+
+* Upgraded JDK to v17
+
 ## 1.8.0
 
 * Upgraded deno_ast to v0.51.0
