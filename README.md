@@ -46,90 +46,90 @@
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j</artifactId> <!-- Must Have -->
-    <version>1.7.1</version>
+    <version>1.8.0</version>
 </dependency>
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j-android-arm</artifactId>
-    <version>1.7.1</version>
+    <version>1.8.0</version>
 </dependency>
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j-android-arm64</artifactId>
-    <version>1.7.1</version>
+    <version>1.8.0</version>
 </dependency>
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j-android-x86</artifactId>
-    <version>1.7.1</version>
+    <version>1.8.0</version>
 </dependency>
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j-android-x86_64</artifactId>
-    <version>1.7.1</version>
+    <version>1.8.0</version>
 </dependency>
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j-linux-arm64</artifactId>
-    <version>1.7.1</version>
+    <version>1.8.0</version>
 </dependency>
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j-linux-x86_64</artifactId>
-    <version>1.7.1</version>
+    <version>1.8.0</version>
 </dependency>
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j-macos-arm64</artifactId>
-    <version>1.7.1</version>
+    <version>1.8.0</version>
 </dependency>
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j-macos-x86_64</artifactId>
-    <version>1.7.1</version>
+    <version>1.8.0</version>
 </dependency>
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j-windows-arm64</artifactId>
-    <version>1.7.1</version>
+    <version>1.8.0</version>
 </dependency>
 <dependency>
     <groupId>com.caoccao.javet</groupId>
     <artifactId>swc4j-windows-x86_64</artifactId>
-    <version>1.7.1</version>
+    <version>1.8.0</version>
 </dependency>
 ```
 
 #### Gradle Kotlin DSL
 
 ```kotlin
-implementation("com.caoccao.javet:swc4j:1.7.1") // Must Have
-implementation("com.caoccao.javet:swc4j-android-arm:1.7.1")
-implementation("com.caoccao.javet:swc4j-android-arm64:1.7.1")
-implementation("com.caoccao.javet:swc4j-android-x86:1.7.1")
-implementation("com.caoccao.javet:swc4j-android-x86_64:1.7.1")
-implementation("com.caoccao.javet:swc4j-linux-arm64:1.7.1")
-implementation("com.caoccao.javet:swc4j-linux-x86_64:1.7.1")
-implementation("com.caoccao.javet:swc4j-macos-arm64:1.7.1")
-implementation("com.caoccao.javet:swc4j-macos-x86_64:1.7.1")
-implementation("com.caoccao.javet:swc4j-windows-arm64:1.7.1")
-implementation("com.caoccao.javet:swc4j-windows-x86_64:1.7.1")
+implementation("com.caoccao.javet:swc4j:1.8.0") // Must Have
+implementation("com.caoccao.javet:swc4j-android-arm:1.8.0")
+implementation("com.caoccao.javet:swc4j-android-arm64:1.8.0")
+implementation("com.caoccao.javet:swc4j-android-x86:1.8.0")
+implementation("com.caoccao.javet:swc4j-android-x86_64:1.8.0")
+implementation("com.caoccao.javet:swc4j-linux-arm64:1.8.0")
+implementation("com.caoccao.javet:swc4j-linux-x86_64:1.8.0")
+implementation("com.caoccao.javet:swc4j-macos-arm64:1.8.0")
+implementation("com.caoccao.javet:swc4j-macos-x86_64:1.8.0")
+implementation("com.caoccao.javet:swc4j-windows-arm64:1.8.0")
+implementation("com.caoccao.javet:swc4j-windows-x86_64:1.8.0")
 ```
 
 #### Gradle Groovy DSL
 
 ```groovy
-implementation 'com.caoccao.javet:swc4j:1.7.1' // Must Have
-implementation 'com.caoccao.javet:swc4j-android-arm:1.7.1'
-implementation 'com.caoccao.javet:swc4j-android-arm64:1.7.1'
-implementation 'com.caoccao.javet:swc4j-android-x86:1.7.1'
-implementation 'com.caoccao.javet:swc4j-android-x86_64:1.7.1'
-implementation 'com.caoccao.javet:swc4j-linux-arm64:1.7.1'
-implementation 'com.caoccao.javet:swc4j-linux-x86_64:1.7.1'
-implementation 'com.caoccao.javet:swc4j-macos-arm64:1.7.1'
-implementation 'com.caoccao.javet:swc4j-macos-x86_64:1.7.1'
-implementation 'com.caoccao.javet:swc4j-windows-arm64:1.7.1'
-implementation 'com.caoccao.javet:swc4j-windows-x86_64:1.7.1'
+implementation 'com.caoccao.javet:swc4j:1.8.0' // Must Have
+implementation 'com.caoccao.javet:swc4j-android-arm:1.8.0'
+implementation 'com.caoccao.javet:swc4j-android-arm64:1.8.0'
+implementation 'com.caoccao.javet:swc4j-android-x86:1.8.0'
+implementation 'com.caoccao.javet:swc4j-android-x86_64:1.8.0'
+implementation 'com.caoccao.javet:swc4j-linux-arm64:1.8.0'
+implementation 'com.caoccao.javet:swc4j-linux-x86_64:1.8.0'
+implementation 'com.caoccao.javet:swc4j-macos-arm64:1.8.0'
+implementation 'com.caoccao.javet:swc4j-macos-x86_64:1.8.0'
+implementation 'com.caoccao.javet:swc4j-windows-arm64:1.8.0'
+implementation 'com.caoccao.javet:swc4j-windows-x86_64:1.8.0'
 ```
 
 ### Transpile
