@@ -57,7 +57,7 @@ public class Tutorial07MimicBabel {
                 // Transform the params.
                 List<Swc4jAstParam> params = node.getParams().stream()
                         .map(Swc4jAstParam::create)
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toCollection(ArrayList::new));
                 // Transform the block statement.
                 Swc4jAstBlockStmt blockStmt;
                 ISwc4jAstBlockStmtOrExpr body = node.getBody();

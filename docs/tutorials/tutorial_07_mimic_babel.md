@@ -83,7 +83,7 @@ public Swc4jAstParam(
 // Transform the params.
 List<Swc4jAstParam> params = node.getParams().stream()
         .map(param -> new Swc4jAstParam(new ArrayList<>(), param, Swc4jSpan.DUMMY))
-        .collect(Collectors.toList());
+        .collect(Collectors.toCollection(ArrayList::new));
 ```
 
 * The function `body` has to be a `Swc4jAstBlockStmt` whereas the arrow expression `body` is an interface `ISwc4jAstBlockStmtOrExpr` whose definition is as follows.
@@ -150,7 +150,7 @@ public Swc4jAstVisitorResponse visitArrowExpr(Swc4jAstArrowExpr node) {
     // Transform the params.
     List<Swc4jAstParam> params = node.getParams().stream()
             .map(Swc4jAstParam::create)
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(ArrayList::new));
     // Transform the block statement.
     Swc4jAstBlockStmt blockStmt;
     ISwc4jAstBlockStmtOrExpr body = node.getBody();

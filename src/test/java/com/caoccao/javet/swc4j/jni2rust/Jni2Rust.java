@@ -88,7 +88,7 @@ public class Jni2Rust<T> {
                             : ((Method) executable).getReturnType().getSimpleName();
                     List<String> parameterNames = Stream.of(executable.getParameters())
                             .map(this::getParameterName)
-                            .collect(Collectors.toList());
+                            .toList();
                     lines.add(StringUtils.EMPTY);
                     if (isVoid || isPrimitive || isString) {
                         lines.add(String.format("  pub fn %s<'local>(", methodName));

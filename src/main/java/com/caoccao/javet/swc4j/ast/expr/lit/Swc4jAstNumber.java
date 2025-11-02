@@ -39,11 +39,11 @@ public class Swc4jAstNumber
         implements ISwc4jAstLit, ISwc4jAstPropName, ISwc4jAstTsLit, ISwc4jAstCoercionPrimitive {
     protected static final int MAX_EXPONENT = 308;
     protected static final Pattern PATTERN_DECIMAL_ZEROS =
-            Pattern.compile("^([\\+\\-]?)(\\d+)\\.0*$", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("^([+\\-]?)(\\d+)\\.0*$", Pattern.CASE_INSENSITIVE);
     protected static final Pattern PATTERN_SCIENTIFIC_NOTATION_WITHOUT_FRACTION =
-            Pattern.compile("^([\\+\\-]?)(\\d+)e([\\+\\-]?)(\\d+)$", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("^([+\\-]?)(\\d+)e([+\\-]?)(\\d+)$", Pattern.CASE_INSENSITIVE);
     protected static final Pattern PATTERN_SCIENTIFIC_NOTATION_WITH_FRACTION =
-            Pattern.compile("^([\\+\\-]?)(\\d+)\\.(\\d*)e([\\+\\-]?)(\\d+)$", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("^([+\\-]?)(\\d+)\\.(\\d*)e([+\\-]?)(\\d+)$", Pattern.CASE_INSENSITIVE);
     @Jni2RustField(componentAtom = true)
     protected Optional<String> raw;
     protected double value;
@@ -179,17 +179,16 @@ public class Swc4jAstNumber
     }
 
     protected int getMinusCount(ISwc4jAst ast) {
-        switch (ast.getType()) {
-            case ParenExpr:
-                return getMinusCount(ast.getParent());
-            case UnaryExpr:
+        return switch (ast.getType()) {
+            case ParenExpr -> getMinusCount(ast.getParent());
+            case UnaryExpr -> {
                 if (ast.as(Swc4jAstUnaryExpr.class).getOp() == Swc4jAstUnaryOp.Minus) {
-                    return getMinusCount(ast.getParent()) + 1;
+                    yield getMinusCount(ast.getParent()) + 1;
                 }
-                return 0;
-            default:
-                return 0;
-        }
+                yield 0;
+            }
+            default -> 0;
+        };
     }
 
     public int getMinusCount() {
@@ -247,13 +246,10 @@ public class Swc4jAstNumber
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitNumber(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitNumber(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

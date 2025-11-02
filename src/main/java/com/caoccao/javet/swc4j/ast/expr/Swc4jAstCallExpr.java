@@ -41,6 +41,7 @@ import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 import com.caoccao.javet.swc4j.utils.SimpleList;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -144,14 +145,14 @@ public class Swc4jAstCallExpr
                                     case 0:
                                         return Optional.of(Swc4jAstArrayLit.create(objString.split().stream()
                                                 .map(str -> str == null ? null : Swc4jAstExprOrSpread.create(Swc4jAstStr.create(str)))
-                                                .collect(Collectors.toList())));
+                                                .collect(Collectors.toCollection(ArrayList::new))));
                                     case 1:
                                         ISwc4jAstExpr arg = args.get(0).getExpr().unParenExpr();
                                         if (arg instanceof ISwc4jAstCoercionPrimitive) {
                                             String separator = arg.as(ISwc4jAstCoercionPrimitive.class).asString();
                                             return Optional.of(Swc4jAstArrayLit.create(objString.split(separator).stream()
                                                     .map(str -> str == null ? null : Swc4jAstExprOrSpread.create(Swc4jAstStr.create(str)))
-                                                    .collect(Collectors.toList())));
+                                                    .collect(Collectors.toCollection(ArrayList::new))));
                                         }
                                         break;
                                     default:
@@ -163,7 +164,7 @@ public class Swc4jAstCallExpr
                                             int limit = arg2.as(ISwc4jAstCoercionPrimitive.class).asInt();
                                             return Optional.of(Swc4jAstArrayLit.create(objString.split(separator, limit).stream()
                                                     .map(str -> str == null ? null : Swc4jAstExprOrSpread.create(Swc4jAstStr.create(str)))
-                                                    .collect(Collectors.toList())));
+                                                    .collect(Collectors.toCollection(ArrayList::new))));
                                         }
                                         break;
                                 }

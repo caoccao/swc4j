@@ -30,17 +30,14 @@ import com.caoccao.javet.swc4j.jni2rust.Jni2RustMethod;
 import com.caoccao.javet.swc4j.span.Swc4jSpan;
 import com.caoccao.javet.swc4j.utils.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Jni2RustClass(filePath = Jni2RustFilePath.AstUtils)
 public class Swc4jAstArrayLit
         extends Swc4jAst
         implements ISwc4jAstExpr, ISwc4jAstCoercionPrimitive {
-    public static final Set<String> ARRAY_FUNCTION_SET = SimpleSet.immutableOf(
+    public static final Set<String> ARRAY_FUNCTION_SET = Set.of(
             "at",
             "concat",
             "copyWithin",
@@ -110,7 +107,7 @@ public class Swc4jAstArrayLit
         super(span);
         this.elems = AssertionUtils.notNull(elems, "Elems").stream()
                 .map(Optional::ofNullable)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
         this.elems.stream().filter(Optional::isPresent).map(Optional::get).forEach(node -> node.setParent(this));
     }
 
@@ -134,19 +131,16 @@ public class Swc4jAstArrayLit
 
     @Override
     public double asDouble() {
-        switch (elems.size()) {
-            case 0:
-                return 0;
-            case 1:
-                return elems.get(0)
-                        .map(Swc4jAstExprOrSpread::getExpr)
-                        .filter(n -> n instanceof Swc4jAstNumber)
-                        .map(n -> (Swc4jAstNumber) n)
-                        .map(Swc4jAstNumber::getValue)
-                        .orElse(Double.NaN);
-            default:
-                return Double.NaN;
-        }
+        return switch (elems.size()) {
+            case 0 -> 0;
+            case 1 -> elems.get(0)
+                    .map(Swc4jAstExprOrSpread::getExpr)
+                    .filter(n -> n instanceof Swc4jAstNumber)
+                    .map(n -> (Swc4jAstNumber) n)
+                    .map(Swc4jAstNumber::getValue)
+                    .orElse(Double.NaN);
+            default -> Double.NaN;
+        };
     }
 
     @Override
@@ -257,7 +251,7 @@ public class Swc4jAstArrayLit
             final int size = elems.size();
             for (int i = 0; i < size; i++) {
                 Optional<Swc4jAstExprOrSpread> optionalOldElem = elems.get(i);
-                if (optionalOldElem.isPresent() && optionalOldElem.get() == oldNode) {
+                if (optionalOldElem.map(node -> node == oldNode).orElse(oldNode == null)) {
                     Optional<Swc4jAstExprOrSpread> optionalNewElem = Optional.ofNullable((Swc4jAstExprOrSpread) newNode);
                     optionalNewElem.ifPresent(node -> node.setParent(this));
                     elems.set(i, optionalNewElem);
@@ -286,13 +280,10 @@ public class Swc4jAstArrayLit
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitArrayLit(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitArrayLit(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

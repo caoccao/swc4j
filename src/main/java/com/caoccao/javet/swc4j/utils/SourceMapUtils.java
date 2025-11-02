@@ -89,7 +89,7 @@ public final class SourceMapUtils {
                 .filter(SimpleJsonUtils.JsonNode::isText)
                 .map(SimpleJsonUtils.JsonNode::asText)
                 .map(SimpleJsonUtils.JsonTextNode::getValue)
-                .collect(Collectors.toList());
+                .toList();
         if (sources.isEmpty()) {
             throw new IllegalArgumentException("Invalid JSON string: sources is empty");
         }
@@ -105,7 +105,7 @@ public final class SourceMapUtils {
                 .filter(SimpleJsonUtils.JsonNode::isText)
                 .map(SimpleJsonUtils.JsonNode::asText)
                 .map(SimpleJsonUtils.JsonTextNode::getValue)
-                .collect(Collectors.toList());
+                .toList();
         if (sourcesContent.isEmpty()) {
             throw new IllegalArgumentException("Invalid JSON string: sourcesContent is empty");
         }
@@ -121,7 +121,7 @@ public final class SourceMapUtils {
                 .filter(SimpleJsonUtils.JsonNode::isText)
                 .map(SimpleJsonUtils.JsonNode::asText)
                 .map(SimpleJsonUtils.JsonTextNode::getValue)
-                .collect(Collectors.toList());
+                .toList();
         SimpleJsonUtils.JsonNode mappingsJsonNode = jsonObjectNode.getNodeMap().get(MAPPINGS);
         if (mappingsJsonNode == null) {
             throw new IllegalArgumentException(

@@ -516,7 +516,7 @@ public class TestCodeGen {
                                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
                                 .filter(field -> !new Jni2RustFieldUtils(field).isIgnore())
                                 .sorted(Comparator.comparingInt(field -> fieldOrderMap.getOrDefault(field.getName(), Integer.MAX_VALUE)))
-                                .collect(Collectors.toList());
+                                .toList();
                         final List<String> processLines = new ArrayList<>();
                         final List<String> initLines = new ArrayList<>();
                         if (!fields.isEmpty()) {
