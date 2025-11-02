@@ -72,11 +72,11 @@ public class Swc4jAstTsModuleBlock
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (!body.isEmpty() && newNode instanceof ISwc4jAstModuleItem) {
+        if (!body.isEmpty() && newNode instanceof ISwc4jAstModuleItem newBody) {
             final int size = body.size();
             for (int i = 0; i < size; i++) {
                 if (body.get(i) == oldNode) {
-                    body.set(i, (ISwc4jAstModuleItem) newNode);
+                    body.set(i, newBody);
                     newNode.setParent(this);
                     return true;
                 }
@@ -87,13 +87,10 @@ public class Swc4jAstTsModuleBlock
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsModuleBlock(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsModuleBlock(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }
