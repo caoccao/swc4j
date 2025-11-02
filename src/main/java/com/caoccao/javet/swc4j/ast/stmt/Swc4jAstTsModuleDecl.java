@@ -58,6 +58,7 @@ public class Swc4jAstTsModuleDecl
         setDeclare(declare);
         setGlobal(global);
         setId(id);
+        setNamespace(namespace);
     }
 
     public static Swc4jAstTsModuleDecl create(ISwc4jAstTsModuleName id) {
@@ -131,12 +132,13 @@ public class Swc4jAstTsModuleDecl
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (body.isPresent() && body.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstTsNamespaceBody)) {
+        if (body.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof ISwc4jAstTsNamespaceBody)) {
             setBody((ISwc4jAstTsNamespaceBody) newNode);
             return true;
         }
-        if (id == oldNode && newNode instanceof ISwc4jAstTsModuleName) {
-            setId((ISwc4jAstTsModuleName) newNode);
+        if (id == oldNode && newNode instanceof ISwc4jAstTsModuleName newId) {
+            setId(newId);
             return true;
         }
         return false;
@@ -171,13 +173,10 @@ public class Swc4jAstTsModuleDecl
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsModuleDecl(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsModuleDecl(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

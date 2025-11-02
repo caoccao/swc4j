@@ -69,8 +69,8 @@ public class Swc4jAstExprStmt
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (expr == oldNode && newNode instanceof ISwc4jAstExpr) {
-            setExpr((ISwc4jAstExpr) newNode);
+        if (expr == oldNode && newNode instanceof ISwc4jAstExpr newExpr) {
+            setExpr(newExpr);
             return true;
         }
         return false;
@@ -84,13 +84,10 @@ public class Swc4jAstExprStmt
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitExprStmt(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitExprStmt(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

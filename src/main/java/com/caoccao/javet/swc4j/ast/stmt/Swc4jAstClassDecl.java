@@ -90,12 +90,12 @@ public class Swc4jAstClassDecl
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (clazz == oldNode && newNode instanceof Swc4jAstClass) {
-            setClazz((Swc4jAstClass) newNode);
+        if (clazz == oldNode && newNode instanceof Swc4jAstClass newClazz) {
+            setClazz(newClazz);
             return true;
         }
-        if (ident == oldNode && newNode instanceof Swc4jAstIdent) {
-            setIdent((Swc4jAstIdent) newNode);
+        if (ident == oldNode && newNode instanceof Swc4jAstIdent newIdent) {
+            setIdent(newIdent);
             return true;
         }
         return false;
@@ -120,13 +120,10 @@ public class Swc4jAstClassDecl
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitClassDecl(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitClassDecl(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

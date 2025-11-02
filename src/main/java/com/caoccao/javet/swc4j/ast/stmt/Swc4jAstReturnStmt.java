@@ -72,7 +72,8 @@ public class Swc4jAstReturnStmt
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (arg.isPresent() && arg.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
+        if (arg.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof ISwc4jAstExpr)) {
             setArg((ISwc4jAstExpr) newNode);
             return true;
         }
@@ -87,13 +88,10 @@ public class Swc4jAstReturnStmt
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitReturnStmt(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitReturnStmt(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

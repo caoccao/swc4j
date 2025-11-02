@@ -91,16 +91,16 @@ public class Swc4jAstForInStmt
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (body == oldNode && newNode instanceof ISwc4jAstStmt) {
-            setBody((ISwc4jAstStmt) newNode);
+        if (body == oldNode && newNode instanceof ISwc4jAstStmt newBody) {
+            setBody(newBody);
             return true;
         }
-        if (left == oldNode && newNode instanceof ISwc4jAstForHead) {
-            setLeft((ISwc4jAstForHead) newNode);
+        if (left == oldNode && newNode instanceof ISwc4jAstForHead newLeft) {
+            setLeft(newLeft);
             return true;
         }
-        if (right == oldNode && newNode instanceof ISwc4jAstExpr) {
-            setRight((ISwc4jAstExpr) newNode);
+        if (right == oldNode && newNode instanceof ISwc4jAstExpr newRight) {
+            setRight(newRight);
             return true;
         }
         return false;
@@ -126,13 +126,10 @@ public class Swc4jAstForInStmt
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitForInStmt(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitForInStmt(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

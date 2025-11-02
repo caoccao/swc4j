@@ -132,25 +132,26 @@ public class Swc4jAstTsInterfaceDecl
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (body == oldNode && newNode instanceof Swc4jAstTsInterfaceBody) {
-            setBody((Swc4jAstTsInterfaceBody) newNode);
+        if (body == oldNode && newNode instanceof Swc4jAstTsInterfaceBody newBody) {
+            setBody(newBody);
             return true;
         }
-        if (!_extends.isEmpty() && newNode instanceof Swc4jAstTsExprWithTypeArgs) {
+        if (!_extends.isEmpty() && newNode instanceof Swc4jAstTsExprWithTypeArgs newExtend) {
             final int size = _extends.size();
             for (int i = 0; i < size; i++) {
                 if (_extends.get(i) == oldNode) {
-                    _extends.set(i, (Swc4jAstTsExprWithTypeArgs) newNode);
+                    _extends.set(i, newExtend);
                     newNode.setParent(this);
                     return true;
                 }
             }
         }
-        if (id == oldNode && newNode instanceof Swc4jAstIdent) {
-            setId((Swc4jAstIdent) newNode);
+        if (id == oldNode && newNode instanceof Swc4jAstIdent newId) {
+            setId(newId);
             return true;
         }
-        if (typeParams.isPresent() && typeParams.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeParamDecl)) {
+        if (typeParams.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof Swc4jAstTsTypeParamDecl)) {
             setTypeParams((Swc4jAstTsTypeParamDecl) newNode);
             return true;
         }
@@ -182,13 +183,10 @@ public class Swc4jAstTsInterfaceDecl
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTsInterfaceDecl(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTsInterfaceDecl(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

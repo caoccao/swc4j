@@ -103,15 +103,17 @@ public class Swc4jAstTryStmt
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (block == oldNode && newNode instanceof Swc4jAstBlockStmt) {
-            setBlock((Swc4jAstBlockStmt) newNode);
+        if (block == oldNode && newNode instanceof Swc4jAstBlockStmt newBlock) {
+            setBlock(newBlock);
             return true;
         }
-        if (finalizer.isPresent() && finalizer.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstBlockStmt)) {
+        if (finalizer.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof Swc4jAstBlockStmt)) {
             setFinalizer((Swc4jAstBlockStmt) newNode);
             return true;
         }
-        if (handler.isPresent() && handler.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstCatchClause)) {
+        if (handler.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof Swc4jAstCatchClause)) {
             setHandler((Swc4jAstCatchClause) newNode);
             return true;
         }
@@ -138,13 +140,10 @@ public class Swc4jAstTryStmt
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitTryStmt(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitTryStmt(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }
