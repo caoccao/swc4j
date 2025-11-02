@@ -206,11 +206,11 @@ public class Swc4jAstClass
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (!_implements.isEmpty() && newNode instanceof Swc4jAstTsExprWithTypeArgs) {
+        if (!_implements.isEmpty() && newNode instanceof Swc4jAstTsExprWithTypeArgs newImplement) {
             final int size = _implements.size();
             for (int i = 0; i < size; i++) {
                 if (_implements.get(i) == oldNode) {
-                    _implements.set(i, (Swc4jAstTsExprWithTypeArgs) newNode);
+                    _implements.set(i, newImplement);
                     newNode.setParent(this);
                     return true;
                 }
@@ -281,13 +281,10 @@ public class Swc4jAstClass
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitClass(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitClass(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

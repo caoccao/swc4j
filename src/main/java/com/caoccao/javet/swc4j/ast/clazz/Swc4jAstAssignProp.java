@@ -78,12 +78,12 @@ public class Swc4jAstAssignProp
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (key == oldNode && newNode instanceof Swc4jAstIdent) {
-            setKey((Swc4jAstIdent) newNode);
+        if (key == oldNode && newNode instanceof Swc4jAstIdent newKey) {
+            setKey(newKey);
             return true;
         }
-        if (value == oldNode && newNode instanceof ISwc4jAstExpr) {
-            setValue((ISwc4jAstExpr) newNode);
+        if (value == oldNode && newNode instanceof ISwc4jAstExpr newValue) {
+            setValue(newValue);
             return true;
         }
         return false;
@@ -103,13 +103,10 @@ public class Swc4jAstAssignProp
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitAssignProp(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitAssignProp(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

@@ -111,19 +111,21 @@ public class Swc4jAstSetterProp
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (body.isPresent() && body.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstBlockStmt)) {
+        if (body.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof Swc4jAstBlockStmt)) {
             setBody((Swc4jAstBlockStmt) newNode);
             return true;
         }
-        if (key == oldNode && newNode instanceof ISwc4jAstPropName) {
-            setKey((ISwc4jAstPropName) newNode);
+        if (key == oldNode && newNode instanceof ISwc4jAstPropName newKey) {
+            setKey(newKey);
             return true;
         }
-        if (param == oldNode && newNode instanceof ISwc4jAstPat) {
-            setParam((ISwc4jAstPat) newNode);
+        if (param == oldNode && newNode instanceof ISwc4jAstPat newParam) {
+            setParam(newParam);
             return true;
         }
-        if (thisParam.isPresent() && thisParam.get() == oldNode && (newNode == null || newNode instanceof ISwc4jAstPat)) {
+        if (thisParam.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof ISwc4jAstPat)) {
             setThisParam((ISwc4jAstPat) newNode);
             return true;
         }
@@ -156,13 +158,10 @@ public class Swc4jAstSetterProp
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitSetterProp(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitSetterProp(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

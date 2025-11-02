@@ -197,7 +197,6 @@ final class Swc4jLibLoader {
      * @since 0.1.0
      */
     void load() {
-        String libFilePath = null;
         try {
             File libPath = new File(OSUtils.TEMP_DIRECTORY, LIB_NAME);
             purge(libPath);
@@ -214,7 +213,7 @@ final class Swc4jLibLoader {
             }
             String resourceFileName = getResourceFileName();
             File libFile = new File(rootLibPath, getLibFileName()).getAbsoluteFile();
-            libFilePath = libFile.getAbsolutePath();
+            String libFilePath = libFile.getAbsolutePath();
             deployLibFile(resourceFileName, libFile);
             System.load(libFilePath);
         } catch (Throwable t) {

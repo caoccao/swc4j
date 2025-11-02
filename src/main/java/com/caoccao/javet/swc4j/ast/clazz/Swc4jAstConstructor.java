@@ -155,19 +155,20 @@ public class Swc4jAstConstructor
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (body.isPresent() && body.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstBlockStmt)) {
+        if (body.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof Swc4jAstBlockStmt)) {
             setBody((Swc4jAstBlockStmt) newNode);
             return true;
         }
-        if (key == oldNode && newNode instanceof ISwc4jAstPropName) {
-            setKey((ISwc4jAstPropName) newNode);
+        if (key == oldNode && newNode instanceof ISwc4jAstPropName newKey) {
+            setKey(newKey);
             return true;
         }
-        if (!params.isEmpty() && newNode instanceof ISwc4jAstParamOrTsParamProp) {
+        if (!params.isEmpty() && newNode instanceof ISwc4jAstParamOrTsParamProp newParam) {
             final int size = params.size();
             for (int i = 0; i < size; i++) {
                 if (params.get(i) == oldNode) {
-                    params.set(i, (ISwc4jAstParamOrTsParamProp) newNode);
+                    params.set(i, newParam);
                     newNode.setParent(this);
                     return true;
                 }
@@ -205,13 +206,10 @@ public class Swc4jAstConstructor
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitConstructor(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitConstructor(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }
