@@ -109,7 +109,7 @@ public class Swc4jAstArrayPat
             final int size = elems.size();
             for (int i = 0; i < size; i++) {
                 Optional<ISwc4jAstPat> optionalOldElem = elems.get(i);
-                if (optionalOldElem.isPresent() && optionalOldElem.get() == oldNode) {
+                if (optionalOldElem.map(node -> node == oldNode).orElse(oldNode == null)) {
                     Optional<ISwc4jAstPat> optionalNewElem = Optional.ofNullable((ISwc4jAstPat) newNode);
                     optionalNewElem.ifPresent(node -> node.setParent(this));
                     elems.set(i, optionalNewElem);
@@ -117,7 +117,8 @@ public class Swc4jAstArrayPat
                 }
             }
         }
-        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+        if (typeAnn.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
             setTypeAnn((Swc4jAstTsTypeAnn) newNode);
             return true;
         }
@@ -137,13 +138,10 @@ public class Swc4jAstArrayPat
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitArrayPat(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitArrayPat(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

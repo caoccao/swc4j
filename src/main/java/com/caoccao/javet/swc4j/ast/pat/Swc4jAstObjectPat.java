@@ -100,17 +100,18 @@ public class Swc4jAstObjectPat
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (!props.isEmpty() && newNode instanceof ISwc4jAstObjectPatProp) {
+        if (!props.isEmpty() && newNode instanceof ISwc4jAstObjectPatProp newProp) {
             final int size = props.size();
             for (int i = 0; i < size; i++) {
                 if (props.get(i) == oldNode) {
-                    props.set(i, (ISwc4jAstObjectPatProp) newNode);
+                    props.set(i, newProp);
                     newNode.setParent(this);
                     return true;
                 }
             }
         }
-        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+        if (typeAnn.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
             setTypeAnn((Swc4jAstTsTypeAnn) newNode);
             return true;
         }
@@ -130,13 +131,10 @@ public class Swc4jAstObjectPat
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitObjectPat(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitObjectPat(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }

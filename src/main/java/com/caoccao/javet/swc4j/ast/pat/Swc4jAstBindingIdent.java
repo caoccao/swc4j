@@ -81,11 +81,12 @@ public class Swc4jAstBindingIdent
 
     @Override
     public boolean replaceNode(ISwc4jAst oldNode, ISwc4jAst newNode) {
-        if (id == oldNode && newNode instanceof Swc4jAstIdent) {
-            setId((Swc4jAstIdent) newNode);
+        if (id == oldNode && newNode instanceof Swc4jAstIdent newId) {
+            setId(newId);
             return true;
         }
-        if (typeAnn.isPresent() && typeAnn.get() == oldNode && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
+        if (typeAnn.map(node -> node == oldNode).orElse(oldNode == null)
+                && (newNode == null || newNode instanceof Swc4jAstTsTypeAnn)) {
             setTypeAnn((Swc4jAstTsTypeAnn) newNode);
             return true;
         }
@@ -106,13 +107,10 @@ public class Swc4jAstBindingIdent
 
     @Override
     public Swc4jAstVisitorResponse visit(ISwc4jAstVisitor visitor) {
-        switch (visitor.visitBindingIdent(this)) {
-            case Error:
-                return Swc4jAstVisitorResponse.Error;
-            case OkAndBreak:
-                return Swc4jAstVisitorResponse.OkAndContinue;
-            default:
-                return super.visit(visitor);
-        }
+        return switch (visitor.visitBindingIdent(this)) {
+            case Error -> Swc4jAstVisitorResponse.Error;
+            case OkAndBreak -> Swc4jAstVisitorResponse.OkAndContinue;
+            default -> super.visit(visitor);
+        };
     }
 }
