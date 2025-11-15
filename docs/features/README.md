@@ -10,6 +10,14 @@ This directory contains detailed documentation for specific features and capabil
 - **[ast_visitor.md](ast_visitor.md)** - Guide to implementing custom AST visitors for code transformation
 - **[plugin.md](plugin.md)** - Creating and using plugins to extend swc4j functionality
 
+### Source Map
+
+- **[source_map.md](source_map.md)** - Parse and work with JavaScript/TypeScript source maps
+  - Map generated code positions to original source locations
+  - VLQ decoding and position mapping
+  - Error location tracking and debugging
+  - Integration with transform/transpile operations
+
 ### Library Loading
 
 - **[custom_library_loading.md](custom_library_loading.md)** - Customize native library deployment and loading behavior
@@ -42,6 +50,7 @@ swc4j provides comprehensive code sanitization and security features to protect 
 - AST structure inspection
 - Token extraction and analysis
 - Custom visitor patterns
+- Source map parsing and position mapping
 
 ### 🔧 Code Transformation
 
@@ -66,7 +75,7 @@ swc4j provides comprehensive code sanitization and security features to protect 
 
 ### For Code Analysis
 
-Start with [ast.md](ast.md) to understand the structure, then explore [ast_visitor.md](ast_visitor.md) for implementing custom analysis.
+Start with [ast.md](ast.md) to understand the structure, then explore [ast_visitor.md](ast_visitor.md) for implementing custom analysis. For debugging transformed code, see [source_map.md](source_map.md) to map generated positions back to original source.
 
 ### For Code Transformation
 

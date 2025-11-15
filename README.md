@@ -21,7 +21,7 @@
 * [Transform](docs/transform.md)
   * Minify
   * Multiple Target ES Version
-  * Source Map
+  * [Source Map](docs/features/source_map.md)
 * [Transpile](docs/transpile.md)
   * TS → JS
   * JSX → JS
