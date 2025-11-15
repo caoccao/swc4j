@@ -85,9 +85,7 @@ public final class SourceMapUtils {
             throw new IllegalArgumentException("Invalid JSON string: sources is not an array");
         }
         List<String> sources = sourcesJsonNode.asArray().getNodes().stream()
-                .filter(SimpleJsonUtils.JsonNode::isText)
-                .map(SimpleJsonUtils.JsonNode::asText)
-                .map(SimpleJsonUtils.JsonTextNode::getValue)
+                .map(node -> node.isText() ? node.asText().getValue() : null)
                 .toList();
         if (sources.isEmpty()) {
             throw new IllegalArgumentException("Invalid JSON string: sources is empty");
@@ -101,9 +99,7 @@ public final class SourceMapUtils {
             throw new IllegalArgumentException("Invalid JSON string: sourcesContent is not an array");
         }
         List<String> sourcesContent = sourcesContentJsonNode.asArray().getNodes().stream()
-                .filter(SimpleJsonUtils.JsonNode::isText)
-                .map(SimpleJsonUtils.JsonNode::asText)
-                .map(SimpleJsonUtils.JsonTextNode::getValue)
+                .map(node -> node.isText() ? node.asText().getValue() : null)
                 .toList();
         if (sourcesContent.isEmpty()) {
             throw new IllegalArgumentException("Invalid JSON string: sourcesContent is empty");
@@ -117,9 +113,7 @@ public final class SourceMapUtils {
             throw new IllegalArgumentException("Invalid JSON string: names is not an array");
         }
         List<String> names = namesJsonNode.asArray().getNodes().stream()
-                .filter(SimpleJsonUtils.JsonNode::isText)
-                .map(SimpleJsonUtils.JsonNode::asText)
-                .map(SimpleJsonUtils.JsonTextNode::getValue)
+                .map(node -> node.isText() ? node.asText().getValue() : null)
                 .toList();
         SimpleJsonUtils.JsonNode mappingsJsonNode = jsonObjectNode.getNodeMap().get(MAPPINGS);
         if (mappingsJsonNode == null) {
@@ -171,14 +165,36 @@ public final class SourceMapUtils {
                     shift = 0;
                 }
             }
-            if (fields.size() < 4) {
-                continue;
+            // Handle different segment field counts:
+            // 1 field: generated column
+            // 4 fields: generated column, source index, original line, original column
+            // 5 fields: generated column, source index, original line, original column, name index
+            if (fields.size() == 1) {
+                // Only update generated column
+                lastNode.generatedPosition.column += fields.get(0);
+                // Don't add to nodes - this is just a position marker without source mapping
+            } else if (fields.size() == 4 || fields.size() == 5) {
+                lastNode.generatedPosition.column += fields.get(0);
+                lastNode.sourceFileIndex += fields.get(1);
+                lastNode.originalPosition.line += fields.get(2);
+                lastNode.originalPosition.column += fields.get(3);
+                if (fields.size() == 5) {
+                    lastNode.nameIndex += fields.get(4);
+                }
+                // Validate indices are within bounds
+                if (lastNode.sourceFileIndex < 0 || lastNode.sourceFileIndex >= sourceFilePaths.size()) {
+                    throw new IllegalArgumentException(
+                            "Invalid source map: sourceFileIndex " + lastNode.sourceFileIndex +
+                            " is out of bounds (sources size: " + sourceFilePaths.size() + ")");
+                }
+                // nameIndex can be -1 (no name), or 0 to names.size()-1
+                if (lastNode.nameIndex < -1 || (lastNode.nameIndex >= 0 && lastNode.nameIndex >= names.size())) {
+                    throw new IllegalArgumentException(
+                            "Invalid source map: nameIndex " + lastNode.nameIndex +
+                            " is out of bounds (names size: " + names.size() + ")");
+                }
+                nodes.add(SourceNode.of(lastNode));
             }
-            lastNode.generatedPosition.column += fields.get(0);
-            lastNode.sourceFileIndex += fields.get(1);
-            lastNode.originalPosition.line += fields.get(2);
-            lastNode.originalPosition.column += fields.get(3);
-            nodes.add(SourceNode.of(lastNode));
         }
         nodesInLines.add(nodes);
     }
@@ -212,7 +228,7 @@ public final class SourceMapUtils {
     public SourceNode getNode(int line, int column) {
         SourceNode node = null;
         if (line >= 0 && column >= 0) {
-            while (line <= nodesInLines.size()) {
+            while (line >= nodesInLines.size()) {
                 if (isParsed()) {
                     break;
                 }
@@ -273,33 +289,45 @@ public final class SourceMapUtils {
         public SourcePosition originalPosition;
         // Zero-based index into the source code array.
         public int sourceFileIndex;
+        // Zero-based index into the names array, -1 if not set.
+        public int nameIndex;
 
         private SourceNode(
                 SourcePosition originalPosition,
                 SourcePosition generatedPosition,
-                int sourceFileIndex) {
+                int sourceFileIndex,
+                int nameIndex) {
             this.generatedPosition = SourcePosition.of(generatedPosition);
             this.originalPosition = SourcePosition.of(originalPosition);
             this.sourceFileIndex = sourceFileIndex;
+            this.nameIndex = nameIndex;
         }
 
         public static SourceNode of() {
-            return of(SourcePosition.of(), SourcePosition.of(), 0);
+            return of(SourcePosition.of(), SourcePosition.of(), 0, -1);
         }
 
         public static SourceNode of(SourceNode node) {
-            return of(node.originalPosition, node.generatedPosition, node.sourceFileIndex);
+            return of(node.originalPosition, node.generatedPosition, node.sourceFileIndex, node.nameIndex);
         }
 
         public static SourceNode of(SourcePosition originalPosition, SourcePosition generatedPosition) {
-            return new SourceNode(originalPosition, generatedPosition, 0);
+            return new SourceNode(originalPosition, generatedPosition, 0, -1);
         }
 
         public static SourceNode of(
                 SourcePosition originalPosition,
                 SourcePosition generatedPosition,
                 int sourceFileIndex) {
-            return new SourceNode(originalPosition, generatedPosition, sourceFileIndex);
+            return new SourceNode(originalPosition, generatedPosition, sourceFileIndex, -1);
+        }
+
+        public static SourceNode of(
+                SourcePosition originalPosition,
+                SourcePosition generatedPosition,
+                int sourceFileIndex,
+                int nameIndex) {
+            return new SourceNode(originalPosition, generatedPosition, sourceFileIndex, nameIndex);
         }
 
         @Override
@@ -307,13 +335,14 @@ public final class SourceMapUtils {
             if (o == null || getClass() != o.getClass()) return false;
             SourceNode that = (SourceNode) o;
             return sourceFileIndex == that.sourceFileIndex
+                    && nameIndex == that.nameIndex
                     && Objects.equals(generatedPosition, that.generatedPosition)
                     && Objects.equals(originalPosition, that.originalPosition);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(generatedPosition, originalPosition, sourceFileIndex);
+            return Objects.hash(generatedPosition, originalPosition, sourceFileIndex, nameIndex);
         }
 
         @Override
@@ -322,6 +351,7 @@ public final class SourceMapUtils {
                     "generatedPosition=" + generatedPosition +
                     ", originalPosition=" + originalPosition +
                     ", sourceFileIndex=" + sourceFileIndex +
+                    ", nameIndex=" + nameIndex +
                     '}';
         }
     }

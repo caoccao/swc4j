@@ -31,7 +31,165 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSourceMapUtils extends BaseTestSuite {
     @Test
-    public void test() throws Swc4jCoreException {
+    public void testEmptySegments() {
+        // Test that empty segments (between commas) are properly skipped
+        String sourceMapJson = """
+                {
+                  "version": 3,
+                  "sources": ["test.js"],
+                  "sourcesContent": ["content"],
+                  "names": [],
+                  "mappings": "AAAA,,CACA"
+                }
+                """;
+        SourceMapUtils sourceMapUtils = SourceMapUtils.of(sourceMapJson);
+        SourceMapUtils.SourceNode node = sourceMapUtils.getNode(0, 0);
+        assertNotNull(node);
+    }
+
+    @Test
+    public void testFiveFieldSegmentsWithNameIndex() {
+        // Test segments with 5 fields (including name index)
+        // Mappings format: AAAAC = [0,0,0,0,1] where the last field is name index delta
+        // Starting from nameIndex=-1, delta=1 makes it 0 (pointing to "myName")
+        String sourceMapJson = """
+                {
+                  "version": 3,
+                  "sources": ["test.js"],
+                  "sourcesContent": ["original"],
+                  "names": ["myName"],
+                  "mappings": "AAAAC"
+                }
+                """;
+        SourceMapUtils sourceMapUtils = SourceMapUtils.of(sourceMapJson);
+        SourceMapUtils.SourceNode node = sourceMapUtils.getNode(0, 0);
+
+        assertNotNull(node);
+        assertEquals(0, node.sourceFileIndex);
+        assertEquals(0, node.nameIndex);
+        assertEquals(0, node.originalPosition.line);
+        assertEquals(0, node.originalPosition.column);
+    }
+
+    @Test
+    public void testNameIndexOutOfBounds() {
+        // Test that invalid nameIndex throws exception
+        // Mappings: "AAAAE" = [0, 0, 0, 0, 2] where field 4 is name index delta
+        // Starting from nameIndex=-1, delta=2 makes it 1, which is out of bounds (only have name at index 0)
+        String sourceMapJson = """
+                {
+                  "version": 3,
+                  "sources": ["test.js"],
+                  "sourcesContent": ["content"],
+                  "names": ["name1"],
+                  "mappings": "AAAAE"
+                }
+                """;
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            SourceMapUtils sourceMapUtils = SourceMapUtils.of(sourceMapJson);
+            sourceMapUtils.getNode(0, 0); // This should trigger parsing and validation
+        });
+    }
+
+    @Test
+    public void testNullPreservationInArrays() {
+        // Test that null values in sources, sourcesContent, and names are preserved
+        String sourceMapJson = """
+                {
+                  "version": 3,
+                  "sources": ["file1.js", null, "file3.js"],
+                  "sourcesContent": ["content1", null, "content3"],
+                  "names": ["name1", null, "name3"],
+                  "mappings": "AAAA"
+                }
+                """;
+        SourceMapUtils sourceMapUtils = SourceMapUtils.of(sourceMapJson);
+
+        // Verify arrays preserve nulls and maintain correct indices
+        assertEquals(3, sourceMapUtils.getSourceFilePaths().size());
+        assertEquals("file1.js", sourceMapUtils.getSourceFilePaths().get(0));
+        assertNull(sourceMapUtils.getSourceFilePaths().get(1));
+        assertEquals("file3.js", sourceMapUtils.getSourceFilePaths().get(2));
+
+        assertEquals(3, sourceMapUtils.getSourceContents().size());
+        assertEquals("content1", sourceMapUtils.getSourceContents().get(0));
+        assertNull(sourceMapUtils.getSourceContents().get(1));
+        assertEquals("content3", sourceMapUtils.getSourceContents().get(2));
+
+        assertEquals(3, sourceMapUtils.getNames().size());
+        assertEquals("name1", sourceMapUtils.getNames().get(0));
+        assertNull(sourceMapUtils.getNames().get(1));
+        assertEquals("name3", sourceMapUtils.getNames().get(2));
+    }
+
+    @Test
+    public void testOneFieldSegments() {
+        // Test that 1-field segments are handled (they update column but don't create mappings)
+        // "A" = [0] (1 field), "C" = [1] (1 field)
+        String sourceMapJson = """
+                {
+                  "version": 3,
+                  "sources": ["test.js"],
+                  "sourcesContent": ["content"],
+                  "names": [],
+                  "mappings": "A,C,AAAA"
+                }
+                """;
+        SourceMapUtils sourceMapUtils = SourceMapUtils.of(sourceMapJson);
+
+        // The 1-field segments should not create source nodes
+        // Only the 4-field segment "AAAA" should create a node
+        SourceMapUtils.SourceNode node = sourceMapUtils.getNode(0, 2);
+        assertNotNull(node);
+        assertEquals(0, node.sourceFileIndex);
+    }
+
+    @Test
+    public void testParsingMultipleLines() {
+        // Test that the parser correctly handles requests for lines beyond initial parse
+        // Multiple lines separated by semicolons
+        String sourceMapJson = """
+                {
+                  "version": 3,
+                  "sources": ["test.js"],
+                  "sourcesContent": ["line1\\nline2\\nline3"],
+                  "names": [],
+                  "mappings": "AAAA;AACA;AACA"
+                }
+                """;
+        SourceMapUtils sourceMapUtils = SourceMapUtils.of(sourceMapJson);
+
+        // Request line 2 - should parse up to that line
+        SourceMapUtils.SourceNode node = sourceMapUtils.getNode(2, 0);
+        assertNotNull(node);
+        assertEquals(2, node.generatedPosition.line);
+        assertEquals(2, node.originalPosition.line);
+    }
+
+    @Test
+    public void testSourceFileIndexOutOfBounds() {
+        // Test that invalid sourceFileIndex throws exception
+        // Mappings: "ACAA" = [0, 1, 0, 0] where field 1 is source index delta
+        // Starting from sourceFileIndex=0, delta=1 makes it 1, which is out of bounds (only have index 0)
+        String sourceMapJson = """
+                {
+                  "version": 3,
+                  "sources": ["test.js"],
+                  "sourcesContent": ["content"],
+                  "names": [],
+                  "mappings": "ACAA"
+                }
+                """;
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            SourceMapUtils sourceMapUtils = SourceMapUtils.of(sourceMapJson);
+            sourceMapUtils.getNode(0, 0); // This should trigger parsing and validation
+        });
+    }
+
+    @Test
+    public void testTransform() throws Swc4jCoreException {
         String code = "function add(a:number, b:number)\n{ return a+b; }";
         String expectedCode = """
                 function add(a: number, b: number) {
