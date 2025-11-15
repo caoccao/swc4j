@@ -49,7 +49,14 @@ public final class SimpleJsonUtils {
                 case '\n' -> sb.append("\\n");
                 case '\r' -> sb.append("\\r");
                 case '\t' -> sb.append("\\t");
-                default -> sb.append(c);
+                default -> {
+                    // Escape control characters (U+0000 to U+001F)
+                    if (c < 0x20) {
+                        sb.append(String.format("\\u%04x", (int) c));
+                    } else {
+                        sb.append(c);
+                    }
+                }
             }
         }
         return sb.toString();
@@ -63,7 +70,7 @@ public final class SimpleJsonUtils {
             context.addOffset(expectedLength);
             return JsonToken.BOOLEAN_FALSE;
         }
-        throw new IllegalArgumentException("Invalid JSON string: expect true at " + context.getOffset());
+        throw new IllegalArgumentException("Invalid JSON string: expect false at " + context.getOffset());
     }
 
     private static JsonToken extractBooleanTrue(String jsonString, JsonParserContext context) {
@@ -93,6 +100,7 @@ public final class SimpleJsonUtils {
                     jsonToken = extractNumber(jsonString, context);
             case 't' -> jsonToken = extractBooleanTrue(jsonString, context);
             case 'f' -> jsonToken = extractBooleanFalse(jsonString, context);
+            case 'n' -> jsonToken = extractNull(jsonString, context);
             case '{' -> {
                 jsonToken = JsonToken.OBJECT_START;
                 context.addOffset(jsonToken.getLength());
@@ -121,6 +129,17 @@ public final class SimpleJsonUtils {
                     "Invalid JSON string: unexpected char " + c + " at " + context.getOffset());
         }
         return jsonToken;
+    }
+
+    private static JsonToken extractNull(String jsonString, JsonParserContext context) {
+        final String expectedString = JsonToken.NULL.getRawString();
+        final int expectedLength = expectedString.length();
+        if (context.getOffset() + expectedLength <= jsonString.length()
+                && expectedString.equals(jsonString.substring(context.getOffset(), context.getOffset() + expectedLength))) {
+            context.addOffset(expectedLength);
+            return JsonToken.NULL;
+        }
+        throw new IllegalArgumentException("Invalid JSON string: expect null at " + context.getOffset());
     }
 
     private static JsonToken extractNumber(String jsonString, JsonParserContext context) {
@@ -154,7 +173,7 @@ public final class SimpleJsonUtils {
                         case 'r' -> sb.append('\r');
                         case 't' -> sb.append('\t');
                         case 'u' -> {
-                            if (context.getOffset() + 5 < length) {
+                            if (context.getOffset() + 5 <= length) {
                                 String hex = jsonString.substring(context.getOffset() + 1, context.getOffset() + 5);
                                 try {
                                     int codePoint = Integer.parseInt(hex, 16);
@@ -200,6 +219,7 @@ public final class SimpleJsonUtils {
         return switch (jsonToken.getType()) {
             case ArrayStart -> parseArray(jsonString, context);
             case Boolean -> JsonBooleanNode.of(jsonToken);
+            case Null -> JsonNullNode.of();
             case Number -> JsonNumberNode.of(jsonToken.getRawString());
             case ObjectStart -> parseObject(jsonString, context);
             case Text -> JsonTextNode.of(jsonToken.getRawString());
@@ -219,6 +239,7 @@ public final class SimpleJsonUtils {
             switch (jsonToken.getType()) {
                 case ArrayStart -> jsonArrayNode.getNodes().add(parseArray(jsonString, context));
                 case Boolean -> jsonArrayNode.getNodes().add(JsonBooleanNode.of(jsonToken));
+                case Null -> jsonArrayNode.getNodes().add(JsonNullNode.of());
                 case Number -> jsonArrayNode.getNodes().add(JsonNumberNode.of(jsonToken.getRawString()));
                 case ObjectStart -> jsonArrayNode.getNodes().add(parseObject(jsonString, context));
                 case Text -> jsonArrayNode.getNodes().add(JsonTextNode.of(jsonToken.getRawString()));
@@ -258,6 +279,7 @@ public final class SimpleJsonUtils {
             switch (jsonToken.getType()) {
                 case ArrayStart -> jsonObjectNode.getNodeMap().put(propertyName, parseArray(jsonString, context));
                 case Boolean -> jsonObjectNode.getNodeMap().put(propertyName, JsonBooleanNode.of(jsonToken));
+                case Null -> jsonObjectNode.getNodeMap().put(propertyName, JsonNullNode.of());
                 case Number ->
                         jsonObjectNode.getNodeMap().put(propertyName, JsonNumberNode.of(jsonToken.getRawString()));
                 case ObjectStart -> jsonObjectNode.getNodeMap().put(propertyName, parseObject(jsonString, context));
@@ -298,6 +320,7 @@ public final class SimpleJsonUtils {
         Comma,
         Colon,
         EndOfFile,
+        Null,
         Number,
         ObjectEnd,
         ObjectStart,
@@ -307,6 +330,14 @@ public final class SimpleJsonUtils {
     public interface JsonNode {
         default JsonArrayNode asArray() {
             return isArray() ? (JsonArrayNode) this : null;
+        }
+
+        default JsonBooleanNode asBoolean() {
+            return isBoolean() ? (JsonBooleanNode) this : null;
+        }
+
+        default JsonNullNode asNull() {
+            return isNull() ? (JsonNullNode) this : null;
         }
 
         default JsonNumberNode asNumber() {
@@ -323,6 +354,14 @@ public final class SimpleJsonUtils {
 
         default boolean isArray() {
             return this instanceof JsonArrayNode;
+        }
+
+        default boolean isBoolean() {
+            return this instanceof JsonBooleanNode;
+        }
+
+        default boolean isNull() {
+            return this instanceof JsonNullNode;
         }
 
         default boolean isNumber() {
@@ -413,6 +452,27 @@ public final class SimpleJsonUtils {
         public JsonBooleanNode setValue(boolean value) {
             this.value = value;
             return this;
+        }
+    }
+
+    public static class JsonNullNode implements JsonNode {
+        private static final JsonNullNode INSTANCE = new JsonNullNode();
+
+        private JsonNullNode() {
+        }
+
+        public static JsonNullNode of() {
+            return INSTANCE;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o != null && getClass() == o.getClass();
+        }
+
+        @Override
+        public int hashCode() {
+            return 0;
         }
     }
 
@@ -635,6 +695,7 @@ public final class SimpleJsonUtils {
         public static final JsonToken COMMA = new JsonToken(",", JsonTokenType.Comma);
         public static final JsonToken COLON = new JsonToken(":", JsonTokenType.Colon);
         public static final JsonToken END_OF_FILE = new JsonToken("", JsonTokenType.EndOfFile);
+        public static final JsonToken NULL = new JsonToken("null", JsonTokenType.Null);
         public static final JsonToken OBJECT_END = new JsonToken("}", JsonTokenType.ObjectEnd);
         public static final JsonToken OBJECT_START = new JsonToken("{", JsonTokenType.ObjectStart);
         private final String rawString;
