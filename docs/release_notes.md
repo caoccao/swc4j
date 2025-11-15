@@ -3,6 +3,8 @@
 ## 2.0.0
 
 * Upgraded JDK to v17
+* Added `ISwc4jLibLoadingListener`
+* Added `getLibLoadingListener()`, `setLibLoadingListener()` to `Swc4jLibLoader`
 
 ## 1.8.0
 

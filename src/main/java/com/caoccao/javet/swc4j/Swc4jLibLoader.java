@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j;
 
 import com.caoccao.javet.swc4j.exceptions.Swc4jLibException;
+import com.caoccao.javet.swc4j.interfaces.ISwc4jLibLoadingListener;
 import com.caoccao.javet.swc4j.interfaces.ISwc4jLogger;
 import com.caoccao.javet.swc4j.utils.ArrayUtils;
 import com.caoccao.javet.swc4j.utils.OSUtils;
@@ -26,13 +27,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.text.MessageFormat;
+import java.util.Objects;
 
 /**
  * The type Swc4j lib loader.
  *
  * @since 0.1.0
  */
-final class Swc4jLibLoader {
+public final class Swc4jLibLoader {
     private static final String ANDROID_ABI_ARM = "armeabi-v7a";
     private static final String ANDROID_ABI_ARM64 = "arm64-v8a";
     private static final String ANDROID_ABI_X86 = "x86";
@@ -43,11 +45,13 @@ final class Swc4jLibLoader {
     private static final String ARCH_X86_64 = "x86_64";
     private static final int BUFFER_LENGTH = 4096;
     private static final String CHMOD = "chmod";
+    private static final String DOT = ".";
     private static final String LIB_FILE_EXTENSION_ANDROID = "soso";
     private static final String LIB_FILE_EXTENSION_LINUX = "so";
     private static final String LIB_FILE_EXTENSION_MACOS = "dylib";
     private static final String LIB_FILE_EXTENSION_WINDOWS = "dll";
     private static final String LIB_FILE_NAME_FORMAT = "libswc4j-{0}-{1}.v.{2}.{3}";
+    private static final String LIB_FILE_NAME_PREFIX = "lib";
     private static final String LIB_NAME = "swc4j";
     private static final String LIB_VERSION = "2.0.0";
     private static final ISwc4jLogger LOGGER = new Swc4jDefaultLogger(Swc4jLibLoader.class.getName());
@@ -58,6 +62,7 @@ final class Swc4jLibLoader {
     private static final String OS_WINDOWS = "windows";
     private static final String RESOURCE_NAME_FORMAT = "/{0}";
     private static final String XRR = "755";
+    private static ISwc4jLibLoadingListener libLoadingListener = new Swc4jLibLoadingListener();
 
     /**
      * Instantiates a new Swc4j lib loader.
@@ -65,6 +70,26 @@ final class Swc4jLibLoader {
      * @since 0.1.0
      */
     Swc4jLibLoader() {
+    }
+
+    /**
+     * Gets lib loading listener.
+     *
+     * @return the lib loading listener
+     * @since 2.0.0
+     */
+    public static ISwc4jLibLoadingListener getLibLoadingListener() {
+        return libLoadingListener;
+    }
+
+    /**
+     * Sets lib loading listener.
+     *
+     * @param libLoadingListener the lib loading listener
+     * @since 2.0.0
+     */
+    public static void setLibLoadingListener(ISwc4jLibLoadingListener libLoadingListener) {
+        Swc4jLibLoader.libLoadingListener = Objects.requireNonNull(libLoadingListener);
     }
 
     private void deployLibFile(String resourceFileName, File libFile) {
@@ -149,6 +174,33 @@ final class Swc4jLibLoader {
                 fileExtension);
     }
 
+    private String getNormalizedLibFilePath(String libFilePath) {
+        boolean prefixToBeNormalized = false;
+        if (OSUtils.IS_LINUX) {
+            prefixToBeNormalized = true;
+            if (libFilePath.endsWith(DOT + LIB_FILE_EXTENSION_LINUX)) {
+                libFilePath = libFilePath.substring(
+                        0, libFilePath.length() - DOT.length() - LIB_FILE_EXTENSION_LINUX.length());
+            }
+        } else if (OSUtils.IS_ANDROID) {
+            prefixToBeNormalized = true;
+            if (libFilePath.endsWith(DOT + LIB_FILE_EXTENSION_ANDROID)) {
+                libFilePath = libFilePath.substring(
+                        0, libFilePath.length() - DOT.length() - LIB_FILE_EXTENSION_ANDROID.length());
+            }
+        } else if (OSUtils.IS_MACOS) {
+            prefixToBeNormalized = true;
+            if (libFilePath.endsWith(DOT + LIB_FILE_EXTENSION_MACOS)) {
+                libFilePath = libFilePath.substring(
+                        0, libFilePath.length() - DOT.length() - LIB_FILE_EXTENSION_MACOS.length());
+            }
+        }
+        if (prefixToBeNormalized && libFilePath.startsWith(LIB_FILE_NAME_PREFIX)) {
+            libFilePath = libFilePath.substring(LIB_FILE_NAME_PREFIX.length());
+        }
+        return libFilePath;
+    }
+
     private String getOSArch() {
         if (OSUtils.IS_WINDOWS) {
             return ARCH_X86_64;
@@ -197,25 +249,49 @@ final class Swc4jLibLoader {
      * @since 0.1.0
      */
     void load() {
+        String libFilePath = null;
         try {
-            File libPath = new File(OSUtils.TEMP_DIRECTORY, LIB_NAME);
-            purge(libPath);
-            File rootLibPath;
-            if (OSUtils.IS_ANDROID) {
-                rootLibPath = libPath;
+            boolean isLibInSystemPath = libLoadingListener.isLibInSystemPath();
+            boolean isDeploy = libLoadingListener.isDeploy();
+            if (isLibInSystemPath) {
+                libFilePath = getLibFileName();
+            } else if (isDeploy) {
+                File libPath = libLoadingListener.getLibPath();
+                Objects.requireNonNull(libPath, "Lib path cannot be null");
+                String resourceFileName = getResourceFileName();
+                File rootLibPath;
+                if (OSUtils.IS_ANDROID) {
+                    rootLibPath = libPath;
+                } else {
+                    rootLibPath = new File(libPath, Long.toString(OSUtils.PROCESS_ID));
+                }
+                if (!rootLibPath.exists()) {
+                    if (!rootLibPath.mkdirs()) {
+                        throw Swc4jLibException.libNotCreated(rootLibPath.getAbsolutePath());
+                    }
+                }
+                purge(libPath);
+                File libFile = new File(rootLibPath, getLibFileName()).getAbsoluteFile();
+                libFilePath = libFile.getAbsolutePath();
+                deployLibFile(resourceFileName, libFile);
             } else {
-                rootLibPath = new File(libPath, Long.toString(OSUtils.PROCESS_ID));
+                File libPath = libLoadingListener.getLibPath();
+                Objects.requireNonNull(libPath, "Lib path cannot be null");
+                libFilePath = new File(libPath, getLibFileName()).getAbsolutePath();
             }
-            if (!rootLibPath.exists()) {
-                if (!rootLibPath.mkdirs()) {
-                    throw Swc4jLibException.libNotCreated(rootLibPath.getAbsolutePath());
+            try {
+                if (isLibInSystemPath) {
+                    System.loadLibrary(getNormalizedLibFilePath(libFilePath));
+                } else {
+                    System.load(libFilePath);
+                }
+            } catch (Throwable t) {
+                if (libLoadingListener.isSuppressingError()) {
+                    LOGGER.warn(t.getMessage());
+                } else {
+                    throw t;
                 }
             }
-            String resourceFileName = getResourceFileName();
-            File libFile = new File(rootLibPath, getLibFileName()).getAbsoluteFile();
-            String libFilePath = libFile.getAbsolutePath();
-            deployLibFile(resourceFileName, libFile);
-            System.load(libFilePath);
         } catch (Throwable t) {
             LOGGER.error(t.getMessage(), t);
         }
