@@ -3,6 +3,7 @@
 ## 2.0.0
 
 * Upgraded JDK to v17
+* Upgraded Android NDK to r29
 * Added `ISwc4jLibLoadingListener`
 * Added `getLibLoadingListener()`, `setLibLoadingListener()` to `Swc4jLibLoader`
 
