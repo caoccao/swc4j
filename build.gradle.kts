@@ -104,7 +104,7 @@ afterEvaluate {
     }
 }
 
-task<Exec>("buildJNIHeaders") {
+tasks.register<Exec>("buildJNIHeaders") {
     mkdir("$buildDir/generated/tmp/jni")
     providers.exec {
         workingDir("$projectDir")
