@@ -27,6 +27,7 @@ public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor) {
             return switch (type) {
                 case "I" -> new ReturnTypeInfo(ReturnType.INT, 1, null);
                 case "Z" -> new ReturnTypeInfo(ReturnType.BOOLEAN, 1, null);
+                case "B" -> new ReturnTypeInfo(ReturnType.BYTE, 1, null);
                 case "C" -> new ReturnTypeInfo(ReturnType.CHAR, 1, null);
                 case "S" -> new ReturnTypeInfo(ReturnType.SHORT, 1, null);
                 case "J" -> new ReturnTypeInfo(ReturnType.LONG, 2, null);

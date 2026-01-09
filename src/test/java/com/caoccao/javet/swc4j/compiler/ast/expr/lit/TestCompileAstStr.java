@@ -38,6 +38,7 @@ public class TestCompileAstStr extends BaseTestCompileSuite {
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
+        assertEquals("com.A", classA.getName());
         var instance = classA.getConstructor().newInstance();
         assertEquals('a', classA.getMethod("test").invoke(instance));
     }

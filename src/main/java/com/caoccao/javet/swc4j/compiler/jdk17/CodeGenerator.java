@@ -223,6 +223,13 @@ public final class CodeGenerator {
                 int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
                 code.invokestatic(valueOfRef);
             } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                    && "Ljava/lang/Byte;".equals(returnTypeInfo.descriptor())) {
+                // Box byte to Byte
+                byte byteValue = (byte) value;
+                code.iconst(byteValue);
+                int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
+                code.invokestatic(valueOfRef);
+            } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                     && "Ljava/lang/Short;".equals(returnTypeInfo.descriptor())) {
                 // Box short to Short
                 short shortValue = (short) value;
@@ -293,13 +300,68 @@ public final class CodeGenerator {
             LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
             if (localVar != null) {
                 switch (localVar.type()) {
-                    case "I", "S", "C", "Z" -> code.iload(localVar.index());
+                    case "I", "S", "C", "Z", "B" -> code.iload(localVar.index());
                     case "J" -> code.lload(localVar.index());
                     case "F" -> code.fload(localVar.index());
                     case "D" -> {
                         // code.dload(localVar.index());
                     }
                     default -> code.aload(localVar.index());
+                }
+                
+                // Handle boxing if needed
+                if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT && returnTypeInfo.descriptor() != null) {
+                    // Check if we need to box a primitive to its wrapper
+                    switch (localVar.type()) {
+                        case "I" -> {
+                            if ("Ljava/lang/Integer;".equals(returnTypeInfo.descriptor())) {
+                                int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+                                code.invokestatic(valueOfRef);
+                            }
+                        }
+                        case "Z" -> {
+                            if ("Ljava/lang/Boolean;".equals(returnTypeInfo.descriptor())) {
+                                int valueOfRef = cp.addMethodRef("java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
+                                code.invokestatic(valueOfRef);
+                            }
+                        }
+                        case "B" -> {
+                            if ("Ljava/lang/Byte;".equals(returnTypeInfo.descriptor())) {
+                                int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
+                                code.invokestatic(valueOfRef);
+                            }
+                        }
+                        case "C" -> {
+                            if ("Ljava/lang/Character;".equals(returnTypeInfo.descriptor())) {
+                                int valueOfRef = cp.addMethodRef("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
+                                code.invokestatic(valueOfRef);
+                            }
+                        }
+                        case "S" -> {
+                            if ("Ljava/lang/Short;".equals(returnTypeInfo.descriptor())) {
+                                int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
+                                code.invokestatic(valueOfRef);
+                            }
+                        }
+                        case "J" -> {
+                            if ("Ljava/lang/Long;".equals(returnTypeInfo.descriptor())) {
+                                int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+                                code.invokestatic(valueOfRef);
+                            }
+                        }
+                        case "F" -> {
+                            if ("Ljava/lang/Float;".equals(returnTypeInfo.descriptor())) {
+                                int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
+                                code.invokestatic(valueOfRef);
+                            }
+                        }
+                        case "D" -> {
+                            if ("Ljava/lang/Double;".equals(returnTypeInfo.descriptor())) {
+                                int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
+                                code.invokestatic(valueOfRef);
+                            }
+                        }
+                    }
                 }
             }
         } else if (expr instanceof Swc4jAstBinExpr binExpr) {
@@ -368,7 +430,7 @@ public final class CodeGenerator {
                 // Generate appropriate return instruction
                 switch (returnTypeInfo.type()) {
                     case VOID -> code.returnVoid();
-                    case INT, SHORT, CHAR, BOOLEAN -> code.ireturn();
+                    case INT, SHORT, CHAR, BOOLEAN, BYTE -> code.ireturn();
                     case LONG -> code.lreturn();
                     case FLOAT -> code.freturn();
                     case DOUBLE -> code.dreturn();
@@ -386,6 +448,7 @@ public final class CodeGenerator {
             case VOID -> "V";
             case INT -> "I";
             case BOOLEAN -> "Z";
+            case BYTE -> "B";
             case CHAR -> "C";
             case SHORT -> "S";
             case LONG -> "J";
@@ -479,6 +542,13 @@ public final class CodeGenerator {
                     int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
                     code.invokestatic(valueOfRef);
                 } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                        && "Ljava/lang/Byte;".equals(returnTypeInfo.descriptor())) {
+                    // Check if we're dealing with a Byte wrapper
+                    byte byteValue = (byte) -(int) value;
+                    code.iconst(byteValue);
+                    int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
+                    code.invokestatic(valueOfRef);
+                } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                         && "Ljava/lang/Short;".equals(returnTypeInfo.descriptor())) {
                     // Check if we're dealing with a Short wrapper
                     short shortValue = (short) -(int) value;
@@ -551,7 +621,7 @@ public final class CodeGenerator {
 
                     // Store the value in the local variable
                     switch (localVar.type()) {
-                        case "I", "S", "C", "Z" -> code.istore(localVar.index());
+                        case "I", "S", "C", "Z", "B" -> code.istore(localVar.index());
                         case "J" -> code.lstore(localVar.index());
                         case "F" -> code.fstore(localVar.index());
                         case "D" -> {
@@ -580,8 +650,10 @@ public final class CodeGenerator {
             case "Ljava/lang/Character;" -> {
                 int charValueRef = cp.addMethodRef("java/lang/Character", "charValue", "()C");
                 code.invokevirtual(charValueRef);
-            }
-            case "Ljava/lang/Long;" -> {
+            }            case "Ljava/lang/Byte;" -> {
+                int byteValueRef = cp.addMethodRef("java/lang/Byte", "byteValue", "()B");
+                code.invokevirtual(byteValueRef);
+            }            case "Ljava/lang/Long;" -> {
                 int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
                 code.invokevirtual(longValueRef);
             }

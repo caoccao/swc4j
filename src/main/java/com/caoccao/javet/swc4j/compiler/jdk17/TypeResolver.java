@@ -179,6 +179,7 @@ public final class TypeResolver {
         return switch (resolvedType) {
             case "int" -> "I";
             case "boolean" -> "Z";
+            case "byte" -> "B";
             case "char" -> "C";
             case "short" -> "S";
             case "long" -> "J";

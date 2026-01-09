@@ -25,6 +25,7 @@ public record ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String>
     static {
         DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
                 "Boolean", "java.lang.Boolean",
+                "Byte", "java.lang.Byte",
                 "Character", "java.lang.Character",
                 "Double", "java.lang.Double",
                 "Float", "java.lang.Float",

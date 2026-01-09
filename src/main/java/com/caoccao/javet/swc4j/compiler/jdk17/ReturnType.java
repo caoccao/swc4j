@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 
 public enum ReturnType {
     BOOLEAN(2),
+    BYTE(2),
     CHAR(2),
     DOUBLE(4),
     FLOAT(2),
