@@ -27,6 +27,82 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testCharPlusChar(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: char = 'A'
+                      const b: char = 'B'
+                      const c = a + b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(131, classA.getMethod("test").invoke(instance)); // 'A' (65) + 'B' (66) = 131
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testCharPlusString(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: char = 'X'
+                      const b: String = 'YZ'
+                      const c = a + b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("XYZ", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testCharacterPlusCharacter(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Character = '1'
+                      const b: Character = '2'
+                      const c = a + b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(99, classA.getMethod("test").invoke(instance)); // '1' (49) + '2' (50) = 99
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testCharacterPlusString(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Character = '@'
+                      const b: String = 'user'
+                      const c = a + b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("@user", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testComplexExpressionWithMultipleAdditions(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -180,9 +256,47 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testStringPlusChar(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: String = 'hello'
+                      const b: char = '!'
+                      const c = a + b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("hello!", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testStringPlusCharacter(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: String = 'test'
+                      const b: Character = '!'
+                      const c = a + b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("test!", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testStringPlusInt(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
-                export type MyString = java.lang.String;
+                export type MyString = String;
                 namespace com {
                   export class A {
                     test() {
@@ -205,7 +319,7 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: java.lang.String = 'a'
+                      const a: String = 'a'
                       const b = 'b'
                       const c = a + b
                       return c

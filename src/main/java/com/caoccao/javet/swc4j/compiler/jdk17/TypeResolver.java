@@ -32,6 +32,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.Optional;
 
@@ -43,7 +44,7 @@ public final class TypeResolver {
             Swc4jAstFunction function,
             Swc4jAstBlockStmt body,
             CompilationContext context,
-            ByteCodeCompilerOptions options) {
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
         // Check for explicit return type annotation first
         var returnTypeOpt = function.getReturnType();
         if (returnTypeOpt.isPresent()) {
@@ -51,21 +52,10 @@ public final class TypeResolver {
             var tsType = returnTypeAnn.getTypeAnn();
             if (tsType instanceof Swc4jAstTsTypeRef typeRef) {
                 ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
-                if (entityName instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent ident) {
+                if (entityName instanceof Swc4jAstIdent ident) {
                     String typeName = ident.getSym();
                     String descriptor = mapTypeNameToDescriptor(typeName, options);
-                    return switch (descriptor) {
-                        case "I" -> new ReturnTypeInfo(ReturnType.INT, 1, null);
-                        case "C" -> new ReturnTypeInfo(ReturnType.CHAR, 1, null);
-                        case "S" -> new ReturnTypeInfo(ReturnType.SHORT, 1, null);
-                        case "J" -> new ReturnTypeInfo(ReturnType.LONG, 2, null);
-                        case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
-                        case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null);
-                        case "Ljava/lang/String;" -> new ReturnTypeInfo(ReturnType.STRING, 1, null);
-                        case "V" -> new ReturnTypeInfo(ReturnType.VOID, 0, null);
-                        default ->
-                                new ReturnTypeInfo(ReturnType.OBJECT, 1, descriptor); // Object reference with descriptor
-                    };
+                    return ReturnTypeInfo.of(descriptor);
                 }
             }
         }
@@ -76,35 +66,9 @@ public final class TypeResolver {
                 var argOpt = returnStmt.getArg();
                 if (argOpt.isPresent()) {
                     ISwc4jAstExpr arg = argOpt.get();
-                    if (arg instanceof Swc4jAstStr) {
-                        return new ReturnTypeInfo(ReturnType.STRING, 1, null);
-                    } else if (arg instanceof Swc4jAstNumber number) {
-                        double value = number.getValue();
-                        if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
-                            return new ReturnTypeInfo(ReturnType.INT, 1, null);
-                        } else {
-                            return new ReturnTypeInfo(ReturnType.DOUBLE, 2, null);
-                        }
-                    } else if (arg instanceof Swc4jAstIdent ident) {
-                        String type = context.getInferredTypes().get(ident.getSym());
-                        if ("I".equals(type)) {
-                            return new ReturnTypeInfo(ReturnType.INT, 1, null);
-                        } else if ("C".equals(type)) {
-                            return new ReturnTypeInfo(ReturnType.CHAR, 1, null);
-                        } else if ("S".equals(type)) {
-                            return new ReturnTypeInfo(ReturnType.SHORT, 1, null);
-                        } else if ("J".equals(type)) {
-                            return new ReturnTypeInfo(ReturnType.LONG, 2, null);
-                        } else if ("F".equals(type)) {
-                            return new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
-                        } else if ("D".equals(type)) {
-                            return new ReturnTypeInfo(ReturnType.DOUBLE, 2, null);
-                        } else if ("Ljava/lang/String;".equals(type)) {
-                            return new ReturnTypeInfo(ReturnType.STRING, 1, null);
-                        } else if (type != null && type.startsWith("L") && type.endsWith(";")) {
-                            return new ReturnTypeInfo(ReturnType.OBJECT, 1, type);
-                        }
-                    }
+                    // Use inferTypeFromExpr for general type inference
+                    String type = inferTypeFromExpr(arg, context, options);
+                    return ReturnTypeInfo.of(type);
                 }
                 return new ReturnTypeInfo(ReturnType.VOID, 0, null);
             }
@@ -156,13 +120,23 @@ public final class TypeResolver {
             if (binExpr.getOp() == Swc4jAstBinaryOp.Add) {
                 String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
                 String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
-                // String concatenation
+                // String concatenation - if either operand is String, result is String
+                // This includes: String + char, char + String, String + Character, Character + String
                 if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
                     return "Ljava/lang/String;";
                 }
                 // If both operands are Integer wrappers, result is also int (after unboxing and addition)
                 // We return "I" because the addition operation works on primitives
                 if ("Ljava/lang/Integer;".equals(leftType) && "Ljava/lang/Integer;".equals(rightType)) {
+                    return "I";
+                }
+                // If both operands are Character wrappers, result is int (after unboxing and addition)
+                // char + char promotes to int in Java
+                if ("Ljava/lang/Character;".equals(leftType) && "Ljava/lang/Character;".equals(rightType)) {
+                    return "I";
+                }
+                // If both operands are char, result is int (char + char promotes to int)
+                if ("C".equals(leftType) && "C".equals(rightType)) {
                     return "I";
                 }
                 // If both operands are Short wrappers, result is also int (after unboxing and addition)

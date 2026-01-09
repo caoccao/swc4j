@@ -45,12 +45,21 @@ public final class CodeGenerator {
 
     private static void appendOperandToStringBuilder(
             CodeBuilder code,
+            ClassWriter.ConstantPool cp,
             String operandType,
             int appendString,
-            int appendInt) {
+            int appendInt,
+            int appendChar) {
         switch (operandType) {
             case "Ljava/lang/String;" -> code.invokevirtual(appendString);
             case "I" -> code.invokevirtual(appendInt);
+            case "C" -> code.invokevirtual(appendChar);
+            case "Ljava/lang/Character;" -> {
+                // Unbox Character to char
+                int charValueRef = cp.addMethodRef("java/lang/Character", "charValue", "()C");
+                code.invokevirtual(charValueRef);
+                code.invokevirtual(appendChar);
+            }
         }
     }
 
@@ -80,7 +89,7 @@ public final class CodeGenerator {
 
                 // Determine type and generate appropriate add instruction
                 switch (leftType) {
-                    case "I", "S", "Ljava/lang/Integer;", "Ljava/lang/Short;" -> code.iadd();
+                    case "I", "S", "C", "Ljava/lang/Integer;", "Ljava/lang/Short;", "Ljava/lang/Character;" -> code.iadd();
                     case "J", "Ljava/lang/Long;" -> code.ladd();
                     case "F", "Ljava/lang/Float;" -> code.fadd();
                     case "D", "Ljava/lang/Double;" -> code.dadd();
@@ -366,22 +375,53 @@ public final class CodeGenerator {
         int stringBuilderInit = cp.addMethodRef("java/lang/StringBuilder", "<init>", "()V");
         int appendString = cp.addMethodRef("java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;");
         int appendInt = cp.addMethodRef("java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;");
+        int appendChar = cp.addMethodRef("java/lang/StringBuilder", "append", "(C)Ljava/lang/StringBuilder;");
         int toString = cp.addMethodRef("java/lang/StringBuilder", "toString", "()Ljava/lang/String;");
 
         code.newInstance(stringBuilderClass)
                 .dup()
                 .invokespecial(stringBuilderInit);
 
-        // Append left operand
-        generateExpr(code, cp, left, null, context, options);
-        appendOperandToStringBuilder(code, leftType, appendString, appendInt);
+        // Flatten the operands - if left is also a string concatenation, collect all operands
+        java.util.List<ISwc4jAstExpr> operands = new java.util.ArrayList<>();
+        java.util.List<String> operandTypes = new java.util.ArrayList<>();
+        
+        // Collect operands from left side
+        collectStringConcatOperands(left, operands, operandTypes, context, options);
+        
+        // Add right operand
+        operands.add(right);
+        operandTypes.add(rightType);
 
-        // Append right operand
-        generateExpr(code, cp, right, null, context, options);
-        appendOperandToStringBuilder(code, rightType, appendString, appendInt);
+        // Append all operands
+        for (int i = 0; i < operands.size(); i++) {
+            generateExpr(code, cp, operands.get(i), null, context, options);
+            appendOperandToStringBuilder(code, cp, operandTypes.get(i), appendString, appendInt, appendChar);
+        }
 
         // Call toString()
         code.invokevirtual(toString);
+    }
+    
+    private static void collectStringConcatOperands(
+            ISwc4jAstExpr expr,
+            java.util.List<ISwc4jAstExpr> operands,
+            java.util.List<String> operandTypes,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) {
+        // If this expression is a binary Add that results in a String, collect its operands
+        if (expr instanceof Swc4jAstBinExpr binExpr && binExpr.getOp() == Swc4jAstBinaryOp.Add) {
+            String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
+            if ("Ljava/lang/String;".equals(exprType)) {
+                // This is a string concatenation - collect operands recursively
+                collectStringConcatOperands(binExpr.getLeft(), operands, operandTypes, context, options);
+                collectStringConcatOperands(binExpr.getRight(), operands, operandTypes, context, options);
+                return;
+            }
+        }
+        // Not a string concatenation - add this expression as an operand
+        operands.add(expr);
+        operandTypes.add(TypeResolver.inferTypeFromExpr(expr, context, options));
     }
 
     public static void generateUnaryExpr(

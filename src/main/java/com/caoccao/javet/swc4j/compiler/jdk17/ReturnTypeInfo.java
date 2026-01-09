@@ -16,5 +16,31 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
 public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor) {
+    public static ReturnTypeInfo of(String type) throws Swc4jByteCodeCompilerException {
+        if (type == null || type.isEmpty()) {
+            throw new Swc4jByteCodeCompilerException("Missing type info.");
+        }
+        if (type.length() == 1) {
+            return switch (type) {
+                case "I" -> new ReturnTypeInfo(ReturnType.INT, 1, null);
+                case "C" -> new ReturnTypeInfo(ReturnType.CHAR, 1, null);
+                case "S" -> new ReturnTypeInfo(ReturnType.SHORT, 1, null);
+                case "J" -> new ReturnTypeInfo(ReturnType.LONG, 2, null);
+                case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
+                case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null);
+                case "V" -> new ReturnTypeInfo(ReturnType.VOID, 0, null);
+                default -> throw new Swc4jByteCodeCompilerException("Unsupported primitive type: " + type);
+            };
+        }
+        if (type.equals("Ljava/lang/String;")) {
+            return new ReturnTypeInfo(ReturnType.STRING, 1, null);
+        }
+        if ((type.startsWith("L") || type.startsWith("[")) && type.endsWith(";")) {
+            return new ReturnTypeInfo(ReturnType.OBJECT, 1, type);
+        }
+        throw new Swc4jByteCodeCompilerException("Unsupported object type: " + type);
+    }
 }
