@@ -25,52 +25,16 @@ public class CodeBuilder {
     private final ByteArrayOutputStream code = new ByteArrayOutputStream();
 
     public CodeBuilder aload(int index) {
-        if (index == 0) {
-            code.write(0x2A); // aload_0
-        } else if (index == 1) {
-            code.write(0x2B); // aload_1
-        } else if (index == 2) {
-            code.write(0x2C); // aload_2
-        } else if (index == 3) {
-            code.write(0x2D); // aload_3
-        } else {
-            code.write(0x19); // aload
-            code.write(index);
+        switch (index) {
+            case 0 -> code.write(0x2A); // aload_0
+            case 1 -> code.write(0x2B); // aload_1
+            case 2 -> code.write(0x2C); // aload_2
+            case 3 -> code.write(0x2D); // aload_3
+            default -> {
+                code.write(0x19); // aload
+                code.write(index);
+            }
         }
-        return this;
-    }
-
-    public CodeBuilder invokespecial(int methodRefIndex) {
-        code.write(0xB7); // invokespecial
-        writeShort(methodRefIndex);
-        return this;
-    }
-
-    public CodeBuilder invokevirtual(int methodRefIndex) {
-        code.write(0xB6); // invokevirtual
-        writeShort(methodRefIndex);
-        return this;
-    }
-
-    public CodeBuilder invokestatic(int methodRefIndex) {
-        code.write(0xB8); // invokestatic
-        writeShort(methodRefIndex);
-        return this;
-    }
-
-    public CodeBuilder ldc(int constantIndex) {
-        if (constantIndex <= 255) {
-            code.write(0x12); // ldc
-            code.write(constantIndex);
-        } else {
-            code.write(0x13); // ldc_w
-            writeShort(constantIndex);
-        }
-        return this;
-    }
-
-    public CodeBuilder returnVoid() {
-        code.write(0xB1); // return
         return this;
     }
 
@@ -79,8 +43,78 @@ public class CodeBuilder {
         return this;
     }
 
-    public CodeBuilder ireturn() {
-        code.write(0xAC); // ireturn
+    public CodeBuilder astore(int index) {
+        switch (index) {
+            case 0 -> code.write(0x4B);
+            // astore_0
+            case 1 -> code.write(0x4C);
+            // astore_1
+            case 2 -> code.write(0x4D);
+            // astore_2
+            case 3 -> code.write(0x4E);
+            // astore_3
+            default -> {
+                code.write(0x3A); // astore
+                code.write(index);
+            }
+        }
+        return this;
+    }
+
+    public CodeBuilder dadd() {
+        code.write(0x63); // dadd
+        return this;
+    }
+
+    public CodeBuilder dconst(double value) {
+        if (value == 0.0) {
+            code.write(0x0E); // dconst_0
+        } else if (value == 1.0) {
+            code.write(0x0F); // dconst_1
+        } else {
+            throw new IllegalArgumentException("Double value " + value + " requires ldc2_w, use ldc2_w() instead");
+        }
+        return this;
+    }
+
+    public CodeBuilder dreturn() {
+        code.write(0xAF); // dreturn
+        return this;
+    }
+
+    public CodeBuilder dup() {
+        code.write(0x59); // dup
+        return this;
+    }
+
+    public CodeBuilder fconst(float value) {
+        if (value == 0.0f) {
+            code.write(0x0B); // fconst_0
+        } else if (value == 1.0f) {
+            code.write(0x0C); // fconst_1
+        } else if (value == 2.0f) {
+            code.write(0x0D); // fconst_2
+        } else {
+            throw new IllegalArgumentException("Float value " + value + " requires ldc");
+        }
+        return this;
+    }
+
+    public CodeBuilder fload(int index) {
+        switch (index) {
+            case 0 -> code.write(0x22);
+            // fload_0
+            case 1 -> code.write(0x23);
+            // fload_1
+            case 2 -> code.write(0x24);
+            // fload_2
+            case 3 -> code.write(0x25);
+            // fload_3
+            default -> {
+                code.write(0x17); // fload
+                code.write(index);
+            }
+        }
         return this;
     }
 
@@ -89,8 +123,41 @@ public class CodeBuilder {
         return this;
     }
 
-    public CodeBuilder dreturn() {
-        code.write(0xAF); // dreturn
+    public CodeBuilder fstore(int index) {
+        switch (index) {
+            case 0 -> code.write(0x43);
+            // fstore_0
+            case 1 -> code.write(0x44);
+            // fstore_1
+            case 2 -> code.write(0x45);
+            // fstore_2
+            case 3 -> code.write(0x46);
+            // fstore_3
+            default -> {
+                code.write(0x38); // fstore
+                code.write(index);
+            }
+        }
+        return this;
+    }
+
+    public CodeBuilder iadd() {
+        code.write(0x60); // iadd
+        return this;
+    }
+
+    public CodeBuilder ineg() {
+        code.write(0x74); // ineg
+        return this;
+    }
+
+    public CodeBuilder fneg() {
+        code.write(0x76); // fneg
+        return this;
+    }
+
+    public CodeBuilder dneg() {
+        code.write(0x77); // dneg
         return this;
     }
 
@@ -125,26 +192,72 @@ public class CodeBuilder {
         return this;
     }
 
-    public CodeBuilder fconst(float value) {
-        if (value == 0.0f) {
-            code.write(0x0B); // fconst_0
-        } else if (value == 1.0f) {
-            code.write(0x0C); // fconst_1
-        } else if (value == 2.0f) {
-            code.write(0x0D); // fconst_2
-        } else {
-            throw new IllegalArgumentException("Float value " + value + " requires ldc");
+    public CodeBuilder iload(int index) {
+        switch (index) {
+            case 0 -> code.write(0x1A);
+            // iload_0
+            case 1 -> code.write(0x1B);
+            // iload_1
+            case 2 -> code.write(0x1C);
+            // iload_2
+            case 3 -> code.write(0x1D);
+            // iload_3
+            default -> {
+                code.write(0x15); // iload
+                code.write(index);
+            }
         }
         return this;
     }
 
-    public CodeBuilder dconst(double value) {
-        if (value == 0.0) {
-            code.write(0x0E); // dconst_0
-        } else if (value == 1.0) {
-            code.write(0x0F); // dconst_1
+    public CodeBuilder invokespecial(int methodRefIndex) {
+        code.write(0xB7); // invokespecial
+        writeShort(methodRefIndex);
+        return this;
+    }
+
+    public CodeBuilder invokestatic(int methodRefIndex) {
+        code.write(0xB8); // invokestatic
+        writeShort(methodRefIndex);
+        return this;
+    }
+
+    public CodeBuilder invokevirtual(int methodRefIndex) {
+        code.write(0xB6); // invokevirtual
+        writeShort(methodRefIndex);
+        return this;
+    }
+
+    public CodeBuilder ireturn() {
+        code.write(0xAC); // ireturn
+        return this;
+    }
+
+    public CodeBuilder istore(int index) {
+        switch (index) {
+            case 0 -> code.write(0x3B);
+            // istore_0
+            case 1 -> code.write(0x3C);
+            // istore_1
+            case 2 -> code.write(0x3D);
+            // istore_2
+            case 3 -> code.write(0x3E);
+            // istore_3
+            default -> {
+                code.write(0x36); // istore
+                code.write(index);
+            }
+        }
+        return this;
+    }
+
+    public CodeBuilder ldc(int constantIndex) {
+        if (constantIndex <= 255) {
+            code.write(0x12); // ldc
+            code.write(constantIndex);
         } else {
-            throw new IllegalArgumentException("Double value " + value + " requires ldc2_w, use ldc2_w() instead");
+            code.write(0x13); // ldc_w
+            writeShort(constantIndex);
         }
         return this;
     }
@@ -155,129 +268,14 @@ public class CodeBuilder {
         return this;
     }
 
-    public CodeBuilder istore(int index) {
-        switch (index) {
-            case 0:
-                code.write(0x3B);
-                break; // istore_0
-            case 1:
-                code.write(0x3C);
-                break; // istore_1
-            case 2:
-                code.write(0x3D);
-                break; // istore_2
-            case 3:
-                code.write(0x3E);
-                break; // istore_3
-            default:
-                code.write(0x36); // istore
-                code.write(index);
-        }
-        return this;
-    }
-
-    public CodeBuilder iload(int index) {
-        switch (index) {
-            case 0:
-                code.write(0x1A);
-                break; // iload_0
-            case 1:
-                code.write(0x1B);
-                break; // iload_1
-            case 2:
-                code.write(0x1C);
-                break; // iload_2
-            case 3:
-                code.write(0x1D);
-                break; // iload_3
-            default:
-                code.write(0x15); // iload
-                code.write(index);
-        }
-        return this;
-    }
-
-    public CodeBuilder fstore(int index) {
-        switch (index) {
-            case 0:
-                code.write(0x43);
-                break; // fstore_0
-            case 1:
-                code.write(0x44);
-                break; // fstore_1
-            case 2:
-                code.write(0x45);
-                break; // fstore_2
-            case 3:
-                code.write(0x46);
-                break; // fstore_3
-            default:
-                code.write(0x38); // fstore
-                code.write(index);
-        }
-        return this;
-    }
-
-    public CodeBuilder fload(int index) {
-        switch (index) {
-            case 0:
-                code.write(0x22);
-                break; // fload_0
-            case 1:
-                code.write(0x23);
-                break; // fload_1
-            case 2:
-                code.write(0x24);
-                break; // fload_2
-            case 3:
-                code.write(0x25);
-                break; // fload_3
-            default:
-                code.write(0x17); // fload
-                code.write(index);
-        }
-        return this;
-    }
-
-    public CodeBuilder astore(int index) {
-        switch (index) {
-            case 0:
-                code.write(0x4B);
-                break; // astore_0
-            case 1:
-                code.write(0x4C);
-                break; // astore_1
-            case 2:
-                code.write(0x4D);
-                break; // astore_2
-            case 3:
-                code.write(0x4E);
-                break; // astore_3
-            default:
-                code.write(0x3A); // astore
-                code.write(index);
-        }
-        return this;
-    }
-
-    public CodeBuilder iadd() {
-        code.write(0x60); // iadd
-        return this;
-    }
-
-    public CodeBuilder dadd() {
-        code.write(0x63); // dadd
-        return this;
-    }
-
     public CodeBuilder newInstance(int classRefIndex) {
         code.write(0xBB); // new
         writeShort(classRefIndex);
         return this;
     }
 
-    public CodeBuilder dup() {
-        code.write(0x59); // dup
+    public CodeBuilder returnVoid() {
+        code.write(0xB1); // return
         return this;
     }
 

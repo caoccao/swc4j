@@ -29,8 +29,8 @@ import java.util.Map;
 public sealed abstract class ByteCodeCompiler permits
         ByteCodeCompiler17 {
     protected final ByteCodeCompilerOptions options;
-    protected final Swc4j swc4j;
     protected final Swc4jParseOptions parseOptions;
+    protected final Swc4j swc4j;
 
     ByteCodeCompiler(ByteCodeCompilerOptions options) {
         this.options = AssertionUtils.notNull(options, "options");

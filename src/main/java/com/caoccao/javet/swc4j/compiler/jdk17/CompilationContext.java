@@ -20,14 +20,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CompilationContext {
-    private final LocalVariableTable localVariableTable = new LocalVariableTable();
     private final Map<String, String> inferredTypes = new HashMap<>();
-
-    public LocalVariableTable getLocalVariableTable() {
-        return localVariableTable;
-    }
+    private final LocalVariableTable localVariableTable = new LocalVariableTable();
 
     public Map<String, String> getInferredTypes() {
         return inferredTypes;
+    }
+
+    public LocalVariableTable getLocalVariableTable() {
+        return localVariableTable;
     }
 }

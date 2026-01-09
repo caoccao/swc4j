@@ -31,11 +31,11 @@ public class LocalVariableTable {
         return index;
     }
 
-    public LocalVariable getVariable(String name) {
-        return variables.get(name);
-    }
-
     public int getMaxLocals() {
         return nextIndex;
+    }
+
+    public LocalVariable getVariable(String name) {
+        return variables.get(name);
     }
 }

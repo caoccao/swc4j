@@ -22,8 +22,10 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
@@ -39,6 +41,91 @@ import java.io.IOException;
 
 public final class CodeGenerator {
     private CodeGenerator() {
+    }
+
+    public static void generateBinExpr(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstBinExpr binExpr,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) {
+        Swc4jAstBinaryOp op = binExpr.getOp();
+
+        if (op == Swc4jAstBinaryOp.Add) {
+            String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+            String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+
+            // Check if this is string concatenation
+            if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
+                generateStringConcat(code, cp, binExpr.getLeft(), binExpr.getRight(), leftType, rightType, context, options);
+            } else {
+                // Generate left operand
+                generateExpr(code, cp, binExpr.getLeft(), null, context, options);
+
+                // Unbox if it's an Integer wrapper
+                if ("Ljava/lang/Integer;".equals(leftType)) {
+                    int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                    code.invokevirtual(intValueRef);
+                }
+
+                // Generate right operand
+                generateExpr(code, cp, binExpr.getRight(), null, context, options);
+
+                // Unbox if it's an Integer wrapper
+                if ("Ljava/lang/Integer;".equals(rightType)) {
+                    int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                    code.invokevirtual(intValueRef);
+                }
+
+                // Determine type and generate appropriate add instruction
+                if ("I".equals(leftType) || "S".equals(leftType) || "Ljava/lang/Integer;".equals(leftType)) {
+                    code.iadd();
+                } else if ("D".equals(leftType)) {
+                    code.dadd();
+                }
+            }
+        }
+    }
+
+    public static void generateUnaryExpr(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstUnaryExpr unaryExpr,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) {
+        Swc4jAstUnaryOp op = unaryExpr.getOp();
+        
+        if (op == Swc4jAstUnaryOp.Minus) {
+            // Handle numeric negation
+            ISwc4jAstExpr arg = unaryExpr.getArg();
+            
+            if (arg instanceof Swc4jAstNumber number) {
+                // Directly generate the negated value
+                double value = number.getValue();
+                
+                // Check if it's an integer value
+                if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
+                    // Integer value - use iconst for negated int
+                    code.iconst(-(int)value);
+                } else {
+                    // Floating point value - use dconst
+                    code.dconst(-value);
+                }
+            } else {
+                // For complex expressions, generate the expression first then negate
+                generateExpr(code, cp, arg, null, context, options);
+                
+                String argType = TypeResolver.inferTypeFromExpr(arg, context, options);
+                if ("D".equals(argType)) {
+                    code.dneg();
+                } else if ("F".equals(argType)) {
+                    code.fneg();
+                } else {
+                    code.ineg();
+                }
+            }
+        }
     }
 
     public static byte[] generateClassBytecode(
@@ -80,6 +167,67 @@ public final class CodeGenerator {
         );
     }
 
+    public static void generateExpr(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            ISwc4jAstExpr expr,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) {
+        if (expr instanceof Swc4jAstStr str) {
+            int stringIndex = cp.addString(str.getValue());
+            code.ldc(stringIndex);
+        } else if (expr instanceof Swc4jAstNumber number) {
+            double value = number.getValue();
+
+            // Check if we need to convert to float based on return type
+            if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.FLOAT) {
+                float floatValue = (float) value;
+                if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
+                    code.fconst(floatValue);
+                } else {
+                    int floatIndex = cp.addFloat(floatValue);
+                    code.ldc(floatIndex);
+                }
+            } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                    && "Ljava/lang/Integer;".equals(returnTypeInfo.descriptor())) {
+                // Box integer to Integer
+                int intValue = (int) value;
+                code.iconst(intValue);
+                int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+                code.invokestatic(valueOfRef);
+            } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
+                code.iconst((int) value);
+            } else {
+                // For double values
+                if (value == 0.0 || value == 1.0) {
+                    code.dconst(value);
+                } else {
+                    int doubleIndex = cp.addDouble(value);
+                    code.ldc2_w(doubleIndex);
+                }
+            }
+        } else if (expr instanceof Swc4jAstIdent ident) {
+            String varName = ident.getSym();
+            LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
+            if (localVar != null) {
+                if ("I".equals(localVar.type()) || "S".equals(localVar.type())) {
+                    code.iload(localVar.index());
+                } else if ("F".equals(localVar.type())) {
+                    code.fload(localVar.index());
+                } else if ("D".equals(localVar.type())) {
+                    // code.dload(localVar.index());
+                } else {
+                    code.aload(localVar.index());
+                }
+            }
+        } else if (expr instanceof Swc4jAstBinExpr binExpr) {
+            generateBinExpr(code, cp, binExpr, context, options);
+        } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
+            generateUnaryExpr(code, cp, unaryExpr, returnTypeInfo, context, options);
+        }
+    }
+
     public static void generateMethod(
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
@@ -119,13 +267,6 @@ public final class CodeGenerator {
         }
     }
 
-    private static String getMethodName(ISwc4jAstPropName propName) {
-        if (propName instanceof Swc4jAstStr str) {
-            return str.getValue();
-        }
-        return propName.toString();
-    }
-
     public static byte[] generateMethodCode(
             ClassWriter.ConstantPool cp,
             Swc4jAstBlockStmt body,
@@ -146,7 +287,7 @@ public final class CodeGenerator {
                 // Generate appropriate return instruction
                 switch (returnTypeInfo.type()) {
                     case VOID -> code.returnVoid();
-                    case INT -> code.ireturn();
+                    case INT, SHORT -> code.ireturn();
                     case FLOAT -> code.freturn();
                     case DOUBLE -> code.dreturn();
                     case STRING, OBJECT -> code.areturn();
@@ -157,148 +298,18 @@ public final class CodeGenerator {
         return code.toByteArray();
     }
 
-    public static void generateVarDecl(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstVarDecl varDecl,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) {
-        for (Swc4jAstVarDeclarator declarator : varDecl.getDecls()) {
-            ISwc4jAstPat name = declarator.getName();
-            if (name instanceof Swc4jAstBindingIdent bindingIdent) {
-                String varName = bindingIdent.getId().getSym();
-                LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
-
-                declarator.getInit().ifPresent(init -> {
-                    // Create a ReturnTypeInfo based on the variable type so we can convert the value appropriately
-                    ReturnTypeInfo varTypeInfo = null;
-                    if ("F".equals(localVar.type())) {
-                        varTypeInfo = new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
-                    } else if ("D".equals(localVar.type())) {
-                        varTypeInfo = new ReturnTypeInfo(ReturnType.DOUBLE, 2, null);
-                    } else if (localVar.type().startsWith("L") && localVar.type().endsWith(";")) {
-                        // Object type
-                        varTypeInfo = new ReturnTypeInfo(ReturnType.OBJECT, 1, localVar.type());
-                    }
-
-                    generateExpr(code, cp, init, varTypeInfo, context, options);
-
-                    // Store the value in the local variable
-                    if ("I".equals(localVar.type())) {
-                        code.istore(localVar.index());
-                    } else if ("F".equals(localVar.type())) {
-                        code.fstore(localVar.index());
-                    } else if ("D".equals(localVar.type())) {
-                        // code.dstore(localVar.index());
-                    } else {
-                        code.astore(localVar.index());
-                    }
-                });
-            }
-        }
-    }
-
-    public static void generateExpr(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            ISwc4jAstExpr expr,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) {
-        if (expr instanceof Swc4jAstStr str) {
-            int stringIndex = cp.addString(str.getValue());
-            code.ldc(stringIndex);
-        } else if (expr instanceof Swc4jAstNumber number) {
-            double value = number.getValue();
-
-            // Check if we need to convert to float based on return type
-            if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.FLOAT) {
-                float floatValue = (float) value;
-                if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
-                    code.fconst(floatValue);
-                } else {
-                    int floatIndex = cp.addFloat(floatValue);
-                    code.ldc(floatIndex);
-                }
-            } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT 
-                    && "Ljava/lang/Integer;".equals(returnTypeInfo.descriptor())) {
-                // Box integer to Integer
-                int intValue = (int) value;
-                code.iconst(intValue);
-                int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
-                code.invokestatic(valueOfRef);
-            } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
-                code.iconst((int) value);
-            } else {
-                // For double values
-                if (value == 0.0 || value == 1.0) {
-                    code.dconst(value);
-                } else {
-                    int doubleIndex = cp.addDouble(value);
-                    code.ldc2_w(doubleIndex);
-                }
-            }
-        } else if (expr instanceof Swc4jAstIdent ident) {
-            String varName = ident.getSym();
-            LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
-            if (localVar != null) {
-                if ("I".equals(localVar.type())) {
-                    code.iload(localVar.index());
-                } else if ("F".equals(localVar.type())) {
-                    code.fload(localVar.index());
-                } else if ("D".equals(localVar.type())) {
-                    // code.dload(localVar.index());
-                } else {
-                    code.aload(localVar.index());
-                }
-            }
-        } else if (expr instanceof Swc4jAstBinExpr binExpr) {
-            generateBinExpr(code, cp, binExpr, context, options);
-        }
-    }
-
-    public static void generateBinExpr(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstBinExpr binExpr,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) {
-        Swc4jAstBinaryOp op = binExpr.getOp();
-
-        if (op == Swc4jAstBinaryOp.Add) {
-            String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
-            String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
-
-            // Check if this is string concatenation
-            if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
-                generateStringConcat(code, cp, binExpr.getLeft(), binExpr.getRight(), leftType, rightType, context, options);
-            } else {
-                // Generate left operand
-                generateExpr(code, cp, binExpr.getLeft(), null, context, options);
-                
-                // Unbox if it's an Integer wrapper
-                if ("Ljava/lang/Integer;".equals(leftType)) {
-                    int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                    code.invokevirtual(intValueRef);
-                }
-
-                // Generate right operand
-                generateExpr(code, cp, binExpr.getRight(), null, context, options);
-                
-                // Unbox if it's an Integer wrapper
-                if ("Ljava/lang/Integer;".equals(rightType)) {
-                    int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                    code.invokevirtual(intValueRef);
-                }
-
-                // Determine type and generate appropriate add instruction
-                if ("I".equals(leftType) || "Ljava/lang/Integer;".equals(leftType)) {
-                    code.iadd();
-                } else if ("D".equals(leftType)) {
-                    code.dadd();
-                }
-            }
-        }
+    public static String generateMethodDescriptor(Swc4jAstFunction function, ReturnTypeInfo returnTypeInfo) {
+        // For now, assume no parameters
+        String returnDescriptor = switch (returnTypeInfo.type()) {
+            case VOID -> "V";
+            case INT -> "I";
+            case SHORT -> "S";
+            case FLOAT -> "F";
+            case DOUBLE -> "D";
+            case STRING -> "Ljava/lang/String;";
+            case OBJECT -> returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : "Ljava/lang/Object;";
+        };
+        return "()" + returnDescriptor;
     }
 
     public static void generateStringConcat(
@@ -342,16 +353,53 @@ public final class CodeGenerator {
         code.invokevirtual(toString);
     }
 
-    public static String generateMethodDescriptor(Swc4jAstFunction function, ReturnTypeInfo returnTypeInfo) {
-        // For now, assume no parameters
-        String returnDescriptor = switch (returnTypeInfo.type()) {
-            case VOID -> "V";
-            case INT -> "I";
-            case FLOAT -> "F";
-            case DOUBLE -> "D";
-            case STRING -> "Ljava/lang/String;";
-            case OBJECT -> returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : "Ljava/lang/Object;";
-        };
-        return "()" + returnDescriptor;
+    public static void generateVarDecl(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstVarDecl varDecl,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) {
+        for (Swc4jAstVarDeclarator declarator : varDecl.getDecls()) {
+            ISwc4jAstPat name = declarator.getName();
+            if (name instanceof Swc4jAstBindingIdent bindingIdent) {
+                String varName = bindingIdent.getId().getSym();
+                LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
+
+                declarator.getInit().ifPresent(init -> {
+                    // Create a ReturnTypeInfo based on the variable type so we can convert the value appropriately
+                    ReturnTypeInfo varTypeInfo = null;
+                    if ("S".equals(localVar.type())) {
+                        varTypeInfo = new ReturnTypeInfo(ReturnType.SHORT, 1, null);
+                    } else if ("F".equals(localVar.type())) {
+                        varTypeInfo = new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
+                    } else if ("D".equals(localVar.type())) {
+                        varTypeInfo = new ReturnTypeInfo(ReturnType.DOUBLE, 2, null);
+                    } else if (localVar.type().startsWith("L") && localVar.type().endsWith(";")) {
+                        // Object type
+                        varTypeInfo = new ReturnTypeInfo(ReturnType.OBJECT, 1, localVar.type());
+                    }
+
+                    generateExpr(code, cp, init, varTypeInfo, context, options);
+
+                    // Store the value in the local variable
+                    if ("I".equals(localVar.type()) || "S".equals(localVar.type())) {
+                        code.istore(localVar.index());
+                    } else if ("F".equals(localVar.type())) {
+                        code.fstore(localVar.index());
+                    } else if ("D".equals(localVar.type())) {
+                        // code.dstore(localVar.index());
+                    } else {
+                        code.astore(localVar.index());
+                    }
+                });
+            }
+        }
+    }
+
+    private static String getMethodName(ISwc4jAstPropName propName) {
+        if (propName instanceof Swc4jAstStr str) {
+            return str.getValue();
+        }
+        return propName.toString();
     }
 }

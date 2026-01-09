@@ -36,65 +36,6 @@ public final class AstProcessor {
     private AstProcessor() {
     }
 
-    public static void processModuleItems(
-            List<ISwc4jAstModuleItem> items,
-            String currentPackage,
-            Map<String, byte[]> byteCodeMap,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-        for (ISwc4jAstModuleItem item : items) {
-            if (item instanceof Swc4jAstTsModuleDecl moduleDecl) {
-                processTsModuleDecl(moduleDecl, currentPackage, byteCodeMap, options);
-            } else if (item instanceof Swc4jAstExportDecl exportDecl) {
-                ISwc4jAstDecl decl = exportDecl.getDecl();
-                if (decl instanceof Swc4jAstClassDecl classDecl) {
-                    processClassDecl(classDecl, currentPackage, byteCodeMap, options);
-                } else if (decl instanceof Swc4jAstTsModuleDecl tsModuleDecl) {
-                    processTsModuleDecl(tsModuleDecl, currentPackage, byteCodeMap, options);
-                }
-            } else if (item instanceof ISwc4jAstStmt stmt) {
-                processStmt(stmt, currentPackage, byteCodeMap, options);
-            }
-        }
-    }
-
-    public static void processStmts(
-            List<ISwc4jAstStmt> stmts,
-            String currentPackage,
-            Map<String, byte[]> byteCodeMap,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-        for (ISwc4jAstStmt stmt : stmts) {
-            processStmt(stmt, currentPackage, byteCodeMap, options);
-        }
-    }
-
-    public static void processStmt(
-            ISwc4jAstStmt stmt,
-            String currentPackage,
-            Map<String, byte[]> byteCodeMap,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-        if (stmt instanceof Swc4jAstTsModuleDecl moduleDecl) {
-            processTsModuleDecl(moduleDecl, currentPackage, byteCodeMap, options);
-        } else if (stmt instanceof Swc4jAstClassDecl classDecl) {
-            processClassDecl(classDecl, currentPackage, byteCodeMap, options);
-        }
-    }
-
-    public static void processTsModuleDecl(
-            Swc4jAstTsModuleDecl moduleDecl,
-            String currentPackage,
-            Map<String, byte[]> byteCodeMap,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-        ISwc4jAstTsModuleName moduleName = moduleDecl.getId();
-        String namespaceName = getModuleName(moduleName);
-
-        String newPackage = currentPackage.isEmpty() ? namespaceName : currentPackage + "." + namespaceName;
-
-        var bodyOpt = moduleDecl.getBody();
-        if (bodyOpt.isPresent() && bodyOpt.get() instanceof Swc4jAstTsModuleBlock moduleBlock) {
-            processModuleItems(moduleBlock.getBody(), newPackage, byteCodeMap, options);
-        }
-    }
-
     public static String getModuleName(ISwc4jAstTsModuleName moduleName) {
         if (moduleName instanceof Swc4jAstStr str) {
             return str.getValue();
@@ -116,6 +57,65 @@ public final class AstProcessor {
             byteCodeMap.put(fullClassName, bytecode);
         } catch (IOException e) {
             throw new Swc4jByteCodeCompilerException("Failed to generate bytecode for class: " + fullClassName, e);
+        }
+    }
+
+    public static void processModuleItems(
+            List<ISwc4jAstModuleItem> items,
+            String currentPackage,
+            Map<String, byte[]> byteCodeMap,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        for (ISwc4jAstModuleItem item : items) {
+            if (item instanceof Swc4jAstTsModuleDecl moduleDecl) {
+                processTsModuleDecl(moduleDecl, currentPackage, byteCodeMap, options);
+            } else if (item instanceof Swc4jAstExportDecl exportDecl) {
+                ISwc4jAstDecl decl = exportDecl.getDecl();
+                if (decl instanceof Swc4jAstClassDecl classDecl) {
+                    processClassDecl(classDecl, currentPackage, byteCodeMap, options);
+                } else if (decl instanceof Swc4jAstTsModuleDecl tsModuleDecl) {
+                    processTsModuleDecl(tsModuleDecl, currentPackage, byteCodeMap, options);
+                }
+            } else if (item instanceof ISwc4jAstStmt stmt) {
+                processStmt(stmt, currentPackage, byteCodeMap, options);
+            }
+        }
+    }
+
+    public static void processStmt(
+            ISwc4jAstStmt stmt,
+            String currentPackage,
+            Map<String, byte[]> byteCodeMap,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        if (stmt instanceof Swc4jAstTsModuleDecl moduleDecl) {
+            processTsModuleDecl(moduleDecl, currentPackage, byteCodeMap, options);
+        } else if (stmt instanceof Swc4jAstClassDecl classDecl) {
+            processClassDecl(classDecl, currentPackage, byteCodeMap, options);
+        }
+    }
+
+    public static void processStmts(
+            List<ISwc4jAstStmt> stmts,
+            String currentPackage,
+            Map<String, byte[]> byteCodeMap,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        for (ISwc4jAstStmt stmt : stmts) {
+            processStmt(stmt, currentPackage, byteCodeMap, options);
+        }
+    }
+
+    public static void processTsModuleDecl(
+            Swc4jAstTsModuleDecl moduleDecl,
+            String currentPackage,
+            Map<String, byte[]> byteCodeMap,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        ISwc4jAstTsModuleName moduleName = moduleDecl.getId();
+        String namespaceName = getModuleName(moduleName);
+
+        String newPackage = currentPackage.isEmpty() ? namespaceName : currentPackage + "." + namespaceName;
+
+        var bodyOpt = moduleDecl.getBody();
+        if (bodyOpt.isPresent() && bodyOpt.get() instanceof Swc4jAstTsModuleBlock moduleBlock) {
+            processModuleItems(moduleBlock.getBody(), newPackage, byteCodeMap, options);
         }
     }
 }

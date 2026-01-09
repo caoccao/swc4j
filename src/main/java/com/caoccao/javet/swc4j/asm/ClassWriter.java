@@ -30,13 +30,12 @@ import java.util.Map;
  */
 public class ClassWriter {
     private static final int MAGIC = 0xCAFEBABE;
-    private static final int MINOR_VERSION = 0;
     private static final int MAJOR_VERSION = 61; // Java 17
-
+    private static final int MINOR_VERSION = 0;
     private final String className;
-    private final String superClassName;
-    private final List<MethodInfo> methods = new ArrayList<>();
     private final ConstantPool constantPool;
+    private final List<MethodInfo> methods = new ArrayList<>();
+    private final String superClassName;
 
     public ClassWriter(String className) {
         this(className, "java/lang/Object");
@@ -48,12 +47,12 @@ public class ClassWriter {
         this.constantPool = new ConstantPool();
     }
 
-    public ConstantPool getConstantPool() {
-        return constantPool;
-    }
-
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals) {
         methods.add(new MethodInfo(accessFlags, name, descriptor, code, maxStack, maxLocals));
+    }
+
+    public ConstantPool getConstantPool() {
+        return constantPool;
     }
 
     public byte[] toByteArray() throws IOException {
@@ -156,31 +155,19 @@ public class ClassWriter {
         }
     }
 
-    private record MethodInfo(int accessFlags, String name, String descriptor, byte[] code, int maxStack,
-                              int maxLocals) {
-    }
-
     public static class ConstantPool {
-        private final List<Object> constants = new ArrayList<>();
-        private final Map<String, Integer> utf8Cache = new HashMap<>();
         private final Map<String, Integer> classCache = new HashMap<>();
-        private final Map<String, Integer> stringCache = new HashMap<>();
-        private final Map<String, Integer> nameAndTypeCache = new HashMap<>();
-        private final Map<String, Integer> methodRefCache = new HashMap<>();
-        private final Map<Float, Integer> floatCache = new HashMap<>();
+        private final List<Object> constants = new ArrayList<>();
         private final Map<Double, Integer> doubleCache = new HashMap<>();
+        private final Map<Float, Integer> floatCache = new HashMap<>();
+        private final Map<String, Integer> methodRefCache = new HashMap<>();
+        private final Map<String, Integer> nameAndTypeCache = new HashMap<>();
+        private final Map<String, Integer> stringCache = new HashMap<>();
+        private final Map<String, Integer> utf8Cache = new HashMap<>();
 
         public ConstantPool() {
             // Index 0 is reserved
             constants.add(null);
-        }
-
-        public int addUtf8(String value) {
-            return utf8Cache.computeIfAbsent(value, v -> {
-                int index = constants.size();
-                constants.add(new Utf8Info(v));
-                return index;
-            });
         }
 
         public int addClass(String className) {
@@ -192,22 +179,20 @@ public class ClassWriter {
             });
         }
 
-        public int addString(String value) {
-            return stringCache.computeIfAbsent(value, v -> {
-                int utf8Index = addUtf8(v);
+        public int addDouble(double value) {
+            return doubleCache.computeIfAbsent(value, v -> {
                 int index = constants.size();
-                constants.add(new StringInfo(utf8Index));
+                constants.add(new DoubleInfo(v));
+                // Double and Long constants take two slots in the constant pool
+                constants.add(null);
                 return index;
             });
         }
 
-        public int addNameAndType(String name, String descriptor) {
-            String key = name + ":" + descriptor;
-            return nameAndTypeCache.computeIfAbsent(key, k -> {
-                int nameIndex = addUtf8(name);
-                int descriptorIndex = addUtf8(descriptor);
+        public int addFloat(float value) {
+            return floatCache.computeIfAbsent(value, v -> {
                 int index = constants.size();
-                constants.add(new NameAndTypeInfo(nameIndex, descriptorIndex));
+                constants.add(new FloatInfo(v));
                 return index;
             });
         }
@@ -223,20 +208,30 @@ public class ClassWriter {
             });
         }
 
-        public int addFloat(float value) {
-            return floatCache.computeIfAbsent(value, v -> {
+        public int addNameAndType(String name, String descriptor) {
+            String key = name + ":" + descriptor;
+            return nameAndTypeCache.computeIfAbsent(key, k -> {
+                int nameIndex = addUtf8(name);
+                int descriptorIndex = addUtf8(descriptor);
                 int index = constants.size();
-                constants.add(new FloatInfo(v));
+                constants.add(new NameAndTypeInfo(nameIndex, descriptorIndex));
                 return index;
             });
         }
 
-        public int addDouble(double value) {
-            return doubleCache.computeIfAbsent(value, v -> {
+        public int addString(String value) {
+            return stringCache.computeIfAbsent(value, v -> {
+                int utf8Index = addUtf8(v);
                 int index = constants.size();
-                constants.add(new DoubleInfo(v));
-                // Double and Long constants take two slots in the constant pool
-                constants.add(null);
+                constants.add(new StringInfo(utf8Index));
+                return index;
+            });
+        }
+
+        public int addUtf8(String value) {
+            return utf8Cache.computeIfAbsent(value, v -> {
+                int index = constants.size();
+                constants.add(new Utf8Info(v));
                 return index;
             });
         }
@@ -281,25 +276,29 @@ public class ClassWriter {
             }
         }
 
-        private record Utf8Info(String value) {
-        }
-
         private record ClassInfo(int nameIndex) {
         }
 
-        private record StringInfo(int utf8Index) {
-        }
-
-        private record NameAndTypeInfo(int nameIndex, int descriptorIndex) {
-        }
-
-        private record MethodRefInfo(int classIndex, int nameAndTypeIndex) {
+        private record DoubleInfo(double value) {
         }
 
         private record FloatInfo(float value) {
         }
 
-        private record DoubleInfo(double value) {
+        private record MethodRefInfo(int classIndex, int nameAndTypeIndex) {
         }
+
+        private record NameAndTypeInfo(int nameIndex, int descriptorIndex) {
+        }
+
+        private record StringInfo(int utf8Index) {
+        }
+
+        private record Utf8Info(String value) {
+        }
+    }
+
+    private record MethodInfo(int accessFlags, String name, String descriptor, byte[] code, int maxStack,
+                              int maxLocals) {
     }
 }
