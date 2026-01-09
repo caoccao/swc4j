@@ -57,6 +57,7 @@ public final class TypeResolver {
                     return switch (descriptor) {
                         case "I" -> new ReturnTypeInfo(ReturnType.INT, 1, null);
                         case "S" -> new ReturnTypeInfo(ReturnType.SHORT, 1, null);
+                        case "J" -> new ReturnTypeInfo(ReturnType.LONG, 2, null);
                         case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
                         case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null);
                         case "Ljava/lang/String;" -> new ReturnTypeInfo(ReturnType.STRING, 1, null);
@@ -89,6 +90,8 @@ public final class TypeResolver {
                             return new ReturnTypeInfo(ReturnType.INT, 1, null);
                         } else if ("S".equals(type)) {
                             return new ReturnTypeInfo(ReturnType.SHORT, 1, null);
+                        } else if ("J".equals(type)) {
+                            return new ReturnTypeInfo(ReturnType.LONG, 2, null);
                         } else if ("F".equals(type)) {
                             return new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
                         } else if ("D".equals(type)) {
@@ -176,6 +179,7 @@ public final class TypeResolver {
         return switch (resolvedType) {
             case "int" -> "I";
             case "short" -> "S";
+            case "long" -> "J";
             case "float" -> "F";
             case "double" -> "D";
             case "java.lang.String", "String" -> "Ljava/lang/String;";

@@ -17,5 +17,23 @@
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
 public enum ReturnType {
-    VOID, INT, SHORT, FLOAT, DOUBLE, STRING, OBJECT
+    DOUBLE(4),
+    FLOAT(2),
+    INT(2),
+    LONG(4),
+    OBJECT(2),
+    SHORT(2),
+    STRING(2),
+    VOID(0),
+    ;
+
+    private final int minStack;
+
+    ReturnType(int minStack) {
+        this.minStack = minStack;
+    }
+
+    public int getMinStack() {
+        return minStack;
+    }
 }

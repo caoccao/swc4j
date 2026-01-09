@@ -77,6 +77,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder dneg() {
+        code.write(0x77); // dneg
+        return this;
+    }
+
     public CodeBuilder dreturn() {
         code.write(0xAF); // dreturn
         return this;
@@ -118,6 +123,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder fneg() {
+        code.write(0x76); // fneg
+        return this;
+    }
+
     public CodeBuilder freturn() {
         code.write(0xAE); // freturn
         return this;
@@ -143,21 +153,6 @@ public class CodeBuilder {
 
     public CodeBuilder iadd() {
         code.write(0x60); // iadd
-        return this;
-    }
-
-    public CodeBuilder ineg() {
-        code.write(0x74); // ineg
-        return this;
-    }
-
-    public CodeBuilder fneg() {
-        code.write(0x76); // fneg
-        return this;
-    }
-
-    public CodeBuilder dneg() {
-        code.write(0x77); // dneg
         return this;
     }
 
@@ -210,6 +205,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder ineg() {
+        code.write(0x74); // ineg
+        return this;
+    }
+
     public CodeBuilder invokespecial(int methodRefIndex) {
         code.write(0xB7); // invokespecial
         writeShort(methodRefIndex);
@@ -251,6 +251,22 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder ladd() {
+        code.write(0x61); // ladd
+        return this;
+    }
+
+    public CodeBuilder lconst(long value) {
+        if (value == 0L) {
+            code.write(0x09); // lconst_0
+        } else if (value == 1L) {
+            code.write(0x0A); // lconst_1
+        } else {
+            throw new IllegalArgumentException("Long value " + value + " requires ldc2_w");
+        }
+        return this;
+    }
+
     public CodeBuilder ldc(int constantIndex) {
         if (constantIndex <= 255) {
             code.write(0x12); // ldc
@@ -265,6 +281,52 @@ public class CodeBuilder {
     public CodeBuilder ldc2_w(int constantIndex) {
         code.write(0x14); // ldc2_w
         writeShort(constantIndex);
+        return this;
+    }
+
+    public CodeBuilder lload(int index) {
+        switch (index) {
+            case 0 -> code.write(0x1E);
+            // lload_0
+            case 1 -> code.write(0x1F);
+            // lload_1
+            case 2 -> code.write(0x20);
+            // lload_2
+            case 3 -> code.write(0x21);
+            // lload_3
+            default -> {
+                code.write(0x16); // lload
+                code.write(index);
+            }
+        }
+        return this;
+    }
+
+    public CodeBuilder lneg() {
+        code.write(0x75); // lneg
+        return this;
+    }
+
+    public CodeBuilder lreturn() {
+        code.write(0xAD); // lreturn
+        return this;
+    }
+
+    public CodeBuilder lstore(int index) {
+        switch (index) {
+            case 0 -> code.write(0x3F);
+            // lstore_0
+            case 1 -> code.write(0x40);
+            // lstore_1
+            case 2 -> code.write(0x41);
+            // lstore_2
+            case 3 -> code.write(0x42);
+            // lstore_3
+            default -> {
+                code.write(0x37); // lstore
+                code.write(index);
+            }
+        }
         return this;
     }
 

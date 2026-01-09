@@ -160,6 +160,7 @@ public class ClassWriter {
         private final List<Object> constants = new ArrayList<>();
         private final Map<Double, Integer> doubleCache = new HashMap<>();
         private final Map<Float, Integer> floatCache = new HashMap<>();
+        private final Map<Long, Integer> longCache = new HashMap<>();
         private final Map<String, Integer> methodRefCache = new HashMap<>();
         private final Map<String, Integer> nameAndTypeCache = new HashMap<>();
         private final Map<String, Integer> stringCache = new HashMap<>();
@@ -193,6 +194,16 @@ public class ClassWriter {
             return floatCache.computeIfAbsent(value, v -> {
                 int index = constants.size();
                 constants.add(new FloatInfo(v));
+                return index;
+            });
+        }
+
+        public int addLong(long value) {
+            return longCache.computeIfAbsent(value, v -> {
+                int index = constants.size();
+                constants.add(new LongInfo(v));
+                // Double and Long constants take two slots in the constant pool
+                constants.add(null);
                 return index;
             });
         }
@@ -269,6 +280,10 @@ public class ClassWriter {
                     out.writeByte(6); // CONSTANT_Double
                     out.writeDouble(doubleInfo.value);
                     i++; // Skip the next slot as double takes 2 slots
+                } else if (constant instanceof LongInfo longInfo) {
+                    out.writeByte(5); // CONSTANT_Long
+                    out.writeLong(longInfo.value);
+                    i++; // Skip the next slot as long takes 2 slots
                 } else if (constant == null) {
                     // Skip null entries (used for double/long second slot)
                     continue;
@@ -283,6 +298,9 @@ public class ClassWriter {
         }
 
         private record FloatInfo(float value) {
+        }
+
+        private record LongInfo(long value) {
         }
 
         private record MethodRefInfo(int classIndex, int nameAndTypeIndex) {

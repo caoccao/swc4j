@@ -80,49 +80,10 @@ public final class CodeGenerator {
                 // Determine type and generate appropriate add instruction
                 if ("I".equals(leftType) || "S".equals(leftType) || "Ljava/lang/Integer;".equals(leftType)) {
                     code.iadd();
+                } else if ("J".equals(leftType)) {
+                    code.ladd();
                 } else if ("D".equals(leftType)) {
                     code.dadd();
-                }
-            }
-        }
-    }
-
-    public static void generateUnaryExpr(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstUnaryExpr unaryExpr,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) {
-        Swc4jAstUnaryOp op = unaryExpr.getOp();
-        
-        if (op == Swc4jAstUnaryOp.Minus) {
-            // Handle numeric negation
-            ISwc4jAstExpr arg = unaryExpr.getArg();
-            
-            if (arg instanceof Swc4jAstNumber number) {
-                // Directly generate the negated value
-                double value = number.getValue();
-                
-                // Check if it's an integer value
-                if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
-                    // Integer value - use iconst for negated int
-                    code.iconst(-(int)value);
-                } else {
-                    // Floating point value - use dconst
-                    code.dconst(-value);
-                }
-            } else {
-                // For complex expressions, generate the expression first then negate
-                generateExpr(code, cp, arg, null, context, options);
-                
-                String argType = TypeResolver.inferTypeFromExpr(arg, context, options);
-                if ("D".equals(argType)) {
-                    code.dneg();
-                } else if ("F".equals(argType)) {
-                    code.fneg();
-                } else {
-                    code.ineg();
                 }
             }
         }
@@ -189,6 +150,15 @@ public final class CodeGenerator {
                     int floatIndex = cp.addFloat(floatValue);
                     code.ldc(floatIndex);
                 }
+            } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.LONG) {
+                // Long value
+                long longValue = (long) value;
+                if (longValue == 0L || longValue == 1L) {
+                    code.lconst(longValue);
+                } else {
+                    int longIndex = cp.addLong(longValue);
+                    code.ldc2_w(longIndex);
+                }
             } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                     && "Ljava/lang/Integer;".equals(returnTypeInfo.descriptor())) {
                 // Box integer to Integer
@@ -213,6 +183,8 @@ public final class CodeGenerator {
             if (localVar != null) {
                 if ("I".equals(localVar.type()) || "S".equals(localVar.type())) {
                     code.iload(localVar.index());
+                } else if ("J".equals(localVar.type())) {
+                    code.lload(localVar.index());
                 } else if ("F".equals(localVar.type())) {
                     code.fload(localVar.index());
                 } else if ("D".equals(localVar.type())) {
@@ -257,7 +229,7 @@ public final class CodeGenerator {
                     accessFlags |= 0x0008; // ACC_STATIC
                 }
 
-                int maxStack = Math.max(returnTypeInfo.maxStack(), 2); // Ensure enough for binary operations
+                int maxStack = Math.max(returnTypeInfo.maxStack(), returnTypeInfo.type().getMinStack());
                 int maxLocals = context.getLocalVariableTable().getMaxLocals();
 
                 classWriter.addMethod(accessFlags, methodName, descriptor, code, maxStack, maxLocals);
@@ -288,6 +260,7 @@ public final class CodeGenerator {
                 switch (returnTypeInfo.type()) {
                     case VOID -> code.returnVoid();
                     case INT, SHORT -> code.ireturn();
+                    case LONG -> code.lreturn();
                     case FLOAT -> code.freturn();
                     case DOUBLE -> code.dreturn();
                     case STRING, OBJECT -> code.areturn();
@@ -304,6 +277,7 @@ public final class CodeGenerator {
             case VOID -> "V";
             case INT -> "I";
             case SHORT -> "S";
+            case LONG -> "J";
             case FLOAT -> "F";
             case DOUBLE -> "D";
             case STRING -> "Ljava/lang/String;";
@@ -353,6 +327,57 @@ public final class CodeGenerator {
         code.invokevirtual(toString);
     }
 
+    public static void generateUnaryExpr(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstUnaryExpr unaryExpr,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) {
+        Swc4jAstUnaryOp op = unaryExpr.getOp();
+
+        if (op == Swc4jAstUnaryOp.Minus) {
+            // Handle numeric negation
+            ISwc4jAstExpr arg = unaryExpr.getArg();
+
+            if (arg instanceof Swc4jAstNumber number) {
+                // Directly generate the negated value
+                double value = number.getValue();
+
+                // Check if we're dealing with a long type
+                if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.LONG) {
+                    long longValue = -(long) value;
+                    if (longValue == 0L || longValue == 1L) {
+                        code.lconst(longValue);
+                    } else {
+                        int longIndex = cp.addLong(longValue);
+                        code.ldc2_w(longIndex);
+                    }
+                } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
+                    // Integer value - use iconst for negated int
+                    code.iconst(-(int) value);
+                } else {
+                    // Floating point value - use dconst
+                    code.dconst(-value);
+                }
+            } else {
+                // For complex expressions, generate the expression first then negate
+                generateExpr(code, cp, arg, null, context, options);
+
+                String argType = TypeResolver.inferTypeFromExpr(arg, context, options);
+                if ("D".equals(argType)) {
+                    code.dneg();
+                } else if ("F".equals(argType)) {
+                    code.fneg();
+                } else if ("J".equals(argType)) {
+                    code.lneg();
+                } else {
+                    code.ineg();
+                }
+            }
+        }
+    }
+
     public static void generateVarDecl(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
@@ -370,6 +395,8 @@ public final class CodeGenerator {
                     ReturnTypeInfo varTypeInfo = null;
                     if ("S".equals(localVar.type())) {
                         varTypeInfo = new ReturnTypeInfo(ReturnType.SHORT, 1, null);
+                    } else if ("J".equals(localVar.type())) {
+                        varTypeInfo = new ReturnTypeInfo(ReturnType.LONG, 2, null);
                     } else if ("F".equals(localVar.type())) {
                         varTypeInfo = new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
                     } else if ("D".equals(localVar.type())) {
@@ -384,6 +411,8 @@ public final class CodeGenerator {
                     // Store the value in the local variable
                     if ("I".equals(localVar.type()) || "S".equals(localVar.type())) {
                         code.istore(localVar.index());
+                    } else if ("J".equals(localVar.type())) {
+                        code.lstore(localVar.index());
                     } else if ("F".equals(localVar.type())) {
                         code.fstore(localVar.index());
                     } else if ("D".equals(localVar.type())) {
