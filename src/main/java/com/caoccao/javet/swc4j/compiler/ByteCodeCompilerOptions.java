@@ -16,8 +16,46 @@
 
 package com.caoccao.javet.swc4j.compiler;
 
-public record ByteCodeCompilerOptions(JdkVersion jdkVersion, String packagePrefix) {
+import java.util.HashMap;
+import java.util.Map;
+
+public final class ByteCodeCompilerOptions {
+    private static final Map<String, String> DEFAULT_TYPE_ALIAS_MAP = Map.of(
+            "BigInteger", "java.lang.BigInteger",
+            "Boolean", "java.lang.Boolean",
+            "Double", "java.lang.Double",
+            "Float", "java.lang.Float",
+            "Integer", "java.lang.Integer",
+            "Long", "java.lang.Long",
+            "Short", "java.lang.Short",
+            "String", "java.lang.String",
+            "void", "void");
+    private final JdkVersion jdkVersion;
+    private final Map<String, String> typeAliasMap;
+    private final String packagePrefix;
+
+    public ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String> typeAliasMap, String packagePrefix) {
+        this.jdkVersion = jdkVersion;
+        this.typeAliasMap = typeAliasMap;
+        this.packagePrefix = packagePrefix;
+    }
+
+    public ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String> typeAliasMap) {
+        this(jdkVersion, typeAliasMap, "");
+    }
     public ByteCodeCompilerOptions(JdkVersion jdkVersion) {
-        this(jdkVersion, "");
+        this(jdkVersion, new HashMap<>(DEFAULT_TYPE_ALIAS_MAP));
+    }
+
+    public Map<String, String> getTypeAliasMap() {
+        return typeAliasMap;
+    }
+
+    public JdkVersion getJdkVersion() {
+        return jdkVersion;
+    }
+
+    public String getPackagePrefix() {
+        return packagePrefix;
     }
 }

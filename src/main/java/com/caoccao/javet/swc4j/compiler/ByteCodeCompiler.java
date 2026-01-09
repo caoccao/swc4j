@@ -40,7 +40,7 @@ public sealed abstract class ByteCodeCompiler permits
 
     public static ByteCodeCompiler of(ByteCodeCompilerOptions options) {
         AssertionUtils.notNull(options, "options");
-        return switch (options.jdkVersion()) {
+        return switch (options.getJdkVersion()) {
             case JDK_17 -> new ByteCodeCompiler17(options);
         };
     }

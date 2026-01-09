@@ -118,6 +118,66 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder istore(int index) {
+        switch (index) {
+            case 0: code.write(0x3B); break; // istore_0
+            case 1: code.write(0x3C); break; // istore_1
+            case 2: code.write(0x3D); break; // istore_2
+            case 3: code.write(0x3E); break; // istore_3
+            default:
+                code.write(0x36); // istore
+                code.write(index);
+        }
+        return this;
+    }
+
+    public CodeBuilder iload(int index) {
+        switch (index) {
+            case 0: code.write(0x1A); break; // iload_0
+            case 1: code.write(0x1B); break; // iload_1
+            case 2: code.write(0x1C); break; // iload_2
+            case 3: code.write(0x1D); break; // iload_3
+            default:
+                code.write(0x15); // iload
+                code.write(index);
+        }
+        return this;
+    }
+
+    public CodeBuilder astore(int index) {
+        switch (index) {
+            case 0: code.write(0x4B); break; // astore_0
+            case 1: code.write(0x4C); break; // astore_1
+            case 2: code.write(0x4D); break; // astore_2
+            case 3: code.write(0x4E); break; // astore_3
+            default:
+                code.write(0x3A); // astore
+                code.write(index);
+        }
+        return this;
+    }
+
+    public CodeBuilder iadd() {
+        code.write(0x60); // iadd
+        return this;
+    }
+
+    public CodeBuilder dadd() {
+        code.write(0x63); // dadd
+        return this;
+    }
+
+    public CodeBuilder newInstance(int classRefIndex) {
+        code.write(0xBB); // new
+        writeShort(classRefIndex);
+        return this;
+    }
+
+    public CodeBuilder dup() {
+        code.write(0x59); // dup
+        return this;
+    }
+
     public byte[] toByteArray() {
         return code.toByteArray();
     }
