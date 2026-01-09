@@ -51,13 +51,85 @@ public final class CodeGenerator {
             int appendChar) {
         switch (operandType) {
             case "Ljava/lang/String;" -> code.invokevirtual(appendString);
-            case "I" -> code.invokevirtual(appendInt);
+            case "I", "B", "S" -> code.invokevirtual(appendInt); // int, byte, short all use append(int)
             case "C" -> code.invokevirtual(appendChar);
+            case "J" -> {
+                // long
+                int appendLong = cp.addMethodRef("java/lang/StringBuilder", "append", "(J)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendLong);
+            }
+            case "F" -> {
+                // float
+                int appendFloat = cp.addMethodRef("java/lang/StringBuilder", "append", "(F)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendFloat);
+            }
+            case "D" -> {
+                // double
+                int appendDouble = cp.addMethodRef("java/lang/StringBuilder", "append", "(D)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendDouble);
+            }
+            case "Z" -> {
+                // boolean
+                int appendBoolean = cp.addMethodRef("java/lang/StringBuilder", "append", "(Z)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendBoolean);
+            }
             case "Ljava/lang/Character;" -> {
                 // Unbox Character to char
                 int charValueRef = cp.addMethodRef("java/lang/Character", "charValue", "()C");
                 code.invokevirtual(charValueRef);
                 code.invokevirtual(appendChar);
+            }
+            case "Ljava/lang/Byte;", "Ljava/lang/Short;", "Ljava/lang/Integer;" -> {
+                // Unbox to int, then append
+                String wrapperClass = operandType.substring(1, operandType.length() - 1); // Remove L and ;
+                String methodName = switch (operandType) {
+                    case "Ljava/lang/Byte;" -> "byteValue";
+                    case "Ljava/lang/Short;" -> "shortValue";
+                    case "Ljava/lang/Integer;" -> "intValue";
+                    default -> throw new IllegalStateException("Unexpected type: " + operandType);
+                };
+                String returnType = switch (operandType) {
+                    case "Ljava/lang/Byte;" -> "B";
+                    case "Ljava/lang/Short;" -> "S";
+                    case "Ljava/lang/Integer;" -> "I";
+                    default -> throw new IllegalStateException("Unexpected type: " + operandType);
+                };
+                int unboxRef = cp.addMethodRef(wrapperClass, methodName, "()" + returnType);
+                code.invokevirtual(unboxRef);
+                code.invokevirtual(appendInt); // byte, short, int all use append(int)
+            }
+            case "Ljava/lang/Long;" -> {
+                // Unbox Long to long
+                int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
+                code.invokevirtual(longValueRef);
+                int appendLong = cp.addMethodRef("java/lang/StringBuilder", "append", "(J)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendLong);
+            }
+            case "Ljava/lang/Float;" -> {
+                // Unbox Float to float
+                int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
+                code.invokevirtual(floatValueRef);
+                int appendFloat = cp.addMethodRef("java/lang/StringBuilder", "append", "(F)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendFloat);
+            }
+            case "Ljava/lang/Double;" -> {
+                // Unbox Double to double
+                int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
+                code.invokevirtual(doubleValueRef);
+                int appendDouble = cp.addMethodRef("java/lang/StringBuilder", "append", "(D)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendDouble);
+            }
+            case "Ljava/lang/Boolean;" -> {
+                // Unbox Boolean to boolean
+                int booleanValueRef = cp.addMethodRef("java/lang/Boolean", "booleanValue", "()Z");
+                code.invokevirtual(booleanValueRef);
+                int appendBoolean = cp.addMethodRef("java/lang/StringBuilder", "append", "(Z)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendBoolean);
+            }
+            default -> {
+                // For any other object type, use append(Object)
+                int appendObject = cp.addMethodRef("java/lang/StringBuilder", "append", "(Ljava/lang/Object;)Ljava/lang/StringBuilder;");
+                code.invokevirtual(appendObject);
             }
         }
     }
