@@ -47,13 +47,53 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntPlusInt(JdkVersion jdkVersion) throws Exception {
+    public void testIntegerPlusInteger(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: int = 5
                       const b: int = 10
+                      const c = a + b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(15, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testComplexExpressionWithMultipleAdditions(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const a: int = 1
+                      const b: int = 2
+                      const c: int = 3
+                      const sum = a + b
+                      const total = sum + c
+                      return total
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(6, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testIntegerObjectPlusIntegerObject(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Integer = 5
+                      const b: Integer = 10
                       const c = a + b
                       return c
                     }

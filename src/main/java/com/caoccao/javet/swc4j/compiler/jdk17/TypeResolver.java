@@ -100,7 +100,12 @@ public final class TypeResolver {
                 if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
                     return "Ljava/lang/String;";
                 }
-                // Numeric addition
+                // If both operands are Integer wrappers, result is also int (after unboxing and addition)
+                // We return "I" because the addition operation works on primitives
+                if ("Ljava/lang/Integer;".equals(leftType) && "Ljava/lang/Integer;".equals(rightType)) {
+                    return "I";
+                }
+                // Numeric addition - return the left type
                 return leftType;
             }
         }
@@ -123,12 +128,12 @@ public final class TypeResolver {
                     String typeName = ident.getSym();
                     String descriptor = mapTypeNameToDescriptor(typeName, options);
                     return switch (descriptor) {
-                        case "I" -> new ReturnTypeInfo(ReturnType.INT, 1);
-                        case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 1);
-                        case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 2);
-                        case "Ljava/lang/String;" -> new ReturnTypeInfo(ReturnType.STRING, 1);
-                        case "V" -> new ReturnTypeInfo(ReturnType.VOID, 0);
-                        default -> new ReturnTypeInfo(ReturnType.STRING, 1); // Default to object reference
+                        case "I" -> new ReturnTypeInfo(ReturnType.INT, 1, null);
+                        case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
+                        case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null);
+                        case "Ljava/lang/String;" -> new ReturnTypeInfo(ReturnType.STRING, 1, null);
+                        case "V" -> new ReturnTypeInfo(ReturnType.VOID, 0, null);
+                        default -> new ReturnTypeInfo(ReturnType.OBJECT, 1, descriptor); // Object reference with descriptor
                     };
                 }
             }
@@ -141,30 +146,32 @@ public final class TypeResolver {
                 if (argOpt.isPresent()) {
                     ISwc4jAstExpr arg = argOpt.get();
                     if (arg instanceof Swc4jAstStr) {
-                        return new ReturnTypeInfo(ReturnType.STRING, 1);
+                        return new ReturnTypeInfo(ReturnType.STRING, 1, null);
                     } else if (arg instanceof Swc4jAstNumber number) {
                         double value = number.getValue();
                         if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
-                            return new ReturnTypeInfo(ReturnType.INT, 1);
+                            return new ReturnTypeInfo(ReturnType.INT, 1, null);
                         } else {
-                            return new ReturnTypeInfo(ReturnType.DOUBLE, 2);
+                            return new ReturnTypeInfo(ReturnType.DOUBLE, 2, null);
                         }
                     } else if (arg instanceof Swc4jAstIdent ident) {
                         String type = context.getInferredTypes().get(ident.getSym());
                         if ("I".equals(type)) {
-                            return new ReturnTypeInfo(ReturnType.INT, 1);
+                            return new ReturnTypeInfo(ReturnType.INT, 1, null);
                         } else if ("F".equals(type)) {
-                            return new ReturnTypeInfo(ReturnType.FLOAT, 1);
+                            return new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
                         } else if ("D".equals(type)) {
-                            return new ReturnTypeInfo(ReturnType.DOUBLE, 2);
+                            return new ReturnTypeInfo(ReturnType.DOUBLE, 2, null);
                         } else if ("Ljava/lang/String;".equals(type)) {
-                            return new ReturnTypeInfo(ReturnType.STRING, 1);
+                            return new ReturnTypeInfo(ReturnType.STRING, 1, null);
+                        } else if (type != null && type.startsWith("L") && type.endsWith(";")) {
+                            return new ReturnTypeInfo(ReturnType.OBJECT, 1, type);
                         }
                     }
                 }
-                return new ReturnTypeInfo(ReturnType.VOID, 0);
+                return new ReturnTypeInfo(ReturnType.VOID, 0, null);
             }
         }
-        return new ReturnTypeInfo(ReturnType.VOID, 0);
+        return new ReturnTypeInfo(ReturnType.VOID, 0, null);
     }
 }

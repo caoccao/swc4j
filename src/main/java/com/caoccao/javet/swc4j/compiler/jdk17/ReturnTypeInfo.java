@@ -16,5 +16,5 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
-public record ReturnTypeInfo(ReturnType type, int maxStack) {
+public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor) {
 }

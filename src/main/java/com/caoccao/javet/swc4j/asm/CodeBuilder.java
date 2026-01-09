@@ -52,6 +52,12 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder invokestatic(int methodRefIndex) {
+        code.write(0xB8); // invokestatic
+        writeShort(methodRefIndex);
+        return this;
+    }
+
     public CodeBuilder ldc(int constantIndex) {
         if (constantIndex <= 255) {
             code.write(0x12); // ldc

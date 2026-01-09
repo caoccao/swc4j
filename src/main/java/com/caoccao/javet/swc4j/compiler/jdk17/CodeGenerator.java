@@ -149,7 +149,7 @@ public final class CodeGenerator {
                     case INT -> code.ireturn();
                     case FLOAT -> code.freturn();
                     case DOUBLE -> code.dreturn();
-                    case STRING -> code.areturn();
+                    case STRING, OBJECT -> code.areturn();
                 }
             }
         }
@@ -173,9 +173,12 @@ public final class CodeGenerator {
                     // Create a ReturnTypeInfo based on the variable type so we can convert the value appropriately
                     ReturnTypeInfo varTypeInfo = null;
                     if ("F".equals(localVar.type())) {
-                        varTypeInfo = new ReturnTypeInfo(ReturnType.FLOAT, 1);
+                        varTypeInfo = new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
                     } else if ("D".equals(localVar.type())) {
-                        varTypeInfo = new ReturnTypeInfo(ReturnType.DOUBLE, 2);
+                        varTypeInfo = new ReturnTypeInfo(ReturnType.DOUBLE, 2, null);
+                    } else if (localVar.type().startsWith("L") && localVar.type().endsWith(";")) {
+                        // Object type
+                        varTypeInfo = new ReturnTypeInfo(ReturnType.OBJECT, 1, localVar.type());
                     }
 
                     generateExpr(code, cp, init, varTypeInfo, context, options);
@@ -217,6 +220,13 @@ public final class CodeGenerator {
                     int floatIndex = cp.addFloat(floatValue);
                     code.ldc(floatIndex);
                 }
+            } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT 
+                    && "Ljava/lang/Integer;".equals(returnTypeInfo.descriptor())) {
+                // Box integer to Integer
+                int intValue = (int) value;
+                code.iconst(intValue);
+                int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+                code.invokestatic(valueOfRef);
             } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
                 code.iconst((int) value);
             } else {
@@ -265,12 +275,24 @@ public final class CodeGenerator {
             } else {
                 // Generate left operand
                 generateExpr(code, cp, binExpr.getLeft(), null, context, options);
+                
+                // Unbox if it's an Integer wrapper
+                if ("Ljava/lang/Integer;".equals(leftType)) {
+                    int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                    code.invokevirtual(intValueRef);
+                }
 
                 // Generate right operand
                 generateExpr(code, cp, binExpr.getRight(), null, context, options);
+                
+                // Unbox if it's an Integer wrapper
+                if ("Ljava/lang/Integer;".equals(rightType)) {
+                    int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                    code.invokevirtual(intValueRef);
+                }
 
                 // Determine type and generate appropriate add instruction
-                if ("I".equals(leftType)) {
+                if ("I".equals(leftType) || "Ljava/lang/Integer;".equals(leftType)) {
                     code.iadd();
                 } else if ("D".equals(leftType)) {
                     code.dadd();
@@ -328,6 +350,7 @@ public final class CodeGenerator {
             case FLOAT -> "F";
             case DOUBLE -> "D";
             case STRING -> "Ljava/lang/String;";
+            case OBJECT -> returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : "Ljava/lang/Object;";
         };
         return "()" + returnDescriptor;
     }
