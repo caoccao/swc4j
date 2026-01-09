@@ -189,7 +189,7 @@ Swc4j swc4j = new Swc4j();
 // Prepare a JavaScript code snippet.
 String code = "const add = (a, b) => a + b; const multiply = (a, b) => { return a * b; }";
 // Prepare a script name.
-URL specifier = new URL("file:///abc.ts");
+URL specifier = URI.create("file:///abc.ts").toURL();
 // Create a plugin host and add the plugin visitors.
 Swc4jPluginHost pluginHost = new Swc4jPluginHost().add(pluginVisitors);
 // Prepare an option with script name and media type.

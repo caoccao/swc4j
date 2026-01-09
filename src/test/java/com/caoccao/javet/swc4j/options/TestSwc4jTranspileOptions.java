@@ -31,6 +31,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.stream.Stream;
@@ -207,7 +208,7 @@ public class TestSwc4jTranspileOptions extends BaseTestSuite {
                 }
                 """;
         String filePath = "file:///abc.ts";
-        URL specifier = new URL(filePath);
+        URL specifier = URI.create(filePath).toURL();
         String[] expectedProperties = new String[]{
                 "version", "sources", "sourcesContent", filePath, "names", "mappings"};
         Swc4jTranspileOutput output = swc4j.transpile(code, tsModuleTranspileOptions

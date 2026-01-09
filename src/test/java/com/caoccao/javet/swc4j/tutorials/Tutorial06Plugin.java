@@ -35,6 +35,7 @@ import com.caoccao.javet.swc4j.plugins.Swc4jPluginHost;
 import com.caoccao.javet.swc4j.plugins.Swc4jPluginVisitors;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 public class Tutorial06Plugin {
@@ -44,7 +45,7 @@ public class Tutorial06Plugin {
         // Prepare a JavaScript code snippet.
         String codeForAssignExpr = "a = b; c = d;";
         // Prepare a script name.
-        URL specifier = new URL("file:///abc.ts");
+        URL specifier = URI.create("file:///abc.ts").toURL();
         // Create a plugin visitors and add an assign expression visitor.
         Swc4jPluginVisitors pluginVisitors = new Swc4jPluginVisitors().add(new Swc4jAstVisitor() {
             @Override

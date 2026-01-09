@@ -27,7 +27,7 @@ String code = "import { Validator } from './Validator';\n" +
         "\n" +
         "export { EmailValidator };";
 // Prepare a script name.
-URL specifier = new URL("file:///abc.ts");
+URL specifier = URI.create("file:///abc.ts").toURL();
 // Prepare an option with script name and media type.
 Swc4jParseOptions options = new Swc4jParseOptions()
         .setSpecifier(specifier)

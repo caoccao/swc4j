@@ -26,7 +26,7 @@ String code = "import { Validator } from './Validator';\n" +
         "\n" +
         "export { EmailValidator };";
 // Prepare a script name.
-URL specifier = new URL("file:///abc.ts");
+URL specifier = URI.create("file:///abc.ts").toURL();
 // Prepare an option with script name and media type.
 // Minify is turned on by default.
 Swc4jTransformOptions options = new Swc4jTransformOptions()

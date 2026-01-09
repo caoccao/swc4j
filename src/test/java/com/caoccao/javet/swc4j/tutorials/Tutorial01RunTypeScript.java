@@ -27,6 +27,7 @@ import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jTranspileOutput;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 public class Tutorial01RunTypeScript {
@@ -36,7 +37,7 @@ public class Tutorial01RunTypeScript {
         // Prepare a simple TypeScript code snippet.
         String code = "function add(a:number, b:number) { return a+b; }";
         // Prepare a script name.
-        URL specifier = new URL("file:///abc.ts");
+        URL specifier = URI.create("file:///abc.ts").toURL();
         // Prepare an option with script name and media type.
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
                 .setSpecifier(specifier)

@@ -61,7 +61,7 @@ Swc4j swc4j = new Swc4j();
 // Prepare a JavaScript code snippet.
 String code = "a = b; c = d;";
 // Prepare a script name.
-URL specifier = new URL("file:///abc.ts");
+URL specifier = URI.create("file:///abc.ts").toURL();
 ```
 
 * Transpile the code snippet as follows.

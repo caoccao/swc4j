@@ -21,7 +21,7 @@ Swc4j swc4j = new Swc4j();
 // Prepare a simple TypeScript code snippet.
 String code = "function add(a:number, b:number) { return a+b; }";
 // Prepare a script name.
-URL specifier = new URL("file:///abc.ts");
+URL specifier = URI.create("file:///abc.ts").toURL();
 // Prepare an option with script name and media type.
 Swc4jTranspileOptions options = new Swc4jTranspileOptions()
         .setSpecifier(specifier)

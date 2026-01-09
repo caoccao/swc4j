@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.plugins.ISwc4jPluginHost;
 import com.caoccao.javet.swc4j.utils.AssertionUtils;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 /**
@@ -40,7 +41,7 @@ public abstract class Swc4jOptions {
 
     static {
         try {
-            DEFAULT_SPECIFIER = new URL("file:///main.js");
+            DEFAULT_SPECIFIER = URI.create("file:///main.js").toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler;
 
 import com.caoccao.javet.swc4j.Swc4j;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstProgram;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import com.caoccao.javet.swc4j.exceptions.Swc4jCoreException;
 import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
@@ -40,15 +41,15 @@ public sealed abstract class ByteCodeCompiler permits
 
     public static ByteCodeCompiler of(ByteCodeCompilerOptions options) {
         AssertionUtils.notNull(options, "options");
-        return switch (options.getJdkVersion()) {
+        return switch (options.jdkVersion()) {
             case JDK_17 -> new ByteCodeCompiler17(options);
         };
     }
 
-    public Map<String, byte[]> compile(String code) throws Swc4jCoreException {
+    public Map<String, byte[]> compile(String code) throws Swc4jCoreException, Swc4jByteCodeCompilerException {
         Swc4jParseOutput output = swc4j.parse(code, parseOptions);
         return compileProgram(output.getProgram());
     }
 
-    abstract Map<String, byte[]> compileProgram(ISwc4jAstProgram<?> program);
+    abstract Map<String, byte[]> compileProgram(ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException;
 }

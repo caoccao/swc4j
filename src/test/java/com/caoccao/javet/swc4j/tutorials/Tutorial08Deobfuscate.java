@@ -45,6 +45,7 @@ import com.caoccao.javet.swc4j.plugins.jsfuck.Swc4jPluginHostJsFuckDecoder;
 import com.caoccao.javet.swc4j.utils.StringUtils;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 
@@ -82,7 +83,7 @@ public class Tutorial08Deobfuscate {
         // Prepare a JavaScript code snippet.
         String code = "[+!+[]]+(+(+!+[]+(!+[]+[])[!+[]+!+[]+!+[]]+[+!+[]]+[+[]]+[+[]])+[])[!+[]+!+[]]+[+!+[]]"; // 1+1
         // Prepare a script name.
-        URL specifier = new URL("file:///abc.ts");
+        URL specifier = URI.create("file:///abc.ts").toURL();
         // Prepare a transform options.
         Swc4jTransformOptions options = new Swc4jTransformOptions()
                 .setSpecifier(specifier)

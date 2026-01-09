@@ -38,10 +38,6 @@ public class ClassWriter {
     private final List<MethodInfo> methods = new ArrayList<>();
     private final ConstantPool constantPool;
 
-    public ConstantPool getConstantPool() {
-        return constantPool;
-    }
-
     public ClassWriter(String className) {
         this(className, "java/lang/Object");
     }
@@ -50,6 +46,10 @@ public class ClassWriter {
         this.className = className;
         this.superClassName = superClassName;
         this.constantPool = new ConstantPool();
+    }
+
+    public ConstantPool getConstantPool() {
+        return constantPool;
     }
 
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals) {
@@ -156,22 +156,8 @@ public class ClassWriter {
         }
     }
 
-    private static class MethodInfo {
-        final int accessFlags;
-        final String name;
-        final String descriptor;
-        final byte[] code;
-        final int maxStack;
-        final int maxLocals;
-
-        MethodInfo(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals) {
-            this.accessFlags = accessFlags;
-            this.name = name;
-            this.descriptor = descriptor;
-            this.code = code;
-            this.maxStack = maxStack;
-            this.maxLocals = maxLocals;
-        }
+    private record MethodInfo(int accessFlags, String name, String descriptor, byte[] code, int maxStack,
+                              int maxLocals) {
     }
 
     public static class ConstantPool {
@@ -265,10 +251,19 @@ public class ClassWriter {
             }
         }
 
-        private record Utf8Info(String value) {}
-        private record ClassInfo(int nameIndex) {}
-        private record StringInfo(int utf8Index) {}
-        private record NameAndTypeInfo(int nameIndex, int descriptorIndex) {}
-        private record MethodRefInfo(int classIndex, int nameAndTypeIndex) {}
+        private record Utf8Info(String value) {
+        }
+
+        private record ClassInfo(int nameIndex) {
+        }
+
+        private record StringInfo(int utf8Index) {
+        }
+
+        private record NameAndTypeInfo(int nameIndex, int descriptorIndex) {
+        }
+
+        private record MethodRefInfo(int classIndex, int nameAndTypeIndex) {
+        }
     }
 }

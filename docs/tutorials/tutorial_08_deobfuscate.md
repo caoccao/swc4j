@@ -31,7 +31,7 @@ Swc4j swc4j = new Swc4j();
 // Prepare a JavaScript code snippet.
 String code = "[+!+[]]+(+(+!+[]+(!+[]+[])[!+[]+!+[]+!+[]]+[+!+[]]+[+[]]+[+[]])+[])[!+[]+!+[]]+[+!+[]]"; // 1+1
 // Prepare a script name.
-URL specifier = new URL("file:///abc.ts");
+URL specifier = URI.create("file:///abc.ts").toURL();
 // Prepare a transform options.
 Swc4jTransformOptions options = new Swc4jTransformOptions()
         .setSpecifier(specifier)

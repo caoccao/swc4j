@@ -37,6 +37,7 @@ import com.caoccao.javet.swc4j.plugins.Swc4jPluginHost;
 import com.caoccao.javet.swc4j.plugins.Swc4jPluginVisitors;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,7 @@ public class Tutorial07MimicBabel {
         // Prepare a JavaScript code snippet.
         String code = "const add = (a, b) => a + b; const multiply = (a, b) => { return a * b; }";
         // Prepare a script name.
-        URL specifier = new URL("file:///abc.ts");
+        URL specifier = URI.create("file:///abc.ts").toURL();
         // Create a plugin visitors and add an arrow expression visitor.
         Swc4jPluginVisitors pluginVisitors = new Swc4jPluginVisitors().add(new Swc4jAstVisitor() {
             @Override

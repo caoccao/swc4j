@@ -17,7 +17,6 @@
 package com.caoccao.javet.swc4j.asm;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  * Helper class to build method bytecode.
@@ -86,14 +85,21 @@ public class CodeBuilder {
 
     public CodeBuilder iconst(int value) {
         switch (value) {
-            case -1: code.write(0x02); break; // iconst_m1
-            case 0:  code.write(0x03); break; // iconst_0
-            case 1:  code.write(0x04); break; // iconst_1
-            case 2:  code.write(0x05); break; // iconst_2
-            case 3:  code.write(0x06); break; // iconst_3
-            case 4:  code.write(0x07); break; // iconst_4
-            case 5:  code.write(0x08); break; // iconst_5
-            default:
+            case -1 -> code.write(0x02);
+            // iconst_m1
+            case 0 -> code.write(0x03);
+            // iconst_0
+            case 1 -> code.write(0x04);
+            // iconst_1
+            case 2 -> code.write(0x05);
+            // iconst_2
+            case 3 -> code.write(0x06);
+            // iconst_3
+            case 4 -> code.write(0x07);
+            // iconst_4
+            case 5 -> code.write(0x08);
+            // iconst_5
+            default -> {
                 if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
                     code.write(0x10); // bipush
                     code.write(value);
@@ -103,6 +109,7 @@ public class CodeBuilder {
                 } else {
                     throw new IllegalArgumentException("Integer value " + value + " requires ldc");
                 }
+            }
         }
         return this;
     }
@@ -120,10 +127,18 @@ public class CodeBuilder {
 
     public CodeBuilder istore(int index) {
         switch (index) {
-            case 0: code.write(0x3B); break; // istore_0
-            case 1: code.write(0x3C); break; // istore_1
-            case 2: code.write(0x3D); break; // istore_2
-            case 3: code.write(0x3E); break; // istore_3
+            case 0:
+                code.write(0x3B);
+                break; // istore_0
+            case 1:
+                code.write(0x3C);
+                break; // istore_1
+            case 2:
+                code.write(0x3D);
+                break; // istore_2
+            case 3:
+                code.write(0x3E);
+                break; // istore_3
             default:
                 code.write(0x36); // istore
                 code.write(index);
@@ -133,10 +148,18 @@ public class CodeBuilder {
 
     public CodeBuilder iload(int index) {
         switch (index) {
-            case 0: code.write(0x1A); break; // iload_0
-            case 1: code.write(0x1B); break; // iload_1
-            case 2: code.write(0x1C); break; // iload_2
-            case 3: code.write(0x1D); break; // iload_3
+            case 0:
+                code.write(0x1A);
+                break; // iload_0
+            case 1:
+                code.write(0x1B);
+                break; // iload_1
+            case 2:
+                code.write(0x1C);
+                break; // iload_2
+            case 3:
+                code.write(0x1D);
+                break; // iload_3
             default:
                 code.write(0x15); // iload
                 code.write(index);
@@ -146,10 +169,18 @@ public class CodeBuilder {
 
     public CodeBuilder astore(int index) {
         switch (index) {
-            case 0: code.write(0x4B); break; // astore_0
-            case 1: code.write(0x4C); break; // astore_1
-            case 2: code.write(0x4D); break; // astore_2
-            case 3: code.write(0x4E); break; // astore_3
+            case 0:
+                code.write(0x4B);
+                break; // astore_0
+            case 1:
+                code.write(0x4C);
+                break; // astore_1
+            case 2:
+                code.write(0x4D);
+                break; // astore_2
+            case 3:
+                code.write(0x4E);
+                break; // astore_3
             default:
                 code.write(0x3A); // astore
                 code.write(index);

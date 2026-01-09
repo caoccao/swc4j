@@ -32,6 +32,7 @@ import com.caoccao.javet.swc4j.options.Swc4jParseOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 public class Tutorial04Ast {
@@ -52,7 +53,7 @@ public class Tutorial04Ast {
                 
                 export { EmailValidator };""";
         // Prepare a script name.
-        URL specifier = new URL("file:///abc.ts");
+        URL specifier = URI.create("file:///abc.ts").toURL();
         // Prepare an option with script name and media type.
         Swc4jParseOptions options = new Swc4jParseOptions()
                 .setSpecifier(specifier)

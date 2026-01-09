@@ -19,7 +19,7 @@ package com.caoccao.javet.swc4j.compiler;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class ByteCodeCompilerOptions {
+public record ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String> typeAliasMap, String packagePrefix) {
     private static final Map<String, String> DEFAULT_TYPE_ALIAS_MAP = Map.of(
             "BigInteger", "java.lang.BigInteger",
             "Boolean", "java.lang.Boolean",
@@ -30,32 +30,12 @@ public final class ByteCodeCompilerOptions {
             "Short", "java.lang.Short",
             "String", "java.lang.String",
             "void", "void");
-    private final JdkVersion jdkVersion;
-    private final Map<String, String> typeAliasMap;
-    private final String packagePrefix;
-
-    public ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String> typeAliasMap, String packagePrefix) {
-        this.jdkVersion = jdkVersion;
-        this.typeAliasMap = typeAliasMap;
-        this.packagePrefix = packagePrefix;
-    }
 
     public ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String> typeAliasMap) {
         this(jdkVersion, typeAliasMap, "");
     }
+
     public ByteCodeCompilerOptions(JdkVersion jdkVersion) {
         this(jdkVersion, new HashMap<>(DEFAULT_TYPE_ALIAS_MAP));
-    }
-
-    public Map<String, String> getTypeAliasMap() {
-        return typeAliasMap;
-    }
-
-    public JdkVersion getJdkVersion() {
-        return jdkVersion;
-    }
-
-    public String getPackagePrefix() {
-        return packagePrefix;
     }
 }

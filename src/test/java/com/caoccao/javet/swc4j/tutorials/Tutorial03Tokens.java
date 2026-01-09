@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.options.Swc4jTranspileOptions;
 import com.caoccao.javet.swc4j.outputs.Swc4jParseOutput;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 
 public class Tutorial03Tokens {
@@ -52,7 +53,7 @@ public class Tutorial03Tokens {
                   return [...quickSort(leftArr), pivot, ...quickSort(rightArr)];
                 }""";
         // Prepare a script name.
-        URL specifier = new URL("file:///abc.ts");
+        URL specifier = URI.create("file:///abc.ts").toURL();
         // Prepare an option with script name and media type.
         Swc4jTranspileOptions options = new Swc4jTranspileOptions()
                 .setSpecifier(specifier)
