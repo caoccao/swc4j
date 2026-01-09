@@ -19,10 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNull;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
+import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsEntityName;
@@ -175,8 +172,27 @@ public final class TypeResolver {
             // null has no specific type - it's compatible with any reference type
             // Return null to indicate that the type should be determined by context
             return null;
+        } else if (expr instanceof Swc4jAstArrayLit) {
+            // Array literal - maps to ArrayList
+            return "Ljava/util/ArrayList;";
+        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
+            // Member expression - handle array-like properties
+            String objType = inferTypeFromExpr(memberExpr.getObj(), context, options);
+            if ("Ljava/util/ArrayList;".equals(objType)) {
+                // Check property name
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    String propName = propIdent.getSym();
+                    if ("length".equals(propName)) {
+                        return "I"; // arr.length returns int
+                    }
+                }
+            }
+            return "Ljava/lang/Object;";
         } else if (expr instanceof Swc4jAstStr) {
             return "Ljava/lang/String;";
+        } else if (expr instanceof Swc4jAstAssignExpr assignExpr) {
+            // Assignment expression returns the type of the value being assigned
+            return inferTypeFromExpr(assignExpr.getRight(), context, options);
         } else if (expr instanceof Swc4jAstIdent ident) {
             return context.getInferredTypes().getOrDefault(ident.getSym(), "Ljava/lang/Object;");
         } else if (expr instanceof Swc4jAstBinExpr binExpr) {

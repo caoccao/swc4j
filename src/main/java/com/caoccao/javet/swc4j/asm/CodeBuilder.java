@@ -327,6 +327,14 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder invokeinterface(int methodRefIndex, int count) {
+        code.write(0xB9); // invokeinterface
+        writeShort(methodRefIndex);
+        code.write(count); // count parameter
+        code.write(0); // reserved byte (must be zero)
+        return this;
+    }
+
     public CodeBuilder ireturn() {
         code.write(0xAC); // ireturn
         return this;
@@ -447,6 +455,11 @@ public class CodeBuilder {
     public CodeBuilder newInstance(int classRefIndex) {
         code.write(0xBB); // new
         writeShort(classRefIndex);
+        return this;
+    }
+
+    public CodeBuilder pop() {
+        code.write(0x57); // pop
         return this;
     }
 

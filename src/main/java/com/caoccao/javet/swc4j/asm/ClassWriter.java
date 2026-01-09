@@ -219,6 +219,17 @@ public class ClassWriter {
             });
         }
 
+        public int addInterfaceMethodRef(String interfaceName, String methodName, String descriptor) {
+            String key = "interface:" + interfaceName + "." + methodName + ":" + descriptor;
+            return methodRefCache.computeIfAbsent(key, k -> {
+                int classIndex = addClass(interfaceName);
+                int nameAndTypeIndex = addNameAndType(methodName, descriptor);
+                int index = constants.size();
+                constants.add(new InterfaceMethodRefInfo(classIndex, nameAndTypeIndex));
+                return index;
+            });
+        }
+
         public int addNameAndType(String name, String descriptor) {
             String key = name + ":" + descriptor;
             return nameAndTypeCache.computeIfAbsent(key, k -> {
@@ -273,6 +284,10 @@ public class ClassWriter {
                     out.writeByte(10); // CONSTANT_Methodref
                     out.writeShort(methodRef.classIndex);
                     out.writeShort(methodRef.nameAndTypeIndex);
+                } else if (constant instanceof InterfaceMethodRefInfo interfaceMethodRef) {
+                    out.writeByte(11); // CONSTANT_InterfaceMethodref
+                    out.writeShort(interfaceMethodRef.classIndex);
+                    out.writeShort(interfaceMethodRef.nameAndTypeIndex);
                 } else if (constant instanceof FloatInfo floatInfo) {
                     out.writeByte(4); // CONSTANT_Float
                     out.writeFloat(floatInfo.value);
@@ -304,6 +319,9 @@ public class ClassWriter {
         }
 
         private record MethodRefInfo(int classIndex, int nameAndTypeIndex) {
+        }
+
+        private record InterfaceMethodRefInfo(int classIndex, int nameAndTypeIndex) {
         }
 
         private record NameAndTypeInfo(int nameIndex, int descriptorIndex) {

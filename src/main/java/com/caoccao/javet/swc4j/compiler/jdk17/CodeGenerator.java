@@ -20,20 +20,15 @@ import com.caoccao.javet.swc4j.asm.ClassWriter;
 import com.caoccao.javet.swc4j.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNull;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
-import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
+import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
+import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -49,7 +44,7 @@ public final class CodeGenerator {
             String operandType,
             int appendString,
             int appendInt,
-            int appendChar) {
+            int appendChar) throws Swc4jByteCodeCompilerException {
         switch (operandType) {
             case "Ljava/lang/String;" -> code.invokevirtual(appendString);
             case "I", "B", "S" -> code.invokevirtual(appendInt); // int, byte, short all use append(int)
@@ -87,13 +82,13 @@ public final class CodeGenerator {
                     case "Ljava/lang/Byte;" -> "byteValue";
                     case "Ljava/lang/Short;" -> "shortValue";
                     case "Ljava/lang/Integer;" -> "intValue";
-                    default -> throw new IllegalStateException("Unexpected type: " + operandType);
+                    default -> throw new Swc4jByteCodeCompilerException("Unexpected type: " + operandType);
                 };
                 String returnType = switch (operandType) {
                     case "Ljava/lang/Byte;" -> "B";
                     case "Ljava/lang/Short;" -> "S";
                     case "Ljava/lang/Integer;" -> "I";
-                    default -> throw new IllegalStateException("Unexpected type: " + operandType);
+                    default -> throw new Swc4jByteCodeCompilerException("Unexpected type: " + operandType);
                 };
                 int unboxRef = cp.addMethodRef(wrapperClass, methodName, "()" + returnType);
                 code.invokevirtual(unboxRef);
@@ -260,12 +255,100 @@ public final class CodeGenerator {
         }
     }
 
+    public static void generateAssignExpr(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstAssignExpr assignExpr,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        // Handle assignments like arr[1] = value or arr.length = 0
+        var left = assignExpr.getLeft();
+        if (left instanceof Swc4jAstMemberExpr memberExpr) {
+            String objType = TypeResolver.inferTypeFromExpr(memberExpr.getObj(), context, options);
+            if ("Ljava/util/ArrayList;".equals(objType)) {
+                // Check if it's arr[index] = value
+                if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
+                    // arr[index] = value -> arr.set(index, value)
+                    generateExpr(code, cp, memberExpr.getObj(), null, context, options); // Stack: [ArrayList]
+                    generateExpr(code, cp, computedProp.getExpr(), null, context, options); // Stack: [ArrayList, index]
+                    generateExpr(code, cp, assignExpr.getRight(), null, context, options); // Stack: [ArrayList, index, value]
+
+                    // Box value if needed
+                    String valueType = TypeResolver.inferTypeFromExpr(assignExpr.getRight(), context, options);
+                    if (isPrimitiveType(valueType)) {
+                        String wrapperType = getWrapperType(valueType);
+                        // wrapperType is already in the form "Ljava/lang/Integer;" so use it directly
+                        String className = wrapperType.substring(1, wrapperType.length() - 1); // Remove L and ;
+                        int valueOfRef = cp.addMethodRef(className, "valueOf", "(" + valueType + ")" + wrapperType);
+                        code.invokestatic(valueOfRef); // Stack: [ArrayList, index, boxedValue]
+                    }
+
+                    // Call ArrayList.set(int, Object)
+                    int setMethod = cp.addMethodRef("java/util/ArrayList", "set", "(ILjava/lang/Object;)Ljava/lang/Object;");
+                    code.invokevirtual(setMethod); // Stack: [oldValue] - the return value of set() is the previous value
+                    // Leave the value on stack for expression statements to pop
+                    return;
+                }
+
+                // Check if it's arr.length = newLength
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    String propName = propIdent.getSym();
+                    if ("length".equals(propName)) {
+                        // arr.length = newLength
+                        // Special case: arr.length = 0 -> arr.clear()
+                        if (assignExpr.getRight() instanceof Swc4jAstNumber number && number.getValue() == 0.0) {
+                            generateExpr(code, cp, memberExpr.getObj(), null, context, options); // Stack: [ArrayList]
+                            int clearMethod = cp.addMethodRef("java/util/ArrayList", "clear", "()V");
+                            code.invokevirtual(clearMethod); // Stack: []
+                            // Assignment expression should return the assigned value (0 in this case)
+                            code.iconst(0); // Stack: [0]
+                            return;
+                        }
+
+                        // General case for constant new length (like arr.length = 2)
+                        // Use ArrayList.subList(newLength, size()).clear() to remove excess elements
+                        if (assignExpr.getRight() instanceof Swc4jAstNumber number) {
+                            int newLength = (int) number.getValue();
+
+                            // Call arr.subList(newLength, arr.size()).clear()
+                            generateExpr(code, cp, memberExpr.getObj(), null, context, options); // Stack: [ArrayList]
+                            code.dup(); // Stack: [ArrayList, ArrayList] - keep one for potential use
+                            code.iconst(newLength); // Stack: [ArrayList, ArrayList, newLength]
+
+                            // Get arr.size() - need to load ArrayList again
+                            generateExpr(code, cp, memberExpr.getObj(), null, context, options); // Stack: [ArrayList, ArrayList, newLength, ArrayList]
+                            int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
+                            code.invokevirtual(sizeMethod); // Stack: [ArrayList, ArrayList, newLength, size]
+
+                            // Call subList(newLength, size) on the second ArrayList
+                            int subListMethod = cp.addMethodRef("java/util/ArrayList", "subList", "(II)Ljava/util/List;");
+                            code.invokevirtual(subListMethod); // Stack: [ArrayList, List]
+
+                            // Call clear() on the List
+                            int clearMethod2 = cp.addInterfaceMethodRef("java/util/List", "clear", "()V");
+                            code.invokeinterface(clearMethod2, 1); // Stack: [ArrayList]
+
+                            // Assignment expression returns the assigned value (newLength), not the ArrayList
+                            code.pop(); // Pop the ArrayList we kept, Stack: []
+                            code.iconst(newLength); // Stack: [newLength]
+                            return;
+                        }
+
+                        // For non-constant expressions, we need more complex handling
+                        throw new Swc4jByteCodeCompilerException("Setting array length to non-constant values not yet supported");
+                    }
+                }
+            }
+        }
+        throw new Swc4jByteCodeCompilerException("Assignment expression not yet supported: " + left);
+    }
+
     public static void generateBinExpr(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstBinExpr binExpr,
             CompilationContext context,
-            ByteCodeCompilerOptions options) {
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
         Swc4jAstBinaryOp op = binExpr.getOp();
 
         if (op == Swc4jAstBinaryOp.Add) {
@@ -301,6 +384,48 @@ public final class CodeGenerator {
                 }
             }
         }
+    }
+
+    public static void generateCallExpr(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstCallExpr callExpr,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        // Handle method calls on arrays (e.g., arr.push(value))
+        if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
+            String objType = TypeResolver.inferTypeFromExpr(memberExpr.getObj(), context, options);
+            if ("Ljava/util/ArrayList;".equals(objType)) {
+                // Generate code for the object (ArrayList)
+                generateExpr(code, cp, memberExpr.getObj(), null, context, options);
+
+                // Get the method name
+                String methodName = null;
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    methodName = propIdent.getSym();
+                }
+
+                if ("push".equals(methodName)) {
+                    // arr.push(value) -> arr.add(value)
+                    if (!callExpr.getArgs().isEmpty()) {
+                        var arg = callExpr.getArgs().get(0);
+                        generateExpr(code, cp, arg.getExpr(), null, context, options);
+                        // Box if primitive
+                        String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
+                        if (argType != null && isPrimitiveType(argType)) {
+                            boxPrimitiveType(code, cp, argType, getWrapperType(argType));
+                        }
+                        int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
+                        code.invokevirtual(addMethod);
+                        code.pop(); // Pop the boolean return value
+                    }
+                    // push() returns void in our implementation
+                    return;
+                }
+            }
+        }
+        // For unsupported call expressions, throw an error for now
+        throw new Swc4jByteCodeCompilerException("Call expression not yet supported");
     }
 
     public static byte[] generateClassBytecode(
@@ -348,7 +473,7 @@ public final class CodeGenerator {
             ISwc4jAstExpr expr,
             ReturnTypeInfo returnTypeInfo,
             CompilationContext context,
-            ByteCodeCompilerOptions options) {
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
         if (expr instanceof Swc4jAstTsAsExpr asExpr) {
             // Handle explicit type cast (e.g., a as double)
             String targetType = TypeResolver.inferTypeFromExpr(asExpr, context, options);
@@ -511,6 +636,42 @@ public final class CodeGenerator {
         } else if (expr instanceof Swc4jAstNull) {
             // null literal - always push null reference onto the stack
             code.aconst_null();
+        } else if (expr instanceof Swc4jAstArrayLit arrayLit) {
+            // Array literal - convert to ArrayList
+            int arrayListClass = cp.addClass("java/util/ArrayList");
+            int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
+            int arrayListAdd = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
+
+            // Create new ArrayList instance
+            code.newInstance(arrayListClass);
+            code.dup();
+            code.invokespecial(arrayListInit);
+
+            // Add each element to the list
+            for (var elemOpt : arrayLit.getElems()) {
+                if (elemOpt.isPresent()) {
+                    var elem = elemOpt.get();
+                    code.dup(); // Duplicate ArrayList reference
+                    // Generate code for the element expression - ensure it's boxed
+                    ISwc4jAstExpr elemExpr = elem.getExpr();
+                    String elemType = TypeResolver.inferTypeFromExpr(elemExpr, context, options);
+                    if (elemType == null) elemType = "Ljava/lang/Object;";
+
+                    generateExpr(code, cp, elemExpr, null, context, options);
+
+                    // Box primitives to objects
+                    if ("I".equals(elemType) || "Z".equals(elemType) || "B".equals(elemType) ||
+                            "C".equals(elemType) || "S".equals(elemType) || "J".equals(elemType) ||
+                            "F".equals(elemType) || "D".equals(elemType)) {
+                        boxPrimitiveType(code, cp, elemType, getWrapperType(elemType));
+                    }
+
+                    // Call ArrayList.add(Object)
+                    code.invokevirtual(arrayListAdd);
+                    code.pop(); // Pop the boolean return value from add()
+                }
+            }
+            // ArrayList reference is now on top of stack
         } else if (expr instanceof Swc4jAstIdent ident) {
             String varName = ident.getSym();
             LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
@@ -578,6 +739,45 @@ public final class CodeGenerator {
                     }
                 }
             }
+        } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
+            // Handle member access (e.g., arr.length)
+            generateMemberExpr(code, cp, memberExpr, context, options);
+
+            // If the member expression returns a primitive and we need an Object, box it
+            if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT) {
+                String exprType = TypeResolver.inferTypeFromExpr(memberExpr, context, options);
+                if ("I".equals(exprType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+                    code.invokestatic(valueOfRef);
+                } else if ("Z".equals(exprType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
+                    code.invokestatic(valueOfRef);
+                } else if ("D".equals(exprType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
+                    code.invokestatic(valueOfRef);
+                } else if ("J".equals(exprType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+                    code.invokestatic(valueOfRef);
+                } else if ("F".equals(exprType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
+                    code.invokestatic(valueOfRef);
+                } else if ("B".equals(exprType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
+                    code.invokestatic(valueOfRef);
+                } else if ("C".equals(exprType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
+                    code.invokestatic(valueOfRef);
+                } else if ("S".equals(exprType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
+                    code.invokestatic(valueOfRef);
+                }
+            }
+        } else if (expr instanceof Swc4jAstCallExpr callExpr) {
+            // Handle method calls (e.g., arr.push(value))
+            generateCallExpr(code, cp, callExpr, context, options);
+        } else if (expr instanceof Swc4jAstAssignExpr assignExpr) {
+            // Handle assignment expressions (e.g., arr[1] = value, arr.length = 0)
+            generateAssignExpr(code, cp, assignExpr, context, options);
         } else if (expr instanceof Swc4jAstBinExpr binExpr) {
             generateBinExpr(code, cp, binExpr, context, options);
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
@@ -586,6 +786,49 @@ public final class CodeGenerator {
             // For parenthesized expressions, generate code for the inner expression
             generateExpr(code, cp, parenExpr.getExpr(), returnTypeInfo, context, options);
         }
+    }
+
+    public static void generateMemberExpr(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstMemberExpr memberExpr,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        // Handle member access on arrays (e.g., arr.length or arr[index])
+        String objType = TypeResolver.inferTypeFromExpr(memberExpr.getObj(), context, options);
+        if ("Ljava/util/ArrayList;".equals(objType)) {
+            // Check if it's a computed property (arr[index]) or named property (arr.length)
+            if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
+                // arr[index] -> arr.get(index)
+                generateExpr(code, cp, memberExpr.getObj(), null, context, options); // Stack: [ArrayList]
+                generateExpr(code, cp, computedProp.getExpr(), null, context, options); // Stack: [ArrayList, index]
+
+                // Convert to int if needed
+                String indexType = TypeResolver.inferTypeFromExpr(computedProp.getExpr(), context, options);
+                if (!"I".equals(indexType)) {
+                    // TODO: Handle type conversion
+                }
+
+                // Call ArrayList.get(int)
+                int getMethod = cp.addMethodRef("java/util/ArrayList", "get", "(I)Ljava/lang/Object;");
+                code.invokevirtual(getMethod); // Stack: [Object]
+                return;
+            }
+
+            // Named property access (arr.length)
+            if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                String propName = propIdent.getSym();
+                if ("length".equals(propName)) {
+                    // arr.length -> arr.size()
+                    generateExpr(code, cp, memberExpr.getObj(), null, context, options); // Stack: [ArrayList]
+                    int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
+                    code.invokevirtual(sizeMethod); // Stack: [int]
+                    return;
+                }
+            }
+        }
+        // For unsupported member expressions, throw an error for now
+        throw new Swc4jByteCodeCompilerException("Member expression not yet supported: " + memberExpr.getProp());
     }
 
     public static void generateMethod(
@@ -618,6 +861,8 @@ public final class CodeGenerator {
                 }
 
                 int maxStack = Math.max(returnTypeInfo.maxStack(), returnTypeInfo.type().getMinStack());
+                // Increase max stack to handle complex expressions like array literals with boxing
+                maxStack = Math.max(maxStack, 10);
                 int maxLocals = context.getLocalVariableTable().getMaxLocals();
 
                 classWriter.addMethod(accessFlags, methodName, descriptor, code, maxStack, maxLocals);
@@ -639,10 +884,26 @@ public final class CodeGenerator {
         for (ISwc4jAstStmt stmt : body.getStmts()) {
             if (stmt instanceof Swc4jAstVarDecl varDecl) {
                 generateVarDecl(code, cp, varDecl, context, options);
+            } else if (stmt instanceof Swc4jAstExprStmt exprStmt) {
+                // Expression statement - evaluate the expression and discard result if any
+                ISwc4jAstExpr expr = exprStmt.getExpr();
+                generateExpr(code, cp, expr, null, context, options);
+
+                // Assignment expressions leave values on the stack that need to be popped
+                // Call expressions handle their own return values (already popped if needed)
+                if (expr instanceof Swc4jAstAssignExpr) {
+                    // Assignment expressions leave the assigned value on the stack
+                    String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
+                    if (exprType != null && !("V".equals(exprType))) {
+                        // Expression leaves a value, pop it
+                        code.pop();
+                    }
+                }
+                // Note: CallExpr already pops its return value in generateCallExpr
             } else if (stmt instanceof Swc4jAstReturnStmt returnStmt) {
-                returnStmt.getArg().ifPresent(arg -> {
-                    generateExpr(code, cp, arg, returnTypeInfo, context, options);
-                });
+                if (returnStmt.getArg().isPresent()) {
+                    generateExpr(code, cp, returnStmt.getArg().get(), returnTypeInfo, context, options);
+                }
 
                 // Generate appropriate return instruction
                 switch (returnTypeInfo.type()) {
@@ -685,7 +946,7 @@ public final class CodeGenerator {
             String leftType,
             String rightType,
             CompilationContext context,
-            ByteCodeCompilerOptions options) {
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
         // Use StringBuilder for string concatenation
         // new StringBuilder
         int stringBuilderClass = cp.addClass("java/lang/StringBuilder");
@@ -726,10 +987,33 @@ public final class CodeGenerator {
             Swc4jAstUnaryExpr unaryExpr,
             ReturnTypeInfo returnTypeInfo,
             CompilationContext context,
-            ByteCodeCompilerOptions options) {
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
         Swc4jAstUnaryOp op = unaryExpr.getOp();
 
-        if (op == Swc4jAstUnaryOp.Minus) {
+        if (op == Swc4jAstUnaryOp.Delete) {
+            // Handle delete operator (e.g., delete arr[1])
+            ISwc4jAstExpr arg = unaryExpr.getArg();
+            if (arg instanceof Swc4jAstMemberExpr memberExpr) {
+                String objType = TypeResolver.inferTypeFromExpr(memberExpr.getObj(), context, options);
+                if ("Ljava/util/ArrayList;".equals(objType)) {
+                    if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
+                        // delete arr[index] -> arr.remove(index)
+                        generateExpr(code, cp, memberExpr.getObj(), null, context, options); // Stack: [ArrayList]
+                        generateExpr(code, cp, computedProp.getExpr(), null, context, options); // Stack: [ArrayList, index]
+
+                        // Call ArrayList.remove(int)
+                        int removeMethod = cp.addMethodRef("java/util/ArrayList", "remove", "(I)Ljava/lang/Object;");
+                        code.invokevirtual(removeMethod); // Stack: [removedObject]
+                        // Delete expression returns true in JavaScript, but we'll just leave the removed object
+                        // Actually, delete should return boolean true
+                        code.pop(); // Pop the removed object
+                        code.iconst(1); // Push true (1)
+                        return;
+                    }
+                }
+            }
+            throw new Swc4jByteCodeCompilerException("Delete operator not yet supported for: " + arg);
+        } else if (op == Swc4jAstUnaryOp.Minus) {
             // Handle numeric negation
             ISwc4jAstExpr arg = unaryExpr.getArg();
 
@@ -869,6 +1153,26 @@ public final class CodeGenerator {
             case "Ljava/lang/Character;" -> "C";
             default -> type;
         };
+    }
+
+    private static String getWrapperType(String primitiveType) {
+        return switch (primitiveType) {
+            case "B" -> "Ljava/lang/Byte;";
+            case "S" -> "Ljava/lang/Short;";
+            case "I" -> "Ljava/lang/Integer;";
+            case "J" -> "Ljava/lang/Long;";
+            case "F" -> "Ljava/lang/Float;";
+            case "D" -> "Ljava/lang/Double;";
+            case "C" -> "Ljava/lang/Character;";
+            case "Z" -> "Ljava/lang/Boolean;";
+            default -> primitiveType; // Already a wrapper or reference type
+        };
+    }
+
+    private static boolean isPrimitiveType(String type) {
+        return "I".equals(type) || "Z".equals(type) || "B".equals(type) ||
+                "C".equals(type) || "S".equals(type) || "J".equals(type) ||
+                "F".equals(type) || "D".equals(type);
     }
 
     private static void unboxWrapperType(CodeBuilder code, ClassWriter.ConstantPool cp, String type) {
