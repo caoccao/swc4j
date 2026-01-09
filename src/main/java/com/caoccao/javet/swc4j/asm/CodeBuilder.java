@@ -78,6 +78,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder freturn() {
+        code.write(0xAE); // freturn
+        return this;
+    }
+
     public CodeBuilder dreturn() {
         code.write(0xAF); // dreturn
         return this;
@@ -114,14 +119,33 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder fconst(float value) {
+        if (value == 0.0f) {
+            code.write(0x0B); // fconst_0
+        } else if (value == 1.0f) {
+            code.write(0x0C); // fconst_1
+        } else if (value == 2.0f) {
+            code.write(0x0D); // fconst_2
+        } else {
+            throw new IllegalArgumentException("Float value " + value + " requires ldc");
+        }
+        return this;
+    }
+
     public CodeBuilder dconst(double value) {
         if (value == 0.0) {
             code.write(0x0E); // dconst_0
         } else if (value == 1.0) {
             code.write(0x0F); // dconst_1
         } else {
-            throw new IllegalArgumentException("Double value " + value + " requires ldc2_w");
+            throw new IllegalArgumentException("Double value " + value + " requires ldc2_w, use ldc2_w() instead");
         }
+        return this;
+    }
+
+    public CodeBuilder ldc2_w(int constantIndex) {
+        code.write(0x14); // ldc2_w
+        writeShort(constantIndex);
         return this;
     }
 
@@ -162,6 +186,48 @@ public class CodeBuilder {
                 break; // iload_3
             default:
                 code.write(0x15); // iload
+                code.write(index);
+        }
+        return this;
+    }
+
+    public CodeBuilder fstore(int index) {
+        switch (index) {
+            case 0:
+                code.write(0x43);
+                break; // fstore_0
+            case 1:
+                code.write(0x44);
+                break; // fstore_1
+            case 2:
+                code.write(0x45);
+                break; // fstore_2
+            case 3:
+                code.write(0x46);
+                break; // fstore_3
+            default:
+                code.write(0x38); // fstore
+                code.write(index);
+        }
+        return this;
+    }
+
+    public CodeBuilder fload(int index) {
+        switch (index) {
+            case 0:
+                code.write(0x22);
+                break; // fload_0
+            case 1:
+                code.write(0x23);
+                break; // fload_1
+            case 2:
+                code.write(0x24);
+                break; // fload_2
+            case 3:
+                code.write(0x25);
+                break; // fload_3
+            default:
+                code.write(0x17); // fload
                 code.write(index);
         }
         return this;

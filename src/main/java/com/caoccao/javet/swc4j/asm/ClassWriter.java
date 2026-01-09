@@ -167,6 +167,8 @@ public class ClassWriter {
         private final Map<String, Integer> stringCache = new HashMap<>();
         private final Map<String, Integer> nameAndTypeCache = new HashMap<>();
         private final Map<String, Integer> methodRefCache = new HashMap<>();
+        private final Map<Float, Integer> floatCache = new HashMap<>();
+        private final Map<Double, Integer> doubleCache = new HashMap<>();
 
         public ConstantPool() {
             // Index 0 is reserved
@@ -221,6 +223,24 @@ public class ClassWriter {
             });
         }
 
+        public int addFloat(float value) {
+            return floatCache.computeIfAbsent(value, v -> {
+                int index = constants.size();
+                constants.add(new FloatInfo(v));
+                return index;
+            });
+        }
+
+        public int addDouble(double value) {
+            return doubleCache.computeIfAbsent(value, v -> {
+                int index = constants.size();
+                constants.add(new DoubleInfo(v));
+                // Double and Long constants take two slots in the constant pool
+                constants.add(null);
+                return index;
+            });
+        }
+
         public int getUtf8Index(String value) {
             Integer index = utf8Cache.get(value);
             return index != null ? index : addUtf8(value);
@@ -247,6 +267,16 @@ public class ClassWriter {
                     out.writeByte(10); // CONSTANT_Methodref
                     out.writeShort(methodRef.classIndex);
                     out.writeShort(methodRef.nameAndTypeIndex);
+                } else if (constant instanceof FloatInfo floatInfo) {
+                    out.writeByte(4); // CONSTANT_Float
+                    out.writeFloat(floatInfo.value);
+                } else if (constant instanceof DoubleInfo doubleInfo) {
+                    out.writeByte(6); // CONSTANT_Double
+                    out.writeDouble(doubleInfo.value);
+                    i++; // Skip the next slot as double takes 2 slots
+                } else if (constant == null) {
+                    // Skip null entries (used for double/long second slot)
+                    continue;
                 }
             }
         }
@@ -264,6 +294,12 @@ public class ClassWriter {
         }
 
         private record MethodRefInfo(int classIndex, int nameAndTypeIndex) {
+        }
+
+        private record FloatInfo(float value) {
+        }
+
+        private record DoubleInfo(double value) {
         }
     }
 }

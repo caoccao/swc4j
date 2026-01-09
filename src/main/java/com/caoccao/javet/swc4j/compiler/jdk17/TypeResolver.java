@@ -16,16 +16,19 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsEntityName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 
@@ -41,6 +44,7 @@ public final class TypeResolver {
 
         return switch (resolvedType) {
             case "int" -> "I";
+            case "float" -> "F";
             case "double" -> "D";
             case "java.lang.String", "String" -> "Ljava/lang/String;";
             case "void" -> "V";
@@ -104,12 +108,35 @@ public final class TypeResolver {
     }
 
     public static ReturnTypeInfo analyzeReturnType(
+            Swc4jAstFunction function,
             Swc4jAstBlockStmt body,
             CompilationContext context,
             ByteCodeCompilerOptions options) {
-        // Analyze the return statement to determine the return type
-        for (com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt stmt : body.getStmts()) {
-            if (stmt instanceof com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt returnStmt) {
+        // Check for explicit return type annotation first
+        var returnTypeOpt = function.getReturnType();
+        if (returnTypeOpt.isPresent()) {
+            var returnTypeAnn = returnTypeOpt.get();
+            var tsType = returnTypeAnn.getTypeAnn();
+            if (tsType instanceof Swc4jAstTsTypeRef typeRef) {
+                ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
+                if (entityName instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent ident) {
+                    String typeName = ident.getSym();
+                    String descriptor = mapTypeNameToDescriptor(typeName, options);
+                    return switch (descriptor) {
+                        case "I" -> new ReturnTypeInfo(ReturnType.INT, 1);
+                        case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 1);
+                        case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 2);
+                        case "Ljava/lang/String;" -> new ReturnTypeInfo(ReturnType.STRING, 1);
+                        case "V" -> new ReturnTypeInfo(ReturnType.VOID, 0);
+                        default -> new ReturnTypeInfo(ReturnType.STRING, 1); // Default to object reference
+                    };
+                }
+            }
+        }
+
+        // Fall back to type inference from return statement
+        for (ISwc4jAstStmt stmt : body.getStmts()) {
+            if (stmt instanceof Swc4jAstReturnStmt returnStmt) {
                 var argOpt = returnStmt.getArg();
                 if (argOpt.isPresent()) {
                     ISwc4jAstExpr arg = argOpt.get();
@@ -126,6 +153,8 @@ public final class TypeResolver {
                         String type = context.getInferredTypes().get(ident.getSym());
                         if ("I".equals(type)) {
                             return new ReturnTypeInfo(ReturnType.INT, 1);
+                        } else if ("F".equals(type)) {
+                            return new ReturnTypeInfo(ReturnType.FLOAT, 1);
                         } else if ("D".equals(type)) {
                             return new ReturnTypeInfo(ReturnType.DOUBLE, 2);
                         } else if ("Ljava/lang/String;".equals(type)) {

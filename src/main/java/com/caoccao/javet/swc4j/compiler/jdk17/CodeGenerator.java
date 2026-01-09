@@ -99,8 +99,8 @@ public final class CodeGenerator {
                 // Analyze variable declarations and infer types
                 VariableAnalyzer.analyzeVariableDeclarations(body, context, options);
 
-                // Determine return type from method body
-                ReturnTypeInfo returnTypeInfo = TypeResolver.analyzeReturnType(body, context, options);
+                // Determine return type from method body or explicit annotation
+                ReturnTypeInfo returnTypeInfo = TypeResolver.analyzeReturnType(function, body, context, options);
                 String descriptor = generateMethodDescriptor(function, returnTypeInfo);
                 byte[] code = generateMethodCode(cp, body, returnTypeInfo, context, options);
 
@@ -140,13 +140,14 @@ public final class CodeGenerator {
                 generateVarDecl(code, cp, varDecl, context, options);
             } else if (stmt instanceof Swc4jAstReturnStmt returnStmt) {
                 returnStmt.getArg().ifPresent(arg -> {
-                    generateExpr(code, cp, arg, context, options);
+                    generateExpr(code, cp, arg, returnTypeInfo, context, options);
                 });
 
                 // Generate appropriate return instruction
                 switch (returnTypeInfo.type()) {
                     case VOID -> code.returnVoid();
                     case INT -> code.ireturn();
+                    case FLOAT -> code.freturn();
                     case DOUBLE -> code.dreturn();
                     case STRING -> code.areturn();
                 }
@@ -169,11 +170,21 @@ public final class CodeGenerator {
                 LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
 
                 declarator.getInit().ifPresent(init -> {
-                    generateExpr(code, cp, init, context, options);
+                    // Create a ReturnTypeInfo based on the variable type so we can convert the value appropriately
+                    ReturnTypeInfo varTypeInfo = null;
+                    if ("F".equals(localVar.type())) {
+                        varTypeInfo = new ReturnTypeInfo(ReturnType.FLOAT, 1);
+                    } else if ("D".equals(localVar.type())) {
+                        varTypeInfo = new ReturnTypeInfo(ReturnType.DOUBLE, 2);
+                    }
+
+                    generateExpr(code, cp, init, varTypeInfo, context, options);
 
                     // Store the value in the local variable
                     if ("I".equals(localVar.type())) {
                         code.istore(localVar.index());
+                    } else if ("F".equals(localVar.type())) {
+                        code.fstore(localVar.index());
                     } else if ("D".equals(localVar.type())) {
                         // code.dstore(localVar.index());
                     } else {
@@ -188,6 +199,7 @@ public final class CodeGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             ISwc4jAstExpr expr,
+            ReturnTypeInfo returnTypeInfo,
             CompilationContext context,
             ByteCodeCompilerOptions options) {
         if (expr instanceof Swc4jAstStr str) {
@@ -195,10 +207,26 @@ public final class CodeGenerator {
             code.ldc(stringIndex);
         } else if (expr instanceof Swc4jAstNumber number) {
             double value = number.getValue();
-            if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
+
+            // Check if we need to convert to float based on return type
+            if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.FLOAT) {
+                float floatValue = (float) value;
+                if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
+                    code.fconst(floatValue);
+                } else {
+                    int floatIndex = cp.addFloat(floatValue);
+                    code.ldc(floatIndex);
+                }
+            } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
                 code.iconst((int) value);
             } else {
-                code.dconst(value);
+                // For double values
+                if (value == 0.0 || value == 1.0) {
+                    code.dconst(value);
+                } else {
+                    int doubleIndex = cp.addDouble(value);
+                    code.ldc2_w(doubleIndex);
+                }
             }
         } else if (expr instanceof Swc4jAstIdent ident) {
             String varName = ident.getSym();
@@ -206,6 +234,8 @@ public final class CodeGenerator {
             if (localVar != null) {
                 if ("I".equals(localVar.type())) {
                     code.iload(localVar.index());
+                } else if ("F".equals(localVar.type())) {
+                    code.fload(localVar.index());
                 } else if ("D".equals(localVar.type())) {
                     // code.dload(localVar.index());
                 } else {
@@ -234,10 +264,10 @@ public final class CodeGenerator {
                 generateStringConcat(code, cp, binExpr.getLeft(), binExpr.getRight(), leftType, rightType, context, options);
             } else {
                 // Generate left operand
-                generateExpr(code, cp, binExpr.getLeft(), context, options);
+                generateExpr(code, cp, binExpr.getLeft(), null, context, options);
 
                 // Generate right operand
-                generateExpr(code, cp, binExpr.getRight(), context, options);
+                generateExpr(code, cp, binExpr.getRight(), null, context, options);
 
                 // Determine type and generate appropriate add instruction
                 if ("I".equals(leftType)) {
@@ -271,7 +301,7 @@ public final class CodeGenerator {
                 .invokespecial(stringBuilderInit);
 
         // Append left operand
-        generateExpr(code, cp, left, context, options);
+        generateExpr(code, cp, left, null, context, options);
         if ("Ljava/lang/String;".equals(leftType)) {
             code.invokevirtual(appendString);
         } else if ("I".equals(leftType)) {
@@ -279,7 +309,7 @@ public final class CodeGenerator {
         }
 
         // Append right operand
-        generateExpr(code, cp, right, context, options);
+        generateExpr(code, cp, right, null, context, options);
         if ("Ljava/lang/String;".equals(rightType)) {
             code.invokevirtual(appendString);
         } else if ("I".equals(rightType)) {
@@ -295,6 +325,7 @@ public final class CodeGenerator {
         String returnDescriptor = switch (returnTypeInfo.type()) {
             case VOID -> "V";
             case INT -> "I";
+            case FLOAT -> "F";
             case DOUBLE -> "D";
             case STRING -> "Ljava/lang/String;";
         };
