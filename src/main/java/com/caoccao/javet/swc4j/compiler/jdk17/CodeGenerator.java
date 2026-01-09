@@ -25,6 +25,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNull;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
@@ -210,7 +211,9 @@ public final class CodeGenerator {
         }
         // Not a string concatenation - add this expression as an operand
         operands.add(expr);
-        operandTypes.add(TypeResolver.inferTypeFromExpr(expr, context, options));
+        String operandType = TypeResolver.inferTypeFromExpr(expr, context, options);
+        // If type is null (e.g., for null literal), default to Object
+        operandTypes.add(operandType != null ? operandType : "Ljava/lang/Object;");
     }
 
     private static void convertPrimitiveType(CodeBuilder code, String fromType, String toType) {
@@ -268,6 +271,9 @@ public final class CodeGenerator {
         if (op == Swc4jAstBinaryOp.Add) {
             String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
             String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+            // Handle null types - default to Object for null literals
+            if (leftType == null) leftType = "Ljava/lang/Object;";
+            if (rightType == null) rightType = "Ljava/lang/Object;";
 
             // Check if this is string concatenation
             if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
@@ -347,6 +353,9 @@ public final class CodeGenerator {
             // Handle explicit type cast (e.g., a as double)
             String targetType = TypeResolver.inferTypeFromExpr(asExpr, context, options);
             String innerType = TypeResolver.inferTypeFromExpr(asExpr.getExpr(), context, options);
+            // Handle null types - should not happen for cast expressions, but default to Object if it does
+            if (targetType == null) targetType = "Ljava/lang/Object;";
+            if (innerType == null) innerType = "Ljava/lang/Object;";
 
             // Generate code for the inner expression
             generateExpr(code, cp, asExpr.getExpr(), null, context, options);
@@ -499,6 +508,9 @@ public final class CodeGenerator {
                 // Primitive boolean
                 code.iconst(value ? 1 : 0);
             }
+        } else if (expr instanceof Swc4jAstNull) {
+            // null literal - always push null reference onto the stack
+            code.aconst_null();
         } else if (expr instanceof Swc4jAstIdent ident) {
             String varName = ident.getSym();
             LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
@@ -796,6 +808,8 @@ public final class CodeGenerator {
                 generateExpr(code, cp, arg, null, context, options);
 
                 String argType = TypeResolver.inferTypeFromExpr(arg, context, options);
+                // Handle null type - should not happen for negation, default to int
+                if (argType == null) argType = "I";
                 switch (argType) {
                     case "D" -> code.dneg();
                     case "F" -> code.fneg();

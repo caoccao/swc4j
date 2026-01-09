@@ -200,6 +200,38 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testDirectNullPlusString(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      return null + "test"
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("nulltest", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDirectStringPlusNull(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      return "test" + null
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("testnull", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testDoubleObjectPlusDoubleObject(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -488,8 +520,6 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
         assertEquals(30L, classA.getMethod("test").invoke(instance));
     }
 
-    // Explicit cast tests - Narrowing conversions
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testExplicitCastFloatWrapperToDouble(JdkVersion jdkVersion) throws Exception {
@@ -525,6 +555,8 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         assertEquals(3.0, classA.getMethod("test").invoke(instance));
     }
+
+    // Explicit cast tests - Narrowing conversions
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -598,8 +630,6 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
         assertEquals(40.0, classA.getMethod("test").invoke(instance));
     }
 
-    // Explicit cast tests - Wrapper to primitive conversions
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testExplicitCastIntegerToLong(JdkVersion jdkVersion) throws Exception {
@@ -635,6 +665,8 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         assertEquals(100L, classA.getMethod("test").invoke(instance));
     }
+
+    // Explicit cast tests - Wrapper to primitive conversions
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -726,8 +758,6 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
         assertEquals(3000.0, classA.getMethod("test").invoke(instance));
     }
 
-    // Explicit cast tests - Wrapper to Wrapper conversions
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testExplicitCastMixedTypes(JdkVersion jdkVersion) throws Exception {
@@ -764,6 +794,8 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         assertEquals(200.0, classA.getMethod("test").invoke(instance));
     }
+
+    // Explicit cast tests - Wrapper to Wrapper conversions
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -893,8 +925,6 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
         assertEquals(31.0, classA.getMethod("test").invoke(instance));
     }
 
-    // Mixed primitive type tests
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testFloatObjectPlusFloatObject(JdkVersion jdkVersion) throws Exception {
@@ -932,6 +962,8 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         assertEquals(31.0, classA.getMethod("test").invoke(instance));
     }
+
+    // Mixed primitive type tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -1199,8 +1231,6 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
         assertEquals(123L, classA.getMethod("test").invoke(instance));
     }
 
-    // Mixed primitive and wrapper type tests
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testLongPlusDouble(JdkVersion jdkVersion) throws Exception {
@@ -1237,6 +1267,26 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals(123.5f, classA.getMethod("test").invoke(instance));
+    }
+
+    // Mixed primitive and wrapper type tests
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNullStringConcatenation(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a = null
+                      const b = "hello"
+                      return a + b
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("nullhello", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -1277,8 +1327,6 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
         assertEquals(30, classA.getMethod("test").invoke(instance));
     }
 
-    // Explicit type cast tests
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testShortPlusLong(JdkVersion jdkVersion) throws Exception {
@@ -1298,6 +1346,8 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
         assertEquals(30L, classA.getMethod("test").invoke(instance));
     }
 
+    // Explicit type cast tests
+
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testShortPlusShort(JdkVersion jdkVersion) throws Exception {
@@ -1314,6 +1364,24 @@ public class TestCompileBinExpr extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals(75, (short) classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testStringNullConcatenation(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a = "hello"
+                      const b = null
+                      return a + b
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("hellonull", classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest

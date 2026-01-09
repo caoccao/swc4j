@@ -24,6 +24,11 @@ import java.io.ByteArrayOutputStream;
 public class CodeBuilder {
     private final ByteArrayOutputStream code = new ByteArrayOutputStream();
 
+    public CodeBuilder aconst_null() {
+        code.write(0x01); // aconst_null
+        return this;
+    }
+
     public CodeBuilder aload(int index) {
         switch (index) {
             case 0 -> code.write(0x2A); // aload_0

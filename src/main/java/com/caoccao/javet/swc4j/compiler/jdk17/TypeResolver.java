@@ -20,6 +20,7 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNull;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -67,6 +68,10 @@ public final class TypeResolver {
                     ISwc4jAstExpr arg = argOpt.get();
                     // Use inferTypeFromExpr for general type inference
                     String type = inferTypeFromExpr(arg, context, options);
+                    // If type is null (e.g., for null literal), default to Object
+                    if (type == null) {
+                        type = "Ljava/lang/Object;";
+                    }
                     return ReturnTypeInfo.of(type);
                 }
                 return new ReturnTypeInfo(ReturnType.VOID, 0, null);
@@ -95,7 +100,9 @@ public final class TypeResolver {
 
         // Type inference from initializer
         if (init.isPresent()) {
-            return inferTypeFromExpr(init.get(), context, options);
+            String type = inferTypeFromExpr(init.get(), context, options);
+            // If type is null (e.g., for null literal), default to Object
+            return type != null ? type : "Ljava/lang/Object;";
         }
 
         return "Ljava/lang/Object;"; // Default
@@ -164,6 +171,10 @@ public final class TypeResolver {
             return "D";
         } else if (expr instanceof Swc4jAstBool) {
             return "Z";
+        } else if (expr instanceof Swc4jAstNull) {
+            // null has no specific type - it's compatible with any reference type
+            // Return null to indicate that the type should be determined by context
+            return null;
         } else if (expr instanceof Swc4jAstStr) {
             return "Ljava/lang/String;";
         } else if (expr instanceof Swc4jAstIdent ident) {
@@ -172,6 +183,9 @@ public final class TypeResolver {
             if (binExpr.getOp() == Swc4jAstBinaryOp.Add) {
                 String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
                 String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
                 // String concatenation - if either operand is String, result is String
                 if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
                     return "Ljava/lang/String;";
