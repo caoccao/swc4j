@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
 public enum ReturnType {
+    CHAR(2),
     DOUBLE(4),
     FLOAT(2),
     INT(2),

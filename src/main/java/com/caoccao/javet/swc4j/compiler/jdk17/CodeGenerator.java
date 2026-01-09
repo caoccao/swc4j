@@ -136,8 +136,32 @@ public final class CodeGenerator {
             CompilationContext context,
             ByteCodeCompilerOptions options) {
         if (expr instanceof Swc4jAstStr str) {
-            int stringIndex = cp.addString(str.getValue());
-            code.ldc(stringIndex);
+            String value = str.getValue();
+            // Check if we need to convert to char based on return type
+            if (returnTypeInfo != null && (returnTypeInfo.type() == ReturnType.CHAR 
+                    || (returnTypeInfo.type() == ReturnType.OBJECT && "Ljava/lang/Character;".equals(returnTypeInfo.descriptor())))) {
+                // Convert string to char - use first character
+                if (value.length() > 0) {
+                    char charValue = value.charAt(0);
+                    code.iconst(charValue);
+                    // Box to Character if needed
+                    if (returnTypeInfo.type() == ReturnType.OBJECT && "Ljava/lang/Character;".equals(returnTypeInfo.descriptor())) {
+                        int valueOfRef = cp.addMethodRef("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
+                        code.invokestatic(valueOfRef);
+                    }
+                } else {
+                    // Empty string, use null character
+                    code.iconst(0);
+                    if (returnTypeInfo.type() == ReturnType.OBJECT && "Ljava/lang/Character;".equals(returnTypeInfo.descriptor())) {
+                        int valueOfRef = cp.addMethodRef("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
+                        code.invokestatic(valueOfRef);
+                    }
+                }
+            } else {
+                // Regular string
+                int stringIndex = cp.addString(value);
+                code.ldc(stringIndex);
+            }
         } else if (expr instanceof Swc4jAstNumber number) {
             double value = number.getValue();
 
@@ -224,7 +248,7 @@ public final class CodeGenerator {
             LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
             if (localVar != null) {
                 switch (localVar.type()) {
-                    case "I", "S" -> code.iload(localVar.index());
+                    case "I", "S", "C" -> code.iload(localVar.index());
                     case "J" -> code.lload(localVar.index());
                     case "F" -> code.fload(localVar.index());
                     case "D" -> {
@@ -299,7 +323,7 @@ public final class CodeGenerator {
                 // Generate appropriate return instruction
                 switch (returnTypeInfo.type()) {
                     case VOID -> code.returnVoid();
-                    case INT, SHORT -> code.ireturn();
+                    case INT, SHORT, CHAR -> code.ireturn();
                     case LONG -> code.lreturn();
                     case FLOAT -> code.freturn();
                     case DOUBLE -> code.dreturn();
@@ -316,6 +340,7 @@ public final class CodeGenerator {
         String returnDescriptor = switch (returnTypeInfo.type()) {
             case VOID -> "V";
             case INT -> "I";
+            case CHAR -> "C";
             case SHORT -> "S";
             case LONG -> "J";
             case FLOAT -> "F";
@@ -465,7 +490,9 @@ public final class CodeGenerator {
                 declarator.getInit().ifPresent(init -> {
                     // Create a ReturnTypeInfo based on the variable type so we can convert the value appropriately
                     ReturnTypeInfo varTypeInfo = null;
-                    if ("S".equals(localVar.type())) {
+                    if ("C".equals(localVar.type())) {
+                        varTypeInfo = new ReturnTypeInfo(ReturnType.CHAR, 1, null);
+                    } else if ("S".equals(localVar.type())) {
                         varTypeInfo = new ReturnTypeInfo(ReturnType.SHORT, 1, null);
                     } else if ("J".equals(localVar.type())) {
                         varTypeInfo = new ReturnTypeInfo(ReturnType.LONG, 2, null);
@@ -482,7 +509,7 @@ public final class CodeGenerator {
 
                     // Store the value in the local variable
                     switch (localVar.type()) {
-                        case "I", "S" -> code.istore(localVar.index());
+                        case "I", "S", "C" -> code.istore(localVar.index());
                         case "J" -> code.lstore(localVar.index());
                         case "F" -> code.fstore(localVar.index());
                         case "D" -> {
@@ -507,6 +534,10 @@ public final class CodeGenerator {
             case "Ljava/lang/Integer;" -> {
                 int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                 code.invokevirtual(intValueRef);
+            }
+            case "Ljava/lang/Character;" -> {
+                int charValueRef = cp.addMethodRef("java/lang/Character", "charValue", "()C");
+                code.invokevirtual(charValueRef);
             }
             case "Ljava/lang/Long;" -> {
                 int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");

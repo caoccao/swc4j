@@ -23,6 +23,7 @@ public record ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String>
     private static final Map<String, String> DEFAULT_TYPE_ALIAS_MAP = Map.of(
             "BigInteger", "java.lang.BigInteger",
             "Boolean", "java.lang.Boolean",
+            "Character", "java.lang.Character",
             "Double", "java.lang.Double",
             "Float", "java.lang.Float",
             "Integer", "java.lang.Integer",

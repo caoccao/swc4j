@@ -56,6 +56,7 @@ public final class TypeResolver {
                     String descriptor = mapTypeNameToDescriptor(typeName, options);
                     return switch (descriptor) {
                         case "I" -> new ReturnTypeInfo(ReturnType.INT, 1, null);
+                        case "C" -> new ReturnTypeInfo(ReturnType.CHAR, 1, null);
                         case "S" -> new ReturnTypeInfo(ReturnType.SHORT, 1, null);
                         case "J" -> new ReturnTypeInfo(ReturnType.LONG, 2, null);
                         case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
@@ -88,6 +89,8 @@ public final class TypeResolver {
                         String type = context.getInferredTypes().get(ident.getSym());
                         if ("I".equals(type)) {
                             return new ReturnTypeInfo(ReturnType.INT, 1, null);
+                        } else if ("C".equals(type)) {
+                            return new ReturnTypeInfo(ReturnType.CHAR, 1, null);
                         } else if ("S".equals(type)) {
                             return new ReturnTypeInfo(ReturnType.SHORT, 1, null);
                         } else if ("J".equals(type)) {
@@ -198,6 +201,7 @@ public final class TypeResolver {
 
         return switch (resolvedType) {
             case "int" -> "I";
+            case "char" -> "C";
             case "short" -> "S";
             case "long" -> "J";
             case "float" -> "F";
