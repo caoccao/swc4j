@@ -26,6 +26,7 @@ public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor) {
         if (type.length() == 1) {
             return switch (type) {
                 case "I" -> new ReturnTypeInfo(ReturnType.INT, 1, null);
+                case "Z" -> new ReturnTypeInfo(ReturnType.BOOLEAN, 1, null);
                 case "C" -> new ReturnTypeInfo(ReturnType.CHAR, 1, null);
                 case "S" -> new ReturnTypeInfo(ReturnType.SHORT, 1, null);
                 case "J" -> new ReturnTypeInfo(ReturnType.LONG, 2, null);
@@ -36,7 +37,7 @@ public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor) {
             };
         }
         if (type.equals("Ljava/lang/String;")) {
-            return new ReturnTypeInfo(ReturnType.STRING, 1, null);
+            return new ReturnTypeInfo(ReturnType.STRING, 1, type);
         }
         if ((type.startsWith("L") || type.startsWith("[")) && type.endsWith(";")) {
             return new ReturnTypeInfo(ReturnType.OBJECT, 1, type);

@@ -20,17 +20,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public record ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String> typeAliasMap, String packagePrefix) {
-    private static final Map<String, String> DEFAULT_TYPE_ALIAS_MAP = Map.of(
-            "BigInteger", "java.lang.BigInteger",
-            "Boolean", "java.lang.Boolean",
-            "Character", "java.lang.Character",
-            "Double", "java.lang.Double",
-            "Float", "java.lang.Float",
-            "Integer", "java.lang.Integer",
-            "Long", "java.lang.Long",
-            "Short", "java.lang.Short",
-            "String", "java.lang.String",
-            "void", "void");
+    private static final Map<String, String> DEFAULT_TYPE_ALIAS_MAP = new HashMap<>();
+
+    static {
+        DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
+                "Boolean", "java.lang.Boolean",
+                "Character", "java.lang.Character",
+                "Double", "java.lang.Double",
+                "Float", "java.lang.Float",
+                "Integer", "java.lang.Integer",
+                "Long", "java.lang.Long",
+                "Short", "java.lang.Short"
+        ));
+        DEFAULT_TYPE_ALIAS_MAP.putAll(Map.of(
+                "BigInteger", "java.lang.BigInteger",
+                "String", "java.lang.String",
+                "Object", "java.lang.Object",
+                "void", "void"
+        ));
+    }
 
     public ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String> typeAliasMap) {
         this(jdkVersion, typeAliasMap, "");

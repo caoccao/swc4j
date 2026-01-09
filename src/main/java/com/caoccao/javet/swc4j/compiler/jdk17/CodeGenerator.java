@@ -26,6 +26,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
@@ -63,6 +64,27 @@ public final class CodeGenerator {
         }
     }
 
+    private static void collectStringConcatOperands(
+            ISwc4jAstExpr expr,
+            java.util.List<ISwc4jAstExpr> operands,
+            java.util.List<String> operandTypes,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) {
+        // If this expression is a binary Add that results in a String, collect its operands
+        if (expr instanceof Swc4jAstBinExpr binExpr && binExpr.getOp() == Swc4jAstBinaryOp.Add) {
+            String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
+            if ("Ljava/lang/String;".equals(exprType)) {
+                // This is a string concatenation - collect operands recursively
+                collectStringConcatOperands(binExpr.getLeft(), operands, operandTypes, context, options);
+                collectStringConcatOperands(binExpr.getRight(), operands, operandTypes, context, options);
+                return;
+            }
+        }
+        // Not a string concatenation - add this expression as an operand
+        operands.add(expr);
+        operandTypes.add(TypeResolver.inferTypeFromExpr(expr, context, options));
+    }
+
     public static void generateBinExpr(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
@@ -89,7 +111,8 @@ public final class CodeGenerator {
 
                 // Determine type and generate appropriate add instruction
                 switch (leftType) {
-                    case "I", "S", "C", "Ljava/lang/Integer;", "Ljava/lang/Short;", "Ljava/lang/Character;" -> code.iadd();
+                    case "I", "S", "C", "Ljava/lang/Integer;", "Ljava/lang/Short;", "Ljava/lang/Character;" ->
+                            code.iadd();
                     case "J", "Ljava/lang/Long;" -> code.ladd();
                     case "F", "Ljava/lang/Float;" -> code.fadd();
                     case "D", "Ljava/lang/Double;" -> code.dadd();
@@ -147,7 +170,7 @@ public final class CodeGenerator {
         if (expr instanceof Swc4jAstStr str) {
             String value = str.getValue();
             // Check if we need to convert to char based on return type
-            if (returnTypeInfo != null && (returnTypeInfo.type() == ReturnType.CHAR 
+            if (returnTypeInfo != null && (returnTypeInfo.type() == ReturnType.CHAR
                     || (returnTypeInfo.type() == ReturnType.OBJECT && "Ljava/lang/Character;".equals(returnTypeInfo.descriptor())))) {
                 // Convert string to char - use first character
                 if (value.length() > 0) {
@@ -252,12 +275,25 @@ public final class CodeGenerator {
                     code.ldc2_w(doubleIndex);
                 }
             }
+        } else if (expr instanceof Swc4jAstBool bool) {
+            boolean value = bool.isValue();
+            // Check if we need to box to Boolean
+            if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                    && "Ljava/lang/Boolean;".equals(returnTypeInfo.descriptor())) {
+                // Box boolean to Boolean
+                code.iconst(value ? 1 : 0);
+                int valueOfRef = cp.addMethodRef("java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
+                code.invokestatic(valueOfRef);
+            } else {
+                // Primitive boolean
+                code.iconst(value ? 1 : 0);
+            }
         } else if (expr instanceof Swc4jAstIdent ident) {
             String varName = ident.getSym();
             LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
             if (localVar != null) {
                 switch (localVar.type()) {
-                    case "I", "S", "C" -> code.iload(localVar.index());
+                    case "I", "S", "C", "Z" -> code.iload(localVar.index());
                     case "J" -> code.lload(localVar.index());
                     case "F" -> code.fload(localVar.index());
                     case "D" -> {
@@ -317,7 +353,7 @@ public final class CodeGenerator {
             Swc4jAstBlockStmt body,
             ReturnTypeInfo returnTypeInfo,
             CompilationContext context,
-            ByteCodeCompilerOptions options) {
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
         CodeBuilder code = new CodeBuilder();
 
         // Process statements in the method body
@@ -332,7 +368,7 @@ public final class CodeGenerator {
                 // Generate appropriate return instruction
                 switch (returnTypeInfo.type()) {
                     case VOID -> code.returnVoid();
-                    case INT, SHORT, CHAR -> code.ireturn();
+                    case INT, SHORT, CHAR, BOOLEAN -> code.ireturn();
                     case LONG -> code.lreturn();
                     case FLOAT -> code.freturn();
                     case DOUBLE -> code.dreturn();
@@ -349,6 +385,7 @@ public final class CodeGenerator {
         String returnDescriptor = switch (returnTypeInfo.type()) {
             case VOID -> "V";
             case INT -> "I";
+            case BOOLEAN -> "Z";
             case CHAR -> "C";
             case SHORT -> "S";
             case LONG -> "J";
@@ -385,10 +422,10 @@ public final class CodeGenerator {
         // Flatten the operands - if left is also a string concatenation, collect all operands
         java.util.List<ISwc4jAstExpr> operands = new java.util.ArrayList<>();
         java.util.List<String> operandTypes = new java.util.ArrayList<>();
-        
+
         // Collect operands from left side
         collectStringConcatOperands(left, operands, operandTypes, context, options);
-        
+
         // Add right operand
         operands.add(right);
         operandTypes.add(rightType);
@@ -401,27 +438,6 @@ public final class CodeGenerator {
 
         // Call toString()
         code.invokevirtual(toString);
-    }
-    
-    private static void collectStringConcatOperands(
-            ISwc4jAstExpr expr,
-            java.util.List<ISwc4jAstExpr> operands,
-            java.util.List<String> operandTypes,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) {
-        // If this expression is a binary Add that results in a String, collect its operands
-        if (expr instanceof Swc4jAstBinExpr binExpr && binExpr.getOp() == Swc4jAstBinaryOp.Add) {
-            String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
-            if ("Ljava/lang/String;".equals(exprType)) {
-                // This is a string concatenation - collect operands recursively
-                collectStringConcatOperands(binExpr.getLeft(), operands, operandTypes, context, options);
-                collectStringConcatOperands(binExpr.getRight(), operands, operandTypes, context, options);
-                return;
-            }
-        }
-        // Not a string concatenation - add this expression as an operand
-        operands.add(expr);
-        operandTypes.add(TypeResolver.inferTypeFromExpr(expr, context, options));
     }
 
     public static void generateUnaryExpr(
@@ -520,36 +536,22 @@ public final class CodeGenerator {
             ClassWriter.ConstantPool cp,
             Swc4jAstVarDecl varDecl,
             CompilationContext context,
-            ByteCodeCompilerOptions options) {
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
         for (Swc4jAstVarDeclarator declarator : varDecl.getDecls()) {
             ISwc4jAstPat name = declarator.getName();
             if (name instanceof Swc4jAstBindingIdent bindingIdent) {
                 String varName = bindingIdent.getId().getSym();
                 LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
 
-                declarator.getInit().ifPresent(init -> {
-                    // Create a ReturnTypeInfo based on the variable type so we can convert the value appropriately
-                    ReturnTypeInfo varTypeInfo = null;
-                    if ("C".equals(localVar.type())) {
-                        varTypeInfo = new ReturnTypeInfo(ReturnType.CHAR, 1, null);
-                    } else if ("S".equals(localVar.type())) {
-                        varTypeInfo = new ReturnTypeInfo(ReturnType.SHORT, 1, null);
-                    } else if ("J".equals(localVar.type())) {
-                        varTypeInfo = new ReturnTypeInfo(ReturnType.LONG, 2, null);
-                    } else if ("F".equals(localVar.type())) {
-                        varTypeInfo = new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
-                    } else if ("D".equals(localVar.type())) {
-                        varTypeInfo = new ReturnTypeInfo(ReturnType.DOUBLE, 2, null);
-                    } else if (localVar.type().startsWith("L") && localVar.type().endsWith(";")) {
-                        // Object type
-                        varTypeInfo = new ReturnTypeInfo(ReturnType.OBJECT, 1, localVar.type());
-                    }
+                if (declarator.getInit().isPresent()) {
+                    var init = declarator.getInit().get();
+                    ReturnTypeInfo varTypeInfo = ReturnTypeInfo.of(localVar.type());
 
                     generateExpr(code, cp, init, varTypeInfo, context, options);
 
                     // Store the value in the local variable
                     switch (localVar.type()) {
-                        case "I", "S", "C" -> code.istore(localVar.index());
+                        case "I", "S", "C", "Z" -> code.istore(localVar.index());
                         case "J" -> code.lstore(localVar.index());
                         case "F" -> code.fstore(localVar.index());
                         case "D" -> {
@@ -557,7 +559,7 @@ public final class CodeGenerator {
                         }
                         default -> code.astore(localVar.index());
                     }
-                });
+                }
             }
         }
     }

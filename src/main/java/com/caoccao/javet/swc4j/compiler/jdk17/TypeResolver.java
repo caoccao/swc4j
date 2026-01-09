@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -112,6 +113,8 @@ public final class TypeResolver {
                 return "I";
             }
             return "D";
+        } else if (expr instanceof Swc4jAstBool) {
+            return "Z";
         } else if (expr instanceof Swc4jAstStr) {
             return "Ljava/lang/String;";
         } else if (expr instanceof Swc4jAstIdent ident) {
@@ -175,12 +178,14 @@ public final class TypeResolver {
 
         return switch (resolvedType) {
             case "int" -> "I";
+            case "boolean" -> "Z";
             case "char" -> "C";
             case "short" -> "S";
             case "long" -> "J";
             case "float" -> "F";
             case "double" -> "D";
             case "java.lang.String", "String" -> "Ljava/lang/String;";
+            case "java.lang.Object", "Object" -> "Ljava/lang/Object;";
             case "void" -> "V";
             default -> "L" + resolvedType.replace('.', '/') + ";";
         };

@@ -35,6 +35,7 @@
   * [Identifier Deletion](docs/features/identifier_deletion.md)
   * [Identifier Freeze](docs/features/identifier_freeze.md)
   * [Identifier Naming Convention](docs/features/identifier_naming_convention.md)
+* [TypeScript to JVM Bytecode (Preview)](docs/typescript_to_jvm_bytecode.md)
 
 ## Quick Start
 
