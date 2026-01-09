@@ -23,9 +23,7 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
@@ -64,6 +62,64 @@ public final class CodeGenerator {
         }
     }
 
+    private static void boxPrimitiveType(CodeBuilder code, ClassWriter.ConstantPool cp, String primitiveType, String targetType) {
+        // Only box if targetType is a wrapper
+        if (!targetType.startsWith("Ljava/lang/")) {
+            return; // Target is primitive, no boxing needed
+        }
+
+        switch (primitiveType) {
+            case "I" -> {
+                if ("Ljava/lang/Integer;".equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+                    code.invokestatic(valueOfRef);
+                }
+            }
+            case "Z" -> {
+                if ("Ljava/lang/Boolean;".equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;");
+                    code.invokestatic(valueOfRef);
+                }
+            }
+            case "B" -> {
+                if ("Ljava/lang/Byte;".equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
+                    code.invokestatic(valueOfRef);
+                }
+            }
+            case "C" -> {
+                if ("Ljava/lang/Character;".equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Character", "valueOf", "(C)Ljava/lang/Character;");
+                    code.invokestatic(valueOfRef);
+                }
+            }
+            case "S" -> {
+                if ("Ljava/lang/Short;".equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
+                    code.invokestatic(valueOfRef);
+                }
+            }
+            case "J" -> {
+                if ("Ljava/lang/Long;".equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+                    code.invokestatic(valueOfRef);
+                }
+            }
+            case "F" -> {
+                if ("Ljava/lang/Float;".equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
+                    code.invokestatic(valueOfRef);
+                }
+            }
+            case "D" -> {
+                if ("Ljava/lang/Double;".equals(targetType)) {
+                    int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
+                    code.invokestatic(valueOfRef);
+                }
+            }
+        }
+    }
+
     private static void collectStringConcatOperands(
             ISwc4jAstExpr expr,
             java.util.List<ISwc4jAstExpr> operands,
@@ -85,6 +141,50 @@ public final class CodeGenerator {
         operandTypes.add(TypeResolver.inferTypeFromExpr(expr, context, options));
     }
 
+    private static void convertPrimitiveType(CodeBuilder code, String fromType, String toType) {
+        if (fromType.equals(toType)) {
+            return; // No conversion needed
+        }
+
+        // byte, short, char are stored as int on the stack, so they start as "I" after unboxing
+        String stackFromType = switch (fromType) {
+            case "B", "S", "C" -> "I";
+            default -> fromType;
+        };
+
+        // Convert from stack type to target type
+        switch (stackFromType) {
+            case "I" -> {
+                switch (toType) {
+                    case "J" -> code.i2l();
+                    case "F" -> code.i2f();
+                    case "D" -> code.i2d();
+                }
+            }
+            case "J" -> {
+                switch (toType) {
+                    case "I" -> code.l2i();
+                    case "F" -> code.l2f();
+                    case "D" -> code.l2d();
+                }
+            }
+            case "F" -> {
+                switch (toType) {
+                    case "I" -> code.f2i();
+                    case "J" -> code.f2l();
+                    case "D" -> code.f2d();
+                }
+            }
+            case "D" -> {
+                switch (toType) {
+                    case "I" -> code.d2i();
+                    case "J" -> code.d2l();
+                    case "F" -> code.d2f();
+                }
+            }
+        }
+    }
+
     public static void generateBinExpr(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
@@ -101,21 +201,25 @@ public final class CodeGenerator {
             if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
                 generateStringConcat(code, cp, binExpr.getLeft(), binExpr.getRight(), leftType, rightType, context, options);
             } else {
+                // Determine the widened result type
+                String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+
                 // Generate left operand
                 generateExpr(code, cp, binExpr.getLeft(), null, context, options);
                 unboxWrapperType(code, cp, leftType);
+                convertPrimitiveType(code, getPrimitiveType(leftType), resultType);
 
                 // Generate right operand
                 generateExpr(code, cp, binExpr.getRight(), null, context, options);
                 unboxWrapperType(code, cp, rightType);
+                convertPrimitiveType(code, getPrimitiveType(rightType), resultType);
 
-                // Determine type and generate appropriate add instruction
-                switch (leftType) {
-                    case "I", "S", "C", "Ljava/lang/Integer;", "Ljava/lang/Short;", "Ljava/lang/Character;" ->
-                            code.iadd();
-                    case "J", "Ljava/lang/Long;" -> code.ladd();
-                    case "F", "Ljava/lang/Float;" -> code.fadd();
-                    case "D", "Ljava/lang/Double;" -> code.dadd();
+                // Generate appropriate add instruction based on result type
+                switch (resultType) {
+                    case "I" -> code.iadd();
+                    case "J" -> code.ladd();
+                    case "F" -> code.fadd();
+                    case "D" -> code.dadd();
                 }
             }
         }
@@ -167,7 +271,27 @@ public final class CodeGenerator {
             ReturnTypeInfo returnTypeInfo,
             CompilationContext context,
             ByteCodeCompilerOptions options) {
-        if (expr instanceof Swc4jAstStr str) {
+        if (expr instanceof Swc4jAstTsAsExpr asExpr) {
+            // Handle explicit type cast (e.g., a as double)
+            String targetType = TypeResolver.inferTypeFromExpr(asExpr, context, options);
+            String innerType = TypeResolver.inferTypeFromExpr(asExpr.getExpr(), context, options);
+
+            // Generate code for the inner expression
+            generateExpr(code, cp, asExpr.getExpr(), null, context, options);
+
+            // Unbox if the inner expression is a wrapper type
+            unboxWrapperType(code, cp, innerType);
+
+            // Get the primitive types for conversion
+            String innerPrimitive = getPrimitiveType(innerType);
+            String targetPrimitive = getPrimitiveType(targetType);
+
+            // Convert from inner primitive type to target primitive type
+            convertPrimitiveType(code, innerPrimitive, targetPrimitive);
+
+            // Box if the target type is a wrapper
+            boxPrimitiveType(code, cp, targetPrimitive, targetType);
+        } else if (expr instanceof Swc4jAstStr str) {
             String value = str.getValue();
             // Check if we need to convert to char based on return type
             if (returnTypeInfo != null && (returnTypeInfo.type() == ReturnType.CHAR
@@ -197,7 +321,7 @@ public final class CodeGenerator {
         } else if (expr instanceof Swc4jAstNumber number) {
             double value = number.getValue();
 
-            // Check if we need to convert to float based on return type
+            // Check if we need to convert to float or double based on return type
             if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.FLOAT) {
                 float floatValue = (float) value;
                 if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
@@ -205,6 +329,14 @@ public final class CodeGenerator {
                 } else {
                     int floatIndex = cp.addFloat(floatValue);
                     code.ldc(floatIndex);
+                }
+            } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.DOUBLE) {
+                // Double value
+                if (value == 0.0 || value == 1.0) {
+                    code.dconst(value);
+                } else {
+                    int doubleIndex = cp.addDouble(value);
+                    code.ldc2_w(doubleIndex);
                 }
             } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.LONG) {
                 // Long value
@@ -303,12 +435,10 @@ public final class CodeGenerator {
                     case "I", "S", "C", "Z", "B" -> code.iload(localVar.index());
                     case "J" -> code.lload(localVar.index());
                     case "F" -> code.fload(localVar.index());
-                    case "D" -> {
-                        // code.dload(localVar.index());
-                    }
+                    case "D" -> code.dload(localVar.index());
                     default -> code.aload(localVar.index());
                 }
-                
+
                 // Handle boxing if needed
                 if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT && returnTypeInfo.descriptor() != null) {
                     // Check if we need to box a primitive to its wrapper
@@ -368,6 +498,9 @@ public final class CodeGenerator {
             generateBinExpr(code, cp, binExpr, context, options);
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             generateUnaryExpr(code, cp, unaryExpr, returnTypeInfo, context, options);
+        } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
+            // For parenthesized expressions, generate code for the inner expression
+            generateExpr(code, cp, parenExpr.getExpr(), returnTypeInfo, context, options);
         }
     }
 
@@ -624,9 +757,7 @@ public final class CodeGenerator {
                         case "I", "S", "C", "Z", "B" -> code.istore(localVar.index());
                         case "J" -> code.lstore(localVar.index());
                         case "F" -> code.fstore(localVar.index());
-                        case "D" -> {
-                            // code.dstore(localVar.index());
-                        }
+                        case "D" -> code.dstore(localVar.index());
                         default -> code.astore(localVar.index());
                     }
                 }
@@ -641,6 +772,19 @@ public final class CodeGenerator {
         return propName.toString();
     }
 
+    private static String getPrimitiveType(String type) {
+        return switch (type) {
+            case "Ljava/lang/Byte;" -> "B";
+            case "Ljava/lang/Short;" -> "S";
+            case "Ljava/lang/Integer;" -> "I";
+            case "Ljava/lang/Long;" -> "J";
+            case "Ljava/lang/Float;" -> "F";
+            case "Ljava/lang/Double;" -> "D";
+            case "Ljava/lang/Character;" -> "C";
+            default -> type;
+        };
+    }
+
     private static void unboxWrapperType(CodeBuilder code, ClassWriter.ConstantPool cp, String type) {
         switch (type) {
             case "Ljava/lang/Integer;" -> {
@@ -650,10 +794,12 @@ public final class CodeGenerator {
             case "Ljava/lang/Character;" -> {
                 int charValueRef = cp.addMethodRef("java/lang/Character", "charValue", "()C");
                 code.invokevirtual(charValueRef);
-            }            case "Ljava/lang/Byte;" -> {
+            }
+            case "Ljava/lang/Byte;" -> {
                 int byteValueRef = cp.addMethodRef("java/lang/Byte", "byteValue", "()B");
                 code.invokevirtual(byteValueRef);
-            }            case "Ljava/lang/Long;" -> {
+            }
+            case "Ljava/lang/Long;" -> {
                 int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
                 code.invokevirtual(longValueRef);
             }

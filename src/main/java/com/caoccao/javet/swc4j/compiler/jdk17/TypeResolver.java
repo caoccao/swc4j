@@ -18,9 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
+import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstBool;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
@@ -103,11 +101,62 @@ public final class TypeResolver {
         return "Ljava/lang/Object;"; // Default
     }
 
+    private static String getPrimitiveType(String type) {
+        return switch (type) {
+            case "Ljava/lang/Byte;" -> "B";
+            case "Ljava/lang/Short;" -> "S";
+            case "Ljava/lang/Integer;" -> "I";
+            case "Ljava/lang/Long;" -> "J";
+            case "Ljava/lang/Float;" -> "F";
+            case "Ljava/lang/Double;" -> "D";
+            case "Ljava/lang/Character;" -> "C";
+            default -> type;
+        };
+    }
+
+    private static String getWidenedType(String leftType, String rightType) {
+        // Get primitive types (unwrap if needed)
+        String left = getPrimitiveType(leftType);
+        String right = getPrimitiveType(rightType);
+
+        // byte, short, char promote to int for operations
+        if ("B".equals(left) || "S".equals(left) || "C".equals(left)) {
+            left = "I";
+        }
+        if ("B".equals(right) || "S".equals(right) || "C".equals(right)) {
+            right = "I";
+        }
+
+        // Type widening rules: double > float > long > int
+        if ("D".equals(left) || "D".equals(right)) {
+            return "D";
+        }
+        if ("F".equals(left) || "F".equals(right)) {
+            return "F";
+        }
+        if ("J".equals(left) || "J".equals(right)) {
+            return "J";
+        }
+        return "I";
+    }
+
     public static String inferTypeFromExpr(
             ISwc4jAstExpr expr,
             CompilationContext context,
             ByteCodeCompilerOptions options) {
-        if (expr instanceof Swc4jAstNumber number) {
+        if (expr instanceof Swc4jAstTsAsExpr asExpr) {
+            // Explicit type cast - return the cast target type
+            var tsType = asExpr.getTypeAnn();
+            if (tsType instanceof Swc4jAstTsTypeRef typeRef) {
+                ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
+                if (entityName instanceof Swc4jAstIdent ident) {
+                    String typeName = ident.getSym();
+                    return mapTypeNameToDescriptor(typeName, options);
+                }
+            }
+            // If we can't determine the cast type, fall back to inferring from the expression
+            return inferTypeFromExpr(asExpr.getExpr(), context, options);
+        } else if (expr instanceof Swc4jAstNumber number) {
             double value = number.getValue();
             if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
                 return "I";
@@ -124,50 +173,18 @@ public final class TypeResolver {
                 String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
                 String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
                 // String concatenation - if either operand is String, result is String
-                // This includes: String + char, char + String, String + Character, Character + String
                 if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
                     return "Ljava/lang/String;";
                 }
-                // If both operands are Integer wrappers, result is also int (after unboxing and addition)
-                // We return "I" because the addition operation works on primitives
-                if ("Ljava/lang/Integer;".equals(leftType) && "Ljava/lang/Integer;".equals(rightType)) {
-                    return "I";
-                }
-                // If both operands are Character wrappers, result is int (after unboxing and addition)
-                // char + char promotes to int in Java
-                if ("Ljava/lang/Character;".equals(leftType) && "Ljava/lang/Character;".equals(rightType)) {
-                    return "I";
-                }
-                // If both operands are char, result is int (char + char promotes to int)
-                if ("C".equals(leftType) && "C".equals(rightType)) {
-                    return "I";
-                }
-                // If both operands are Short wrappers, result is also int (after unboxing and addition)
-                // We return "I" because the addition operation works on primitives
-                if ("Ljava/lang/Short;".equals(leftType) && "Ljava/lang/Short;".equals(rightType)) {
-                    return "I";
-                }
-                // If both operands are Long wrappers, result is also long (after unboxing and addition)
-                // We return "J" because the addition operation works on primitives
-                if ("Ljava/lang/Long;".equals(leftType) && "Ljava/lang/Long;".equals(rightType)) {
-                    return "J";
-                }
-                // If both operands are Float wrappers, result is also float (after unboxing and addition)
-                // We return "F" because the addition operation works on primitives
-                if ("Ljava/lang/Float;".equals(leftType) && "Ljava/lang/Float;".equals(rightType)) {
-                    return "F";
-                }
-                // If both operands are Double wrappers, result is also double (after unboxing and addition)
-                // We return "D" because the addition operation works on primitives
-                if ("Ljava/lang/Double;".equals(leftType) && "Ljava/lang/Double;".equals(rightType)) {
-                    return "D";
-                }
-                // Numeric addition - return the left type
-                return leftType;
+                // Numeric addition - use type widening rules
+                return getWidenedType(leftType, rightType);
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             // For unary expressions, infer type from the argument
             return inferTypeFromExpr(unaryExpr.getArg(), context, options);
+        } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
+            // For parenthesized expressions, infer type from the inner expression
+            return inferTypeFromExpr(parenExpr.getExpr(), context, options);
         }
         return "Ljava/lang/Object;";
     }

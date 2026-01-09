@@ -61,6 +61,21 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder d2f() {
+        code.write(0x90); // d2f
+        return this;
+    }
+
+    public CodeBuilder d2i() {
+        code.write(0x8E); // d2i
+        return this;
+    }
+
+    public CodeBuilder d2l() {
+        code.write(0x8F); // d2l
+        return this;
+    }
+
     public CodeBuilder dadd() {
         code.write(0x63); // dadd
         return this;
@@ -77,6 +92,20 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder dload(int index) {
+        switch (index) {
+            case 0 -> code.write(0x26); // dload_0
+            case 1 -> code.write(0x27); // dload_1
+            case 2 -> code.write(0x28); // dload_2
+            case 3 -> code.write(0x29); // dload_3
+            default -> {
+                code.write(0x18); // dload
+                code.write(index);
+            }
+        }
+        return this;
+    }
+
     public CodeBuilder dneg() {
         code.write(0x77); // dneg
         return this;
@@ -87,8 +116,37 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder dstore(int index) {
+        switch (index) {
+            case 0 -> code.write(0x47); // dstore_0
+            case 1 -> code.write(0x48); // dstore_1
+            case 2 -> code.write(0x49); // dstore_2
+            case 3 -> code.write(0x4A); // dstore_3
+            default -> {
+                code.write(0x39); // dstore
+                code.write(index);
+            }
+        }
+        return this;
+    }
+
     public CodeBuilder dup() {
         code.write(0x59); // dup
+        return this;
+    }
+
+    public CodeBuilder f2d() {
+        code.write(0x8D); // f2d
+        return this;
+    }
+
+    public CodeBuilder f2i() {
+        code.write(0x8B); // f2i
+        return this;
+    }
+
+    public CodeBuilder f2l() {
+        code.write(0x8C); // f2l
         return this;
     }
 
@@ -153,6 +211,37 @@ public class CodeBuilder {
                 code.write(index);
             }
         }
+        return this;
+    }
+
+    public CodeBuilder i2b() {
+        code.write(0x91); // i2b
+        return this;
+    }
+
+    public CodeBuilder i2c() {
+        code.write(0x92); // i2c
+        return this;
+    }
+
+    public CodeBuilder i2d() {
+        code.write(0x87); // i2d
+        return this;
+    }
+
+    public CodeBuilder i2f() {
+        code.write(0x86); // i2f
+        return this;
+    }
+
+    // Type conversion instructions
+    public CodeBuilder i2l() {
+        code.write(0x85); // i2l
+        return this;
+    }
+
+    public CodeBuilder i2s() {
+        code.write(0x93); // i2s
         return this;
     }
 
@@ -253,6 +342,21 @@ public class CodeBuilder {
                 code.write(index);
             }
         }
+        return this;
+    }
+
+    public CodeBuilder l2d() {
+        code.write(0x8A); // l2d
+        return this;
+    }
+
+    public CodeBuilder l2f() {
+        code.write(0x89); // l2f
+        return this;
+    }
+
+    public CodeBuilder l2i() {
+        code.write(0x88); // l2i
         return this;
     }
 
