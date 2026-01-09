@@ -92,6 +92,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder fadd() {
+        code.write(0x62); // fadd
+        return this;
+    }
+
     public CodeBuilder fconst(float value) {
         if (value == 0.0f) {
             code.write(0x0B); // fconst_0

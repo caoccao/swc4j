@@ -27,6 +27,39 @@ public class TestCompileAstNumber extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testReturnDoubleObjectWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Double = 123.5
+                      return a
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123.5, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testReturnDoubleObjectWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Double {
+                      return 123.5
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123.5, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testReturnDoubleWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -56,6 +89,39 @@ public class TestCompileAstNumber extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals(123.456D, (double) classA.getMethod("test").invoke(instance), 0.00001D);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testReturnFloatObjectWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Float = 123.5
+                      return a
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123.5f, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testReturnFloatObjectWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Float {
+                      return 123.5
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123.5f, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -208,6 +274,39 @@ public class TestCompileAstNumber extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testReturnLongObjectWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Long = 123
+                      return a
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123L, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testReturnLongObjectWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Long {
+                      return 123
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123L, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testReturnLongWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -308,72 +407,6 @@ public class TestCompileAstNumber extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testReturnShortWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      var a: short = 123
-                      return a
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123, (short) classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testReturnShortWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): short {
-                      return 123
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123, (short) classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testReturnLongObjectWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Long = 123
-                      return a
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123L, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testReturnLongObjectWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): Long {
-                      return 123
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(123L, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
     public void testReturnShortObjectWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -403,5 +436,38 @@ public class TestCompileAstNumber extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals((short) 123, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testReturnShortWithTypeAnnotationOnConst(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      var a: short = 123
+                      return a
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123, (short) classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testReturnShortWithTypeAnnotationOnFunction(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): short {
+                      return 123
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123, (short) classA.getMethod("test").invoke(instance));
     }
 }

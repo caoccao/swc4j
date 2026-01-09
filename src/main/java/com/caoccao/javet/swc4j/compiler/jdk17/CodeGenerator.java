@@ -82,7 +82,8 @@ public final class CodeGenerator {
                 switch (leftType) {
                     case "I", "S", "Ljava/lang/Integer;", "Ljava/lang/Short;" -> code.iadd();
                     case "J", "Ljava/lang/Long;" -> code.ladd();
-                    case "D" -> code.dadd();
+                    case "F", "Ljava/lang/Float;" -> code.fadd();
+                    case "D", "Ljava/lang/Double;" -> code.dadd();
                 }
             }
         }
@@ -183,6 +184,29 @@ public final class CodeGenerator {
                     code.ldc2_w(longIndex);
                 }
                 int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+                code.invokestatic(valueOfRef);
+            } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                    && "Ljava/lang/Float;".equals(returnTypeInfo.descriptor())) {
+                // Box float to Float
+                float floatValue = (float) value;
+                if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
+                    code.fconst(floatValue);
+                } else {
+                    int floatIndex = cp.addFloat(floatValue);
+                    code.ldc(floatIndex);
+                }
+                int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
+                code.invokestatic(valueOfRef);
+            } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                    && "Ljava/lang/Double;".equals(returnTypeInfo.descriptor())) {
+                // Box double to Double
+                if (value == 0.0 || value == 1.0) {
+                    code.dconst(value);
+                } else {
+                    int doubleIndex = cp.addDouble(value);
+                    code.ldc2_w(doubleIndex);
+                }
+                int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
                 code.invokestatic(valueOfRef);
             } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
                 code.iconst((int) value);
@@ -380,6 +404,30 @@ public final class CodeGenerator {
                     code.iconst(shortValue);
                     int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
                     code.invokestatic(valueOfRef);
+                } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                        && "Ljava/lang/Float;".equals(returnTypeInfo.descriptor())) {
+                    // Check if we're dealing with a Float wrapper
+                    float floatValue = -(float) value;
+                    if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
+                        code.fconst(floatValue);
+                    } else {
+                        int floatIndex = cp.addFloat(floatValue);
+                        code.ldc(floatIndex);
+                    }
+                    int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
+                    code.invokestatic(valueOfRef);
+                } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                        && "Ljava/lang/Double;".equals(returnTypeInfo.descriptor())) {
+                    // Check if we're dealing with a Double wrapper
+                    double doubleValue = -value;
+                    if (doubleValue == 0.0 || doubleValue == 1.0) {
+                        code.dconst(doubleValue);
+                    } else {
+                        int doubleIndex = cp.addDouble(doubleValue);
+                        code.ldc2_w(doubleIndex);
+                    }
+                    int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
+                    code.invokestatic(valueOfRef);
                 } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
                     // Integer value - use iconst for negated int
                     code.iconst(-(int) value);
@@ -467,6 +515,14 @@ public final class CodeGenerator {
             case "Ljava/lang/Short;" -> {
                 int shortValueRef = cp.addMethodRef("java/lang/Short", "shortValue", "()S");
                 code.invokevirtual(shortValueRef);
+            }
+            case "Ljava/lang/Float;" -> {
+                int floatValueRef = cp.addMethodRef("java/lang/Float", "floatValue", "()F");
+                code.invokevirtual(floatValueRef);
+            }
+            case "Ljava/lang/Double;" -> {
+                int doubleValueRef = cp.addMethodRef("java/lang/Double", "doubleValue", "()D");
+                code.invokevirtual(doubleValueRef);
             }
         }
     }
