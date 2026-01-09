@@ -162,6 +162,16 @@ public final class TypeResolver {
                 if ("Ljava/lang/Integer;".equals(leftType) && "Ljava/lang/Integer;".equals(rightType)) {
                     return "I";
                 }
+                // If both operands are Short wrappers, result is also int (after unboxing and addition)
+                // We return "I" because the addition operation works on primitives
+                if ("Ljava/lang/Short;".equals(leftType) && "Ljava/lang/Short;".equals(rightType)) {
+                    return "I";
+                }
+                // If both operands are Long wrappers, result is also long (after unboxing and addition)
+                // We return "J" because the addition operation works on primitives
+                if ("Ljava/lang/Long;".equals(leftType) && "Ljava/lang/Long;".equals(rightType)) {
+                    return "J";
+                }
                 // Numeric addition - return the left type
                 return leftType;
             }

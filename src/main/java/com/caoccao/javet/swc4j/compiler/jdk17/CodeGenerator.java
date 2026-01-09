@@ -43,6 +43,17 @@ public final class CodeGenerator {
     private CodeGenerator() {
     }
 
+    private static void appendOperandToStringBuilder(
+            CodeBuilder code,
+            String operandType,
+            int appendString,
+            int appendInt) {
+        switch (operandType) {
+            case "Ljava/lang/String;" -> code.invokevirtual(appendString);
+            case "I" -> code.invokevirtual(appendInt);
+        }
+    }
+
     public static void generateBinExpr(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
@@ -61,29 +72,17 @@ public final class CodeGenerator {
             } else {
                 // Generate left operand
                 generateExpr(code, cp, binExpr.getLeft(), null, context, options);
-
-                // Unbox if it's an Integer wrapper
-                if ("Ljava/lang/Integer;".equals(leftType)) {
-                    int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                    code.invokevirtual(intValueRef);
-                }
+                unboxWrapperType(code, cp, leftType);
 
                 // Generate right operand
                 generateExpr(code, cp, binExpr.getRight(), null, context, options);
-
-                // Unbox if it's an Integer wrapper
-                if ("Ljava/lang/Integer;".equals(rightType)) {
-                    int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
-                    code.invokevirtual(intValueRef);
-                }
+                unboxWrapperType(code, cp, rightType);
 
                 // Determine type and generate appropriate add instruction
-                if ("I".equals(leftType) || "S".equals(leftType) || "Ljava/lang/Integer;".equals(leftType)) {
-                    code.iadd();
-                } else if ("J".equals(leftType)) {
-                    code.ladd();
-                } else if ("D".equals(leftType)) {
-                    code.dadd();
+                switch (leftType) {
+                    case "I", "S", "Ljava/lang/Integer;", "Ljava/lang/Short;" -> code.iadd();
+                    case "J", "Ljava/lang/Long;" -> code.ladd();
+                    case "D" -> code.dadd();
                 }
             }
         }
@@ -166,6 +165,25 @@ public final class CodeGenerator {
                 code.iconst(intValue);
                 int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
                 code.invokestatic(valueOfRef);
+            } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                    && "Ljava/lang/Short;".equals(returnTypeInfo.descriptor())) {
+                // Box short to Short
+                short shortValue = (short) value;
+                code.iconst(shortValue);
+                int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
+                code.invokestatic(valueOfRef);
+            } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                    && "Ljava/lang/Long;".equals(returnTypeInfo.descriptor())) {
+                // Box long to Long
+                long longValue = (long) value;
+                if (longValue == 0L || longValue == 1L) {
+                    code.lconst(longValue);
+                } else {
+                    int longIndex = cp.addLong(longValue);
+                    code.ldc2_w(longIndex);
+                }
+                int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+                code.invokestatic(valueOfRef);
             } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
                 code.iconst((int) value);
             } else {
@@ -181,16 +199,14 @@ public final class CodeGenerator {
             String varName = ident.getSym();
             LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
             if (localVar != null) {
-                if ("I".equals(localVar.type()) || "S".equals(localVar.type())) {
-                    code.iload(localVar.index());
-                } else if ("J".equals(localVar.type())) {
-                    code.lload(localVar.index());
-                } else if ("F".equals(localVar.type())) {
-                    code.fload(localVar.index());
-                } else if ("D".equals(localVar.type())) {
-                    // code.dload(localVar.index());
-                } else {
-                    code.aload(localVar.index());
+                switch (localVar.type()) {
+                    case "I", "S" -> code.iload(localVar.index());
+                    case "J" -> code.lload(localVar.index());
+                    case "F" -> code.fload(localVar.index());
+                    case "D" -> {
+                        // code.dload(localVar.index());
+                    }
+                    default -> code.aload(localVar.index());
                 }
             }
         } else if (expr instanceof Swc4jAstBinExpr binExpr) {
@@ -309,19 +325,11 @@ public final class CodeGenerator {
 
         // Append left operand
         generateExpr(code, cp, left, null, context, options);
-        if ("Ljava/lang/String;".equals(leftType)) {
-            code.invokevirtual(appendString);
-        } else if ("I".equals(leftType)) {
-            code.invokevirtual(appendInt);
-        }
+        appendOperandToStringBuilder(code, leftType, appendString, appendInt);
 
         // Append right operand
         generateExpr(code, cp, right, null, context, options);
-        if ("Ljava/lang/String;".equals(rightType)) {
-            code.invokevirtual(appendString);
-        } else if ("I".equals(rightType)) {
-            code.invokevirtual(appendInt);
-        }
+        appendOperandToStringBuilder(code, rightType, appendString, appendInt);
 
         // Call toString()
         code.invokevirtual(toString);
@@ -353,6 +361,25 @@ public final class CodeGenerator {
                         int longIndex = cp.addLong(longValue);
                         code.ldc2_w(longIndex);
                     }
+                } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                        && "Ljava/lang/Long;".equals(returnTypeInfo.descriptor())) {
+                    // Check if we're dealing with a Long wrapper
+                    long longValue = -(long) value;
+                    if (longValue == 0L || longValue == 1L) {
+                        code.lconst(longValue);
+                    } else {
+                        int longIndex = cp.addLong(longValue);
+                        code.ldc2_w(longIndex);
+                    }
+                    int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+                    code.invokestatic(valueOfRef);
+                } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                        && "Ljava/lang/Short;".equals(returnTypeInfo.descriptor())) {
+                    // Check if we're dealing with a Short wrapper
+                    short shortValue = (short) -(int) value;
+                    code.iconst(shortValue);
+                    int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
+                    code.invokestatic(valueOfRef);
                 } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
                     // Integer value - use iconst for negated int
                     code.iconst(-(int) value);
@@ -365,14 +392,11 @@ public final class CodeGenerator {
                 generateExpr(code, cp, arg, null, context, options);
 
                 String argType = TypeResolver.inferTypeFromExpr(arg, context, options);
-                if ("D".equals(argType)) {
-                    code.dneg();
-                } else if ("F".equals(argType)) {
-                    code.fneg();
-                } else if ("J".equals(argType)) {
-                    code.lneg();
-                } else {
-                    code.ineg();
+                switch (argType) {
+                    case "D" -> code.dneg();
+                    case "F" -> code.fneg();
+                    case "J" -> code.lneg();
+                    default -> code.ineg();
                 }
             }
         }
@@ -409,16 +433,14 @@ public final class CodeGenerator {
                     generateExpr(code, cp, init, varTypeInfo, context, options);
 
                     // Store the value in the local variable
-                    if ("I".equals(localVar.type()) || "S".equals(localVar.type())) {
-                        code.istore(localVar.index());
-                    } else if ("J".equals(localVar.type())) {
-                        code.lstore(localVar.index());
-                    } else if ("F".equals(localVar.type())) {
-                        code.fstore(localVar.index());
-                    } else if ("D".equals(localVar.type())) {
-                        // code.dstore(localVar.index());
-                    } else {
-                        code.astore(localVar.index());
+                    switch (localVar.type()) {
+                        case "I", "S" -> code.istore(localVar.index());
+                        case "J" -> code.lstore(localVar.index());
+                        case "F" -> code.fstore(localVar.index());
+                        case "D" -> {
+                            // code.dstore(localVar.index());
+                        }
+                        default -> code.astore(localVar.index());
                     }
                 });
             }
@@ -430,5 +452,22 @@ public final class CodeGenerator {
             return str.getValue();
         }
         return propName.toString();
+    }
+
+    private static void unboxWrapperType(CodeBuilder code, ClassWriter.ConstantPool cp, String type) {
+        switch (type) {
+            case "Ljava/lang/Integer;" -> {
+                int intValueRef = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                code.invokevirtual(intValueRef);
+            }
+            case "Ljava/lang/Long;" -> {
+                int longValueRef = cp.addMethodRef("java/lang/Long", "longValue", "()J");
+                code.invokevirtual(longValueRef);
+            }
+            case "Ljava/lang/Short;" -> {
+                int shortValueRef = cp.addMethodRef("java/lang/Short", "shortValue", "()S");
+                code.invokevirtual(shortValueRef);
+            }
+        }
     }
 }
