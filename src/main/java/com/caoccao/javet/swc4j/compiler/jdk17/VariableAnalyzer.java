@@ -16,9 +16,12 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
@@ -26,6 +29,36 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 
 public final class VariableAnalyzer {
     private VariableAnalyzer() {
+    }
+
+    /**
+     * Analyze function parameters and allocate local variable slots for them.
+     * Parameters start at index 1 (index 0 is reserved for 'this' in instance methods).
+     */
+    public static void analyzeParameters(
+            Swc4jAstFunction function,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) {
+        for (Swc4jAstParam param : function.getParams()) {
+            ISwc4jAstPat pat = param.getPat();
+
+            if (pat instanceof Swc4jAstRestPat restPat) {
+                // Handle varargs parameter
+                ISwc4jAstPat arg = restPat.getArg();
+                if (arg instanceof Swc4jAstBindingIdent bindingIdent) {
+                    String paramName = bindingIdent.getId().getSym();
+                    String paramType = TypeResolver.extractParameterType(restPat, options);
+                    context.getLocalVariableTable().allocateVariable(paramName, paramType);
+                    context.getInferredTypes().put(paramName, paramType);
+                }
+            } else if (pat instanceof Swc4jAstBindingIdent bindingIdent) {
+                // Handle regular parameter
+                String paramName = bindingIdent.getId().getSym();
+                String paramType = TypeResolver.extractParameterType(pat, options);
+                context.getLocalVariableTable().allocateVariable(paramName, paramType);
+                context.getInferredTypes().put(paramName, paramType);
+            }
+        }
     }
 
     public static void analyzeVariableDeclarations(

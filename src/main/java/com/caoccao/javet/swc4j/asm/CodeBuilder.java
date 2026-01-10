@@ -28,6 +28,16 @@ public class CodeBuilder {
     private final List<ClassWriter.LineNumberEntry> lineNumbers = new ArrayList<>();
     private int currentLine = -1;
 
+    public CodeBuilder aaload() {
+        code.write(0x32); // aaload
+        return this;
+    }
+
+    public CodeBuilder aastore() {
+        code.write(0x53); // aastore
+        return this;
+    }
+
     public CodeBuilder aconst_null() {
         code.write(0x01); // aconst_null
         return this;
@@ -47,8 +57,19 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder anewarray(int classRefIndex) {
+        code.write(0xBD); // anewarray
+        writeShort(classRefIndex);
+        return this;
+    }
+
     public CodeBuilder areturn() {
         code.write(0xB0); // areturn
+        return this;
+    }
+
+    public CodeBuilder arraylength() {
+        code.write(0xBE); // arraylength
         return this;
     }
 
@@ -70,6 +91,26 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder baload() {
+        code.write(0x33); // baload
+        return this;
+    }
+
+    public CodeBuilder bastore() {
+        code.write(0x54); // bastore
+        return this;
+    }
+
+    public CodeBuilder caload() {
+        code.write(0x34); // caload
+        return this;
+    }
+
+    public CodeBuilder castore() {
+        code.write(0x55); // castore
+        return this;
+    }
+
     public CodeBuilder d2f() {
         code.write(0x90); // d2f
         return this;
@@ -87,6 +128,16 @@ public class CodeBuilder {
 
     public CodeBuilder dadd() {
         code.write(0x63); // dadd
+        return this;
+    }
+
+    public CodeBuilder daload() {
+        code.write(0x31); // daload
+        return this;
+    }
+
+    public CodeBuilder dastore() {
+        code.write(0x52); // dastore
         return this;
     }
 
@@ -149,13 +200,13 @@ public class CodeBuilder {
         return this;
     }
 
-    public CodeBuilder dup_x2() {
-        code.write(0x5B); // dup_x2
+    public CodeBuilder dup2_x2() {
+        code.write(0x5E); // dup2_x2
         return this;
     }
 
-    public CodeBuilder dup2_x2() {
-        code.write(0x5E); // dup2_x2
+    public CodeBuilder dup_x2() {
+        code.write(0x5B); // dup_x2
         return this;
     }
 
@@ -176,6 +227,16 @@ public class CodeBuilder {
 
     public CodeBuilder fadd() {
         code.write(0x62); // fadd
+        return this;
+    }
+
+    public CodeBuilder faload() {
+        code.write(0x30); // faload
+        return this;
+    }
+
+    public CodeBuilder fastore() {
+        code.write(0x51); // fastore
         return this;
     }
 
@@ -238,6 +299,14 @@ public class CodeBuilder {
         return this;
     }
 
+    public int getCurrentOffset() {
+        return code.size();
+    }
+
+    public List<ClassWriter.LineNumberEntry> getLineNumbers() {
+        return lineNumbers;
+    }
+
     public CodeBuilder i2b() {
         code.write(0x91); // i2b
         return this;
@@ -271,6 +340,16 @@ public class CodeBuilder {
 
     public CodeBuilder iadd() {
         code.write(0x60); // iadd
+        return this;
+    }
+
+    public CodeBuilder iaload() {
+        code.write(0x2E); // iaload
+        return this;
+    }
+
+    public CodeBuilder iastore() {
+        code.write(0x4F); // iastore
         return this;
     }
 
@@ -328,6 +407,14 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder invokeinterface(int methodRefIndex, int count) {
+        code.write(0xB9); // invokeinterface
+        writeShort(methodRefIndex);
+        code.write(count); // count parameter
+        code.write(0); // reserved byte (must be zero)
+        return this;
+    }
+
     public CodeBuilder invokespecial(int methodRefIndex) {
         code.write(0xB7); // invokespecial
         writeShort(methodRefIndex);
@@ -343,14 +430,6 @@ public class CodeBuilder {
     public CodeBuilder invokevirtual(int methodRefIndex) {
         code.write(0xB6); // invokevirtual
         writeShort(methodRefIndex);
-        return this;
-    }
-
-    public CodeBuilder invokeinterface(int methodRefIndex, int count) {
-        code.write(0xB9); // invokeinterface
-        writeShort(methodRefIndex);
-        code.write(count); // count parameter
-        code.write(0); // reserved byte (must be zero)
         return this;
     }
 
@@ -394,6 +473,16 @@ public class CodeBuilder {
 
     public CodeBuilder ladd() {
         code.write(0x61); // ladd
+        return this;
+    }
+
+    public CodeBuilder laload() {
+        code.write(0x2F); // laload
+        return this;
+    }
+
+    public CodeBuilder lastore() {
+        code.write(0x50); // lastore
         return this;
     }
 
@@ -483,97 +572,6 @@ public class CodeBuilder {
         return this;
     }
 
-    public CodeBuilder anewarray(int classRefIndex) {
-        code.write(0xBD); // anewarray
-        writeShort(classRefIndex);
-        return this;
-    }
-
-    public CodeBuilder bastore() {
-        code.write(0x54); // bastore
-        return this;
-    }
-
-    public CodeBuilder castore() {
-        code.write(0x55); // castore
-        return this;
-    }
-
-    public CodeBuilder sastore() {
-        code.write(0x56); // sastore
-        return this;
-    }
-
-    public CodeBuilder iastore() {
-        code.write(0x4F); // iastore
-        return this;
-    }
-
-    public CodeBuilder lastore() {
-        code.write(0x50); // lastore
-        return this;
-    }
-
-    public CodeBuilder fastore() {
-        code.write(0x51); // fastore
-        return this;
-    }
-
-    public CodeBuilder dastore() {
-        code.write(0x52); // dastore
-        return this;
-    }
-
-    public CodeBuilder aastore() {
-        code.write(0x53); // aastore
-        return this;
-    }
-
-    public CodeBuilder baload() {
-        code.write(0x33); // baload
-        return this;
-    }
-
-    public CodeBuilder caload() {
-        code.write(0x34); // caload
-        return this;
-    }
-
-    public CodeBuilder saload() {
-        code.write(0x35); // saload
-        return this;
-    }
-
-    public CodeBuilder iaload() {
-        code.write(0x2E); // iaload
-        return this;
-    }
-
-    public CodeBuilder laload() {
-        code.write(0x2F); // laload
-        return this;
-    }
-
-    public CodeBuilder faload() {
-        code.write(0x30); // faload
-        return this;
-    }
-
-    public CodeBuilder daload() {
-        code.write(0x31); // daload
-        return this;
-    }
-
-    public CodeBuilder aaload() {
-        code.write(0x32); // aaload
-        return this;
-    }
-
-    public CodeBuilder arraylength() {
-        code.write(0xBE); // arraylength
-        return this;
-    }
-
     public CodeBuilder pop() {
         code.write(0x57); // pop
         return this;
@@ -589,19 +587,21 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder saload() {
+        code.write(0x35); // saload
+        return this;
+    }
+
+    public CodeBuilder sastore() {
+        code.write(0x56); // sastore
+        return this;
+    }
+
     public void setLineNumber(int lineNumber) {
         if (lineNumber != currentLine && lineNumber > 0) {
             currentLine = lineNumber;
             lineNumbers.add(new ClassWriter.LineNumberEntry(getCurrentOffset(), lineNumber));
         }
-    }
-
-    public List<ClassWriter.LineNumberEntry> getLineNumbers() {
-        return lineNumbers;
-    }
-
-    public int getCurrentOffset() {
-        return code.size();
     }
 
     public byte[] toByteArray() {

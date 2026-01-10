@@ -16,9 +16,9 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Collection;
 
 public class LocalVariableTable {
     private final Map<String, LocalVariable> variables = new HashMap<>();
@@ -32,15 +32,15 @@ public class LocalVariableTable {
         return index;
     }
 
+    public Collection<LocalVariable> getAllVariables() {
+        return variables.values();
+    }
+
     public int getMaxLocals() {
         return nextIndex;
     }
 
     public LocalVariable getVariable(String name) {
         return variables.get(name);
-    }
-
-    public Collection<LocalVariable> getAllVariables() {
-        return variables.values();
     }
 }

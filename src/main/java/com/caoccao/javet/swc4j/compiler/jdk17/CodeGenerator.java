@@ -18,10 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.asm.ClassWriter;
 import com.caoccao.javet.swc4j.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
-import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
+import com.caoccao.javet.swc4j.ast.clazz.*;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
@@ -865,6 +862,81 @@ public final class CodeGenerator {
         }
     }
 
+    private static void generateJavaArray(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstArrayLit arrayLit,
+            String arrayDescriptor,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        // Extract element type from array descriptor (e.g., "[I" -> "I", "[Ljava/lang/String;" -> "Ljava/lang/String;")
+        String elemType = arrayDescriptor.substring(1);
+
+        // Count non-empty elements
+        int size = (int) arrayLit.getElems().stream().filter(Optional::isPresent).count();
+
+        // Create the array
+        code.iconst(size);
+
+        // Use newarray for primitive types, anewarray for reference types
+        switch (elemType) {
+            case "Z" -> code.newarray(4);  // T_BOOLEAN
+            case "C" -> code.newarray(5);  // T_CHAR
+            case "F" -> code.newarray(6);  // T_FLOAT
+            case "D" -> code.newarray(7);  // T_DOUBLE
+            case "B" -> code.newarray(8);  // T_BYTE
+            case "S" -> code.newarray(9);  // T_SHORT
+            case "I" -> code.newarray(10); // T_INT
+            case "J" -> code.newarray(11); // T_LONG
+            default -> {
+                // Reference type array - use anewarray
+                String className = elemType.substring(1, elemType.length() - 1); // Remove "L" and ";"
+                int classIndex = cp.addClass(className);
+                code.anewarray(classIndex);
+            }
+        }
+
+        // Store elements in the array
+        int index = 0;
+        for (var elemOpt : arrayLit.getElems()) {
+            if (elemOpt.isPresent()) {
+                var elem = elemOpt.get();
+                ISwc4jAstExpr elemExpr = elem.getExpr();
+
+                code.dup();          // Duplicate array reference
+                code.iconst(index);  // Push index
+
+                // Generate the element value
+                String exprType = TypeResolver.inferTypeFromExpr(elemExpr, context, options);
+                if (exprType == null) exprType = "Ljava/lang/Object;";
+
+                generateExpr(code, cp, elemExpr, null, context, options);
+
+                // Unbox if needed
+                unboxWrapperType(code, cp, exprType);
+
+                // Convert to target type if needed
+                String exprPrimitive = getPrimitiveType(exprType);
+                convertPrimitiveType(code, exprPrimitive, elemType);
+
+                // Store in array using appropriate instruction
+                switch (elemType) {
+                    case "Z", "B" -> code.bastore(); // boolean and byte use bastore
+                    case "C" -> code.castore(); // char uses castore
+                    case "S" -> code.sastore(); // short uses sastore
+                    case "I" -> code.iastore(); // int uses iastore
+                    case "J" -> code.lastore(); // long uses lastore
+                    case "F" -> code.fastore(); // float uses fastore
+                    case "D" -> code.dastore(); // double uses dastore
+                    default -> code.aastore(); // reference types use aastore
+                }
+
+                index++;
+            }
+        }
+        // Array reference is now on top of stack
+    }
+
     public static void generateMemberExpr(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
@@ -964,17 +1036,27 @@ public final class CodeGenerator {
                 Swc4jAstBlockStmt body = bodyOpt.get();
                 CompilationContext context = new CompilationContext();
 
+                // Analyze function parameters and allocate local variable slots
+                VariableAnalyzer.analyzeParameters(function, context, options);
+
                 // Analyze variable declarations and infer types
                 VariableAnalyzer.analyzeVariableDeclarations(body, context, options);
 
                 // Determine return type from method body or explicit annotation
                 ReturnTypeInfo returnTypeInfo = TypeResolver.analyzeReturnType(function, body, context, options);
-                String descriptor = generateMethodDescriptor(function, returnTypeInfo);
+                String descriptor = generateMethodDescriptor(function, returnTypeInfo, options);
                 CodeBuilder code = generateMethodCode(cp, body, returnTypeInfo, context, options);
 
                 int accessFlags = 0x0001; // ACC_PUBLIC
                 if (method.isStatic()) {
                     accessFlags |= 0x0008; // ACC_STATIC
+                }
+                // Check if method has varargs (RestPat in last parameter)
+                if (!function.getParams().isEmpty()) {
+                    Swc4jAstParam lastParam = function.getParams().get(function.getParams().size() - 1);
+                    if (lastParam.getPat() instanceof com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat) {
+                        accessFlags |= 0x0080; // ACC_VARARGS
+                    }
                 }
 
                 int maxStack = Math.max(returnTypeInfo.maxStack(), returnTypeInfo.type().getMinStack());
@@ -986,19 +1068,19 @@ public final class CodeGenerator {
                 if (options.debug()) {
                     List<ClassWriter.LineNumberEntry> lineNumbers = code.getLineNumbers();
                     List<ClassWriter.LocalVariableEntry> localVariableTable = new java.util.ArrayList<>();
-                    
+
                     // Build LocalVariableTable from compilation context
                     int codeLength = code.getCurrentOffset();
                     for (LocalVariable var : context.getLocalVariableTable().getAllVariables()) {
                         localVariableTable.add(new ClassWriter.LocalVariableEntry(
-                            0, // startPc - variable scope starts at method beginning
-                            codeLength, // length - variable scope covers entire method
-                            var.name(),
-                            var.type(),
-                            var.index()
+                                0, // startPc - variable scope starts at method beginning
+                                codeLength, // length - variable scope covers entire method
+                                var.name(),
+                                var.type(),
+                                var.index()
                         ));
                     }
-                    
+
                     classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
                             lineNumbers, localVariableTable);
                 } else {
@@ -1008,81 +1090,6 @@ public final class CodeGenerator {
                 throw new Swc4jByteCodeCompilerException("Failed to generate method: " + methodName, e);
             }
         }
-    }
-
-    private static void generateJavaArray(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstArrayLit arrayLit,
-            String arrayDescriptor,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-        // Extract element type from array descriptor (e.g., "[I" -> "I", "[Ljava/lang/String;" -> "Ljava/lang/String;")
-        String elemType = arrayDescriptor.substring(1);
-
-        // Count non-empty elements
-        int size = (int) arrayLit.getElems().stream().filter(Optional::isPresent).count();
-
-        // Create the array
-        code.iconst(size);
-
-        // Use newarray for primitive types, anewarray for reference types
-        switch (elemType) {
-            case "Z" -> code.newarray(4);  // T_BOOLEAN
-            case "C" -> code.newarray(5);  // T_CHAR
-            case "F" -> code.newarray(6);  // T_FLOAT
-            case "D" -> code.newarray(7);  // T_DOUBLE
-            case "B" -> code.newarray(8);  // T_BYTE
-            case "S" -> code.newarray(9);  // T_SHORT
-            case "I" -> code.newarray(10); // T_INT
-            case "J" -> code.newarray(11); // T_LONG
-            default -> {
-                // Reference type array - use anewarray
-                String className = elemType.substring(1, elemType.length() - 1); // Remove "L" and ";"
-                int classIndex = cp.addClass(className);
-                code.anewarray(classIndex);
-            }
-        }
-
-        // Store elements in the array
-        int index = 0;
-        for (var elemOpt : arrayLit.getElems()) {
-            if (elemOpt.isPresent()) {
-                var elem = elemOpt.get();
-                ISwc4jAstExpr elemExpr = elem.getExpr();
-
-                code.dup();          // Duplicate array reference
-                code.iconst(index);  // Push index
-
-                // Generate the element value
-                String exprType = TypeResolver.inferTypeFromExpr(elemExpr, context, options);
-                if (exprType == null) exprType = "Ljava/lang/Object;";
-
-                generateExpr(code, cp, elemExpr, null, context, options);
-
-                // Unbox if needed
-                unboxWrapperType(code, cp, exprType);
-
-                // Convert to target type if needed
-                String exprPrimitive = getPrimitiveType(exprType);
-                convertPrimitiveType(code, exprPrimitive, elemType);
-
-                // Store in array using appropriate instruction
-                switch (elemType) {
-                    case "Z", "B" -> code.bastore(); // boolean and byte use bastore
-                    case "C" -> code.castore(); // char uses castore
-                    case "S" -> code.sastore(); // short uses sastore
-                    case "I" -> code.iastore(); // int uses iastore
-                    case "J" -> code.lastore(); // long uses lastore
-                    case "F" -> code.fastore(); // float uses fastore
-                    case "D" -> code.dastore(); // double uses dastore
-                    default -> code.aastore(); // reference types use aastore
-                }
-
-                index++;
-            }
-        }
-        // Array reference is now on top of stack
     }
 
     public static CodeBuilder generateMethodCode(
@@ -1099,7 +1106,7 @@ public final class CodeGenerator {
             if (options.debug() && stmt.getSpan() != null) {
                 code.setLineNumber(stmt.getSpan().getLine());
             }
-            
+
             if (stmt instanceof Swc4jAstVarDecl varDecl) {
                 generateVarDecl(code, cp, varDecl, context, options);
             } else if (stmt instanceof Swc4jAstExprStmt exprStmt) {
@@ -1143,8 +1150,14 @@ public final class CodeGenerator {
         return code;
     }
 
-    public static String generateMethodDescriptor(Swc4jAstFunction function, ReturnTypeInfo returnTypeInfo) {
-        // For now, assume no parameters
+    public static String generateMethodDescriptor(Swc4jAstFunction function, ReturnTypeInfo returnTypeInfo, ByteCodeCompilerOptions options) {
+        // Build parameter descriptors
+        StringBuilder paramDescriptors = new StringBuilder();
+        for (Swc4jAstParam param : function.getParams()) {
+            String paramType = TypeResolver.extractParameterType(param.getPat(), options);
+            paramDescriptors.append(paramType);
+        }
+
         String returnDescriptor = switch (returnTypeInfo.type()) {
             case VOID -> "V";
             case INT -> "I";
@@ -1158,7 +1171,7 @@ public final class CodeGenerator {
             case STRING -> "Ljava/lang/String;";
             case OBJECT -> returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : "Ljava/lang/Object;";
         };
-        return "()" + returnDescriptor;
+        return "(" + paramDescriptors + ")" + returnDescriptor;
     }
 
     public static void generateStringConcat(

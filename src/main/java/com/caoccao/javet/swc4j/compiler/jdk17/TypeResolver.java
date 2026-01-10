@@ -21,11 +21,9 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsEntityName;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
+import com.caoccao.javet.swc4j.ast.interfaces.*;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsArrayType;
@@ -72,6 +70,36 @@ public final class TypeResolver {
             }
         }
         return new ReturnTypeInfo(ReturnType.VOID, 0, null);
+    }
+
+    /**
+     * Extract type from parameter pattern (regular param or varargs).
+     */
+    public static String extractParameterType(
+            ISwc4jAstPat pat,
+            ByteCodeCompilerOptions options) {
+        if (pat instanceof Swc4jAstRestPat restPat) {
+            // Varargs parameter - extract type from RestPat's type annotation
+            var typeAnn = restPat.getTypeAnn();
+            if (typeAnn.isPresent()) {
+                ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
+                // RestPat type annotation is already an array type (int[])
+                // We need to map it to the corresponding JVM array descriptor
+                return mapTsTypeToDescriptor(tsType, options);
+            }
+            // Default to Object[] for untyped varargs
+            return "[Ljava/lang/Object;";
+        } else if (pat instanceof Swc4jAstBindingIdent bindingIdent) {
+            // Regular parameter - extract type from type annotation
+            var typeAnn = bindingIdent.getTypeAnn();
+            if (typeAnn.isPresent()) {
+                ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
+                return mapTsTypeToDescriptor(tsType, options);
+            }
+            // Default to Object for untyped parameters
+            return "Ljava/lang/Object;";
+        }
+        return "Ljava/lang/Object;";
     }
 
     public static String extractType(
@@ -244,8 +272,8 @@ public final class TypeResolver {
                 String typeName = ident.getSym();
                 // Check if this is Array<T> generic syntax
                 if ("Array".equals(typeName)) {
-                    // Array<T> syntax - maps to ArrayList
-                    return "Ljava/util/ArrayList;";
+                    // Array<T> syntax - maps to List interface (more flexible than ArrayList)
+                    return "Ljava/util/List;";
                 }
                 return mapTypeNameToDescriptor(typeName, options);
             }

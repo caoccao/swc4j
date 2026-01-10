@@ -82,7 +82,7 @@ public class ClassWriter {
 
             if (method.code != null) {
                 constantPool.addUtf8("Code");
-                
+
                 // Add debug attribute names if present
                 if (method.lineNumberTable != null && !method.lineNumberTable.isEmpty()) {
                     constantPool.addUtf8("LineNumberTable");
@@ -151,17 +151,17 @@ public class ClassWriter {
 
             // Calculate attribute length including sub-attributes
             int attributeLength = 12 + method.code.length; // Base: max_stack + max_locals + code_length + code + exception_table_length + attributes_count
-            
+
             // Add LineNumberTable size if present
             if (method.lineNumberTable != null && !method.lineNumberTable.isEmpty()) {
                 attributeLength += 8 + method.lineNumberTable.size() * 4; // attribute_name_index + attribute_length + line_number_table_length + entries
             }
-            
+
             // Add LocalVariableTable size if present
             if (method.localVariableTable != null && !method.localVariableTable.isEmpty()) {
                 attributeLength += 8 + method.localVariableTable.size() * 10; // attribute_name_index + attribute_length + local_variable_table_length + entries
             }
-            
+
             out.writeInt(attributeLength);
 
             // Max stack
@@ -261,6 +261,17 @@ public class ClassWriter {
             });
         }
 
+        public int addInterfaceMethodRef(String interfaceName, String methodName, String descriptor) {
+            String key = "interface:" + interfaceName + "." + methodName + ":" + descriptor;
+            return methodRefCache.computeIfAbsent(key, k -> {
+                int classIndex = addClass(interfaceName);
+                int nameAndTypeIndex = addNameAndType(methodName, descriptor);
+                int index = constants.size();
+                constants.add(new InterfaceMethodRefInfo(classIndex, nameAndTypeIndex));
+                return index;
+            });
+        }
+
         public int addLong(long value) {
             return longCache.computeIfAbsent(value, v -> {
                 int index = constants.size();
@@ -278,17 +289,6 @@ public class ClassWriter {
                 int nameAndTypeIndex = addNameAndType(methodName, descriptor);
                 int index = constants.size();
                 constants.add(new MethodRefInfo(classIndex, nameAndTypeIndex));
-                return index;
-            });
-        }
-
-        public int addInterfaceMethodRef(String interfaceName, String methodName, String descriptor) {
-            String key = "interface:" + interfaceName + "." + methodName + ":" + descriptor;
-            return methodRefCache.computeIfAbsent(key, k -> {
-                int classIndex = addClass(interfaceName);
-                int nameAndTypeIndex = addNameAndType(methodName, descriptor);
-                int index = constants.size();
-                constants.add(new InterfaceMethodRefInfo(classIndex, nameAndTypeIndex));
                 return index;
             });
         }
@@ -378,13 +378,13 @@ public class ClassWriter {
         private record FloatInfo(float value) {
         }
 
+        private record InterfaceMethodRefInfo(int classIndex, int nameAndTypeIndex) {
+        }
+
         private record LongInfo(long value) {
         }
 
         private record MethodRefInfo(int classIndex, int nameAndTypeIndex) {
-        }
-
-        private record InterfaceMethodRefInfo(int classIndex, int nameAndTypeIndex) {
         }
 
         private record NameAndTypeInfo(int nameIndex, int descriptorIndex) {
