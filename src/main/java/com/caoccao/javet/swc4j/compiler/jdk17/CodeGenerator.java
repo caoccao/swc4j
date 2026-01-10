@@ -33,6 +33,7 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
+import java.util.List;
 
 public final class CodeGenerator {
     private CodeGenerator() {
@@ -853,7 +854,7 @@ public final class CodeGenerator {
                 // Determine return type from method body or explicit annotation
                 ReturnTypeInfo returnTypeInfo = TypeResolver.analyzeReturnType(function, body, context, options);
                 String descriptor = generateMethodDescriptor(function, returnTypeInfo);
-                byte[] code = generateMethodCode(cp, body, returnTypeInfo, context, options);
+                CodeBuilder code = generateMethodCode(cp, body, returnTypeInfo, context, options);
 
                 int accessFlags = 0x0001; // ACC_PUBLIC
                 if (method.isStatic()) {
@@ -865,14 +866,35 @@ public final class CodeGenerator {
                 maxStack = Math.max(maxStack, 10);
                 int maxLocals = context.getLocalVariableTable().getMaxLocals();
 
-                classWriter.addMethod(accessFlags, methodName, descriptor, code, maxStack, maxLocals);
+                // Add debug information if enabled
+                if (options.debug()) {
+                    List<ClassWriter.LineNumberEntry> lineNumbers = code.getLineNumbers();
+                    List<ClassWriter.LocalVariableEntry> localVariableTable = new java.util.ArrayList<>();
+                    
+                    // Build LocalVariableTable from compilation context
+                    int codeLength = code.getCurrentOffset();
+                    for (LocalVariable var : context.getLocalVariableTable().getAllVariables()) {
+                        localVariableTable.add(new ClassWriter.LocalVariableEntry(
+                            0, // startPc - variable scope starts at method beginning
+                            codeLength, // length - variable scope covers entire method
+                            var.name(),
+                            var.type(),
+                            var.index()
+                        ));
+                    }
+                    
+                    classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
+                            lineNumbers, localVariableTable);
+                } else {
+                    classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals);
+                }
             } catch (Exception e) {
                 throw new Swc4jByteCodeCompilerException("Failed to generate method: " + methodName, e);
             }
         }
     }
 
-    public static byte[] generateMethodCode(
+    public static CodeBuilder generateMethodCode(
             ClassWriter.ConstantPool cp,
             Swc4jAstBlockStmt body,
             ReturnTypeInfo returnTypeInfo,
@@ -882,6 +904,11 @@ public final class CodeGenerator {
 
         // Process statements in the method body
         for (ISwc4jAstStmt stmt : body.getStmts()) {
+            // Add line number information if debug is enabled
+            if (options.debug() && stmt.getSpan() != null) {
+                code.setLineNumber(stmt.getSpan().getLine());
+            }
+            
             if (stmt instanceof Swc4jAstVarDecl varDecl) {
                 generateVarDecl(code, cp, varDecl, context, options);
             } else if (stmt instanceof Swc4jAstExprStmt exprStmt) {
@@ -917,7 +944,7 @@ public final class CodeGenerator {
             }
         }
 
-        return code.toByteArray();
+        return code;
     }
 
     public static String generateMethodDescriptor(Swc4jAstFunction function, ReturnTypeInfo returnTypeInfo) {

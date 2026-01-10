@@ -48,7 +48,12 @@ public class ClassWriter {
     }
 
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals) {
-        methods.add(new MethodInfo(accessFlags, name, descriptor, code, maxStack, maxLocals));
+        addMethod(accessFlags, name, descriptor, code, maxStack, maxLocals, null, null);
+    }
+
+    public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals,
+                          List<LineNumberEntry> lineNumberTable, List<LocalVariableEntry> localVariableTable) {
+        methods.add(new MethodInfo(accessFlags, name, descriptor, code, maxStack, maxLocals, lineNumberTable, localVariableTable));
     }
 
     public ConstantPool getConstantPool() {
@@ -77,6 +82,19 @@ public class ClassWriter {
 
             if (method.code != null) {
                 constantPool.addUtf8("Code");
+                
+                // Add debug attribute names if present
+                if (method.lineNumberTable != null && !method.lineNumberTable.isEmpty()) {
+                    constantPool.addUtf8("LineNumberTable");
+                }
+                if (method.localVariableTable != null && !method.localVariableTable.isEmpty()) {
+                    constantPool.addUtf8("LocalVariableTable");
+                    // Add variable names and descriptors to constant pool
+                    for (LocalVariableEntry entry : method.localVariableTable) {
+                        constantPool.addUtf8(entry.name);
+                        constantPool.addUtf8(entry.descriptor);
+                    }
+                }
             }
         }
 
@@ -131,8 +149,19 @@ public class ClassWriter {
             // Code attribute
             out.writeShort(constantPool.getUtf8Index("Code"));
 
-            // Attribute length
-            int attributeLength = 12 + method.code.length;
+            // Calculate attribute length including sub-attributes
+            int attributeLength = 12 + method.code.length; // Base: max_stack + max_locals + code_length + code + exception_table_length + attributes_count
+            
+            // Add LineNumberTable size if present
+            if (method.lineNumberTable != null && !method.lineNumberTable.isEmpty()) {
+                attributeLength += 8 + method.lineNumberTable.size() * 4; // attribute_name_index + attribute_length + line_number_table_length + entries
+            }
+            
+            // Add LocalVariableTable size if present
+            if (method.localVariableTable != null && !method.localVariableTable.isEmpty()) {
+                attributeLength += 8 + method.localVariableTable.size() * 10; // attribute_name_index + attribute_length + local_variable_table_length + entries
+            }
+            
             out.writeInt(attributeLength);
 
             // Max stack
@@ -150,8 +179,42 @@ public class ClassWriter {
             // Exception table length
             out.writeShort(0);
 
-            // Code attributes count
-            out.writeShort(0);
+            // Code attributes count (LineNumberTable + LocalVariableTable if present)
+            int codeAttributeCount = 0;
+            if (method.lineNumberTable != null && !method.lineNumberTable.isEmpty()) {
+                codeAttributeCount++;
+            }
+            if (method.localVariableTable != null && !method.localVariableTable.isEmpty()) {
+                codeAttributeCount++;
+            }
+            out.writeShort(codeAttributeCount);
+
+            // Write LineNumberTable attribute
+            if (method.lineNumberTable != null && !method.lineNumberTable.isEmpty()) {
+                out.writeShort(constantPool.addUtf8("LineNumberTable"));
+                int lineNumberTableLength = 2 + method.lineNumberTable.size() * 4;
+                out.writeInt(lineNumberTableLength);
+                out.writeShort(method.lineNumberTable.size());
+                for (LineNumberEntry entry : method.lineNumberTable) {
+                    out.writeShort(entry.startPc);
+                    out.writeShort(entry.lineNumber);
+                }
+            }
+
+            // Write LocalVariableTable attribute
+            if (method.localVariableTable != null && !method.localVariableTable.isEmpty()) {
+                out.writeShort(constantPool.addUtf8("LocalVariableTable"));
+                int localVariableTableLength = 2 + method.localVariableTable.size() * 10;
+                out.writeInt(localVariableTableLength);
+                out.writeShort(method.localVariableTable.size());
+                for (LocalVariableEntry entry : method.localVariableTable) {
+                    out.writeShort(entry.startPc);
+                    out.writeShort(entry.length);
+                    out.writeShort(constantPool.addUtf8(entry.name));
+                    out.writeShort(constantPool.addUtf8(entry.descriptor));
+                    out.writeShort(entry.index);
+                }
+            }
         }
     }
 
@@ -334,7 +397,14 @@ public class ClassWriter {
         }
     }
 
+    public record LineNumberEntry(int startPc, int lineNumber) {
+    }
+
+    public record LocalVariableEntry(int startPc, int length, String name, String descriptor, int index) {
+    }
+
     private record MethodInfo(int accessFlags, String name, String descriptor, byte[] code, int maxStack,
-                              int maxLocals) {
+                              int maxLocals, List<LineNumberEntry> lineNumberTable,
+                              List<LocalVariableEntry> localVariableTable) {
     }
 }

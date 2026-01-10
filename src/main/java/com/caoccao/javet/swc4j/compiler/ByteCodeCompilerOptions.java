@@ -19,7 +19,11 @@ package com.caoccao.javet.swc4j.compiler;
 import java.util.HashMap;
 import java.util.Map;
 
-public record ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String> typeAliasMap, String packagePrefix) {
+public record ByteCodeCompilerOptions(
+        JdkVersion jdkVersion,
+        Map<String, String> typeAliasMap,
+        String packagePrefix,
+        boolean debug) {
     private static final Map<String, String> DEFAULT_TYPE_ALIAS_MAP = new HashMap<>();
 
     static {
@@ -42,10 +46,45 @@ public record ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String>
     }
 
     public ByteCodeCompilerOptions(JdkVersion jdkVersion, Map<String, String> typeAliasMap) {
-        this(jdkVersion, typeAliasMap, "");
+        this(jdkVersion, typeAliasMap, "", false);
     }
 
     public ByteCodeCompilerOptions(JdkVersion jdkVersion) {
         this(jdkVersion, new HashMap<>(DEFAULT_TYPE_ALIAS_MAP));
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private boolean debug = false;
+        private JdkVersion jdkVersion = JdkVersion.JDK_17;
+        private String packagePrefix = "";
+        private Map<String, String> typeAliasMap = new HashMap<>(DEFAULT_TYPE_ALIAS_MAP);
+
+        public ByteCodeCompilerOptions build() {
+            return new ByteCodeCompilerOptions(jdkVersion, typeAliasMap, packagePrefix, debug);
+        }
+
+        public Builder debug(boolean debug) {
+            this.debug = debug;
+            return this;
+        }
+
+        public Builder jdkVersion(JdkVersion jdkVersion) {
+            this.jdkVersion = jdkVersion;
+            return this;
+        }
+
+        public Builder packagePrefix(String packagePrefix) {
+            this.packagePrefix = packagePrefix;
+            return this;
+        }
+
+        public Builder typeAliasMap(Map<String, String> typeAliasMap) {
+            this.typeAliasMap = typeAliasMap;
+            return this;
+        }
     }
 }

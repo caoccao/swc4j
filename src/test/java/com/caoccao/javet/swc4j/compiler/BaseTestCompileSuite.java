@@ -21,7 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public abstract class BaseTestCompileSuite {
 
     protected ByteCodeCompiler getCompiler(JdkVersion jdkVersion) {
-        ByteCodeCompilerOptions options = new ByteCodeCompilerOptions(jdkVersion);
+        ByteCodeCompilerOptions options = ByteCodeCompilerOptions.builder()
+                .jdkVersion(jdkVersion)
+                .debug(true)
+                .build();
         return ByteCodeCompiler.of(options);
     }
 

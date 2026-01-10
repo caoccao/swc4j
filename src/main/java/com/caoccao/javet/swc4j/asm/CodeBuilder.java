@@ -17,12 +17,16 @@
 package com.caoccao.javet.swc4j.asm;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Helper class to build method bytecode.
  */
 public class CodeBuilder {
     private final ByteArrayOutputStream code = new ByteArrayOutputStream();
+    private final List<ClassWriter.LineNumberEntry> lineNumbers = new ArrayList<>();
+    private int currentLine = -1;
 
     public CodeBuilder aconst_null() {
         code.write(0x01); // aconst_null
@@ -466,6 +470,21 @@ public class CodeBuilder {
     public CodeBuilder returnVoid() {
         code.write(0xB1); // return
         return this;
+    }
+
+    public void setLineNumber(int lineNumber) {
+        if (lineNumber != currentLine && lineNumber > 0) {
+            currentLine = lineNumber;
+            lineNumbers.add(new ClassWriter.LineNumberEntry(getCurrentOffset(), lineNumber));
+        }
+    }
+
+    public List<ClassWriter.LineNumberEntry> getLineNumbers() {
+        return lineNumbers;
+    }
+
+    public int getCurrentOffset() {
+        return code.size();
     }
 
     public byte[] toByteArray() {
