@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
@@ -27,6 +28,8 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsType;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsArrayType;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsKeywordType;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -47,14 +50,8 @@ public final class TypeResolver {
         if (returnTypeOpt.isPresent()) {
             var returnTypeAnn = returnTypeOpt.get();
             var tsType = returnTypeAnn.getTypeAnn();
-            if (tsType instanceof Swc4jAstTsTypeRef typeRef) {
-                ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
-                if (entityName instanceof Swc4jAstIdent ident) {
-                    String typeName = ident.getSym();
-                    String descriptor = mapTypeNameToDescriptor(typeName, options);
-                    return ReturnTypeInfo.of(descriptor);
-                }
-            }
+            String descriptor = mapTsTypeToDescriptor(tsType, options);
+            return ReturnTypeInfo.of(descriptor);
         }
 
         // Fall back to type inference from return statement
@@ -86,13 +83,7 @@ public final class TypeResolver {
         var typeAnn = bindingIdent.getTypeAnn();
         if (typeAnn.isPresent()) {
             ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
-            if (tsType instanceof Swc4jAstTsTypeRef typeRef) {
-                ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
-                if (entityName instanceof Swc4jAstIdent ident) {
-                    String typeName = ident.getSym();
-                    return mapTypeNameToDescriptor(typeName, options);
-                }
-            }
+            return mapTsTypeToDescriptor(tsType, options);
         }
 
         // Type inference from initializer
@@ -178,8 +169,21 @@ public final class TypeResolver {
         } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
             // Member expression - handle array-like properties
             String objType = inferTypeFromExpr(memberExpr.getObj(), context, options);
-            if ("Ljava/util/ArrayList;".equals(objType)) {
-                // Check property name
+
+            if (objType != null && objType.startsWith("[")) {
+                // Java array operations
+                if (memberExpr.getProp() instanceof Swc4jAstComputedPropName) {
+                    // arr[index] returns the element type
+                    return objType.substring(1); // Remove leading "["
+                }
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    String propName = propIdent.getSym();
+                    if ("length".equals(propName)) {
+                        return "I"; // arr.length returns int
+                    }
+                }
+            } else if ("Ljava/util/ArrayList;".equals(objType)) {
+                // ArrayList operations
                 if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                     String propName = propIdent.getSym();
                     if ("length".equals(propName)) {
@@ -216,6 +220,37 @@ public final class TypeResolver {
             // For parenthesized expressions, infer type from the inner expression
             return inferTypeFromExpr(parenExpr.getExpr(), context, options);
         }
+        return "Ljava/lang/Object;";
+    }
+
+    public static String mapTsTypeToDescriptor(ISwc4jAstTsType tsType, ByteCodeCompilerOptions options) {
+        if (tsType instanceof Swc4jAstTsArrayType arrayType) {
+            // type[] syntax - maps to Java array
+            String elemType = mapTsTypeToDescriptor(arrayType.getElemType(), options);
+            return "[" + elemType;
+        } else if (tsType instanceof Swc4jAstTsKeywordType keywordType) {
+            // Handle TypeScript keyword types (boolean, number, string, etc.)
+            return switch (keywordType.getKind()) {
+                case TsBooleanKeyword -> "Z";
+                case TsNumberKeyword -> "D";  // Default to double for number
+                case TsStringKeyword -> "Ljava/lang/String;";
+                case TsBigIntKeyword -> "J";  // Map to long
+                case TsVoidKeyword -> "V";
+                default -> "Ljava/lang/Object;";
+            };
+        } else if (tsType instanceof Swc4jAstTsTypeRef typeRef) {
+            ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
+            if (entityName instanceof Swc4jAstIdent ident) {
+                String typeName = ident.getSym();
+                // Check if this is Array<T> generic syntax
+                if ("Array".equals(typeName)) {
+                    // Array<T> syntax - maps to ArrayList
+                    return "Ljava/util/ArrayList;";
+                }
+                return mapTypeNameToDescriptor(typeName, options);
+            }
+        }
+        // Default to Object for unknown types
         return "Ljava/lang/Object;";
     }
 

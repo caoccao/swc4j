@@ -34,6 +34,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public final class CodeGenerator {
     private CodeGenerator() {
@@ -266,7 +267,64 @@ public final class CodeGenerator {
         var left = assignExpr.getLeft();
         if (left instanceof Swc4jAstMemberExpr memberExpr) {
             String objType = TypeResolver.inferTypeFromExpr(memberExpr.getObj(), context, options);
-            if ("Ljava/util/ArrayList;".equals(objType)) {
+
+            if (objType != null && objType.startsWith("[")) {
+                // Java array operations
+                if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
+                    // arr[index] = value - array element assignment
+                    generateExpr(code, cp, memberExpr.getObj(), null, context, options); // Stack: [array]
+                    generateExpr(code, cp, computedProp.getExpr(), null, context, options); // Stack: [array, index]
+
+                    // Convert index to int if needed
+                    String indexType = TypeResolver.inferTypeFromExpr(computedProp.getExpr(), context, options);
+                    if (indexType != null && !"I".equals(indexType)) {
+                        convertPrimitiveType(code, getPrimitiveType(indexType), "I");
+                    }
+
+                    // Generate the value to store
+                    String valueType = TypeResolver.inferTypeFromExpr(assignExpr.getRight(), context, options);
+                    generateExpr(code, cp, assignExpr.getRight(), null, context, options); // Stack: [array, index, value]
+
+                    // Unbox if needed
+                    unboxWrapperType(code, cp, valueType);
+
+                    // Convert to target element type if needed
+                    String elemType = objType.substring(1); // Remove leading "["
+                    String valuePrimitive = getPrimitiveType(valueType);
+                    convertPrimitiveType(code, valuePrimitive, elemType);
+
+                    // Duplicate value and place it below array and index so it's left after store
+                    // Stack: [array, index, value] -> [value, array, index, value]
+                    if ("D".equals(elemType) || "J".equals(elemType)) {
+                        code.dup2_x2(); // For wide types (double, long)
+                    } else {
+                        code.dup_x2(); // For single-slot types
+                    }
+
+                    // Use appropriate array store instruction
+                    // Stack: [value, array, index, value] -> [value] after store
+                    switch (elemType) {
+                        case "Z", "B" -> code.bastore(); // boolean and byte
+                        case "C" -> code.castore(); // char
+                        case "S" -> code.sastore(); // short
+                        case "I" -> code.iastore(); // int
+                        case "J" -> code.lastore(); // long
+                        case "F" -> code.fastore(); // float
+                        case "D" -> code.dastore(); // double
+                        default -> code.aastore(); // reference types
+                    }
+                    // The duplicated value is now on the stack as the assignment result
+                    return;
+                }
+
+                // Check if it's arr.length = newLength - NOT SUPPORTED for Java arrays
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    String propName = propIdent.getSym();
+                    if ("length".equals(propName)) {
+                        throw new Swc4jByteCodeCompilerException("Cannot set length on Java array - array size is fixed");
+                    }
+                }
+            } else if ("Ljava/util/ArrayList;".equals(objType)) {
                 // Check if it's arr[index] = value
                 if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                     // arr[index] = value -> arr.set(index, value)
@@ -396,7 +454,15 @@ public final class CodeGenerator {
         // Handle method calls on arrays (e.g., arr.push(value))
         if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
             String objType = TypeResolver.inferTypeFromExpr(memberExpr.getObj(), context, options);
-            if ("Ljava/util/ArrayList;".equals(objType)) {
+
+            if (objType != null && objType.startsWith("[")) {
+                // Java array - method calls not supported
+                String methodName = null;
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    methodName = propIdent.getSym();
+                }
+                throw new Swc4jByteCodeCompilerException("Method '" + methodName + "()' not supported on Java arrays - arrays have fixed size");
+            } else if ("Ljava/util/ArrayList;".equals(objType)) {
                 // Generate code for the object (ArrayList)
                 generateExpr(code, cp, memberExpr.getObj(), null, context, options);
 
@@ -638,41 +704,51 @@ public final class CodeGenerator {
             // null literal - always push null reference onto the stack
             code.aconst_null();
         } else if (expr instanceof Swc4jAstArrayLit arrayLit) {
-            // Array literal - convert to ArrayList
-            int arrayListClass = cp.addClass("java/util/ArrayList");
-            int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
-            int arrayListAdd = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
+            // Check if we should generate a Java array or ArrayList
+            boolean isJavaArray = returnTypeInfo != null &&
+                    returnTypeInfo.descriptor() != null &&
+                    returnTypeInfo.descriptor().startsWith("[");
 
-            // Create new ArrayList instance
-            code.newInstance(arrayListClass);
-            code.dup();
-            code.invokespecial(arrayListInit);
+            if (isJavaArray) {
+                // Generate Java array
+                generateJavaArray(code, cp, arrayLit, returnTypeInfo.descriptor(), context, options);
+            } else {
+                // Array literal - convert to ArrayList
+                int arrayListClass = cp.addClass("java/util/ArrayList");
+                int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
+                int arrayListAdd = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
 
-            // Add each element to the list
-            for (var elemOpt : arrayLit.getElems()) {
-                if (elemOpt.isPresent()) {
-                    var elem = elemOpt.get();
-                    code.dup(); // Duplicate ArrayList reference
-                    // Generate code for the element expression - ensure it's boxed
-                    ISwc4jAstExpr elemExpr = elem.getExpr();
-                    String elemType = TypeResolver.inferTypeFromExpr(elemExpr, context, options);
-                    if (elemType == null) elemType = "Ljava/lang/Object;";
+                // Create new ArrayList instance
+                code.newInstance(arrayListClass);
+                code.dup();
+                code.invokespecial(arrayListInit);
 
-                    generateExpr(code, cp, elemExpr, null, context, options);
+                // Add each element to the list
+                for (var elemOpt : arrayLit.getElems()) {
+                    if (elemOpt.isPresent()) {
+                        var elem = elemOpt.get();
+                        code.dup(); // Duplicate ArrayList reference
+                        // Generate code for the element expression - ensure it's boxed
+                        ISwc4jAstExpr elemExpr = elem.getExpr();
+                        String elemType = TypeResolver.inferTypeFromExpr(elemExpr, context, options);
+                        if (elemType == null) elemType = "Ljava/lang/Object;";
 
-                    // Box primitives to objects
-                    if ("I".equals(elemType) || "Z".equals(elemType) || "B".equals(elemType) ||
-                            "C".equals(elemType) || "S".equals(elemType) || "J".equals(elemType) ||
-                            "F".equals(elemType) || "D".equals(elemType)) {
-                        boxPrimitiveType(code, cp, elemType, getWrapperType(elemType));
+                        generateExpr(code, cp, elemExpr, null, context, options);
+
+                        // Box primitives to objects
+                        if ("I".equals(elemType) || "Z".equals(elemType) || "B".equals(elemType) ||
+                                "C".equals(elemType) || "S".equals(elemType) || "J".equals(elemType) ||
+                                "F".equals(elemType) || "D".equals(elemType)) {
+                            boxPrimitiveType(code, cp, elemType, getWrapperType(elemType));
+                        }
+
+                        // Call ArrayList.add(Object)
+                        code.invokevirtual(arrayListAdd);
+                        code.pop(); // Pop the boolean return value from add()
                     }
-
-                    // Call ArrayList.add(Object)
-                    code.invokevirtual(arrayListAdd);
-                    code.pop(); // Pop the boolean return value from add()
                 }
+                // ArrayList reference is now on top of stack
             }
-            // ArrayList reference is now on top of stack
         } else if (expr instanceof Swc4jAstIdent ident) {
             String varName = ident.getSym();
             LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
@@ -797,7 +873,47 @@ public final class CodeGenerator {
             ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
         // Handle member access on arrays (e.g., arr.length or arr[index])
         String objType = TypeResolver.inferTypeFromExpr(memberExpr.getObj(), context, options);
-        if ("Ljava/util/ArrayList;".equals(objType)) {
+
+        if (objType != null && objType.startsWith("[")) {
+            // Java array operations
+            if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
+                // arr[index] - array element access
+                generateExpr(code, cp, memberExpr.getObj(), null, context, options); // Stack: [array]
+                generateExpr(code, cp, computedProp.getExpr(), null, context, options); // Stack: [array, index]
+
+                // Convert index to int if needed
+                String indexType = TypeResolver.inferTypeFromExpr(computedProp.getExpr(), context, options);
+                if (indexType != null && !"I".equals(indexType)) {
+                    convertPrimitiveType(code, getPrimitiveType(indexType), "I");
+                }
+
+                // Use appropriate array load instruction based on element type
+                String elemType = objType.substring(1); // Remove leading "["
+                switch (elemType) {
+                    case "Z", "B" -> code.baload(); // boolean and byte
+                    case "C" -> code.caload(); // char
+                    case "S" -> code.saload(); // short
+                    case "I" -> code.iaload(); // int
+                    case "J" -> code.laload(); // long
+                    case "F" -> code.faload(); // float
+                    case "D" -> code.daload(); // double
+                    default -> code.aaload(); // reference types
+                }
+                return;
+            }
+
+            // Named property access
+            if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                String propName = propIdent.getSym();
+                if ("length".equals(propName)) {
+                    // arr.length - use arraylength instruction
+                    generateExpr(code, cp, memberExpr.getObj(), null, context, options); // Stack: [array]
+                    code.arraylength(); // Stack: [int]
+                    return;
+                }
+            }
+        } else if ("Ljava/util/ArrayList;".equals(objType)) {
+            // ArrayList operations
             // Check if it's a computed property (arr[index]) or named property (arr.length)
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                 // arr[index] -> arr.get(index)
@@ -894,6 +1010,81 @@ public final class CodeGenerator {
         }
     }
 
+    private static void generateJavaArray(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstArrayLit arrayLit,
+            String arrayDescriptor,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        // Extract element type from array descriptor (e.g., "[I" -> "I", "[Ljava/lang/String;" -> "Ljava/lang/String;")
+        String elemType = arrayDescriptor.substring(1);
+
+        // Count non-empty elements
+        int size = (int) arrayLit.getElems().stream().filter(Optional::isPresent).count();
+
+        // Create the array
+        code.iconst(size);
+
+        // Use newarray for primitive types, anewarray for reference types
+        switch (elemType) {
+            case "Z" -> code.newarray(4);  // T_BOOLEAN
+            case "C" -> code.newarray(5);  // T_CHAR
+            case "F" -> code.newarray(6);  // T_FLOAT
+            case "D" -> code.newarray(7);  // T_DOUBLE
+            case "B" -> code.newarray(8);  // T_BYTE
+            case "S" -> code.newarray(9);  // T_SHORT
+            case "I" -> code.newarray(10); // T_INT
+            case "J" -> code.newarray(11); // T_LONG
+            default -> {
+                // Reference type array - use anewarray
+                String className = elemType.substring(1, elemType.length() - 1); // Remove "L" and ";"
+                int classIndex = cp.addClass(className);
+                code.anewarray(classIndex);
+            }
+        }
+
+        // Store elements in the array
+        int index = 0;
+        for (var elemOpt : arrayLit.getElems()) {
+            if (elemOpt.isPresent()) {
+                var elem = elemOpt.get();
+                ISwc4jAstExpr elemExpr = elem.getExpr();
+
+                code.dup();          // Duplicate array reference
+                code.iconst(index);  // Push index
+
+                // Generate the element value
+                String exprType = TypeResolver.inferTypeFromExpr(elemExpr, context, options);
+                if (exprType == null) exprType = "Ljava/lang/Object;";
+
+                generateExpr(code, cp, elemExpr, null, context, options);
+
+                // Unbox if needed
+                unboxWrapperType(code, cp, exprType);
+
+                // Convert to target type if needed
+                String exprPrimitive = getPrimitiveType(exprType);
+                convertPrimitiveType(code, exprPrimitive, elemType);
+
+                // Store in array using appropriate instruction
+                switch (elemType) {
+                    case "Z", "B" -> code.bastore(); // boolean and byte use bastore
+                    case "C" -> code.castore(); // char uses castore
+                    case "S" -> code.sastore(); // short uses sastore
+                    case "I" -> code.iastore(); // int uses iastore
+                    case "J" -> code.lastore(); // long uses lastore
+                    case "F" -> code.fastore(); // float uses fastore
+                    case "D" -> code.dastore(); // double uses dastore
+                    default -> code.aastore(); // reference types use aastore
+                }
+
+                index++;
+            }
+        }
+        // Array reference is now on top of stack
+    }
+
     public static CodeBuilder generateMethodCode(
             ClassWriter.ConstantPool cp,
             Swc4jAstBlockStmt body,
@@ -923,7 +1114,12 @@ public final class CodeGenerator {
                     String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
                     if (exprType != null && !("V".equals(exprType))) {
                         // Expression leaves a value, pop it
-                        code.pop();
+                        // Use pop2 for wide types (double, long)
+                        if ("D".equals(exprType) || "J".equals(exprType)) {
+                            code.pop2();
+                        } else {
+                            code.pop();
+                        }
                     }
                 }
                 // Note: CallExpr already pops its return value in generateCallExpr
@@ -1022,7 +1218,11 @@ public final class CodeGenerator {
             ISwc4jAstExpr arg = unaryExpr.getArg();
             if (arg instanceof Swc4jAstMemberExpr memberExpr) {
                 String objType = TypeResolver.inferTypeFromExpr(memberExpr.getObj(), context, options);
-                if ("Ljava/util/ArrayList;".equals(objType)) {
+
+                if (objType != null && objType.startsWith("[")) {
+                    // Java array - delete not supported
+                    throw new Swc4jByteCodeCompilerException("Delete operator not supported on Java arrays - arrays have fixed size");
+                } else if ("Ljava/util/ArrayList;".equals(objType)) {
                     if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                         // delete arr[index] -> arr.remove(index)
                         generateExpr(code, cp, memberExpr.getObj(), null, context, options); // Stack: [ArrayList]

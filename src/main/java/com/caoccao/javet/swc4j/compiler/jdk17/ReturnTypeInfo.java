@@ -40,7 +40,12 @@ public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor) {
         if (type.equals("Ljava/lang/String;")) {
             return new ReturnTypeInfo(ReturnType.STRING, 1, type);
         }
-        if ((type.startsWith("L") || type.startsWith("[")) && type.endsWith(";")) {
+        // Handle array types (primitive arrays like [I or reference arrays like [Ljava/lang/String;)
+        if (type.startsWith("[")) {
+            return new ReturnTypeInfo(ReturnType.OBJECT, 1, type);
+        }
+        // Handle regular reference types
+        if (type.startsWith("L") && type.endsWith(";")) {
             return new ReturnTypeInfo(ReturnType.OBJECT, 1, type);
         }
         throw new Swc4jByteCodeCompilerException("Unsupported object type: " + type);
