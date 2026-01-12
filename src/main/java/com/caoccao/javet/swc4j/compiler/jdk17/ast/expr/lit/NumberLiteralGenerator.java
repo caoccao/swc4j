@@ -1,0 +1,135 @@
+/*
+ * Copyright (c) 2026. caoccao.com Sam Cao
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit;
+
+import com.caoccao.javet.swc4j.asm.ClassWriter;
+import com.caoccao.javet.swc4j.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
+import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
+public final class NumberLiteralGenerator {
+    private NumberLiteralGenerator() {
+    }
+
+    public static void generate(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstNumber number,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        double value = number.getValue();
+
+        // Check if we need to convert to float or double based on return type
+        if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.FLOAT) {
+            float floatValue = (float) value;
+            if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
+                code.fconst(floatValue);
+            } else {
+                int floatIndex = cp.addFloat(floatValue);
+                code.ldc(floatIndex);
+            }
+        } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.DOUBLE) {
+            // Double value
+            if (value == 0.0 || value == 1.0) {
+                code.dconst(value);
+            } else {
+                int doubleIndex = cp.addDouble(value);
+                code.ldc2_w(doubleIndex);
+            }
+        } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.LONG) {
+            // Long value
+            long longValue = (long) value;
+            if (longValue == 0L || longValue == 1L) {
+                code.lconst(longValue);
+            } else {
+                int longIndex = cp.addLong(longValue);
+                code.ldc2_w(longIndex);
+            }
+        } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                && "Ljava/lang/Integer;".equals(returnTypeInfo.descriptor())) {
+            // Box integer to Integer
+            int intValue = (int) value;
+            code.iconst(intValue);
+            int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+            code.invokestatic(valueOfRef);
+        } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                && "Ljava/lang/Byte;".equals(returnTypeInfo.descriptor())) {
+            // Box byte to Byte
+            byte byteValue = (byte) value;
+            code.iconst(byteValue);
+            int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
+            code.invokestatic(valueOfRef);
+        } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                && "Ljava/lang/Short;".equals(returnTypeInfo.descriptor())) {
+            // Box short to Short
+            short shortValue = (short) value;
+            code.iconst(shortValue);
+            int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
+            code.invokestatic(valueOfRef);
+        } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                && "Ljava/lang/Long;".equals(returnTypeInfo.descriptor())) {
+            // Box long to Long
+            long longValue = (long) value;
+            if (longValue == 0L || longValue == 1L) {
+                code.lconst(longValue);
+            } else {
+                int longIndex = cp.addLong(longValue);
+                code.ldc2_w(longIndex);
+            }
+            int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+            code.invokestatic(valueOfRef);
+        } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                && "Ljava/lang/Float;".equals(returnTypeInfo.descriptor())) {
+            // Box float to Float
+            float floatValue = (float) value;
+            if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
+                code.fconst(floatValue);
+            } else {
+                int floatIndex = cp.addFloat(floatValue);
+                code.ldc(floatIndex);
+            }
+            int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
+            code.invokestatic(valueOfRef);
+        } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                && "Ljava/lang/Double;".equals(returnTypeInfo.descriptor())) {
+            // Box double to Double
+            if (value == 0.0 || value == 1.0) {
+                code.dconst(value);
+            } else {
+                int doubleIndex = cp.addDouble(value);
+                code.ldc2_w(doubleIndex);
+            }
+            int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
+            code.invokestatic(valueOfRef);
+        } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
+            code.iconst((int) value);
+        } else {
+            // For double values
+            if (value == 0.0 || value == 1.0) {
+                code.dconst(value);
+            } else {
+                int doubleIndex = cp.addDouble(value);
+                code.ldc2_w(doubleIndex);
+            }
+        }
+    }
+}

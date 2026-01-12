@@ -1,0 +1,199 @@
+/*
+ * Copyright (c) 2026. caoccao.com Sam Cao
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
+
+import com.caoccao.javet.swc4j.asm.ClassWriter;
+import com.caoccao.javet.swc4j.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.jdk17.*;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt.VarDeclGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
+import java.util.List;
+
+public final class MethodGenerator {
+    private MethodGenerator() {
+    }
+
+    public static void generate(
+            ClassWriter classWriter,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstClassMethod method,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        ISwc4jAstPropName key = method.getKey();
+        String methodName = CodeGeneratorUtils.getMethodName(key);
+        Swc4jAstFunction function = method.getFunction();
+
+        // Only handle methods with bodies
+        var bodyOpt = function.getBody();
+        if (bodyOpt.isPresent()) {
+            try {
+                Swc4jAstBlockStmt body = bodyOpt.get();
+                CompilationContext context = new CompilationContext();
+
+                // Analyze function parameters and allocate local variable slots
+                VariableAnalyzer.analyzeParameters(function, context, options);
+
+                // Analyze variable declarations and infer types
+                VariableAnalyzer.analyzeVariableDeclarations(body, context, options);
+
+                // Determine return type from method body or explicit annotation
+                ReturnTypeInfo returnTypeInfo = TypeResolver.analyzeReturnType(function, body, context, options);
+                String descriptor = generateDescriptor(function, returnTypeInfo, options);
+                CodeBuilder code = generateCode(cp, body, returnTypeInfo, context, options);
+
+                int accessFlags = 0x0001; // ACC_PUBLIC
+                if (method.isStatic()) {
+                    accessFlags |= 0x0008; // ACC_STATIC
+                }
+                // Check if method has varargs (RestPat in last parameter)
+                if (!function.getParams().isEmpty()) {
+                    Swc4jAstParam lastParam = function.getParams().get(function.getParams().size() - 1);
+                    if (lastParam.getPat() instanceof com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat) {
+                        accessFlags |= 0x0080; // ACC_VARARGS
+                    }
+                }
+
+                int maxStack = Math.max(returnTypeInfo.maxStack(), returnTypeInfo.type().getMinStack());
+                // Increase max stack to handle complex expressions like array literals with boxing
+                maxStack = Math.max(maxStack, 10);
+                int maxLocals = context.getLocalVariableTable().getMaxLocals();
+
+                // Add debug information if enabled
+                if (options.debug()) {
+                    List<ClassWriter.LineNumberEntry> lineNumbers = code.getLineNumbers();
+                    List<ClassWriter.LocalVariableEntry> localVariableTable = new java.util.ArrayList<>();
+
+                    // Build LocalVariableTable from compilation context
+                    int codeLength = code.getCurrentOffset();
+                    for (LocalVariable var : context.getLocalVariableTable().getAllVariables()) {
+                        localVariableTable.add(new ClassWriter.LocalVariableEntry(
+                                0, // startPc - variable scope starts at method beginning
+                                codeLength, // length - variable scope covers entire method
+                                var.name(),
+                                var.type(),
+                                var.index()
+                        ));
+                    }
+
+                    classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
+                            lineNumbers, localVariableTable);
+                } else {
+                    classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals);
+                }
+            } catch (Exception e) {
+                throw new Swc4jByteCodeCompilerException("Failed to generate method: " + methodName, e);
+            }
+        }
+    }
+
+    public static CodeBuilder generateCode(
+            ClassWriter.ConstantPool cp,
+            Swc4jAstBlockStmt body,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        CodeBuilder code = new CodeBuilder();
+
+        // Process statements in the method body
+        for (ISwc4jAstStmt stmt : body.getStmts()) {
+            // Add line number information if debug is enabled
+            if (options.debug() && stmt.getSpan() != null) {
+                code.setLineNumber(stmt.getSpan().getLine());
+            }
+
+            if (stmt instanceof Swc4jAstVarDecl varDecl) {
+                VarDeclGenerator.generate(code, cp, varDecl, context, options);
+            } else if (stmt instanceof Swc4jAstExprStmt exprStmt) {
+                // Expression statement - evaluate the expression and discard result if any
+                ISwc4jAstExpr expr = exprStmt.getExpr();
+                ExpressionGenerator.generate(code, cp, expr, null, context, options);
+
+                // Assignment expressions leave values on the stack that need to be popped
+                // Call expressions handle their own return values (already popped if needed)
+                if (expr instanceof Swc4jAstAssignExpr) {
+                    // Assignment expressions leave the assigned value on the stack
+                    String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
+                    if (exprType != null && !("V".equals(exprType))) {
+                        // Expression leaves a value, pop it
+                        // Use pop2 for wide types (double, long)
+                        if ("D".equals(exprType) || "J".equals(exprType)) {
+                            code.pop2();
+                        } else {
+                            code.pop();
+                        }
+                    }
+                }
+                // Note: CallExpr already pops its return value in generateCallExpr
+            } else if (stmt instanceof Swc4jAstReturnStmt returnStmt) {
+                if (returnStmt.getArg().isPresent()) {
+                    ExpressionGenerator.generate(code, cp, returnStmt.getArg().get(), returnTypeInfo, context, options);
+                }
+
+                // Generate appropriate return instruction
+                switch (returnTypeInfo.type()) {
+                    case VOID -> code.returnVoid();
+                    case INT, SHORT, CHAR, BOOLEAN, BYTE -> code.ireturn();
+                    case LONG -> code.lreturn();
+                    case FLOAT -> code.freturn();
+                    case DOUBLE -> code.dreturn();
+                    case STRING, OBJECT -> code.areturn();
+                }
+            }
+        }
+
+        return code;
+    }
+
+    public static String generateDescriptor(Swc4jAstFunction function, ReturnTypeInfo returnTypeInfo, ByteCodeCompilerOptions options) {
+        // Build parameter descriptors
+        StringBuilder paramDescriptors = new StringBuilder();
+        for (Swc4jAstParam param : function.getParams()) {
+            String paramType = TypeResolver.extractParameterType(param.getPat(), options);
+            paramDescriptors.append(paramType);
+        }
+
+        String returnDescriptor = switch (returnTypeInfo.type()) {
+            case VOID -> "V";
+            case INT -> "I";
+            case BOOLEAN -> "Z";
+            case BYTE -> "B";
+            case CHAR -> "C";
+            case SHORT -> "S";
+            case LONG -> "J";
+            case FLOAT -> "F";
+            case DOUBLE -> "D";
+            case STRING -> "Ljava/lang/String;";
+            case OBJECT -> returnTypeInfo.descriptor() != null ? returnTypeInfo.descriptor() : "Ljava/lang/Object;";
+        };
+
+        return "(" + paramDescriptors + ")" + returnDescriptor;
+    }
+}

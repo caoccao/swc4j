@@ -26,6 +26,7 @@ import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
@@ -53,7 +54,7 @@ public final class AstProcessor {
         String internalClassName = fullClassName.replace('.', '/');
 
         try {
-            byte[] bytecode = CodeGenerator.generateClassBytecode(internalClassName, classDecl.getClazz(), options);
+            byte[] bytecode = ClassGenerator.generateBytecode(internalClassName, classDecl.getClazz(), options);
             byteCodeMap.put(fullClassName, bytecode);
         } catch (IOException e) {
             throw new Swc4jByteCodeCompilerException("Failed to generate bytecode for class: " + fullClassName, e);

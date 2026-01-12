@@ -1,0 +1,180 @@
+/*
+ * Copyright (c) 2026. caoccao.com Sam Cao
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
+
+import com.caoccao.javet.swc4j.asm.ClassWriter;
+import com.caoccao.javet.swc4j.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionHelper;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
+public final class AssignExpressionGenerator {
+    private AssignExpressionGenerator() {
+    }
+
+    public static void generate(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstAssignExpr assignExpr,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        // Handle assignments like arr[1] = value or arr.length = 0
+        var left = assignExpr.getLeft();
+        if (left instanceof Swc4jAstMemberExpr memberExpr) {
+            String objType = TypeResolver.inferTypeFromExpr(memberExpr.getObj(), context, options);
+
+            if (objType != null && objType.startsWith("[")) {
+                // Java array operations
+                if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
+                    // arr[index] = value - array element assignment
+                    ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options); // Stack: [array]
+                    ExpressionGenerator.generate(code, cp, computedProp.getExpr(), null, context, options); // Stack: [array, index]
+
+                    // Convert index to int if needed
+                    String indexType = TypeResolver.inferTypeFromExpr(computedProp.getExpr(), context, options);
+                    if (indexType != null && !"I".equals(indexType)) {
+                        TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(indexType), "I");
+                    }
+
+                    // Generate the value to store
+                    String valueType = TypeResolver.inferTypeFromExpr(assignExpr.getRight(), context, options);
+                    ExpressionGenerator.generate(code, cp, assignExpr.getRight(), null, context, options); // Stack: [array, index, value]
+
+                    // Unbox if needed
+                    TypeConversionHelper.unboxWrapperType(code, cp, valueType);
+
+                    // Convert to target element type if needed
+                    String elemType = objType.substring(1); // Remove leading "["
+                    String valuePrimitive = TypeConversionHelper.getPrimitiveType(valueType);
+                    TypeConversionHelper.convertPrimitiveType(code, valuePrimitive, elemType);
+
+                    // Duplicate value and place it below array and index so it's left after store
+                    // Stack: [array, index, value] -> [value, array, index, value]
+                    if ("D".equals(elemType) || "J".equals(elemType)) {
+                        code.dup2_x2(); // For wide types (double, long)
+                    } else {
+                        code.dup_x2(); // For single-slot types
+                    }
+
+                    // Use appropriate array store instruction
+                    // Stack: [value, array, index, value] -> [value] after store
+                    switch (elemType) {
+                        case "Z", "B" -> code.bastore(); // boolean and byte
+                        case "C" -> code.castore(); // char
+                        case "S" -> code.sastore(); // short
+                        case "I" -> code.iastore(); // int
+                        case "J" -> code.lastore(); // long
+                        case "F" -> code.fastore(); // float
+                        case "D" -> code.dastore(); // double
+                        default -> code.aastore(); // reference types
+                    }
+                    // The duplicated value is now on the stack as the assignment result
+                    return;
+                }
+
+                // Check if it's arr.length = newLength - NOT SUPPORTED for Java arrays
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    String propName = propIdent.getSym();
+                    if ("length".equals(propName)) {
+                        throw new Swc4jByteCodeCompilerException("Cannot set length on Java array - array size is fixed");
+                    }
+                }
+            } else if ("Ljava/util/ArrayList;".equals(objType)) {
+                // Check if it's arr[index] = value
+                if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
+                    // arr[index] = value -> arr.set(index, value)
+                    ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options); // Stack: [ArrayList]
+                    ExpressionGenerator.generate(code, cp, computedProp.getExpr(), null, context, options); // Stack: [ArrayList, index]
+                    ExpressionGenerator.generate(code, cp, assignExpr.getRight(), null, context, options); // Stack: [ArrayList, index, value]
+
+                    // Box value if needed
+                    String valueType = TypeResolver.inferTypeFromExpr(assignExpr.getRight(), context, options);
+                    if (TypeConversionHelper.isPrimitiveType(valueType)) {
+                        String wrapperType = TypeConversionHelper.getWrapperType(valueType);
+                        // wrapperType is already in the form "Ljava/lang/Integer;" so use it directly
+                        String className = wrapperType.substring(1, wrapperType.length() - 1); // Remove L and ;
+                        int valueOfRef = cp.addMethodRef(className, "valueOf", "(" + valueType + ")" + wrapperType);
+                        code.invokestatic(valueOfRef); // Stack: [ArrayList, index, boxedValue]
+                    }
+
+                    // Call ArrayList.set(int, Object)
+                    int setMethod = cp.addMethodRef("java/util/ArrayList", "set", "(ILjava/lang/Object;)Ljava/lang/Object;");
+                    code.invokevirtual(setMethod); // Stack: [oldValue] - the return value of set() is the previous value
+                    // Leave the value on stack for expression statements to pop
+                    return;
+                }
+
+                // Check if it's arr.length = newLength
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    String propName = propIdent.getSym();
+                    if ("length".equals(propName)) {
+                        // arr.length = newLength
+                        // Special case: arr.length = 0 -> arr.clear()
+                        if (assignExpr.getRight() instanceof Swc4jAstNumber number && number.getValue() == 0.0) {
+                            ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options); // Stack: [ArrayList]
+                            int clearMethod = cp.addMethodRef("java/util/ArrayList", "clear", "()V");
+                            code.invokevirtual(clearMethod); // Stack: []
+                            // Assignment expression should return the assigned value (0 in this case)
+                            code.iconst(0); // Stack: [0]
+                            return;
+                        }
+
+                        // General case for constant new length (like arr.length = 2)
+                        // Use ArrayList.subList(newLength, size()).clear() to remove excess elements
+                        if (assignExpr.getRight() instanceof Swc4jAstNumber number) {
+                            int newLength = (int) number.getValue();
+
+                            // Call arr.subList(newLength, arr.size()).clear()
+                            ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options); // Stack: [ArrayList]
+                            code.dup(); // Stack: [ArrayList, ArrayList] - keep one for potential use
+                            code.iconst(newLength); // Stack: [ArrayList, ArrayList, newLength]
+
+                            // Get arr.size() - need to load ArrayList again
+                            ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options); // Stack: [ArrayList, ArrayList, newLength, ArrayList]
+                            int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
+                            code.invokevirtual(sizeMethod); // Stack: [ArrayList, ArrayList, newLength, size]
+
+                            // Call subList(newLength, size) on the second ArrayList
+                            int subListMethod = cp.addMethodRef("java/util/ArrayList", "subList", "(II)Ljava/util/List;");
+                            code.invokevirtual(subListMethod); // Stack: [ArrayList, List]
+
+                            // Call clear() on the List
+                            int clearMethod2 = cp.addInterfaceMethodRef("java/util/List", "clear", "()V");
+                            code.invokeinterface(clearMethod2, 1); // Stack: [ArrayList]
+
+                            // Assignment expression returns the assigned value (newLength), not the ArrayList
+                            code.pop(); // Pop the ArrayList we kept, Stack: []
+                            code.iconst(newLength); // Stack: [newLength]
+                            return;
+                        }
+
+                        // For non-constant expressions, we need more complex handling
+                        throw new Swc4jByteCodeCompilerException("Setting array length to non-constant values not yet supported");
+                    }
+                }
+            }
+        }
+        throw new Swc4jByteCodeCompilerException("Assignment expression not yet supported: " + left);
+    }
+}
