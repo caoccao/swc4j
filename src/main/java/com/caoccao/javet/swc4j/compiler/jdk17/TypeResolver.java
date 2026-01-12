@@ -18,7 +18,6 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
@@ -228,26 +227,38 @@ public final class TypeResolver {
         } else if (expr instanceof Swc4jAstIdent ident) {
             return context.getInferredTypes().getOrDefault(ident.getSym(), "Ljava/lang/Object;");
         } else if (expr instanceof Swc4jAstBinExpr binExpr) {
-            if (binExpr.getOp() == Swc4jAstBinaryOp.Add) {
-                String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
-                String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
-                // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
-                // String concatenation - if either operand is String, result is String
-                if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
-                    return "Ljava/lang/String;";
+            switch (binExpr.getOp()) {
+                case Add -> {
+                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
+                    String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // String concatenation - if either operand is String, result is String
+                    if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
+                        return "Ljava/lang/String;";
+                    }
+                    // Numeric addition - use type widening rules
+                    return getWidenedType(leftType, rightType);
                 }
-                // Numeric addition - use type widening rules
-                return getWidenedType(leftType, rightType);
-            } else if (binExpr.getOp() == Swc4jAstBinaryOp.Sub) {
-                String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
-                String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
-                // Handle null types - default to Object for null literals
-                if (leftType == null) leftType = "Ljava/lang/Object;";
-                if (rightType == null) rightType = "Ljava/lang/Object;";
-                // Numeric subtraction - use type widening rules
-                return getWidenedType(leftType, rightType);
+                case Sub -> {
+                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
+                    String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // Numeric subtraction - use type widening rules
+                    return getWidenedType(leftType, rightType);
+                }
+                case Mul -> {
+                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
+                    String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // Numeric multiplication - use type widening rules
+                    return getWidenedType(leftType, rightType);
+                }
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             // For unary expressions, infer type from the argument

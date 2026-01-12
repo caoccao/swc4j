@@ -4,9 +4,11 @@
 
 This document outlines the implementation plan for supporting all 25 binary operations defined in `Swc4jAstBinaryOp` for TypeScript to JVM bytecode compilation.
 
-**Current Status:** 1 of 25 operations implemented (4% complete)
+**Current Status:** 3 of 25 operations implemented (12% complete)
 - ✅ **Add (`+`)** - Fully implemented with numeric addition and string concatenation
-- ❌ **24 operations remaining**
+- ✅ **Sub (`-`)** - Fully implemented with type widening and null handling
+- ✅ **Mul (`*`)** - Fully implemented with type widening and null handling
+- ❌ **22 operations remaining**
 
 **Implementation File:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)  
 **Test File:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)  
@@ -19,8 +21,8 @@ This document outlines the implementation plan for supporting all 25 binary oper
 | # | Operation | Symbol | Category | Status | Complexity |
 |---|-----------|--------|----------|--------|------------|
 | 0 | Add | `+` | Arithmetic | ✅ Implemented | Medium |
-| 23 | Sub | `-` | Arithmetic | ❌ Not Implemented | Low |
-| 18 | Mul | `*` | Arithmetic | ❌ Not Implemented | Low |
+| 23 | Sub | `-` | Arithmetic | ✅ Implemented | Low |
+| 18 | Mul | `*` | Arithmetic | ✅ Implemented | Low |
 | 4 | Div | `/` | Arithmetic | ❌ Not Implemented | Medium |
 | 17 | Mod | `%` | Arithmetic | ❌ Not Implemented | Medium |
 | 7 | Exp | `**` | Arithmetic | ❌ Not Implemented | High |
@@ -877,5 +879,5 @@ checkcast               - Cast to type (throws ClassCastException)
 ---
 
 *Last Updated: January 12, 2026*
-*Status: Planning Phase*
-*Next Step: Implement Tier 1 arithmetic operations (Sub, Mul)*
+*Status: Implementation Phase*
+*Next Step: Implement remaining Tier 1 arithmetic operations (Div, Mod)*

@@ -18,7 +18,6 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.asm.ClassWriter;
 import com.caoccao.javet.swc4j.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
@@ -37,19 +36,47 @@ public final class BinaryExpressionGenerator {
             Swc4jAstBinExpr binExpr,
             CompilationContext context,
             ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-        Swc4jAstBinaryOp op = binExpr.getOp();
+        switch (binExpr.getOp()) {
+            case Add -> {
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
 
-        if (op == Swc4jAstBinaryOp.Add) {
-            String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
-            String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
-            // Handle null types - default to Object for null literals
-            if (leftType == null) leftType = "Ljava/lang/Object;";
-            if (rightType == null) rightType = "Ljava/lang/Object;";
+                // Check if this is string concatenation
+                if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
+                    StringConcatHelper.generateConcat(code, cp, binExpr.getLeft(), binExpr.getRight(), leftType, rightType, context, options, ExpressionGenerator::generate);
+                } else {
+                    // Determine the widened result type
+                    String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
 
-            // Check if this is string concatenation
-            if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
-                StringConcatHelper.generateConcat(code, cp, binExpr.getLeft(), binExpr.getRight(), leftType, rightType, context, options, ExpressionGenerator::generate);
-            } else {
+                    // Generate left operand
+                    ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                    TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                    TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+
+                    // Generate right operand
+                    ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                    TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                    TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+
+                    // Generate appropriate add instruction based on result type
+                    switch (resultType) {
+                        case "I" -> code.iadd();
+                        case "J" -> code.ladd();
+                        case "F" -> code.fadd();
+                        case "D" -> code.dadd();
+                    }
+                }
+            }
+            case Sub -> {
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
+
                 // Determine the widened result type
                 String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
 
@@ -63,40 +90,41 @@ public final class BinaryExpressionGenerator {
                 TypeConversionHelper.unboxWrapperType(code, cp, rightType);
                 TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
 
-                // Generate appropriate add instruction based on result type
+                // Generate appropriate sub instruction based on result type
                 switch (resultType) {
-                    case "I" -> code.iadd();
-                    case "J" -> code.ladd();
-                    case "F" -> code.fadd();
-                    case "D" -> code.dadd();
+                    case "I" -> code.isub();
+                    case "J" -> code.lsub();
+                    case "F" -> code.fsub();
+                    case "D" -> code.dsub();
                 }
             }
-        } else if (op == Swc4jAstBinaryOp.Sub) {
-            String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
-            String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
-            // Handle null types - default to Object for null literals
-            if (leftType == null) leftType = "Ljava/lang/Object;";
-            if (rightType == null) rightType = "Ljava/lang/Object;";
+            case Mul -> {
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
 
-            // Determine the widened result type
-            String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+                // Determine the widened result type
+                String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
 
-            // Generate left operand
-            ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-            TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-            TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+                // Generate left operand
+                ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
 
-            // Generate right operand
-            ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-            TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-            TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+                // Generate right operand
+                ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
 
-            // Generate appropriate sub instruction based on result type
-            switch (resultType) {
-                case "I" -> code.isub();
-                case "J" -> code.lsub();
-                case "F" -> code.fsub();
-                case "D" -> code.dsub();
+                // Generate appropriate mul instruction based on result type
+                switch (resultType) {
+                    case "I" -> code.imul();
+                    case "J" -> code.lmul();
+                    case "F" -> code.fmul();
+                    case "D" -> code.dmul();
+                }
             }
         }
     }

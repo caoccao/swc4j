@@ -166,6 +166,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder dmul() {
+        code.write(0x6B); // dmul
+        return this;
+    }
+
     public CodeBuilder dneg() {
         code.write(0x77); // dneg
         return this;
@@ -273,6 +278,11 @@ public class CodeBuilder {
                 code.write(index);
             }
         }
+        return this;
+    }
+
+    public CodeBuilder fmul() {
+        code.write(0x6A); // fmul
         return this;
     }
 
@@ -412,6 +422,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder imul() {
+        code.write(0x68); // imul
+        return this;
+    }
+
     public CodeBuilder ineg() {
         code.write(0x74); // ineg
         return this;
@@ -544,6 +559,11 @@ public class CodeBuilder {
                 code.write(index);
             }
         }
+        return this;
+    }
+
+    public CodeBuilder lmul() {
+        code.write(0x69); // lmul
         return this;
     }
 
