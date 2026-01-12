@@ -190,6 +190,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder dsub() {
+        code.write(0x67); // dsub
+        return this;
+    }
+
     public CodeBuilder dup() {
         code.write(0x59); // dup
         return this;
@@ -296,6 +301,11 @@ public class CodeBuilder {
                 code.write(index);
             }
         }
+        return this;
+    }
+
+    public CodeBuilder fsub() {
+        code.write(0x66); // fsub
         return this;
     }
 
@@ -456,6 +466,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder isub() {
+        code.write(0x64); // isub
+        return this;
+    }
+
     public CodeBuilder l2d() {
         code.write(0x8A); // l2d
         return this;
@@ -557,6 +572,11 @@ public class CodeBuilder {
                 code.write(index);
             }
         }
+        return this;
+    }
+
+    public CodeBuilder lsub() {
+        code.write(0x65); // lsub
         return this;
     }
 

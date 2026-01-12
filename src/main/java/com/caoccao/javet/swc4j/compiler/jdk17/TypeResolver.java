@@ -240,6 +240,14 @@ public final class TypeResolver {
                 }
                 // Numeric addition - use type widening rules
                 return getWidenedType(leftType, rightType);
+            } else if (binExpr.getOp() == Swc4jAstBinaryOp.Sub) {
+                String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
+                // Numeric subtraction - use type widening rules
+                return getWidenedType(leftType, rightType);
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             // For unary expressions, infer type from the argument

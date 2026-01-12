@@ -28,25 +28,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestSwc4jAstIfStmt extends BaseTestSuiteSwc4jAst {
     @Test
-    public void testNoAltWithoutParenthesis() throws Swc4jCoreException {
-        String code = "if (a) b;";
-        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
-        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
-        Swc4jAstIfStmt ifStmt = assertAst(
-                script, script.getBody().get(0).as(Swc4jAstIfStmt.class), Swc4jAstType.IfStmt, 0, 9);
-        Swc4jAstIdent ident = assertAst(
-                ifStmt, ifStmt.getTest().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 4, 5);
-        assertEquals("a", ident.getSym());
-        Swc4jAstExprStmt exprStmt = assertAst(
-                ifStmt, ifStmt.getCons().as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 7, 9);
-        ident = assertAst(
-                exprStmt, exprStmt.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 7, 8);
-        assertEquals("b", ident.getSym());
-        assertFalse(ifStmt.getAlt().isPresent());
-        assertSpan(code, script);
-    }
-
-    @Test
     public void testNoAltWithParenthesis() throws Swc4jCoreException {
         String code = "if (a) { b; }";
         Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
@@ -62,6 +43,25 @@ public class TestSwc4jAstIfStmt extends BaseTestSuiteSwc4jAst {
                 blockStmt, blockStmt.getStmts().get(0).as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 9, 11);
         ident = assertAst(
                 exprStmt, exprStmt.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 9, 10);
+        assertEquals("b", ident.getSym());
+        assertFalse(ifStmt.getAlt().isPresent());
+        assertSpan(code, script);
+    }
+
+    @Test
+    public void testNoAltWithoutParenthesis() throws Swc4jCoreException {
+        String code = "if (a) b;";
+        Swc4jParseOutput output = swc4j.parse(code, tsScriptParseOptions);
+        Swc4jAstScript script = output.getProgram().as(Swc4jAstScript.class);
+        Swc4jAstIfStmt ifStmt = assertAst(
+                script, script.getBody().get(0).as(Swc4jAstIfStmt.class), Swc4jAstType.IfStmt, 0, 9);
+        Swc4jAstIdent ident = assertAst(
+                ifStmt, ifStmt.getTest().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 4, 5);
+        assertEquals("a", ident.getSym());
+        Swc4jAstExprStmt exprStmt = assertAst(
+                ifStmt, ifStmt.getCons().as(Swc4jAstExprStmt.class), Swc4jAstType.ExprStmt, 7, 9);
+        ident = assertAst(
+                exprStmt, exprStmt.getExpr().as(Swc4jAstIdent.class), Swc4jAstType.Ident, 7, 8);
         assertEquals("b", ident.getSym());
         assertFalse(ifStmt.getAlt().isPresent());
         assertSpan(code, script);
