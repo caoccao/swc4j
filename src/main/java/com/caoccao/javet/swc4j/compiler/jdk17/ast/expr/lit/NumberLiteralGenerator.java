@@ -121,7 +121,15 @@ public final class NumberLiteralGenerator {
             int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
             code.invokestatic(valueOfRef);
         } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
-            code.iconst((int) value);
+            // Integer value - check if it fits in iconst/bipush/sipush range
+            int intValue = (int) value;
+            if (intValue >= Short.MIN_VALUE && intValue <= Short.MAX_VALUE) {
+                code.iconst(intValue);
+            } else {
+                // Value requires ldc
+                int intIndex = cp.addInteger(intValue);
+                code.ldc(intIndex);
+            }
         } else {
             // For double values
             if (value == 0.0 || value == 1.0) {

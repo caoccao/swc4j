@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatHelper;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionHelper;
@@ -34,6 +35,7 @@ public final class BinaryExpressionGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstBinExpr binExpr,
+            ReturnTypeInfo returnTypeInfo,
             CompilationContext context,
             ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
         switch (binExpr.getOp()) {
@@ -68,6 +70,14 @@ public final class BinaryExpressionGenerator {
                         case "F" -> code.fadd();
                         case "D" -> code.dadd();
                     }
+
+                    // Convert to target type if specified and different from result type
+                    if (returnTypeInfo != null) {
+                        String targetType = returnTypeInfo.getPrimitiveTypeDescriptor();
+                        if (targetType != null && !targetType.equals(resultType)) {
+                            TypeConversionHelper.convertPrimitiveType(code, resultType, targetType);
+                        }
+                    }
                 }
             }
             case Sub -> {
@@ -97,6 +107,14 @@ public final class BinaryExpressionGenerator {
                     case "F" -> code.fsub();
                     case "D" -> code.dsub();
                 }
+
+                // Convert to target type if specified and different from result type
+                if (returnTypeInfo != null) {
+                    String targetType = returnTypeInfo.getPrimitiveTypeDescriptor();
+                    if (targetType != null && !targetType.equals(resultType)) {
+                        TypeConversionHelper.convertPrimitiveType(code, resultType, targetType);
+                    }
+                }
             }
             case Mul -> {
                 String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
@@ -125,6 +143,14 @@ public final class BinaryExpressionGenerator {
                     case "F" -> code.fmul();
                     case "D" -> code.dmul();
                 }
+
+                // Convert to target type if specified and different from result type
+                if (returnTypeInfo != null) {
+                    String targetType = returnTypeInfo.getPrimitiveTypeDescriptor();
+                    if (targetType != null && !targetType.equals(resultType)) {
+                        TypeConversionHelper.convertPrimitiveType(code, resultType, targetType);
+                    }
+                }
             }
             case Div -> {
                 String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
@@ -152,6 +178,50 @@ public final class BinaryExpressionGenerator {
                     case "J" -> code.ldiv();
                     case "F" -> code.fdiv();
                     case "D" -> code.ddiv();
+                }
+
+                // Convert to target type if specified and different from result type
+                if (returnTypeInfo != null) {
+                    String targetType = returnTypeInfo.getPrimitiveTypeDescriptor();
+                    if (targetType != null && !targetType.equals(resultType)) {
+                        TypeConversionHelper.convertPrimitiveType(code, resultType, targetType);
+                    }
+                }
+            }
+            case Mod -> {
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
+
+                // Determine the widened result type
+                String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+
+                // Generate left operand
+                ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+
+                // Generate right operand
+                ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+
+                // Generate appropriate rem instruction based on result type
+                switch (resultType) {
+                    case "I" -> code.irem();
+                    case "J" -> code.lrem();
+                    case "F" -> code.frem();
+                    case "D" -> code.drem();
+                }
+
+                // Convert to target type if specified and different from result type
+                if (returnTypeInfo != null) {
+                    String targetType = returnTypeInfo.getPrimitiveTypeDescriptor();
+                    if (targetType != null && !targetType.equals(resultType)) {
+                        TypeConversionHelper.convertPrimitiveType(code, resultType, targetType);
+                    }
                 }
             }
         }

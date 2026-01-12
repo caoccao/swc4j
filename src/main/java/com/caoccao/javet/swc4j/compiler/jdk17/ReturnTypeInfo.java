@@ -50,4 +50,18 @@ public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor) {
         }
         throw new Swc4jByteCodeCompilerException("Unsupported object type: " + type);
     }
+
+    public String getPrimitiveTypeDescriptor() {
+        return switch (type) {
+            case INT -> "I";
+            case BOOLEAN -> "Z";
+            case BYTE -> "B";
+            case CHAR -> "C";
+            case SHORT -> "S";
+            case LONG -> "J";
+            case FLOAT -> "F";
+            case DOUBLE -> "D";
+            default -> null; // For VOID, STRING, OBJECT, return null to skip conversion
+        };
+    }
 }

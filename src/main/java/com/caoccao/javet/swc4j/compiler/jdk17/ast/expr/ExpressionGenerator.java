@@ -61,7 +61,7 @@ public final class ExpressionGenerator {
         } else if (expr instanceof Swc4jAstAssignExpr assignExpr) {
             AssignExpressionGenerator.generate(code, cp, assignExpr, context, options);
         } else if (expr instanceof Swc4jAstBinExpr binExpr) {
-            BinaryExpressionGenerator.generate(code, cp, binExpr, context, options);
+            BinaryExpressionGenerator.generate(code, cp, binExpr, returnTypeInfo, context, options);
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             UnaryExpressionGenerator.generate(code, cp, unaryExpr, returnTypeInfo, context, options);
         } else if (expr instanceof Swc4jAstParenExpr parenExpr) {

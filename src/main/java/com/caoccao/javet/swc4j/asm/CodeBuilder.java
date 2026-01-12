@@ -181,6 +181,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder drem() {
+        code.write(0x73); // drem
+        return this;
+    }
+
     public CodeBuilder dreturn() {
         code.write(0xAF); // dreturn
         return this;
@@ -298,6 +303,11 @@ public class CodeBuilder {
 
     public CodeBuilder fneg() {
         code.write(0x76); // fneg
+        return this;
+    }
+
+    public CodeBuilder frem() {
+        code.write(0x72); // frem
         return this;
     }
 
@@ -473,6 +483,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder irem() {
+        code.write(0x70); // irem
+        return this;
+    }
+
     public CodeBuilder ireturn() {
         code.write(0xAC); // ireturn
         return this;
@@ -589,6 +604,11 @@ public class CodeBuilder {
 
     public CodeBuilder lneg() {
         code.write(0x75); // lneg
+        return this;
+    }
+
+    public CodeBuilder lrem() {
+        code.write(0x71); // lrem
         return this;
     }
 

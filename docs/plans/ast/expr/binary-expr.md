@@ -4,12 +4,13 @@
 
 This document outlines the implementation plan for supporting all 25 binary operations defined in `Swc4jAstBinaryOp` for TypeScript to JVM bytecode compilation.
 
-**Current Status:** 4 of 25 operations implemented (16% complete)
+**Current Status:** 5 of 25 operations implemented (20% complete)
 - ✅ **Add (`+`)** - Fully implemented with numeric addition and string concatenation
 - ✅ **Sub (`-`)** - Fully implemented with type widening and null handling
 - ✅ **Mul (`*`)** - Fully implemented with type widening and null handling
 - ✅ **Div (`/`)** - Fully implemented with type widening, null handling, and JVM-native division behavior
-- ❌ **21 operations remaining**
+- ✅ **Mod (`%`)** - Fully implemented with type widening, null handling, and JVM-native remainder behavior
+- ❌ **20 operations remaining**
 
 **Implementation File:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)  
 **Test File:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)  
@@ -25,7 +26,7 @@ This document outlines the implementation plan for supporting all 25 binary oper
 | 23 | Sub | `-` | Arithmetic | ✅ Implemented | Low |
 | 18 | Mul | `*` | Arithmetic | ✅ Implemented | Low |
 | 4 | Div | `/` | Arithmetic | ✅ Implemented | Medium |
-| 17 | Mod | `%` | Arithmetic | ❌ Not Implemented | Medium |
+| 17 | Mod | `%` | Arithmetic | ✅ Implemented | Medium |
 | 7 | Exp | `**` | Arithmetic | ❌ Not Implemented | High |
 | 14 | LShift | `<<` | Bitwise | ❌ Not Implemented | Medium |
 | 22 | RShift | `>>` | Bitwise | ❌ Not Implemented | Medium |

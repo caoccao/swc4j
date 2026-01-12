@@ -223,6 +223,7 @@ public class ClassWriter {
         private final List<Object> constants = new ArrayList<>();
         private final Map<Double, Integer> doubleCache = new HashMap<>();
         private final Map<Float, Integer> floatCache = new HashMap<>();
+        private final Map<Integer, Integer> integerCache = new HashMap<>();
         private final Map<Long, Integer> longCache = new HashMap<>();
         private final Map<String, Integer> methodRefCache = new HashMap<>();
         private final Map<String, Integer> nameAndTypeCache = new HashMap<>();
@@ -257,6 +258,14 @@ public class ClassWriter {
             return floatCache.computeIfAbsent(value, v -> {
                 int index = constants.size();
                 constants.add(new FloatInfo(v));
+                return index;
+            });
+        }
+
+        public int addInteger(int value) {
+            return integerCache.computeIfAbsent(value, v -> {
+                int index = constants.size();
+                constants.add(new IntegerInfo(v));
                 return index;
             });
         }
@@ -351,6 +360,9 @@ public class ClassWriter {
                     out.writeByte(11); // CONSTANT_InterfaceMethodref
                     out.writeShort(interfaceMethodRef.classIndex);
                     out.writeShort(interfaceMethodRef.nameAndTypeIndex);
+                } else if (constant instanceof IntegerInfo integerInfo) {
+                    out.writeByte(3); // CONSTANT_Integer
+                    out.writeInt(integerInfo.value);
                 } else if (constant instanceof FloatInfo floatInfo) {
                     out.writeByte(4); // CONSTANT_Float
                     out.writeFloat(floatInfo.value);
@@ -376,6 +388,9 @@ public class ClassWriter {
         }
 
         private record FloatInfo(float value) {
+        }
+
+        private record IntegerInfo(int value) {
         }
 
         private record InterfaceMethodRefInfo(int classIndex, int nameAndTypeIndex) {
