@@ -126,6 +126,34 @@ public final class BinaryExpressionGenerator {
                     case "D" -> code.dmul();
                 }
             }
+            case Div -> {
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
+
+                // Determine the widened result type
+                String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+
+                // Generate left operand
+                ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+
+                // Generate right operand
+                ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+
+                // Generate appropriate div instruction based on result type
+                switch (resultType) {
+                    case "I" -> code.idiv();
+                    case "J" -> code.ldiv();
+                    case "F" -> code.fdiv();
+                    case "D" -> code.ddiv();
+                }
+            }
         }
     }
 }

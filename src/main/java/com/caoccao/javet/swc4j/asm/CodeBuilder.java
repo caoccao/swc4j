@@ -152,6 +152,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder ddiv() {
+        code.write(0x6F); // ddiv
+        return this;
+    }
+
     public CodeBuilder dload(int index) {
         switch (index) {
             case 0 -> code.write(0x26); // dload_0
@@ -260,6 +265,11 @@ public class CodeBuilder {
         } else {
             throw new IllegalArgumentException("Float value " + value + " requires ldc");
         }
+        return this;
+    }
+
+    public CodeBuilder fdiv() {
+        code.write(0x6E); // fdiv
         return this;
     }
 
@@ -404,6 +414,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder idiv() {
+        code.write(0x6C); // idiv
+        return this;
+    }
+
     public CodeBuilder iload(int index) {
         switch (index) {
             case 0 -> code.write(0x1A);
@@ -541,6 +556,11 @@ public class CodeBuilder {
     public CodeBuilder ldc2_w(int constantIndex) {
         code.write(0x14); // ldc2_w
         writeShort(constantIndex);
+        return this;
+    }
+
+    public CodeBuilder ldiv() {
+        code.write(0x6D); // ldiv
         return this;
     }
 

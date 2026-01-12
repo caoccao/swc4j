@@ -259,6 +259,15 @@ public final class TypeResolver {
                     // Numeric multiplication - use type widening rules
                     return getWidenedType(leftType, rightType);
                 }
+                case Div -> {
+                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
+                    String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // Numeric division - use type widening rules
+                    return getWidenedType(leftType, rightType);
+                }
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             // For unary expressions, infer type from the argument
