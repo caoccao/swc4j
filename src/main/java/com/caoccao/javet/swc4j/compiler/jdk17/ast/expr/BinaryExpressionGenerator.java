@@ -335,6 +335,58 @@ public final class BinaryExpressionGenerator {
                     case "J" -> code.land();
                 }
             }
+            case BitOr -> {
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
+
+                // Determine the widened result type
+                resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+
+                // Generate left operand
+                ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+
+                // Generate right operand
+                ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+
+                // Generate appropriate bitwise OR instruction based on result type
+                switch (resultType) {
+                    case "I" -> code.ior();
+                    case "J" -> code.lor();
+                }
+            }
+            case BitXor -> {
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
+
+                // Determine the widened result type
+                resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+
+                // Generate left operand
+                ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+
+                // Generate right operand
+                ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+
+                // Generate appropriate bitwise XOR instruction based on result type
+                switch (resultType) {
+                    case "I" -> code.ixor();
+                    case "J" -> code.lxor();
+                }
+            }
         }
         if (returnTypeInfo != null && resultType != null) {
             String targetType = returnTypeInfo.getPrimitiveTypeDescriptor();

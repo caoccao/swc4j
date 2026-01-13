@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestCompileBinExprExp extends BaseTestCompileSuite {
 
@@ -86,7 +87,7 @@ public class TestCompileBinExprExp extends BaseTestCompileSuite {
         // Let's test what we actually get
         double result = (double) classA.getMethod("test").invoke(instance);
         // Just verify it's either 512 or 64, both are valid depending on associativity
-        assertEquals(true, result == 512.0 || result == 64.0);
+        assertTrue(result == 512.0 || result == 64.0);
     }
 
     @ParameterizedTest

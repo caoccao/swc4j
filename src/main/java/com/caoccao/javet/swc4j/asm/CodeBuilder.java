@@ -488,6 +488,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder ior() {
+        code.write(0x80); // ior
+        return this;
+    }
+
     public CodeBuilder irem() {
         code.write(0x70); // irem
         return this;
@@ -533,6 +538,11 @@ public class CodeBuilder {
 
     public CodeBuilder iushr() {
         code.write(0x7C); // iushr
+        return this;
+    }
+
+    public CodeBuilder ixor() {
+        code.write(0x82); // ixor
         return this;
     }
 
@@ -632,6 +642,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder lor() {
+        code.write(0x81); // lor
+        return this;
+    }
+
     public CodeBuilder lrem() {
         code.write(0x71); // lrem
         return this;
@@ -677,6 +692,11 @@ public class CodeBuilder {
 
     public CodeBuilder lushr() {
         code.write(0x7D); // lushr
+        return this;
+    }
+
+    public CodeBuilder lxor() {
+        code.write(0x83); // lxor
         return this;
     }
 

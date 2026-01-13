@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting all 25 binary operations defined in `Swc4jAstBinaryOp` for TypeScript to JVM bytecode compilation.
 
-**Current Status:** 10 of 25 operations implemented (40% complete)
+**Current Status:** 12 of 25 operations implemented (48% complete)
 - ✅ **Add (`+`)** - Fully implemented with numeric addition and string concatenation
 - ✅ **Sub (`-`)** - Fully implemented with type widening and null handling
 - ✅ **Mul (`*`)** - Fully implemented with type widening and null handling
@@ -15,7 +15,9 @@ This document outlines the implementation plan for supporting all 25 binary oper
 - ✅ **RShift (`>>`)** - Fully implemented with sign-extension (arithmetic shift) and automatic masking
 - ✅ **ZeroFillRShift (`>>>`)** - Fully implemented with zero-fill (logical shift) and automatic masking
 - ✅ **BitAnd (`&`)** - Fully implemented with type widening and bitwise AND operation
-- ❌ **15 operations remaining**
+- ✅ **BitOr (`|`)** - Fully implemented with type widening and bitwise OR operation
+- ✅ **BitXor (`^`)** - Fully implemented with type widening and bitwise XOR operation
+- ❌ **13 operations remaining**
 
 **Implementation File:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)  
 **Test File:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)  
@@ -37,8 +39,8 @@ This document outlines the implementation plan for supporting all 25 binary oper
 | 22 | RShift | `>>` | Bitwise | ✅ Implemented | Medium |
 | 24 | ZeroFillRShift | `>>>` | Bitwise | ✅ Implemented | Medium |
 | 1 | BitAnd | `&` | Bitwise | ✅ Implemented | Low |
-| 2 | BitOr | `\|` | Bitwise | ❌ Not Implemented | Low |
-| 3 | BitXor | `^` | Bitwise | ❌ Not Implemented | Low |
+| 2 | BitOr | `\|` | Bitwise | ✅ Implemented | Low |
+| 3 | BitXor | `^` | Bitwise | ✅ Implemented | Low |
 | 5 | EqEq | `==` | Comparison | ❌ Not Implemented | High |
 | 6 | EqEqEq | `===` | Comparison | ❌ Not Implemented | High |
 | 19 | NotEq | `!=` | Comparison | ❌ Not Implemented | High |
@@ -887,4 +889,4 @@ checkcast               - Cast to type (throws ClassCastException)
 
 *Last Updated: January 13, 2026*
 *Status: Implementation Phase*
-*Next Step: Implement remaining bitwise operations (BitOr, BitXor)*
+*Next Step: Implement comparison operators (Lt, LtEq, Gt, GtEq)*
