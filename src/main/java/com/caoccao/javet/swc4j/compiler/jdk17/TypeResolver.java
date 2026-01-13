@@ -136,7 +136,7 @@ public final class TypeResolver {
         };
     }
 
-    private static String getWidenedType(String leftType, String rightType) {
+    public static String getWidenedType(String leftType, String rightType) {
         // Get primitive types (unwrap if needed)
         String left = getPrimitiveType(leftType);
         String right = getPrimitiveType(rightType);
@@ -352,6 +352,10 @@ public final class TypeResolver {
                     if (rightType == null) rightType = "Ljava/lang/Object;";
                     // Use type widening rules (int ^ long → long, etc.)
                     return getWidenedType(leftType, rightType);
+                }
+                case EqEq, EqEqEq -> {
+                    // Equality comparison returns boolean (represented as int in bytecode)
+                    return "I";
                 }
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {

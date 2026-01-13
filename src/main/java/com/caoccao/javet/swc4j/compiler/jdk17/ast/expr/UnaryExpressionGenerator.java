@@ -139,11 +139,53 @@ public final class UnaryExpressionGenerator {
                     int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
                     code.invokestatic(valueOfRef);
                 } else if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
-                    // Integer value - use iconst for negated int
-                    code.iconst(-(int) value);
+                    // Integer value
+                    int intValue = -(int) value;
+                    // Check if value fits in the range supported by iconst/bipush/sipush
+                    if (intValue >= Short.MIN_VALUE && intValue <= Short.MAX_VALUE) {
+                        code.iconst(intValue);
+                    } else {
+                        // Use ldc for values outside sipush range
+                        int intIndex = cp.addInteger(intValue);
+                        code.ldc(intIndex);
+                    }
                 } else {
-                    // Floating point value - use dconst
-                    code.dconst(-value);
+                    // Floating point value - need to determine if it's float or double
+                    // Check context to infer the type
+                    String targetType = "D"; // Default to double
+                    if (returnTypeInfo != null) {
+                        if (returnTypeInfo.type() == ReturnType.FLOAT) {
+                            targetType = "F";
+                        } else if (returnTypeInfo.type() == ReturnType.DOUBLE) {
+                            targetType = "D";
+                        } else if (returnTypeInfo.descriptor() != null) {
+                            if (returnTypeInfo.descriptor().equals("F")) {
+                                targetType = "F";
+                            } else if (returnTypeInfo.descriptor().equals("D")) {
+                                targetType = "D";
+                            }
+                        }
+                    }
+
+                    if ("F".equals(targetType)) {
+                        // Float type
+                        float floatValue = -(float) value;
+                        if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
+                            code.fconst(floatValue);
+                        } else {
+                            int floatIndex = cp.addFloat(floatValue);
+                            code.ldc(floatIndex);
+                        }
+                    } else {
+                        // Double type (default)
+                        double doubleValue = -value;
+                        if (doubleValue == 0.0 || doubleValue == 1.0) {
+                            code.dconst(doubleValue);
+                        } else {
+                            int doubleIndex = cp.addDouble(doubleValue);
+                            code.ldc2_w(doubleIndex);
+                        }
+                    }
                 }
             } else {
                 // For complex expressions, generate the expression first then negate

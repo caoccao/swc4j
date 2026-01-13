@@ -48,12 +48,22 @@ public class ClassWriter {
     }
 
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals) {
-        addMethod(accessFlags, name, descriptor, code, maxStack, maxLocals, null, null);
+        addMethod(accessFlags, name, descriptor, code, maxStack, maxLocals, null, null, null);
     }
 
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals,
                           List<LineNumberEntry> lineNumberTable, List<LocalVariableEntry> localVariableTable) {
-        methods.add(new MethodInfo(accessFlags, name, descriptor, code, maxStack, maxLocals, lineNumberTable, localVariableTable));
+        addMethod(accessFlags, name, descriptor, code, maxStack, maxLocals, lineNumberTable, localVariableTable, null);
+    }
+
+    public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals,
+                          List<LineNumberEntry> lineNumberTable, List<LocalVariableEntry> localVariableTable,
+                          List<StackMapEntry> stackMapTable) {
+        methods.add(new MethodInfo(accessFlags, name, descriptor, code, maxStack, maxLocals, lineNumberTable, localVariableTable, stackMapTable));
+    }
+
+    public String getClassName() {
+        return className;
     }
 
     public ConstantPool getConstantPool() {
@@ -84,6 +94,9 @@ public class ClassWriter {
                 constantPool.addUtf8("Code");
 
                 // Add debug attribute names if present
+                if (method.stackMapTable != null && !method.stackMapTable.isEmpty()) {
+                    constantPool.addUtf8("StackMapTable");
+                }
                 if (method.lineNumberTable != null && !method.lineNumberTable.isEmpty()) {
                     constantPool.addUtf8("LineNumberTable");
                 }
@@ -152,6 +165,30 @@ public class ClassWriter {
             // Calculate attribute length including sub-attributes
             int attributeLength = 12 + method.code.length; // Base: max_stack + max_locals + code_length + code + exception_table_length + attributes_count
 
+            // Add StackMapTable size if present
+            if (method.stackMapTable != null && !method.stackMapTable.isEmpty()) {
+                int stackMapSize = 2; // number_of_entries
+                for (StackMapEntry entry : method.stackMapTable) {
+                    stackMapSize += 1; // frame_type
+                    if (entry.frameType == 255) { // FULL_FRAME
+                        stackMapSize += 2; // offset_delta
+                        stackMapSize += 2; // number_of_locals
+                        if (entry.locals != null) {
+                            for (int local : entry.locals) {
+                                stackMapSize += (local == 7) ? 3 : 1; // OBJECT type needs 1 byte + 2 byte index
+                            }
+                        }
+                        stackMapSize += 2; // number_of_stack_items
+                        if (entry.stack != null) {
+                            for (int stackItem : entry.stack) {
+                                stackMapSize += (stackItem == 7) ? 3 : 1; // OBJECT type needs 1 byte + 2 byte index
+                            }
+                        }
+                    }
+                }
+                attributeLength += 6 + stackMapSize; // attribute_name_index + attribute_length + stackMapSize
+            }
+
             // Add LineNumberTable size if present
             if (method.lineNumberTable != null && !method.lineNumberTable.isEmpty()) {
                 attributeLength += 8 + method.lineNumberTable.size() * 4; // attribute_name_index + attribute_length + line_number_table_length + entries
@@ -179,8 +216,11 @@ public class ClassWriter {
             // Exception table length
             out.writeShort(0);
 
-            // Code attributes count (LineNumberTable + LocalVariableTable if present)
+            // Code attributes count (StackMapTable + LineNumberTable + LocalVariableTable if present)
             int codeAttributeCount = 0;
+            if (method.stackMapTable != null && !method.stackMapTable.isEmpty()) {
+                codeAttributeCount++;
+            }
             if (method.lineNumberTable != null && !method.lineNumberTable.isEmpty()) {
                 codeAttributeCount++;
             }
@@ -188,6 +228,36 @@ public class ClassWriter {
                 codeAttributeCount++;
             }
             out.writeShort(codeAttributeCount);
+
+            // Write StackMapTable attribute
+            if (method.stackMapTable != null && !method.stackMapTable.isEmpty()) {
+                out.writeShort(constantPool.addUtf8("StackMapTable"));
+                // Calculate size
+                ByteArrayOutputStream stackMapBaos = new ByteArrayOutputStream();
+                DataOutputStream stackMapOut = new DataOutputStream(stackMapBaos);
+                stackMapOut.writeShort(method.stackMapTable.size());
+                for (StackMapEntry entry : method.stackMapTable) {
+                    stackMapOut.writeByte(entry.frameType);
+                    if (entry.frameType == 255) { // FULL_FRAME
+                        stackMapOut.writeShort(entry.offset);
+                        stackMapOut.writeShort(entry.locals != null ? entry.locals.size() : 0);
+                        if (entry.locals != null) {
+                            for (int local : entry.locals) {
+                                writeVerificationType(stackMapOut, local, className);
+                            }
+                        }
+                        stackMapOut.writeShort(entry.stack != null ? entry.stack.size() : 0);
+                        if (entry.stack != null) {
+                            for (int stackItem : entry.stack) {
+                                writeVerificationType(stackMapOut, stackItem, className);
+                            }
+                        }
+                    }
+                }
+                byte[] stackMapData = stackMapBaos.toByteArray();
+                out.writeInt(stackMapData.length);
+                out.write(stackMapData);
+            }
 
             // Write LineNumberTable attribute
             if (method.lineNumberTable != null && !method.lineNumberTable.isEmpty()) {
@@ -216,6 +286,15 @@ public class ClassWriter {
                 }
             }
         }
+    }
+
+    private void writeVerificationType(DataOutputStream out, int type, String className) throws IOException {
+        out.writeByte(type);
+        if (type == 7) { // OBJECT - needs constant pool index
+            int classIndex = constantPool.addClass(className);
+            out.writeShort(classIndex);
+        }
+        // Other types (INTEGER, LONG, FLOAT, DOUBLE, etc.) don't need additional data
     }
 
     public static class ConstantPool {
@@ -420,6 +499,9 @@ public class ClassWriter {
 
     private record MethodInfo(int accessFlags, String name, String descriptor, byte[] code, int maxStack,
                               int maxLocals, List<LineNumberEntry> lineNumberTable,
-                              List<LocalVariableEntry> localVariableTable) {
+                              List<LocalVariableEntry> localVariableTable, List<StackMapEntry> stackMapTable) {
+    }
+
+    public record StackMapEntry(int offset, int frameType, List<Integer> locals, List<Integer> stack) {
     }
 }

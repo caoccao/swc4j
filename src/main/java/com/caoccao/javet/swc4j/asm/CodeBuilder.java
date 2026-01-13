@@ -141,6 +141,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder dcmpl() {
+        code.write(0x97); // dcmpl
+        return this;
+    }
+
     public CodeBuilder dconst(double value) {
         if (value == 0.0) {
             code.write(0x0E); // dconst_0
@@ -260,6 +265,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder fcmpl() {
+        code.write(0x95); // fcmpl
+        return this;
+    }
+
     public CodeBuilder fconst(float value) {
         if (value == 0.0f) {
             code.write(0x0B); // fconst_0
@@ -339,12 +349,33 @@ public class CodeBuilder {
         return this;
     }
 
+    /**
+     * Generates StackMapTable entries for methods with branch instructions.
+     * Uses bytecode analysis to compute verification frames.
+     *
+     * @param maxLocals the maximum number of local variables
+     * @param isStatic  whether the method is static
+     * @param className the class name for 'this' reference type
+     * @return list of stack map entries, or null if not needed
+     */
+    public java.util.List<ClassWriter.StackMapEntry> generateStackMapTable(int maxLocals, boolean isStatic, String className) {
+        byte[] bytecode = code.toByteArray();
+        StackMapGenerator generator = new StackMapGenerator(bytecode, maxLocals, isStatic, className);
+        return generator.generate();
+    }
+
     public int getCurrentOffset() {
         return code.size();
     }
 
     public List<ClassWriter.LineNumberEntry> getLineNumbers() {
         return lineNumbers;
+    }
+
+    public CodeBuilder gotoLabel(int offset) {
+        code.write(0xA7); // goto
+        writeShort(offset);
+        return this;
     }
 
     public CodeBuilder i2b() {
@@ -431,6 +462,54 @@ public class CodeBuilder {
 
     public CodeBuilder idiv() {
         code.write(0x6C); // idiv
+        return this;
+    }
+
+    public CodeBuilder if_acmpeq(int offset) {
+        code.write(0xA5); // if_acmpeq
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder if_acmpne(int offset) {
+        code.write(0xA6); // if_acmpne
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder if_icmpeq(int offset) {
+        code.write(0x9F); // if_icmpeq
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder if_icmpne(int offset) {
+        code.write(0xA0); // if_icmpne
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder ifeq(int offset) {
+        code.write(0x99); // ifeq
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder ifne(int offset) {
+        code.write(0x9A); // ifne
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder ifnonnull(int offset) {
+        code.write(0xC7); // ifnonnull
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder ifnull(int offset) {
+        code.write(0xC6); // ifnull
+        writeShort(offset);
         return this;
     }
 
@@ -578,6 +657,11 @@ public class CodeBuilder {
 
     public CodeBuilder lastore() {
         code.write(0x50); // lastore
+        return this;
+    }
+
+    public CodeBuilder lcmp() {
+        code.write(0x94); // lcmp
         return this;
     }
 

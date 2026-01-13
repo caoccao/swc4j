@@ -103,10 +103,16 @@ public final class MethodGenerator {
                         ));
                     }
 
+                    // Generate stack map table for methods with branches (required for Java 7+)
+                    boolean isStatic = (accessFlags & 0x0008) != 0;
+                    var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName());
                     classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
-                            lineNumbers, localVariableTable);
+                            lineNumbers, localVariableTable, stackMapTable);
                 } else {
-                    classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals);
+                    boolean isStatic = (accessFlags & 0x0008) != 0;
+                    var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName());
+                    classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
+                            null, null, stackMapTable);
                 }
             } catch (Exception e) {
                 throw new Swc4jByteCodeCompilerException("Failed to generate method: " + methodName, e);

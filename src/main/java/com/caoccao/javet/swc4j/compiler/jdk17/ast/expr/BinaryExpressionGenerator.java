@@ -387,6 +387,89 @@ public final class BinaryExpressionGenerator {
                     case "J" -> code.lxor();
                 }
             }
+            case EqEq, EqEqEq -> {
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
+
+                // Result type for comparison is always int (boolean represented as 0 or 1)
+                resultType = "I";
+
+                // Determine the comparison type (widen to common type for primitives)
+                String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
+                String leftPrimitive = TypeConversionHelper.getPrimitiveType(leftType);
+                String rightPrimitive = TypeConversionHelper.getPrimitiveType(rightType);
+
+                // Check if both are primitive types (NOT wrappers - those use Objects.equals)
+                boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
+                        rightType.equals(rightPrimitive) &&
+                        (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
+                                leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
+                                leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
+                                leftPrimitive.equals("C"));
+
+                if (isPrimitiveComparison) {
+                    // Generate left operand
+                    ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                    TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                    TypeConversionHelper.convertPrimitiveType(code, leftPrimitive, comparisonType);
+
+                    // Generate right operand
+                    ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                    TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                    TypeConversionHelper.convertPrimitiveType(code, rightPrimitive, comparisonType);
+
+                    // Use direct bytecode comparison instructions
+                    // Pattern: if not equal, jump to iconst_0, else fall through to iconst_1
+                    switch (comparisonType) {
+                        case "I" -> {
+                            // int comparison: use if_icmpne
+                            // if a != b, jump to push 0, else push 1
+                            code.if_icmpne(7); // if not equal, jump to iconst_0
+                            code.iconst(1);    // equal: push 1
+                            code.gotoLabel(4); // jump over iconst_0
+                            code.iconst(0);    // not equal: push 0
+                        }
+                        case "J" -> {
+                            // long comparison: use lcmp then ifne
+                            code.lcmp();       // compare longs, result is 0 if equal
+                            code.ifne(7);      // if non-zero (not equal), jump to iconst_0
+                            code.iconst(1);    // equal: push 1
+                            code.gotoLabel(4); // jump over iconst_0
+                            code.iconst(0);    // not equal: push 0
+                        }
+                        case "F" -> {
+                            // float comparison: use fcmpl then ifne
+                            code.fcmpl();      // compare floats, result is 0 if equal
+                            code.ifne(7);      // if non-zero (not equal), jump to iconst_0
+                            code.iconst(1);    // equal: push 1
+                            code.gotoLabel(4); // jump over iconst_0
+                            code.iconst(0);    // not equal: push 0
+                        }
+                        case "D" -> {
+                            // double comparison: use dcmpl then ifne
+                            code.dcmpl();      // compare doubles, result is 0 if equal
+                            code.ifne(7);      // if non-zero (not equal), jump to iconst_0
+                            code.iconst(1);    // equal: push 1
+                            code.gotoLabel(4); // jump over iconst_0
+                            code.iconst(0);    // not equal: push 0
+                        }
+                    }
+                } else {
+                    // Object comparison: use Objects.equals() for null-safe comparison
+                    // Generate left operand
+                    ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+
+                    // Generate right operand
+                    ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+
+                    // Objects.equals returns boolean (Z) which is represented as 0 or 1
+                    int equalsRef = cp.addMethodRef("java/util/Objects", "equals", "(Ljava/lang/Object;Ljava/lang/Object;)Z");
+                    code.invokestatic(equalsRef);
+                }
+            }
         }
         if (returnTypeInfo != null && resultType != null) {
             String targetType = returnTypeInfo.getPrimitiveTypeDescriptor();
