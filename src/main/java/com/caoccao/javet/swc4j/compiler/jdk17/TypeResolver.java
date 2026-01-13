@@ -277,6 +277,10 @@ public final class TypeResolver {
                     // Numeric modulo - use type widening rules
                     return getWidenedType(leftType, rightType);
                 }
+                case Exp -> {
+                    // Exponentiation always returns double (Math.pow returns double)
+                    return "D";
+                }
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             // For unary expressions, infer type from the argument

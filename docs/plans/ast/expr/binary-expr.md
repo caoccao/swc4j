@@ -4,13 +4,14 @@
 
 This document outlines the implementation plan for supporting all 25 binary operations defined in `Swc4jAstBinaryOp` for TypeScript to JVM bytecode compilation.
 
-**Current Status:** 5 of 25 operations implemented (20% complete)
+**Current Status:** 6 of 25 operations implemented (24% complete)
 - ✅ **Add (`+`)** - Fully implemented with numeric addition and string concatenation
 - ✅ **Sub (`-`)** - Fully implemented with type widening and null handling
 - ✅ **Mul (`*`)** - Fully implemented with type widening and null handling
 - ✅ **Div (`/`)** - Fully implemented with type widening, null handling, and JVM-native division behavior
 - ✅ **Mod (`%`)** - Fully implemented with type widening, null handling, and JVM-native remainder behavior
-- ❌ **20 operations remaining**
+- ✅ **Exp (`**`)** - Fully implemented using Math.pow with type conversion and null handling
+- ❌ **19 operations remaining**
 
 **Implementation File:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)  
 **Test File:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)  
@@ -27,7 +28,7 @@ This document outlines the implementation plan for supporting all 25 binary oper
 | 18 | Mul | `*` | Arithmetic | ✅ Implemented | Low |
 | 4 | Div | `/` | Arithmetic | ✅ Implemented | Medium |
 | 17 | Mod | `%` | Arithmetic | ✅ Implemented | Medium |
-| 7 | Exp | `**` | Arithmetic | ❌ Not Implemented | High |
+| 7 | Exp | `**` | Arithmetic | ✅ Implemented | High |
 | 14 | LShift | `<<` | Bitwise | ❌ Not Implemented | Medium |
 | 22 | RShift | `>>` | Bitwise | ❌ Not Implemented | Medium |
 | 24 | ZeroFillRShift | `>>>` | Bitwise | ❌ Not Implemented | Medium |
@@ -880,6 +881,6 @@ checkcast               - Cast to type (throws ClassCastException)
 
 ---
 
-*Last Updated: January 12, 2026*
+*Last Updated: January 13, 2026*
 *Status: Implementation Phase*
-*Next Step: Implement remaining Tier 1 arithmetic operation (Mod)*
+*Next Step: Implement Tier 2 bitwise operations (BitAnd, BitOr, BitXor)*

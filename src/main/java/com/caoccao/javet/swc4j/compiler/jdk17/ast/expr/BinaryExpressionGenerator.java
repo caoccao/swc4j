@@ -224,6 +224,35 @@ public final class BinaryExpressionGenerator {
                     }
                 }
             }
+            case Exp -> {
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
+
+                // Generate left operand (base) and convert to double
+                ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), "D");
+
+                // Generate right operand (exponent) and convert to double
+                ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), "D");
+
+                // Call Math.pow(double, double)
+                int mathPowRef = cp.addMethodRef("java/lang/Math", "pow", "(DD)D");
+                code.invokestatic(mathPowRef);
+
+                // Convert to target type if specified
+                if (returnTypeInfo != null) {
+                    String targetType = returnTypeInfo.getPrimitiveTypeDescriptor();
+                    if (targetType != null && !targetType.equals("D")) {
+                        TypeConversionHelper.convertPrimitiveType(code, "D", targetType);
+                    }
+                }
+            }
         }
     }
 }
