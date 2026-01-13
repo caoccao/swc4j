@@ -388,6 +388,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder iand() {
+        code.write(0x7E); // iand
+        return this;
+    }
+
     public CodeBuilder iastore() {
         code.write(0x4F); // iastore
         return this;
@@ -503,11 +508,6 @@ public class CodeBuilder {
         return this;
     }
 
-    public CodeBuilder iushr() {
-        code.write(0x7C); // iushr
-        return this;
-    }
-
     public CodeBuilder istore(int index) {
         switch (index) {
             case 0 -> code.write(0x3B);
@@ -528,6 +528,11 @@ public class CodeBuilder {
 
     public CodeBuilder isub() {
         code.write(0x64); // isub
+        return this;
+    }
+
+    public CodeBuilder iushr() {
+        code.write(0x7C); // iushr
         return this;
     }
 
@@ -553,6 +558,11 @@ public class CodeBuilder {
 
     public CodeBuilder laload() {
         code.write(0x2F); // laload
+        return this;
+    }
+
+    public CodeBuilder land() {
+        code.write(0x7F); // land
         return this;
     }
 
@@ -642,11 +652,6 @@ public class CodeBuilder {
         return this;
     }
 
-    public CodeBuilder lushr() {
-        code.write(0x7D); // lushr
-        return this;
-    }
-
     public CodeBuilder lstore(int index) {
         switch (index) {
             case 0 -> code.write(0x3F);
@@ -667,6 +672,11 @@ public class CodeBuilder {
 
     public CodeBuilder lsub() {
         code.write(0x65); // lsub
+        return this;
+    }
+
+    public CodeBuilder lushr() {
+        code.write(0x7D); // lushr
         return this;
     }
 

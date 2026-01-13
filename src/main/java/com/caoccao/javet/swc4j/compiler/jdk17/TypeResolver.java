@@ -323,6 +323,16 @@ public final class TypeResolver {
                     }
                     return "I";
                 }
+                case BitAnd -> {
+                    // Bitwise AND uses type widening - result is wider of the two operand types
+                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
+                    String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    if (rightType == null) rightType = "Ljava/lang/Object;";
+                    // Use type widening rules (int & long → long, etc.)
+                    return getWidenedType(leftType, rightType);
+                }
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             // For unary expressions, infer type from the argument
