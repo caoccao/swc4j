@@ -503,6 +503,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder iushr() {
+        code.write(0x7C); // iushr
+        return this;
+    }
+
     public CodeBuilder istore(int index) {
         switch (index) {
             case 0 -> code.write(0x3B);
@@ -634,6 +639,11 @@ public class CodeBuilder {
 
     public CodeBuilder lshr() {
         code.write(0x7B); // lshr
+        return this;
+    }
+
+    public CodeBuilder lushr() {
+        code.write(0x7D); // lushr
         return this;
     }
 

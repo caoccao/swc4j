@@ -309,6 +309,20 @@ public final class TypeResolver {
                     }
                     return "I";
                 }
+                case ZeroFillRShift -> {
+                    // Zero-fill right shift returns the type of the left operand (int or long)
+                    // Same semantics as other shift operations
+                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    // Get primitive type
+                    String primitiveType = getPrimitiveType(leftType);
+                    // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
+                    if ("J".equals(primitiveType)) {
+                        return "J";
+                    }
+                    return "I";
+                }
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             // For unary expressions, infer type from the argument

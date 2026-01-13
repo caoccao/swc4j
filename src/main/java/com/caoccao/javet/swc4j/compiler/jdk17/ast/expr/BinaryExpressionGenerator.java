@@ -31,15 +31,6 @@ public final class BinaryExpressionGenerator {
     private BinaryExpressionGenerator() {
     }
 
-    private static void convertToTargetTypeIfNeeded(CodeBuilder code, String resultType, ReturnTypeInfo returnTypeInfo) {
-        if (returnTypeInfo != null) {
-            String targetType = returnTypeInfo.getPrimitiveTypeDescriptor();
-            if (targetType != null && !targetType.equals(resultType)) {
-                TypeConversionHelper.convertPrimitiveType(code, resultType, targetType);
-            }
-        }
-    }
-
     public static void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
@@ -47,6 +38,7 @@ public final class BinaryExpressionGenerator {
             ReturnTypeInfo returnTypeInfo,
             CompilationContext context,
             ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        String resultType = null;
         switch (binExpr.getOp()) {
             case Add -> {
                 String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
@@ -57,10 +49,19 @@ public final class BinaryExpressionGenerator {
 
                 // Check if this is string concatenation
                 if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
-                    StringConcatHelper.generateConcat(code, cp, binExpr.getLeft(), binExpr.getRight(), leftType, rightType, context, options, ExpressionGenerator::generate);
+                    StringConcatHelper.generateConcat(
+                            code,
+                            cp,
+                            binExpr.getLeft(), binExpr.getRight(),
+                            leftType,
+                            rightType,
+                            context,
+                            options,
+                            ExpressionGenerator::generate);
+                    resultType = "Ljava/lang/String;";
                 } else {
                     // Determine the widened result type
-                    String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+                    resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
 
                     // Generate left operand
                     ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
@@ -79,8 +80,6 @@ public final class BinaryExpressionGenerator {
                         case "F" -> code.fadd();
                         case "D" -> code.dadd();
                     }
-
-                    convertToTargetTypeIfNeeded(code, resultType, returnTypeInfo);
                 }
             }
             case Sub -> {
@@ -91,7 +90,7 @@ public final class BinaryExpressionGenerator {
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the widened result type
-                String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+                resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
 
                 // Generate left operand
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
@@ -110,8 +109,6 @@ public final class BinaryExpressionGenerator {
                     case "F" -> code.fsub();
                     case "D" -> code.dsub();
                 }
-
-                convertToTargetTypeIfNeeded(code, resultType, returnTypeInfo);
             }
             case Mul -> {
                 String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
@@ -121,7 +118,7 @@ public final class BinaryExpressionGenerator {
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the widened result type
-                String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+                resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
 
                 // Generate left operand
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
@@ -140,8 +137,6 @@ public final class BinaryExpressionGenerator {
                     case "F" -> code.fmul();
                     case "D" -> code.dmul();
                 }
-
-                convertToTargetTypeIfNeeded(code, resultType, returnTypeInfo);
             }
             case Div -> {
                 String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
@@ -151,7 +146,7 @@ public final class BinaryExpressionGenerator {
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the widened result type
-                String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+                resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
 
                 // Generate left operand
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
@@ -170,8 +165,6 @@ public final class BinaryExpressionGenerator {
                     case "F" -> code.fdiv();
                     case "D" -> code.ddiv();
                 }
-
-                convertToTargetTypeIfNeeded(code, resultType, returnTypeInfo);
             }
             case Mod -> {
                 String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
@@ -181,7 +174,7 @@ public final class BinaryExpressionGenerator {
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the widened result type
-                String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+                resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
 
                 // Generate left operand
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
@@ -200,8 +193,6 @@ public final class BinaryExpressionGenerator {
                     case "F" -> code.frem();
                     case "D" -> code.drem();
                 }
-
-                convertToTargetTypeIfNeeded(code, resultType, returnTypeInfo);
             }
             case Exp -> {
                 String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
@@ -209,6 +200,7 @@ public final class BinaryExpressionGenerator {
                 // Handle null types - default to Object for null literals
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
+                resultType = "D"; // Math.pow returns double
 
                 // Generate left operand (base) and convert to double
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
@@ -223,8 +215,6 @@ public final class BinaryExpressionGenerator {
                 // Call Math.pow(double, double)
                 int mathPowRef = cp.addMethodRef("java/lang/Math", "pow", "(DD)D");
                 code.invokestatic(mathPowRef);
-
-                convertToTargetTypeIfNeeded(code, "D", returnTypeInfo);
             }
             case LShift -> {
                 String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
@@ -234,7 +224,7 @@ public final class BinaryExpressionGenerator {
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the result type based on left operand
-                String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+                resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
 
                 // Generate left operand and convert to result type (int or long)
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
@@ -256,8 +246,6 @@ public final class BinaryExpressionGenerator {
                         code.ishl();
                     }
                 }
-
-                convertToTargetTypeIfNeeded(code, resultType, returnTypeInfo);
             }
             case RShift -> {
                 String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
@@ -267,7 +255,7 @@ public final class BinaryExpressionGenerator {
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
                 // Determine the result type based on left operand
-                String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+                resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
 
                 // Generate left operand and convert to result type (int or long)
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
@@ -289,8 +277,43 @@ public final class BinaryExpressionGenerator {
                         code.ishr();
                     }
                 }
+            }
+            case ZeroFillRShift -> {
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
 
-                convertToTargetTypeIfNeeded(code, resultType, returnTypeInfo);
+                // Determine the result type based on left operand
+                resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+
+                // Generate left operand and convert to result type (int or long)
+                ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+
+                // Generate right operand (shift amount) and convert to int
+                ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), "I");
+
+                // Generate appropriate unsigned shift instruction based on result type
+                switch (resultType) {
+                    case "I" -> code.iushr();
+                    case "J" -> code.lushr();
+                    default -> {
+                        // For other types (byte, short, char, float, double), convert to int first
+                        // This matches JavaScript ToInt32 semantics
+                        code.iushr();
+                    }
+                }
+            }
+        }
+        if (returnTypeInfo != null && resultType != null) {
+            String targetType = returnTypeInfo.getPrimitiveTypeDescriptor();
+            if (targetType != null && !targetType.equals(resultType)) {
+                TypeConversionHelper.convertPrimitiveType(code, resultType, targetType);
             }
         }
     }
