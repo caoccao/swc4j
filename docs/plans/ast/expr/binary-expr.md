@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting all 25 binary operations defined in `Swc4jAstBinaryOp` for TypeScript to JVM bytecode compilation.
 
-**Current Status:** 12 of 25 operations implemented (48% complete)
+**Current Status:** 16 of 25 operations implemented (64% complete)
 - ✅ **Add (`+`)** - Fully implemented with numeric addition and string concatenation
 - ✅ **Sub (`-`)** - Fully implemented with type widening and null handling
 - ✅ **Mul (`*`)** - Fully implemented with type widening and null handling
@@ -17,7 +17,11 @@ This document outlines the implementation plan for supporting all 25 binary oper
 - ✅ **BitAnd (`&`)** - Fully implemented with type widening and bitwise AND operation
 - ✅ **BitOr (`|`)** - Fully implemented with type widening and bitwise OR operation
 - ✅ **BitXor (`^`)** - Fully implemented with type widening and bitwise XOR operation
-- ❌ **13 operations remaining**
+- ✅ **EqEq (`==`)** - Fully implemented with primitive value equality and Objects.equals() for objects
+- ✅ **EqEqEq (`===`)** - Fully implemented, identical to EqEq in Java (both use value equality)
+- ✅ **NotEq (`!=`)** - Fully implemented with inverted logic from EqEq
+- ✅ **NotEqEq (`!==`)** - Fully implemented, identical to NotEq in Java
+- ❌ **9 operations remaining**
 
 **Implementation File:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)  
 **Test File:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)  
@@ -41,10 +45,10 @@ This document outlines the implementation plan for supporting all 25 binary oper
 | 1 | BitAnd | `&` | Bitwise | ✅ Implemented | Low |
 | 2 | BitOr | `\|` | Bitwise | ✅ Implemented | Low |
 | 3 | BitXor | `^` | Bitwise | ✅ Implemented | Low |
-| 5 | EqEq | `==` | Comparison | ❌ Not Implemented | High |
-| 6 | EqEqEq | `===` | Comparison | ❌ Not Implemented | High |
-| 19 | NotEq | `!=` | Comparison | ❌ Not Implemented | High |
-| 20 | NotEqEq | `!==` | Comparison | ❌ Not Implemented | High |
+| 5 | EqEq | `==` | Comparison | ✅ Implemented | High |
+| 6 | EqEqEq | `===` | Comparison | ✅ Implemented | High |
+| 19 | NotEq | `!=` | Comparison | ✅ Implemented | High |
+| 20 | NotEqEq | `!==` | Comparison | ✅ Implemented | High |
 | 15 | Lt | `<` | Comparison | ❌ Not Implemented | Medium |
 | 16 | LtEq | `<=` | Comparison | ❌ Not Implemented | Medium |
 | 8 | Gt | `>` | Comparison | ❌ Not Implemented | Medium |
