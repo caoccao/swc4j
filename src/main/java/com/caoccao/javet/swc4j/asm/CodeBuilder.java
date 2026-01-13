@@ -488,13 +488,18 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder ireturn() {
+        code.write(0xAC); // ireturn
+        return this;
+    }
+
     public CodeBuilder ishl() {
         code.write(0x78); // ishl
         return this;
     }
 
-    public CodeBuilder ireturn() {
-        code.write(0xAC); // ireturn
+    public CodeBuilder ishr() {
+        code.write(0x7A); // ishr
         return this;
     }
 
@@ -617,13 +622,18 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder lreturn() {
+        code.write(0xAD); // lreturn
+        return this;
+    }
+
     public CodeBuilder lshl() {
         code.write(0x79); // lshl
         return this;
     }
 
-    public CodeBuilder lreturn() {
-        code.write(0xAD); // lreturn
+    public CodeBuilder lshr() {
+        code.write(0x7B); // lshr
         return this;
     }
 

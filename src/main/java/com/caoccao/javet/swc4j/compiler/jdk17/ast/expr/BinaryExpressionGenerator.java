@@ -259,6 +259,39 @@ public final class BinaryExpressionGenerator {
 
                 convertToTargetTypeIfNeeded(code, resultType, returnTypeInfo);
             }
+            case RShift -> {
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
+
+                // Determine the result type based on left operand
+                String resultType = TypeResolver.inferTypeFromExpr(binExpr, context, options);
+
+                // Generate left operand and convert to result type (int or long)
+                ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+
+                // Generate right operand (shift amount) and convert to int
+                ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), "I");
+
+                // Generate appropriate shift instruction based on result type
+                switch (resultType) {
+                    case "I" -> code.ishr();
+                    case "J" -> code.lshr();
+                    default -> {
+                        // For other types (byte, short, char, float, double), convert to int first
+                        // This matches JavaScript ToInt32 semantics
+                        code.ishr();
+                    }
+                }
+
+                convertToTargetTypeIfNeeded(code, resultType, returnTypeInfo);
+            }
         }
     }
 }

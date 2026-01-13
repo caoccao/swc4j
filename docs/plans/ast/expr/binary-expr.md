@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting all 25 binary operations defined in `Swc4jAstBinaryOp` for TypeScript to JVM bytecode compilation.
 
-**Current Status:** 7 of 25 operations implemented (28% complete)
+**Current Status:** 8 of 25 operations implemented (32% complete)
 - ✅ **Add (`+`)** - Fully implemented with numeric addition and string concatenation
 - ✅ **Sub (`-`)** - Fully implemented with type widening and null handling
 - ✅ **Mul (`*`)** - Fully implemented with type widening and null handling
@@ -12,7 +12,8 @@ This document outlines the implementation plan for supporting all 25 binary oper
 - ✅ **Mod (`%`)** - Fully implemented with type widening, null handling, and JVM-native remainder behavior
 - ✅ **Exp (`**`)** - Fully implemented using Math.pow with type conversion and null handling
 - ✅ **LShift (`<<`)** - Fully implemented with automatic shift amount masking and type conversion
-- ❌ **18 operations remaining**
+- ✅ **RShift (`>>`)** - Fully implemented with sign-extension (arithmetic shift) and automatic masking
+- ❌ **17 operations remaining**
 
 **Implementation File:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)  
 **Test File:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)  
@@ -31,7 +32,7 @@ This document outlines the implementation plan for supporting all 25 binary oper
 | 17 | Mod | `%` | Arithmetic | ✅ Implemented | Medium |
 | 7 | Exp | `**` | Arithmetic | ✅ Implemented | High |
 | 14 | LShift | `<<` | Bitwise | ✅ Implemented | Medium |
-| 22 | RShift | `>>` | Bitwise | ❌ Not Implemented | Medium |
+| 22 | RShift | `>>` | Bitwise | ✅ Implemented | Medium |
 | 24 | ZeroFillRShift | `>>>` | Bitwise | ❌ Not Implemented | Medium |
 | 1 | BitAnd | `&` | Bitwise | ❌ Not Implemented | Low |
 | 2 | BitOr | `\|` | Bitwise | ❌ Not Implemented | Low |
@@ -884,4 +885,4 @@ checkcast               - Cast to type (throws ClassCastException)
 
 *Last Updated: January 13, 2026*
 *Status: Implementation Phase*
-*Next Step: Implement remaining bitwise operations (RShift, ZeroFillRShift, BitAnd, BitOr, BitXor)*
+*Next Step: Implement remaining bitwise operations (ZeroFillRShift, BitAnd, BitOr, BitXor)*
