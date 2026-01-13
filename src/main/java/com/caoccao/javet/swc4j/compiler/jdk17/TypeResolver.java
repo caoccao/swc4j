@@ -281,6 +281,20 @@ public final class TypeResolver {
                     // Exponentiation always returns double (Math.pow returns double)
                     return "D";
                 }
+                case LShift -> {
+                    // Left shift returns the type of the left operand (int or long)
+                    // For JavaScript semantics, we convert to int (ToInt32), but JVM supports both
+                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
+                    // Handle null types - default to Object for null literals
+                    if (leftType == null) leftType = "Ljava/lang/Object;";
+                    // Get primitive type
+                    String primitiveType = getPrimitiveType(leftType);
+                    // If long, keep as long; otherwise, convert to int (JavaScript ToInt32)
+                    if ("J".equals(primitiveType)) {
+                        return "J";
+                    }
+                    return "I";
+                }
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             // For unary expressions, infer type from the argument

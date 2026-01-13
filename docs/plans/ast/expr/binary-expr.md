@@ -4,14 +4,15 @@
 
 This document outlines the implementation plan for supporting all 25 binary operations defined in `Swc4jAstBinaryOp` for TypeScript to JVM bytecode compilation.
 
-**Current Status:** 6 of 25 operations implemented (24% complete)
+**Current Status:** 7 of 25 operations implemented (28% complete)
 - ✅ **Add (`+`)** - Fully implemented with numeric addition and string concatenation
 - ✅ **Sub (`-`)** - Fully implemented with type widening and null handling
 - ✅ **Mul (`*`)** - Fully implemented with type widening and null handling
 - ✅ **Div (`/`)** - Fully implemented with type widening, null handling, and JVM-native division behavior
 - ✅ **Mod (`%`)** - Fully implemented with type widening, null handling, and JVM-native remainder behavior
 - ✅ **Exp (`**`)** - Fully implemented using Math.pow with type conversion and null handling
-- ❌ **19 operations remaining**
+- ✅ **LShift (`<<`)** - Fully implemented with automatic shift amount masking and type conversion
+- ❌ **18 operations remaining**
 
 **Implementation File:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)  
 **Test File:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)  
@@ -29,7 +30,7 @@ This document outlines the implementation plan for supporting all 25 binary oper
 | 4 | Div | `/` | Arithmetic | ✅ Implemented | Medium |
 | 17 | Mod | `%` | Arithmetic | ✅ Implemented | Medium |
 | 7 | Exp | `**` | Arithmetic | ✅ Implemented | High |
-| 14 | LShift | `<<` | Bitwise | ❌ Not Implemented | Medium |
+| 14 | LShift | `<<` | Bitwise | ✅ Implemented | Medium |
 | 22 | RShift | `>>` | Bitwise | ❌ Not Implemented | Medium |
 | 24 | ZeroFillRShift | `>>>` | Bitwise | ❌ Not Implemented | Medium |
 | 1 | BitAnd | `&` | Bitwise | ❌ Not Implemented | Low |
@@ -883,4 +884,4 @@ checkcast               - Cast to type (throws ClassCastException)
 
 *Last Updated: January 13, 2026*
 *Status: Implementation Phase*
-*Next Step: Implement Tier 2 bitwise operations (BitAnd, BitOr, BitXor)*
+*Next Step: Implement remaining bitwise operations (RShift, ZeroFillRShift, BitAnd, BitOr, BitXor)*

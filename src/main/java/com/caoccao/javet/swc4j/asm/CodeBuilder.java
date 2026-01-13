@@ -488,6 +488,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder ishl() {
+        code.write(0x78); // ishl
+        return this;
+    }
+
     public CodeBuilder ireturn() {
         code.write(0xAC); // ireturn
         return this;
@@ -609,6 +614,11 @@ public class CodeBuilder {
 
     public CodeBuilder lrem() {
         code.write(0x71); // lrem
+        return this;
+    }
+
+    public CodeBuilder lshl() {
+        code.write(0x79); // lshl
         return this;
     }
 
