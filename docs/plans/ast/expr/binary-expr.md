@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting all 25 binary operations defined in `Swc4jAstBinaryOp` for TypeScript to JVM bytecode compilation.
 
-**Current Status:** 21 of 25 operations implemented (84% complete)
+**Current Status:** 22 of 25 operations implemented (88% complete)
 - ✅ **Add (`+`)** - Fully implemented with numeric addition and string concatenation
 - ✅ **Sub (`-`)** - Fully implemented with type widening and null handling
 - ✅ **Mul (`*`)** - Fully implemented with type widening and null handling
@@ -26,7 +26,8 @@ This document outlines the implementation plan for supporting all 25 binary oper
 - ✅ **Gt (`>`)** - Fully implemented with primitive comparisons using if_icmple/ifle for branching
 - ✅ **GtEq (`>=`)** - Fully implemented with primitive comparisons using if_icmplt/iflt for branching
 - ✅ **LogicalAnd (`&&`)** - Fully implemented with short-circuit evaluation and Boolean unboxing
-- ❌ **4 operations remaining**
+- ✅ **LogicalOr (`||`)** - Fully implemented with short-circuit evaluation and Boolean unboxing
+- ❌ **3 operations remaining**
 
 **Implementation File:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)  
 **Test File:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)  
@@ -59,7 +60,7 @@ This document outlines the implementation plan for supporting all 25 binary oper
 | 8 | Gt | `>` | Comparison | ✅ Implemented | Medium |
 | 9 | GtEq | `>=` | Comparison | ✅ Implemented | Medium |
 | 12 | LogicalAnd | `&&` | Logical | ✅ Implemented | High |
-| 13 | LogicalOr | `\|\|` | Logical | ❌ Not Implemented | High |
+| 13 | LogicalOr | `\|\|` | Logical | ✅ Implemented | High |
 | 21 | NullishCoalescing | `??` | Special | ❌ Not Implemented | High |
 | 11 | InstanceOf | `instanceof` | Special | ❌ Not Implemented | Very High |
 | 10 | In | `in` | Special | ❌ Not Implemented | Very High |

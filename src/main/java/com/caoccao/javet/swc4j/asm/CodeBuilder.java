@@ -24,8 +24,8 @@ import java.util.List;
  * Helper class to build method bytecode.
  */
 public class CodeBuilder {
-    private final List<Byte> code = new ArrayList<>();
-    private final List<ClassWriter.LineNumberEntry> lineNumbers = new ArrayList<>();
+    private final List<Byte> code = new ArrayList<>(4096);
+    private final List<ClassWriter.LineNumberEntry> lineNumbers = new ArrayList<>(1024);
     private int currentLine = -1;
 
     public CodeBuilder aaload() {

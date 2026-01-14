@@ -804,6 +804,65 @@ public final class BinaryExpressionGenerator {
                 int gotoOffset = endLabel - gotoOpcodePos;
                 code.patchShort(gotoOffsetPos, gotoOffset);
             }
+            case LogicalOr -> {
+                // LogicalOr (||) with short-circuit evaluation
+                // If left is true, skip evaluating right and return true
+                // If left is false, evaluate and return the right operand value
+
+                // Result type is always boolean
+                resultType = "Z";
+
+                // Get types of operands
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+
+                // Generate left operand
+                ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                // Unbox if it's a Boolean object
+                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+
+                // Short-circuit: if left is true (non-zero), skip right evaluation
+                // Pattern:
+                //   [left expression]
+                //   ifne TRUE_LABEL    // if left != 0, jump to TRUE_LABEL
+                //   [right expression]
+                //   goto END_LABEL
+                //   TRUE_LABEL:
+                //   iconst_1
+                //   END_LABEL:
+
+                code.ifne(0); // Placeholder, will patch offset later
+                // After ifne(0), the stream has: [opcode][offset_byte1][offset_byte2]
+                // getCurrentOffset() points to the byte after the instruction
+                // ifneOpcode position = getCurrentOffset() - 3
+                // ifneOffset position = getCurrentOffset() - 2
+                int ifneOffsetPos = code.getCurrentOffset() - 2;
+                int ifneOpcodePos = code.getCurrentOffset() - 3;
+
+                // Generate right operand
+                ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                // Unbox if it's a Boolean object
+                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+
+                code.gotoLabel(0); // Placeholder for goto
+                int gotoOrOffsetPos = code.getCurrentOffset() - 2;
+                int gotoOrOpcodePos = code.getCurrentOffset() - 3;
+
+                int trueLabel = code.getCurrentOffset();
+                code.iconst(1); // Push true
+
+                int endOrLabel = code.getCurrentOffset();
+
+                // Calculate and patch the ifne offset
+                // JVM offset is relative to the opcode position
+                int ifneOffset = trueLabel - ifneOpcodePos;
+                code.patchShort(ifneOffsetPos, ifneOffset);
+
+                // Calculate and patch the goto offset
+                // JVM offset is relative to the opcode position
+                int gotoOrOffset = endOrLabel - gotoOrOpcodePos;
+                code.patchShort(gotoOrOffsetPos, gotoOrOffset);
+            }
         }
         if (returnTypeInfo != null && resultType != null) {
             String targetType = returnTypeInfo.getPrimitiveTypeDescriptor();
