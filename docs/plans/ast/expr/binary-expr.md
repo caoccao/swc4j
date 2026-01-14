@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting all 25 binary operations defined in `Swc4jAstBinaryOp` for TypeScript to JVM bytecode compilation.
 
-**Current Status:** 18 of 25 operations implemented (72% complete)
+**Current Status:** 20 of 25 operations implemented (80% complete)
 - ✅ **Add (`+`)** - Fully implemented with numeric addition and string concatenation
 - ✅ **Sub (`-`)** - Fully implemented with type widening and null handling
 - ✅ **Mul (`*`)** - Fully implemented with type widening and null handling
@@ -23,7 +23,9 @@ This document outlines the implementation plan for supporting all 25 binary oper
 - ✅ **NotEqEq (`!==`)** - Fully implemented, identical to NotEq in Java
 - ✅ **Lt (`<`)** - Fully implemented with primitive comparisons using if_icmpge/ifge for branching
 - ✅ **LtEq (`<=`)** - Fully implemented with primitive comparisons using if_icmpgt/ifgt for branching
-- ❌ **7 operations remaining**
+- ✅ **Gt (`>`)** - Fully implemented with primitive comparisons using if_icmple/ifle for branching
+- ✅ **GtEq (`>=`)** - Fully implemented with primitive comparisons using if_icmplt/iflt for branching
+- ❌ **5 operations remaining**
 
 **Implementation File:** [BinaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/BinaryExpressionGenerator.java)  
 **Test File:** [TestCompileBinExpr.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileBinExpr.java)  
@@ -53,8 +55,8 @@ This document outlines the implementation plan for supporting all 25 binary oper
 | 20 | NotEqEq | `!==` | Comparison | ✅ Implemented | High |
 | 15 | Lt | `<` | Comparison | ✅ Implemented | Medium |
 | 16 | LtEq | `<=` | Comparison | ✅ Implemented | Medium |
-| 8 | Gt | `>` | Comparison | ❌ Not Implemented | Medium |
-| 9 | GtEq | `>=` | Comparison | ❌ Not Implemented | Medium |
+| 8 | Gt | `>` | Comparison | ✅ Implemented | Medium |
+| 9 | GtEq | `>=` | Comparison | ✅ Implemented | Medium |
 | 12 | LogicalAnd | `&&` | Logical | ❌ Not Implemented | High |
 | 13 | LogicalOr | `\|\|` | Logical | ❌ Not Implemented | High |
 | 21 | NullishCoalescing | `??` | Special | ❌ Not Implemented | High |

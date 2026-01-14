@@ -652,6 +652,99 @@ public final class BinaryExpressionGenerator {
                             "Use comparable types or implement Comparable interface.");
                 }
             }
+            case Gt, GtEq -> {
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
+
+                // Result type for comparison is always boolean
+                resultType = "Z";
+
+                // Determine the comparison type (widen to common type for primitives)
+                String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
+                String leftPrimitive = TypeConversionHelper.getPrimitiveType(leftType);
+                String rightPrimitive = TypeConversionHelper.getPrimitiveType(rightType);
+
+                // Check if both are primitive types (NOT wrappers)
+                boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
+                        rightType.equals(rightPrimitive) &&
+                        (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
+                                leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
+                                leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
+                                leftPrimitive.equals("C"));
+
+                if (isPrimitiveComparison) {
+                    // Generate left operand
+                    ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                    TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                    TypeConversionHelper.convertPrimitiveType(code, leftPrimitive, comparisonType);
+
+                    // Generate right operand
+                    ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                    TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                    TypeConversionHelper.convertPrimitiveType(code, rightPrimitive, comparisonType);
+
+                    // Use direct bytecode comparison instructions
+                    // Pattern: if condition is FALSE, jump to iconst_0, else fall through to iconst_1
+                    boolean isGtEq = binExpr.getOp() == Swc4jAstBinaryOp.GtEq;
+                    switch (comparisonType) {
+                        case "I", "Z" -> {
+                            // int/boolean comparison: use if_icmple/if_icmplt (boolean values are represented as int on stack)
+                            if (isGtEq) {
+                                code.if_icmplt(7); // if a < b (NOT >=), jump to iconst_0
+                            } else {
+                                code.if_icmple(7); // if a <= b (NOT >), jump to iconst_0
+                            }
+                            code.iconst(1);    // condition true: push 1
+                            code.gotoLabel(4); // jump over iconst_0
+                            code.iconst(0);    // condition false: push 0
+                        }
+                        case "J" -> {
+                            // long comparison: use lcmp then iflt or ifle
+                            code.lcmp();       // compare longs, result is -1, 0, or 1
+                            if (isGtEq) {
+                                code.iflt(7);  // if result < 0 (NOT >=), jump to iconst_0
+                            } else {
+                                code.ifle(7);  // if result <= 0 (NOT >), jump to iconst_0
+                            }
+                            code.iconst(1);    // condition true: push 1
+                            code.gotoLabel(4); // jump over iconst_0
+                            code.iconst(0);    // condition false: push 0
+                        }
+                        case "F" -> {
+                            // float comparison: use fcmpl then iflt or ifle
+                            code.fcmpl();      // compare floats, result is -1, 0, or 1 (NaN -> 1)
+                            if (isGtEq) {
+                                code.iflt(7);  // if result < 0 (NOT >=), jump to iconst_0
+                            } else {
+                                code.ifle(7);  // if result <= 0 (NOT >), jump to iconst_0
+                            }
+                            code.iconst(1);    // condition true: push 1
+                            code.gotoLabel(4); // jump over iconst_0
+                            code.iconst(0);    // condition false: push 0
+                        }
+                        case "D" -> {
+                            // double comparison: use dcmpl then iflt or ifle
+                            code.dcmpl();      // compare doubles, result is -1, 0, or 1 (NaN -> 1)
+                            if (isGtEq) {
+                                code.iflt(7);  // if result < 0 (NOT >=), jump to iconst_0
+                            } else {
+                                code.ifle(7);  // if result <= 0 (NOT >), jump to iconst_0
+                            }
+                            code.iconst(1);    // condition true: push 1
+                            code.gotoLabel(4); // jump over iconst_0
+                            code.iconst(0);    // condition false: push 0
+                        }
+                    }
+                } else {
+                    // Object comparison: not supported for > or >=
+                    throw new Swc4jByteCodeCompilerException(
+                            "Greater than comparison not supported for non-primitive types. " +
+                            "Use comparable types or implement Comparable interface.");
+                }
+            }
         }
         if (returnTypeInfo != null && resultType != null) {
             String targetType = returnTypeInfo.getPrimitiveTypeDescriptor();
