@@ -649,7 +649,7 @@ public final class BinaryExpressionGenerator {
                     // Object comparison: not supported for < or <=
                     throw new Swc4jByteCodeCompilerException(
                             "Less than comparison not supported for non-primitive types. " +
-                            "Use comparable types or implement Comparable interface.");
+                                    "Use comparable types or implement Comparable interface.");
                 }
             }
             case Gt, GtEq -> {
@@ -742,8 +742,67 @@ public final class BinaryExpressionGenerator {
                     // Object comparison: not supported for > or >=
                     throw new Swc4jByteCodeCompilerException(
                             "Greater than comparison not supported for non-primitive types. " +
-                            "Use comparable types or implement Comparable interface.");
+                                    "Use comparable types or implement Comparable interface.");
                 }
+            }
+            case LogicalAnd -> {
+                // LogicalAnd (&&) with short-circuit evaluation
+                // If left is false, skip evaluating right and return false
+                // If left is true, return the right operand value
+
+                // Result type is always boolean
+                resultType = "Z";
+
+                // Get types of operands
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+
+                // Generate left operand
+                ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                // Unbox if it's a Boolean object
+                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+
+                // Short-circuit: if left is false (0), skip right evaluation
+                // Pattern:
+                //   [left expression]
+                //   ifeq FALSE_LABEL    // if left == 0, jump to FALSE_LABEL
+                //   [right expression]
+                //   goto END_LABEL
+                //   FALSE_LABEL:
+                //   iconst_0
+                //   END_LABEL:
+
+                code.ifeq(0); // Placeholder, will patch offset later
+                // After ifeq(0), the stream has: [opcode][offset_byte1][offset_byte2]
+                // getCurrentOffset() points to the byte after the instruction
+                // ifeqOpcode position = getCurrentOffset() - 3
+                // ifeqOffset position = getCurrentOffset() - 2
+                int ifeqOffsetPos = code.getCurrentOffset() - 2;
+                int ifeqOpcodePos = code.getCurrentOffset() - 3;
+
+                // Generate right operand
+                ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                // Unbox if it's a Boolean object
+                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+
+                code.gotoLabel(0); // Placeholder for goto
+                int gotoOffsetPos = code.getCurrentOffset() - 2;
+                int gotoOpcodePos = code.getCurrentOffset() - 3;
+
+                int falseLabel = code.getCurrentOffset();
+                code.iconst(0); // Push false
+
+                int endLabel = code.getCurrentOffset();
+
+                // Calculate and patch the ifeq offset
+                // JVM offset is relative to the opcode position
+                int ifeqOffset = falseLabel - ifeqOpcodePos;
+                code.patchShort(ifeqOffsetPos, ifeqOffset);
+
+                // Calculate and patch the goto offset
+                // JVM offset is relative to the opcode position
+                int gotoOffset = endLabel - gotoOpcodePos;
+                code.patchShort(gotoOffsetPos, gotoOffset);
             }
         }
         if (returnTypeInfo != null && resultType != null) {
