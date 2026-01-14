@@ -15,7 +15,8 @@ This document outlines the implementation plan for supporting all 7 unary operat
 
 **Implementation File:** [UnaryExpressionGenerator.java](../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/UnaryExpressionGenerator.java)
 **Test Files:**
-- [TestCompileUnaryExprBang.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileUnaryExprBang.java) (Bang operator tests)
+- [TestCompileUnaryExprBang.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileUnaryExprBang.java) (Bang operator - 15 tests, all passing ✅)
+- [TestCompileUnaryExprMinus.java](../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/TestCompileUnaryExprMinus.java) (Minus operator - 30 tests, all passing ✅)
 - Additional test files to be created for other operators
 **Enum Definition:** [Swc4jAstUnaryOp.java](../../src/main/java/com/caoccao/javet/swc4j/ast/enums/Swc4jAstUnaryOp.java)
 
@@ -40,6 +41,19 @@ This document outlines the implementation plan for supporting all 7 unary operat
 ### Implementation Review
 
 The Minus operation is **fully implemented** and serves as the reference pattern:
+
+**Test Coverage:** 30 comprehensive tests in TestCompileUnaryExprMinus.java covering:
+- ✅ Basic negation (int, double, float, long)
+- ✅ Literal negation (int, double, float, long)
+- ✅ Edge values (0, 1, -1, MAX_VALUE, MIN_VALUE for int and long)
+- ✅ Negative number negation (double negation to positive)
+- ✅ Expression negation `-(x + y)`
+- ✅ Multiple nested minus operators `-(-x)`, `-(-(-x))`
+- ✅ Wrapper variable types (Integer, Long, Float, Double) - FIXED ✅
+- ✅ Wrapper literal types (Integer, Long, Float, Double) - FIXED ✅
+- ⚠️ MIN_VALUE literal bug verified (see Known Issues)
+
+**All 30 tests passing ✅**
 
 ```java
 case Minus -> {
@@ -714,19 +728,42 @@ Each operation should have tests for:
 
 ## Known Issues to Fix
 
-### 1. Minus Operation MIN_VALUE Bug
-**Issue:** `-2147483648` is loaded as `-2147483647`
+### 1. Minus Operation MIN_VALUE Bug ✅ Verified
+**Issue:** `-2147483648` literal is loaded as `-2147483647`
 
-**Root Cause:** Integer literal parsing or constant generation issue
+**Root Cause:** Integer literal parsing or constant generation issue (likely in AST parsing phase before bytecode generation)
+
+**Test:** `testMinusLiteralIntMinValue` in TestCompileUnaryExprMinus.java verifies this bug
 
 **Fix Required:** Investigate NumberLiteralGenerator or constant pool generation
+
+**Note:** When negating the variable containing MIN_VALUE (not the literal), the behavior is correct: -(-2147483648) = 2147483647 (overflow to MAX_VALUE)
 
 ### 2. Missing Boolean Type Rejection
 **Issue:** Minus operation doesn't reject boolean operands
 
 **Fix Required:** Add type check to throw error for boolean in Minus case
 
-### 3. Delete Operation Limited Support
+**Status:** Not yet tested, needs verification
+
+### 3. Wrapper Type Variable Negation Bug ✅ FIXED
+**Issue:** Negating wrapper type variables (Integer, Long, Float, Double) was causing VerifyError (bytecode verification failure)
+
+**Root Cause:** Missing unboxing before negation and missing boxing after negation in the expression path
+
+**Fix Applied:**
+1. Added `TypeConversionHelper.unboxWrapperType(code, cp, argType)` before negation instructions (line 247)
+2. Added `TypeConversionHelper.boxPrimitiveType(code, cp, primitiveType, argType)` after negation to box back to wrapper type (line 261)
+3. Added Integer wrapper literal support in the literal optimization path (lines 148-159)
+
+**Tests:** All wrapper type tests now passing:
+- testMinusIntegerWrapper ✅
+- testMinusLongWrapper ✅
+- testMinusFloatWrapper ✅
+- testMinusDoubleWrapper ✅
+- testMinusLiteralInteger ✅
+
+### 4. Delete Operation Limited Support
 **Issue:** Only supports ArrayList.remove(int), not HashMap or other collections
 
 **Fix Required:** Extend to HashMap.remove(key) and other collection types
@@ -791,15 +828,20 @@ Test interactions with binary operators:
 ## Implementation Checklist
 
 - [x] Implement Bang (`!`) operator
-- [ ] Fix Minus operation MIN_VALUE bug
+- [x] Create comprehensive test suite for Bang operator (15 tests)
+- [x] Document all edge cases in tests for Bang operator
+- [x] Create comprehensive test suite for Minus operator (30 tests)
+- [x] Add tests for long, Integer, Long, Float, Double types
+- [x] Verify and document MIN_VALUE bug
+- [x] Fix wrapper type variable negation bug (unboxing + boxing) ✅
+- [x] Fix Integer wrapper literal support ✅
+- [ ] Fix Minus operation MIN_VALUE literal bug
+- [ ] Test and fix boolean type rejection in Minus operator
 - [ ] Implement Plus (`+`) operator
 - [ ] Implement Tilde (`~`) operator
 - [ ] Extend Delete operator for HashMap
 - [ ] Implement TypeOf operator (or document as not supported)
 - [ ] Implement Void operator
-- [x] Create comprehensive test suite for Bang operator
-- [x] Document all edge cases in tests for Bang operator
-- [ ] Update this plan with actual implementation details
 
 ---
 

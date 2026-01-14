@@ -146,6 +146,18 @@ public final class UnaryExpressionGenerator {
                         int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
                         code.invokestatic(valueOfRef);
                     } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
+                            && "Ljava/lang/Integer;".equals(returnTypeInfo.descriptor())) {
+                        // Check if we're dealing with an Integer wrapper
+                        int intValue = -(int) value;
+                        if (intValue >= Short.MIN_VALUE && intValue <= Short.MAX_VALUE) {
+                            code.iconst(intValue);
+                        } else {
+                            int intIndex = cp.addInteger(intValue);
+                            code.ldc(intIndex);
+                        }
+                        int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+                        code.invokestatic(valueOfRef);
+                    } else if (returnTypeInfo != null && returnTypeInfo.type() == ReturnType.OBJECT
                             && "Ljava/lang/Byte;".equals(returnTypeInfo.descriptor())) {
                         // Check if we're dealing with a Byte wrapper
                         byte byteValue = (byte) -(int) value;
@@ -239,11 +251,26 @@ public final class UnaryExpressionGenerator {
                     String argType = TypeResolver.inferTypeFromExpr(arg, context, options);
                     // Handle null type - should not happen for negation, default to int
                     if (argType == null) argType = "I";
-                    switch (argType) {
+
+                    // Check if argType is a wrapper before unboxing
+                    boolean isWrapper = !argType.equals(TypeConversionHelper.getPrimitiveType(argType));
+
+                    // Unbox wrapper types before negation
+                    TypeConversionHelper.unboxWrapperType(code, cp, argType);
+
+                    // Get the primitive type for determining which negation instruction to use
+                    String primitiveType = TypeConversionHelper.getPrimitiveType(argType);
+
+                    switch (primitiveType) {
                         case "D" -> code.dneg();
                         case "F" -> code.fneg();
                         case "J" -> code.lneg();
                         default -> code.ineg();
+                    }
+
+                    // Box back to wrapper type if original was wrapper
+                    if (isWrapper) {
+                        TypeConversionHelper.boxPrimitiveType(code, cp, primitiveType, argType);
                     }
                 }
             }
