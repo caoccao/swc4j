@@ -353,9 +353,9 @@ public final class TypeResolver {
                     // Use type widening rules (int ^ long → long, etc.)
                     return getWidenedType(leftType, rightType);
                 }
-                case EqEq, EqEqEq, NotEq, NotEqEq -> {
-                    // Equality and inequality comparisons return boolean (represented as int in bytecode)
-                    return "I";
+                case EqEq, EqEqEq, NotEq, NotEqEq, Lt, LtEq -> {
+                    // Equality, inequality, and relational comparisons return boolean
+                    return "Z";
                 }
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {

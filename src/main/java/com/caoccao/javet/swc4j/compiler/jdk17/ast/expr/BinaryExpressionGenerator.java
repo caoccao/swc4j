@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.asm.ClassWriter;
 import com.caoccao.javet.swc4j.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
@@ -394,8 +395,8 @@ public final class BinaryExpressionGenerator {
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
-                // Result type for comparison is always int (boolean represented as 0 or 1)
-                resultType = "I";
+                // Result type for comparison is always boolean
+                resultType = "Z";
 
                 // Determine the comparison type (widen to common type for primitives)
                 String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
@@ -408,7 +409,7 @@ public final class BinaryExpressionGenerator {
                         (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
                                 leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
                                 leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
-                                leftPrimitive.equals("C"));
+                                leftPrimitive.equals("C") || leftPrimitive.equals("Z"));
 
                 if (isPrimitiveComparison) {
                     // Generate left operand
@@ -424,8 +425,8 @@ public final class BinaryExpressionGenerator {
                     // Use direct bytecode comparison instructions
                     // Pattern: if not equal, jump to iconst_0, else fall through to iconst_1
                     switch (comparisonType) {
-                        case "I" -> {
-                            // int comparison: use if_icmpne
+                        case "I", "Z" -> {
+                            // int/boolean comparison: use if_icmpne (boolean values are represented as int on stack)
                             // if a != b, jump to push 0, else push 1
                             code.if_icmpne(7); // if not equal, jump to iconst_0
                             code.iconst(1);    // equal: push 1
@@ -477,8 +478,8 @@ public final class BinaryExpressionGenerator {
                 if (leftType == null) leftType = "Ljava/lang/Object;";
                 if (rightType == null) rightType = "Ljava/lang/Object;";
 
-                // Result type for comparison is always int (boolean represented as 0 or 1)
-                resultType = "I";
+                // Result type for comparison is always boolean
+                resultType = "Z";
 
                 // Determine the comparison type (widen to common type for primitives)
                 String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
@@ -491,7 +492,7 @@ public final class BinaryExpressionGenerator {
                         (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
                                 leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
                                 leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
-                                leftPrimitive.equals("C"));
+                                leftPrimitive.equals("C") || leftPrimitive.equals("Z"));
 
                 if (isPrimitiveComparison) {
                     // Generate left operand
@@ -507,8 +508,8 @@ public final class BinaryExpressionGenerator {
                     // Use direct bytecode comparison instructions (inverted logic from EqEq)
                     // Pattern: if equal, jump to iconst_0, else fall through to iconst_1
                     switch (comparisonType) {
-                        case "I" -> {
-                            // int comparison: use if_icmpeq (opposite of EqEq)
+                        case "I", "Z" -> {
+                            // int/boolean comparison: use if_icmpeq (boolean values are represented as int on stack)
                             // if a == b, jump to push 0, else push 1
                             code.if_icmpeq(7); // if equal, jump to iconst_0
                             code.iconst(1);    // not equal: push 1
@@ -556,6 +557,99 @@ public final class BinaryExpressionGenerator {
                     // We can use: iconst_1, ixor (XOR with 1 flips the bit)
                     code.iconst(1);
                     code.ixor();
+                }
+            }
+            case Lt, LtEq -> {
+                String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
+                String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+                // Handle null types - default to Object for null literals
+                if (leftType == null) leftType = "Ljava/lang/Object;";
+                if (rightType == null) rightType = "Ljava/lang/Object;";
+
+                // Result type for comparison is always boolean
+                resultType = "Z";
+
+                // Determine the comparison type (widen to common type for primitives)
+                String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
+                String leftPrimitive = TypeConversionHelper.getPrimitiveType(leftType);
+                String rightPrimitive = TypeConversionHelper.getPrimitiveType(rightType);
+
+                // Check if both are primitive types (NOT wrappers)
+                boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
+                        rightType.equals(rightPrimitive) &&
+                        (leftPrimitive.equals("I") || leftPrimitive.equals("J") ||
+                                leftPrimitive.equals("F") || leftPrimitive.equals("D") ||
+                                leftPrimitive.equals("B") || leftPrimitive.equals("S") ||
+                                leftPrimitive.equals("C"));
+
+                if (isPrimitiveComparison) {
+                    // Generate left operand
+                    ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+                    TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                    TypeConversionHelper.convertPrimitiveType(code, leftPrimitive, comparisonType);
+
+                    // Generate right operand
+                    ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                    TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                    TypeConversionHelper.convertPrimitiveType(code, rightPrimitive, comparisonType);
+
+                    // Use direct bytecode comparison instructions
+                    // Pattern: if condition is FALSE, jump to iconst_0, else fall through to iconst_1
+                    boolean isLtEq = binExpr.getOp() == Swc4jAstBinaryOp.LtEq;
+                    switch (comparisonType) {
+                        case "I", "Z" -> {
+                            // int/boolean comparison: use if_icmpge/if_icmpgt (boolean values are represented as int on stack)
+                            if (isLtEq) {
+                                code.if_icmpgt(7); // if a > b (NOT <=), jump to iconst_0
+                            } else {
+                                code.if_icmpge(7); // if a >= b (NOT <), jump to iconst_0
+                            }
+                            code.iconst(1);    // condition true: push 1
+                            code.gotoLabel(4); // jump over iconst_0
+                            code.iconst(0);    // condition false: push 0
+                        }
+                        case "J" -> {
+                            // long comparison: use lcmp then ifge or ifgt
+                            code.lcmp();       // compare longs, result is -1, 0, or 1
+                            if (isLtEq) {
+                                code.ifgt(7);  // if result > 0 (NOT <=), jump to iconst_0
+                            } else {
+                                code.ifge(7);  // if result >= 0 (NOT <), jump to iconst_0
+                            }
+                            code.iconst(1);    // condition true: push 1
+                            code.gotoLabel(4); // jump over iconst_0
+                            code.iconst(0);    // condition false: push 0
+                        }
+                        case "F" -> {
+                            // float comparison: use fcmpl then ifge or ifgt
+                            code.fcmpl();      // compare floats, result is -1, 0, or 1 (NaN -> 1)
+                            if (isLtEq) {
+                                code.ifgt(7);  // if result > 0 (NOT <=), jump to iconst_0
+                            } else {
+                                code.ifge(7);  // if result >= 0 (NOT <), jump to iconst_0
+                            }
+                            code.iconst(1);    // condition true: push 1
+                            code.gotoLabel(4); // jump over iconst_0
+                            code.iconst(0);    // condition false: push 0
+                        }
+                        case "D" -> {
+                            // double comparison: use dcmpl then ifge or ifgt
+                            code.dcmpl();      // compare doubles, result is -1, 0, or 1 (NaN -> 1)
+                            if (isLtEq) {
+                                code.ifgt(7);  // if result > 0 (NOT <=), jump to iconst_0
+                            } else {
+                                code.ifge(7);  // if result >= 0 (NOT <), jump to iconst_0
+                            }
+                            code.iconst(1);    // condition true: push 1
+                            code.gotoLabel(4); // jump over iconst_0
+                            code.iconst(0);    // condition false: push 0
+                        }
+                    }
+                } else {
+                    // Object comparison: not supported for < or <=
+                    throw new Swc4jByteCodeCompilerException(
+                            "Less than comparison not supported for non-primitive types. " +
+                            "Use comparable types or implement Comparable interface.");
                 }
             }
         }

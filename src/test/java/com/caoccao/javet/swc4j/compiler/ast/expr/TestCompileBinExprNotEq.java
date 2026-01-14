@@ -21,7 +21,8 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
 
@@ -41,7 +42,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -60,7 +61,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -79,7 +80,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -98,7 +99,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -120,7 +121,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Both comparisons are false (0 != 0 = 0)
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Both comparisons are false (0 != 0 = 0)
     }
 
     @ParameterizedTest
@@ -142,7 +143,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Both are 0, so 0 !== 0 = 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Both are 0, so 0 !== 0 = 0
     }
 
     @ParameterizedTest
@@ -161,7 +162,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -180,7 +181,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -199,7 +200,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -218,7 +219,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -237,7 +238,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal strings should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal strings should return 0
     }
 
     @ParameterizedTest
@@ -256,7 +257,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -275,7 +276,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -294,7 +295,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -313,7 +314,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -332,7 +333,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -351,7 +352,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -370,7 +371,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -389,7 +390,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -408,7 +409,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -427,7 +428,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -446,7 +447,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -465,7 +466,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -484,7 +485,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -503,7 +504,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -522,7 +523,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -541,7 +542,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -560,7 +561,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -579,7 +580,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -598,7 +599,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -617,7 +618,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -636,7 +637,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -655,7 +656,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal strings should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal strings should return 0
     }
 
     @ParameterizedTest
@@ -674,7 +675,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -693,7 +694,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -712,7 +713,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -734,7 +735,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Both are 0, so 0 !== 0 = 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Both are 0, so 0 !== 0 = 0
     }
 
     @ParameterizedTest
@@ -753,7 +754,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -772,7 +773,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -791,7 +792,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -810,7 +811,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -829,7 +830,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -848,7 +849,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -867,7 +868,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal strings should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal strings should return 0
     }
 
     @ParameterizedTest
@@ -886,7 +887,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal strings should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal strings should return 1
     }
 
     @ParameterizedTest
@@ -905,7 +906,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal strings should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal strings should return 0
     }
 
     @ParameterizedTest
@@ -924,7 +925,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal strings should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal strings should return 1
     }
 
     @ParameterizedTest
@@ -943,7 +944,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -962,7 +963,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -981,7 +982,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
+        assertFalse((boolean) classA.getMethod("test").invoke(instance)); // Inverted: equal values should return 0
     }
 
     @ParameterizedTest
@@ -1000,7 +1001,7 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 
     @ParameterizedTest
@@ -1019,6 +1020,6 @@ public class TestCompileBinExprNotEq extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
+        assertTrue((boolean) classA.getMethod("test").invoke(instance)); // Inverted: unequal values should return 1
     }
 }

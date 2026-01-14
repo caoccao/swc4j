@@ -489,6 +489,30 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder if_icmplt(int offset) {
+        code.write(0xA1); // if_icmplt
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder if_icmpge(int offset) {
+        code.write(0xA2); // if_icmpge
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder if_icmpgt(int offset) {
+        code.write(0xA3); // if_icmpgt
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder if_icmple(int offset) {
+        code.write(0xA4); // if_icmple
+        writeShort(offset);
+        return this;
+    }
+
     public CodeBuilder ifeq(int offset) {
         code.write(0x99); // ifeq
         writeShort(offset);
@@ -497,6 +521,30 @@ public class CodeBuilder {
 
     public CodeBuilder ifne(int offset) {
         code.write(0x9A); // ifne
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder iflt(int offset) {
+        code.write(0x9B); // iflt
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder ifge(int offset) {
+        code.write(0x9C); // ifge
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder ifgt(int offset) {
+        code.write(0x9D); // ifgt
+        writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder ifle(int offset) {
+        code.write(0x9E); // ifle
         writeShort(offset);
         return this;
     }
