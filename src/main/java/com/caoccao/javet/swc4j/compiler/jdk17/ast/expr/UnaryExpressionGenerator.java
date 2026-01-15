@@ -274,6 +274,53 @@ public final class UnaryExpressionGenerator {
                     }
                 }
             }
+            case Plus -> {
+                // Handle unary plus (numeric coercion) - essentially a no-op for numeric types
+                ISwc4jAstExpr arg = unaryExpr.getArg();
+                String argType = TypeResolver.inferTypeFromExpr(arg, context, options);
+
+                // Handle null type
+                if (argType == null) argType = "I";
+
+                // Get primitive type
+                String primitiveType = TypeConversionHelper.getPrimitiveType(argType);
+
+                // Check if type is numeric
+                boolean isNumericPrimitive = primitiveType.equals("I") || primitiveType.equals("J") ||
+                        primitiveType.equals("F") || primitiveType.equals("D") ||
+                        primitiveType.equals("B") || primitiveType.equals("S") || primitiveType.equals("C");
+
+                if (!isNumericPrimitive) {
+                    // Reject boolean
+                    if (primitiveType.equals("Z")) {
+                        throw new Swc4jByteCodeCompilerException(
+                                "Unary plus (+) not supported on boolean types");
+                    }
+                    // Reject string
+                    if ("Ljava/lang/String;".equals(argType)) {
+                        throw new Swc4jByteCodeCompilerException(
+                                "Unary plus (+) string-to-number conversion not supported. " +
+                                        "Use explicit parsing: Integer.parseInt() or Double.parseDouble()");
+                    }
+                    throw new Swc4jByteCodeCompilerException(
+                            "Unary plus (+) not supported for type: " + argType);
+                }
+
+                // For numeric types, just generate the expression
+                ExpressionGenerator.generate(code, cp, arg, null, context, options);
+
+                // Check if argType is a wrapper before unboxing
+                boolean isWrapper = !argType.equals(primitiveType);
+
+                // Unbox wrapper types to get primitive
+                if (isWrapper) {
+                    TypeConversionHelper.unboxWrapperType(code, cp, argType);
+
+                    // Box back to wrapper type if original was wrapper
+                    TypeConversionHelper.boxPrimitiveType(code, cp, primitiveType, argType);
+                }
+                // For primitive types, nothing more to do (no-op)
+            }
         }
     }
 }
