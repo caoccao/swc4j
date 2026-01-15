@@ -19,8 +19,8 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 import com.caoccao.javet.swc4j.asm.ClassWriter;
 import com.caoccao.javet.swc4j.asm.CodeBuilder;
 
-public final class TypeConversionHelper {
-    private TypeConversionHelper() {
+public final class TypeConversionUtils {
+    private TypeConversionUtils() {
     }
 
     public static void boxPrimitiveType(CodeBuilder code, ClassWriter.ConstantPool cp, String primitiveType, String targetType) {

@@ -22,7 +22,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstParenExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatHelper;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class ParenExpressionGenerator {
@@ -36,7 +36,7 @@ public final class ParenExpressionGenerator {
             ReturnTypeInfo returnTypeInfo,
             CompilationContext context,
             ByteCodeCompilerOptions options,
-            StringConcatHelper.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
+            StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
         // For parenthesized expressions, generate code for the inner expression
         callback.generateExpr(code, cp, parenExpr.getExpr(), returnTypeInfo, context, options);
     }

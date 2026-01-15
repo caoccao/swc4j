@@ -26,7 +26,7 @@ import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionHelper;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class AssignExpressionGenerator {
@@ -54,7 +54,7 @@ public final class AssignExpressionGenerator {
                     // Convert index to int if needed
                     String indexType = TypeResolver.inferTypeFromExpr(computedProp.getExpr(), context, options);
                     if (indexType != null && !"I".equals(indexType)) {
-                        TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(indexType), "I");
+                        TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
                     }
 
                     // Generate the value to store
@@ -62,12 +62,12 @@ public final class AssignExpressionGenerator {
                     ExpressionGenerator.generate(code, cp, assignExpr.getRight(), null, context, options); // Stack: [array, index, value]
 
                     // Unbox if needed
-                    TypeConversionHelper.unboxWrapperType(code, cp, valueType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, valueType);
 
                     // Convert to target element type if needed
                     String elemType = objType.substring(1); // Remove leading "["
-                    String valuePrimitive = TypeConversionHelper.getPrimitiveType(valueType);
-                    TypeConversionHelper.convertPrimitiveType(code, valuePrimitive, elemType);
+                    String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
+                    TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, elemType);
 
                     // Duplicate value and place it below array and index so it's left after store
                     // Stack: [array, index, value] -> [value, array, index, value]
@@ -110,8 +110,8 @@ public final class AssignExpressionGenerator {
 
                     // Box value if needed
                     String valueType = TypeResolver.inferTypeFromExpr(assignExpr.getRight(), context, options);
-                    if (TypeConversionHelper.isPrimitiveType(valueType)) {
-                        String wrapperType = TypeConversionHelper.getWrapperType(valueType);
+                    if (TypeConversionUtils.isPrimitiveType(valueType)) {
+                        String wrapperType = TypeConversionUtils.getWrapperType(valueType);
                         // wrapperType is already in the form "Ljava/lang/Integer;" so use it directly
                         String className = wrapperType.substring(1, wrapperType.length() - 1); // Remove L and ;
                         int valueOfRef = cp.addMethodRef(className, "valueOf", "(" + valueType + ")" + wrapperType);

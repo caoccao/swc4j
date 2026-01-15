@@ -24,7 +24,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionHelper;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class MemberExpressionGenerator {
@@ -50,7 +50,7 @@ public final class MemberExpressionGenerator {
                 // Convert index to int if needed
                 String indexType = TypeResolver.inferTypeFromExpr(computedProp.getExpr(), context, options);
                 if (indexType != null && !"I".equals(indexType)) {
-                    TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(indexType), "I");
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(indexType), "I");
                 }
 
                 // Use appropriate array load instruction based on element type

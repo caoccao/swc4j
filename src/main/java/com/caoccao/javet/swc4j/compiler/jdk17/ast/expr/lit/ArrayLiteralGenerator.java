@@ -24,8 +24,8 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatHelper;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionHelper;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.Optional;
@@ -41,7 +41,7 @@ public final class ArrayLiteralGenerator {
             ReturnTypeInfo returnTypeInfo,
             CompilationContext context,
             ByteCodeCompilerOptions options,
-            StringConcatHelper.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
+            StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
         // Check if we should generate a Java array or ArrayList
         boolean isJavaArray = returnTypeInfo != null &&
                 returnTypeInfo.descriptor() != null &&
@@ -77,7 +77,7 @@ public final class ArrayLiteralGenerator {
                     if ("I".equals(elemType) || "Z".equals(elemType) || "B".equals(elemType) ||
                             "C".equals(elemType) || "S".equals(elemType) || "J".equals(elemType) ||
                             "F".equals(elemType) || "D".equals(elemType)) {
-                        TypeConversionHelper.boxPrimitiveType(code, cp, elemType, TypeConversionHelper.getWrapperType(elemType));
+                        TypeConversionUtils.boxPrimitiveType(code, cp, elemType, TypeConversionUtils.getWrapperType(elemType));
                     }
 
                     // Call ArrayList.add(Object)
@@ -96,7 +96,7 @@ public final class ArrayLiteralGenerator {
             String arrayDescriptor,
             CompilationContext context,
             ByteCodeCompilerOptions options,
-            StringConcatHelper.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
+            StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
         // Extract element type from array descriptor (e.g., "[I" -> "I", "[Ljava/lang/String;" -> "Ljava/lang/String;")
         String elemType = arrayDescriptor.substring(1);
 
@@ -141,11 +141,11 @@ public final class ArrayLiteralGenerator {
                 callback.generateExpr(code, cp, elemExpr, null, context, options);
 
                 // Unbox if needed
-                TypeConversionHelper.unboxWrapperType(code, cp, exprType);
+                TypeConversionUtils.unboxWrapperType(code, cp, exprType);
 
                 // Convert to target type if needed
-                String exprPrimitive = TypeConversionHelper.getPrimitiveType(exprType);
-                TypeConversionHelper.convertPrimitiveType(code, exprPrimitive, elemType);
+                String exprPrimitive = TypeConversionUtils.getPrimitiveType(exprType);
+                TypeConversionUtils.convertPrimitiveType(code, exprPrimitive, elemType);
 
                 // Store in array using appropriate instruction
                 switch (elemType) {

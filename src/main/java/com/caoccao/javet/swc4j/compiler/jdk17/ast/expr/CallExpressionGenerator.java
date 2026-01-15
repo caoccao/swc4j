@@ -24,7 +24,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionHelper;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class CallExpressionGenerator {
@@ -66,8 +66,8 @@ public final class CallExpressionGenerator {
                             ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
                             // Box if primitive
                             String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
-                            if (argType != null && TypeConversionHelper.isPrimitiveType(argType)) {
-                                TypeConversionHelper.boxPrimitiveType(code, cp, argType, TypeConversionHelper.getWrapperType(argType));
+                            if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
+                                TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
                             }
                             int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
                             code.invokevirtual(addMethod);
@@ -110,8 +110,8 @@ public final class CallExpressionGenerator {
                             ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
                             // Box if primitive
                             String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
-                            if (argType != null && TypeConversionHelper.isPrimitiveType(argType)) {
-                                TypeConversionHelper.boxPrimitiveType(code, cp, argType, TypeConversionHelper.getWrapperType(argType));
+                            if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
+                                TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
                             }
 
                             int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(ILjava/lang/Object;)V");
@@ -127,20 +127,20 @@ public final class CallExpressionGenerator {
                             ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
                             // Box argument if primitive
                             String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
-                            if (argType != null && TypeConversionHelper.isPrimitiveType(argType)) {
-                                TypeConversionHelper.boxPrimitiveType(code, cp, argType, TypeConversionHelper.getWrapperType(argType));
+                            if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
+                                TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
                             }
 
                             int indexOfMethod = cp.addMethodRef("java/util/ArrayList", "indexOf", "(Ljava/lang/Object;)I");
                             code.invokevirtual(indexOfMethod); // Returns int index
 
                             // Box the int result to Integer for return
-                            TypeConversionHelper.boxPrimitiveType(code, cp, "I", "Ljava/lang/Integer;");
+                            TypeConversionUtils.boxPrimitiveType(code, cp, "I", "Ljava/lang/Integer;");
                         } else {
                             // No argument - pop ArrayList ref and return -1 boxed
                             code.pop();
                             code.iconst(-1);
-                            TypeConversionHelper.boxPrimitiveType(code, cp, "I", "Ljava/lang/Integer;");
+                            TypeConversionUtils.boxPrimitiveType(code, cp, "I", "Ljava/lang/Integer;");
                         }
                         return;
                     }
@@ -152,20 +152,20 @@ public final class CallExpressionGenerator {
                             ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
                             // Box argument if primitive
                             String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
-                            if (argType != null && TypeConversionHelper.isPrimitiveType(argType)) {
-                                TypeConversionHelper.boxPrimitiveType(code, cp, argType, TypeConversionHelper.getWrapperType(argType));
+                            if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
+                                TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
                             }
 
                             int containsMethod = cp.addMethodRef("java/util/ArrayList", "contains", "(Ljava/lang/Object;)Z");
                             code.invokevirtual(containsMethod); // Returns boolean
 
                             // Box the boolean result to Boolean for return
-                            TypeConversionHelper.boxPrimitiveType(code, cp, "Z", "Ljava/lang/Boolean;");
+                            TypeConversionUtils.boxPrimitiveType(code, cp, "Z", "Ljava/lang/Boolean;");
                         } else {
                             // No argument - pop ArrayList ref and return false boxed
                             code.pop();
                             code.iconst(0); // false
-                            TypeConversionHelper.boxPrimitiveType(code, cp, "Z", "Ljava/lang/Boolean;");
+                            TypeConversionUtils.boxPrimitiveType(code, cp, "Z", "Ljava/lang/Boolean;");
                         }
                         return;
                     }
@@ -189,6 +189,35 @@ public final class CallExpressionGenerator {
                         code.invokestatic(sortMethod); // Sort in place
 
                         // The duplicated array reference is now on top of stack, ready to return
+                        return;
+                    }
+                    case "join" -> {
+                        // arr.join(sep) -> ArrayHelper.join(arr, sep)
+                        // JavaScript's join() returns a string
+                        // Default separator is "," if not provided
+
+                        if (callExpr.getArgs().isEmpty()) {
+                            // No separator provided - use default ","
+                            code.ldc(cp.addString(","));
+                        } else {
+                            // Get separator argument
+                            var arg = callExpr.getArgs().get(0);
+                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+
+                            // If the separator is not a String, convert it
+                            String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
+                            if (argType != null && !"Ljava/lang/String;".equals(argType)) {
+                                // Convert to string using String.valueOf()
+                                int valueOfMethod = cp.addMethodRef("java/lang/String", "valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
+                                code.invokestatic(valueOfMethod);
+                            }
+                        }
+
+                        // Call ArrayHelper.join(ArrayList, String)
+                        int joinMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayJoinUtils", "join",
+                                "(Ljava/util/List;Ljava/lang/String;)Ljava/lang/String;");
+                        code.invokestatic(joinMethod);
+
                         return;
                     }
                 }

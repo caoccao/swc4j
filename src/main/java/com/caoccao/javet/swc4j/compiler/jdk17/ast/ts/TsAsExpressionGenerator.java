@@ -24,7 +24,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionHelper;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class TsAsExpressionGenerator {
@@ -49,16 +49,16 @@ public final class TsAsExpressionGenerator {
         ExpressionGenerator.generate(code, cp, asExpr.getExpr(), null, context, options);
 
         // Unbox if the inner expression is a wrapper type
-        TypeConversionHelper.unboxWrapperType(code, cp, innerType);
+        TypeConversionUtils.unboxWrapperType(code, cp, innerType);
 
         // Get the primitive types for conversion
-        String innerPrimitive = TypeConversionHelper.getPrimitiveType(innerType);
-        String targetPrimitive = TypeConversionHelper.getPrimitiveType(targetType);
+        String innerPrimitive = TypeConversionUtils.getPrimitiveType(innerType);
+        String targetPrimitive = TypeConversionUtils.getPrimitiveType(targetType);
 
         // Convert from inner primitive type to target primitive type
-        TypeConversionHelper.convertPrimitiveType(code, innerPrimitive, targetPrimitive);
+        TypeConversionUtils.convertPrimitiveType(code, innerPrimitive, targetPrimitive);
 
         // Box if the target type is a wrapper
-        TypeConversionHelper.boxPrimitiveType(code, cp, targetPrimitive, targetType);
+        TypeConversionUtils.boxPrimitiveType(code, cp, targetPrimitive, targetType);
     }
 }

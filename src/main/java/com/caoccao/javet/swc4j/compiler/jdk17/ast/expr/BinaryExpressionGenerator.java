@@ -24,8 +24,8 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatHelper;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionHelper;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatUtils;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class BinaryExpressionGenerator {
@@ -50,7 +50,7 @@ public final class BinaryExpressionGenerator {
 
                 // Check if this is string concatenation
                 if ("Ljava/lang/String;".equals(leftType) || "Ljava/lang/String;".equals(rightType)) {
-                    StringConcatHelper.generateConcat(
+                    StringConcatUtils.generateConcat(
                             code,
                             cp,
                             binExpr.getLeft(), binExpr.getRight(),
@@ -66,13 +66,13 @@ public final class BinaryExpressionGenerator {
 
                     // Generate left operand
                     ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                    TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                    TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                     // Generate right operand
                     ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                    TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                    TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                     // Generate appropriate add instruction based on result type
                     switch (resultType) {
@@ -95,13 +95,13 @@ public final class BinaryExpressionGenerator {
 
                 // Generate left operand
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                 // Generate right operand
                 ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                 // Generate appropriate sub instruction based on result type
                 switch (resultType) {
@@ -123,13 +123,13 @@ public final class BinaryExpressionGenerator {
 
                 // Generate left operand
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                 // Generate right operand
                 ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                 // Generate appropriate mul instruction based on result type
                 switch (resultType) {
@@ -151,13 +151,13 @@ public final class BinaryExpressionGenerator {
 
                 // Generate left operand
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                 // Generate right operand
                 ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                 // Generate appropriate div instruction based on result type
                 switch (resultType) {
@@ -179,13 +179,13 @@ public final class BinaryExpressionGenerator {
 
                 // Generate left operand
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                 // Generate right operand
                 ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                 // Generate appropriate rem instruction based on result type
                 switch (resultType) {
@@ -205,13 +205,13 @@ public final class BinaryExpressionGenerator {
 
                 // Generate left operand (base) and convert to double
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), "D");
+                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), "D");
 
                 // Generate right operand (exponent) and convert to double
                 ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), "D");
+                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "D");
 
                 // Call Math.pow(double, double)
                 int mathPowRef = cp.addMethodRef("java/lang/Math", "pow", "(DD)D");
@@ -229,13 +229,13 @@ public final class BinaryExpressionGenerator {
 
                 // Generate left operand and convert to result type (int or long)
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                 // Generate right operand (shift amount) and convert to int
                 ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), "I");
+                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
 
                 // Generate appropriate shift instruction based on result type
                 switch (resultType) {
@@ -260,13 +260,13 @@ public final class BinaryExpressionGenerator {
 
                 // Generate left operand and convert to result type (int or long)
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                 // Generate right operand (shift amount) and convert to int
                 ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), "I");
+                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
 
                 // Generate appropriate shift instruction based on result type
                 switch (resultType) {
@@ -291,13 +291,13 @@ public final class BinaryExpressionGenerator {
 
                 // Generate left operand and convert to result type (int or long)
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                 // Generate right operand (shift amount) and convert to int
                 ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), "I");
+                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), "I");
 
                 // Generate appropriate unsigned shift instruction based on result type
                 switch (resultType) {
@@ -322,13 +322,13 @@ public final class BinaryExpressionGenerator {
 
                 // Generate left operand
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                 // Generate right operand
                 ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                 // Generate appropriate bitwise AND instruction based on result type
                 switch (resultType) {
@@ -348,13 +348,13 @@ public final class BinaryExpressionGenerator {
 
                 // Generate left operand
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                 // Generate right operand
                 ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                 // Generate appropriate bitwise OR instruction based on result type
                 switch (resultType) {
@@ -374,13 +374,13 @@ public final class BinaryExpressionGenerator {
 
                 // Generate left operand
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(leftType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(leftType), resultType);
 
                 // Generate right operand
                 ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                TypeConversionHelper.convertPrimitiveType(code, TypeConversionHelper.getPrimitiveType(rightType), resultType);
+                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.convertPrimitiveType(code, TypeConversionUtils.getPrimitiveType(rightType), resultType);
 
                 // Generate appropriate bitwise XOR instruction based on result type
                 switch (resultType) {
@@ -400,8 +400,8 @@ public final class BinaryExpressionGenerator {
 
                 // Determine the comparison type (widen to common type for primitives)
                 String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
-                String leftPrimitive = TypeConversionHelper.getPrimitiveType(leftType);
-                String rightPrimitive = TypeConversionHelper.getPrimitiveType(rightType);
+                String leftPrimitive = TypeConversionUtils.getPrimitiveType(leftType);
+                String rightPrimitive = TypeConversionUtils.getPrimitiveType(rightType);
 
                 // Check if both are primitive types (NOT wrappers - those use Objects.equals)
                 boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
@@ -414,13 +414,13 @@ public final class BinaryExpressionGenerator {
                 if (isPrimitiveComparison) {
                     // Generate left operand
                     ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                    TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                    TypeConversionHelper.convertPrimitiveType(code, leftPrimitive, comparisonType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
 
                     // Generate right operand
                     ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                    TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                    TypeConversionHelper.convertPrimitiveType(code, rightPrimitive, comparisonType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
 
                     // Use direct bytecode comparison instructions
                     // Pattern: if not equal, jump to iconst_0, else fall through to iconst_1
@@ -483,8 +483,8 @@ public final class BinaryExpressionGenerator {
 
                 // Determine the comparison type (widen to common type for primitives)
                 String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
-                String leftPrimitive = TypeConversionHelper.getPrimitiveType(leftType);
-                String rightPrimitive = TypeConversionHelper.getPrimitiveType(rightType);
+                String leftPrimitive = TypeConversionUtils.getPrimitiveType(leftType);
+                String rightPrimitive = TypeConversionUtils.getPrimitiveType(rightType);
 
                 // Check if both are primitive types (NOT wrappers - those use Objects.equals)
                 boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
@@ -497,13 +497,13 @@ public final class BinaryExpressionGenerator {
                 if (isPrimitiveComparison) {
                     // Generate left operand
                     ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                    TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                    TypeConversionHelper.convertPrimitiveType(code, leftPrimitive, comparisonType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
 
                     // Generate right operand
                     ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                    TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                    TypeConversionHelper.convertPrimitiveType(code, rightPrimitive, comparisonType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
 
                     // Use direct bytecode comparison instructions (inverted logic from EqEq)
                     // Pattern: if equal, jump to iconst_0, else fall through to iconst_1
@@ -571,8 +571,8 @@ public final class BinaryExpressionGenerator {
 
                 // Determine the comparison type (widen to common type for primitives)
                 String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
-                String leftPrimitive = TypeConversionHelper.getPrimitiveType(leftType);
-                String rightPrimitive = TypeConversionHelper.getPrimitiveType(rightType);
+                String leftPrimitive = TypeConversionUtils.getPrimitiveType(leftType);
+                String rightPrimitive = TypeConversionUtils.getPrimitiveType(rightType);
 
                 // Check if both are primitive types (NOT wrappers)
                 boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
@@ -585,13 +585,13 @@ public final class BinaryExpressionGenerator {
                 if (isPrimitiveComparison) {
                     // Generate left operand
                     ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                    TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                    TypeConversionHelper.convertPrimitiveType(code, leftPrimitive, comparisonType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
 
                     // Generate right operand
                     ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                    TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                    TypeConversionHelper.convertPrimitiveType(code, rightPrimitive, comparisonType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
 
                     // Use direct bytecode comparison instructions
                     // Pattern: if condition is FALSE, jump to iconst_0, else fall through to iconst_1
@@ -664,8 +664,8 @@ public final class BinaryExpressionGenerator {
 
                 // Determine the comparison type (widen to common type for primitives)
                 String comparisonType = TypeResolver.getWidenedType(leftType, rightType);
-                String leftPrimitive = TypeConversionHelper.getPrimitiveType(leftType);
-                String rightPrimitive = TypeConversionHelper.getPrimitiveType(rightType);
+                String leftPrimitive = TypeConversionUtils.getPrimitiveType(leftType);
+                String rightPrimitive = TypeConversionUtils.getPrimitiveType(rightType);
 
                 // Check if both are primitive types (NOT wrappers)
                 boolean isPrimitiveComparison = leftType.equals(leftPrimitive) &&
@@ -678,13 +678,13 @@ public final class BinaryExpressionGenerator {
                 if (isPrimitiveComparison) {
                     // Generate left operand
                     ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                    TypeConversionHelper.unboxWrapperType(code, cp, leftType);
-                    TypeConversionHelper.convertPrimitiveType(code, leftPrimitive, comparisonType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
 
                     // Generate right operand
                     ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
-                    TypeConversionHelper.unboxWrapperType(code, cp, rightType);
-                    TypeConversionHelper.convertPrimitiveType(code, rightPrimitive, comparisonType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, rightType);
+                    TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
 
                     // Use direct bytecode comparison instructions
                     // Pattern: if condition is FALSE, jump to iconst_0, else fall through to iconst_1
@@ -760,7 +760,7 @@ public final class BinaryExpressionGenerator {
                 // Generate left operand
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
                 // Unbox if it's a Boolean object
-                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
 
                 // Short-circuit: if left is false (0), skip right evaluation
                 // Pattern:
@@ -783,7 +783,7 @@ public final class BinaryExpressionGenerator {
                 // Generate right operand
                 ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
                 // Unbox if it's a Boolean object
-                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
 
                 code.gotoLabel(0); // Placeholder for goto
                 int gotoOffsetPos = code.getCurrentOffset() - 2;
@@ -819,7 +819,7 @@ public final class BinaryExpressionGenerator {
                 // Generate left operand
                 ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
                 // Unbox if it's a Boolean object
-                TypeConversionHelper.unboxWrapperType(code, cp, leftType);
+                TypeConversionUtils.unboxWrapperType(code, cp, leftType);
 
                 // Short-circuit: if left is true (non-zero), skip right evaluation
                 // Pattern:
@@ -842,7 +842,7 @@ public final class BinaryExpressionGenerator {
                 // Generate right operand
                 ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
                 // Unbox if it's a Boolean object
-                TypeConversionHelper.unboxWrapperType(code, cp, rightType);
+                TypeConversionUtils.unboxWrapperType(code, cp, rightType);
 
                 code.gotoLabel(0); // Placeholder for goto
                 int gotoOrOffsetPos = code.getCurrentOffset() - 2;
@@ -867,7 +867,7 @@ public final class BinaryExpressionGenerator {
         if (returnTypeInfo != null && resultType != null) {
             String targetType = returnTypeInfo.getPrimitiveTypeDescriptor();
             if (targetType != null && !targetType.equals(resultType)) {
-                TypeConversionHelper.convertPrimitiveType(code, resultType, targetType);
+                TypeConversionUtils.convertPrimitiveType(code, resultType, targetType);
             }
         }
     }

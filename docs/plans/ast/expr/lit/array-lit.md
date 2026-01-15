@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (97 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (108 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -206,7 +206,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | `indexOf(elem)` | `indexOf(elem)` | Manual loop | ✅ Implemented |
 | `lastIndexOf(elem)` | `lastIndexOf(elem)` | Manual loop | ❌ Not implemented |
 | `includes(elem)` | `contains(elem)` | Manual loop | ✅ Implemented |
-| `join(sep)` | String concat loop | String concat loop | ❌ Not implemented |
+| `join(sep)` | `ArrayHelper.join()` | String concat loop | ✅ Implemented |
 | `toString()` | `toString()` | `Arrays.toString()` | ❌ Not implemented |
 | `toLocaleString()` | Custom formatting | Custom formatting | ❌ Not implemented |
 
@@ -911,10 +911,17 @@ arr.customProperty = "hello"  // JS allows this
   - **Tests:** 10 comprehensive tests covering basic sort (integers), returns array, strings (alphabetical), empty array (via pop operations), single element, already sorted, reverse sorted, after modifications (push/unshift), duplicates, error handling
   - **Note:** Collections.sort() returns void, so we use `dup` before the call to keep the array reference on the stack for return
   - **Limitation:** Elements must be Comparable - sorting mixed types (e.g., Integer + String) will throw ClassCastException at runtime
+- [x] `join(sep)` - Convert to string ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 194-222
+  - **Bytecode:** Calls `ArrayHelper.join(ArrayList, String)Ljava/lang/String;` static helper method
+  - **Return:** String - joined elements separated by the specified separator
+  - **Tests:** 11 comprehensive tests covering basic join with comma, default separator (comma), custom separator, empty array, single element, empty separator (concatenate), mixed types, after modifications, numbers, multi-character separator, error handling
+  - **Helper:** ArrayHelper.java runtime utility class with static join() method
+  - **Default separator:** "," if no argument provided (JavaScript behavior)
+  - **Element conversion:** Uses String.valueOf() to convert each element (null becomes "null")
 - [ ] `splice(index, count, ...items)` - Complex insertion/deletion
 - [ ] `concat(arr2)` - Merge arrays
 - [ ] `slice(start, end)` - Extract subarray
-- [ ] `join(sep)` - Convert to string
 
 ### Phase 4: Spread Operator (Priority: HIGH)
 - [ ] Detect spread elements in AST
@@ -1198,25 +1205,26 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (97 tests passing)
+**Current Implementation:** ✅ Solid foundation (108 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()` ✅
 
 **Recently Completed:**
-- ✅ **sort() method** - Implemented in CallExpressionGenerator.java
-  - Sorts ArrayList in place using Collections.sort() with natural ordering
-  - 10 comprehensive tests added
+- ✅ **join() method** - Implemented in CallExpressionGenerator.java with ArrayHelper runtime utility
+  - Joins ArrayList elements into a string with a separator
+  - 11 comprehensive tests added
   - Error handling for Java arrays (throws exception)
-  - Returns the array itself for method chaining (JavaScript behavior)
-  - Uses `dup` instruction before Collections.sort() call to keep array reference on stack
-  - Works with integers, strings, and any Comparable types
-  - **Note:** Sorting mixed types will throw ClassCastException at runtime (Java limitation)
+  - Returns string with elements separated by the specified separator (default: ",")
+  - Uses ArrayHelper.join() static method from runtime package
+  - Converts all elements to strings using String.valueOf()
+  - Handles empty arrays (returns ""), single elements, and mixed types
+  - **Note:** Creates a new runtime utility class for complex operations
 
 **Next Steps:**
 1. Implement spread operator support (HIGH priority)
-2. Add common array methods (`join`, `concat`, `slice`, `splice`)
+2. Add common array methods (`concat`, `slice`, `splice`)
 3. Fix delete behavior to create holes instead of shifting
 4. Test nested and multi-dimensional arrays thoroughly
 5. Add functional methods (when function support is available)

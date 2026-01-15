@@ -29,7 +29,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionHelper;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 public final class UnaryExpressionGenerator {
@@ -57,7 +57,7 @@ public final class UnaryExpressionGenerator {
                     ExpressionGenerator.generate(code, cp, arg, null, context, options);
 
                     // Unbox if wrapper type
-                    TypeConversionHelper.unboxWrapperType(code, cp, argType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, argType);
 
                     // Invert the boolean value using ifeq
                     // If value == 0 (false), jump to TRUE_LABEL and push 1 (true)
@@ -253,13 +253,13 @@ public final class UnaryExpressionGenerator {
                     if (argType == null) argType = "I";
 
                     // Check if argType is a wrapper before unboxing
-                    boolean isWrapper = !argType.equals(TypeConversionHelper.getPrimitiveType(argType));
+                    boolean isWrapper = !argType.equals(TypeConversionUtils.getPrimitiveType(argType));
 
                     // Unbox wrapper types before negation
-                    TypeConversionHelper.unboxWrapperType(code, cp, argType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, argType);
 
                     // Get the primitive type for determining which negation instruction to use
-                    String primitiveType = TypeConversionHelper.getPrimitiveType(argType);
+                    String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
 
                     switch (primitiveType) {
                         case "D" -> code.dneg();
@@ -270,7 +270,7 @@ public final class UnaryExpressionGenerator {
 
                     // Box back to wrapper type if original was wrapper
                     if (isWrapper) {
-                        TypeConversionHelper.boxPrimitiveType(code, cp, primitiveType, argType);
+                        TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, argType);
                     }
                 }
             }
@@ -283,7 +283,7 @@ public final class UnaryExpressionGenerator {
                 if (argType == null) argType = "I";
 
                 // Get primitive type
-                String primitiveType = TypeConversionHelper.getPrimitiveType(argType);
+                String primitiveType = TypeConversionUtils.getPrimitiveType(argType);
 
                 // Check if type is numeric
                 boolean isNumericPrimitive = primitiveType.equals("I") || primitiveType.equals("J") ||
@@ -314,10 +314,10 @@ public final class UnaryExpressionGenerator {
 
                 // Unbox wrapper types to get primitive
                 if (isWrapper) {
-                    TypeConversionHelper.unboxWrapperType(code, cp, argType);
+                    TypeConversionUtils.unboxWrapperType(code, cp, argType);
 
                     // Box back to wrapper type if original was wrapper
-                    TypeConversionHelper.boxPrimitiveType(code, cp, primitiveType, argType);
+                    TypeConversionUtils.boxPrimitiveType(code, cp, primitiveType, argType);
                 }
                 // For primitive types, nothing more to do (no-op)
             }

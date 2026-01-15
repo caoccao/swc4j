@@ -26,8 +26,8 @@ import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public final class StringConcatHelper {
-    private StringConcatHelper() {
+public final class StringConcatUtils {
+    private StringConcatUtils() {
     }
 
     public static void appendOperandToStringBuilder(
