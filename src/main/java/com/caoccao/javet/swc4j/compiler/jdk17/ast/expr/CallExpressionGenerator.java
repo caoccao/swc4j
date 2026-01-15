@@ -58,22 +58,39 @@ public final class CallExpressionGenerator {
                     methodName = propIdent.getSym();
                 }
 
-                if ("push".equals(methodName)) {
-                    // arr.push(value) -> arr.add(value)
-                    if (!callExpr.getArgs().isEmpty()) {
-                        var arg = callExpr.getArgs().get(0);
-                        ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
-                        // Box if primitive
-                        String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
-                        if (argType != null && TypeConversionHelper.isPrimitiveType(argType)) {
-                            TypeConversionHelper.boxPrimitiveType(code, cp, argType, TypeConversionHelper.getWrapperType(argType));
+                switch (methodName) {
+                    case "push" -> {
+                        // arr.push(value) -> arr.add(value)
+                        if (!callExpr.getArgs().isEmpty()) {
+                            var arg = callExpr.getArgs().get(0);
+                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+                            // Box if primitive
+                            String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
+                            if (argType != null && TypeConversionHelper.isPrimitiveType(argType)) {
+                                TypeConversionHelper.boxPrimitiveType(code, cp, argType, TypeConversionHelper.getWrapperType(argType));
+                            }
+                            int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
+                            code.invokevirtual(addMethod);
+                            code.pop(); // Pop the boolean return value
                         }
-                        int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
-                        code.invokevirtual(addMethod);
-                        code.pop(); // Pop the boolean return value
+                        return;
                     }
-                    // push() returns void in our implementation
-                    return;
+                    case "pop" -> {
+                        // arr.pop() -> arr.remove(arr.size() - 1)
+                        // Returns the removed element
+                        code.dup(); // Duplicate ArrayList reference for size() call
+
+                        int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
+                        code.invokevirtual(sizeMethod); // Get size
+
+                        code.iconst(1);
+                        code.isub(); // size - 1
+
+                        int removeMethod = cp.addMethodRef("java/util/ArrayList", "remove", "(I)Ljava/lang/Object;");
+                        code.invokevirtual(removeMethod); // Returns removed element
+
+                        return;
+                    }
                 }
             }
         }

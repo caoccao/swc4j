@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (30 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (38 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -105,6 +105,15 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 5. **ArrayList Mutating Methods:**
    - `testArrayPush` - push() method
+   - `testArrayPop` - pop() method (8 tests)
+     - `testArrayPop` - Basic pop returns last element
+     - `testArrayPopChangesLength` - Pop reduces array length
+     - `testArrayPopMultipleTimes` - Multiple pops work correctly
+     - `testArrayPopReturnsCorrectType` - Pop works with strings
+     - `testArrayPopSingleElement` - Pop on single-element array
+     - `testArrayPopSingleElementLeavesEmpty` - Pop leaves empty array
+     - `testArrayPopWithMixedTypes` - Pop works with mixed types
+     - `testArrayPushAndPop` - Push and pop work together
    - `testArrayDelete` - delete arr[i]
    - `testArrayClear` - arr.length = 0
    - `testArrayShrink` - arr.length = 2
@@ -112,6 +121,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 6. **Error Handling:**
    - `testJavaArrayDeleteNotSupported` - delete on Java array throws error
    - `testJavaArrayPushNotSupported` - push() on Java array throws error
+   - `testJavaArrayPopNotSupported` - pop() on Java array throws error
    - `testJavaArraySetLengthNotSupported` - length assignment throws error
 
 ---
@@ -132,7 +142,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | JavaScript Method | ArrayList Equivalent | Notes | Status |
 |------------------|---------------------|-------|---------|
 | `push(elem)` | `add(elem)` | Returns new length | ✅ Implemented |
-| `pop()` | `remove(size()-1)` | Returns removed element | ❌ Not implemented |
+| `pop()` | `remove(size()-1)` | Returns removed element | ✅ Implemented |
 | `shift()` | `remove(0)` | Returns removed element | ❌ Not implemented |
 | `unshift(elem)` | `add(0, elem)` | Returns new length | ❌ Not implemented |
 | `splice(i, n, ...)` | Multiple operations | Complex - add/remove | ❌ Not implemented |
@@ -815,7 +825,11 @@ arr.customProperty = "hello"  // JS allows this
 - [ ] Sparse arrays (holes)
 
 ### Phase 3: Common Array Methods (Priority: HIGH)
-- [ ] `pop()` - Remove last element
+- [x] `pop()` - Remove last element ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 77-88
+  - **Bytecode:** Uses `dup`, `size()`, `iconst 1`, `isub`, `remove(I)Ljava/lang/Object;`
+  - **Return:** Returns the removed element (Object type)
+  - **Tests:** 8 comprehensive tests covering basic functionality, length changes, multiple pops, type compatibility, edge cases, integration with push, error handling
 - [ ] `shift()` - Remove first element
 - [ ] `unshift(elem)` - Add to beginning
 - [ ] `splice(index, count, ...items)` - Complex insertion/deletion
@@ -1109,14 +1123,21 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (30 tests passing)
+**Current Implementation:** ✅ Solid foundation (38 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
+- Array methods: `push()`, `pop()` ✅
+
+**Recently Completed:**
+- ✅ **pop() method** - Implemented in CallExpressionGenerator.java
+  - Returns removed element from end of ArrayList
+  - 8 comprehensive tests added
+  - Error handling for Java arrays (throws exception)
 
 **Next Steps:**
 1. Implement spread operator support (HIGH priority)
-2. Add common array methods (pop, shift, splice, concat, slice)
+2. Add common array methods (`shift`, `unshift`, `splice`, `concat`, `slice`)
 3. Fix delete behavior to create holes instead of shifting
 4. Test nested and multi-dimensional arrays thoroughly
 5. Add functional methods (when function support is available)

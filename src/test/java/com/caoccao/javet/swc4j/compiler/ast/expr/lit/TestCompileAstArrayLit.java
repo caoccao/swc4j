@@ -169,6 +169,134 @@ public class TestCompileAstArrayLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testArrayPop(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3]
+                      const removed = arr.pop()
+                      return removed
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(3, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayPopChangesLength(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [10, 20, 30, 40]
+                      arr.pop()
+                      return arr.length
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(3, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayPopMultipleTimes(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [5, 10, 15, 20, 25]
+                      arr.pop()
+                      arr.pop()
+                      const last = arr.pop()
+                      return last
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(15, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayPopReturnsCorrectType(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = ["hello", "world", "test"]
+                      return arr.pop()
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("test", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayPopSingleElement(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [42]
+                      const val = arr.pop()
+                      return val
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(42, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayPopSingleElementLeavesEmpty(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [99]
+                      arr.pop()
+                      return arr.length
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(0, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayPopWithMixedTypes(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, "hello", true]
+                      arr.pop()
+                      arr.pop()
+                      return arr.pop()
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(1, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testArrayPush(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -183,6 +311,26 @@ public class TestCompileAstArrayLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals(3, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayPushAndPop(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2]
+                      arr.push(3)
+                      arr.push(4)
+                      const last = arr.pop()
+                      return last
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(4, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -360,6 +508,27 @@ public class TestCompileAstArrayLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals(5, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testJavaArrayPopNotSupported(JdkVersion jdkVersion) {
+        try {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const a: int[] = [1, 2, 3]
+                          a.pop()
+                          return a
+                        }
+                      }
+                    }""");
+            fail("Should throw exception for pop on Java array");
+        } catch (Exception e) {
+            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
+            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
+        }
     }
 
     @ParameterizedTest
