@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (57 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (68 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -134,6 +134,17 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
      - `testArrayUnshiftAndShift` - Unshift and shift work together
      - `testArrayUnshiftAndPush` - Unshift and push work together
      - `testArrayUnshiftPreservesOrder` - Verify element order after unshift
+   - `testArrayIndexOf` - indexOf() method (10 tests)
+     - `testArrayIndexOf` - Basic indexOf finds element
+     - `testArrayIndexOfNotFound` - Returns -1 when not found
+     - `testArrayIndexOfFirstElement` - Find first element (index 0)
+     - `testArrayIndexOfLastElement` - Find last element
+     - `testArrayIndexOfDuplicates` - Returns first occurrence index
+     - `testArrayIndexOfString` - indexOf works with strings
+     - `testArrayIndexOfStringNotFound` - String not found returns -1
+     - `testArrayIndexOfOnEmptyArray` - Empty array returns -1
+     - `testArrayIndexOfWithMixedTypes` - indexOf works with mixed types
+     - `testArrayIndexOfAfterModification` - indexOf after push/unshift operations
    - `testArrayDelete` - delete arr[i]
    - `testArrayClear` - arr.length = 0
    - `testArrayShrink` - arr.length = 2
@@ -144,6 +155,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
    - `testJavaArrayPopNotSupported` - pop() on Java array throws error
    - `testJavaArrayShiftNotSupported` - shift() on Java array throws error
    - `testJavaArrayUnshiftNotSupported` - unshift() on Java array throws error
+   - `testJavaArrayIndexOfNotSupported` - indexOf() on Java array throws error
    - `testJavaArraySetLengthNotSupported` - length assignment throws error
 
 ---
@@ -179,7 +191,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 |------------------|---------------------|----------------------|---------|
 | `concat(arr2)` | `new ArrayList<>(list1); addAll(list2)` | `Arrays.copyOf()` + manual copy | ❌ Not implemented |
 | `slice(start, end)` | `subList(start, end)` | `Arrays.copyOfRange()` | ❌ Not implemented |
-| `indexOf(elem)` | `indexOf(elem)` | Manual loop | ❌ Not implemented |
+| `indexOf(elem)` | `indexOf(elem)` | Manual loop | ✅ Implemented |
 | `lastIndexOf(elem)` | `lastIndexOf(elem)` | Manual loop | ❌ Not implemented |
 | `includes(elem)` | `contains(elem)` | Manual loop | ❌ Not implemented |
 | `join(sep)` | String concat loop | String concat loop | ❌ Not implemented |
@@ -862,10 +874,15 @@ arr.customProperty = "hello"  // JS allows this
   - **Bytecode:** Uses `iconst 0`, element expression, boxing if needed, `add(ILjava/lang/Object;)V`
   - **Return:** void (JavaScript returns new length, but we don't return it yet)
   - **Tests:** 9 comprehensive tests covering basic functionality, length changes, multiple unshifts, empty array, type compatibility, integration with shift/push, order preservation, error handling
+- [x] `indexOf(elem)` - Find index ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 122-146
+  - **Bytecode:** Uses element expression, boxing if needed, `indexOf(Ljava/lang/Object;)I`, then boxes int result to Integer
+  - **Return:** Integer (boxed int) - returns index or -1 if not found
+  - **Tests:** 10 comprehensive tests covering basic functionality, not found case, first/last element, duplicates (returns first), strings, empty array, mixed types, after modifications, error handling
+  - **Note:** Result must be boxed because indexOf() returns primitive int but expressions expect Object
 - [ ] `splice(index, count, ...items)` - Complex insertion/deletion
 - [ ] `concat(arr2)` - Merge arrays
 - [ ] `slice(start, end)` - Extract subarray
-- [ ] `indexOf(elem)` - Find index
 - [ ] `includes(elem)` - Check existence
 - [ ] `join(sep)` - Convert to string
 - [ ] `reverse()` - Reverse in place
@@ -1153,22 +1170,23 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (57 tests passing)
+**Current Implementation:** ✅ Solid foundation (68 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()` ✅
 
 **Recently Completed:**
-- ✅ **unshift() method** - Implemented in CallExpressionGenerator.java
-  - Adds element to beginning of ArrayList
-  - 9 comprehensive tests added
+- ✅ **indexOf() method** - Implemented in CallExpressionGenerator.java
+  - Finds index of element in ArrayList, returns -1 if not found
+  - 10 comprehensive tests added
   - Error handling for Java arrays (throws exception)
-  - Uses `add(0, elem)` with proper boxing for primitives
+  - Returns int which is boxed to Integer for expressions
+  - Handles duplicates correctly (returns first occurrence)
 
 **Next Steps:**
 1. Implement spread operator support (HIGH priority)
-2. Add common array methods (`splice`, `concat`, `slice`, `indexOf`, `includes`, `join`)
+2. Add common array methods (`includes`, `join`, `concat`, `slice`, `splice`)
 3. Fix delete behavior to create holes instead of shifting
 4. Test nested and multi-dimensional arrays thoroughly
 5. Add functional methods (when function support is available)

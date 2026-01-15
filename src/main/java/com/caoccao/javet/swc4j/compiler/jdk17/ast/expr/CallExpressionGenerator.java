@@ -119,6 +119,31 @@ public final class CallExpressionGenerator {
                         }
                         return;
                     }
+                    case "indexOf" -> {
+                        // arr.indexOf(elem) -> arr.indexOf(elem)
+                        // Returns index or -1 if not found
+                        if (!callExpr.getArgs().isEmpty()) {
+                            var arg = callExpr.getArgs().get(0);
+                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+                            // Box argument if primitive
+                            String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
+                            if (argType != null && TypeConversionHelper.isPrimitiveType(argType)) {
+                                TypeConversionHelper.boxPrimitiveType(code, cp, argType, TypeConversionHelper.getWrapperType(argType));
+                            }
+
+                            int indexOfMethod = cp.addMethodRef("java/util/ArrayList", "indexOf", "(Ljava/lang/Object;)I");
+                            code.invokevirtual(indexOfMethod); // Returns int index
+
+                            // Box the int result to Integer for return
+                            TypeConversionHelper.boxPrimitiveType(code, cp, "I", "Ljava/lang/Integer;");
+                        } else {
+                            // No argument - pop ArrayList ref and return -1 boxed
+                            code.pop();
+                            code.iconst(-1);
+                            TypeConversionHelper.boxPrimitiveType(code, cp, "I", "Ljava/lang/Integer;");
+                        }
+                        return;
+                    }
                 }
             }
         }
