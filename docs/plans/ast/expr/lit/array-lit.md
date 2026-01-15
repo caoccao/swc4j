@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (68 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (79 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -145,6 +145,17 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
      - `testArrayIndexOfOnEmptyArray` - Empty array returns -1
      - `testArrayIndexOfWithMixedTypes` - indexOf works with mixed types
      - `testArrayIndexOfAfterModification` - indexOf after push/unshift operations
+   - `testArrayIncludes` - includes() method (10 tests)
+     - `testArrayIncludes` - Basic includes finds element
+     - `testArrayIncludesNotFound` - Returns false when not found
+     - `testArrayIncludesFirstElement` - Find first element
+     - `testArrayIncludesLastElement` - Find last element
+     - `testArrayIncludesString` - includes works with strings
+     - `testArrayIncludesStringNotFound` - String not found returns false
+     - `testArrayIncludesOnEmptyArray` - Empty array returns false
+     - `testArrayIncludesWithMixedTypes` - includes works with mixed types
+     - `testArrayIncludesAfterModification` - includes after push/unshift operations
+     - `testArrayIncludesReturnsFalseForDifferentType` - Type mismatch returns false
    - `testArrayDelete` - delete arr[i]
    - `testArrayClear` - arr.length = 0
    - `testArrayShrink` - arr.length = 2
@@ -156,6 +167,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
    - `testJavaArrayShiftNotSupported` - shift() on Java array throws error
    - `testJavaArrayUnshiftNotSupported` - unshift() on Java array throws error
    - `testJavaArrayIndexOfNotSupported` - indexOf() on Java array throws error
+   - `testJavaArrayIncludesNotSupported` - includes() on Java array throws error
    - `testJavaArraySetLengthNotSupported` - length assignment throws error
 
 ---
@@ -193,7 +205,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | `slice(start, end)` | `subList(start, end)` | `Arrays.copyOfRange()` | ❌ Not implemented |
 | `indexOf(elem)` | `indexOf(elem)` | Manual loop | ✅ Implemented |
 | `lastIndexOf(elem)` | `lastIndexOf(elem)` | Manual loop | ❌ Not implemented |
-| `includes(elem)` | `contains(elem)` | Manual loop | ❌ Not implemented |
+| `includes(elem)` | `contains(elem)` | Manual loop | ✅ Implemented |
 | `join(sep)` | String concat loop | String concat loop | ❌ Not implemented |
 | `toString()` | `toString()` | `Arrays.toString()` | ❌ Not implemented |
 | `toLocaleString()` | Custom formatting | Custom formatting | ❌ Not implemented |
@@ -880,10 +892,15 @@ arr.customProperty = "hello"  // JS allows this
   - **Return:** Integer (boxed int) - returns index or -1 if not found
   - **Tests:** 10 comprehensive tests covering basic functionality, not found case, first/last element, duplicates (returns first), strings, empty array, mixed types, after modifications, error handling
   - **Note:** Result must be boxed because indexOf() returns primitive int but expressions expect Object
+- [x] `includes(elem)` - Check existence ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 147-171
+  - **Bytecode:** Uses element expression, boxing if needed, `contains(Ljava/lang/Object;)Z`, then boxes boolean result to Boolean
+  - **Return:** Boolean (boxed boolean) - returns true if element exists, false otherwise
+  - **Tests:** 10 comprehensive tests covering basic functionality, not found case, first/last element, strings, empty array, mixed types, after modifications, type mismatch, error handling
+  - **Note:** Result must be boxed because contains() returns primitive boolean but expressions expect Object
 - [ ] `splice(index, count, ...items)` - Complex insertion/deletion
 - [ ] `concat(arr2)` - Merge arrays
 - [ ] `slice(start, end)` - Extract subarray
-- [ ] `includes(elem)` - Check existence
 - [ ] `join(sep)` - Convert to string
 - [ ] `reverse()` - Reverse in place
 - [ ] `sort()` - Sort in place
@@ -1170,23 +1187,24 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (68 tests passing)
+**Current Implementation:** ✅ Solid foundation (79 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()` ✅
 
 **Recently Completed:**
-- ✅ **indexOf() method** - Implemented in CallExpressionGenerator.java
-  - Finds index of element in ArrayList, returns -1 if not found
+- ✅ **includes() method** - Implemented in CallExpressionGenerator.java
+  - Checks if element exists in ArrayList, returns true/false
   - 10 comprehensive tests added
   - Error handling for Java arrays (throws exception)
-  - Returns int which is boxed to Integer for expressions
-  - Handles duplicates correctly (returns first occurrence)
+  - Returns boolean which is boxed to Boolean for expressions
+  - Uses ArrayList.contains() method
+  - Handles type mismatches correctly (returns false for different types)
 
 **Next Steps:**
 1. Implement spread operator support (HIGH priority)
-2. Add common array methods (`includes`, `join`, `concat`, `slice`, `splice`)
+2. Add common array methods (`join`, `concat`, `slice`, `splice`, `reverse`, `sort`)
 3. Fix delete behavior to create holes instead of shifting
 4. Test nested and multi-dimensional arrays thoroughly
 5. Add functional methods (when function support is available)

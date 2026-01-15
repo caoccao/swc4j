@@ -144,6 +144,31 @@ public final class CallExpressionGenerator {
                         }
                         return;
                     }
+                    case "includes" -> {
+                        // arr.includes(elem) -> arr.contains(elem)
+                        // Returns true if element exists, false otherwise
+                        if (!callExpr.getArgs().isEmpty()) {
+                            var arg = callExpr.getArgs().get(0);
+                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+                            // Box argument if primitive
+                            String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
+                            if (argType != null && TypeConversionHelper.isPrimitiveType(argType)) {
+                                TypeConversionHelper.boxPrimitiveType(code, cp, argType, TypeConversionHelper.getWrapperType(argType));
+                            }
+
+                            int containsMethod = cp.addMethodRef("java/util/ArrayList", "contains", "(Ljava/lang/Object;)Z");
+                            code.invokevirtual(containsMethod); // Returns boolean
+
+                            // Box the boolean result to Boolean for return
+                            TypeConversionHelper.boxPrimitiveType(code, cp, "Z", "Ljava/lang/Boolean;");
+                        } else {
+                            // No argument - pop ArrayList ref and return false boxed
+                            code.pop();
+                            code.iconst(0); // false
+                            TypeConversionHelper.boxPrimitiveType(code, cp, "Z", "Ljava/lang/Boolean;");
+                        }
+                        return;
+                    }
                 }
             }
         }
