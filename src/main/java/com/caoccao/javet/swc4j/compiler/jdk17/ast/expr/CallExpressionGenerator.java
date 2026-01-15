@@ -180,6 +180,17 @@ public final class CallExpressionGenerator {
                         // The duplicated array reference is now on top of stack, ready to return
                         return;
                     }
+                    case "sort" -> {
+                        // arr.sort() -> Collections.sort(arr); returns void but we keep arr on stack
+                        // JavaScript's sort() returns the array itself (for chaining)
+                        code.dup(); // Duplicate array reference for return
+
+                        int sortMethod = cp.addMethodRef("java/util/Collections", "sort", "(Ljava/util/List;)V");
+                        code.invokestatic(sortMethod); // Sort in place
+
+                        // The duplicated array reference is now on top of stack, ready to return
+                        return;
+                    }
                 }
             }
         }

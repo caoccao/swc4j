@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (87 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (97 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -193,7 +193,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | `unshift(elem)` | `add(0, elem)` | Returns new length | ✅ Implemented |
 | `splice(i, n, ...)` | Multiple operations | Complex - add/remove | ❌ Not implemented |
 | `reverse()` | `Collections.reverse(list)` | Mutates in place, returns array | ✅ Implemented |
-| `sort()` | `Collections.sort(list)` | Mutates in place | ❌ Not implemented |
+| `sort()` | `Collections.sort(list)` | Mutates in place, returns array | ✅ Implemented |
 | `fill(val, start, end)` | Loop with `set()` | Fill range with value | ❌ Not implemented |
 | `copyWithin(t, s, e)` | Manual copy | Copy within array | ❌ Not implemented |
 
@@ -904,11 +904,17 @@ arr.customProperty = "hello"  // JS allows this
   - **Return:** ArrayList (the array itself) - JavaScript's reverse() returns the array for method chaining
   - **Tests:** 8 comprehensive tests covering basic reverse, returns array, strings, empty array, single element, mixed types, reverse twice (restore original), after modifications, error handling
   - **Note:** Collections.reverse() returns void, so we use `dup` before the call to keep the array reference on the stack for return
+- [x] `sort()` - Sort in place ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 183-193
+  - **Bytecode:** Uses `dup` to duplicate array reference, then `invokestatic Collections.sort(List)V`
+  - **Return:** ArrayList (the array itself) - JavaScript's sort() returns the array for method chaining
+  - **Tests:** 10 comprehensive tests covering basic sort (integers), returns array, strings (alphabetical), empty array (via pop operations), single element, already sorted, reverse sorted, after modifications (push/unshift), duplicates, error handling
+  - **Note:** Collections.sort() returns void, so we use `dup` before the call to keep the array reference on the stack for return
+  - **Limitation:** Elements must be Comparable - sorting mixed types (e.g., Integer + String) will throw ClassCastException at runtime
 - [ ] `splice(index, count, ...items)` - Complex insertion/deletion
 - [ ] `concat(arr2)` - Merge arrays
 - [ ] `slice(start, end)` - Extract subarray
 - [ ] `join(sep)` - Convert to string
-- [ ] `sort()` - Sort in place
 
 ### Phase 4: Spread Operator (Priority: HIGH)
 - [ ] Detect spread elements in AST
@@ -1192,24 +1198,25 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (87 tests passing)
+**Current Implementation:** ✅ Solid foundation (97 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()` ✅
 
 **Recently Completed:**
-- ✅ **reverse() method** - Implemented in CallExpressionGenerator.java
-  - Reverses ArrayList in place using Collections.reverse()
-  - 8 comprehensive tests added
+- ✅ **sort() method** - Implemented in CallExpressionGenerator.java
+  - Sorts ArrayList in place using Collections.sort() with natural ordering
+  - 10 comprehensive tests added
   - Error handling for Java arrays (throws exception)
   - Returns the array itself for method chaining (JavaScript behavior)
-  - Uses `dup` instruction before Collections.reverse() call to keep array reference on stack
-  - Works with all element types (integers, strings, mixed types)
+  - Uses `dup` instruction before Collections.sort() call to keep array reference on stack
+  - Works with integers, strings, and any Comparable types
+  - **Note:** Sorting mixed types will throw ClassCastException at runtime (Java limitation)
 
 **Next Steps:**
 1. Implement spread operator support (HIGH priority)
-2. Add common array methods (`join`, `concat`, `slice`, `splice`, `sort`)
+2. Add common array methods (`join`, `concat`, `slice`, `splice`)
 3. Fix delete behavior to create holes instead of shifting
 4. Test nested and multi-dimensional arrays thoroughly
 5. Add functional methods (when function support is available)
