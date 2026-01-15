@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (47 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (57 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -124,6 +124,16 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
      - `testArrayShiftWithMixedTypes` - Shift works with mixed types
      - `testArrayPushAndShift` - Push and shift work together
      - `testArrayShiftAndRemainingElements` - Verify remaining elements after shift
+   - `testArrayUnshift` - unshift() method (9 tests)
+     - `testArrayUnshift` - Basic unshift adds to beginning
+     - `testArrayUnshiftChangesLength` - Unshift increases array length
+     - `testArrayUnshiftMultipleTimes` - Multiple unshifts work correctly
+     - `testArrayUnshiftOnEmptyArray` - Unshift on empty array
+     - `testArrayUnshiftString` - Unshift works with strings
+     - `testArrayUnshiftWithMixedTypes` - Unshift works with mixed types
+     - `testArrayUnshiftAndShift` - Unshift and shift work together
+     - `testArrayUnshiftAndPush` - Unshift and push work together
+     - `testArrayUnshiftPreservesOrder` - Verify element order after unshift
    - `testArrayDelete` - delete arr[i]
    - `testArrayClear` - arr.length = 0
    - `testArrayShrink` - arr.length = 2
@@ -133,6 +143,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
    - `testJavaArrayPushNotSupported` - push() on Java array throws error
    - `testJavaArrayPopNotSupported` - pop() on Java array throws error
    - `testJavaArrayShiftNotSupported` - shift() on Java array throws error
+   - `testJavaArrayUnshiftNotSupported` - unshift() on Java array throws error
    - `testJavaArraySetLengthNotSupported` - length assignment throws error
 
 ---
@@ -155,7 +166,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | `push(elem)` | `add(elem)` | Returns new length | ✅ Implemented |
 | `pop()` | `remove(size()-1)` | Returns removed element | ✅ Implemented |
 | `shift()` | `remove(0)` | Returns removed element | ✅ Implemented |
-| `unshift(elem)` | `add(0, elem)` | Returns new length | ❌ Not implemented |
+| `unshift(elem)` | `add(0, elem)` | Returns new length | ✅ Implemented |
 | `splice(i, n, ...)` | Multiple operations | Complex - add/remove | ❌ Not implemented |
 | `reverse()` | `Collections.reverse(list)` | Mutates in place | ❌ Not implemented |
 | `sort()` | `Collections.sort(list)` | Mutates in place | ❌ Not implemented |
@@ -846,7 +857,11 @@ arr.customProperty = "hello"  // JS allows this
   - **Bytecode:** Uses `iconst 0`, `remove(I)Ljava/lang/Object;`
   - **Return:** Returns the removed element (Object type)
   - **Tests:** 9 comprehensive tests covering basic functionality, length changes, multiple shifts, type compatibility, edge cases, integration with push, remaining elements verification, error handling
-- [ ] `unshift(elem)` - Add to beginning
+- [x] `unshift(elem)` - Add to beginning ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 104-121
+  - **Bytecode:** Uses `iconst 0`, element expression, boxing if needed, `add(ILjava/lang/Object;)V`
+  - **Return:** void (JavaScript returns new length, but we don't return it yet)
+  - **Tests:** 9 comprehensive tests covering basic functionality, length changes, multiple unshifts, empty array, type compatibility, integration with shift/push, order preservation, error handling
 - [ ] `splice(index, count, ...items)` - Complex insertion/deletion
 - [ ] `concat(arr2)` - Merge arrays
 - [ ] `slice(start, end)` - Extract subarray
@@ -1138,22 +1153,22 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (47 tests passing)
+**Current Implementation:** ✅ Solid foundation (57 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()` ✅
 
 **Recently Completed:**
-- ✅ **shift() method** - Implemented in CallExpressionGenerator.java
-  - Removes and returns first element from ArrayList
+- ✅ **unshift() method** - Implemented in CallExpressionGenerator.java
+  - Adds element to beginning of ArrayList
   - 9 comprehensive tests added
   - Error handling for Java arrays (throws exception)
-  - Simpler bytecode than pop() (just `iconst 0` then `remove(I)`)
+  - Uses `add(0, elem)` with proper boxing for primitives
 
 **Next Steps:**
 1. Implement spread operator support (HIGH priority)
-2. Add common array methods (`unshift`, `splice`, `concat`, `slice`, `indexOf`, `includes`)
+2. Add common array methods (`splice`, `concat`, `slice`, `indexOf`, `includes`, `join`)
 3. Fix delete behavior to create holes instead of shifting
 4. Test nested and multi-dimensional arrays thoroughly
 5. Add functional methods (when function support is available)

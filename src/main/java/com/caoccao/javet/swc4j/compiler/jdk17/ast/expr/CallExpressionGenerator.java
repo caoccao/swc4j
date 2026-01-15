@@ -101,6 +101,24 @@ public final class CallExpressionGenerator {
 
                         return;
                     }
+                    case "unshift" -> {
+                        // arr.unshift(value) -> arr.add(0, value)
+                        if (!callExpr.getArgs().isEmpty()) {
+                            code.iconst(0); // Index 0
+
+                            var arg = callExpr.getArgs().get(0);
+                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+                            // Box if primitive
+                            String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
+                            if (argType != null && TypeConversionHelper.isPrimitiveType(argType)) {
+                                TypeConversionHelper.boxPrimitiveType(code, cp, argType, TypeConversionHelper.getWrapperType(argType));
+                            }
+
+                            int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(ILjava/lang/Object;)V");
+                            code.invokevirtual(addMethod);
+                        }
+                        return;
+                    }
                 }
             }
         }
