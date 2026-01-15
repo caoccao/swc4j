@@ -169,6 +169,17 @@ public final class CallExpressionGenerator {
                         }
                         return;
                     }
+                    case "reverse" -> {
+                        // arr.reverse() -> Collections.reverse(arr); returns void but we keep arr on stack
+                        // JavaScript's reverse() returns the array itself (for chaining)
+                        code.dup(); // Duplicate array reference for return
+
+                        int reverseMethod = cp.addMethodRef("java/util/Collections", "reverse", "(Ljava/util/List;)V");
+                        code.invokestatic(reverseMethod); // Reverse in place
+
+                        // The duplicated array reference is now on top of stack, ready to return
+                        return;
+                    }
                 }
             }
         }
