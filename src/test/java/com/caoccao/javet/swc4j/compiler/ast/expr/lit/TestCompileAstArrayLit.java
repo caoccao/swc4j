@@ -335,6 +335,172 @@ public class TestCompileAstArrayLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testArrayPushAndShift(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2]
+                      arr.push(3)
+                      arr.push(4)
+                      const first = arr.shift()
+                      return first
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(1, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayShift(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3]
+                      const removed = arr.shift()
+                      return removed
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(1, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayShiftAndRemainingElements(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [100, 200, 300]
+                      arr.shift()
+                      return arr
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(200, 300), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayShiftChangesLength(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [10, 20, 30, 40]
+                      arr.shift()
+                      return arr.length
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(3, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayShiftMultipleTimes(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [5, 10, 15, 20, 25]
+                      arr.shift()
+                      arr.shift()
+                      const first = arr.shift()
+                      return first
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(15, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayShiftReturnsCorrectType(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = ["hello", "world", "test"]
+                      return arr.shift()
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("hello", classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayShiftSingleElement(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [42]
+                      const val = arr.shift()
+                      return val
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(42, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayShiftSingleElementLeavesEmpty(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [99]
+                      arr.shift()
+                      return arr.length
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(0, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayShiftWithMixedTypes(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, "hello", true]
+                      arr.shift()
+                      arr.shift()
+                      return arr.shift()
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(true, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testArrayShrink(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -570,6 +736,27 @@ public class TestCompileAstArrayLit extends BaseTestCompileSuite {
         } catch (Exception e) {
             String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
             assertTrue(message.contains("Cannot set length on Java array"), "Expected error about setting length, got: " + message);
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testJavaArrayShiftNotSupported(JdkVersion jdkVersion) {
+        try {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const a: int[] = [1, 2, 3]
+                          a.shift()
+                          return a
+                        }
+                      }
+                    }""");
+            fail("Should throw exception for shift on Java array");
+        } catch (Exception e) {
+            String message = e.getMessage() + (e.getCause() != null ? " " + e.getCause().getMessage() : "");
+            assertTrue(message.contains("not supported on Java arrays"), "Expected error about Java arrays, got: " + message);
         }
     }
 

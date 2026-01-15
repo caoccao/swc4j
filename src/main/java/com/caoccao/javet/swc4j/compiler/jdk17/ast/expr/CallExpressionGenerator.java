@@ -91,6 +91,16 @@ public final class CallExpressionGenerator {
 
                         return;
                     }
+                    case "shift" -> {
+                        // arr.shift() -> arr.remove(0)
+                        // Returns the removed element
+                        code.iconst(0); // Index 0
+
+                        int removeMethod = cp.addMethodRef("java/util/ArrayList", "remove", "(I)Ljava/lang/Object;");
+                        code.invokevirtual(removeMethod); // Returns removed element
+
+                        return;
+                    }
                 }
             }
         }
