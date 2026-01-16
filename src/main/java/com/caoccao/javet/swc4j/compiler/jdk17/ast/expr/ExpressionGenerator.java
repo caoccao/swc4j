@@ -52,6 +52,8 @@ public final class ExpressionGenerator {
             NullLiteralGenerator.generate(code, cp, nullLit, returnTypeInfo, context, options);
         } else if (expr instanceof Swc4jAstArrayLit arrayLit) {
             ArrayLiteralGenerator.generate(code, cp, arrayLit, returnTypeInfo, context, options, ExpressionGenerator::generate);
+        } else if (expr instanceof Swc4jAstObjectLit objectLit) {
+            ObjectLiteralGenerator.generate(code, cp, objectLit, returnTypeInfo, context, options, ExpressionGenerator::generate);
         } else if (expr instanceof Swc4jAstIdent ident) {
             IdentifierGenerator.generate(code, cp, ident, returnTypeInfo, context, options);
         } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
