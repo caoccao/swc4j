@@ -324,4 +324,27 @@ public final class ArrayApiUtils {
 
         return result;
     }
+
+    /**
+     * Create a sorted copy of the ArrayList without modifying the original.
+     * JavaScript equivalent: arr.toSorted() (ES2023)
+     *
+     * @param list the ArrayList to sort
+     * @return a new ArrayList with elements in sorted order
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static ArrayList<Object> toSorted(ArrayList<?> list) {
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Create a copy of the list
+        ArrayList<Object> result = new ArrayList<>(list);
+
+        // Sort the copy (requires elements to be Comparable)
+        // Using raw type to avoid compilation error
+        java.util.Collections.sort((java.util.List) result);
+
+        return result;
+    }
 }

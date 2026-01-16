@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (218 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (229 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -231,7 +231,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | JavaScript Method | Java Equivalent | Notes | Status |
 |------------------|----------------|-------|---------|
 | `toReversed()` | `new ArrayList<>(list); reverse()` | Returns new array | ✅ Implemented |
-| `toSorted()` | `new ArrayList<>(list); sort()` | Returns new array | ❌ Not implemented |
+| `toSorted()` | `new ArrayList<>(list); sort()` | Returns new array | ✅ Implemented |
 | `toSpliced(i, n, ...)` | Manual copy + splice | Returns new array | ❌ Not implemented |
 | `with(index, value)` | `new ArrayList<>(list); set()` | Returns new array | ❌ Not implemented |
 
@@ -1081,9 +1081,30 @@ arr.customProperty = "hello"  // JS allows this
   - **Helper method:** toReversed() in ArrayApiUtils creates copy then reverses it
   - **Key difference from reverse():** Creates new array instead of mutating original
   - **ES2023 feature:** Part of ES2023 specification for non-mutating array methods
+- [x] `toSorted()` - ES2023 non-mutating sort ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 220-232, ArrayApiUtils.java lines 328-349
+  - **Bytecode:** Calls `ArrayApiUtils.toSorted(ArrayList)` static method
+  - **Return:** ArrayList (new array) - sorted copy without modifying original
+  - **Tests:** 11 comprehensive tests covering basic usage, non-mutating behavior, empty arrays, single elements, different types, method chaining, error handling
+  - **Test coverage:**
+    - `testArrayToSortedBasic` - Basic toSorted() functionality
+    - `testArrayToSortedDoesNotMutateOriginal` - Verifies original array unchanged
+    - `testArrayToSortedReturnsNewArray` - Returns new sorted array
+    - `testArrayToSortedEmpty` - Empty array returns empty array
+    - `testArrayToSortedSingleElement` - Single element handling
+    - `testArrayToSortedStrings` - String arrays (alphabetical sort)
+    - `testArrayToSortedAlreadySorted` - Already sorted arrays
+    - `testArrayToSortedReverseSorted` - Reverse-sorted input
+    - `testArrayToSortedWithDuplicates` - Arrays with duplicate elements
+    - `testArrayToSortedMethodChaining` - Method chaining with reverse()
+    - `testJavaArrayToSortedNotSupported` - Error for Java arrays
+  - **Helper method:** toSorted() in ArrayApiUtils creates copy then sorts using Collections.sort()
+  - **Key difference from sort():** Creates new array instead of mutating original
+  - **ES2023 feature:** Part of ES2023 specification for non-mutating array operations
+  - **Requirement:** Elements must be Comparable, otherwise ClassCastException at runtime
 - [ ] Multi-dimensional arrays
 - [ ] Array methods with return values
-- [ ] ES2023 non-mutating methods (`toSorted`, `toSpliced`, `with`)
+- [ ] ES2023 non-mutating methods (`toSpliced`, `with`)
 
 ### Phase 6: Functional Methods (Priority: LOW - Requires Functions)
 - [ ] `forEach(callback)`
@@ -1352,15 +1373,26 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (218 tests passing)
+**Current Implementation:** ✅ Solid foundation (229 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `lastIndexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()`, `toString()`, `toLocaleString()`, `toReversed()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `lastIndexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()`, `toString()`, `toLocaleString()`, `toReversed()`, `toSorted()` ✅
 - Spread operator support for ArrayList mode ✅
-- ES2023 non-mutating methods: `toReversed()` ✅
+- ES2023 non-mutating methods: `toReversed()`, `toSorted()` ✅
 
 **Recently Completed:**
+- ✅ **toSorted() method (ES2023)** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
+  - Non-mutating version of sort() that returns a new sorted array
+  - 11 comprehensive tests added covering all scenarios
+  - Returns new ArrayList with elements in sorted order
+  - Original array remains unchanged (key difference from sort())
+  - **Bytecode generation:** Calls ArrayApiUtils.toSorted(ArrayList) which returns new ArrayList
+  - **Helper method:** Creates copy using ArrayList constructor, then sorts with Collections.sort()
+  - **ES2023 compliance:** Part of ES2023 specification for non-mutating array operations
+  - **Limitation:** Elements must be Comparable, otherwise ClassCastException at runtime
+  - **Use case:** Get sorted array without modifying original, enabling functional programming patterns
+
 - ✅ **toReversed() method (ES2023)** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
   - Non-mutating version of reverse() that returns a new reversed array
   - 10 comprehensive tests added covering all scenarios

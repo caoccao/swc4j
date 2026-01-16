@@ -217,6 +217,19 @@ public final class CallExpressionGenerator {
                         // The duplicated array reference is now on top of stack, ready to return
                         return;
                     }
+                    case "toSorted" -> {
+                        // arr.toSorted() -> ArrayApiUtils.toSorted(arr)
+                        // Returns new sorted array without modifying original (ES2023)
+                        // Stack: ArrayList
+
+                        // Call ArrayApiUtils.toSorted(ArrayList)
+                        int toSortedMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "toSorted",
+                                "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
+                        code.invokestatic(toSortedMethod);
+                        // Stack: new ArrayList (sorted)
+
+                        return;
+                    }
                     case "join" -> {
                         // arr.join(sep) -> ArrayHelper.join(arr, sep)
                         // JavaScript's join() returns a string
