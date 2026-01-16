@@ -23,8 +23,12 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class StringConcatUtils {
     private StringConcatUtils() {
@@ -124,8 +128,8 @@ public final class StringConcatUtils {
 
     public static void collectOperands(
             ISwc4jAstExpr expr,
-            java.util.List<ISwc4jAstExpr> operands,
-            java.util.List<String> operandTypes,
+            List<ISwc4jAstExpr> operands,
+            List<String> operandTypes,
             CompilationContext context,
             ByteCodeCompilerOptions options) {
         // If this expression is a binary Add that results in a String, collect its operands
@@ -169,8 +173,8 @@ public final class StringConcatUtils {
                 .invokespecial(stringBuilderInit);
 
         // Flatten the operands - if left is also a string concatenation, collect all operands
-        java.util.List<ISwc4jAstExpr> operands = new java.util.ArrayList<>();
-        java.util.List<String> operandTypes = new java.util.ArrayList<>();
+        List<ISwc4jAstExpr> operands = new ArrayList<>();
+        List<String> operandTypes = new ArrayList<>();
 
         // Collect operands from left side
         collectOperands(left, operands, operandTypes, context, options);
@@ -195,7 +199,7 @@ public final class StringConcatUtils {
                 CodeBuilder code,
                 ClassWriter.ConstantPool cp,
                 ISwc4jAstExpr expr,
-                com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo returnTypeInfo,
+                ReturnTypeInfo returnTypeInfo,
                 CompilationContext context,
                 ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException;
     }

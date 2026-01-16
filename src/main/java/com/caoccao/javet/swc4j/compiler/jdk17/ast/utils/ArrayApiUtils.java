@@ -20,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Runtime helper methods for array operations in compiled bytecode.
+ * Utility class for ArrayList operations similar to JavaScript Array methods.
  */
-public final class ArrayJoinUtils {
-    private ArrayJoinUtils() {
+public final class ArrayApiUtils {
+    private ArrayApiUtils() {
         // Prevent instantiation
     }
 
@@ -76,5 +76,35 @@ public final class ArrayJoinUtils {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Extract a section of an ArrayList and return it as a new ArrayList.
+     * JavaScript equivalent: arr.slice(start, end)
+     *
+     * @param list  the ArrayList to slice
+     * @param start the beginning index (inclusive), negative values count from end
+     * @param end   the ending index (exclusive), negative values count from end
+     * @return a new ArrayList containing the extracted elements
+     */
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Object> slice(ArrayList<?> list, int start, int end) {
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        int length = list.size();
+
+        // Handle negative indices
+        int actualStart = start < 0 ? Math.max(0, length + start) : Math.min(start, length);
+        int actualEnd = end < 0 ? Math.max(0, length + end) : Math.min(end, length);
+
+        // If start >= end, return empty array
+        if (actualStart >= actualEnd) {
+            return new ArrayList<>();
+        }
+
+        // Create new ArrayList from subList
+        return new ArrayList<>(list.subList(actualStart, actualEnd));
     }
 }

@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (118 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (131 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -202,7 +202,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | JavaScript Method | ArrayList Equivalent | Java Array Equivalent | Status |
 |------------------|---------------------|----------------------|---------|
 | `concat(arr2)` | `new ArrayList<>(list1); addAll(list2)` | `Arrays.copyOf()` + manual copy | ✅ Implemented |
-| `slice(start, end)` | `subList(start, end)` | `Arrays.copyOfRange()` | ❌ Not implemented |
+| `slice(start, end)` | `new ArrayList<>(subList(start, end))` | `Arrays.copyOfRange()` | ✅ Implemented |
 | `indexOf(elem)` | `indexOf(elem)` | Manual loop | ✅ Implemented |
 | `lastIndexOf(elem)` | `lastIndexOf(elem)` | Manual loop | ❌ Not implemented |
 | `includes(elem)` | `contains(elem)` | Manual loop | ✅ Implemented |
@@ -911,21 +911,33 @@ arr.customProperty = "hello"  // JS allows this
   - **Limitation:** Elements must be Comparable - sorting mixed types (e.g., Integer + String) will throw ClassCastException at runtime
 - [x] `join(sep)` - Convert to string ✅ **IMPLEMENTED**
   - **Implementation:** CallExpressionGenerator.java lines 186-214
-  - **Bytecode:** Calls `ArrayJoinUtils.join(List, String)Ljava/lang/String;` static helper method
+  - **Bytecode:** Calls `ArrayApiUtils.join(List, String)Ljava/lang/String;` static helper method
   - **Return:** String - joined elements separated by the specified separator
   - **Tests:** 11 comprehensive tests covering basic join with comma, default separator (comma), custom separator, empty array, single element, empty separator (concatenate), mixed types, after modifications, numbers, multi-character separator, error handling
-  - **Helper:** ArrayJoinUtils.java runtime utility class with static join() method
+  - **Helper:** ArrayApiUtils.java runtime utility class with static join() method
   - **Default separator:** "," if no argument provided (JavaScript behavior)
   - **Element conversion:** Uses String.valueOf() to convert each element (null becomes "null")
 - [x] `concat(arr2)` - Merge arrays ✅ **IMPLEMENTED**
   - **Implementation:** CallExpressionGenerator.java lines 215-240
-  - **Bytecode:** Calls `ArrayJoinUtils.concat(ArrayList, ArrayList)Ljava/util/ArrayList;` static helper method when argument provided; uses ArrayList copy constructor `new ArrayList(Collection)` when no argument
+  - **Bytecode:** Calls `ArrayApiUtils.concat(ArrayList, ArrayList)Ljava/util/ArrayList;` static helper method when argument provided; uses ArrayList copy constructor `new ArrayList(Collection)` when no argument
   - **Return:** ArrayList (new array) - JavaScript's concat() returns a new array containing elements from both arrays
   - **Tests:** 10 comprehensive tests covering basic concat (merge two arrays), empty array, no argument (returns copy), returns new array (not modifying original), strings, mixed types, single element, concat with empty first array, chaining multiple concat calls, error handling
-  - **Helper:** ArrayJoinUtils.java runtime utility class with static concat() method
+  - **Helper:** ArrayApiUtils.java runtime utility class with static concat() method
   - **No argument behavior:** Returns a shallow copy of the array (new ArrayList with same elements)
   - **Chaining support:** TypeResolver updated to infer return type of concat() as ArrayList, enabling method chaining like `arr1.concat(arr2).concat(arr3)`
-- [ ] `slice(start, end)` - Extract subarray
+- [x] `slice(start, end)` - Extract subarray ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 241-365
+  - **Bytecode:** Calls `ArrayApiUtils.slice(ArrayList, int, int)Ljava/util/ArrayList;` static helper method with start and end indices
+  - **Return:** ArrayList (new array) - JavaScript's slice() returns a new array with extracted elements
+  - **Tests:** 13 comprehensive tests covering basic slice with start and end, slice with only start, no arguments (copy entire array), negative start index, negative end index, both negative indices, empty array, start >= end (returns empty), out of bounds indices (clamped), strings, returns new array (non-mutating), method chaining, error handling for Java arrays
+  - **Helper:** ArrayApiUtils.java runtime utility class with static slice() method
+  - **Argument handling:**
+    - No arguments: `slice()` - copies entire array (start=0, end=size)
+    - One argument: `slice(start)` - from start to end of array (end=size)
+    - Two arguments: `slice(start, end)` - from start to end (exclusive)
+  - **Negative indices:** Converted to positive by adding array length (e.g., -1 becomes length-1)
+  - **Bounds checking:** Out of bounds indices are clamped to valid range [0, length]
+  - **Stack manipulation:** Complex bytecode for argument cases using dup, dup_x1, dup_x2, swap, pop to arrange stack properly for static method call
 - [ ] `splice(index, count, ...items)` - Complex insertion/deletion
 
 ### Phase 4: Spread Operator (Priority: HIGH)
@@ -1210,26 +1222,28 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (118 tests passing)
+**Current Implementation:** ✅ Solid foundation (131 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()` ✅
 
 **Recently Completed:**
-- ✅ **concat() method** - Implemented in CallExpressionGenerator.java with ArrayJoinUtils runtime utility
-  - Merges two ArrayLists into a new ArrayList (non-mutating)
-  - 10 comprehensive tests added covering all edge cases
+- ✅ **slice() method** - Implemented in CallExpressionGenerator.java with ArrayApiUtils runtime utility
+  - Extracts a section of an ArrayList and returns it as a new ArrayList (non-mutating)
+  - 13 comprehensive tests added covering all edge cases
   - Error handling for Java arrays (throws exception)
-  - Returns new ArrayList containing elements from both arrays
-  - Uses ArrayJoinUtils.concat() static method
-  - Supports concat() with no argument (returns shallow copy)
-  - Handles empty arrays, mixed types, and method chaining
-  - **TypeResolver enhancement:** Added CallExpr case to infer return types of ArrayList methods, enabling method chaining like `arr1.concat(arr2).concat(arr3)`
-  - **CodeBuilder enhancement:** Added `dup_x1()` and `swap()` bytecode instructions
+  - Returns new ArrayList containing extracted elements
+  - Uses ArrayApiUtils.slice() static method with negative index handling and bounds checking
+  - Supports three calling patterns:
+    - `slice()` - copy entire array
+    - `slice(start)` - from start to end
+    - `slice(start, end)` - from start to end (exclusive)
+  - Handles negative indices (count from end), out of bounds indices (clamped), and method chaining
+  - **Complex stack manipulation:** Uses dup, dup_x1, dup_x2, swap, pop instructions to arrange arguments properly for each calling pattern
 
 **Next Steps:**
-1. Implement remaining Phase 3 methods (`slice`, `splice`)
+1. Implement remaining Phase 3 method (`splice`)
 2. Implement spread operator support (HIGH priority)
 3. Fix delete behavior to create holes instead of shifting
 4. Test nested and multi-dimensional arrays thoroughly

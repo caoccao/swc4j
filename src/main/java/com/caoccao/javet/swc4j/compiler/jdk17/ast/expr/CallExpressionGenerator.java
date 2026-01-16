@@ -206,14 +206,14 @@ public final class CallExpressionGenerator {
                         }
 
                         // Call ArrayHelper.join(ArrayList, String)
-                        int joinMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayJoinUtils", "join",
+                        int joinMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "join",
                                 "(Ljava/util/List;Ljava/lang/String;)Ljava/lang/String;");
                         code.invokestatic(joinMethod);
 
                         return;
                     }
                     case "concat" -> {
-                        // arr.concat(arr2) -> ArrayJoinUtils.concat(arr, arr2)
+                        // arr.concat(arr2) -> ArrayApiUtils.concat(arr, arr2)
                         // JavaScript's concat() returns a new array
 
                         if (!callExpr.getArgs().isEmpty()) {
@@ -221,8 +221,8 @@ public final class CallExpressionGenerator {
                             var arg = callExpr.getArgs().get(0);
                             ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
 
-                            // Call ArrayJoinUtils.concat(ArrayList, ArrayList)
-                            int concatMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayJoinUtils", "concat",
+                            // Call ArrayApiUtils.concat(ArrayList, ArrayList)
+                            int concatMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "concat",
                                     "(Ljava/util/ArrayList;Ljava/util/ArrayList;)Ljava/util/ArrayList;");
                             code.invokestatic(concatMethod);
                         } else {
@@ -235,6 +235,131 @@ public final class CallExpressionGenerator {
                                     .swap()    // Swap to get: new ArrayList, original array, new ArrayList
                                     .invokespecial(arrayListInit);  // Call ArrayList(Collection)
                         }
+
+                        return;
+                    }
+                    case "slice" -> {
+                        // arr.slice(start, end) -> ArrayApiUtils.slice(arr, start, end)
+                        // JavaScript's slice() returns a new array with extracted elements
+
+                        int argCount = callExpr.getArgs().size();
+
+                        if (argCount == 0) {
+                            // No arguments: arr.slice() - copy entire array
+                            // Stack: ArrayList
+                            code.iconst(0);  // start = 0
+                            // Stack: ArrayList, 0
+
+                            code.dup_x1();  // Duplicate start, place below ArrayList
+                            // Stack: 0, ArrayList, 0
+
+                            code.pop();  // Remove top 0
+                            // Stack: 0, ArrayList
+
+                            code.dup();  // Duplicate ArrayList for size() call
+                            // Stack: 0, ArrayList, ArrayList
+
+                            int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
+                            code.invokevirtual(sizeMethod);  // Get size
+                            // Stack: 0, ArrayList, size
+
+                            // Now we need: ArrayList, start, end
+                            // Current stack: 0, ArrayList, size
+                            // Reorder to: ArrayList, 0, size
+
+                            code.dup_x2();  // Duplicate size, place it before ArrayList
+                            // Stack: size, 0, ArrayList, size
+
+                            code.pop();  // Remove top size
+                            // Stack: size, 0, ArrayList
+
+                            code.dup_x2();  // Duplicate ArrayList
+                            // Stack: ArrayList, size, 0, ArrayList
+
+                            code.pop();  // Remove top ArrayList
+                            // Stack: ArrayList, size, 0
+
+                            code.swap();  // Swap to get: ArrayList, 0, size
+                            // Stack: ArrayList, 0, size
+
+                        } else if (argCount == 1) {
+                            // One argument: arr.slice(start) - from start to end
+                            // Stack: ArrayList
+
+                            var startArg = callExpr.getArgs().get(0);
+                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+                            // Stack: ArrayList, start
+
+                            // Need to unbox if Integer
+                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+                            // Stack: ArrayList, start (int)
+
+                            code.dup_x1();  // Duplicate start
+                            // Stack: start, ArrayList, start
+
+                            code.pop();  // Remove top start
+                            // Stack: start, ArrayList
+
+                            code.dup();  // Duplicate ArrayList for size() call
+                            // Stack: start, ArrayList, ArrayList
+
+                            int sizeMethod = cp.addMethodRef("java/util/ArrayList", "size", "()I");
+                            code.invokevirtual(sizeMethod);  // Get size
+                            // Stack: start, ArrayList, size
+
+                            // Reorder to: ArrayList, start, size
+                            code.dup_x2();  // Duplicate size
+                            // Stack: size, start, ArrayList, size
+
+                            code.pop();  // Remove top size
+                            // Stack: size, start, ArrayList
+
+                            code.dup_x2();  // Duplicate ArrayList
+                            // Stack: ArrayList, size, start, ArrayList
+
+                            code.pop();  // Remove top ArrayList
+                            // Stack: ArrayList, size, start
+
+                            code.swap();  // Swap to get: ArrayList, start, size
+                            // Stack: ArrayList, start, size
+
+                        } else {
+                            // Two arguments: arr.slice(start, end)
+                            // Stack: ArrayList
+
+                            var startArg = callExpr.getArgs().get(0);
+                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+                            // Stack: ArrayList, start
+
+                            // Unbox if Integer
+                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+                            // Stack: ArrayList, start
+
+                            var endArg = callExpr.getArgs().get(1);
+                            ExpressionGenerator.generate(code, cp, endArg.getExpr(), null, context, options);
+                            // Stack: ArrayList, start, end
+
+                            // Unbox if Integer
+                            String endType = TypeResolver.inferTypeFromExpr(endArg.getExpr(), context, options);
+                            if (endType != null && "Ljava/lang/Integer;".equals(endType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+                            // Stack: ArrayList, start, end
+                        }
+
+                        // Call ArrayApiUtils.slice(ArrayList, int, int)
+                        int sliceMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "slice",
+                                "(Ljava/util/ArrayList;II)Ljava/util/ArrayList;");
+                        code.invokestatic(sliceMethod);
 
                         return;
                     }
