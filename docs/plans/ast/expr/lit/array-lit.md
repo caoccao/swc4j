@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (145 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (152 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -558,32 +558,16 @@ const arr2 = [4, 5, 6]
 const merged = [0, ...arr1, ...arr2, 7]  // [0, 1, 2, 3, 4, 5, 6, 7]
 ```
 
-**Status:** ❌ Not implemented
+**Status:** ✅ Implemented (ArrayList mode only)
 
-**Detection:** `Swc4jAstArrayLit.isSpreadPresent()` method exists in AST
+**Detection:** `elem.getSpread().isPresent()` checks if element is a spread
 
-**Implementation Strategy:**
-```java
-for (var elemOpt : arrayLit.getElems()) {
-    if (elemOpt.isPresent()) {
-        var elem = elemOpt.get();
-        if (elem.getSpread().isPresent()) {
-            // Spread element - generate spread expression
-            ISwc4jAstExpr spreadExpr = elem.getExpr();
-            callback.generateExpr(code, cp, spreadExpr, null, context, options);
-
-            // Call list.addAll(spreadList) or manual array copying
-            int addAllMethod = cp.addMethodRef("java/util/ArrayList",
-                "addAll", "(Ljava/util/Collection;)Z");
-            code.invokevirtual(addAllMethod);
-            code.pop();  // Discard boolean return
-        } else {
-            // Regular element
-            // ... existing element generation
-        }
-    }
-}
-```
+**Implementation:**
+- **File:** ArrayLiteralGenerator.java lines 70-82
+- **Bytecode:** Uses `ArrayList.addAll(Collection)` to add all elements from spread array
+- **Sequence:** `dup` (keep ArrayList reference) → generate spread expression → `invokevirtual addAll` → `pop` (discard boolean return)
+- **Tests:** 7 comprehensive tests covering all spread scenarios
+- **Limitation:** Not supported for Java arrays (typed arrays like `int[]`) - requires ArrayList mode
 
 ---
 
@@ -955,12 +939,32 @@ arr.customProperty = "hello"  // JS allows this
   - **Mutation:** Original array is mutated in place, splice returns removed elements
   - **Stack manipulation:** Uses dup to keep array reference, creates temporary ArrayList for items, uses swap/pop to arrange return value
 
-### Phase 4: Spread Operator (Priority: HIGH)
-- [ ] Detect spread elements in AST
-- [ ] Generate `addAll()` for ArrayList
-- [ ] Array copying for Java arrays
-- [ ] Nested spreads
-- [ ] Test spread order
+### Phase 4: Spread Operator ✅ COMPLETE
+- [x] Detect spread elements in AST ✅ **IMPLEMENTED**
+  - **Implementation:** ArrayLiteralGenerator.java lines 70-82
+  - **Detection:** Uses `elem.getSpread().isPresent()` to check if element is a spread
+  - **Bytecode:** For spread elements, generates code for the spread expression and calls `ArrayList.addAll(Collection)` to add all elements at once
+  - **Return:** void (addAll returns boolean, but we pop it from stack)
+- [x] Generate `addAll()` for ArrayList ✅ **IMPLEMENTED**
+  - **Method:** `ArrayList.addAll(Collection)` - adds all elements from the spread array/collection
+  - **Bytecode sequence:** `dup` (keep ArrayList reference), generate spread expression, `invokevirtual addAll`, `pop` (discard boolean return)
+- [x] Nested spreads ✅ **IMPLEMENTED**
+  - **Support:** Nested spreads work because each spread element recursively generates its own ArrayList
+  - **Example:** `[...[...arr]]` - inner spread generates ArrayList, outer spread calls addAll on it
+- [x] Test spread order ✅ **IMPLEMENTED**
+  - **Tests:** 7 comprehensive tests covering basic spread, multiple spreads, mixed elements, nested spreads, empty arrays, strings, and complex multiple spreads with mixed elements
+  - **Test coverage:**
+    - `testSpreadBasic` - Basic spread: `[...arr]`
+    - `testSpreadMultiple` - Multiple spreads: `[...arr1, ...arr2]`
+    - `testSpreadMixedElements` - Mixed elements and spreads: `[1, ...arr, 4]`
+    - `testSpreadNested` - Nested spreads: `[...[...arr]]`
+    - `testSpreadEmpty` - Empty array spread: `[...[]]`
+    - `testSpreadWithStrings` - Spread with string arrays
+    - `testSpreadMultipleWithMixed` - Complex: `[...arr1, 3, 4, ...arr2, 7]`
+- [ ] Array copying for Java arrays ❌ NOT IMPLEMENTED
+  - **Status:** Spread operator not supported for typed Java arrays (e.g., `int[]`)
+  - **Reason:** Java arrays are fixed-size, cannot use `addAll()` method
+  - **Future:** Could implement by creating new larger array and copying elements, but deferred for now
 
 ### Phase 5: Advanced Features (Priority: MEDIUM)
 - [ ] Multi-dimensional arrays
@@ -1028,9 +1032,9 @@ list.set(index, null);  // Creates hole
 **Status:** Fundamental difference - ArrayList is not an object
 
 ### 7. Spread Operator
-**Issue:** Not implemented yet
+**Status:** ✅ Implemented for ArrayList mode
 
-**Priority:** HIGH - common feature
+**Limitation:** Not supported for Java arrays (typed arrays) - requires dynamic ArrayList
 
 ### 8. Functional Methods
 **Issue:** Requires function/lambda support
@@ -1237,13 +1241,24 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (145 tests passing)
+**Current Implementation:** ✅ Solid foundation (152 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
 - Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()` ✅
+- Spread operator support for ArrayList mode ✅
 
 **Recently Completed:**
+- ✅ **Spread operator** - Implemented in ArrayLiteralGenerator.java for ArrayList mode
+  - Detects spread elements using `elem.getSpread().isPresent()`
+  - Uses `ArrayList.addAll(Collection)` to add all elements from spread arrays
+  - 7 comprehensive tests added covering all spread scenarios
+  - Supports nested spreads: `[...[...arr]]`
+  - Supports multiple spreads: `[...arr1, ...arr2]`
+  - Supports mixed elements and spreads: `[1, ...arr, 2]`
+  - **Bytecode sequence:** `dup` (keep ArrayList reference) → generate spread expression → `invokevirtual addAll` → `pop` (discard boolean return)
+  - **Limitation:** Not supported for Java arrays (typed arrays like `int[]`) - requires ArrayList mode
+
 - ✅ **splice() method** - Implemented in CallExpressionGenerator.java with ArrayApiUtils runtime utility
   - Removes and/or inserts elements at a specific position in ArrayList (mutating)
   - 14 comprehensive tests added covering all edge cases
@@ -1260,9 +1275,9 @@ namespace com {
   - **Mutation and return:** Uses dup to keep original array reference, splice mutates it, uses swap/pop to return removed elements
 
 **Next Steps:**
-1. Implement spread operator support (HIGH priority)
-2. Fix delete behavior to create holes instead of shifting
-3. Test nested and multi-dimensional arrays thoroughly
+1. Fix delete behavior to create holes instead of shifting
+2. Test nested and multi-dimensional arrays thoroughly
+3. Add more array methods (fill, copyWithin, toString, etc.)
 4. Add functional methods (when function support is available)
 
 **Key Differences from JavaScript:**

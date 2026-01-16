@@ -55,6 +55,7 @@ public final class ArrayLiteralGenerator {
             int arrayListClass = cp.addClass("java/util/ArrayList");
             int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
             int arrayListAdd = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
+            int arrayListAddAll = cp.addMethodRef("java/util/ArrayList", "addAll", "(Ljava/util/Collection;)Z");
 
             // Create new ArrayList instance
             code.newInstance(arrayListClass);
@@ -65,24 +66,40 @@ public final class ArrayLiteralGenerator {
             for (var elemOpt : arrayLit.getElems()) {
                 if (elemOpt.isPresent()) {
                     var elem = elemOpt.get();
-                    code.dup(); // Duplicate ArrayList reference
-                    // Generate code for the element expression - ensure it's boxed
-                    ISwc4jAstExpr elemExpr = elem.getExpr();
-                    String elemType = TypeResolver.inferTypeFromExpr(elemExpr, context, options);
-                    if (elemType == null) elemType = "Ljava/lang/Object;";
 
-                    callback.generateExpr(code, cp, elemExpr, null, context, options);
+                    // Check if this is a spread element
+                    if (elem.getSpread().isPresent()) {
+                        // Spread element: ...array
+                        code.dup(); // Duplicate ArrayList reference
+                        ISwc4jAstExpr elemExpr = elem.getExpr();
 
-                    // Box primitives to objects
-                    if ("I".equals(elemType) || "Z".equals(elemType) || "B".equals(elemType) ||
-                            "C".equals(elemType) || "S".equals(elemType) || "J".equals(elemType) ||
-                            "F".equals(elemType) || "D".equals(elemType)) {
-                        TypeConversionUtils.boxPrimitiveType(code, cp, elemType, TypeConversionUtils.getWrapperType(elemType));
+                        // Generate code for the spread expression (should be an array/collection)
+                        callback.generateExpr(code, cp, elemExpr, null, context, options);
+
+                        // Call ArrayList.addAll(Collection) to add all elements
+                        code.invokevirtual(arrayListAddAll);
+                        code.pop(); // Pop the boolean return value from addAll()
+                    } else {
+                        // Regular element
+                        code.dup(); // Duplicate ArrayList reference
+                        // Generate code for the element expression - ensure it's boxed
+                        ISwc4jAstExpr elemExpr = elem.getExpr();
+                        String elemType = TypeResolver.inferTypeFromExpr(elemExpr, context, options);
+                        if (elemType == null) elemType = "Ljava/lang/Object;";
+
+                        callback.generateExpr(code, cp, elemExpr, null, context, options);
+
+                        // Box primitives to objects
+                        if ("I".equals(elemType) || "Z".equals(elemType) || "B".equals(elemType) ||
+                                "C".equals(elemType) || "S".equals(elemType) || "J".equals(elemType) ||
+                                "F".equals(elemType) || "D".equals(elemType)) {
+                            TypeConversionUtils.boxPrimitiveType(code, cp, elemType, TypeConversionUtils.getWrapperType(elemType));
+                        }
+
+                        // Call ArrayList.add(Object)
+                        code.invokevirtual(arrayListAdd);
+                        code.pop(); // Pop the boolean return value from add()
                     }
-
-                    // Call ArrayList.add(Object)
-                    code.invokevirtual(arrayListAdd);
-                    code.pop(); // Pop the boolean return value from add()
                 }
             }
             // ArrayList reference is now on top of stack
