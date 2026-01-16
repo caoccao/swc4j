@@ -478,6 +478,90 @@ public final class CallExpressionGenerator {
 
                         return;
                     }
+                    case "fill" -> {
+                        // arr.fill(value, start, end) -> ArrayApiUtils.fill(arr, value, [start], [end])
+                        // Returns the array itself (mutates in place)
+                        int argCount = callExpr.getArgs().size();
+
+                        if (argCount == 0) {
+                            // No value provided - throw error
+                            throw new Swc4jByteCodeCompilerException("fill() requires at least one argument (value)");
+                        }
+
+                        // Stack starts with: ArrayList
+
+                        // Generate the value argument
+                        var valueArg = callExpr.getArgs().get(0);
+                        ExpressionGenerator.generate(code, cp, valueArg.getExpr(), null, context, options);
+                        // Stack: ArrayList, value
+
+                        // Box primitive value if needed
+                        String valueType = TypeResolver.inferTypeFromExpr(valueArg.getExpr(), context, options);
+                        if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
+                            TypeConversionUtils.boxPrimitiveType(code, cp, valueType, TypeConversionUtils.getWrapperType(valueType));
+                        }
+                        // Stack: ArrayList, value (Object)
+
+                        if (argCount == 1) {
+                            // fill(value) - fill entire array
+                            // Stack: ArrayList, value
+                            // Call ArrayApiUtils.fill(ArrayList, Object)
+                            int fillMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "fill",
+                                    "(Ljava/util/ArrayList;Ljava/lang/Object;)Ljava/util/ArrayList;");
+                            code.invokestatic(fillMethod);
+
+                        } else if (argCount == 2) {
+                            // fill(value, start) - fill from start to end
+                            var startArg = callExpr.getArgs().get(1);
+                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+                            // Stack: ArrayList, value, start
+
+                            // Unbox if needed
+                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+                            // Stack: ArrayList, value, start
+
+                            // Call ArrayApiUtils.fill(ArrayList, Object, int)
+                            int fillMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "fill",
+                                    "(Ljava/util/ArrayList;Ljava/lang/Object;I)Ljava/util/ArrayList;");
+                            code.invokestatic(fillMethod);
+
+                        } else {
+                            // fill(value, start, end) - three arguments
+                            var startArg = callExpr.getArgs().get(1);
+                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+
+                            // Unbox start if needed
+                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+                            // Stack: ArrayList, value, start
+
+                            var endArg = callExpr.getArgs().get(2);
+                            ExpressionGenerator.generate(code, cp, endArg.getExpr(), null, context, options);
+
+                            // Unbox end if needed
+                            String endType = TypeResolver.inferTypeFromExpr(endArg.getExpr(), context, options);
+                            if (endType != null && "Ljava/lang/Integer;".equals(endType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+                            // Stack: ArrayList, value, start, end
+
+                            // Call ArrayApiUtils.fill(ArrayList, Object, int, int)
+                            int fillMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "fill",
+                                    "(Ljava/util/ArrayList;Ljava/lang/Object;II)Ljava/util/ArrayList;");
+                            code.invokestatic(fillMethod);
+                        }
+                        // Stack: ArrayList (returned)
+
+                        return;
+                    }
                 }
             }
         }

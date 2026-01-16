@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
+import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -250,6 +251,220 @@ public class TestCompileAstArrayLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals(2, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayFillBothNegative(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.fill(0, -4, -1)
+                      return arr
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 0, 0, 0, 5), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayFillEmptyArray(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = []
+                      arr.fill(0)
+                      return arr
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayFillEntireArray(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.fill(0)
+                      return arr
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(0, 0, 0, 0, 0), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayFillMethodChaining(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.fill(0, 1, 3).reverse()
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(5, 4, 0, 0, 1), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayFillNegativeEnd(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.fill(0, 1, -1)
+                      return arr
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 0, 0, 0, 5), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayFillNegativeStart(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.fill(0, -3)
+                      return arr
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 2, 0, 0, 0), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayFillOutOfBoundsStart(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3]
+                      arr.fill(0, 10)
+                      return arr
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayFillReturnsArray(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.fill(0, 2, 4)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 2, 0, 0, 5), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayFillStartGreaterThanEnd(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.fill(0, 3, 1)
+                      return arr
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 2, 3, 4, 5), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayFillWithStart(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.fill(0, 2)
+                      return arr
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 2, 0, 0, 0), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayFillWithStartAndEnd(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.fill(0, 1, 4)
+                      return arr
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 0, 0, 0, 5), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayFillWithString(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.fill("x", 1, 4)
+                      return arr
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, "x", "x", "x", 5), classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -2259,6 +2474,23 @@ public class TestCompileAstArrayLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testJavaArrayFillNotSupported(JdkVersion jdkVersion) {
+        assertThrows(Swc4jByteCodeCompilerException.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const arr: int[] = [1, 2, 3, 4, 5]
+                          arr.fill(0)
+                          return arr
+                        }
+                      }
+                    }""");
+        });
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testJavaArrayIncludesNotSupported(JdkVersion jdkVersion) {
         try {
             getCompiler(jdkVersion).compile("""
@@ -2632,6 +2864,127 @@ public class TestCompileAstArrayLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testSpreadBasic(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3]
+                      return [...arr]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSpreadEmpty(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = []
+                      return [...arr]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSpreadMixedElements(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [2, 3]
+                      return [1, ...arr, 4]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 2, 3, 4), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSpreadMultiple(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr1 = [1, 2]
+                      const arr2 = [3, 4]
+                      return [...arr1, ...arr2]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 2, 3, 4), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSpreadMultipleWithMixed(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr1 = [1, 2]
+                      const arr2 = [5, 6]
+                      return [...arr1, 3, 4, ...arr2, 7]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSpreadNested(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3]
+                      return [...[...arr]]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSpreadWithStrings(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = ["hello", "world"]
+                      return [...arr, "!"]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of("hello", "world", "!"), classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testStringArray(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -2663,126 +3016,5 @@ public class TestCompileAstArrayLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         assertEquals("goodbye", classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSpreadBasic(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const arr = [1, 2, 3]
-                      return [...arr]
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSpreadMultiple(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const arr1 = [1, 2]
-                      const arr2 = [3, 4]
-                      return [...arr1, ...arr2]
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of(1, 2, 3, 4), classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSpreadMixedElements(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const arr = [2, 3]
-                      return [1, ...arr, 4]
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of(1, 2, 3, 4), classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSpreadNested(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const arr = [1, 2, 3]
-                      return [...[...arr]]
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSpreadEmpty(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const arr = []
-                      return [...arr]
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSpreadWithStrings(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const arr = ["hello", "world"]
-                      return [...arr, "!"]
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of("hello", "world", "!"), classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSpreadMultipleWithMixed(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const arr1 = [1, 2]
-                      const arr2 = [5, 6]
-                      return [...arr1, 3, 4, ...arr2, 7]
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(List.of(1, 2, 3, 4, 5, 6, 7), classA.getMethod("test").invoke(instance));
     }
 }

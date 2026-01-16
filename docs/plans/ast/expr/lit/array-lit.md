@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (152 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (165 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -194,7 +194,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | `splice(i, n, ...)` | `ArrayApiUtils.splice()` | Remove/insert elements, returns removed | ✅ Implemented |
 | `reverse()` | `Collections.reverse(list)` | Mutates in place, returns array | ✅ Implemented |
 | `sort()` | `Collections.sort(list)` | Mutates in place, returns array | ✅ Implemented |
-| `fill(val, start, end)` | Loop with `set()` | Fill range with value | ❌ Not implemented |
+| `fill(val, start, end)` | `ArrayApiUtils.fill()` | Fill range with value, returns array | ✅ Implemented |
 | `copyWithin(t, s, e)` | Manual copy | Copy within array | ❌ Not implemented |
 
 ### Non-Mutating Methods (Both ArrayList and Arrays)
@@ -967,10 +967,35 @@ arr.customProperty = "hello"  // JS allows this
   - **Future:** Could implement by creating new larger array and copying elements, but deferred for now
 
 ### Phase 5: Advanced Features (Priority: MEDIUM)
+- [x] `fill(value, start, end)` ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 481-564, ArrayApiUtils.java lines 149-202
+  - **Bytecode:** Calls overloaded `ArrayApiUtils.fill()` static methods based on argument count
+  - **Method signatures:**
+    - `fill(ArrayList, Object)` - fills entire array
+    - `fill(ArrayList, Object, int)` - fills from start to end
+    - `fill(ArrayList, Object, int, int)` - fills from start to end (exclusive)
+  - **Return:** ArrayList (the array itself) - JavaScript's fill() returns the array for method chaining
+  - **Tests:** 13 comprehensive tests covering all argument combinations, negative indices, out of bounds, empty arrays, method chaining, error handling
+  - **Test coverage:**
+    - `testArrayFillEntireArray` - fill(value) fills entire array
+    - `testArrayFillWithStart` - fill(value, start) fills from start
+    - `testArrayFillWithStartAndEnd` - fill(value, start, end) fills range
+    - `testArrayFillNegativeStart` - Negative start index
+    - `testArrayFillNegativeEnd` - Negative end index
+    - `testArrayFillBothNegative` - Both negative indices
+    - `testArrayFillWithString` - fill() with string values
+    - `testArrayFillEmptyArray` - fill() on empty array (no-op)
+    - `testArrayFillReturnsArray` - fill() returns the array
+    - `testArrayFillOutOfBoundsStart` - Out of bounds start (clamped)
+    - `testArrayFillStartGreaterThanEnd` - Invalid range (no-op)
+    - `testArrayFillMethodChaining` - Method chaining with fill().reverse()
+    - `testJavaArrayFillNotSupported` - Error for Java arrays
+  - **Helper methods:** Three overloaded fill() methods in ArrayApiUtils for different argument counts
+  - **Index handling:** Negative indices converted to positive, out of bounds indices clamped to valid range
+  - **Edge cases:** Empty arrays, start >= end (no-op), out of bounds indices handled correctly
 - [ ] Multi-dimensional arrays
 - [ ] Array methods with return values
 - [ ] `toString()` / `toLocaleString()`
-- [ ] `fill(value, start, end)`
 - [ ] `copyWithin(target, start, end)`
 - [ ] ES2023 non-mutating methods (`toReversed`, `toSorted`, `with`)
 
@@ -1241,14 +1266,28 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (152 tests passing)
+**Current Implementation:** ✅ Solid foundation (165 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()` ✅
 - Spread operator support for ArrayList mode ✅
 
 **Recently Completed:**
+- ✅ **fill() method** - Implemented in CallExpressionGenerator.java with overloaded ArrayApiUtils helpers
+  - Fills all or part of an ArrayList with a static value (mutating)
+  - 13 comprehensive tests added covering all argument combinations and edge cases
+  - Returns the ArrayList (the array itself) for method chaining
+  - Uses three overloaded ArrayApiUtils.fill() static methods based on argument count
+  - Supports three calling patterns:
+    - `fill(value)` - fills entire array (start=0, end=length)
+    - `fill(value, start)` - fills from start to end (end=length)
+    - `fill(value, start, end)` - fills from start to end (exclusive)
+  - Handles negative start/end indices (count from end), out of bounds indices (clamped to valid range)
+  - **Method signatures:** fill(ArrayList, Object), fill(ArrayList, Object, int), fill(ArrayList, Object, int, int)
+  - **Bytecode generation:** Calls appropriate overloaded method based on argCount, boxing value if primitive
+  - **Limitation:** Not supported for Java arrays (throws compilation error)
+
 - ✅ **Spread operator** - Implemented in ArrayLiteralGenerator.java for ArrayList mode
   - Detects spread elements using `elem.getSpread().isPresent()`
   - Uses `ArrayList.addAll(Collection)` to add all elements from spread arrays
@@ -1277,7 +1316,7 @@ namespace com {
 **Next Steps:**
 1. Fix delete behavior to create holes instead of shifting
 2. Test nested and multi-dimensional arrays thoroughly
-3. Add more array methods (fill, copyWithin, toString, etc.)
+3. Add more array methods (copyWithin, toString, etc.)
 4. Add functional methods (when function support is available)
 
 **Key Differences from JavaScript:**

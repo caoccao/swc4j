@@ -51,6 +51,61 @@ public final class ArrayApiUtils {
     }
 
     /**
+     * Fill entire ArrayList with a static value.
+     * JavaScript equivalent: arr.fill(value)
+     *
+     * @param list  the ArrayList to modify (mutated in place)
+     * @param value the value to fill
+     * @return the modified ArrayList (same reference as input)
+     */
+    public static ArrayList<Object> fill(ArrayList<Object> list, Object value) {
+        return fill(list, value, 0, list == null ? 0 : list.size());
+    }
+
+    /**
+     * Fill ArrayList from start index to end with a static value.
+     * JavaScript equivalent: arr.fill(value, start)
+     *
+     * @param list  the ArrayList to modify (mutated in place)
+     * @param value the value to fill
+     * @param start the beginning index (inclusive), negative values count from end
+     * @return the modified ArrayList (same reference as input)
+     */
+    public static ArrayList<Object> fill(ArrayList<Object> list, Object value, int start) {
+        return fill(list, value, start, list == null ? 0 : list.size());
+    }
+
+    /**
+     * Fill all or part of an ArrayList with a static value.
+     * JavaScript equivalent: arr.fill(value, start, end)
+     *
+     * @param list  the ArrayList to modify (mutated in place)
+     * @param value the value to fill
+     * @param start the beginning index (inclusive), negative values count from end
+     * @param end   the ending index (exclusive), negative values count from end
+     * @return the modified ArrayList (same reference as input)
+     */
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Object> fill(ArrayList<Object> list, Object value, int start, int end) {
+        if (list == null || list.isEmpty()) {
+            return list;
+        }
+
+        int length = list.size();
+
+        // Handle negative indices
+        int actualStart = start < 0 ? Math.max(0, length + start) : Math.min(start, length);
+        int actualEnd = end < 0 ? Math.max(0, length + end) : Math.min(end, length);
+
+        // Fill elements from start to end (exclusive)
+        for (int i = actualStart; i < actualEnd; i++) {
+            list.set(i, value);
+        }
+
+        return list;
+    }
+
+    /**
      * Join ArrayList elements into a string with the specified separator.
      * JavaScript equivalent: arr.join(separator)
      *
