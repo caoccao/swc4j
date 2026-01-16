@@ -107,4 +107,42 @@ public final class ArrayApiUtils {
         // Create new ArrayList from subList
         return new ArrayList<>(list.subList(actualStart, actualEnd));
     }
+
+    /**
+     * Remove and/or insert elements at a specific position in an ArrayList.
+     * JavaScript equivalent: arr.splice(start, deleteCount, ...items)
+     *
+     * @param list        the ArrayList to modify (mutated in place)
+     * @param start       the beginning index, negative values count from end
+     * @param deleteCount the number of elements to remove
+     * @param items       the ArrayList of items to insert (can be null or empty)
+     * @return a new ArrayList containing the removed elements
+     */
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Object> splice(ArrayList<Object> list, int start, int deleteCount, ArrayList<?> items) {
+        if (list == null) {
+            return new ArrayList<>();
+        }
+
+        int length = list.size();
+
+        // Handle negative start index
+        int actualStart = start < 0 ? Math.max(0, length + start) : Math.min(start, length);
+
+        // Clamp deleteCount to valid range
+        int actualDeleteCount = Math.max(0, Math.min(deleteCount, length - actualStart));
+
+        // Collect removed elements
+        ArrayList<Object> removed = new ArrayList<>();
+        for (int i = 0; i < actualDeleteCount; i++) {
+            removed.add(list.remove(actualStart));
+        }
+
+        // Insert new items at the position
+        if (items != null && !items.isEmpty()) {
+            list.addAll(actualStart, items);
+        }
+
+        return removed;
+    }
 }

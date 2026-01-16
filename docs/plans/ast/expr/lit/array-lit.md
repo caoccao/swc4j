@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (131 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (145 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -191,7 +191,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | `pop()` | `remove(size()-1)` | Returns removed element | ✅ Implemented |
 | `shift()` | `remove(0)` | Returns removed element | ✅ Implemented |
 | `unshift(elem)` | `add(0, elem)` | Returns new length | ✅ Implemented |
-| `splice(i, n, ...)` | Multiple operations | Complex - add/remove | ❌ Not implemented |
+| `splice(i, n, ...)` | `ArrayApiUtils.splice()` | Remove/insert elements, returns removed | ✅ Implemented |
 | `reverse()` | `Collections.reverse(list)` | Mutates in place, returns array | ✅ Implemented |
 | `sort()` | `Collections.sort(list)` | Mutates in place, returns array | ✅ Implemented |
 | `fill(val, start, end)` | Loop with `set()` | Fill range with value | ❌ Not implemented |
@@ -938,7 +938,22 @@ arr.customProperty = "hello"  // JS allows this
   - **Negative indices:** Converted to positive by adding array length (e.g., -1 becomes length-1)
   - **Bounds checking:** Out of bounds indices are clamped to valid range [0, length]
   - **Stack manipulation:** Complex bytecode for argument cases using dup, dup_x1, dup_x2, swap, pop to arrange stack properly for static method call
-- [ ] `splice(index, count, ...items)` - Complex insertion/deletion
+- [x] `splice(index, count, ...items)` - Complex insertion/deletion ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 366-480
+  - **Bytecode:** Calls `ArrayApiUtils.splice(ArrayList, int, int, ArrayList)Ljava/util/ArrayList;` static helper method with start index, deleteCount, and items to insert
+  - **Return:** ArrayList (new array) - JavaScript's splice() returns an array of removed elements
+  - **Tests:** 14 comprehensive tests covering basic splice with start and deleteCount, mutates original array, insert items while deleting, only start (remove to end), no arguments (returns empty), negative start index, insert without delete (deleteCount=0), delete all elements, strings, empty array, returns removed elements, single item, out of bounds start, error handling for Java arrays
+  - **Helper:** ArrayApiUtils.java runtime utility class with static splice() method
+  - **Argument handling:**
+    - No arguments: `splice()` - removes nothing, returns empty array
+    - One argument: `splice(start)` - removes from start to end (deleteCount=Integer.MAX_VALUE)
+    - Two arguments: `splice(start, deleteCount)` - removes deleteCount elements starting at start
+    - Three+ arguments: `splice(start, deleteCount, item1, item2, ...)` - removes and inserts items
+  - **Negative start:** Converted to positive by adding array length (e.g., -2 becomes length-2)
+  - **DeleteCount clamping:** Clamped to valid range [0, length - actualStart]
+  - **Items collection:** Variable arguments collected into a temporary ArrayList and passed to helper method
+  - **Mutation:** Original array is mutated in place, splice returns removed elements
+  - **Stack manipulation:** Uses dup to keep array reference, creates temporary ArrayList for items, uses swap/pop to arrange return value
 
 ### Phase 4: Spread Operator (Priority: HIGH)
 - [ ] Detect spread elements in AST
@@ -1222,32 +1237,33 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (131 tests passing)
+**Current Implementation:** ✅ Solid foundation (145 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()` ✅
 
 **Recently Completed:**
-- ✅ **slice() method** - Implemented in CallExpressionGenerator.java with ArrayApiUtils runtime utility
-  - Extracts a section of an ArrayList and returns it as a new ArrayList (non-mutating)
-  - 13 comprehensive tests added covering all edge cases
+- ✅ **splice() method** - Implemented in CallExpressionGenerator.java with ArrayApiUtils runtime utility
+  - Removes and/or inserts elements at a specific position in ArrayList (mutating)
+  - 14 comprehensive tests added covering all edge cases
   - Error handling for Java arrays (throws exception)
-  - Returns new ArrayList containing extracted elements
-  - Uses ArrayApiUtils.slice() static method with negative index handling and bounds checking
-  - Supports three calling patterns:
-    - `slice()` - copy entire array
-    - `slice(start)` - from start to end
-    - `slice(start, end)` - from start to end (exclusive)
-  - Handles negative indices (count from end), out of bounds indices (clamped), and method chaining
-  - **Complex stack manipulation:** Uses dup, dup_x1, dup_x2, swap, pop instructions to arrange arguments properly for each calling pattern
+  - Returns new ArrayList containing removed elements
+  - Uses ArrayApiUtils.splice() static method with negative index handling and deleteCount clamping
+  - Supports four calling patterns:
+    - `splice()` - removes nothing, returns empty array
+    - `splice(start)` - removes from start to end
+    - `splice(start, deleteCount)` - removes deleteCount elements
+    - `splice(start, deleteCount, item1, item2, ...)` - removes and inserts items
+  - Handles negative start index (count from end), deleteCount clamping, variable arguments for items
+  - **Variable arguments handling:** Collects all items into a temporary ArrayList using newInstance, dup, add() in a loop
+  - **Mutation and return:** Uses dup to keep original array reference, splice mutates it, uses swap/pop to return removed elements
 
 **Next Steps:**
-1. Implement remaining Phase 3 method (`splice`)
-2. Implement spread operator support (HIGH priority)
-3. Fix delete behavior to create holes instead of shifting
-4. Test nested and multi-dimensional arrays thoroughly
-5. Add functional methods (when function support is available)
+1. Implement spread operator support (HIGH priority)
+2. Fix delete behavior to create holes instead of shifting
+3. Test nested and multi-dimensional arrays thoroughly
+4. Add functional methods (when function support is available)
 
 **Key Differences from JavaScript:**
 - No arbitrary properties on arrays

@@ -375,7 +375,7 @@ public final class TypeResolver {
                         String methodName = propIdent.getSym();
                         // Methods that return ArrayList
                         switch (methodName) {
-                            case "concat", "reverse", "sort", "slice" -> {
+                            case "concat", "reverse", "sort", "slice", "splice" -> {
                                 return "Ljava/util/ArrayList;";
                             }
                             case "join" -> {
