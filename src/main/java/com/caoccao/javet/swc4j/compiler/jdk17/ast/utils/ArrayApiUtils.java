@@ -349,6 +349,33 @@ public final class ArrayApiUtils {
     }
 
     /**
+     * Create a copy of the ArrayList with elements removed and/or inserted.
+     * JavaScript equivalent: arr.toSpliced(start, deleteCount, ...items) (ES2023)
+     * This is the non-mutating version of splice() that returns the modified array.
+     *
+     * @param list        the ArrayList to copy
+     * @param start       the beginning index, negative values count from end
+     * @param deleteCount the number of elements to remove
+     * @param items       the ArrayList of items to insert (can be null or empty)
+     * @return a new ArrayList with the modifications applied
+     */
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Object> toSpliced(ArrayList<?> list, int start, int deleteCount, ArrayList<?> items) {
+        if (list == null) {
+            return new ArrayList<>();
+        }
+
+        // Create a copy of the list
+        ArrayList<Object> result = new ArrayList<>(list);
+
+        // Call splice on the copy (splice mutates and returns removed elements)
+        splice(result, start, deleteCount, items);
+
+        // Return the modified copy (not the removed elements)
+        return result;
+    }
+
+    /**
      * Create a copy of the ArrayList with a single element changed.
      * JavaScript equivalent: arr.with(index, value) (ES2023)
      *

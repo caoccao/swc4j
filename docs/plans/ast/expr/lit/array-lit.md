@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (242 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (255 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -232,7 +232,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 |------------------|----------------|-------|---------|
 | `toReversed()` | `new ArrayList<>(list); reverse()` | Returns new array | ✅ Implemented |
 | `toSorted()` | `new ArrayList<>(list); sort()` | Returns new array | ✅ Implemented |
-| `toSpliced(i, n, ...)` | Manual copy + splice | Returns new array | ❌ Not implemented |
+| `toSpliced(i, n, ...)` | Manual copy + splice | Returns new array | ✅ Implemented |
 | `with(index, value)` | `new ArrayList<>(list); set()` | Returns new array | ✅ Implemented |
 
 ### Iterator Methods
@@ -1126,9 +1126,31 @@ arr.customProperty = "hello"  // JS allows this
   - **Key difference from JavaScript:** Out of bounds indices return copy without modification instead of throwing RangeError
   - **ES2023 feature:** Part of ES2023 specification for non-mutating array operations
   - **Use case:** Create array variant with one element changed without modifying original
+- [x] `toSpliced(start, deleteCount, ...items)` - ES2023 non-mutating splice ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 272-375, ArrayApiUtils.java lines 387-412
+  - **Bytecode:** Calls `ArrayApiUtils.toSpliced(ArrayList, int, int, ArrayList)` static method
+  - **Return:** ArrayList (new array) - copy with elements removed and/or inserted
+  - **Tests:** 13 comprehensive tests covering basic usage, non-mutating behavior, empty arrays, insertions, deletions, negative indices, method chaining, different types
+  - **Test coverage:**
+    - `testArrayToSplicedBasic` - Basic toSpliced() removes elements
+    - `testArrayToSplicedDoesNotMutateOriginal` - Verifies original array unchanged
+    - `testArrayToSplicedEmpty` - Empty array returns empty array
+    - `testArrayToSplicedInsertItems` - Insert items without deleting (deleteCount=0)
+    - `testArrayToSplicedInsertWhileDeleting` - Insert while deleting
+    - `testArrayToSplicedMethodChaining` - Method chaining with sort()
+    - `testArrayToSplicedNegativeStart` - Negative start index
+    - `testArrayToSplicedNoArguments` - No arguments returns copy
+    - `testArrayToSplicedOnlyStart` - Only start (remove to end)
+    - `testArrayToSplicedOutOfBounds` - Out of bounds handling
+    - `testArrayToSplicedReturnsNewArray` - Returns new array
+    - `testArrayToSplicedSingleElement` - Single element handling
+    - `testArrayToSplicedStrings` - String arrays
+  - **Helper method:** toSpliced() in ArrayApiUtils creates copy, calls splice on copy, returns modified copy
+  - **Key difference from splice():** Creates new array and returns modified array (not removed elements), doesn't mutate original
+  - **ES2023 feature:** Part of ES2023 specification for non-mutating array operations
+  - **Use case:** Get modified array with elements removed/inserted without mutating original
 - [ ] Multi-dimensional arrays
 - [ ] Array methods with return values
-- [ ] ES2023 non-mutating methods (`toSpliced`)
 
 ### Phase 6: Functional Methods (Priority: LOW - Requires Functions)
 - [ ] `forEach(callback)`
@@ -1397,15 +1419,26 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (242 tests passing)
+**Current Implementation:** ✅ Solid foundation (255 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `lastIndexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()`, `toString()`, `toLocaleString()`, `toReversed()`, `toSorted()`, `with()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `lastIndexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()`, `toString()`, `toLocaleString()`, `toReversed()`, `toSorted()`, `with()`, `toSpliced()` ✅
 - Spread operator support for ArrayList mode ✅
-- ES2023 non-mutating methods: `toReversed()`, `toSorted()`, `with()` ✅
+- ES2023 non-mutating methods: `toReversed()`, `toSorted()`, `with()`, `toSpliced()` ✅
 
 **Recently Completed:**
+- ✅ **toSpliced() method (ES2023)** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
+  - Non-mutating version of splice() that returns a new array with elements removed/inserted
+  - 13 comprehensive tests added covering all scenarios including insertions, deletions, negative indices
+  - Returns new ArrayList with modifications applied (removes/inserts elements)
+  - Original array remains unchanged (key difference from splice())
+  - **Bytecode generation:** Calls ArrayApiUtils.toSpliced(ArrayList, int, int, ArrayList) which returns new ArrayList
+  - **Helper method:** Creates copy using ArrayList constructor, calls splice on copy, returns modified copy
+  - **ES2023 compliance:** Part of ES2023 specification for non-mutating array operations
+  - **Key difference from splice():** Returns the modified array (not removed elements), doesn't mutate original
+  - **Use case:** Get modified array with elements removed/inserted without mutating original
+
 - ✅ **with() method (ES2023)** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
   - Non-mutating method that returns a new array with one element changed
   - 13 comprehensive tests added covering all scenarios including negative indices and edge cases

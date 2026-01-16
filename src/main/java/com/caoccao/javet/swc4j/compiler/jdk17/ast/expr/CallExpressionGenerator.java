@@ -269,6 +269,110 @@ public final class CallExpressionGenerator {
 
                         return;
                     }
+                    case "toSpliced" -> {
+                        // arr.toSpliced(start, deleteCount, ...items) -> ArrayApiUtils.toSpliced(arr, start, deleteCount, items)
+                        // Returns new array with elements removed/inserted (ES2023 non-mutating)
+                        // Stack: ArrayList
+
+                        int argCount = callExpr.getArgs().size();
+
+                        if (argCount == 0) {
+                            // No arguments: toSpliced() - returns copy with no changes
+                            code.iconst(0);  // start = 0
+                            code.iconst(0);  // deleteCount = 0
+                            code.aconst_null();  // items = null
+                        } else if (argCount == 1) {
+                            // One argument: toSpliced(start) - remove from start to end
+                            var startArg = callExpr.getArgs().get(0);
+                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+
+                            // Unbox if Integer
+                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+                            // Stack: ArrayList, start
+
+                            // deleteCount = Integer.MAX_VALUE (remove all after start)
+                            code.ldc(cp.addInteger(Integer.MAX_VALUE));
+                            // Stack: ArrayList, start, deleteCount
+
+                            code.aconst_null();  // items = null
+                            // Stack: ArrayList, start, deleteCount, null
+                        } else {
+                            // Two or more arguments: toSpliced(start, deleteCount, ...items)
+                            // Generate start parameter
+                            var startArg = callExpr.getArgs().get(0);
+                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+
+                            // Unbox if Integer
+                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+                            // Stack: ArrayList, start
+
+                            // Generate deleteCount parameter
+                            var deleteCountArg = callExpr.getArgs().get(1);
+                            ExpressionGenerator.generate(code, cp, deleteCountArg.getExpr(), null, context, options);
+
+                            // Unbox if Integer
+                            String deleteCountType = TypeResolver.inferTypeFromExpr(deleteCountArg.getExpr(), context, options);
+                            if (deleteCountType != null && "Ljava/lang/Integer;".equals(deleteCountType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+                            // Stack: ArrayList, start, deleteCount
+
+                            // Create ArrayList for items to insert (if any)
+                            if (argCount > 2) {
+                                // Create new ArrayList for items
+                                int arrayListClass = cp.addClass("java/util/ArrayList");
+                                int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "()V");
+                                int addMethod = cp.addMethodRef("java/util/ArrayList", "add", "(Ljava/lang/Object;)Z");
+
+                                code.newInstance(arrayListClass);
+                                code.dup();
+                                code.invokespecial(arrayListInit);
+                                // Stack: ArrayList, start, deleteCount, itemsList
+
+                                // Add each item to the items ArrayList
+                                for (int i = 2; i < argCount; i++) {
+                                    code.dup();  // Duplicate itemsList for add() call
+                                    // Stack: ArrayList, start, deleteCount, itemsList, itemsList
+
+                                    var itemArg = callExpr.getArgs().get(i);
+                                    ExpressionGenerator.generate(code, cp, itemArg.getExpr(), null, context, options);
+                                    // Stack: ArrayList, start, deleteCount, itemsList, itemsList, item
+
+                                    // Box if primitive
+                                    String itemType = TypeResolver.inferTypeFromExpr(itemArg.getExpr(), context, options);
+                                    if (itemType != null && TypeConversionUtils.isPrimitiveType(itemType)) {
+                                        TypeConversionUtils.boxPrimitiveType(code, cp, itemType, TypeConversionUtils.getWrapperType(itemType));
+                                    }
+
+                                    code.invokevirtual(addMethod);
+                                    code.pop();  // Pop the boolean return value
+                                    // Stack: ArrayList, start, deleteCount, itemsList
+                                }
+                                // Stack: ArrayList, start, deleteCount, itemsList
+                            } else {
+                                // No items to insert
+                                code.aconst_null();
+                                // Stack: ArrayList, start, deleteCount, null
+                            }
+                        }
+
+                        // Call ArrayApiUtils.toSpliced(ArrayList, int, int, ArrayList)
+                        int toSplicedMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "toSpliced",
+                                "(Ljava/util/ArrayList;IILjava/util/ArrayList;)Ljava/util/ArrayList;");
+                        code.invokestatic(toSplicedMethod);
+                        // Stack: new ArrayList (with modifications applied)
+
+                        return;
+                    }
                     case "join" -> {
                         // arr.join(sep) -> ArrayHelper.join(arr, sep)
                         // JavaScript's join() returns a string
