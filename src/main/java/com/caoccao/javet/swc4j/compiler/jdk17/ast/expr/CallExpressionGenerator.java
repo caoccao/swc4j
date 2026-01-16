@@ -230,6 +230,45 @@ public final class CallExpressionGenerator {
 
                         return;
                     }
+                    case "with" -> {
+                        // arr.with(index, value) -> ArrayApiUtils.with(arr, index, value)
+                        // Returns new array with one element changed (ES2023)
+                        // Stack: ArrayList
+
+                        if (callExpr.getArgs().size() < 2) {
+                            throw new Swc4jByteCodeCompilerException("with() requires two arguments (index, value)");
+                        }
+
+                        // Generate index argument
+                        var indexArg = callExpr.getArgs().get(0);
+                        ExpressionGenerator.generate(code, cp, indexArg.getExpr(), null, context, options);
+
+                        // Unbox index if needed
+                        String indexType = TypeResolver.inferTypeFromExpr(indexArg.getExpr(), context, options);
+                        if (indexType != null && "Ljava/lang/Integer;".equals(indexType)) {
+                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                            code.invokevirtual(intValueMethod);
+                        }
+
+                        // Generate value argument
+                        var valueArg = callExpr.getArgs().get(1);
+                        ExpressionGenerator.generate(code, cp, valueArg.getExpr(), null, context, options);
+
+                        // Box value if primitive
+                        String valueType = TypeResolver.inferTypeFromExpr(valueArg.getExpr(), context, options);
+                        if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
+                            TypeConversionUtils.boxPrimitiveType(code, cp, valueType, TypeConversionUtils.getWrapperType(valueType));
+                        }
+
+                        // Stack: ArrayList, index (int), value (Object)
+                        // Call ArrayApiUtils.with(ArrayList, int, Object)
+                        int withMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "with",
+                                "(Ljava/util/ArrayList;ILjava/lang/Object;)Ljava/util/ArrayList;");
+                        code.invokestatic(withMethod);
+                        // Stack: new ArrayList (with element changed)
+
+                        return;
+                    }
                     case "join" -> {
                         // arr.join(sep) -> ArrayHelper.join(arr, sep)
                         // JavaScript's join() returns a string

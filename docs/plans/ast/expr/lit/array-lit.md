@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (229 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (242 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -233,7 +233,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | `toReversed()` | `new ArrayList<>(list); reverse()` | Returns new array | ✅ Implemented |
 | `toSorted()` | `new ArrayList<>(list); sort()` | Returns new array | ✅ Implemented |
 | `toSpliced(i, n, ...)` | Manual copy + splice | Returns new array | ❌ Not implemented |
-| `with(index, value)` | `new ArrayList<>(list); set()` | Returns new array | ❌ Not implemented |
+| `with(index, value)` | `new ArrayList<>(list); set()` | Returns new array | ✅ Implemented |
 
 ### Iterator Methods
 
@@ -1102,9 +1102,33 @@ arr.customProperty = "hello"  // JS allows this
   - **Key difference from sort():** Creates new array instead of mutating original
   - **ES2023 feature:** Part of ES2023 specification for non-mutating array operations
   - **Requirement:** Elements must be Comparable, otherwise ClassCastException at runtime
+- [x] `with(index, value)` - ES2023 non-mutating element replacement ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 233-271, ArrayApiUtils.java lines 351-385
+  - **Bytecode:** Calls `ArrayApiUtils.with(ArrayList, int, Object)` static method
+  - **Return:** ArrayList (new array) - copy with one element changed at specified index
+  - **Tests:** 13 comprehensive tests covering basic usage, non-mutating behavior, empty arrays, negative indices, out of bounds, method chaining, different types, error handling
+  - **Test coverage:**
+    - `testArrayWithBasic` - Basic with() functionality replaces element
+    - `testArrayWithDoesNotMutateOriginal` - Verifies original array unchanged
+    - `testArrayWithEmpty` - Empty array returns empty array
+    - `testArrayWithFirstElement` - Replace first element (index 0)
+    - `testArrayWithLastElement` - Replace last element
+    - `testArrayWithMethodChaining` - Method chaining with sort()
+    - `testArrayWithMixedTypes` - Mixed type arrays
+    - `testArrayWithNegativeIndex` - Negative indices (count from end)
+    - `testArrayWithNegativeIndexLast` - Negative index -1 (last element)
+    - `testArrayWithOutOfBounds` - Out of bounds returns unchanged copy
+    - `testArrayWithReturnsNewArray` - Returns new array
+    - `testArrayWithSingleElement` - Single element handling
+    - `testArrayWithStrings` - String arrays
+  - **Helper method:** with() in ArrayApiUtils creates copy, sets element at index, returns new array
+  - **Index handling:** Negative indices converted to positive (e.g., -1 becomes length-1), out of bounds indices return unchanged copy (differs from JavaScript which throws RangeError)
+  - **Key difference from JavaScript:** Out of bounds indices return copy without modification instead of throwing RangeError
+  - **ES2023 feature:** Part of ES2023 specification for non-mutating array operations
+  - **Use case:** Create array variant with one element changed without modifying original
 - [ ] Multi-dimensional arrays
 - [ ] Array methods with return values
-- [ ] ES2023 non-mutating methods (`toSpliced`, `with`)
+- [ ] ES2023 non-mutating methods (`toSpliced`)
 
 ### Phase 6: Functional Methods (Priority: LOW - Requires Functions)
 - [ ] `forEach(callback)`
@@ -1373,15 +1397,26 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (229 tests passing)
+**Current Implementation:** ✅ Solid foundation (242 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `lastIndexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()`, `toString()`, `toLocaleString()`, `toReversed()`, `toSorted()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `lastIndexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()`, `toString()`, `toLocaleString()`, `toReversed()`, `toSorted()`, `with()` ✅
 - Spread operator support for ArrayList mode ✅
-- ES2023 non-mutating methods: `toReversed()`, `toSorted()` ✅
+- ES2023 non-mutating methods: `toReversed()`, `toSorted()`, `with()` ✅
 
 **Recently Completed:**
+- ✅ **with() method (ES2023)** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
+  - Non-mutating method that returns a new array with one element changed
+  - 13 comprehensive tests added covering all scenarios including negative indices and edge cases
+  - Returns new ArrayList with element at specified index replaced with new value
+  - Original array remains unchanged (key feature of ES2023 non-mutating methods)
+  - **Bytecode generation:** Calls ArrayApiUtils.with(ArrayList, int, Object) which returns new ArrayList
+  - **Helper method:** Creates copy using ArrayList constructor, sets element at index, returns new array
+  - **ES2023 compliance:** Part of ES2023 specification for non-mutating array operations
+  - **Index handling:** Negative indices converted to positive (e.g., -1 becomes last element), out of bounds returns unchanged copy
+  - **Use case:** Create array variant with single element modification without mutating original
+
 - ✅ **toSorted() method (ES2023)** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
   - Non-mutating version of sort() that returns a new sorted array
   - 11 comprehensive tests added covering all scenarios

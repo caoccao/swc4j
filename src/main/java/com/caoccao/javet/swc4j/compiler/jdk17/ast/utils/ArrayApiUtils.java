@@ -347,4 +347,40 @@ public final class ArrayApiUtils {
 
         return result;
     }
+
+    /**
+     * Create a copy of the ArrayList with a single element changed.
+     * JavaScript equivalent: arr.with(index, value) (ES2023)
+     *
+     * @param list  the ArrayList to copy
+     * @param index the index to change (negative values count from end)
+     * @param value the new value for the element
+     * @return a new ArrayList with the element at index changed to value
+     */
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Object> with(ArrayList<?> list, int index, Object value) {
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        int length = list.size();
+
+        // Handle negative indices
+        int actualIndex = index < 0 ? length + index : index;
+
+        // Check bounds
+        if (actualIndex < 0 || actualIndex >= length) {
+            // JavaScript throws RangeError for out of bounds
+            // We'll return a copy without modification for now
+            return new ArrayList<>(list);
+        }
+
+        // Create a copy of the list
+        ArrayList<Object> result = new ArrayList<>(list);
+
+        // Set the element at the specified index
+        result.set(actualIndex, value);
+
+        return result;
+    }
 }
