@@ -140,6 +140,27 @@ public final class CallExpressionGenerator {
                         }
                         return;
                     }
+                    case "lastIndexOf" -> {
+                        // arr.lastIndexOf(elem) -> arr.lastIndexOf(elem)
+                        // Returns int: last index or -1 if not found
+                        if (!callExpr.getArgs().isEmpty()) {
+                            var arg = callExpr.getArgs().get(0);
+                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+                            // Box argument if primitive
+                            String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
+                            if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
+                                TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
+                            }
+
+                            int lastIndexOfMethod = cp.addMethodRef("java/util/ArrayList", "lastIndexOf", "(Ljava/lang/Object;)I");
+                            code.invokevirtual(lastIndexOfMethod); // Returns int index
+                        } else {
+                            // No argument - pop ArrayList ref and return -1
+                            code.pop();
+                            code.iconst(-1);
+                        }
+                        return;
+                    }
                     case "includes" -> {
                         // arr.includes(elem) -> arr.contains(elem)
                         // Returns boolean: true if element exists, false otherwise

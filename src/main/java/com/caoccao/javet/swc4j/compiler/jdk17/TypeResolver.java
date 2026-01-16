@@ -381,7 +381,7 @@ public final class TypeResolver {
                             case "join", "toString" -> {
                                 return "Ljava/lang/String;";
                             }
-                            case "indexOf" -> {
+                            case "indexOf", "lastIndexOf" -> {
                                 return "I";
                             }
                             case "includes" -> {

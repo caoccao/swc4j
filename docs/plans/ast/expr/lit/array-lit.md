@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (187 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (199 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -204,7 +204,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | `concat(arr2)` | `new ArrayList<>(list1); addAll(list2)` | `Arrays.copyOf()` + manual copy | ✅ Implemented |
 | `slice(start, end)` | `new ArrayList<>(subList(start, end))` | `Arrays.copyOfRange()` | ✅ Implemented |
 | `indexOf(elem)` | `indexOf(elem)` | Manual loop | ✅ Implemented |
-| `lastIndexOf(elem)` | `lastIndexOf(elem)` | Manual loop | ❌ Not implemented |
+| `lastIndexOf(elem)` | `lastIndexOf(elem)` | Manual loop | ✅ Implemented |
 | `includes(elem)` | `contains(elem)` | Manual loop | ✅ Implemented |
 | `join(sep)` | `ArrayHelper.join()` | String concat loop | ✅ Implemented |
 | `toString()` | `ArrayApiUtils.arrayToString()` | Not applicable | ✅ Implemented |
@@ -875,6 +875,12 @@ arr.customProperty = "hello"  // JS allows this
   - **Bytecode:** Uses element expression, boxing if needed, `indexOf(Ljava/lang/Object;)I`
   - **Return:** int (primitive) - returns index or -1 if not found
   - **Tests:** 10 comprehensive tests covering basic functionality, not found case, first/last element, duplicates (returns first), strings, empty array, mixed types, after modifications, error handling
+- [x] `lastIndexOf(elem)` - Find last index ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 143-163
+  - **Bytecode:** Uses element expression, boxing if needed, `lastIndexOf(Ljava/lang/Object;)I`
+  - **Return:** int (primitive) - returns last index or -1 if not found
+  - **Tests:** 12 comprehensive tests covering basic functionality, not found case, first/last element, duplicates (returns last occurrence), multiple duplicates, strings, string not found, empty array, mixed types, after modifications, error handling for Java arrays
+  - **Key difference from indexOf:** Returns the LAST occurrence of the element instead of the first
 - [x] `includes(elem)` - Check existence ✅ **IMPLEMENTED**
   - **Implementation:** CallExpressionGenerator.java lines 143-163
   - **Bytecode:** Uses element expression, boxing if needed, `contains(Ljava/lang/Object;)Z`
@@ -1309,14 +1315,22 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (187 tests passing)
+**Current Implementation:** ✅ Solid foundation (199 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()`, `toString()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `lastIndexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()`, `toString()` ✅
 - Spread operator support for ArrayList mode ✅
 
 **Recently Completed:**
+- ✅ **lastIndexOf() method** - Implemented in CallExpressionGenerator.java using ArrayList.lastIndexOf()
+  - Finds the last occurrence of an element in ArrayList (non-mutating)
+  - 12 comprehensive tests added covering all common scenarios including duplicates
+  - Returns int (primitive) - last index or -1 if not found
+  - Key difference from indexOf(): Returns LAST occurrence instead of first
+  - **Bytecode generation:** Uses element expression, boxing if needed, calls `lastIndexOf(Ljava/lang/Object;)I`
+  - **Use case:** Finding the last position of an element in an array with duplicates
+
 - ✅ **toString() method** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
   - Converts ArrayList to string representation with comma-separated values (non-mutating)
   - 8 comprehensive tests added covering all common scenarios
