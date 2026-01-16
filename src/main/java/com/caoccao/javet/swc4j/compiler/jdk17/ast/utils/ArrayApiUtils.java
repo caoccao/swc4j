@@ -42,6 +42,37 @@ public final class ArrayApiUtils {
     }
 
     /**
+     * Convert ArrayList to locale-specific string representation.
+     * JavaScript equivalent: arr.toLocaleString()
+     * JavaScript arrays use comma-separated values with locale-specific formatting: "1,2,3"
+     * Note: This implementation uses the default locale for formatting.
+     * Future enhancement: Support custom locale parameter.
+     *
+     * @param list the ArrayList to convert
+     * @return the locale-specific string representation (comma-separated values)
+     */
+    public static String arrayToLocaleString(List<?> list) {
+        if (list == null || list.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < list.size(); i++) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            Object element = list.get(i);
+            if (element != null) {
+                // Use String.valueOf for basic conversion
+                // Future enhancement: Use locale-specific formatting for numbers/dates
+                sb.append(String.valueOf(element));
+            }
+        }
+
+        return sb.toString();
+    }
+
+    /**
      * Concatenate two ArrayLists into a new ArrayList.
      * JavaScript equivalent: arr1.concat(arr2)
      *

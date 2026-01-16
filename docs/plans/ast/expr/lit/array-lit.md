@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (199 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (208 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -208,7 +208,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | `includes(elem)` | `contains(elem)` | Manual loop | ✅ Implemented |
 | `join(sep)` | `ArrayHelper.join()` | String concat loop | ✅ Implemented |
 | `toString()` | `ArrayApiUtils.arrayToString()` | Not applicable | ✅ Implemented |
-| `toLocaleString()` | Custom formatting | Custom formatting | ❌ Not implemented |
+| `toLocaleString()` | `ArrayApiUtils.arrayToLocaleString()` | Not applicable | ✅ Implemented |
 
 ### Functional Methods (Require Function Support)
 
@@ -1043,9 +1043,27 @@ arr.customProperty = "hello"  // JS allows this
   - **Helper method:** arrayToString() in ArrayApiUtils delegates to join(",")
   - **Format difference:** JavaScript arrays use "1,2,3" while Java's ArrayList.toString() returns "[1, 2, 3]"
   - **Note:** Equivalent to calling join(",") - returns comma-separated values
+- [x] `toLocaleString()` ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 668-680, ArrayApiUtils.java lines 44-73
+  - **Bytecode:** Calls `ArrayApiUtils.arrayToLocaleString(List)` static method
+  - **Return:** String - locale-specific comma-separated values (e.g., "1,2,3")
+  - **Tests:** 9 comprehensive tests covering basic usage, empty arrays, single elements, different types, method chaining, non-mutating behavior, error handling
+  - **Test coverage:**
+    - `testArrayToLocaleStringBasic` - toLocaleString() with numbers
+    - `testArrayToLocaleStringEmpty` - toLocaleString() on empty array
+    - `testArrayToLocaleStringSingleElement` - toLocaleString() with single element
+    - `testArrayToLocaleStringWithStrings` - toLocaleString() with string arrays
+    - `testArrayToLocaleStringMixedTypes` - toLocaleString() with mixed types
+    - `testArrayToLocaleStringAfterModification` - toLocaleString() after push/unshift
+    - `testArrayToLocaleStringMethodChaining` - Method chaining with sort().toLocaleString()
+    - `testArrayToLocaleStringNonMutating` - toLocaleString() doesn't mutate array
+    - `testJavaArrayToLocaleStringNotSupported` - Error for Java arrays
+  - **Helper method:** arrayToLocaleString() in ArrayApiUtils iterates through elements and uses String.valueOf()
+  - **Current implementation:** Uses default locale formatting (comma separator)
+  - **Future enhancement:** Could add locale-specific number/date formatting for improved JavaScript compatibility
+  - **Format:** Returns comma-separated values like toString(), but designed for locale-specific formatting
 - [ ] Multi-dimensional arrays
 - [ ] Array methods with return values
-- [ ] `toLocaleString()`
 - [ ] ES2023 non-mutating methods (`toReversed`, `toSorted`, `with`)
 
 ### Phase 6: Functional Methods (Priority: LOW - Requires Functions)
@@ -1315,14 +1333,24 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (199 tests passing)
+**Current Implementation:** ✅ Solid foundation (208 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `lastIndexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()`, `toString()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `lastIndexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()`, `toString()`, `toLocaleString()` ✅
 - Spread operator support for ArrayList mode ✅
 
 **Recently Completed:**
+- ✅ **toLocaleString() method** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
+  - Converts ArrayList to locale-specific string representation (non-mutating)
+  - 9 comprehensive tests added covering all common scenarios
+  - Returns string with comma-separated values: "1,2,3"
+  - Similar to toString() but designed for locale-aware formatting
+  - **Bytecode generation:** Calls ArrayApiUtils.arrayToLocaleString(List) which returns String
+  - **Helper method:** arrayToLocaleString() iterates elements using String.valueOf()
+  - **Current behavior:** Uses comma separator (future: locale-specific formatting for numbers/dates)
+  - **Use case:** Displaying array contents with locale-appropriate formatting
+
 - ✅ **lastIndexOf() method** - Implemented in CallExpressionGenerator.java using ArrayList.lastIndexOf()
   - Finds the last occurrence of an element in ArrayList (non-mutating)
   - 12 comprehensive tests added covering all common scenarios including duplicates

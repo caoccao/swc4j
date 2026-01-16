@@ -665,6 +665,19 @@ public final class CallExpressionGenerator {
 
                         return;
                     }
+                    case "toLocaleString" -> {
+                        // arr.toLocaleString() -> ArrayApiUtils.arrayToLocaleString(arr)
+                        // Returns locale-specific string representation (comma-separated values)
+                        // Stack: ArrayList
+
+                        // Call ArrayApiUtils.arrayToLocaleString(List)
+                        int toLocaleStringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "arrayToLocaleString",
+                                "(Ljava/util/List;)Ljava/lang/String;");
+                        code.invokestatic(toLocaleStringMethod);
+                        // Stack: String
+
+                        return;
+                    }
                 }
             }
         }
