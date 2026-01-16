@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,6 +25,29 @@ import java.util.List;
 public final class ArrayJoinUtils {
     private ArrayJoinUtils() {
         // Prevent instantiation
+    }
+
+    /**
+     * Concatenate two ArrayLists into a new ArrayList.
+     * JavaScript equivalent: arr1.concat(arr2)
+     *
+     * @param list1 the first ArrayList
+     * @param list2 the second ArrayList to concatenate
+     * @return a new ArrayList containing all elements from both lists
+     */
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Object> concat(ArrayList<?> list1, ArrayList<?> list2) {
+        ArrayList<Object> result = new ArrayList<>();
+
+        if (list1 != null) {
+            result.addAll(list1);
+        }
+
+        if (list2 != null) {
+            result.addAll(list2);
+        }
+
+        return result;
     }
 
     /**

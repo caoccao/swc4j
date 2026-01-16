@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (108 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (118 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -201,7 +201,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 | JavaScript Method | ArrayList Equivalent | Java Array Equivalent | Status |
 |------------------|---------------------|----------------------|---------|
-| `concat(arr2)` | `new ArrayList<>(list1); addAll(list2)` | `Arrays.copyOf()` + manual copy | ❌ Not implemented |
+| `concat(arr2)` | `new ArrayList<>(list1); addAll(list2)` | `Arrays.copyOf()` + manual copy | ✅ Implemented |
 | `slice(start, end)` | `subList(start, end)` | `Arrays.copyOfRange()` | ❌ Not implemented |
 | `indexOf(elem)` | `indexOf(elem)` | Manual loop | ✅ Implemented |
 | `lastIndexOf(elem)` | `lastIndexOf(elem)` | Manual loop | ❌ Not implemented |
@@ -887,41 +887,46 @@ arr.customProperty = "hello"  // JS allows this
   - **Return:** void (JavaScript returns new length, but we don't return it yet)
   - **Tests:** 9 comprehensive tests covering basic functionality, length changes, multiple unshifts, empty array, type compatibility, integration with shift/push, order preservation, error handling
 - [x] `indexOf(elem)` - Find index ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 122-146
-  - **Bytecode:** Uses element expression, boxing if needed, `indexOf(Ljava/lang/Object;)I`, then boxes int result to Integer
-  - **Return:** Integer (boxed int) - returns index or -1 if not found
+  - **Implementation:** CallExpressionGenerator.java lines 122-142
+  - **Bytecode:** Uses element expression, boxing if needed, `indexOf(Ljava/lang/Object;)I`
+  - **Return:** int (primitive) - returns index or -1 if not found
   - **Tests:** 10 comprehensive tests covering basic functionality, not found case, first/last element, duplicates (returns first), strings, empty array, mixed types, after modifications, error handling
-  - **Note:** Result must be boxed because indexOf() returns primitive int but expressions expect Object
 - [x] `includes(elem)` - Check existence ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 147-171
-  - **Bytecode:** Uses element expression, boxing if needed, `contains(Ljava/lang/Object;)Z`, then boxes boolean result to Boolean
-  - **Return:** Boolean (boxed boolean) - returns true if element exists, false otherwise
+  - **Implementation:** CallExpressionGenerator.java lines 143-163
+  - **Bytecode:** Uses element expression, boxing if needed, `contains(Ljava/lang/Object;)Z`
+  - **Return:** boolean (primitive) - returns true if element exists, false otherwise
   - **Tests:** 10 comprehensive tests covering basic functionality, not found case, first/last element, strings, empty array, mixed types, after modifications, type mismatch, error handling
-  - **Note:** Result must be boxed because contains() returns primitive boolean but expressions expect Object
 - [x] `reverse()` - Reverse in place ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 172-182
+  - **Implementation:** CallExpressionGenerator.java lines 164-174
   - **Bytecode:** Uses `dup` to duplicate array reference, then `invokestatic Collections.reverse(List)V`
   - **Return:** ArrayList (the array itself) - JavaScript's reverse() returns the array for method chaining
   - **Tests:** 8 comprehensive tests covering basic reverse, returns array, strings, empty array, single element, mixed types, reverse twice (restore original), after modifications, error handling
   - **Note:** Collections.reverse() returns void, so we use `dup` before the call to keep the array reference on the stack for return
 - [x] `sort()` - Sort in place ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 183-193
+  - **Implementation:** CallExpressionGenerator.java lines 175-185
   - **Bytecode:** Uses `dup` to duplicate array reference, then `invokestatic Collections.sort(List)V`
   - **Return:** ArrayList (the array itself) - JavaScript's sort() returns the array for method chaining
   - **Tests:** 10 comprehensive tests covering basic sort (integers), returns array, strings (alphabetical), empty array (via pop operations), single element, already sorted, reverse sorted, after modifications (push/unshift), duplicates, error handling
   - **Note:** Collections.sort() returns void, so we use `dup` before the call to keep the array reference on the stack for return
   - **Limitation:** Elements must be Comparable - sorting mixed types (e.g., Integer + String) will throw ClassCastException at runtime
 - [x] `join(sep)` - Convert to string ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 194-222
-  - **Bytecode:** Calls `ArrayHelper.join(ArrayList, String)Ljava/lang/String;` static helper method
+  - **Implementation:** CallExpressionGenerator.java lines 186-214
+  - **Bytecode:** Calls `ArrayJoinUtils.join(List, String)Ljava/lang/String;` static helper method
   - **Return:** String - joined elements separated by the specified separator
   - **Tests:** 11 comprehensive tests covering basic join with comma, default separator (comma), custom separator, empty array, single element, empty separator (concatenate), mixed types, after modifications, numbers, multi-character separator, error handling
-  - **Helper:** ArrayHelper.java runtime utility class with static join() method
+  - **Helper:** ArrayJoinUtils.java runtime utility class with static join() method
   - **Default separator:** "," if no argument provided (JavaScript behavior)
   - **Element conversion:** Uses String.valueOf() to convert each element (null becomes "null")
-- [ ] `splice(index, count, ...items)` - Complex insertion/deletion
-- [ ] `concat(arr2)` - Merge arrays
+- [x] `concat(arr2)` - Merge arrays ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 215-240
+  - **Bytecode:** Calls `ArrayJoinUtils.concat(ArrayList, ArrayList)Ljava/util/ArrayList;` static helper method when argument provided; uses ArrayList copy constructor `new ArrayList(Collection)` when no argument
+  - **Return:** ArrayList (new array) - JavaScript's concat() returns a new array containing elements from both arrays
+  - **Tests:** 10 comprehensive tests covering basic concat (merge two arrays), empty array, no argument (returns copy), returns new array (not modifying original), strings, mixed types, single element, concat with empty first array, chaining multiple concat calls, error handling
+  - **Helper:** ArrayJoinUtils.java runtime utility class with static concat() method
+  - **No argument behavior:** Returns a shallow copy of the array (new ArrayList with same elements)
+  - **Chaining support:** TypeResolver updated to infer return type of concat() as ArrayList, enabling method chaining like `arr1.concat(arr2).concat(arr3)`
 - [ ] `slice(start, end)` - Extract subarray
+- [ ] `splice(index, count, ...items)` - Complex insertion/deletion
 
 ### Phase 4: Spread Operator (Priority: HIGH)
 - [ ] Detect spread elements in AST
@@ -1205,26 +1210,27 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (108 tests passing)
+**Current Implementation:** ✅ Solid foundation (118 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()` ✅
 
 **Recently Completed:**
-- ✅ **join() method** - Implemented in CallExpressionGenerator.java with ArrayHelper runtime utility
-  - Joins ArrayList elements into a string with a separator
-  - 11 comprehensive tests added
+- ✅ **concat() method** - Implemented in CallExpressionGenerator.java with ArrayJoinUtils runtime utility
+  - Merges two ArrayLists into a new ArrayList (non-mutating)
+  - 10 comprehensive tests added covering all edge cases
   - Error handling for Java arrays (throws exception)
-  - Returns string with elements separated by the specified separator (default: ",")
-  - Uses ArrayHelper.join() static method from runtime package
-  - Converts all elements to strings using String.valueOf()
-  - Handles empty arrays (returns ""), single elements, and mixed types
-  - **Note:** Creates a new runtime utility class for complex operations
+  - Returns new ArrayList containing elements from both arrays
+  - Uses ArrayJoinUtils.concat() static method
+  - Supports concat() with no argument (returns shallow copy)
+  - Handles empty arrays, mixed types, and method chaining
+  - **TypeResolver enhancement:** Added CallExpr case to infer return types of ArrayList methods, enabling method chaining like `arr1.concat(arr2).concat(arr3)`
+  - **CodeBuilder enhancement:** Added `dup_x1()` and `swap()` bytecode instructions
 
 **Next Steps:**
-1. Implement spread operator support (HIGH priority)
-2. Add common array methods (`concat`, `slice`, `splice`)
+1. Implement remaining Phase 3 methods (`slice`, `splice`)
+2. Implement spread operator support (HIGH priority)
 3. Fix delete behavior to create holes instead of shifting
 4. Test nested and multi-dimensional arrays thoroughly
 5. Add functional methods (when function support is available)

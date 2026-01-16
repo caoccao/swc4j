@@ -230,6 +230,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder dup_x1() {
+        code.add((byte) (0x5A)); // dup_x1
+        return this;
+    }
+
     public CodeBuilder dup_x2() {
         code.add((byte) (0x5B)); // dup_x2
         return this;
@@ -868,6 +873,11 @@ public class CodeBuilder {
 
     public CodeBuilder pop2() {
         code.add((byte) (0x58)); // pop2
+        return this;
+    }
+
+    public CodeBuilder swap() {
+        code.add((byte) (0x5F)); // swap
         return this;
     }
 

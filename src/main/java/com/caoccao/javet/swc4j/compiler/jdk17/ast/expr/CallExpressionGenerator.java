@@ -121,7 +121,7 @@ public final class CallExpressionGenerator {
                     }
                     case "indexOf" -> {
                         // arr.indexOf(elem) -> arr.indexOf(elem)
-                        // Returns index or -1 if not found
+                        // Returns int: index or -1 if not found
                         if (!callExpr.getArgs().isEmpty()) {
                             var arg = callExpr.getArgs().get(0);
                             ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
@@ -133,20 +133,16 @@ public final class CallExpressionGenerator {
 
                             int indexOfMethod = cp.addMethodRef("java/util/ArrayList", "indexOf", "(Ljava/lang/Object;)I");
                             code.invokevirtual(indexOfMethod); // Returns int index
-
-                            // Box the int result to Integer for return
-                            TypeConversionUtils.boxPrimitiveType(code, cp, "I", "Ljava/lang/Integer;");
                         } else {
-                            // No argument - pop ArrayList ref and return -1 boxed
+                            // No argument - pop ArrayList ref and return -1
                             code.pop();
                             code.iconst(-1);
-                            TypeConversionUtils.boxPrimitiveType(code, cp, "I", "Ljava/lang/Integer;");
                         }
                         return;
                     }
                     case "includes" -> {
                         // arr.includes(elem) -> arr.contains(elem)
-                        // Returns true if element exists, false otherwise
+                        // Returns boolean: true if element exists, false otherwise
                         if (!callExpr.getArgs().isEmpty()) {
                             var arg = callExpr.getArgs().get(0);
                             ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
@@ -158,14 +154,10 @@ public final class CallExpressionGenerator {
 
                             int containsMethod = cp.addMethodRef("java/util/ArrayList", "contains", "(Ljava/lang/Object;)Z");
                             code.invokevirtual(containsMethod); // Returns boolean
-
-                            // Box the boolean result to Boolean for return
-                            TypeConversionUtils.boxPrimitiveType(code, cp, "Z", "Ljava/lang/Boolean;");
                         } else {
-                            // No argument - pop ArrayList ref and return false boxed
+                            // No argument - pop ArrayList ref and return false
                             code.pop();
                             code.iconst(0); // false
-                            TypeConversionUtils.boxPrimitiveType(code, cp, "Z", "Ljava/lang/Boolean;");
                         }
                         return;
                     }
@@ -217,6 +209,32 @@ public final class CallExpressionGenerator {
                         int joinMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayJoinUtils", "join",
                                 "(Ljava/util/List;Ljava/lang/String;)Ljava/lang/String;");
                         code.invokestatic(joinMethod);
+
+                        return;
+                    }
+                    case "concat" -> {
+                        // arr.concat(arr2) -> ArrayJoinUtils.concat(arr, arr2)
+                        // JavaScript's concat() returns a new array
+
+                        if (!callExpr.getArgs().isEmpty()) {
+                            // Get the second array argument
+                            var arg = callExpr.getArgs().get(0);
+                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+
+                            // Call ArrayJoinUtils.concat(ArrayList, ArrayList)
+                            int concatMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayJoinUtils", "concat",
+                                    "(Ljava/util/ArrayList;Ljava/util/ArrayList;)Ljava/util/ArrayList;");
+                            code.invokestatic(concatMethod);
+                        } else {
+                            // No argument - just return a copy of the array
+                            int arrayListClass = cp.addClass("java/util/ArrayList");
+                            int arrayListInit = cp.addMethodRef("java/util/ArrayList", "<init>", "(Ljava/util/Collection;)V");
+
+                            code.newInstance(arrayListClass)
+                                    .dup_x1()  // Duplicate new ArrayList ref, place it below the original array
+                                    .swap()    // Swap to get: new ArrayList, original array, new ArrayList
+                                    .invokespecial(arrayListInit);  // Call ArrayList(Collection)
+                        }
 
                         return;
                     }

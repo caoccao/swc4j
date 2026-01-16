@@ -364,6 +364,37 @@ public final class TypeResolver {
         } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
             // For parenthesized expressions, infer type from the inner expression
             return inferTypeFromExpr(parenExpr.getExpr(), context, options);
+        } else if (expr instanceof Swc4jAstCallExpr callExpr) {
+            // For call expressions, try to infer the return type
+            if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
+                String objType = inferTypeFromExpr(memberExpr.getObj(), context, options);
+
+                // ArrayList methods
+                if ("Ljava/util/ArrayList;".equals(objType)) {
+                    if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                        String methodName = propIdent.getSym();
+                        // Methods that return ArrayList
+                        switch (methodName) {
+                            case "concat", "reverse", "sort" -> {
+                                return "Ljava/util/ArrayList;";
+                            }
+                            case "join" -> {
+                                return "Ljava/lang/String;";
+                            }
+                            case "indexOf" -> {
+                                return "I";
+                            }
+                            case "includes" -> {
+                                return "Z";
+                            }
+                            case "pop", "shift" -> {
+                                return "Ljava/lang/Object;";
+                            }
+                        }
+                    }
+                }
+            }
+            return "Ljava/lang/Object;";
         }
         return "Ljava/lang/Object;";
     }
