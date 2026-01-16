@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (165 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (179 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -195,7 +195,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | `reverse()` | `Collections.reverse(list)` | Mutates in place, returns array | ✅ Implemented |
 | `sort()` | `Collections.sort(list)` | Mutates in place, returns array | ✅ Implemented |
 | `fill(val, start, end)` | `ArrayApiUtils.fill()` | Fill range with value, returns array | ✅ Implemented |
-| `copyWithin(t, s, e)` | Manual copy | Copy within array | ❌ Not implemented |
+| `copyWithin(t, s, e)` | `ArrayApiUtils.copyWithin()` | Copy within array, returns array | ✅ Implemented |
 
 ### Non-Mutating Methods (Both ArrayList and Arrays)
 
@@ -968,7 +968,7 @@ arr.customProperty = "hello"  // JS allows this
 
 ### Phase 5: Advanced Features (Priority: MEDIUM)
 - [x] `fill(value, start, end)` ✅ **IMPLEMENTED**
-  - **Implementation:** CallExpressionGenerator.java lines 481-564, ArrayApiUtils.java lines 149-202
+  - **Implementation:** CallExpressionGenerator.java lines 481-564, ArrayApiUtils.java lines 53-106
   - **Bytecode:** Calls overloaded `ArrayApiUtils.fill()` static methods based on argument count
   - **Method signatures:**
     - `fill(ArrayList, Object)` - fills entire array
@@ -993,10 +993,36 @@ arr.customProperty = "hello"  // JS allows this
   - **Helper methods:** Three overloaded fill() methods in ArrayApiUtils for different argument counts
   - **Index handling:** Negative indices converted to positive, out of bounds indices clamped to valid range
   - **Edge cases:** Empty arrays, start >= end (no-op), out of bounds indices handled correctly
+- [x] `copyWithin(target, start, end)` ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 565-633, ArrayApiUtils.java lines 108-163
+  - **Bytecode:** Calls overloaded `ArrayApiUtils.copyWithin()` static methods based on argument count
+  - **Method signatures:**
+    - `copyWithin(ArrayList, int, int)` - copies from start to end
+    - `copyWithin(ArrayList, int, int, int)` - copies from start to end (exclusive)
+  - **Return:** ArrayList (the array itself) - JavaScript's copyWithin() returns the array for method chaining
+  - **Tests:** 14 comprehensive tests covering all argument combinations, negative indices, overlapping regions, out of bounds, empty arrays, method chaining, error handling
+  - **Test coverage:**
+    - `testArrayCopyWithinBasic` - copyWithin(target, start) basic functionality
+    - `testArrayCopyWithinWithEnd` - copyWithin(target, start, end) with all arguments
+    - `testArrayCopyWithinNegativeTarget` - Negative target index
+    - `testArrayCopyWithinNegativeStart` - Negative start index
+    - `testArrayCopyWithinNegativeEnd` - Negative end index
+    - `testArrayCopyWithinAllNegative` - All negative indices
+    - `testArrayCopyWithinOverlapping` - Overlapping source and target ranges
+    - `testArrayCopyWithinToEnd` - Copy to end of array
+    - `testArrayCopyWithinEmptyArray` - copyWithin() on empty array (no-op)
+    - `testArrayCopyWithinReturnsArray` - copyWithin() returns the array
+    - `testArrayCopyWithinOutOfBoundsTarget` - Out of bounds target (clamped)
+    - `testArrayCopyWithinOutOfBoundsStart` - Out of bounds start (no-op)
+    - `testArrayCopyWithinMethodChaining` - Method chaining with copyWithin().reverse()
+    - `testJavaArrayCopyWithinNotSupported` - Error for Java arrays
+  - **Helper methods:** Two overloaded copyWithin() methods in ArrayApiUtils for different argument counts
+  - **Index handling:** Negative indices converted to positive, out of bounds indices clamped to valid range
+  - **Edge cases:** Empty arrays, overlapping ranges (uses temp ArrayList to avoid overwriting), out of bounds handled correctly
+  - **Algorithm:** Creates temporary ArrayList to hold copied elements, then writes to target to handle overlapping ranges correctly
 - [ ] Multi-dimensional arrays
 - [ ] Array methods with return values
 - [ ] `toString()` / `toLocaleString()`
-- [ ] `copyWithin(target, start, end)`
 - [ ] ES2023 non-mutating methods (`toReversed`, `toSorted`, `with`)
 
 ### Phase 6: Functional Methods (Priority: LOW - Requires Functions)
@@ -1266,14 +1292,28 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (165 tests passing)
+**Current Implementation:** ✅ Solid foundation (179 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()` ✅
 - Spread operator support for ArrayList mode ✅
 
 **Recently Completed:**
+- ✅ **copyWithin() method** - Implemented in CallExpressionGenerator.java with overloaded ArrayApiUtils helpers
+  - Copies part of ArrayList to another location within the same ArrayList (mutating)
+  - 14 comprehensive tests added covering all argument combinations and edge cases
+  - Returns the ArrayList (the array itself) for method chaining
+  - Uses two overloaded ArrayApiUtils.copyWithin() static methods based on argument count
+  - Supports two calling patterns:
+    - `copyWithin(target, start)` - copies from start to end (end=length)
+    - `copyWithin(target, start, end)` - copies from start to end (exclusive)
+  - Handles negative target/start/end indices (count from end), out of bounds indices (clamped to valid range)
+  - **Method signatures:** copyWithin(ArrayList, int, int), copyWithin(ArrayList, int, int, int)
+  - **Bytecode generation:** Calls appropriate overloaded method based on argCount, unboxing indices if needed
+  - **Algorithm:** Uses temporary ArrayList to avoid overwriting during copy, handles overlapping ranges correctly
+  - **Limitation:** Not supported for Java arrays (throws compilation error)
+
 - ✅ **fill() method** - Implemented in CallExpressionGenerator.java with overloaded ArrayApiUtils helpers
   - Fills all or part of an ArrayList with a static value (mutating)
   - 13 comprehensive tests added covering all argument combinations and edge cases
@@ -1316,7 +1356,7 @@ namespace com {
 **Next Steps:**
 1. Fix delete behavior to create holes instead of shifting
 2. Test nested and multi-dimensional arrays thoroughly
-3. Add more array methods (copyWithin, toString, etc.)
+3. Add more array methods (toString, toLocaleString, ES2023 methods, etc.)
 4. Add functional methods (when function support is available)
 
 **Key Differences from JavaScript:**

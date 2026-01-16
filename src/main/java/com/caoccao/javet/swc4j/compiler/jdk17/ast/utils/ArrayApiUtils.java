@@ -51,28 +51,60 @@ public final class ArrayApiUtils {
     }
 
     /**
-     * Fill entire ArrayList with a static value.
-     * JavaScript equivalent: arr.fill(value)
+     * Copy part of ArrayList to another location within the same ArrayList.
+     * JavaScript equivalent: arr.copyWithin(target, start)
      *
-     * @param list  the ArrayList to modify (mutated in place)
-     * @param value the value to fill
+     * @param list   the ArrayList to modify (mutated in place)
+     * @param target the index at which to copy the sequence to (negative values count from end)
+     * @param start  the beginning index to start copying from (negative values count from end)
      * @return the modified ArrayList (same reference as input)
      */
-    public static ArrayList<Object> fill(ArrayList<Object> list, Object value) {
-        return fill(list, value, 0, list == null ? 0 : list.size());
+    public static ArrayList<Object> copyWithin(ArrayList<Object> list, int target, int start) {
+        return copyWithin(list, target, start, list == null ? 0 : list.size());
     }
 
     /**
-     * Fill ArrayList from start index to end with a static value.
-     * JavaScript equivalent: arr.fill(value, start)
+     * Copy part of ArrayList to another location within the same ArrayList.
+     * JavaScript equivalent: arr.copyWithin(target, start, end)
      *
-     * @param list  the ArrayList to modify (mutated in place)
-     * @param value the value to fill
-     * @param start the beginning index (inclusive), negative values count from end
+     * @param list   the ArrayList to modify (mutated in place)
+     * @param target the index at which to copy the sequence to (negative values count from end)
+     * @param start  the beginning index to start copying from (negative values count from end)
+     * @param end    the ending index to stop copying from (exclusive, negative values count from end)
      * @return the modified ArrayList (same reference as input)
      */
-    public static ArrayList<Object> fill(ArrayList<Object> list, Object value, int start) {
-        return fill(list, value, start, list == null ? 0 : list.size());
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Object> copyWithin(ArrayList<Object> list, int target, int start, int end) {
+        if (list == null || list.isEmpty()) {
+            return list;
+        }
+
+        int length = list.size();
+
+        // Handle negative indices
+        int actualTarget = target < 0 ? Math.max(0, length + target) : Math.min(target, length);
+        int actualStart = start < 0 ? Math.max(0, length + start) : Math.min(start, length);
+        int actualEnd = end < 0 ? Math.max(0, length + end) : Math.min(end, length);
+
+        // Calculate copy length
+        int copyLength = Math.min(actualEnd - actualStart, length - actualTarget);
+
+        if (copyLength <= 0) {
+            return list;
+        }
+
+        // Copy elements to temporary list to avoid overwriting during copy
+        ArrayList<Object> temp = new ArrayList<>();
+        for (int i = 0; i < copyLength; i++) {
+            temp.add(list.get(actualStart + i));
+        }
+
+        // Write elements to target position
+        for (int i = 0; i < copyLength; i++) {
+            list.set(actualTarget + i, temp.get(i));
+        }
+
+        return list;
     }
 
     /**
@@ -103,6 +135,31 @@ public final class ArrayApiUtils {
         }
 
         return list;
+    }
+
+    /**
+     * Fill entire ArrayList with a static value.
+     * JavaScript equivalent: arr.fill(value)
+     *
+     * @param list  the ArrayList to modify (mutated in place)
+     * @param value the value to fill
+     * @return the modified ArrayList (same reference as input)
+     */
+    public static ArrayList<Object> fill(ArrayList<Object> list, Object value) {
+        return fill(list, value, 0, list == null ? 0 : list.size());
+    }
+
+    /**
+     * Fill ArrayList from start index to end with a static value.
+     * JavaScript equivalent: arr.fill(value, start)
+     *
+     * @param list  the ArrayList to modify (mutated in place)
+     * @param value the value to fill
+     * @param start the beginning index (inclusive), negative values count from end
+     * @return the modified ArrayList (same reference as input)
+     */
+    public static ArrayList<Object> fill(ArrayList<Object> list, Object value, int start) {
+        return fill(list, value, start, list == null ? 0 : list.size());
     }
 
     /**

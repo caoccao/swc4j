@@ -562,6 +562,75 @@ public final class CallExpressionGenerator {
 
                         return;
                     }
+                    case "copyWithin" -> {
+                        // arr.copyWithin(target, start, end) -> ArrayApiUtils.copyWithin(arr, target, start, [end])
+                        // Returns the array itself (mutates in place)
+                        int argCount = callExpr.getArgs().size();
+
+                        if (argCount < 2) {
+                            // Need at least target and start
+                            throw new Swc4jByteCodeCompilerException("copyWithin() requires at least two arguments (target, start)");
+                        }
+
+                        // Stack starts with: ArrayList
+
+                        // Generate the target argument
+                        var targetArg = callExpr.getArgs().get(0);
+                        ExpressionGenerator.generate(code, cp, targetArg.getExpr(), null, context, options);
+                        // Stack: ArrayList, target
+
+                        // Unbox target if needed
+                        String targetType = TypeResolver.inferTypeFromExpr(targetArg.getExpr(), context, options);
+                        if (targetType != null && "Ljava/lang/Integer;".equals(targetType)) {
+                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                            code.invokevirtual(intValueMethod);
+                        }
+                        // Stack: ArrayList, target (int)
+
+                        // Generate the start argument
+                        var startArg = callExpr.getArgs().get(1);
+                        ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+                        // Stack: ArrayList, target, start
+
+                        // Unbox start if needed
+                        String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                        if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                            int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                            code.invokevirtual(intValueMethod);
+                        }
+                        // Stack: ArrayList, target, start
+
+                        if (argCount == 2) {
+                            // copyWithin(target, start) - copy from start to end
+                            // Stack: ArrayList, target, start
+
+                            // Call ArrayApiUtils.copyWithin(ArrayList, int, int)
+                            int copyWithinMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "copyWithin",
+                                    "(Ljava/util/ArrayList;II)Ljava/util/ArrayList;");
+                            code.invokestatic(copyWithinMethod);
+
+                        } else {
+                            // copyWithin(target, start, end) - three arguments
+                            var endArg = callExpr.getArgs().get(2);
+                            ExpressionGenerator.generate(code, cp, endArg.getExpr(), null, context, options);
+
+                            // Unbox end if needed
+                            String endType = TypeResolver.inferTypeFromExpr(endArg.getExpr(), context, options);
+                            if (endType != null && "Ljava/lang/Integer;".equals(endType)) {
+                                int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
+                                code.invokevirtual(intValueMethod);
+                            }
+                            // Stack: ArrayList, target, start, end
+
+                            // Call ArrayApiUtils.copyWithin(ArrayList, int, int, int)
+                            int copyWithinMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "copyWithin",
+                                    "(Ljava/util/ArrayList;III)Ljava/util/ArrayList;");
+                            code.invokestatic(copyWithinMethod);
+                        }
+                        // Stack: ArrayList (returned)
+
+                        return;
+                    }
                 }
             }
         }
