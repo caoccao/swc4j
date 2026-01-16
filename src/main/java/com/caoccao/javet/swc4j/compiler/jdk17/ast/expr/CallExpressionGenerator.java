@@ -193,6 +193,19 @@ public final class CallExpressionGenerator {
                         // The duplicated array reference is now on top of stack, ready to return
                         return;
                     }
+                    case "toReversed" -> {
+                        // arr.toReversed() -> ArrayApiUtils.toReversed(arr)
+                        // Returns new reversed array without modifying original (ES2023)
+                        // Stack: ArrayList
+
+                        // Call ArrayApiUtils.toReversed(ArrayList)
+                        int toReversedMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "toReversed",
+                                "(Ljava/util/ArrayList;)Ljava/util/ArrayList;");
+                        code.invokestatic(toReversedMethod);
+                        // Stack: new ArrayList (reversed)
+
+                        return;
+                    }
                     case "sort" -> {
                         // arr.sort() -> Collections.sort(arr); returns void but we keep arr on stack
                         // JavaScript's sort() returns the array itself (for chaining)

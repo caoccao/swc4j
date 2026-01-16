@@ -28,20 +28,6 @@ public final class ArrayApiUtils {
     }
 
     /**
-     * Convert ArrayList to string representation.
-     * JavaScript equivalent: arr.toString()
-     * JavaScript arrays use comma-separated values without brackets: "1,2,3"
-     * This differs from Java's ArrayList.toString() which returns "[1, 2, 3]"
-     *
-     * @param list the ArrayList to convert
-     * @return the string representation (comma-separated values)
-     */
-    public static String arrayToString(List<?> list) {
-        // JavaScript's toString() is equivalent to join(",")
-        return join(list, ",");
-    }
-
-    /**
      * Convert ArrayList to locale-specific string representation.
      * JavaScript equivalent: arr.toLocaleString()
      * JavaScript arrays use comma-separated values with locale-specific formatting: "1,2,3"
@@ -70,6 +56,20 @@ public final class ArrayApiUtils {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Convert ArrayList to string representation.
+     * JavaScript equivalent: arr.toString()
+     * JavaScript arrays use comma-separated values without brackets: "1,2,3"
+     * This differs from Java's ArrayList.toString() which returns "[1, 2, 3]"
+     *
+     * @param list the ArrayList to convert
+     * @return the string representation (comma-separated values)
+     */
+    public static String arrayToString(List<?> list) {
+        // JavaScript's toString() is equivalent to join(",")
+        return join(list, ",");
     }
 
     /**
@@ -301,5 +301,27 @@ public final class ArrayApiUtils {
         }
 
         return removed;
+    }
+
+    /**
+     * Create a reversed copy of the ArrayList without modifying the original.
+     * JavaScript equivalent: arr.toReversed() (ES2023)
+     *
+     * @param list the ArrayList to reverse
+     * @return a new ArrayList with elements in reversed order
+     */
+    @SuppressWarnings("unchecked")
+    public static ArrayList<Object> toReversed(ArrayList<?> list) {
+        if (list == null || list.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Create a copy of the list
+        ArrayList<Object> result = new ArrayList<>(list);
+
+        // Reverse the copy
+        java.util.Collections.reverse(result);
+
+        return result;
     }
 }

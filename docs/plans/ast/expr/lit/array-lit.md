@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (208 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (218 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -230,7 +230,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 | JavaScript Method | Java Equivalent | Notes | Status |
 |------------------|----------------|-------|---------|
-| `toReversed()` | `new ArrayList<>(list); reverse()` | Returns new array | ❌ Not implemented |
+| `toReversed()` | `new ArrayList<>(list); reverse()` | Returns new array | ✅ Implemented |
 | `toSorted()` | `new ArrayList<>(list); sort()` | Returns new array | ❌ Not implemented |
 | `toSpliced(i, n, ...)` | Manual copy + splice | Returns new array | ❌ Not implemented |
 | `with(index, value)` | `new ArrayList<>(list); set()` | Returns new array | ❌ Not implemented |
@@ -1062,9 +1062,28 @@ arr.customProperty = "hello"  // JS allows this
   - **Current implementation:** Uses default locale formatting (comma separator)
   - **Future enhancement:** Could add locale-specific number/date formatting for improved JavaScript compatibility
   - **Format:** Returns comma-separated values like toString(), but designed for locale-specific formatting
+- [x] `toReversed()` - ES2023 non-mutating reverse ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 196-208, ArrayApiUtils.java lines 306-326
+  - **Bytecode:** Calls `ArrayApiUtils.toReversed(ArrayList)` static method
+  - **Return:** ArrayList (new array) - reversed copy without modifying original
+  - **Tests:** 10 comprehensive tests covering basic usage, non-mutating behavior, empty arrays, single elements, different types, method chaining, error handling
+  - **Test coverage:**
+    - `testArrayToReversedBasic` - Basic toReversed() functionality
+    - `testArrayToReversedDoesNotMutateOriginal` - Verifies original array unchanged
+    - `testArrayToReversedReturnsNewArray` - Returns new reversed array
+    - `testArrayToReversedEmpty` - Empty array returns empty array
+    - `testArrayToReversedSingleElement` - Single element handling
+    - `testArrayToReversedStrings` - String arrays
+    - `testArrayToReversedMixedTypes` - Mixed type arrays
+    - `testArrayToReversedMethodChaining` - Method chaining with sort()
+    - `testArrayToReversedAfterModification` - After push/unshift operations
+    - `testJavaArrayToReversedNotSupported` - Error for Java arrays
+  - **Helper method:** toReversed() in ArrayApiUtils creates copy then reverses it
+  - **Key difference from reverse():** Creates new array instead of mutating original
+  - **ES2023 feature:** Part of ES2023 specification for non-mutating array methods
 - [ ] Multi-dimensional arrays
 - [ ] Array methods with return values
-- [ ] ES2023 non-mutating methods (`toReversed`, `toSorted`, `with`)
+- [ ] ES2023 non-mutating methods (`toSorted`, `toSpliced`, `with`)
 
 ### Phase 6: Functional Methods (Priority: LOW - Requires Functions)
 - [ ] `forEach(callback)`
@@ -1333,14 +1352,25 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (208 tests passing)
+**Current Implementation:** ✅ Solid foundation (218 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `lastIndexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()`, `toString()`, `toLocaleString()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `lastIndexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()`, `toString()`, `toLocaleString()`, `toReversed()` ✅
 - Spread operator support for ArrayList mode ✅
+- ES2023 non-mutating methods: `toReversed()` ✅
 
 **Recently Completed:**
+- ✅ **toReversed() method (ES2023)** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
+  - Non-mutating version of reverse() that returns a new reversed array
+  - 10 comprehensive tests added covering all scenarios
+  - Returns new ArrayList with elements in reversed order
+  - Original array remains unchanged (key difference from reverse())
+  - **Bytecode generation:** Calls ArrayApiUtils.toReversed(ArrayList) which returns new ArrayList
+  - **Helper method:** Creates copy using ArrayList constructor, then reverses with Collections.reverse()
+  - **ES2023 compliance:** Part of ES2023 specification for non-mutating array operations
+  - **Use case:** Get reversed array without modifying original, enabling functional programming patterns
+
 - ✅ **toLocaleString() method** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
   - Converts ArrayList to locale-specific string representation (non-mutating)
   - 9 comprehensive tests added covering all common scenarios
