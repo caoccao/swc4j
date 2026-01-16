@@ -378,7 +378,7 @@ public final class TypeResolver {
                             case "concat", "reverse", "sort", "slice", "splice", "fill", "copyWithin" -> {
                                 return "Ljava/util/ArrayList;";
                             }
-                            case "join" -> {
+                            case "join", "toString" -> {
                                 return "Ljava/lang/String;";
                             }
                             case "indexOf" -> {

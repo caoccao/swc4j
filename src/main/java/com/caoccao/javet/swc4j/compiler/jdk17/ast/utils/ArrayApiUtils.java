@@ -28,6 +28,20 @@ public final class ArrayApiUtils {
     }
 
     /**
+     * Convert ArrayList to string representation.
+     * JavaScript equivalent: arr.toString()
+     * JavaScript arrays use comma-separated values without brackets: "1,2,3"
+     * This differs from Java's ArrayList.toString() which returns "[1, 2, 3]"
+     *
+     * @param list the ArrayList to convert
+     * @return the string representation (comma-separated values)
+     */
+    public static String arrayToString(List<?> list) {
+        // JavaScript's toString() is equivalent to join(",")
+        return join(list, ",");
+    }
+
+    /**
      * Concatenate two ArrayLists into a new ArrayList.
      * JavaScript equivalent: arr1.concat(arr2)
      *

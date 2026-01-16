@@ -8,7 +8,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 
 **Implementation File:** [ArrayLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ArrayLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (179 tests passing)
+**Test File:** [TestCompileAstArrayLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstArrayLit.java) ✅ (187 tests passing)
 
 **AST Definition:** [Swc4jAstArrayLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstArrayLit.java)
 
@@ -207,7 +207,7 @@ This document outlines the implementation plan for supporting JavaScript/TypeScr
 | `lastIndexOf(elem)` | `lastIndexOf(elem)` | Manual loop | ❌ Not implemented |
 | `includes(elem)` | `contains(elem)` | Manual loop | ✅ Implemented |
 | `join(sep)` | `ArrayHelper.join()` | String concat loop | ✅ Implemented |
-| `toString()` | `toString()` | `Arrays.toString()` | ❌ Not implemented |
+| `toString()` | `ArrayApiUtils.arrayToString()` | Not applicable | ✅ Implemented |
 | `toLocaleString()` | Custom formatting | Custom formatting | ❌ Not implemented |
 
 ### Functional Methods (Require Function Support)
@@ -1020,9 +1020,26 @@ arr.customProperty = "hello"  // JS allows this
   - **Index handling:** Negative indices converted to positive, out of bounds indices clamped to valid range
   - **Edge cases:** Empty arrays, overlapping ranges (uses temp ArrayList to avoid overwriting), out of bounds handled correctly
   - **Algorithm:** Creates temporary ArrayList to hold copied elements, then writes to target to handle overlapping ranges correctly
+- [x] `toString()` ✅ **IMPLEMENTED**
+  - **Implementation:** CallExpressionGenerator.java lines 634-646, ArrayApiUtils.java lines 193-205
+  - **Bytecode:** Calls `ArrayApiUtils.arrayToString(List)` static method
+  - **Return:** String - comma-separated values without brackets (e.g., "1,2,3")
+  - **Tests:** 8 comprehensive tests covering basic usage, empty arrays, single elements, different types, method chaining, non-mutating behavior
+  - **Test coverage:**
+    - `testArrayToStringBasic` - toString() with numbers
+    - `testArrayToStringEmpty` - toString() on empty array
+    - `testArrayToStringSingleElement` - toString() with single element
+    - `testArrayToStringWithStrings` - toString() with string arrays
+    - `testArrayToStringMixedTypes` - toString() with mixed types
+    - `testArrayToStringAfterModification` - toString() after push/unshift
+    - `testArrayToStringMethodChaining` - Method chaining with sort().toString()
+    - `testArrayToStringNonMutating` - toString() doesn't mutate array
+  - **Helper method:** arrayToString() in ArrayApiUtils delegates to join(",")
+  - **Format difference:** JavaScript arrays use "1,2,3" while Java's ArrayList.toString() returns "[1, 2, 3]"
+  - **Note:** Equivalent to calling join(",") - returns comma-separated values
 - [ ] Multi-dimensional arrays
 - [ ] Array methods with return values
-- [ ] `toString()` / `toLocaleString()`
+- [ ] `toLocaleString()`
 - [ ] ES2023 non-mutating methods (`toReversed`, `toSorted`, `with`)
 
 ### Phase 6: Functional Methods (Priority: LOW - Requires Functions)
@@ -1292,14 +1309,22 @@ namespace com {
 
 ## Summary
 
-**Current Implementation:** ✅ Solid foundation (179 tests passing)
+**Current Implementation:** ✅ Solid foundation (187 tests passing)
 - Basic array creation and operations work
 - Both ArrayList and Java array modes supported
 - Type conversion and boxing implemented
-- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()` ✅
+- Array methods: `push()`, `pop()`, `shift()`, `unshift()`, `indexOf()`, `includes()`, `reverse()`, `sort()`, `join()`, `concat()`, `slice()`, `splice()`, `fill()`, `copyWithin()`, `toString()` ✅
 - Spread operator support for ArrayList mode ✅
 
 **Recently Completed:**
+- ✅ **toString() method** - Implemented in CallExpressionGenerator.java with ArrayApiUtils helper
+  - Converts ArrayList to string representation with comma-separated values (non-mutating)
+  - 8 comprehensive tests added covering all common scenarios
+  - Returns string in JavaScript format: "1,2,3" (not Java's "[1, 2, 3]")
+  - Internally delegates to join(",") for consistent behavior
+  - **Bytecode generation:** Calls ArrayApiUtils.arrayToString(List) which returns String
+  - **Format:** Comma-separated values without brackets, matching JavaScript's toString() behavior
+
 - ✅ **copyWithin() method** - Implemented in CallExpressionGenerator.java with overloaded ArrayApiUtils helpers
   - Copies part of ArrayList to another location within the same ArrayList (mutating)
   - 14 comprehensive tests added covering all argument combinations and edge cases
@@ -1356,7 +1381,7 @@ namespace com {
 **Next Steps:**
 1. Fix delete behavior to create holes instead of shifting
 2. Test nested and multi-dimensional arrays thoroughly
-3. Add more array methods (toString, toLocaleString, ES2023 methods, etc.)
+3. Add more array methods (toLocaleString, lastIndexOf, ES2023 methods, etc.)
 4. Add functional methods (when function support is available)
 
 **Key Differences from JavaScript:**

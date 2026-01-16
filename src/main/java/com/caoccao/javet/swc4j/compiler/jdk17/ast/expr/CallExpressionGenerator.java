@@ -631,6 +631,19 @@ public final class CallExpressionGenerator {
 
                         return;
                     }
+                    case "toString" -> {
+                        // arr.toString() -> ArrayApiUtils.arrayToString(arr)
+                        // Returns string representation (comma-separated values)
+                        // Stack: ArrayList
+
+                        // Call ArrayApiUtils.arrayToString(List)
+                        int toStringMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "arrayToString",
+                                "(Ljava/util/List;)Ljava/lang/String;");
+                        code.invokestatic(toStringMethod);
+                        // Stack: String
+
+                        return;
+                    }
                 }
             }
         }
