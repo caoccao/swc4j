@@ -313,6 +313,9 @@ public final class TypeResolver {
         } else if (expr instanceof Swc4jAstArrayLit) {
             // Array literal - maps to ArrayList
             return "Ljava/util/ArrayList;";
+        } else if (expr instanceof Swc4jAstObjectLit) {
+            // Object literal - maps to LinkedHashMap
+            return "Ljava/util/LinkedHashMap;";
         } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
             // Member expression - handle array-like properties
             String objType = inferTypeFromExpr(memberExpr.getObj(), context, options);
@@ -337,6 +340,10 @@ public final class TypeResolver {
                         return "I"; // arr.length returns int
                     }
                 }
+            } else if ("Ljava/util/LinkedHashMap;".equals(objType)) {
+                // LinkedHashMap operations (object literal member access)
+                // map.get() returns Object
+                return "Ljava/lang/Object;";
             }
             return "Ljava/lang/Object;";
         } else if (expr instanceof Swc4jAstStr) {

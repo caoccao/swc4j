@@ -103,6 +103,40 @@ public final class MemberExpressionGenerator {
                     return;
                 }
             }
+        } else if ("Ljava/util/LinkedHashMap;".equals(objType)) {
+            // LinkedHashMap operations (object literal member access)
+            // Check if it's a computed property (obj[key]) or named property (obj.prop)
+            if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
+                // obj[key] -> map.get(key)
+                ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options); // Stack: [LinkedHashMap]
+                ExpressionGenerator.generate(code, cp, computedProp.getExpr(), null, context, options); // Stack: [LinkedHashMap, key]
+
+                // Box primitive keys if needed
+                String keyType = TypeResolver.inferTypeFromExpr(computedProp.getExpr(), context, options);
+                if (keyType != null && TypeConversionUtils.isPrimitiveType(keyType)) {
+                    String wrapperType = TypeConversionUtils.getWrapperType(keyType);
+                    TypeConversionUtils.boxPrimitiveType(code, cp, keyType, wrapperType);
+                }
+
+                // Call LinkedHashMap.get(Object)
+                int getMethod = cp.addMethodRef("java/util/LinkedHashMap", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
+                code.invokevirtual(getMethod); // Stack: [Object]
+                return;
+            }
+
+            // Named property access (obj.prop)
+            if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                String propName = propIdent.getSym();
+                // obj.prop -> map.get("prop")
+                ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options); // Stack: [LinkedHashMap]
+                int keyIndex = cp.addString(propName);
+                code.ldc(keyIndex); // Stack: [LinkedHashMap, "prop"]
+
+                // Call LinkedHashMap.get(Object)
+                int getMethod = cp.addMethodRef("java/util/LinkedHashMap", "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
+                code.invokevirtual(getMethod); // Stack: [Object]
+                return;
+            }
         }
         // For unsupported member expressions, throw an error for now
         throw new Swc4jByteCodeCompilerException("Member expression not yet supported: " + memberExpr.getProp());
