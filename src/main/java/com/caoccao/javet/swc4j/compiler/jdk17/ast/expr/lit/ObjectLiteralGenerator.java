@@ -113,7 +113,14 @@ public final class ObjectLiteralGenerator {
                     valueType = "Ljava/lang/Object;";
                 }
 
-                callback.generateExpr(code, cp, valueExpr, null, context, options);
+                // Phase 2.3: Pass nested GenericTypeInfo for nested object literals
+                ReturnTypeInfo valueReturnType = null;
+                if (genericTypeInfo != null && genericTypeInfo.isNested() && valueExpr instanceof Swc4jAstObjectLit) {
+                    // Create ReturnTypeInfo with nested GenericTypeInfo for recursive validation
+                    valueReturnType = ReturnTypeInfo.of("Ljava/util/LinkedHashMap;", genericTypeInfo.getNestedTypeInfo());
+                }
+
+                callback.generateExpr(code, cp, valueExpr, valueReturnType, context, options);
                 // Stack: [map, map, key, value]
 
                 // Box primitive values to Object
@@ -486,10 +493,20 @@ public final class ObjectLiteralGenerator {
 
         String expectedValueType = genericTypeInfo.getValueType();
 
-        // Handle nested Record types
-        if (genericTypeInfo.isNested() && valueExpr instanceof Swc4jAstObjectLit) {
-            // Nested object literal - validation will be handled recursively
-            // when the nested object literal is generated
+        // Phase 2.3: Handle nested Record types - validate nested object literals recursively
+        if (genericTypeInfo.isNested() && valueExpr instanceof Swc4jAstObjectLit nestedObjLit) {
+            // Nested object literal - recursively validate all properties
+            GenericTypeInfo nestedTypeInfo = genericTypeInfo.getNestedTypeInfo();
+            for (var nestedProp : nestedObjLit.getProps()) {
+                if (nestedProp instanceof Swc4jAstKeyValueProp nestedKvProp) {
+                    validateKeyValueProperty(nestedKvProp, nestedTypeInfo, context, options);
+                } else if (nestedProp instanceof Swc4jAstIdent nestedIdent) {
+                    validateShorthandProperty(nestedIdent, nestedTypeInfo, context, options);
+                }
+                // Spread elements in nested objects would need special handling
+                // For now, we skip validation for spread (will use runtime types)
+            }
+            // Nested validation complete - actual type is LinkedHashMap which matches expected
             return;
         }
 

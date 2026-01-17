@@ -735,6 +735,126 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
                 "Expected value type mismatch error, got: " + causeMessage);
     }
 
+    // Phase 2.3: Nested Record types
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedRecordValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, Record<string, number>> = {
+                        outer1: {inner1: 42, inner2: 99},
+                        outer2: {inner3: 100}
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(
+                "outer1", Map.of("inner1", 42, "inner2", 99),
+                "outer2", Map.of("inner3", 100)
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedRecordInvalidNestedValue(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const obj: Record<string, Record<string, number>> = {
+                            outer: {inner: "invalid"}
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Property 'inner'") &&
+                        causeMessage.contains("String"),
+                "Expected nested type mismatch error, got: " + causeMessage);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedRecordEmptyNested(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, Record<string, number>> = {
+                        outer1: {},
+                        outer2: {inner: 42}
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(
+                "outer1", Map.of(),
+                "outer2", Map.of("inner", 42)
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedRecordMixedTypes(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, Record<string, number>> = {
+                        a: {x: 1, y: 2.5},
+                        b: {z: 100}
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(
+                "a", Map.of("x", 1, "y", 2.5),
+                "b", Map.of("z", 100)
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedRecordInvalidNestedKey(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const obj: Record<string, Record<number, string>> = {
+                            outer: {a: "invalid"}
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Key 'a'") &&
+                        causeMessage.contains("String"),
+                "Expected nested key type mismatch error, got: " + causeMessage);
+    }
+
     // Phase 3: Property Shorthand
 
     @ParameterizedTest

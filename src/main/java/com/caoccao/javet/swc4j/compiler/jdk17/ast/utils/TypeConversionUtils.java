@@ -19,7 +19,11 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 import com.caoccao.javet.swc4j.asm.ClassWriter;
 import com.caoccao.javet.swc4j.asm.CodeBuilder;
 
+import java.util.Set;
+
 public final class TypeConversionUtils {
+    private static final Set<String> PRIMITIVE_TYPES = Set.of("I", "Z", "B", "C", "S", "J", "F", "D");
+
     private TypeConversionUtils() {
     }
 
@@ -153,9 +157,7 @@ public final class TypeConversionUtils {
     }
 
     public static boolean isPrimitiveType(String type) {
-        return "I".equals(type) || "Z".equals(type) || "B".equals(type) ||
-                "C".equals(type) || "S".equals(type) || "J".equals(type) ||
-                "F".equals(type) || "D".equals(type);
+        return PRIMITIVE_TYPES.contains(type);
     }
 
     public static void unboxWrapperType(CodeBuilder code, ClassWriter.ConstantPool cp, String type) {

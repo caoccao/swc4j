@@ -30,6 +30,7 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsKeywordType;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
@@ -545,7 +546,7 @@ public final class TypeResolver {
         }
 
         // Handle primitive to wrapper boxing
-        if (isPrimitiveType(fromType) && !isPrimitiveType(toType)) {
+        if (TypeConversionUtils.isPrimitiveType(fromType) && !TypeConversionUtils.isPrimitiveType(toType)) {
             String wrapperType = getWrapperType(fromType);
             if (wrapperType.equals(toType)) {
                 return true; // Direct boxing: int → Integer
@@ -555,11 +556,11 @@ public final class TypeResolver {
         }
 
         // Handle wrapper to primitive unboxing
-        if (!isPrimitiveType(fromType) && isPrimitiveType(toType)) {
+        if (!TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
             String primitiveType = getPrimitiveType(fromType);
             // getPrimitiveType returns the primitive type for wrappers, or the type unchanged for non-wrappers
             // Check if it's actually a primitive after conversion
-            if (isPrimitiveType(primitiveType)) {
+            if (TypeConversionUtils.isPrimitiveType(primitiveType)) {
                 if (primitiveType.equals(toType)) {
                     return true; // Direct unboxing: Integer → int
                 }
@@ -571,12 +572,12 @@ public final class TypeResolver {
         }
 
         // Handle widening primitive conversions
-        if (isPrimitiveType(fromType) && isPrimitiveType(toType)) {
+        if (TypeConversionUtils.isPrimitiveType(fromType) && TypeConversionUtils.isPrimitiveType(toType)) {
             return isPrimitiveWidening(fromType, toType);
         }
 
         // Handle object hierarchy (both are reference types)
-        if (!isPrimitiveType(fromType) && !isPrimitiveType(toType)) {
+        if (!TypeConversionUtils.isPrimitiveType(fromType) && !TypeConversionUtils.isPrimitiveType(toType)) {
             return isObjectAssignable(fromType, toType);
         }
 
@@ -621,19 +622,7 @@ public final class TypeResolver {
         return false;
     }
 
-    /**
-     * Check if a type descriptor represents a primitive type.
-     *
-     * @param typeDescriptor JVM type descriptor (e.g., "I", "D", "Ljava/lang/String;")
-     * @return true if primitive type
-     */
-    private static boolean isPrimitiveType(String typeDescriptor) {
-        if (typeDescriptor == null || typeDescriptor.isEmpty()) {
-            return false;
-        }
-        // Primitive types are single characters: Z, B, C, S, I, J, F, D
-        return typeDescriptor.length() == 1 && "ZBCSIJFD".contains(typeDescriptor);
-    }
+
 
     /**
      * Check if a primitive type can be widened to another primitive type.

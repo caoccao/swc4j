@@ -4,11 +4,11 @@
 
 This document outlines the implementation plan for supporting JavaScript/TypeScript object literals (`Swc4jAstObjectLit`) and compiling them to JVM bytecode using `LinkedHashMap<Object, Object>` as the underlying data structure.
 
-**Current Status:** ✅ Phase 0-2 COMPLETED (Type validation infrastructure + Record<K,V> validation + Primitive wrapper keys) + Phase 1,3-4 Implemented (Basic key-value pairs + Computed property names + Property shorthand + Spread operator working)
+**Current Status:** ✅ Phase 0-2.3 COMPLETED (Type validation infrastructure + Record<K,V> validation + Primitive wrapper keys + Nested Record types) + Phase 1,3-4 Implemented (Basic key-value pairs + Computed property names + Property shorthand + Spread operator working)
 
 **Implementation File:** [ObjectLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ObjectLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstObjectLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstObjectLit.java) ✅ (57 tests passing: 37 Phase 1,3-4 + 7 Phase 2.0 + 6 Phase 2.1 + 7 Phase 2.2)
+**Test File:** [TestCompileAstObjectLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstObjectLit.java) ✅ (62 tests passing: 37 Phase 1,3-4 + 7 Phase 2.0 + 6 Phase 2.1 + 7 Phase 2.2 + 5 Phase 2.3)
 
 **AST Definition:** [Swc4jAstObjectLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit.java)
 
@@ -1408,8 +1408,8 @@ map.put("b", Integer.valueOf(2));
 - [x] Generate `LinkedHashMap<String, Integer>` for Record<string, number>
 - [x] Test type validation errors (clear error messages) - All 7 tests pass
 - [x] Support Record<number, V> with Integer keys - All 6 tests pass
-- [ ] Support Record<string, Record<string, V>> (nested) (deferred to future phase)
-- [ ] Validate nested object types recursively (deferred to future phase)
+- [x] Support Record<string, Record<string, V>> (nested) - All 5 tests pass (Phase 2.3)
+- [x] Validate nested object types recursively - Implemented in Phase 2.3
 - [x] Test primitive-to-wrapper conversions (covered by isAssignable tests)
 - [x] Test widening conversions (int → long, int → double) (covered by isAssignable tests)
 - [x] Reject narrowing conversions (long → int) (covered by isAssignable tests)
@@ -1519,6 +1519,40 @@ map.put("b", Integer.valueOf(2));
 **Files Modified:**
 - `ObjectLiteralGenerator.java` - Extended primitive wrapper support, renamed method, enhanced validation
 - `TestCompileAstObjectLit.java` - Added 7 Phase 2.2 tests
+
+**Phase 2.3 Implementation Summary (Nested Record Types: Record<string, Record<string, V>>):**
+
+**Features Added:**
+1. Recursive validation for nested Record types
+2. Nested GenericTypeInfo propagation through value generation
+3. Support for arbitrary nesting depth
+4. Type validation for all levels of nested object literals
+
+**Implementation Details:**
+1. Enhanced value generation in ObjectLiteralGenerator (lines 116-123):
+   - Check if GenericTypeInfo has `isNested()` flag set
+   - Extract nested GenericTypeInfo using `getNestedTypeInfo()`
+   - Pass nested type info through ReturnTypeInfo to recursive object literal generation
+2. Implemented recursive validation in `validateKeyValueProperty()` (lines 496-511):
+   - Detect nested object literals when GenericTypeInfo indicates nesting
+   - Recursively call validation methods on all nested properties
+   - Validate nested keys and values against nested type constraints
+   - Skip validation for spread elements (use runtime types)
+3. Leveraged existing infrastructure:
+   - GenericTypeInfo already supported nested types (isNested, nestedTypeInfo fields)
+   - ReturnTypeInfo already supported passing GenericTypeInfo
+   - No changes to data structures needed
+
+**Tests Added (5 tests, all passing):**
+- ✅ `testNestedRecordValid` - Valid Record<string, Record<string, number>> with multiple properties
+- ✅ `testNestedRecordInvalidNestedValue` - Rejects invalid nested value type (string instead of number)
+- ✅ `testNestedRecordEmptyNested` - Empty nested objects are allowed
+- ✅ `testNestedRecordMixedTypes` - Mixed int and double in nested values
+- ✅ `testNestedRecordInvalidNestedKey` - Rejects invalid nested key type (string instead of number)
+
+**Files Modified:**
+- `ObjectLiteralGenerator.java` - Added nested type info propagation and recursive validation
+- `TestCompileAstObjectLit.java` - Added 5 Phase 2.3 tests
 
 **Phase 2.0-2.1 Files Modified (from previous implementation):**
 - `ReturnTypeInfo.java` - Added genericTypeInfo field
