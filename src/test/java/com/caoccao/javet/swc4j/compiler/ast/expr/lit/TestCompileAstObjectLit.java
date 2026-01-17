@@ -429,12 +429,60 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRecordNumberStringValid(JdkVersion jdkVersion) throws Exception {
+    public void testRecordIntegerKeyTypeMismatch(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const obj: Record<Integer, string> = {
+                            a: "invalid"
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Key 'a'") &&
+                        causeMessage.contains("String"),
+                "Expected key type mismatch error, got: " + causeMessage);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordIntegerNumberValid(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const obj: Record<number, string> = {
+                      const obj: Record<Integer, number> = {
+                        1: 100,
+                        2: 200,
+                        3: 3.14
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(3, result.size());
+        assertEquals(100, result.get(1));
+        assertEquals(200, result.get(2));
+        assertEquals(3.14, result.get(3));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordIntegerStringValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<Integer, string> = {
                         0: "zero",
                         1: "one",
                         42: "forty-two"
@@ -454,36 +502,37 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRecordNumberNumberValid(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj: Record<number, number> = {
-                        1: 100,
-                        2: 200,
-                        3: 300
+    public void testRecordLongKeyTypeMismatch(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const obj: Record<Long, string> = {
+                            a: "invalid"
+                          }
+                          return obj
+                        }
                       }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(Map.of(1, 100, 2, 200, 3, 300), result);
+                    }""");
+        });
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Key 'a'") &&
+                        causeMessage.contains("String"),
+                "Expected key type mismatch error, got: " + causeMessage);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRecordNumberMixedIntAndDouble(JdkVersion jdkVersion) throws Exception {
+    public void testRecordLongNumberValid(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const obj: Record<number, number> = {
-                        1: 42,
-                        2: 3.14
+                      const obj: Record<Long, number> = {
+                        1: 100,
+                        2147483648: 200
                       }
                       return obj
                     }
@@ -493,8 +542,61 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(2, result.size());
-        assertEquals(42, result.get(1));
-        assertEquals(3.14, result.get(2));
+        assertEquals(100, result.get(1L));
+        assertEquals(200, result.get(2147483648L));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordLongStringValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<Long, string> = {
+                        0: "zero",
+                        1: "one",
+                        2147483648: "large"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(3, result.size());
+        assertEquals("zero", result.get(0L));
+        assertEquals("one", result.get(1L));
+        assertEquals("large", result.get(2147483648L));
+    }
+
+    // Phase 2.2: Type Alias Keys - Integer, Long, Double, String
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordMixedValidAndInvalid(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const obj: Record<string, number> = {
+                            a: 1,
+                            b: 2,
+                            c: "invalid"
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        // Check the cause contains the validation error
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Property 'c'") &&
+                        causeMessage.contains("String"),
+                "Expected type mismatch error for property 'c', got: " + causeMessage);
     }
 
     @ParameterizedTest
@@ -541,6 +643,76 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testRecordNumberMixedIntAndDouble(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<number, number> = {
+                        1: 42,
+                        2: 3.14
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(2, result.size());
+        assertEquals(42, result.get(1));
+        assertEquals(3.14, result.get(2));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordNumberNumberValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<number, number> = {
+                        1: 100,
+                        2: 200,
+                        3: 300
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(1, 100, 2, 200, 3, 300), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordNumberStringValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<number, string> = {
+                        0: "zero",
+                        1: "one",
+                        42: "forty-two"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(3, result.size());
+        assertEquals("zero", result.get(0));
+        assertEquals("one", result.get(1));
+        assertEquals("forty-two", result.get(42));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testRecordNumberValueTypeMismatch(JdkVersion jdkVersion) {
         var exception = assertThrows(Exception.class, () -> {
             getCompiler(jdkVersion).compile("""
@@ -567,28 +739,25 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testRecordMixedValidAndInvalid(JdkVersion jdkVersion) {
+    public void testRecordStringKeyNumericMismatch(JdkVersion jdkVersion) {
         var exception = assertThrows(Exception.class, () -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
                         test() {
-                          const obj: Record<string, number> = {
-                            a: 1,
-                            b: 2,
-                            c: "invalid"
+                          const obj: Record<String, number> = {
+                            1: 42
                           }
                           return obj
                         }
                       }
                     }""");
         });
-        // Check the cause contains the validation error
         assertNotNull(exception.getCause(), "Expected wrapped exception");
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Property 'c'") &&
-                        causeMessage.contains("String"),
-                "Expected type mismatch error for property 'c', got: " + causeMessage);
+        assertTrue(causeMessage.contains("Key '1'") &&
+                        causeMessage.contains("Integer"),
+                "Expected key type mismatch error, got: " + causeMessage);
     }
 
     @ParameterizedTest

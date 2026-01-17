@@ -4,11 +4,11 @@
 
 This document outlines the implementation plan for supporting JavaScript/TypeScript object literals (`Swc4jAstObjectLit`) and compiling them to JVM bytecode using `LinkedHashMap<Object, Object>` as the underlying data structure.
 
-**Current Status:** ✅ Phase 0-2 COMPLETED (Type validation infrastructure + Record<K,V> validation + Record<number, V> numeric keys) + Phase 1,3-4 Implemented (Basic key-value pairs + Computed property names + Property shorthand + Spread operator working)
+**Current Status:** ✅ Phase 0-2 COMPLETED (Type validation infrastructure + Record<K,V> validation + Primitive wrapper keys) + Phase 1,3-4 Implemented (Basic key-value pairs + Computed property names + Property shorthand + Spread operator working)
 
 **Implementation File:** [ObjectLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ObjectLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstObjectLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstObjectLit.java) ✅ (50 tests passing: 37 Phase 1,3-4 + 7 Phase 2 Record<string,V> + 6 Phase 2.1 Record<number,V>)
+**Test File:** [TestCompileAstObjectLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstObjectLit.java) ✅ (57 tests passing: 37 Phase 1,3-4 + 7 Phase 2.0 + 6 Phase 2.1 + 7 Phase 2.2)
 
 **AST Definition:** [Swc4jAstObjectLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit.java)
 
@@ -1481,7 +1481,46 @@ map.put("b", Integer.valueOf(2));
 - `ObjectLiteralGenerator.java` - Added numeric key generation logic
 - `TestCompileAstObjectLit.java` - Added 6 Phase 2.1 tests
 
-**Phase 2 Files Modified (from previous implementation):**
+**Phase 2.2 Implementation Summary (Type Alias Keys: Integer, Long, Short, Byte, Float, Double, Boolean, Character):**
+
+**Features Added:**
+1. Support for all primitive wrapper types as object keys (not just numeric)
+2. Type-directed key generation based on explicit type annotations
+3. Smart validation that allows numeric conversions between wrapper types
+4. Renamed `isNumericKeyType()` to `isPrimitiveKeyType()` for clarity
+
+**Implementation Details:**
+1. Extended `isPrimitiveKeyType()` to check for all primitive wrappers: Integer, Long, Float, Double, Boolean, Short, Byte, Character
+2. Updated `generateNumericKey()` to handle explicit wrapper type annotations:
+   - `Record<Long, V>` → generates Long keys even for small integer literals
+   - `Record<Short, V>` → generates Short keys
+   - `Record<Byte, V>` → generates Byte keys
+   - `Record<Float, V>` → generates Float keys
+   - `Record<Double, V>` → generates Double keys
+   - `Record<number, V>` (primitive D) → infers based on value (int → Integer, large int → Long, decimal → Double)
+   - `Record<Integer, V>` → infers based on value (same as number)
+3. Enhanced validation to allow primitive wrapper conversions:
+   - Integer literal → Long key is allowed for `Record<Long, V>`
+   - Any numeric literal → any numeric wrapper is allowed
+   - Validation checks compatibility, generation handles conversion
+4. Updated all comments to reflect "primitive wrapper" terminology instead of "numeric"
+
+**Tests Added (7 tests, all passing):**
+- ✅ `testRecordIntegerStringValid` - Valid Record<Integer, string>
+- ✅ `testRecordLongStringValid` - Valid Record<Long, string>
+- ✅ `testRecordIntegerNumberValid` - Valid Record<Integer, number>
+- ✅ `testRecordLongNumberValid` - Valid Record<Long, number>
+- ✅ `testRecordIntegerKeyTypeMismatch` - Rejects string key for Integer type
+- ✅ `testRecordLongKeyTypeMismatch` - Rejects string key for Long type
+- ✅ `testRecordStringKeyNumericMismatch` - Rejects numeric key for String type
+
+**Note:** Float, Double, Boolean, Short, Byte, and Character are supported in the implementation but not tested per user request.
+
+**Files Modified:**
+- `ObjectLiteralGenerator.java` - Extended primitive wrapper support, renamed method, enhanced validation
+- `TestCompileAstObjectLit.java` - Added 7 Phase 2.2 tests
+
+**Phase 2.0-2.1 Files Modified (from previous implementation):**
 - `ReturnTypeInfo.java` - Added genericTypeInfo field
 - `CompilationContext.java` - Added genericTypeInfoMap
 - `TypeResolver.java` - Added extractGenericTypeInfo(), updated mapTsTypeToDescriptor()

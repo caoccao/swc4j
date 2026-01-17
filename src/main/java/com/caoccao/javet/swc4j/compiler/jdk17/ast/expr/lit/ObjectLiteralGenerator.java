@@ -102,7 +102,8 @@ public final class ObjectLiteralGenerator {
                 code.dup(); // Stack: [map, map]
 
                 // Generate key
-                generateKey(code, cp, kvProp.getKey(), genericTypeInfo, context, options, callback);
+                String expectedKeyType = genericTypeInfo != null ? genericTypeInfo.getKeyType() : null;
+                generateKey(code, cp, kvProp.getKey(), expectedKeyType, context, options, callback);
                 // Stack: [map, map, key]
 
                 // Generate value
@@ -186,12 +187,12 @@ public final class ObjectLiteralGenerator {
     /**
      * Generate bytecode for property key.
      * Phase 1-2: Support IdentName, Str, Number, and Computed keys (all converted to String by default)
-     * Phase 2.1: Support numeric keys as Integer when Record<number, V> is declared
+     * Phase 2.1: Support primitive wrapper keys when Record<T, V> is declared with non-String key type
      *
      * @param code            code builder
      * @param cp              constant pool
      * @param key             property key AST node
-     * @param genericTypeInfo generic type info for Record type (may be null)
+     * @param expectedKeyType expected key type descriptor from Record type (may be null)
      * @param context         compilation context
      * @param options         compiler options
      * @param callback        callback for generating computed keys
@@ -201,13 +202,13 @@ public final class ObjectLiteralGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             ISwc4jAstPropName key,
-            GenericTypeInfo genericTypeInfo,
+            String expectedKeyType,
             CompilationContext context,
             ByteCodeCompilerOptions options,
             StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
 
-        // Phase 2.1: Check if we should generate numeric keys (Record<number, V>)
-        boolean numericKeys = genericTypeInfo != null && isNumericKeyType(genericTypeInfo.getKeyType());
+        // Phase 2.1: Check if we should generate primitive wrapper keys (not String)
+        boolean nonStringKeys = expectedKeyType != null && isPrimitiveKeyType(expectedKeyType);
 
         if (key instanceof Swc4jAstIdentName identName) {
             // Identifier key: {name: value} → "name"
@@ -221,9 +222,9 @@ public final class ObjectLiteralGenerator {
             code.ldc(keyIndex);
         } else if (key instanceof Swc4jAstNumber num) {
             // Numeric key handling depends on Record type
-            if (numericKeys) {
-                // Phase 2.1: Record<number, V> - generate Integer key
-                generateNumericKey(code, cp, num);
+            if (nonStringKeys) {
+                // Phase 2.1: Record<T, V> where T is a wrapper type - generate boxed key
+                generateNumericKey(code, cp, num, expectedKeyType);
             } else {
                 // Phase 1: Default behavior - convert to String
                 String keyStr = String.valueOf((int) num.getValue());
@@ -244,20 +245,18 @@ public final class ObjectLiteralGenerator {
             // Stack: [expr_result]
 
             // Phase 2.1: Convert to appropriate key type based on Record type
-            if (numericKeys) {
-                // Record<number, V> - ensure key is numeric (Integer, Long, or Double)
+            if (nonStringKeys) {
+                // Record<T, V> where T is a primitive wrapper - ensure key is boxed
                 if (TypeConversionUtils.isPrimitiveType(exprType)) {
-                    // Box primitive numeric types
+                    // Box primitive types
                     String wrapperType = TypeConversionUtils.getWrapperType(exprType);
                     TypeConversionUtils.boxPrimitiveType(code, cp, exprType, wrapperType);
-                    // Stack: [boxed number]
-                } else if ("Ljava/lang/Integer;".equals(exprType) ||
-                        "Ljava/lang/Long;".equals(exprType) ||
-                        "Ljava/lang/Double;".equals(exprType)) {
-                    // Already boxed numeric type, no conversion needed
-                    // Stack: [boxed number]
+                    // Stack: [boxed value]
+                } else if (isPrimitiveKeyType(exprType)) {
+                    // Already boxed primitive wrapper type, no conversion needed
+                    // Stack: [boxed value]
                 } else {
-                    // Non-numeric type for Record<number, V> - should have been caught by validation
+                    // Non-wrapper type - should have been caught by validation
                     // Stack: [Object]
                 }
             } else {
@@ -287,76 +286,102 @@ public final class ObjectLiteralGenerator {
     }
 
     /**
-     * Check if a type descriptor represents a numeric key type.
-     * Phase 2.1: Support Record<number, V> with Integer keys
+     * Generate bytecode for numeric literal key based on expected primitive wrapper type.
+     * Phase 2.1: Converts numeric literals to the appropriate wrapper type.
+     * For explicit wrapper types (Long, Short, Byte, Float), uses that type.
+     * For generic number type (D) or Integer, infers from the actual value (int → Integer, large int → Long, decimal → Double).
+     * Supports: Integer, Long, Float, Double, Short, Byte
      *
-     * @param typeDescriptor JVM type descriptor
-     * @return true if type is Integer, Long, Double, or primitive numeric type
-     */
-    private static boolean isNumericKeyType(String typeDescriptor) {
-        if (typeDescriptor == null) {
-            return false;
-        }
-        return "Ljava/lang/Integer;".equals(typeDescriptor) ||
-                "Ljava/lang/Long;".equals(typeDescriptor) ||
-                "Ljava/lang/Double;".equals(typeDescriptor) ||
-                "I".equals(typeDescriptor) ||
-                "J".equals(typeDescriptor) ||
-                "D".equals(typeDescriptor);
-    }
-
-    /**
-     * Generate bytecode for numeric key (Integer, Long, or Double).
-     * Phase 2.1: Support Record<number, V> with boxed numeric keys
-     *
-     * @param code code builder
-     * @param cp   constant pool
-     * @param num  numeric key AST node
+     * @param code            code builder
+     * @param cp              constant pool
+     * @param num             numeric key AST node
+     * @param expectedKeyType expected key type descriptor (determines which wrapper to use)
      * @throws Swc4jByteCodeCompilerException if generation fails
      */
     private static void generateNumericKey(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
-            Swc4jAstNumber num) throws Swc4jByteCodeCompilerException {
+            Swc4jAstNumber num,
+            String expectedKeyType) throws Swc4jByteCodeCompilerException {
         double value = num.getValue();
 
-        // Determine if it's an integer or floating-point value
-        if (value == Math.floor(value) && !Double.isInfinite(value)) {
-            // Integer value
+        // For explicit Long type annotation, always use Long
+        if ("Ljava/lang/Long;".equals(expectedKeyType) || "J".equals(expectedKeyType)) {
             long longValue = (long) value;
-            if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
-                // Fits in int - use Integer.valueOf(int)
-                int intValue = (int) longValue;
-                if (intValue >= Short.MIN_VALUE && intValue <= Short.MAX_VALUE) {
-                    // Use iconst for values in short range
-                    code.iconst(intValue);
-                } else {
-                    // Use ldc for other integers
-                    code.ldc(cp.addInteger(intValue));
-                }
-                // Box to Integer
-                int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf",
-                        "(I)Ljava/lang/Integer;");
-                code.invokestatic(valueOfRef);
+            code.ldc2_w(cp.addLong(longValue));
+            int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+            code.invokestatic(valueOfRef);
+        }
+        // For explicit Short type annotation, always use Short
+        else if ("Ljava/lang/Short;".equals(expectedKeyType) || "S".equals(expectedKeyType)) {
+            short shortValue = (short) value;
+            code.iconst(shortValue);
+            int valueOfRef = cp.addMethodRef("java/lang/Short", "valueOf", "(S)Ljava/lang/Short;");
+            code.invokestatic(valueOfRef);
+        }
+        // For explicit Byte type annotation, always use Byte
+        else if ("Ljava/lang/Byte;".equals(expectedKeyType) || "B".equals(expectedKeyType)) {
+            byte byteValue = (byte) value;
+            code.iconst(byteValue);
+            int valueOfRef = cp.addMethodRef("java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;");
+            code.invokestatic(valueOfRef);
+        }
+        // For explicit Float type annotation, always use Float
+        else if ("Ljava/lang/Float;".equals(expectedKeyType) || "F".equals(expectedKeyType)) {
+            float floatValue = (float) value;
+            if (floatValue == 0.0f || floatValue == 1.0f || floatValue == 2.0f) {
+                code.fconst(floatValue);
             } else {
-                // Doesn't fit in int - use Long.valueOf(long)
-                code.ldc2_w(cp.addLong(longValue));
-                int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf",
-                        "(J)Ljava/lang/Long;");
-                code.invokestatic(valueOfRef);
+                code.ldc(cp.addFloat(floatValue));
             }
-        } else {
-            // Floating-point value - use Double.valueOf(double)
+            int valueOfRef = cp.addMethodRef("java/lang/Float", "valueOf", "(F)Ljava/lang/Float;");
+            code.invokestatic(valueOfRef);
+        }
+        // For explicit Double type annotation, always use Double
+        else if ("Ljava/lang/Double;".equals(expectedKeyType)) {
             if (value == 0.0 || value == 1.0) {
                 code.dconst(value);
             } else {
                 code.ldc2_w(cp.addDouble(value));
             }
-            int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf",
-                    "(D)Ljava/lang/Double;");
+            int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
             code.invokestatic(valueOfRef);
         }
-        // Stack: [boxed numeric key]
+        // For generic number type (primitive D) or Integer, infer from actual value
+        // This handles Record<number, V> where number is primitive double (D)
+        else {
+            // Infer wrapper type from actual numeric value
+            if (value == Math.floor(value) && !Double.isInfinite(value)) {
+                // Integer value
+                long longValue = (long) value;
+                if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
+                    // Fits in int → Integer
+                    int intValue = (int) longValue;
+                    if (intValue >= Short.MIN_VALUE && intValue <= Short.MAX_VALUE) {
+                        code.iconst(intValue);
+                    } else {
+                        code.ldc(cp.addInteger(intValue));
+                    }
+                    int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;");
+                    code.invokestatic(valueOfRef);
+                } else {
+                    // Doesn't fit in int → Long
+                    code.ldc2_w(cp.addLong(longValue));
+                    int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf", "(J)Ljava/lang/Long;");
+                    code.invokestatic(valueOfRef);
+                }
+            } else {
+                // Floating-point value → Double
+                if (value == 0.0 || value == 1.0) {
+                    code.dconst(value);
+                } else {
+                    code.ldc2_w(cp.addDouble(value));
+                }
+                int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf", "(D)Ljava/lang/Double;");
+                code.invokestatic(valueOfRef);
+            }
+        }
+        // Stack: [boxed key]
     }
 
     /**
@@ -376,6 +401,38 @@ public final class ObjectLiteralGenerator {
             return "<computed>";
         }
         return "<unknown>";
+    }
+
+    /**
+     * Check if a type descriptor represents a primitive wrapper key type.
+     * Phase 2.1: Support Record<T, V> where T can be any primitive wrapper (Integer, Long, Boolean, etc.)
+     *
+     * @param typeDescriptor JVM type descriptor
+     * @return true if type is a primitive wrapper or primitive (not String)
+     */
+    private static boolean isPrimitiveKeyType(String typeDescriptor) {
+        if (typeDescriptor == null) {
+            return false;
+        }
+        // Support all primitive wrappers and primitives except String
+        // Wrappers: Integer, Long, Float, Double, Boolean, Short, Byte, Character
+        // Primitives: int, long, float, double, boolean, short, byte, char
+        return "Ljava/lang/Integer;".equals(typeDescriptor) ||
+                "Ljava/lang/Long;".equals(typeDescriptor) ||
+                "Ljava/lang/Float;".equals(typeDescriptor) ||
+                "Ljava/lang/Double;".equals(typeDescriptor) ||
+                "Ljava/lang/Boolean;".equals(typeDescriptor) ||
+                "Ljava/lang/Short;".equals(typeDescriptor) ||
+                "Ljava/lang/Byte;".equals(typeDescriptor) ||
+                "Ljava/lang/Character;".equals(typeDescriptor) ||
+                "I".equals(typeDescriptor) ||
+                "J".equals(typeDescriptor) ||
+                "F".equals(typeDescriptor) ||
+                "D".equals(typeDescriptor) ||
+                "Z".equals(typeDescriptor) ||
+                "S".equals(typeDescriptor) ||
+                "B".equals(typeDescriptor) ||
+                "C".equals(typeDescriptor);
     }
 
     /**
@@ -401,14 +458,24 @@ public final class ObjectLiteralGenerator {
         String actualKeyType = TypeResolver.inferKeyType(key, context, options);
         String expectedKeyType = genericTypeInfo.getKeyType();
 
+        // Special handling for primitive wrapper keys: if expected type is a primitive wrapper,
+        // allow any numeric literal since we'll convert during generation
+        boolean expectedIsPrimitiveWrapper = isPrimitiveKeyType(expectedKeyType);
+        boolean actualIsNumeric = isPrimitiveKeyType(actualKeyType);
+
         if (!TypeResolver.isAssignable(actualKeyType, expectedKeyType)) {
-            String keyName = getPropertyName(key);
-            throw Swc4jByteCodeCompilerException.typeMismatch(
-                    keyName,
-                    expectedKeyType,
-                    actualKeyType,
-                    true  // isKey = true
-            );
+            // Allow numeric literal → primitive wrapper conversion (e.g., Integer → Long)
+            if (expectedIsPrimitiveWrapper && actualIsNumeric) {
+                // Compatible - will be converted during generation
+            } else {
+                String keyName = getPropertyName(key);
+                throw Swc4jByteCodeCompilerException.typeMismatch(
+                        keyName,
+                        expectedKeyType,
+                        actualKeyType,
+                        true  // isKey = true
+                );
+            }
         }
 
         // Validate value type
