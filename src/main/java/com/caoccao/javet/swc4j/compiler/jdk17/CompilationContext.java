@@ -20,8 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CompilationContext {
+    private final Map<String, GenericTypeInfo> genericTypeInfoMap = new HashMap<>();
     private final Map<String, String> inferredTypes = new HashMap<>();
     private final LocalVariableTable localVariableTable = new LocalVariableTable();
+
+    public Map<String, GenericTypeInfo> getGenericTypeInfoMap() {
+        return genericTypeInfoMap;
+    }
 
     public Map<String, String> getInferredTypes() {
         return inferredTypes;

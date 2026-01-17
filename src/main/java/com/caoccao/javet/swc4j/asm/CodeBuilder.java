@@ -876,11 +876,6 @@ public class CodeBuilder {
         return this;
     }
 
-    public CodeBuilder swap() {
-        code.add((byte) (0x5F)); // swap
-        return this;
-    }
-
     public CodeBuilder returnVoid() {
         code.add((byte) (0xB1)); // return
         return this;
@@ -901,6 +896,11 @@ public class CodeBuilder {
             currentLine = lineNumber;
             lineNumbers.add(new ClassWriter.LineNumberEntry(getCurrentOffset(), lineNumber));
         }
+    }
+
+    public CodeBuilder swap() {
+        code.add((byte) (0x5F)); // swap
+        return this;
     }
 
     public byte[] toByteArray() {

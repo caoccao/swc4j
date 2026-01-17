@@ -18,35 +18,39 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor) {
+public record ReturnTypeInfo(ReturnType type, int maxStack, String descriptor, GenericTypeInfo genericTypeInfo) {
     public static ReturnTypeInfo of(String type) throws Swc4jByteCodeCompilerException {
+        return of(type, null);
+    }
+
+    public static ReturnTypeInfo of(String type, GenericTypeInfo genericTypeInfo) throws Swc4jByteCodeCompilerException {
         if (type == null || type.isEmpty()) {
             throw new Swc4jByteCodeCompilerException("Missing type info.");
         }
         if (type.length() == 1) {
             return switch (type) {
-                case "I" -> new ReturnTypeInfo(ReturnType.INT, 1, null);
-                case "Z" -> new ReturnTypeInfo(ReturnType.BOOLEAN, 1, null);
-                case "B" -> new ReturnTypeInfo(ReturnType.BYTE, 1, null);
-                case "C" -> new ReturnTypeInfo(ReturnType.CHAR, 1, null);
-                case "S" -> new ReturnTypeInfo(ReturnType.SHORT, 1, null);
-                case "J" -> new ReturnTypeInfo(ReturnType.LONG, 2, null);
-                case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null);
-                case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null);
-                case "V" -> new ReturnTypeInfo(ReturnType.VOID, 0, null);
+                case "I" -> new ReturnTypeInfo(ReturnType.INT, 1, null, genericTypeInfo);
+                case "Z" -> new ReturnTypeInfo(ReturnType.BOOLEAN, 1, null, genericTypeInfo);
+                case "B" -> new ReturnTypeInfo(ReturnType.BYTE, 1, null, genericTypeInfo);
+                case "C" -> new ReturnTypeInfo(ReturnType.CHAR, 1, null, genericTypeInfo);
+                case "S" -> new ReturnTypeInfo(ReturnType.SHORT, 1, null, genericTypeInfo);
+                case "J" -> new ReturnTypeInfo(ReturnType.LONG, 2, null, genericTypeInfo);
+                case "F" -> new ReturnTypeInfo(ReturnType.FLOAT, 1, null, genericTypeInfo);
+                case "D" -> new ReturnTypeInfo(ReturnType.DOUBLE, 2, null, genericTypeInfo);
+                case "V" -> new ReturnTypeInfo(ReturnType.VOID, 0, null, genericTypeInfo);
                 default -> throw new Swc4jByteCodeCompilerException("Unsupported primitive type: " + type);
             };
         }
         if (type.equals("Ljava/lang/String;")) {
-            return new ReturnTypeInfo(ReturnType.STRING, 1, type);
+            return new ReturnTypeInfo(ReturnType.STRING, 1, type, genericTypeInfo);
         }
         // Handle array types (primitive arrays like [I or reference arrays like [Ljava/lang/String;)
         if (type.startsWith("[")) {
-            return new ReturnTypeInfo(ReturnType.OBJECT, 1, type);
+            return new ReturnTypeInfo(ReturnType.OBJECT, 1, type, genericTypeInfo);
         }
         // Handle regular reference types
         if (type.startsWith("L") && type.endsWith(";")) {
-            return new ReturnTypeInfo(ReturnType.OBJECT, 1, type);
+            return new ReturnTypeInfo(ReturnType.OBJECT, 1, type, genericTypeInfo);
         }
         throw new Swc4jByteCodeCompilerException("Unsupported object type: " + type);
     }

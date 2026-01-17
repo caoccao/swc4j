@@ -468,9 +468,9 @@ public class StackMapGenerator {
     private record Frame(List<Integer> locals, List<Integer> stack) {
 
         Frame copy() {
-                return new Frame(new ArrayList<>(locals), new ArrayList<>(stack));
-            }
+            return new Frame(new ArrayList<>(locals), new ArrayList<>(stack));
         }
+    }
 
     private record WorkItem(int offset, Frame frame) {
     }

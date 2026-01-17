@@ -74,6 +74,12 @@ public final class VariableAnalyzer {
                         String varType = TypeResolver.extractType(bindingIdent, declarator.getInit(), context, options);
                         context.getLocalVariableTable().allocateVariable(varName, varType);
                         context.getInferredTypes().put(varName, varType);
+
+                        // Phase 2: Extract GenericTypeInfo for Record types
+                        GenericTypeInfo genericTypeInfo = TypeResolver.extractGenericTypeInfo(bindingIdent, options);
+                        if (genericTypeInfo != null) {
+                            context.getGenericTypeInfoMap().put(varName, genericTypeInfo);
+                        }
                     }
                 }
             }

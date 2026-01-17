@@ -27,10 +27,12 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsArrayType;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsKeywordType;
+import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
+import java.util.List;
 import java.util.Optional;
 
 public final class TypeResolver {
@@ -65,10 +67,33 @@ public final class TypeResolver {
                     }
                     return ReturnTypeInfo.of(type);
                 }
-                return new ReturnTypeInfo(ReturnType.VOID, 0, null);
+                return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
             }
         }
-        return new ReturnTypeInfo(ReturnType.VOID, 0, null);
+        return new ReturnTypeInfo(ReturnType.VOID, 0, null, null);
+    }
+
+    /**
+     * Extract GenericTypeInfo from a BindingIdent's type annotation if it's a Record type.
+     * Phase 2: Support for Record<K, V> type validation
+     *
+     * @param bindingIdent binding identifier with potential type annotation
+     * @param options      compiler options
+     * @return GenericTypeInfo if the type annotation is a Record type, null otherwise
+     */
+    public static GenericTypeInfo extractGenericTypeInfo(
+            Swc4jAstBindingIdent bindingIdent,
+            ByteCodeCompilerOptions options) {
+        var typeAnn = bindingIdent.getTypeAnn();
+        if (typeAnn.isEmpty()) {
+            return null;
+        }
+
+        ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
+
+        // Check if it's a Record type by calling parseRecordType
+        // parseRecordType returns null if it's not a Record type
+        return parseRecordType(tsType, options);
     }
 
     /**
@@ -125,6 +150,7 @@ public final class TypeResolver {
 
     private static String getPrimitiveType(String type) {
         return switch (type) {
+            case "Ljava/lang/Boolean;" -> "Z";
             case "Ljava/lang/Byte;" -> "B";
             case "Ljava/lang/Short;" -> "S";
             case "Ljava/lang/Integer;" -> "I";
@@ -160,6 +186,99 @@ public final class TypeResolver {
             return "J";
         }
         return "I";
+    }
+
+    /**
+     * Get the wrapper type for a primitive type.
+     *
+     * @param primitiveType primitive type descriptor (e.g., "I", "D")
+     * @return wrapper type descriptor (e.g., "Ljava/lang/Integer;", "Ljava/lang/Double;")
+     */
+    private static String getWrapperType(String primitiveType) {
+        return switch (primitiveType) {
+            case "Z" -> "Ljava/lang/Boolean;";
+            case "B" -> "Ljava/lang/Byte;";
+            case "C" -> "Ljava/lang/Character;";
+            case "S" -> "Ljava/lang/Short;";
+            case "I" -> "Ljava/lang/Integer;";
+            case "J" -> "Ljava/lang/Long;";
+            case "F" -> "Ljava/lang/Float;";
+            case "D" -> "Ljava/lang/Double;";
+            default -> null;
+        };
+    }
+
+    /**
+     * Infer the JVM type descriptor for an object literal property key.
+     * <p>
+     * Handles different property name types:
+     * - IdentName → String (identifier keys are always strings)
+     * - Str → String (string literal keys)
+     * - Number → Integer, Long, or Double based on the actual numeric value
+     * - BigInt → Long or BigInteger based on size
+     * - ComputedPropName → Inferred from the computed expression
+     *
+     * @param key     Property name AST node
+     * @param context Compilation context
+     * @param options Compiler options
+     * @return JVM type descriptor (e.g., "Ljava/lang/String;", "Ljava/lang/Integer;", "D")
+     */
+    public static String inferKeyType(
+            ISwc4jAstPropName key,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) {
+        if (key == null) {
+            return "Ljava/lang/String;"; // Default to String
+        }
+
+        // IdentName keys are always strings
+        if (key instanceof Swc4jAstIdentName) {
+            return "Ljava/lang/String;";
+        }
+
+        // String literal keys
+        if (key instanceof Swc4jAstStr) {
+            return "Ljava/lang/String;";
+        }
+
+        // Numeric keys - infer specific numeric type
+        if (key instanceof Swc4jAstNumber number) {
+            double value = number.getValue();
+
+            // Check if it's a whole number (no decimal part)
+            if (value == Math.floor(value) && !Double.isInfinite(value)) {
+                // It's an integer value
+                long longValue = (long) value;
+
+                // Check if it fits in an int
+                if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
+                    return "Ljava/lang/Integer;";
+                }
+
+                // It needs a long
+                return "Ljava/lang/Long;";
+            }
+
+            // It has a decimal part - use Double
+            return "Ljava/lang/Double;";
+        }
+
+        // BigInt keys - always Long or BigInteger
+        if (key instanceof Swc4jAstBigInt bigInt) {
+            // For now, default to Long
+            // In the future, could parse the BigInt value and choose BigInteger if needed
+            return "Ljava/lang/Long;";
+        }
+
+        // Computed property names - infer from expression
+        if (key instanceof Swc4jAstComputedPropName computed) {
+            ISwc4jAstExpr expr = computed.getExpr();
+            String inferredType = inferTypeFromExpr(expr, context, options);
+            return inferredType != null ? inferredType : "Ljava/lang/String;";
+        }
+
+        // Default to String for any unknown key type
+        return "Ljava/lang/String;";
     }
 
     public static String inferTypeFromExpr(
@@ -375,7 +494,8 @@ public final class TypeResolver {
                         String methodName = propIdent.getSym();
                         // Methods that return ArrayList
                         switch (methodName) {
-                            case "concat", "reverse", "sort", "slice", "splice", "fill", "copyWithin", "toReversed", "toSorted", "with", "toSpliced" -> {
+                            case "concat", "reverse", "sort", "slice", "splice", "fill", "copyWithin", "toReversed",
+                                 "toSorted", "with", "toSpliced" -> {
                                 return "Ljava/util/ArrayList;";
                             }
                             case "join", "toString", "toLocaleString" -> {
@@ -397,6 +517,166 @@ public final class TypeResolver {
             return "Ljava/lang/Object;";
         }
         return "Ljava/lang/Object;";
+    }
+
+    /**
+     * Check if a value of fromType can be assigned to a variable of toType.
+     * <p>
+     * Handles:
+     * - Exact type matches
+     * - Primitive-to-wrapper boxing (int → Integer, double → Double, etc.)
+     * - Wrapper-to-primitive unboxing (Integer → int, Double → double, etc.)
+     * - Widening primitive conversions (int → long, int → double, float → double, etc.)
+     * - Object hierarchy (String → Object, Integer → Number → Object)
+     * - Narrowing conversions are REJECTED (long → int, double → int)
+     *
+     * @param fromType JVM type descriptor of source value (e.g., "I", "Ljava/lang/String;")
+     * @param toType   JVM type descriptor of target type (e.g., "Ljava/lang/Integer;", "Ljava/lang/Object;")
+     * @return true if fromType is assignable to toType
+     */
+    public static boolean isAssignable(String fromType, String toType) {
+        if (fromType == null || toType == null) {
+            return false;
+        }
+
+        // Exact match
+        if (fromType.equals(toType)) {
+            return true;
+        }
+
+        // Handle primitive to wrapper boxing
+        if (isPrimitiveType(fromType) && !isPrimitiveType(toType)) {
+            String wrapperType = getWrapperType(fromType);
+            if (wrapperType.equals(toType)) {
+                return true; // Direct boxing: int → Integer
+            }
+            // After boxing, check object hierarchy (e.g., int → Integer → Number)
+            return isObjectAssignable(wrapperType, toType);
+        }
+
+        // Handle wrapper to primitive unboxing
+        if (!isPrimitiveType(fromType) && isPrimitiveType(toType)) {
+            String primitiveType = getPrimitiveType(fromType);
+            // getPrimitiveType returns the primitive type for wrappers, or the type unchanged for non-wrappers
+            // Check if it's actually a primitive after conversion
+            if (isPrimitiveType(primitiveType)) {
+                if (primitiveType.equals(toType)) {
+                    return true; // Direct unboxing: Integer → int
+                }
+                // Wrapper to different primitive requires unboxing + widening
+                return isPrimitiveWidening(primitiveType, toType);
+            }
+            // fromType is not a wrapper type, so cannot unbox to primitive
+            return false;
+        }
+
+        // Handle widening primitive conversions
+        if (isPrimitiveType(fromType) && isPrimitiveType(toType)) {
+            return isPrimitiveWidening(fromType, toType);
+        }
+
+        // Handle object hierarchy (both are reference types)
+        if (!isPrimitiveType(fromType) && !isPrimitiveType(toType)) {
+            return isObjectAssignable(fromType, toType);
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if an object type can be assigned to another object type.
+     * <p>
+     * Handles:
+     * - Object hierarchy (String → Object, Integer → Number → Object)
+     * - Wrapper class hierarchy (Integer/Long/Short/Byte → Number → Object)
+     * - Any object → Object
+     *
+     * @param fromType object type descriptor (e.g., "Ljava/lang/String;")
+     * @param toType   object type descriptor (e.g., "Ljava/lang/Object;")
+     * @return true if fromType is assignable to toType
+     */
+    private static boolean isObjectAssignable(String fromType, String toType) {
+        // Exact match
+        if (fromType.equals(toType)) {
+            return true;
+        }
+
+        // Everything is assignable to Object
+        if (toType.equals("Ljava/lang/Object;")) {
+            return true;
+        }
+
+        // Number wrapper hierarchy: Integer/Long/Short/Byte/Float/Double → Number
+        if (toType.equals("Ljava/lang/Number;")) {
+            return fromType.equals("Ljava/lang/Integer;") ||
+                    fromType.equals("Ljava/lang/Long;") ||
+                    fromType.equals("Ljava/lang/Short;") ||
+                    fromType.equals("Ljava/lang/Byte;") ||
+                    fromType.equals("Ljava/lang/Float;") ||
+                    fromType.equals("Ljava/lang/Double;");
+        }
+
+        // For other object types, we'd need full class hierarchy information
+        // For now, we only support the common cases above
+        return false;
+    }
+
+    /**
+     * Check if a type descriptor represents a primitive type.
+     *
+     * @param typeDescriptor JVM type descriptor (e.g., "I", "D", "Ljava/lang/String;")
+     * @return true if primitive type
+     */
+    private static boolean isPrimitiveType(String typeDescriptor) {
+        if (typeDescriptor == null || typeDescriptor.isEmpty()) {
+            return false;
+        }
+        // Primitive types are single characters: Z, B, C, S, I, J, F, D
+        return typeDescriptor.length() == 1 && "ZBCSIJFD".contains(typeDescriptor);
+    }
+
+    /**
+     * Check if a primitive type can be widened to another primitive type.
+     * <p>
+     * Widening conversions allowed:
+     * - byte → short, int, long, float, double
+     * - short → int, long, float, double
+     * - char → int, long, float, double
+     * - int → long, float, double
+     * - long → float, double
+     * - float → double
+     * <p>
+     * Narrowing conversions are NOT allowed (e.g., long → int, double → float)
+     *
+     * @param fromPrimitive primitive type descriptor (e.g., "I", "D")
+     * @param toPrimitive   primitive type descriptor (e.g., "J", "D")
+     * @return true if widening conversion is allowed
+     */
+    private static boolean isPrimitiveWidening(String fromPrimitive, String toPrimitive) {
+        // Same primitive type
+        if (fromPrimitive.equals(toPrimitive)) {
+            return true;
+        }
+
+        // Widening conversions matrix
+        return switch (fromPrimitive) {
+            case "B" -> // byte
+                    toPrimitive.equals("S") || toPrimitive.equals("I") || toPrimitive.equals("J") ||
+                            toPrimitive.equals("F") || toPrimitive.equals("D");
+            case "S" -> // short
+                    toPrimitive.equals("I") || toPrimitive.equals("J") ||
+                            toPrimitive.equals("F") || toPrimitive.equals("D");
+            case "C" -> // char
+                    toPrimitive.equals("I") || toPrimitive.equals("J") ||
+                            toPrimitive.equals("F") || toPrimitive.equals("D");
+            case "I" -> // int
+                    toPrimitive.equals("J") || toPrimitive.equals("F") || toPrimitive.equals("D");
+            case "J" -> // long
+                    toPrimitive.equals("F") || toPrimitive.equals("D");
+            case "F" -> // float
+                    toPrimitive.equals("D");
+            default -> false;
+        };
     }
 
     public static String mapTsTypeToDescriptor(ISwc4jAstTsType tsType, ByteCodeCompilerOptions options) {
@@ -423,6 +703,11 @@ public final class TypeResolver {
                     // Array<T> syntax - maps to List interface (more flexible than ArrayList)
                     return "Ljava/util/List;";
                 }
+                // Phase 2: Check if this is Record<K, V> generic syntax
+                if ("Record".equals(typeName)) {
+                    // Record<K, V> syntax - maps to LinkedHashMap
+                    return "Ljava/util/LinkedHashMap;";
+                }
                 return mapTypeNameToDescriptor(typeName, options);
             }
         }
@@ -448,5 +733,67 @@ public final class TypeResolver {
             case "void" -> "V";
             default -> "L" + resolvedType.replace('.', '/') + ";";
         };
+    }
+
+    /**
+     * Parse Record<K, V> type annotation to extract generic type parameters.
+     * <p>
+     * Supports:
+     * - Record<string, number> → GenericTypeInfo.of("Ljava/lang/String;", "I")
+     * - Record<number, string> → GenericTypeInfo.of("Ljava/lang/Integer;", "Ljava/lang/String;")
+     * - Record<string, Record<string, number>> → GenericTypeInfo.ofNested(...)
+     *
+     * @param tsType  TypeScript type annotation (expected to be TsTypeRef with type params)
+     * @param options compiler options
+     * @return GenericTypeInfo containing key and value type descriptors, or null if not a Record type
+     */
+    public static GenericTypeInfo parseRecordType(ISwc4jAstTsType tsType, ByteCodeCompilerOptions options) {
+        if (!(tsType instanceof Swc4jAstTsTypeRef typeRef)) {
+            return null;
+        }
+
+        // Check if this is a "Record" type
+        ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
+        if (!(entityName instanceof Swc4jAstIdent ident)) {
+            return null;
+        }
+
+        String typeName = ident.getSym();
+        if (!"Record".equals(typeName)) {
+            return null;
+        }
+
+        // Extract type parameters
+        Optional<Swc4jAstTsTypeParamInstantiation> typeParamsOpt = typeRef.getTypeParams();
+        if (typeParamsOpt.isEmpty()) {
+            // Record without type parameters - default to Record<string, Object>
+            return GenericTypeInfo.of("Ljava/lang/String;", "Ljava/lang/Object;");
+        }
+
+        Swc4jAstTsTypeParamInstantiation typeParams = typeParamsOpt.get();
+        List<ISwc4jAstTsType> params = typeParams.getParams();
+
+        if (params.size() != 2) {
+            // Record type must have exactly 2 type parameters
+            return null;
+        }
+
+        // Parse key type (first parameter)
+        ISwc4jAstTsType keyTsType = params.get(0);
+        String keyType = mapTsTypeToDescriptor(keyTsType, options);
+
+        // Parse value type (second parameter)
+        ISwc4jAstTsType valueTsType = params.get(1);
+
+        // Check if value type is a nested Record
+        GenericTypeInfo nestedInfo = parseRecordType(valueTsType, options);
+        if (nestedInfo != null) {
+            // Nested Record type: Record<K, Record<K2, V2>>
+            return GenericTypeInfo.ofNested(keyType, nestedInfo);
+        }
+
+        // Simple Record type: Record<K, V>
+        String valueType = mapTsTypeToDescriptor(valueTsType, options);
+        return GenericTypeInfo.of(keyType, valueType);
     }
 }

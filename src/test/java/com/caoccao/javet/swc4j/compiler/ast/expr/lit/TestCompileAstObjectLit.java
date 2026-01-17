@@ -22,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Phase 1: Basic key-value pairs with no type annotation
  * Phase 2: Computed property names
  * Phase 3: Property shorthand
+ * Phase 4: Spread operator
  */
 public class TestCompileAstObjectLit extends BaseTestCompileSuite {
 
@@ -53,11 +55,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(4, result.size());
-        assertEquals(42, result.get("intVal"));
-        assertEquals(3.14, result.get("doubleVal"));
-        assertEquals(false, result.get("boolVal"));
-        assertEquals("text", result.get("strVal"));
+        assertEquals(Map.of("intVal", 42, "doubleVal", 3.14, "boolVal", false, "strVal", "text"), result);
     }
 
     @ParameterizedTest
@@ -75,9 +73,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(2, result.size());
-        assertEquals("yes", result.get("true"));
-        assertEquals("no", result.get("false"));
+        assertEquals(Map.of("true", "yes", "false", "no"), result);
     }
 
     @ParameterizedTest
@@ -95,8 +91,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(1, result.size());
-        assertEquals(3, result.get("a")); // Last value wins
+        assertEquals(Map.of("a", 3), result); // Last value wins
     }
 
     @ParameterizedTest
@@ -115,10 +110,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(1, result.size());
-        var nested = (LinkedHashMap<?, ?>) result.get("nested");
-        assertNotNull(nested);
-        assertEquals(42, nested.get("inner"));
+        assertEquals(Map.of("nested", Map.of("inner", 42)), result);
     }
 
     @ParameterizedTest
@@ -136,9 +128,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(2, result.size());
-        assertEquals("two", result.get("2"));
-        assertEquals("ten", result.get("10"));
+        assertEquals(Map.of("2", "two", "10", "ten"), result);
     }
 
     @ParameterizedTest
@@ -156,9 +146,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(2, result.size());
-        assertEquals("answer", result.get("42"));
-        assertEquals("zero", result.get("0"));
+        assertEquals(Map.of("42", "answer", "0", "zero"), result);
     }
 
     @ParameterizedTest
@@ -176,9 +164,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(2, result.size());
-        assertEquals("value1", result.get("key1"));
-        assertEquals("value2", result.get("key2"));
+        assertEquals(Map.of("key1", "value1", "key2", "value2"), result);
     }
 
     @ParameterizedTest
@@ -196,8 +182,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(1, result.size());
-        assertEquals("value", result.get("computed"));
+        assertEquals(Map.of("computed", "value"), result);
     }
 
     @ParameterizedTest
@@ -216,8 +201,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(1, result.size());
-        assertEquals("value", result.get("dynamic"));
+        assertEquals(Map.of("dynamic", "value"), result);
     }
 
     @ParameterizedTest
@@ -236,9 +220,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         // Later value should win
-        assertEquals(2, result.size());
-        assertEquals(3, result.get("a"));
-        assertEquals(2, result.get("b"));
+        assertEquals(Map.of("a", 3, "b", 2), result);
     }
 
     @ParameterizedTest
@@ -256,9 +238,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        assertEquals(0, result.size());
+        assertEquals(Map.of(), result);
     }
 
     // Phase 2: Computed Property Names
@@ -279,11 +259,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(4, result.size());
-        assertEquals(1, result.get("normal"));
-        assertEquals(2, result.get("literal"));
-        assertEquals(3, result.get("comp"));
-        assertEquals(4, result.get("2"));
+        assertEquals(Map.of("normal", 1, "literal", 2, "comp", 3, "2", 4), result);
     }
 
     @ParameterizedTest
@@ -301,10 +277,51 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(3, result.size());
-        assertEquals(1, result.get("normal"));
-        assertEquals(2, result.get("string-literal"));
-        assertEquals(3, result.get("42")); // Numeric key coerced to string
+        // Numeric key coerced to string
+        assertEquals(Map.of("normal", 1, "string-literal", 2, "42", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMultipleSpreads(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj1 = {a: 1, b: 2}
+                      const obj2 = {c: 3, d: 4}
+                      const obj3 = {e: 5}
+                      const merged = {...obj1, ...obj2, ...obj3}
+                      return merged
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMultipleSpreadsWithOverlap(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj1 = {a: 1, b: 2}
+                      const obj2 = {b: 20, c: 3}
+                      const obj3 = {c: 30, d: 4}
+                      const merged = {...obj1, ...obj2, ...obj3}
+                      return merged
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // obj2.b overwrites obj1.b, obj3.c overwrites obj2.c
+        assertEquals(Map.of("a", 1, "b", 20, "c", 30, "d", 4), result);
     }
 
     @ParameterizedTest
@@ -328,12 +345,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(1, result.size());
-        var outer = (LinkedHashMap<?, ?>) result.get("outer");
-        assertNotNull(outer);
-        var inner = (LinkedHashMap<?, ?>) outer.get("inner");
-        assertNotNull(inner);
-        assertEquals(42, inner.get("value"));
+        assertEquals(Map.of("outer", Map.of("inner", Map.of("value", 42))), result);
     }
 
     @ParameterizedTest
@@ -371,11 +383,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(3, result.size());
         // Numeric keys are coerced to strings (JavaScript behavior)
-        assertEquals("zero", result.get("0"));
-        assertEquals("one", result.get("1"));
-        assertEquals("answer", result.get("42"));
+        assertEquals(Map.of("0", "zero", "1", "one", "42", "answer"), result);
     }
 
     @ParameterizedTest
@@ -400,6 +409,168 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testRecordEmptyValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, number> = {}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertTrue(result.isEmpty());
+    }
+
+    // Phase 3: Property Shorthand
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordMixedValidAndInvalid(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const obj: Record<string, number> = {
+                            a: 1,
+                            b: 2,
+                            c: "invalid"
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        // Check the cause contains the validation error
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Property 'c'") &&
+                        causeMessage.contains("String"),
+                "Expected type mismatch error for property 'c', got: " + causeMessage);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordStringNumberValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, number> = {
+                        a: 1,
+                        b: 2,
+                        c: 3
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordStringNumberWithDouble(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, number> = {
+                        a: 1,
+                        b: 3.14,
+                        c: 42
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(1, result.get("a"));
+        assertEquals(3.14, result.get("b"));
+        assertEquals(42, result.get("c"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordStringStringValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, string> = {
+                        name: "Alice",
+                        city: "NYC"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("name", "Alice", "city", "NYC"), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordValueTypeMismatchBoolean(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const obj: Record<string, number> = {
+                            flag: true
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        // Check the cause contains the validation error
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Property 'flag'") &&
+                        causeMessage.contains("has type") &&
+                        causeMessage.contains("but Record requires"),
+                "Expected type mismatch error for boolean value, got: " + causeMessage);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordValueTypeMismatchString(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const obj: Record<string, number> = {
+                            a: "hello"
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        // Check the cause contains the validation error
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Property 'a' has type String") &&
+                        causeMessage.contains("but Record requires"),
+                "Expected type mismatch error for value type, got: " + causeMessage);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testReservedKeywords(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -413,10 +584,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(3, result.size());
-        assertEquals("value", result.get("class"));
-        assertEquals("loop", result.get("for"));
-        assertEquals("condition", result.get("if"));
+        assertEquals(Map.of("class", "value", "for", "loop", "if", "condition"), result);
     }
 
     @ParameterizedTest
@@ -436,11 +604,10 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(3, result.size());
-        assertEquals(10, result.get("x"));
-        assertEquals(20, result.get("dynamic"));
-        assertEquals(30, result.get("normal"));
+        assertEquals(Map.of("x", 10, "dynamic", 20, "normal", 30), result);
     }
+
+    // Phase 4: Spread Operator
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -459,15 +626,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(5, result.size());
-        assertEquals(1, result.get("a"));
-        assertEquals(10, result.get("x"));
-        assertEquals(2, result.get("b"));
-        assertEquals(20, result.get("y"));
-        assertEquals(3, result.get("c"));
+        assertEquals(Map.of("a", 1, "x", 10, "b", 2, "y", 20, "c", 3), result);
     }
-
-    // Phase 3: Property Shorthand
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -487,10 +647,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(3, result.size());
-        assertEquals(1, result.get("a"));
-        assertEquals(2, result.get("b"));
-        assertEquals(3, result.get("c"));
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
     }
 
     @ParameterizedTest
@@ -535,8 +692,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(1, result.size());
-        assertEquals(10, result.get("x"));
+        assertEquals(Map.of("x", 10), result);
     }
 
     @ParameterizedTest
@@ -579,10 +735,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(3, result.size());
-        assertEquals(42, result.get("num"));
-        assertEquals("hello", result.get("str"));
-        assertEquals(true, result.get("bool"));
+        assertEquals(Map.of("num", 42, "str", "hello", "bool", true), result);
     }
 
     @ParameterizedTest
@@ -601,10 +754,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(1, result.size());
-        var nested = (LinkedHashMap<?, ?>) result.get("nested");
-        assertNotNull(nested);
-        assertEquals(42, nested.get("inner"));
+        assertEquals(Map.of("nested", Map.of("inner", 42)), result);
     }
 
     @ParameterizedTest
@@ -622,10 +772,147 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(3, result.size());
-        assertEquals(1, result.get("a"));
-        assertEquals("hello", result.get("b"));
-        assertEquals(true, result.get("c"));
+        assertEquals(Map.of("a", 1, "b", "hello", "c", true), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSpreadNestedObjects(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const inner = {x: 1}
+                      const base = {nested: inner, a: 2}
+                      const obj = {...base, b: 3}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("nested", Map.of("x", 1), "a", 2, "b", 3), result);
+    }
+
+    // ========== Phase 2: Record Type Validation Tests ==========
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSpreadOverwritesPreviousProperties(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base = {a: 10, b: 20}
+                      const obj = {a: 1, ...base, c: 3}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // base.a overwrites initial a
+        assertEquals(Map.of("a", 10, "b", 20, "c", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSpreadOverwrittenByLaterProperties(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base = {a: 10, b: 20}
+                      const obj = {...base, a: 1, c: 3}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Later a overwrites base.a
+        assertEquals(Map.of("a", 1, "b", 20, "c", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSpreadSingleObject(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base = {a: 1, b: 2}
+                      const obj = {...base}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSpreadWithAdditionalProperties(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base = {a: 1, b: 2}
+                      const obj = {c: 3, ...base, d: 4}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3, "d", 4), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSpreadWithComputedKeys(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base = {a: 1, b: 2}
+                      const key = "dynamic"
+                      const obj = {[key]: 100, ...base, c: 3}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("dynamic", 100, "a", 1, "b", 2, "c", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSpreadWithShorthand(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base = {a: 1, b: 2}
+                      const x = 10
+                      const obj = {x, ...base, y: 20}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("x", 10, "a", 1, "b", 2, "y", 20), result);
     }
 
     @ParameterizedTest
@@ -643,9 +930,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(2, result.size());
-        assertEquals(1, result.get("string-key"));
-        assertEquals(2, result.get("key with spaces"));
+        assertEquals(Map.of("string-key", 1, "key with spaces", 2), result);
     }
 
 }

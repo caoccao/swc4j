@@ -4,11 +4,11 @@
 
 This document outlines the implementation plan for supporting JavaScript/TypeScript object literals (`Swc4jAstObjectLit`) and compiling them to JVM bytecode using `LinkedHashMap<Object, Object>` as the underlying data structure.
 
-**Current Status:** ✅ Phase 1-3 Implemented (Basic key-value pairs + Computed property names + Property shorthand working)
+**Current Status:** ✅ Phase 0-2 COMPLETED (Type validation infrastructure + Record<K,V> validation) + Phase 1,3-4 Implemented (Basic key-value pairs + Computed property names + Property shorthand + Spread operator working)
 
 **Implementation File:** [ObjectLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ObjectLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstObjectLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstObjectLit.java) ✅ (28 tests passing)
+**Test File:** [TestCompileAstObjectLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstObjectLit.java) ✅ (44 tests passing: 37 Phase 1,3-4 + 7 Phase 2)
 
 **AST Definition:** [Swc4jAstObjectLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit.java)
 
@@ -341,13 +341,104 @@ const obj: Record<number, string> = {1: "one", 2: "two", 3: "three"}
 
 ## Implementation Strategy
 
-### Phase 0: Type Validation Infrastructure (Priority: CRITICAL)
+### Phase 0: Type Validation Infrastructure (Priority: CRITICAL) - ✅ COMPLETED
 
 **Goal:** Build type validation system before object literal generation.
 
+**Implementation Status:**
+
+✅ **GenericTypeInfo Class** - `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/GenericTypeInfo.java`
+- Holds parsed generic type information for Record<K, V>
+- Supports nested Record types
+- Factory methods: `of(keyType, valueType)` and `ofNested(keyType, nestedTypeInfo)`
+
+✅ **parseRecordType()** - Added to `TypeResolver.java`
+- Parses Record<K, V> type annotations from TypeScript AST
+- Extracts key and value types as JVM descriptors
+- Handles nested Record types recursively
+- Examples:
+  - `Record<string, number>` → `GenericTypeInfo.of("Ljava/lang/String;", "D")`
+  - `Record<number, string>` → `GenericTypeInfo.of("D", "Ljava/lang/String;")`
+  - `Record<string, Record<string, number>>` → Nested GenericTypeInfo
+
+✅ **Type Compatibility Checker** - Added to `TypeResolver.java`
+- `isAssignable(String fromType, String toType)` - Checks type compatibility
+- Handles exact type matches
+- Handles primitive-to-wrapper boxing (int → Integer, double → Double, etc.)
+- Handles wrapper-to-primitive unboxing (Integer → int, Double → double, etc.)
+- Handles widening primitive conversions (int → long, int → double, etc.)
+- Handles object hierarchy (String → Object, Integer → Number → Object)
+- Rejects narrowing conversions (long → int, double → int)
+- Supporting methods:
+  - `isPrimitiveType(String)` - Check if type is primitive
+  - `getWrapperType(String)` - Get wrapper for primitive type
+  - `getPrimitiveType(String)` - Get primitive for wrapper type (updated to support Boolean)
+  - `isPrimitiveWidening(String, String)` - Check widening conversion validity
+  - `isObjectAssignable(String, String)` - Check object hierarchy compatibility
+
+✅ **Key Type Inferrer** - Added to `TypeResolver.java`
+- `inferKeyType(ISwc4jAstPropName key, CompilationContext context, ByteCodeCompilerOptions options)` - Infer key type from property name
+- Handles different property name types:
+  - `Swc4jAstIdentName` → "Ljava/lang/String;" (identifier keys are always strings)
+  - `Swc4jAstStr` → "Ljava/lang/String;" (string literal keys)
+  - `Swc4jAstNumber` → Inferred based on actual numeric value:
+    - Integer value in int range → "Ljava/lang/Integer;"
+    - Integer value outside int range → "Ljava/lang/Long;"
+    - Decimal value → "Ljava/lang/Double;"
+  - `Swc4jAstBigInt` → "Ljava/lang/Long;"
+  - `Swc4jAstComputedPropName` → Inferred from expression using `inferTypeFromExpr()`
+  - Null → "Ljava/lang/String;" (default)
+
+✅ **Validation Error Formatter** - Static factory methods in `Swc4jByteCodeCompilerException.java`
+- `typeMismatch(String propertyName, String expectedType, String actualType, boolean isKey)` - Create type mismatch exception
+  - Generates messages like: "Property 'name' has type String, but Record requires double"
+  - Key errors: "Key 'count' has type String, but Record requires Integer"
+  - Nested errors: "Nested property 'outer.inner' has type String, but Record requires double"
+- `typeMismatchWithRecordType(...)` - Enhanced version with Record type context
+  - Generates messages like: "Property 'age' has type String, but Record<string, number> requires double"
+  - Includes full Record<K, V> type in error message for better clarity
+- `descriptorToTypeName(String descriptor)` - Private helper to convert JVM type descriptors to human-readable names
+  - Primitive types: "I" → "int", "D" → "double", "Z" → "boolean"
+  - Object types: "Ljava/lang/String;" → "String", "Ljava/lang/Integer;" → "Integer"
+  - Array types: "[I" → "int[]", "[Ljava/lang/String;" → "String[]"
+  - Handles edge cases (null, empty, invalid descriptors)
+
+✅ **Comprehensive Tests** - `src/test/java/com/caoccao/javet/temp/TestRecordTypeParsing.java`
+- Tests GenericTypeInfo creation and nested types
+- Tests TypeScript keyword type mapping
+- Tests type assignability:
+  - Exact type matches (4 tests)
+  - Primitive-to-wrapper boxing (8 tests)
+  - Wrapper-to-primitive unboxing (4 tests)
+  - Primitive widening conversions (17 tests)
+  - Narrowing rejection (7 tests)
+  - Object hierarchy (9 tests)
+  - Boxing + object hierarchy (6 tests)
+  - Incompatible type rejection (6 tests)
+  - Null input handling (3 tests)
+  - Wrapper unboxing + widening (5 tests)
+- Tests key type inference:
+  - IdentName keys → String (1 test)
+  - String literal keys → String (1 test)
+  - Integer number keys → Integer (5 tests covering various int values)
+  - Long number keys → Long (3 tests for values outside int range)
+  - Double number keys → Double (3 tests for decimal values)
+  - BigInt keys → Long (1 test)
+  - Null keys → String (1 test)
+- Tests exception factory methods:
+  - Value property type mismatch (1 test)
+  - Key type mismatch (1 test)
+  - Nested property errors (2 tests)
+  - Null property name handling (1 test)
+  - With Record type context (3 tests)
+  - Primitive type errors (3 tests)
+  - Wrapper type errors (2 tests)
+  - Array type errors (1 test)
+- **Total: 100+ test assertions covering all type validation scenarios**
+
 **Components:**
 
-1. **Generic Type Parser**
+1. **Generic Type Parser** ✅ COMPLETED
    ```java
    class GenericTypeInfo {
        String keyType;      // e.g., "Ljava/lang/String;"
@@ -356,14 +447,14 @@ const obj: Record<number, string> = {1: "one", 2: "two", 3: "three"}
        GenericTypeInfo nestedTypeInfo;  // for nested Records
    }
 
-   GenericTypeInfo parseRecordType(ReturnTypeInfo returnTypeInfo) {
+   GenericTypeInfo parseRecordType(ISwc4jAstTsType tsType, ByteCodeCompilerOptions options) {
        // Parse type annotation like "Record<string, number>"
        // Extract key and value types
        // Handle nested Record types
    }
    ```
 
-2. **Type Compatibility Checker**
+2. **Type Compatibility Checker** ✅ COMPLETED
    ```java
    boolean isAssignable(String fromType, String toType) {
        // Check if fromType can be assigned to toType
@@ -373,27 +464,47 @@ const obj: Record<number, string> = {1: "one", 2: "two", 3: "three"}
    }
    ```
 
-3. **Key Type Inferrer**
+3. **Key Type Inferrer** ✅ COMPLETED
    ```java
-   String inferKeyType(ISwc4jAstPropName key) {
-       if (key instanceof Swc4jAstIdentName || key instanceof Swc4jAstStr) {
-           return "Ljava/lang/String;";
-       } else if (key instanceof Swc4jAstNumber) {
-           return "Ljava/lang/Integer;";  // or determine int vs long
-       } else if (key instanceof Swc4jAstComputedPropName computed) {
-           return TypeResolver.inferTypeFromExpr(computed.getExpr(), context, options);
-       }
+   String inferKeyType(ISwc4jAstPropName key, CompilationContext context, ByteCodeCompilerOptions options) {
+       // IdentName → "Ljava/lang/String;"
+       // Str → "Ljava/lang/String;"
+       // Number → "Ljava/lang/Integer;", "Ljava/lang/Long;", or "Ljava/lang/Double;"
+       //   (inferred based on actual numeric value)
+       // BigInt → "Ljava/lang/Long;"
+       // ComputedPropName → infer from expression using inferTypeFromExpr()
    }
    ```
 
-4. **Validation Error Formatter**
+4. **Validation Error Formatter** ✅ COMPLETED
    ```java
-   String formatTypeMismatchError(
+   // Static factory methods in Swc4jByteCodeCompilerException
+   static Swc4jByteCodeCompilerException typeMismatch(
        String propertyName,
        String expectedType,
        String actualType,
        boolean isKey) {
-       // Format clear, actionable error message
+       // Create exception with clear, actionable error message
+       // Examples:
+       // - "Property 'name' has type String, but Record requires double"
+       // - "Key 'count' has type String, but Record requires Integer"
+       // - "Nested property 'outer.inner' has type String, but Record requires double"
+   }
+
+   static Swc4jByteCodeCompilerException typeMismatchWithRecordType(
+       String propertyName,
+       String expectedType,
+       String actualType,
+       boolean isKey,
+       String recordKeyTypeName,
+       String recordValueTypeName) {
+       // Create exception with full Record<K, V> type context
+       // Example: "Property 'age' has type String, but Record<string, number> requires double"
+   }
+
+   private static String descriptorToTypeName(String descriptor) {
+       // Convert JVM type descriptors to human-readable names
+       // "I" → "int", "Ljava/lang/String;" → "String", "[I" → "int[]"
    }
    ```
 
@@ -651,7 +762,7 @@ const obj5 = {num, str, bool}
 
 ---
 
-### Phase 4: Spread Operator (Priority: MEDIUM)
+### Phase 4: Spread Operator (Priority: MEDIUM) ✅ COMPLETED
 
 **Goal:** Support object spread syntax for shallow merging.
 
@@ -662,36 +773,69 @@ const obj2 = {b: 2}
 const merged = {a: 0, ...obj1, ...obj2, c: 3}
 ```
 
-**Implementation:**
+**Implementation:** ✅
+- Detect `Swc4jAstSpreadElement` in props list
+- Generate the spread expression (evaluates to a Map)
+- Call `map.putAll(spreadMap)` to perform shallow merge
+
 ```java
 if (prop instanceof Swc4jAstSpreadElement spread) {
+    code.dup(); // Stack: [map, map]
+
     // Generate the spread expression (should evaluate to a Map)
-    callback.generateExpr(code, cp, spread.getExpr(), null, context, options);
-    // Stack: [map, spreadMap]
+    ISwc4jAstExpr spreadExpr = spread.getExpr();
+    callback.generateExpr(code, cp, spreadExpr, null, context, options);
+    // Stack: [map, map, spreadMap]
 
     // Call map.putAll(spreadMap)
-    int putAllMethod = cp.addMethodRef("java/util/LinkedHashMap",
+    int putAllRef = cp.addMethodRef("java/util/LinkedHashMap",
         "putAll", "(Ljava/util/Map;)V");
-    code.invokevirtual(putAllMethod);
+    code.invokevirtual(putAllRef);
     // Stack: [map]
 }
 ```
 
 **Edge Cases:**
-- ❗ Spread order matters (later spreads override earlier values)
-- ❗ Spread of non-object values (should throw error)
-- ❗ Spread with null/undefined (should skip)
-- ❗ Multiple spreads in same object
+- ✅ Spread order matters (later spreads override earlier values)
+- ✅ Multiple spreads in same object
+- ✅ Spread with additional properties before/after
+- ✅ Spread mixed with shorthand and computed keys
+- ✅ Spread nested objects (shallow copy)
+- ⚠️ Spread of non-object values (runtime error)
+- ⚠️ Spread with null/undefined (runtime error)
 
-**Test Cases:**
+**Test Cases:** ✅ All passing (9 tests)
 ```typescript
-const base: LinkedHashMap<Object> = new LinkedHashMap<Object>()
-base.put("a", 1)
-base.put("b", 2)
+// Single spread
+const base = {a: 1, b: 2}
+const obj1 = {...base}
 
-const obj = {a: 0, ...base, c: 3}
-// obj should be {a: 1, b: 2, c: 3}
-assertEquals(1, obj.get("a"))  // base.a overrides initial a
+// Spread with additional properties
+const obj2 = {c: 3, ...base, d: 4}
+
+// Spread overwrites previous properties
+const obj3 = {a: 1, ...base, c: 3}  // base.a overwrites initial a
+
+// Spread overwritten by later properties
+const obj4 = {...base, a: 1, c: 3}  // Later a overwrites base.a
+
+// Multiple spreads
+const merged = {...obj1, ...obj2, ...obj3}
+
+// Multiple spreads with overlap (later wins)
+const obj5 = {...{a:1, b:2}, ...{b:20, c:3}, ...{c:30, d:4}}
+
+// Spread with shorthand
+const x = 10
+const obj6 = {x, ...base, y: 20}
+
+// Spread with computed keys
+const key = "dynamic"
+const obj7 = {[key]: 100, ...base, c: 3}
+
+// Spread nested objects (shallow copy)
+const inner = {x: 1}
+const obj8 = {...{nested: inner, a: 2}, b: 3}
 ```
 
 ---
@@ -1235,15 +1379,15 @@ map.put("b", Integer.valueOf(2));
 
 ## Implementation Checklist
 
-### Phase 0: Type Validation Infrastructure (CRITICAL)
-- [ ] Create GenericTypeInfo class for parsing Record<K, V> types
-- [ ] Implement parseRecordType() to extract key/value types from type annotations
-- [ ] Create type assignability checker (isAssignable)
-- [ ] Implement primitive-to-wrapper boxing checks
-- [ ] Implement widening conversion checks
-- [ ] Create key type inferrer (inferKeyType)
-- [ ] Create validation error formatter with clear messages
-- [ ] Test type validation infrastructure with unit tests
+### Phase 0: Type Validation Infrastructure (CRITICAL) - ✅ COMPLETED
+- [x] Create GenericTypeInfo class for parsing Record<K, V> types ✅
+- [x] Implement parseRecordType() to extract key/value types from type annotations ✅
+- [x] Create type assignability checker (isAssignable) ✅
+- [x] Implement primitive-to-wrapper boxing checks ✅
+- [x] Implement widening conversion checks ✅
+- [x] Create key type inferrer (inferKeyType) ✅
+- [x] Create validation error formatter with clear messages ✅
+- [x] Test type validation infrastructure with unit tests ✅ (all components tested)
 
 ### Phase 1: Basic Implementation (No Type Annotation) ✅ COMPLETED
 - [x] Create ObjectLiteralGenerator.java
@@ -1257,19 +1401,65 @@ map.put("b", Integer.valueOf(2));
 - [x] Test different value types (primitives, strings, booleans, null)
 - [x] Default type: `LinkedHashMap<String, Object>`
 
-### Phase 2: Typed Objects with Record<K, V>
-- [ ] Parse Record<string, number> type annotations
-- [ ] Validate all keys are strings
-- [ ] Validate all values match declared value type
-- [ ] Generate `LinkedHashMap<String, Integer>` for Record<string, number>
-- [ ] Test type validation errors (clear error messages)
-- [ ] Support Record<number, V> with Integer keys
-- [ ] Support Record<string, Record<string, V>> (nested)
-- [ ] Validate nested object types recursively
-- [ ] Test primitive-to-wrapper conversions
-- [ ] Test widening conversions (int → long, int → double)
-- [ ] Reject narrowing conversions (long → int)
-- [ ] Reject incompatible types (string → number)
+### Phase 2: Typed Objects with Record<K, V> ✅ COMPLETED
+- [x] Parse Record<string, number> type annotations
+- [x] Validate all keys are strings
+- [x] Validate all values match declared value type
+- [x] Generate `LinkedHashMap<String, Integer>` for Record<string, number>
+- [x] Test type validation errors (clear error messages) - All 7 tests pass
+- [ ] Support Record<number, V> with Integer keys (deferred to future phase)
+- [ ] Support Record<string, Record<string, V>> (nested) (deferred to future phase)
+- [ ] Validate nested object types recursively (deferred to future phase)
+- [x] Test primitive-to-wrapper conversions (covered by isAssignable tests)
+- [x] Test widening conversions (int → long, int → double) (covered by isAssignable tests)
+- [x] Reject narrowing conversions (long → int) (covered by isAssignable tests)
+- [x] Reject incompatible types (string → number)
+
+**Implementation Summary:**
+
+**Infrastructure Added:**
+1. Enhanced `ReturnTypeInfo` to include `GenericTypeInfo` field for holding Record type parameters
+2. Added `GenericTypeInfo.genericTypeInfo()` accessor method
+3. Extended `CompilationContext` with `genericTypeInfoMap` to store GenericTypeInfo for variables
+4. Added `TypeResolver.extractGenericTypeInfo()` to extract Record type info from type annotations
+5. Enhanced `VariableAnalyzer` to extract and store GenericTypeInfo during variable analysis
+6. Updated `VarDeclGenerator` to retrieve GenericTypeInfo and pass it through ReturnTypeInfo
+
+**Validation Logic:**
+1. `ObjectLiteralGenerator.validateKeyValueProperty()` - Validates key/value types against Record constraints
+2. `ObjectLiteralGenerator.validateShorthandProperty()` - Validates shorthand properties
+3. Uses `TypeResolver.inferKeyType()` to infer actual key types
+4. Uses `TypeResolver.isAssignable()` to check type compatibility
+5. Throws `Swc4jByteCodeCompilerException.typeMismatch()` for violations
+
+**Type Mapping:**
+1. Updated `TypeResolver.mapTsTypeToDescriptor()` to map Record<K,V> → `Ljava/util/LinkedHashMap;`
+2. TypeScript `number` → primitive `D` (double) in GenericTypeInfo
+3. TypeScript `string` → `Ljava/lang/String;`
+
+**Tests Added (7 tests, all passing):**
+- ✅ `testRecordStringNumberValid` - Valid Record<string, number> with integers
+- ✅ `testRecordStringNumberWithDouble` - Valid Record with mixed int/double values
+- ✅ `testRecordStringStringValid` - Valid Record<string, string>
+- ✅ `testRecordEmptyValid` - Empty Record<string, number> {}
+- ✅ `testRecordValueTypeMismatchString` - Correctly rejects string value for number type
+- ✅ `testRecordValueTypeMismatchBoolean` - Correctly rejects boolean value for number type
+- ✅ `testRecordMixedValidAndInvalid` - Correctly rejects mixed valid/invalid properties
+
+**Bug Fixed:**
+- Issue: Tests were checking `exception.getMessage()` which only returned the outer wrapper exception message
+- Fix: Updated tests to assert on `exception.getCause().getMessage()` to check the wrapped validation exception
+- Result: Validation errors are now properly detected and all tests pass
+
+**Files Modified:**
+- `ReturnTypeInfo.java` - Added genericTypeInfo field
+- `CompilationContext.java` - Added genericTypeInfoMap
+- `TypeResolver.java` - Added extractGenericTypeInfo(), updated mapTsTypeToDescriptor()
+- `VariableAnalyzer.java` - Extract and store GenericTypeInfo
+- `VarDeclGenerator.java` - Retrieve and pass GenericTypeInfo
+- `ObjectLiteralGenerator.java` - Added validation methods
+- `Swc4jByteCodeCompilerException.java` - Already had typeMismatch() factory methods (from Phase 0)
+- `TestCompileAstObjectLit.java` - Added 7 Phase 2 tests
 
 ### Phase 3: Advanced Keys (Partially Complete - Basic computed keys without type validation)
 - [x] Implement computed property names `{[expr]: value}`

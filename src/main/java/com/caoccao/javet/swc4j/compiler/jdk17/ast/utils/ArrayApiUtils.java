@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -51,7 +52,7 @@ public final class ArrayApiUtils {
             if (element != null) {
                 // Use String.valueOf for basic conversion
                 // Future enhancement: Use locale-specific formatting for numbers/dates
-                sb.append(String.valueOf(element));
+                sb.append(element);
             }
         }
 
@@ -320,7 +321,7 @@ public final class ArrayApiUtils {
         ArrayList<Object> result = new ArrayList<>(list);
 
         // Reverse the copy
-        java.util.Collections.reverse(result);
+        Collections.reverse(result);
 
         return result;
     }
@@ -343,7 +344,7 @@ public final class ArrayApiUtils {
 
         // Sort the copy (requires elements to be Comparable)
         // Using raw type to avoid compilation error
-        java.util.Collections.sort((java.util.List) result);
+        Collections.sort((java.util.List) result);
 
         return result;
     }

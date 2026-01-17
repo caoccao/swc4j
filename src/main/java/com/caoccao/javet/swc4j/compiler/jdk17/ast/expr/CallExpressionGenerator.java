@@ -245,7 +245,7 @@ public final class CallExpressionGenerator {
 
                         // Unbox index if needed
                         String indexType = TypeResolver.inferTypeFromExpr(indexArg.getExpr(), context, options);
-                        if (indexType != null && "Ljava/lang/Integer;".equals(indexType)) {
+                        if ("Ljava/lang/Integer;".equals(indexType)) {
                             int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                             code.invokevirtual(intValueMethod);
                         }
@@ -288,7 +288,7 @@ public final class CallExpressionGenerator {
 
                             // Unbox if Integer
                             String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
-                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                            if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
                             }
@@ -308,7 +308,7 @@ public final class CallExpressionGenerator {
 
                             // Unbox if Integer
                             String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
-                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                            if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
                             }
@@ -320,7 +320,7 @@ public final class CallExpressionGenerator {
 
                             // Unbox if Integer
                             String deleteCountType = TypeResolver.inferTypeFromExpr(deleteCountArg.getExpr(), context, options);
-                            if (deleteCountType != null && "Ljava/lang/Integer;".equals(deleteCountType)) {
+                            if ("Ljava/lang/Integer;".equals(deleteCountType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
                             }
@@ -482,7 +482,7 @@ public final class CallExpressionGenerator {
 
                             // Need to unbox if Integer
                             String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
-                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                            if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
                             }
@@ -527,7 +527,7 @@ public final class CallExpressionGenerator {
 
                             // Unbox if Integer
                             String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
-                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                            if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
                             }
@@ -539,7 +539,7 @@ public final class CallExpressionGenerator {
 
                             // Unbox if Integer
                             String endType = TypeResolver.inferTypeFromExpr(endArg.getExpr(), context, options);
-                            if (endType != null && "Ljava/lang/Integer;".equals(endType)) {
+                            if ("Ljava/lang/Integer;".equals(endType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
                             }
@@ -576,7 +576,7 @@ public final class CallExpressionGenerator {
 
                             // Unbox if Integer
                             String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
-                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                            if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
                             }
@@ -597,7 +597,7 @@ public final class CallExpressionGenerator {
 
                             // Unbox if Integer
                             String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
-                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                            if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
                             }
@@ -609,7 +609,7 @@ public final class CallExpressionGenerator {
 
                             // Unbox if Integer
                             String deleteCountType = TypeResolver.inferTypeFromExpr(deleteCountArg.getExpr(), context, options);
-                            if (deleteCountType != null && "Ljava/lang/Integer;".equals(deleteCountType)) {
+                            if ("Ljava/lang/Integer;".equals(deleteCountType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
                             }
@@ -708,7 +708,7 @@ public final class CallExpressionGenerator {
 
                             // Unbox if needed
                             String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
-                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                            if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
                             }
@@ -726,7 +726,7 @@ public final class CallExpressionGenerator {
 
                             // Unbox start if needed
                             String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
-                            if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                            if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
                             }
@@ -737,7 +737,7 @@ public final class CallExpressionGenerator {
 
                             // Unbox end if needed
                             String endType = TypeResolver.inferTypeFromExpr(endArg.getExpr(), context, options);
-                            if (endType != null && "Ljava/lang/Integer;".equals(endType)) {
+                            if ("Ljava/lang/Integer;".equals(endType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
                             }
@@ -771,7 +771,7 @@ public final class CallExpressionGenerator {
 
                         // Unbox target if needed
                         String targetType = TypeResolver.inferTypeFromExpr(targetArg.getExpr(), context, options);
-                        if (targetType != null && "Ljava/lang/Integer;".equals(targetType)) {
+                        if ("Ljava/lang/Integer;".equals(targetType)) {
                             int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                             code.invokevirtual(intValueMethod);
                         }
@@ -784,7 +784,7 @@ public final class CallExpressionGenerator {
 
                         // Unbox start if needed
                         String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
-                        if (startType != null && "Ljava/lang/Integer;".equals(startType)) {
+                        if ("Ljava/lang/Integer;".equals(startType)) {
                             int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                             code.invokevirtual(intValueMethod);
                         }
@@ -806,7 +806,7 @@ public final class CallExpressionGenerator {
 
                             // Unbox end if needed
                             String endType = TypeResolver.inferTypeFromExpr(endArg.getExpr(), context, options);
-                            if (endType != null && "Ljava/lang/Integer;".equals(endType)) {
+                            if ("Ljava/lang/Integer;".equals(endType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
                             }

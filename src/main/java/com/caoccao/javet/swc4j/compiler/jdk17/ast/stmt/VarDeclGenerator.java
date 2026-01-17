@@ -24,6 +24,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.jdk17.GenericTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
@@ -47,7 +48,10 @@ public final class VarDeclGenerator {
 
                 if (declarator.getInit().isPresent()) {
                     var init = declarator.getInit().get();
-                    ReturnTypeInfo varTypeInfo = ReturnTypeInfo.of(localVar.type());
+
+                    // Phase 2: Get GenericTypeInfo from context if available (for Record types)
+                    GenericTypeInfo genericTypeInfo = context.getGenericTypeInfoMap().get(varName);
+                    ReturnTypeInfo varTypeInfo = ReturnTypeInfo.of(localVar.type(), genericTypeInfo);
 
                     ExpressionGenerator.generate(code, cp, init, varTypeInfo, context, options);
 

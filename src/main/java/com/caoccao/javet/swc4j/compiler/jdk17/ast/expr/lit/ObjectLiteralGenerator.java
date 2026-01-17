@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstKeyValueProp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstSpreadElement;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
@@ -29,6 +30,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.jdk17.GenericTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.StringConcatUtils;
@@ -37,13 +39,14 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
  * Generator for object literal bytecode.
- * Generates LinkedHashMap<String, Object> by default (Phase 1-3: no type annotation).
+ * Generates LinkedHashMap<String, Object> by default (Phase 1-4: no type annotation).
  * <p>
  * Phase 1: Basic key-value pairs with identifier, string literal, and numeric keys
  * Phase 2: Computed property names {[expr]: value}
  * Phase 3: Property shorthand {x, y} equivalent to {x: x, y: y}
+ * Phase 4: Spread operator {...other} for shallow merging
  * <p>
- * JavaScript: {a: 1, b: "hello", c: true, [key]: value, x, y}
+ * JavaScript: {a: 1, b: "hello", c: true, [key]: value, x, y, ...other}
  * Java: LinkedHashMap<String, Object> with key-value pairs
  */
 public final class ObjectLiteralGenerator {
@@ -52,16 +55,17 @@ public final class ObjectLiteralGenerator {
 
     /**
      * Generate bytecode for object literal.
-     * Phase 1-3: Basic implementation with computed property names and shorthand - no type annotation, default to LinkedHashMap<String, Object>
+     * Phase 1-4: Basic implementation with computed property names, shorthand, and spread - no type annotation, default to LinkedHashMap<String, Object>
+     * Phase 2: Type validation for Record<K, V> types
      *
      * @param code           code builder for bytecode generation
      * @param cp             constant pool
      * @param objectLit      object literal AST node
-     * @param returnTypeInfo return type information (currently unused, for future type validation)
+     * @param returnTypeInfo return type information (used for Record type validation in Phase 2)
      * @param context        compilation context
      * @param options        compiler options
      * @param callback       callback for generating nested expressions
-     * @throws Swc4jByteCodeCompilerException if generation fails
+     * @throws Swc4jByteCodeCompilerException if generation fails or type validation fails
      */
     public static void generate(
             CodeBuilder code,
@@ -71,6 +75,9 @@ public final class ObjectLiteralGenerator {
             CompilationContext context,
             ByteCodeCompilerOptions options,
             StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
+
+        // Phase 2: Extract generic type info for Record type validation
+        GenericTypeInfo genericTypeInfo = returnTypeInfo != null ? returnTypeInfo.genericTypeInfo() : null;
 
         // Create new LinkedHashMap instance
         int hashMapClass = cp.addClass("java/util/LinkedHashMap");
@@ -86,6 +93,11 @@ public final class ObjectLiteralGenerator {
         // Add each property to the map
         for (var prop : objectLit.getProps()) {
             if (prop instanceof Swc4jAstKeyValueProp kvProp) {
+                // Phase 2: Validate key and value types against Record<K, V> if present
+                if (genericTypeInfo != null) {
+                    validateKeyValueProperty(kvProp, genericTypeInfo, context, options);
+                }
+
                 // Duplicate map reference for put() call
                 code.dup(); // Stack: [map, map]
 
@@ -116,6 +128,12 @@ public final class ObjectLiteralGenerator {
             } else if (prop instanceof Swc4jAstIdent ident) {
                 // Property shorthand: {x, y} → {x: x, y: y}
                 // Phase 3: Handle shorthand property syntax (Swc4jAstIdent directly in props list)
+
+                // Phase 2: Validate shorthand property types against Record<K, V> if present
+                if (genericTypeInfo != null) {
+                    validateShorthandProperty(ident, genericTypeInfo, context, options);
+                }
+
                 code.dup(); // Stack: [map, map]
 
                 // Generate key from identifier name
@@ -143,8 +161,23 @@ public final class ObjectLiteralGenerator {
                 // Call map.put(key, value)
                 code.invokevirtual(hashMapPut); // Stack: [map, oldValue]
                 code.pop(); // Discard old value - Stack: [map]
+            } else if (prop instanceof Swc4jAstSpreadElement spread) {
+                // Spread operator: {...other} for shallow merging
+                // Phase 4: Handle spread syntax
+                code.dup(); // Stack: [map, map]
+
+                // Generate the spread expression (should evaluate to a Map)
+                ISwc4jAstExpr spreadExpr = spread.getExpr();
+                callback.generateExpr(code, cp, spreadExpr, null, context, options);
+                // Stack: [map, map, spreadMap]
+
+                // Call map.putAll(spreadMap) to merge all properties
+                int putAllRef = cp.addMethodRef("java/util/LinkedHashMap", "putAll",
+                        "(Ljava/util/Map;)V");
+                code.invokevirtual(putAllRef); // Stack: [map]
+                // Note: putAll returns void, so no need to pop
             }
-            // TODO: Phase 4+ - Handle other property types (Spread, Method, Getter/Setter, etc.)
+            // TODO: Phase 5+ - Handle other property types (Method, Getter/Setter, etc.)
         }
         // Stack: [map]
         // LinkedHashMap instance is left on stack for return/assignment
@@ -219,6 +252,133 @@ public final class ObjectLiteralGenerator {
             throw new Swc4jByteCodeCompilerException(
                     "Unsupported property key type: " + key.getClass().getSimpleName() +
                             ". Supported types: Identifier, String literal, Number, and Computed property names.");
+        }
+    }
+
+    /**
+     * Extract property name from a property key for error messages.
+     *
+     * @param key property key AST node
+     * @return property name as string
+     */
+    private static String getPropertyName(ISwc4jAstPropName key) {
+        if (key instanceof Swc4jAstIdentName identName) {
+            return identName.getSym();
+        } else if (key instanceof Swc4jAstStr str) {
+            return str.getValue();
+        } else if (key instanceof Swc4jAstNumber num) {
+            return String.valueOf((int) num.getValue());
+        } else if (key instanceof Swc4jAstComputedPropName) {
+            return "<computed>";
+        }
+        return "<unknown>";
+    }
+
+    /**
+     * Validate a key-value property against Record<K, V> type constraints.
+     * Phase 2: Type validation for object literal properties
+     *
+     * @param kvProp          key-value property to validate
+     * @param genericTypeInfo Record type information (key and value type constraints)
+     * @param context         compilation context
+     * @param options         compiler options
+     * @throws Swc4jByteCodeCompilerException if key or value type doesn't match Record constraints
+     */
+    private static void validateKeyValueProperty(
+            Swc4jAstKeyValueProp kvProp,
+            GenericTypeInfo genericTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        ISwc4jAstPropName key = kvProp.getKey();
+        ISwc4jAstExpr valueExpr = kvProp.getValue();
+
+        // Validate key type
+        String actualKeyType = TypeResolver.inferKeyType(key, context, options);
+        String expectedKeyType = genericTypeInfo.getKeyType();
+
+        if (!TypeResolver.isAssignable(actualKeyType, expectedKeyType)) {
+            String keyName = getPropertyName(key);
+            throw Swc4jByteCodeCompilerException.typeMismatch(
+                    keyName,
+                    expectedKeyType,
+                    actualKeyType,
+                    true  // isKey = true
+            );
+        }
+
+        // Validate value type
+        String actualValueType = TypeResolver.inferTypeFromExpr(valueExpr, context, options);
+        if (actualValueType == null) {
+            actualValueType = "Ljava/lang/Object;";
+        }
+
+        String expectedValueType = genericTypeInfo.getValueType();
+
+        // Handle nested Record types
+        if (genericTypeInfo.isNested() && valueExpr instanceof Swc4jAstObjectLit) {
+            // Nested object literal - validation will be handled recursively
+            // when the nested object literal is generated
+            return;
+        }
+
+        if (!TypeResolver.isAssignable(actualValueType, expectedValueType)) {
+            String keyName = getPropertyName(key);
+            throw Swc4jByteCodeCompilerException.typeMismatch(
+                    keyName,
+                    expectedValueType,
+                    actualValueType,
+                    false  // isKey = false (this is a value)
+            );
+        }
+    }
+
+    /**
+     * Validate a shorthand property against Record<K, V> type constraints.
+     * Phase 2: Type validation for shorthand properties like {x, y}
+     *
+     * @param ident           identifier in shorthand property
+     * @param genericTypeInfo Record type information
+     * @param context         compilation context
+     * @param options         compiler options
+     * @throws Swc4jByteCodeCompilerException if property type doesn't match Record constraints
+     */
+    private static void validateShorthandProperty(
+            Swc4jAstIdent ident,
+            GenericTypeInfo genericTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        String propertyName = ident.getSym();
+
+        // Shorthand keys are always strings
+        String actualKeyType = "Ljava/lang/String;";
+        String expectedKeyType = genericTypeInfo.getKeyType();
+
+        if (!TypeResolver.isAssignable(actualKeyType, expectedKeyType)) {
+            throw Swc4jByteCodeCompilerException.typeMismatch(
+                    propertyName,
+                    expectedKeyType,
+                    actualKeyType,
+                    true  // isKey = true
+            );
+        }
+
+        // Validate value type (the identifier's inferred type)
+        String actualValueType = TypeResolver.inferTypeFromExpr(ident, context, options);
+        if (actualValueType == null) {
+            actualValueType = "Ljava/lang/Object;";
+        }
+
+        String expectedValueType = genericTypeInfo.getValueType();
+
+        if (!TypeResolver.isAssignable(actualValueType, expectedValueType)) {
+            throw Swc4jByteCodeCompilerException.typeMismatch(
+                    propertyName,
+                    expectedValueType,
+                    actualValueType,
+                    false  // isKey = false (this is a value)
+            );
         }
     }
 }
