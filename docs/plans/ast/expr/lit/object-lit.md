@@ -4,11 +4,11 @@
 
 This document outlines the implementation plan for supporting JavaScript/TypeScript object literals (`Swc4jAstObjectLit`) and compiling them to JVM bytecode using `LinkedHashMap<Object, Object>` as the underlying data structure.
 
-**Current Status:** ✅ Phase 0-2 COMPLETED (Type validation infrastructure + Record<K,V> validation) + Phase 1,3-4 Implemented (Basic key-value pairs + Computed property names + Property shorthand + Spread operator working)
+**Current Status:** ✅ Phase 0-2 COMPLETED (Type validation infrastructure + Record<K,V> validation + Record<number, V> numeric keys) + Phase 1,3-4 Implemented (Basic key-value pairs + Computed property names + Property shorthand + Spread operator working)
 
 **Implementation File:** [ObjectLiteralGenerator.java](../../../../../src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/expr/lit/ObjectLiteralGenerator.java) ✅
 
-**Test File:** [TestCompileAstObjectLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstObjectLit.java) ✅ (44 tests passing: 37 Phase 1,3-4 + 7 Phase 2)
+**Test File:** [TestCompileAstObjectLit.java](../../../../../src/test/java/com/caoccao/javet/swc4j/compiler/ast/expr/lit/TestCompileAstObjectLit.java) ✅ (50 tests passing: 37 Phase 1,3-4 + 7 Phase 2 Record<string,V> + 6 Phase 2.1 Record<number,V>)
 
 **AST Definition:** [Swc4jAstObjectLit.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/expr/lit/Swc4jAstObjectLit.java)
 
@@ -1407,7 +1407,7 @@ map.put("b", Integer.valueOf(2));
 - [x] Validate all values match declared value type
 - [x] Generate `LinkedHashMap<String, Integer>` for Record<string, number>
 - [x] Test type validation errors (clear error messages) - All 7 tests pass
-- [ ] Support Record<number, V> with Integer keys (deferred to future phase)
+- [x] Support Record<number, V> with Integer keys - All 6 tests pass
 - [ ] Support Record<string, Record<string, V>> (nested) (deferred to future phase)
 - [ ] Validate nested object types recursively (deferred to future phase)
 - [x] Test primitive-to-wrapper conversions (covered by isAssignable tests)
@@ -1451,7 +1451,37 @@ map.put("b", Integer.valueOf(2));
 - Fix: Updated tests to assert on `exception.getCause().getMessage()` to check the wrapped validation exception
 - Result: Validation errors are now properly detected and all tests pass
 
+**Phase 2.1 Implementation Summary (Record<number, V> with Integer keys):**
+
+**Features Added:**
+1. Numeric key generation - Keys stored as Integer/Long/Double objects instead of String
+2. Type-aware key generation based on GenericTypeInfo key type
+3. Computed property names support numeric keys when Record<number, V> is declared
+
+**Implementation Details:**
+1. Added `isNumericKeyType()` helper to detect numeric key types (Integer, Long, Double, primitives)
+2. Added `generateNumericKey()` to generate boxed numeric keys:
+   - Integer values in int range → Integer.valueOf(int)
+   - Integer values outside int range → Long.valueOf(long)
+   - Floating-point values → Double.valueOf(double)
+   - Optimized bytecode using iconst for short range, ldc for others
+3. Updated `generateKey()` to accept GenericTypeInfo and conditionally generate numeric keys
+4. Updated computed property name handling to preserve numeric types for Record<number, V>
+5. All calls to `generateKey()` now pass genericTypeInfo parameter
+
+**Tests Added (6 tests, all passing):**
+- ✅ `testRecordNumberStringValid` - Valid Record<number, string> with integer keys
+- ✅ `testRecordNumberNumberValid` - Valid Record<number, number>
+- ✅ `testRecordNumberMixedIntAndDouble` - Mixed int and double values
+- ✅ `testRecordNumberEmptyValid` - Empty Record<number, string> {}
+- ✅ `testRecordNumberKeyTypeMismatch` - Correctly rejects string key for number type
+- ✅ `testRecordNumberValueTypeMismatch` - Correctly rejects string value for number type
+
 **Files Modified:**
+- `ObjectLiteralGenerator.java` - Added numeric key generation logic
+- `TestCompileAstObjectLit.java` - Added 6 Phase 2.1 tests
+
+**Phase 2 Files Modified (from previous implementation):**
 - `ReturnTypeInfo.java` - Added genericTypeInfo field
 - `CompilationContext.java` - Added genericTypeInfoMap
 - `TypeResolver.java` - Added extractGenericTypeInfo(), updated mapTsTypeToDescriptor()

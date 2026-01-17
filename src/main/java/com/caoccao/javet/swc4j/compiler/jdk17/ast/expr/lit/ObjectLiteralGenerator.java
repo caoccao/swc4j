@@ -102,7 +102,7 @@ public final class ObjectLiteralGenerator {
                 code.dup(); // Stack: [map, map]
 
                 // Generate key
-                generateKey(code, cp, kvProp.getKey(), context, options, callback);
+                generateKey(code, cp, kvProp.getKey(), genericTypeInfo, context, options, callback);
                 // Stack: [map, map, key]
 
                 // Generate value
@@ -185,23 +185,29 @@ public final class ObjectLiteralGenerator {
 
     /**
      * Generate bytecode for property key.
-     * Phase 1-2: Support IdentName, Str, Number, and Computed keys (all converted to String)
+     * Phase 1-2: Support IdentName, Str, Number, and Computed keys (all converted to String by default)
+     * Phase 2.1: Support numeric keys as Integer when Record<number, V> is declared
      *
-     * @param code     code builder
-     * @param cp       constant pool
-     * @param key      property key AST node
-     * @param context  compilation context
-     * @param options  compiler options
-     * @param callback callback for generating computed keys
+     * @param code            code builder
+     * @param cp              constant pool
+     * @param key             property key AST node
+     * @param genericTypeInfo generic type info for Record type (may be null)
+     * @param context         compilation context
+     * @param options         compiler options
+     * @param callback        callback for generating computed keys
      * @throws Swc4jByteCodeCompilerException if key generation fails
      */
     private static void generateKey(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             ISwc4jAstPropName key,
+            GenericTypeInfo genericTypeInfo,
             CompilationContext context,
             ByteCodeCompilerOptions options,
             StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
+
+        // Phase 2.1: Check if we should generate numeric keys (Record<number, V>)
+        boolean numericKeys = genericTypeInfo != null && isNumericKeyType(genericTypeInfo.getKeyType());
 
         if (key instanceof Swc4jAstIdentName identName) {
             // Identifier key: {name: value} → "name"
@@ -214,13 +220,19 @@ public final class ObjectLiteralGenerator {
             int keyIndex = cp.addString(keyStr);
             code.ldc(keyIndex);
         } else if (key instanceof Swc4jAstNumber num) {
-            // Numeric key: {42: value} → "42" (JavaScript coerces to string)
-            String keyStr = String.valueOf((int) num.getValue());
-            int keyIndex = cp.addString(keyStr);
-            code.ldc(keyIndex);
+            // Numeric key handling depends on Record type
+            if (numericKeys) {
+                // Phase 2.1: Record<number, V> - generate Integer key
+                generateNumericKey(code, cp, num);
+            } else {
+                // Phase 1: Default behavior - convert to String
+                String keyStr = String.valueOf((int) num.getValue());
+                int keyIndex = cp.addString(keyStr);
+                code.ldc(keyIndex);
+            }
         } else if (key instanceof Swc4jAstComputedPropName computed) {
             // Computed property name: {[expr]: value}
-            // Phase 2: Generate expression and convert to String
+            // Phase 2.1: Generate expression and convert to appropriate type (String or Number)
             ISwc4jAstExpr expr = computed.getExpr();
             String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
             if (exprType == null) {
@@ -231,28 +243,120 @@ public final class ObjectLiteralGenerator {
             callback.generateExpr(code, cp, expr, null, context, options);
             // Stack: [expr_result]
 
-            // Convert to String using String.valueOf()
-            if ("Ljava/lang/String;".equals(exprType)) {
-                // Already a String, no conversion needed
-            } else {
-                // Box primitives first, then call String.valueOf(Object)
+            // Phase 2.1: Convert to appropriate key type based on Record type
+            if (numericKeys) {
+                // Record<number, V> - ensure key is numeric (Integer, Long, or Double)
                 if (TypeConversionUtils.isPrimitiveType(exprType)) {
+                    // Box primitive numeric types
                     String wrapperType = TypeConversionUtils.getWrapperType(exprType);
                     TypeConversionUtils.boxPrimitiveType(code, cp, exprType, wrapperType);
+                    // Stack: [boxed number]
+                } else if ("Ljava/lang/Integer;".equals(exprType) ||
+                        "Ljava/lang/Long;".equals(exprType) ||
+                        "Ljava/lang/Double;".equals(exprType)) {
+                    // Already boxed numeric type, no conversion needed
+                    // Stack: [boxed number]
+                } else {
+                    // Non-numeric type for Record<number, V> - should have been caught by validation
+                    // Stack: [Object]
                 }
-                // Stack: [Object]
+            } else {
+                // Default behavior - convert to String using String.valueOf()
+                if ("Ljava/lang/String;".equals(exprType)) {
+                    // Already a String, no conversion needed
+                } else {
+                    // Box primitives first, then call String.valueOf(Object)
+                    if (TypeConversionUtils.isPrimitiveType(exprType)) {
+                        String wrapperType = TypeConversionUtils.getWrapperType(exprType);
+                        TypeConversionUtils.boxPrimitiveType(code, cp, exprType, wrapperType);
+                    }
+                    // Stack: [Object]
 
-                // Call String.valueOf(Object) to convert to String
-                int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf",
-                        "(Ljava/lang/Object;)Ljava/lang/String;");
-                code.invokestatic(valueOfRef);
-                // Stack: [String]
+                    // Call String.valueOf(Object) to convert to String
+                    int valueOfRef = cp.addMethodRef("java/lang/String", "valueOf",
+                            "(Ljava/lang/Object;)Ljava/lang/String;");
+                    code.invokestatic(valueOfRef);
+                    // Stack: [String]
+                }
             }
         } else {
             throw new Swc4jByteCodeCompilerException(
                     "Unsupported property key type: " + key.getClass().getSimpleName() +
                             ". Supported types: Identifier, String literal, Number, and Computed property names.");
         }
+    }
+
+    /**
+     * Check if a type descriptor represents a numeric key type.
+     * Phase 2.1: Support Record<number, V> with Integer keys
+     *
+     * @param typeDescriptor JVM type descriptor
+     * @return true if type is Integer, Long, Double, or primitive numeric type
+     */
+    private static boolean isNumericKeyType(String typeDescriptor) {
+        if (typeDescriptor == null) {
+            return false;
+        }
+        return "Ljava/lang/Integer;".equals(typeDescriptor) ||
+                "Ljava/lang/Long;".equals(typeDescriptor) ||
+                "Ljava/lang/Double;".equals(typeDescriptor) ||
+                "I".equals(typeDescriptor) ||
+                "J".equals(typeDescriptor) ||
+                "D".equals(typeDescriptor);
+    }
+
+    /**
+     * Generate bytecode for numeric key (Integer, Long, or Double).
+     * Phase 2.1: Support Record<number, V> with boxed numeric keys
+     *
+     * @param code code builder
+     * @param cp   constant pool
+     * @param num  numeric key AST node
+     * @throws Swc4jByteCodeCompilerException if generation fails
+     */
+    private static void generateNumericKey(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstNumber num) throws Swc4jByteCodeCompilerException {
+        double value = num.getValue();
+
+        // Determine if it's an integer or floating-point value
+        if (value == Math.floor(value) && !Double.isInfinite(value)) {
+            // Integer value
+            long longValue = (long) value;
+            if (longValue >= Integer.MIN_VALUE && longValue <= Integer.MAX_VALUE) {
+                // Fits in int - use Integer.valueOf(int)
+                int intValue = (int) longValue;
+                if (intValue >= Short.MIN_VALUE && intValue <= Short.MAX_VALUE) {
+                    // Use iconst for values in short range
+                    code.iconst(intValue);
+                } else {
+                    // Use ldc for other integers
+                    code.ldc(cp.addInteger(intValue));
+                }
+                // Box to Integer
+                int valueOfRef = cp.addMethodRef("java/lang/Integer", "valueOf",
+                        "(I)Ljava/lang/Integer;");
+                code.invokestatic(valueOfRef);
+            } else {
+                // Doesn't fit in int - use Long.valueOf(long)
+                code.ldc2_w(cp.addLong(longValue));
+                int valueOfRef = cp.addMethodRef("java/lang/Long", "valueOf",
+                        "(J)Ljava/lang/Long;");
+                code.invokestatic(valueOfRef);
+            }
+        } else {
+            // Floating-point value - use Double.valueOf(double)
+            if (value == 0.0 || value == 1.0) {
+                code.dconst(value);
+            } else {
+                code.ldc2_w(cp.addDouble(value));
+            }
+            int valueOfRef = cp.addMethodRef("java/lang/Double", "valueOf",
+                    "(D)Ljava/lang/Double;");
+            code.invokestatic(valueOfRef);
+        }
+        // Stack: [boxed numeric key]
     }
 
     /**
