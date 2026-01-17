@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
+import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -350,6 +351,126 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testNestedRecordEmptyNested(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, Record<string, number>> = {
+                        outer1: {},
+                        outer2: {inner: 42}
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(
+                "outer1", Map.of(),
+                "outer2", Map.of("inner", 42)
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedRecordInvalidNestedKey(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const obj: Record<string, Record<number, string>> = {
+                            outer: {a: "invalid"}
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Key 'a'") &&
+                        causeMessage.contains("String"),
+                "Expected nested key type mismatch error, got: " + causeMessage);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedRecordInvalidNestedValue(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const obj: Record<string, Record<string, number>> = {
+                            outer: {inner: "invalid"}
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Property 'inner'") &&
+                        causeMessage.contains("String"),
+                "Expected nested type mismatch error, got: " + causeMessage);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedRecordMixedTypes(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, Record<string, number>> = {
+                        a: {x: 1, y: 2.5},
+                        b: {z: 100}
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(
+                "a", Map.of("x", 1, "y", 2.5),
+                "b", Map.of("z", 100)
+        ), result);
+    }
+
+    // Phase 2.1: Record<number, V> - Numeric keys
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedRecordValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, Record<string, number>> = {
+                        outer1: {inner1: 42, inner2: 99},
+                        outer2: {inner3: 100}
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(
+                "outer1", Map.of("inner1", 42, "inner2", 99),
+                "outer2", Map.of("inner3", 100)
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testNullValue(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -389,6 +510,308 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testObjectLiteralArraysWithComputedKeys(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const key = "data"
+                      const obj = {
+                        [key]: [1, 2, 3],
+                        ["key" + 2]: [4, 5]
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(2, result.size());
+        assertEquals(java.util.List.of(1, 2, 3), result.get("data"));
+        assertEquals(java.util.List.of(4, 5), result.get("key2"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testObjectLiteralArraysWithShorthand(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a = [1, 2, 3]
+                      const b = [4, 5]
+                      const obj = {
+                        a,
+                        b,
+                        c: [6, 7]
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(3, result.size());
+        assertEquals(java.util.List.of(1, 2, 3), result.get("a"));
+        assertEquals(java.util.List.of(4, 5), result.get("b"));
+        assertEquals(java.util.List.of(6, 7), result.get("c"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testObjectLiteralArraysWithSpread(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base = {
+                        a: [1, 2]
+                      }
+                      const obj = {
+                        ...base,
+                        b: [3, 4]
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(2, result.size());
+        assertEquals(java.util.List.of(1, 2), result.get("a"));
+        assertEquals(java.util.List.of(3, 4), result.get("b"));
+    }
+
+    // Phase 2.2: Type Alias Keys - Integer, Long, Double, String
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testObjectLiteralMixedArraysAndPrimitives(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        num: 42,
+                        str: "hello",
+                        arr: [1, 2, 3],
+                        nested: {inner: [4, 5]},
+                        bool: true
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(5, result.size());
+        assertEquals(42, result.get("num"));
+        assertEquals("hello", result.get("str"));
+        assertEquals(java.util.List.of(1, 2, 3), result.get("arr"));
+        assertEquals(Map.of("inner", java.util.List.of(4, 5)), result.get("nested"));
+        assertEquals(true, result.get("bool"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testObjectLiteralNullInNestedObject(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        outer: {
+                          inner1: null,
+                          inner2: 42
+                        },
+                        value: null
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(SimpleMap.of(
+                "outer", SimpleMap.of("inner1", null, "inner2", 42),
+                "value", null), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testObjectLiteralNullOverridesValue(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base = {a: 1, b: 2}
+                      const obj = {
+                        ...base,
+                        a: null
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(SimpleMap.of("a", null, "b", 2), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testObjectLiteralNullWithComputedKey(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const key = "computed"
+                      const obj = {
+                        [key]: null,
+                        regular: null,
+                        value: 42
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(SimpleMap.of("computed", null, "regular", null, "value", 42), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testObjectLiteralNullWithShorthand(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a = null
+                      const b = 42
+                      const obj = {
+                        a,
+                        b,
+                        c: null
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(SimpleMap.of("a", null, "b", 42, "c", null), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testObjectLiteralNullWithSpread(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base = {a: null, b: 2}
+                      const obj = {
+                        ...base,
+                        c: null,
+                        d: 4
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(SimpleMap.of("a", null, "b", 2, "c", null, "d", 4), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testObjectLiteralWithArrayValues(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        a: [1, 2, 3],
+                        b: [4, 5],
+                        c: []
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(3, result.size());
+        assertEquals(java.util.List.of(1, 2, 3), result.get("a"));
+        assertEquals(java.util.List.of(4, 5), result.get("b"));
+        assertEquals(java.util.List.of(), result.get("c"));
+    }
+
+    // Phase 2.3: Nested Record types
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testObjectLiteralWithNestedArrays(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        a: [[1, 2], [3, 4]],
+                        b: [[5]],
+                        c: []
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(3, result.size());
+        var aValue = (java.util.ArrayList<?>) result.get("a");
+        assertEquals(java.util.List.of(java.util.List.of(1, 2), java.util.List.of(3, 4)), aValue);
+        var bValue = (java.util.ArrayList<?>) result.get("b");
+        assertEquals(java.util.List.of(java.util.List.of(5)), bValue);
+        assertEquals(java.util.List.of(), result.get("c"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testObjectLiteralWithNullValues(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        a: null,
+                        b: 42,
+                        c: null
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(SimpleMap.of("a", null, "b", 42, "c", null), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testObjectWithArrayValue(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -409,6 +832,102 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testRecordComputedKeyNumberMismatch(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const key: string = "stringkey"
+                          const obj: Record<number, string> = {
+                            [key]: "value"
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Key") && causeMessage.contains("String"),
+                "Expected computed key type mismatch error, got: " + causeMessage);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordComputedKeyStringMismatch(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const key: number = 42
+                          const obj: Record<string, number> = {
+                            [key]: 100
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Key") && causeMessage.contains("double"),
+                "Expected computed key type mismatch error, got: " + causeMessage);
+    }
+
+    // Phase 3: Computed Key Type Validation
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordComputedNumberKeyValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const key: number = 42
+                      const obj: Record<number, string> = {
+                        [key]: "forty-two",
+                        [1 + 1]: "two"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Expected: First key is 42.0 (Double from variable), second key is 2 (Integer from expression)
+        var expected = new LinkedHashMap<>();
+        expected.put(42.0, "forty-two");
+        expected.put(2, "two");
+        assertEquals(expected, result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordComputedStringKeyValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const key: string = "computed"
+                      const obj: Record<string, number> = {
+                        [key]: 42,
+                        ["key" + 1]: 99
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("computed", 42, "key1", 99), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testRecordEmptyValid(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -424,8 +943,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertTrue(result.isEmpty());
     }
-
-    // Phase 2.1: Record<number, V> - Numeric keys
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -449,6 +966,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
                         causeMessage.contains("String"),
                 "Expected key type mismatch error, got: " + causeMessage);
     }
+
+    // Phase 2.2: Record Type Validation (Continued)
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -571,7 +1090,144 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals("large", result.get(2147483648L));
     }
 
-    // Phase 2.2: Type Alias Keys - Integer, Long, Double, String
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordMixedAllFeatures(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj1: Record<string, number> = {x: 10}
+                      const y: number = 20
+                      const z: number = 30
+                      const key: string = "computed"
+                      const obj: Record<string, number> = {
+                        ...obj1,
+                        y,
+                        [key]: 40,
+                        z,
+                        ["key" + 2]: 50,
+                        literal: 60
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("x", 10, "y", 20.0, "computed", 40, "z", 30.0, "key2", 50, "literal", 60), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordMixedComputedAndSpreadValidation(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base: Record<string, number> = {a: 1}
+                      const key: string = "b"
+                      const obj: Record<string, number> = {
+                        ...base,
+                        [key]: 2,
+                        ["c" + "d"]: 3
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2, "cd", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordMixedMultipleSpreadsAndShorthands(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj1: Record<string, number> = {a: 1}
+                      const obj2: Record<string, number> = {b: 2}
+                      const c: number = 3
+                      const d: number = 4
+                      const obj: Record<string, number> = {
+                        ...obj1,
+                        c,
+                        ...obj2,
+                        d,
+                        e: 5
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "c", 3.0, "b", 2, "d", 4.0, "e", 5), result);
+    }
+
+    // Phase 4: Spread Operator
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordMixedNestedWithSpreadShorthand(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base: Record<string, Record<string, number>> = {
+                        outer1: {inner1: 1}
+                      }
+                      const outer2: Record<string, number> = {inner2: 2}
+                      const obj: Record<string, Record<string, number>> = {
+                        ...base,
+                        outer2,
+                        outer3: {inner3: 3}
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(
+                "outer1", Map.of("inner1", 1),
+                "outer2", Map.of("inner2", 2),
+                "outer3", Map.of("inner3", 3)
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordMixedSpreadShorthandComputed(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base: Record<string, number> = {a: 1, b: 2}
+                      const c: number = 3
+                      const key: string = "d"
+                      const obj: Record<string, number> = {
+                        ...base,
+                        c,
+                        [key]: 4,
+                        e: 5
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3.0, "d", 4, "e", 5), result);
+    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -597,6 +1253,31 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertTrue(causeMessage.contains("Property 'c'") &&
                         causeMessage.contains("String"),
                 "Expected type mismatch error for property 'c', got: " + causeMessage);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordMixedWithOverrides(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base: Record<string, number> = {a: 1, b: 2}
+                      const a: number = 99
+                      const obj: Record<string, number> = {
+                        ...base,
+                        a,
+                        b: 88
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Later properties override earlier ones
+        assertEquals(Map.of("a", 99.0, "b", 88), result);
     }
 
     @ParameterizedTest
@@ -663,6 +1344,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(42, result.get(1));
         assertEquals(3.14, result.get(2));
     }
+
+    // Phase 5: Shorthand Type Validation
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -735,18 +1418,168 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
                 "Expected value type mismatch error, got: " + causeMessage);
     }
 
-    // Phase 2.3: Nested Record types
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordShorthandKeyTypeMismatch(JdkVersion jdkVersion) {
+        // Shorthand keys are always strings, so Record<number, V> should fail
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const a: string = "value"
+                          const obj: Record<number, string> = {a}
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Key 'a'") && causeMessage.contains("String"),
+                "Expected shorthand key type mismatch error, got: " + causeMessage);
+    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNestedRecordValid(JdkVersion jdkVersion) throws Exception {
+    public void testRecordShorthandMixedValid(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
+                      const x: number = 10
+                      const y: number = 20
+                      const obj: Record<string, number> = {x, y, z: 30}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("x", 10.0, "y", 20.0, "z", 30), result);
+    }
+
+    // Phase 1: Basic Properties
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordShorthandStringNumberValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: number = 1
+                      const b: number = 2
+                      const c: number = 3
+                      const obj: Record<string, number> = {a, b, c}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1.0, "b", 2.0, "c", 3.0), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordShorthandStringStringValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const name: string = "Alice"
+                      const city: string = "NYC"
+                      const obj: Record<string, string> = {name, city}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("name", "Alice", "city", "NYC"), result);
+    }
+
+    // ========== Phase 2: Record Type Validation Tests ==========
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordShorthandValueTypeMismatch(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const a: string = "hello"
+                          const obj: Record<string, number> = {a}
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Property 'a'") && causeMessage.contains("String"),
+                "Expected shorthand value type mismatch error, got: " + causeMessage);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordSpreadKeyTypeMismatch(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const source: Record<number, string> = {1: "one"}
+                          const obj: Record<string, string> = {...source}
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("incompatible key type"),
+                "Expected spread key type mismatch error, got: " + causeMessage);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordSpreadMultiple(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj1: Record<string, number> = {a: 1}
+                      const obj2: Record<string, number> = {b: 2}
+                      const obj: Record<string, number> = {...obj1, ...obj2, c: 3}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordSpreadNested(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base: Record<string, Record<string, number>> = {
+                        outer1: {inner1: 1, inner2: 2}
+                      }
                       const obj: Record<string, Record<string, number>> = {
-                        outer1: {inner1: 42, inner2: 99},
-                        outer2: {inner3: 100}
+                        ...base,
+                        outer2: {inner3: 3}
                       }
                       return obj
                     }
@@ -756,21 +1589,56 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of(
-                "outer1", Map.of("inner1", 42, "inner2", 99),
-                "outer2", Map.of("inner3", 100)
+                "outer1", Map.of("inner1", 1, "inner2", 2),
+                "outer2", Map.of("inner3", 3)
         ), result);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNestedRecordInvalidNestedValue(JdkVersion jdkVersion) {
+    public void testRecordSpreadNestedMultiple(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj1: Record<string, Record<string, number>> = {
+                        a: {x: 1}
+                      }
+                      const obj2: Record<string, Record<string, number>> = {
+                        b: {y: 2}
+                      }
+                      const obj: Record<string, Record<string, number>> = {
+                        ...obj1,
+                        ...obj2,
+                        c: {z: 3}
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(
+                "a", Map.of("x", 1),
+                "b", Map.of("y", 2),
+                "c", Map.of("z", 3)
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordSpreadNestedTypeMismatch(JdkVersion jdkVersion) {
         var exception = assertThrows(Exception.class, () -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
                         test() {
+                          const source: Record<string, Record<string, string>> = {
+                            outer: {inner: "hello"}
+                          }
                           const obj: Record<string, Record<string, number>> = {
-                            outer: {inner: "invalid"}
+                            ...source
                           }
                           return obj
                         }
@@ -779,22 +1647,21 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         });
         assertNotNull(exception.getCause(), "Expected wrapped exception");
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Property 'inner'") &&
-                        causeMessage.contains("String"),
-                "Expected nested type mismatch error, got: " + causeMessage);
+        assertTrue(causeMessage.contains("incompatible value type"),
+                "Expected nested spread value type mismatch error, got: " + causeMessage);
     }
+
+    // Phase 4: Spread Type Validation
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNestedRecordEmptyNested(JdkVersion jdkVersion) throws Exception {
+    public void testRecordSpreadOverwrite(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const obj: Record<string, Record<string, number>> = {
-                        outer1: {},
-                        outer2: {inner: 42}
-                      }
+                      const base: Record<string, number> = {a: 1, b: 2}
+                      const obj: Record<string, number> = {a: 99, ...base, c: 3}
                       return obj
                     }
                   }
@@ -802,23 +1669,19 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(Map.of(
-                "outer1", Map.of(),
-                "outer2", Map.of("inner", 42)
-        ), result);
+        // Spread overwrites earlier properties
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNestedRecordMixedTypes(JdkVersion jdkVersion) throws Exception {
+    public void testRecordSpreadValid(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const obj: Record<string, Record<string, number>> = {
-                        a: {x: 1, y: 2.5},
-                        b: {z: 100}
-                      }
+                      const base: Record<string, number> = {a: 1, b: 2}
+                      const obj: Record<string, number> = {c: 3, ...base, d: 4}
                       return obj
                     }
                   }
@@ -826,23 +1689,19 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(Map.of(
-                "a", Map.of("x", 1, "y", 2.5),
-                "b", Map.of("z", 100)
-        ), result);
+        assertEquals(Map.of("c", 3, "a", 1, "b", 2, "d", 4), result);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNestedRecordInvalidNestedKey(JdkVersion jdkVersion) {
+    public void testRecordSpreadValueTypeMismatch(JdkVersion jdkVersion) {
         var exception = assertThrows(Exception.class, () -> {
             getCompiler(jdkVersion).compile("""
                     namespace com {
                       export class A {
                         test() {
-                          const obj: Record<string, Record<number, string>> = {
-                            outer: {a: "invalid"}
-                          }
+                          const source: Record<string, string> = {a: "hello"}
+                          const obj: Record<string, number> = {...source}
                           return obj
                         }
                       }
@@ -850,12 +1709,9 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         });
         assertNotNull(exception.getCause(), "Expected wrapped exception");
         String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Key 'a'") &&
-                        causeMessage.contains("String"),
-                "Expected nested key type mismatch error, got: " + causeMessage);
+        assertTrue(causeMessage.contains("incompatible value type"),
+                "Expected spread value type mismatch error, got: " + causeMessage);
     }
-
-    // Phase 3: Property Shorthand
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -972,6 +1828,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
                 "Expected type mismatch error for boolean value, got: " + causeMessage);
     }
 
+    // Phase 7: Mixed Scenarios (Spread + Shorthand + Computed)
+
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordValueTypeMismatchString(JdkVersion jdkVersion) {
@@ -1033,8 +1891,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("x", 10, "dynamic", 20, "normal", 30), result);
     }
-
-    // Phase 4: Spread Operator
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -1102,6 +1958,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals("a", keys[1]);
         assertEquals("m", keys[2]);
     }
+
+    // Phase 7: Array Value Types (without Record type validation)
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -1222,7 +2080,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(Map.of("nested", Map.of("x", 1), "a", 2, "b", 3), result);
     }
 
-    // ========== Phase 2: Record Type Validation Tests ==========
+    // Phase 7: Null Handling
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -1341,6 +2199,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("x", 10, "a", 1, "b", 2, "y", 20), result);
     }
+
+    // Phase 1: Basic Properties
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)

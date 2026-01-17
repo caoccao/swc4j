@@ -19,7 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 import java.util.Objects;
 
 /**
- * Holds parsed generic type information for types like Record<K, V>.
+ * Holds parsed generic type information for types like {@code Record<K, V>}.
  * Used by object literal compilation to validate and generate typed LinkedHashMap instances.
  */
 public final class GenericTypeInfo {
@@ -40,7 +40,7 @@ public final class GenericTypeInfo {
     }
 
     /**
-     * Create a simple generic type info for Record<K, V> without nested types.
+     * Create a simple generic type info for {@code Record<K, V>} without nested types.
      *
      * @param keyType   JVM type descriptor for key type (e.g., "Ljava/lang/String;")
      * @param valueType JVM type descriptor for value type (e.g., "Ljava/lang/Integer;")
@@ -51,7 +51,7 @@ public final class GenericTypeInfo {
     }
 
     /**
-     * Create a nested generic type info for types like Record<string, Record<string, number>>.
+     * Create a nested generic type info for types like {@code Record<string, Record<string, number>>}.
      *
      * @param keyType        JVM type descriptor for key type
      * @param nestedTypeInfo Nested generic type information for the value type
@@ -105,7 +105,7 @@ public final class GenericTypeInfo {
     }
 
     /**
-     * Check if the value type is itself a nested generic type (e.g., Record<string, Record<...>>).
+     * Check if the value type is itself a nested generic type (e.g., {@code Record<string, Record<...>>}).
      *
      * @return true if value type is a nested Record type
      */

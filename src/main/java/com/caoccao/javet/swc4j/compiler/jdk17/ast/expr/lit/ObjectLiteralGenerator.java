@@ -39,7 +39,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 /**
  * Generator for object literal bytecode.
- * Generates LinkedHashMap<String, Object> by default (Phase 1-4: no type annotation).
+ * Generates {@code LinkedHashMap<String, Object>} by default (Phase 1-4: no type annotation).
  * <p>
  * Phase 1: Basic key-value pairs with identifier, string literal, and numeric keys
  * Phase 2: Computed property names {[expr]: value}
@@ -47,7 +47,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  * Phase 4: Spread operator {...other} for shallow merging
  * <p>
  * JavaScript: {a: 1, b: "hello", c: true, [key]: value, x, y, ...other}
- * Java: LinkedHashMap<String, Object> with key-value pairs
+ * Java: {@code LinkedHashMap<String, Object>} with key-value pairs
  */
 public final class ObjectLiteralGenerator {
     private ObjectLiteralGenerator() {
@@ -55,8 +55,8 @@ public final class ObjectLiteralGenerator {
 
     /**
      * Generate bytecode for object literal.
-     * Phase 1-4: Basic implementation with computed property names, shorthand, and spread - no type annotation, default to LinkedHashMap<String, Object>
-     * Phase 2: Type validation for Record<K, V> types
+     * Phase 1-4: Basic implementation with computed property names, shorthand, and spread - no type annotation, default to {@code LinkedHashMap<String, Object>}
+     * Phase 2: Type validation for {@code Record<K, V>} types
      *
      * @param code           code builder for bytecode generation
      * @param cp             constant pool
@@ -171,7 +171,13 @@ public final class ObjectLiteralGenerator {
                 code.pop(); // Discard old value - Stack: [map]
             } else if (prop instanceof Swc4jAstSpreadElement spread) {
                 // Spread operator: {...other} for shallow merging
-                // Phase 4: Handle spread syntax
+                // Phase 4: Handle spread syntax with type validation
+
+                // Phase 4: Validate spread source type against Record<K, V> if present
+                if (genericTypeInfo != null) {
+                    validateSpreadElement(spread, genericTypeInfo, context, options);
+                }
+
                 code.dup(); // Stack: [map, map]
 
                 // Generate the spread expression (should evaluate to a Map)
@@ -568,5 +574,102 @@ public final class ObjectLiteralGenerator {
                     false  // isKey = false (this is a value)
             );
         }
+    }
+
+    /**
+     * Validate a spread element against Record<K, V> type constraints.
+     * Phase 4: Type validation for spread properties like {...other}
+     *
+     * @param spread          spread element AST node
+     * @param genericTypeInfo Record type information
+     * @param context         compilation context
+     * @param options         compiler options
+     * @throws Swc4jByteCodeCompilerException if spread source type doesn't match Record constraints
+     */
+    private static void validateSpreadElement(
+            Swc4jAstSpreadElement spread,
+            GenericTypeInfo genericTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        ISwc4jAstExpr spreadExpr = spread.getExpr();
+
+        // Infer the type of the spread expression
+        String spreadType = TypeResolver.inferTypeFromExpr(spreadExpr, context, options);
+        if (spreadType == null) {
+            spreadType = "Ljava/lang/Object;";
+        }
+
+        // The spread source must be a LinkedHashMap (or compatible Map type)
+        // For now, we check if it's assignable to LinkedHashMap
+        if (!"Ljava/util/LinkedHashMap;".equals(spreadType) &&
+                !"Ljava/util/Map;".equals(spreadType) &&
+                !"Ljava/lang/Object;".equals(spreadType)) {
+            throw new Swc4jByteCodeCompilerException(
+                    "Spread source must be a Map type, got: " + spreadType);
+        }
+
+        // Check if the spread expression has generic type info (e.g., it's a Record type)
+        GenericTypeInfo spreadGenericInfo = null;
+        if (spreadExpr instanceof Swc4jAstIdent ident) {
+            // Look up the variable's generic type info from context
+            String varName = ident.getSym();
+            spreadGenericInfo = context.getGenericTypeInfoMap().get(varName);
+        }
+
+        // If we have generic type info for both target and source, validate compatibility
+        if (spreadGenericInfo != null) {
+            String expectedKeyType = genericTypeInfo.getKeyType();
+            String actualKeyType = spreadGenericInfo.getKeyType();
+
+            // Validate key types match
+            if (!TypeResolver.isAssignable(actualKeyType, expectedKeyType)) {
+                throw new Swc4jByteCodeCompilerException(
+                        "Spread source has incompatible key type: expected " +
+                                expectedKeyType + ", got " + actualKeyType);
+            }
+
+            String expectedValueType = genericTypeInfo.getValueType();
+            String actualValueType = spreadGenericInfo.getValueType();
+
+            // Phase 4.1: Handle nested Record types - validate nested compatibility
+            if (genericTypeInfo.isNested() && spreadGenericInfo.isNested()) {
+                // Both are nested - recursively validate nested types
+                GenericTypeInfo expectedNestedInfo = genericTypeInfo.getNestedTypeInfo();
+                GenericTypeInfo actualNestedInfo = spreadGenericInfo.getNestedTypeInfo();
+
+                String expectedNestedKeyType = expectedNestedInfo.getKeyType();
+                String actualNestedKeyType = actualNestedInfo.getKeyType();
+
+                if (!TypeResolver.isAssignable(actualNestedKeyType, expectedNestedKeyType)) {
+                    throw new Swc4jByteCodeCompilerException(
+                            "Spread source has incompatible nested key type: expected " +
+                                    expectedNestedKeyType + ", got " + actualNestedKeyType);
+                }
+
+                String expectedNestedValueType = expectedNestedInfo.getValueType();
+                String actualNestedValueType = actualNestedInfo.getValueType();
+
+                if (!TypeResolver.isAssignable(actualNestedValueType, expectedNestedValueType)) {
+                    throw new Swc4jByteCodeCompilerException(
+                            "Spread source has incompatible value type: expected " +
+                                    expectedNestedValueType + ", got " + actualNestedValueType);
+                }
+            } else if (genericTypeInfo.isNested() != spreadGenericInfo.isNested()) {
+                // One is nested, the other is not - incompatible
+                throw new Swc4jByteCodeCompilerException(
+                        "Spread source has incompatible nesting: expected nested=" +
+                                genericTypeInfo.isNested() + ", got nested=" + spreadGenericInfo.isNested());
+            } else {
+                // Neither is nested - validate value types match
+                if (!TypeResolver.isAssignable(actualValueType, expectedValueType)) {
+                    throw new Swc4jByteCodeCompilerException(
+                            "Spread source has incompatible value type: expected " +
+                                    expectedValueType + ", got " + actualValueType);
+                }
+            }
+        }
+        // If spread source doesn't have generic type info, we can't validate at compile time
+        // Runtime will handle any type mismatches
     }
 }

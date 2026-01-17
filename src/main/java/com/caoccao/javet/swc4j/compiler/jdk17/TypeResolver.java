@@ -76,7 +76,7 @@ public final class TypeResolver {
 
     /**
      * Extract GenericTypeInfo from a BindingIdent's type annotation if it's a Record type.
-     * Phase 2: Support for Record<K, V> type validation
+     * Phase 2: Support for {@code Record<K, V>} type validation
      *
      * @param bindingIdent binding identifier with potential type annotation
      * @param options      compiler options
@@ -725,12 +725,12 @@ public final class TypeResolver {
     }
 
     /**
-     * Parse Record<K, V> type annotation to extract generic type parameters.
+     * Parse {@code Record<K, V>} type annotation to extract generic type parameters.
      * <p>
      * Supports:
-     * - Record<string, number> → GenericTypeInfo.of("Ljava/lang/String;", "I")
-     * - Record<number, string> → GenericTypeInfo.of("Ljava/lang/Integer;", "Ljava/lang/String;")
-     * - Record<string, Record<string, number>> → GenericTypeInfo.ofNested(...)
+     * - {@code Record<string, number>} → GenericTypeInfo.of("Ljava/lang/String;", "I")
+     * - {@code Record<number, string>} → GenericTypeInfo.of("Ljava/lang/Integer;", "Ljava/lang/String;")
+     * - {@code Record<string, Record<string, number>>} → GenericTypeInfo.ofNested(...)
      *
      * @param tsType  TypeScript type annotation (expected to be TsTypeRef with type params)
      * @param options compiler options

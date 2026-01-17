@@ -80,8 +80,8 @@ public final class Swc4jByteCodeCompilerException extends Swc4jException {
      * Create a type mismatch exception with TypeScript Record type context.
      * <p>
      * Generates messages that reference the TypeScript type annotation:
-     * - "Property 'age' has type String, but Record<string, number> requires double"
-     * - "Key 'id' has type String, but Record<number, string> requires Integer"
+     * - "Property 'age' has type String, but {@code Record<string, number>} requires double"
+     * - "Key 'id' has type String, but {@code Record<number, string>} requires Integer"
      *
      * @param propertyName        Property name
      * @param expectedType        JVM type descriptor of expected type
