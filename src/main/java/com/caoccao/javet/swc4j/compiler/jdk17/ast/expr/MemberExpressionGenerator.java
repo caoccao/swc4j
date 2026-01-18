@@ -16,12 +16,12 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
-import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
-import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
+import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
@@ -103,12 +103,20 @@ public final class MemberExpressionGenerator {
                     return;
                 }
             }
-        } else if ("Ljava/util/LinkedHashMap;".equals(objType)) {
+        } else if ("Ljava/util/LinkedHashMap;".equals(objType) || "Ljava/lang/Object;".equals(objType)) {
             // LinkedHashMap operations (object literal member access)
+            // Also handle Object type (for nested properties where map values are typed as Object)
             // Check if it's a computed property (obj[key]) or named property (obj.prop)
             if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
                 // obj[key] -> map.get(key)
-                ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options); // Stack: [LinkedHashMap]
+                ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options); // Stack: [LinkedHashMap or Object]
+
+                // Cast to LinkedHashMap if type is Object
+                if ("Ljava/lang/Object;".equals(objType)) {
+                    int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
+                    code.checkcast(linkedHashMapClass); // Stack: [LinkedHashMap]
+                }
+
                 ExpressionGenerator.generate(code, cp, computedProp.getExpr(), null, context, options); // Stack: [LinkedHashMap, key]
 
                 // Box primitive keys if needed
@@ -128,7 +136,14 @@ public final class MemberExpressionGenerator {
             if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
                 String propName = propIdent.getSym();
                 // obj.prop -> map.get("prop")
-                ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options); // Stack: [LinkedHashMap]
+                ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options); // Stack: [LinkedHashMap or Object]
+
+                // Cast to LinkedHashMap if type is Object
+                if ("Ljava/lang/Object;".equals(objType)) {
+                    int linkedHashMapClass = cp.addClass("java/util/LinkedHashMap");
+                    code.checkcast(linkedHashMapClass); // Stack: [LinkedHashMap]
+                }
+
                 int keyIndex = cp.addString(propName);
                 code.ldc(keyIndex); // Stack: [LinkedHashMap, "prop"]
 
