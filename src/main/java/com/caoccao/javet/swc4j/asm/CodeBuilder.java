@@ -111,6 +111,13 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder checkcast(int classRefIndex) {
+        code.add((byte) (0xC0)); // checkcast
+        code.add((byte) (classRefIndex >> 8)); // high byte
+        code.add((byte) (classRefIndex & 0xFF)); // low byte
+        return this;
+    }
+
     public CodeBuilder d2f() {
         code.add((byte) (0x90)); // d2f
         return this;

@@ -3121,5 +3121,106 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(2, result);
     }
 
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6AssignmentDotNotation(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Assignment with dot notation (obj.prop = value → map.put("prop", value))
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {a: 1, b: 2}
+                      obj.c = 3
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6AssignmentBracketNotation(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Assignment with bracket notation (obj["prop"] = value → map.put("prop", value))
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {a: 1}
+                      obj["b"] = "hello"
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", "hello"), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6AssignmentComputedKey(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Assignment with computed key (obj[variable] = value → map.put(variable, value))
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {a: 1}
+                      const key = "b"
+                      obj[key] = 2
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6AssignmentModifyExisting(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Assignment that modifies existing property
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {a: 1, b: 2, c: 3}
+                      obj.b = 99
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 99, "c", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6AssignmentRecordType(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Assignment with Record type annotation
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, number> = {a: 1, b: 2}
+                      obj.c = 3
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
+    }
+
 }
 

@@ -173,6 +173,60 @@ public final class AssignExpressionGenerator {
                         throw new Swc4jByteCodeCompilerException("Setting array length to non-constant values not yet supported");
                     }
                 }
+            } else if ("Ljava/util/LinkedHashMap;".equals(objType)) {
+                // LinkedHashMap operations (object literal property assignment)
+                // Check if it's obj[key] = value (computed property)
+                if (memberExpr.getProp() instanceof Swc4jAstComputedPropName computedProp) {
+                    // obj[key] = value -> map.put(key, value)
+                    ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options); // Stack: [LinkedHashMap]
+                    ExpressionGenerator.generate(code, cp, computedProp.getExpr(), null, context, options); // Stack: [LinkedHashMap, key]
+
+                    // Box primitive keys if needed
+                    String keyType = TypeResolver.inferTypeFromExpr(computedProp.getExpr(), context, options);
+                    if (keyType != null && TypeConversionUtils.isPrimitiveType(keyType)) {
+                        String wrapperType = TypeConversionUtils.getWrapperType(keyType);
+                        TypeConversionUtils.boxPrimitiveType(code, cp, keyType, wrapperType);
+                    }
+
+                    ExpressionGenerator.generate(code, cp, assignExpr.getRight(), null, context, options); // Stack: [LinkedHashMap, key, value]
+
+                    // Box primitive values if needed
+                    String valueType = TypeResolver.inferTypeFromExpr(assignExpr.getRight(), context, options);
+                    if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
+                        String wrapperType = TypeConversionUtils.getWrapperType(valueType);
+                        TypeConversionUtils.boxPrimitiveType(code, cp, valueType, wrapperType);
+                    }
+
+                    // Call LinkedHashMap.put(Object, Object)
+                    int putMethod = cp.addMethodRef("java/util/LinkedHashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+                    code.invokevirtual(putMethod); // Stack: [oldValue] - the return value is the previous value (or null)
+                    // Leave the value on stack for expression statements to pop
+                    return;
+                }
+
+                // Check if it's obj.prop = value (named property)
+                if (memberExpr.getProp() instanceof Swc4jAstIdentName propIdent) {
+                    String propName = propIdent.getSym();
+                    // obj.prop = value -> map.put("prop", value)
+                    ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options); // Stack: [LinkedHashMap]
+                    int keyIndex = cp.addString(propName);
+                    code.ldc(keyIndex); // Stack: [LinkedHashMap, "prop"]
+
+                    ExpressionGenerator.generate(code, cp, assignExpr.getRight(), null, context, options); // Stack: [LinkedHashMap, "prop", value]
+
+                    // Box primitive values if needed
+                    String valueType = TypeResolver.inferTypeFromExpr(assignExpr.getRight(), context, options);
+                    if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
+                        String wrapperType = TypeConversionUtils.getWrapperType(valueType);
+                        TypeConversionUtils.boxPrimitiveType(code, cp, valueType, wrapperType);
+                    }
+
+                    // Call LinkedHashMap.put(Object, Object)
+                    int putMethod = cp.addMethodRef("java/util/LinkedHashMap", "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+                    code.invokevirtual(putMethod); // Stack: [oldValue]
+                    // Leave the value on stack for expression statements to pop
+                    return;
+                }
             }
         }
         throw new Swc4jByteCodeCompilerException("Assignment expression not yet supported: " + left);
