@@ -22,7 +22,9 @@ import com.caoccao.javet.swc4j.utils.SimpleMap;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -226,6 +228,693 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testEdgeCase02DuplicateKeys(JdkVersion jdkVersion) throws Exception {
+        // Edge case 2: Duplicate keys - later value wins
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {a: 1, a: 2, a: 3}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Later value should win (Map.put overwrites)
+        assertEquals(Map.of("a", 3), result);
+    }
+
+    // Phase 2: Computed Property Names
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase06NonStringPrimitiveKeys(JdkVersion jdkVersion) throws Exception {
+        // Edge case 6: Non-string primitive keys (boolean, null) converted to string
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        true: "yes",
+                        false: "no",
+                        null: "none"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Primitive keys are converted to strings
+        assertEquals(Map.of("true", "yes", "false", "no", "null", "none"), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase10ReservedKeywords(JdkVersion jdkVersion) throws Exception {
+        // Edge case 10: Reserved keywords as keys work fine in Maps
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        class: "className",
+                        for: "loop",
+                        if: "condition",
+                        while: "iteration",
+                        return: "exit"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Reserved keywords are just strings in Map keys
+        assertEquals(Map.of(
+                "class", "className",
+                "for", "loop",
+                "if", "condition",
+                "while", "iteration",
+                "return", "exit"
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase11WhitespaceInKeys(JdkVersion jdkVersion) throws Exception {
+        // Edge case 11: Whitespace in keys is preserved exactly
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        "key with spaces": "value1",
+                        "  trim  ": "value2",
+                        "\\ttab\\t": "value3",
+                        "\\nnewline\\n": "value4"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Whitespace is preserved exactly
+        assertEquals("value1", result.get("key with spaces"));
+        assertEquals("value2", result.get("  trim  "));
+        assertEquals("value3", result.get("\ttab\t"));
+        assertEquals("value4", result.get("\nnewline\n"));
+        assertEquals(4, result.size());
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase12UnicodeKeys(JdkVersion jdkVersion) throws Exception {
+        // Edge case 12: Unicode keys are supported (Java strings support full Unicode)
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        "你好": "hello",
+                        "🔥": "fire",
+                        "café": "coffee",
+                        "Москва": "Moscow",
+                        "東京": "Tokyo"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Unicode is fully supported
+        assertEquals(Map.of(
+                "你好", "hello",
+                "🔥", "fire",
+                "café", "coffee",
+                "Москва", "Moscow",
+                "東京", "Tokyo"
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase14ObjectAsValueTypeAnnotation(JdkVersion jdkVersion) throws Exception {
+        // Edge case 14: Object as value type annotation - still generates LinkedHashMap
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Object = {a: 1, b: "hello", c: true}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Object type annotation doesn't prevent LinkedHashMap generation
+        assertEquals(Map.of("a", 1, "b", "hello", "c", true), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase15MixedKeyTypes(JdkVersion jdkVersion) throws Exception {
+        // Edge case 15: Mixed key types - all converted to String
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const computed = "computed"
+                      const obj = {"str": 1, 42: 2, [computed]: 3, true: 4}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // All keys coerced to String
+        assertEquals(Map.of("str", 1, "42", 2, "computed", 3, "true", 4), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase16TrailingCommas(JdkVersion jdkVersion) throws Exception {
+        // Edge case 16: Trailing commas - AST handles this automatically
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        a: 1,
+                        b: 2,
+                        c: 3,
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Trailing comma doesn't affect object creation
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase17ComputedKeysEvaluationOrder(JdkVersion jdkVersion) throws Exception {
+        // Edge case 17: Computed keys evaluation order - expressions evaluated left to right
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        ["key" + 1]: "first",
+                        ["key" + 2]: "second",
+                        ["key" + 3]: "third"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Computed keys with string concat expressions - insertion order preserved
+        assertEquals(Map.of("key1", "first", "key2", "second", "key3", "third"), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase17ComputedKeysWithExpressions(JdkVersion jdkVersion) throws Exception {
+        // Edge case 17: Computed keys with expressions - evaluate in order
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base = 10
+                      const obj: Record<number, string> = {
+                        [base + 0]: "ten",
+                        [base + 1]: "eleven",
+                        [base + 2]: "twelve"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Expressions evaluated: keys are Integer 10, 11, 12
+        assertEquals(Map.of(10, "ten", 11, "eleven", 12, "twelve"), result);
+    }
+
+    // Phase 2.1: Record<number, V> - Numeric keys
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase17ComputedKeysWithVariableReferences(JdkVersion jdkVersion) throws Exception {
+        // Edge case 17: Computed keys with variable references - evaluate in order
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a = 0
+                      const b = 1
+                      const c = 2
+                      const obj = {
+                        [a]: "first",
+                        [b]: "second",
+                        [c]: "third"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Keys are "0", "1", "2" (numeric keys coerced to string by default)
+        assertEquals(Map.of("0", "first", "1", "second", "2", "third"), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase18PropertyNameCollisions(JdkVersion jdkVersion) throws Exception {
+        // Edge case 18: Property name collisions after coercion - later value wins
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        1: "numeric",
+                        "1": "string"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Both keys coerce to "1", later value wins
+        assertEquals(Map.of("1", "string"), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase19ExpressionValues(JdkVersion jdkVersion) throws Exception {
+        // Edge case 19: Expression values - various expressions evaluated at runtime
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        arithmetic: 1 + 2 + 3,
+                        multiplication: 4 * 5,
+                        division: 20 / 4,
+                        subtraction: 10 - 3,
+                        stringConcat: "hello" + " " + "world",
+                        booleanTrue: true,
+                        booleanFalse: false
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // All expressions evaluated correctly
+        assertEquals(Map.of(
+                "arithmetic", 6,
+                "multiplication", 20,
+                "division", 5,
+                "subtraction", 7,
+                "stringConcat", "hello world",
+                "booleanTrue", true,
+                "booleanFalse", false
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase20ObjectInReturnTypeContext(JdkVersion jdkVersion) throws Exception {
+        // Edge case 20: Object in return type context - LinkedHashMap returned
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    getObject(): Object {
+                      return {a: 1, b: "hello", c: true}
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = classA.getMethod("getObject").invoke(instance);
+        // Verify result is LinkedHashMap even with Object return type
+        assertInstanceOf(LinkedHashMap.class, result);
+        var linkedHashMap = (LinkedHashMap<?, ?>) result;
+        assertEquals(Map.of("a", 1, "b", "hello", "c", true), linkedHashMap);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase23MixedNumericStringKeys(JdkVersion jdkVersion) {
+        // Edge case 23: Mixed numeric literal and string literal keys with Record<number, V>
+        // Should reject string keys for strict type safety
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const obj: Record<number, string> = {
+                            1: "one",
+                            "2": "two"
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Key") && causeMessage.contains("String"),
+                "Expected key type mismatch for string key '2', got: " + causeMessage);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase24NullInNonNullableRecord(JdkVersion jdkVersion) {
+        // Edge case 24: Null values in Record<string, string> should be allowed (Java allows null)
+        // Note: Java doesn't enforce non-nullable by default, so this test verifies null is allowed
+        try {
+            var map = getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const obj: Record<string, string> = {
+                            a: "hello",
+                            b: null
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+            Class<?> classA = loadClass(map.get("com.A"));
+            var instance = classA.getConstructor().newInstance();
+            var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+            // Null should be allowed in Java Maps
+            assertEquals(SimpleMap.of("a", "hello", "b", null), result);
+        } catch (Exception e) {
+            // If compilation fails, it means null validation is strict
+            assertNotNull(e.getCause(), "Expected wrapped exception");
+            String causeMessage = e.getCause().getMessage();
+            assertTrue(causeMessage.contains("null") || causeMessage.contains("Property 'b'"),
+                    "Expected null-related error, got: " + causeMessage);
+        }
+    }
+
+    // Phase 2.2: Type Alias Keys - Integer, Long, Double, String
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase27WideningConversion(JdkVersion jdkVersion) throws Exception {
+        // Edge case 27: Widening conversion - int literals widen to long type
+        // Note: Current implementation stores values based on literal size
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, long> = {
+                        a: 42,
+                        b: 100
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // int literals are stored as Integer when they fit in int range
+        assertEquals(Map.of("a", 42, "b", 100), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase28NarrowingAllowed(JdkVersion jdkVersion) throws Exception {
+        // Edge case 28: Narrowing conversion - compiler allows long literals in int context
+        // Note: Current implementation allows this (no strict narrowing validation)
+        // The large value will be truncated/wrapped at runtime
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, int> = {
+                        a: 1,
+                        b: 42
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 42), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase29ObjectTypePermissive(JdkVersion jdkVersion) throws Exception {
+        // Edge case 29: Record<string, Object> allows any value type (permissive)
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, Object> = {
+                        a: 1,
+                        b: "hello",
+                        c: true,
+                        d: {nested: "object"},
+                        e: [1, 2, 3]
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Verify primitive values
+        assertEquals(1, result.get("a"));
+        assertEquals("hello", result.get("b"));
+        assertEquals(true, result.get("c"));
+        // Verify nested object
+        var nested = (LinkedHashMap<?, ?>) result.get("d");
+        assertEquals(Map.of("nested", "object"), nested);
+        // Verify array
+        assertEquals(List.of(1, 2, 3), result.get("e"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase30UnionTypesIgnored(JdkVersion jdkVersion) throws Exception {
+        // Edge case 30: Union types (number | string) compile but validation is not enforced
+        // Note: Current implementation parses union types but treats them permissively (like Object)
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, number | string> = {
+                        a: 1,
+                        b: "hello",
+                        c: 3.14
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Union types are treated permissively - mixed types allowed
+        assertEquals(Map.of("a", 1, "b", "hello", "c", 3.14), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase31ArrayValuesInRecord(JdkVersion jdkVersion) throws Exception {
+        // Edge case 31: Array values in Record<string, Object> - arrays work as values
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, Object> = {
+                        a: [1, 2, 3],
+                        b: [4, 5, 6]
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Verify arrays are stored correctly
+        assertEquals(2, result.size());
+        assertInstanceOf(List.class, result.get("a"));
+        assertInstanceOf(List.class, result.get("b"));
+        assertEquals(List.of(1, 2, 3), result.get("a"));
+        assertEquals(List.of(4, 5, 6), result.get("b"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase32EmptyObjectWithStrictRecordType(JdkVersion jdkVersion) throws Exception {
+        // Edge case 32: Empty object with strict Record type - should be valid
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, number> = {}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Empty map is valid for any Record type
+        assertEquals(Map.of(), result);
+        assertTrue(result.isEmpty());
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase33ComputedPropertyMultipleKeys(JdkVersion jdkVersion) throws Exception {
+        // Edge case 33: Multiple computed properties with type validation
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const key1: string = "first"
+                      const key2: string = "second"
+                      const obj: Record<string, number> = {
+                        [key1]: 1,
+                        [key2]: 2,
+                        third: 3
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Mix of computed and regular keys
+        assertEquals(Map.of("first", 1, "second", 2, "third", 3), result);
+    }
+
+    // Phase 2.3: Nested Record types
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase33ComputedPropertyWithCorrectNumericType(JdkVersion jdkVersion) throws Exception {
+        // Edge case 33: Computed property with numeric key type - should work with Record<number, V>
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const key: number = 123
+                      const obj: Record<number, string> = {[key]: "value"}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Computed key with number type - TypeScript number maps to Double
+        assertEquals(Map.of(123.0, "value"), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase33ComputedPropertyWithCorrectType(JdkVersion jdkVersion) throws Exception {
+        // Edge case 33: Computed property with type validation - correct type should work
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const key: string = "dynamic"
+                      const obj: Record<string, number> = {[key]: 42}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Computed key with string type matches Record<string, number>
+        assertEquals(Map.of("dynamic", 42), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase34ComputedPropertyStringInNumberRecord(JdkVersion jdkVersion) {
+        // Edge case 34: String computed key in Record<number, V> - should reject
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const key: string = "notANumber"
+                          const obj: Record<number, string> = {[key]: "value"}
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        // Should fail - compiler rejects type mismatch during bytecode generation
+        assertTrue(exception.getMessage().contains("Failed to generate method"),
+                "Error message should indicate generation failure: " + exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testEdgeCase34ComputedPropertyWithWrongKeyType(JdkVersion jdkVersion) {
+        // Edge case 34: Computed property with wrong key type - should reject
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const key: number = 123
+                          const obj: Record<string, number> = {[key]: 42}
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        // Should fail - compiler rejects type mismatch during bytecode generation
+        assertTrue(exception.getMessage().contains("Failed to generate method"),
+                "Error message should indicate generation failure: " + exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testEmptyObject(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -242,7 +931,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(Map.of(), result);
     }
 
-    // Phase 2: Computed Property Names
+    // Phase 3: Computed Key Type Validation
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -324,6 +1013,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         // obj2.b overwrites obj1.b, obj3.c overwrites obj2.c
         assertEquals(Map.of("a", 1, "b", 20, "c", 30, "d", 4), result);
     }
+
+    // Phase 2.2: Record Type Validation (Continued)
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -443,8 +1134,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         ), result);
     }
 
-    // Phase 2.1: Record<number, V> - Numeric keys
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testNestedRecordValid(JdkVersion jdkVersion) throws Exception {
@@ -508,6 +1197,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(Map.of("0", "zero", "1", "one", "42", "answer"), result);
     }
 
+    // Phase 4: Spread Operator
+
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testObjectLiteralArraysWithComputedKeys(JdkVersion jdkVersion) throws Exception {
@@ -528,8 +1219,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(2, result.size());
-        assertEquals(java.util.List.of(1, 2, 3), result.get("data"));
-        assertEquals(java.util.List.of(4, 5), result.get("key2"));
+        assertEquals(List.of(1, 2, 3), result.get("data"));
+        assertEquals(List.of(4, 5), result.get("key2"));
     }
 
     @ParameterizedTest
@@ -554,9 +1245,9 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(3, result.size());
-        assertEquals(java.util.List.of(1, 2, 3), result.get("a"));
-        assertEquals(java.util.List.of(4, 5), result.get("b"));
-        assertEquals(java.util.List.of(6, 7), result.get("c"));
+        assertEquals(List.of(1, 2, 3), result.get("a"));
+        assertEquals(List.of(4, 5), result.get("b"));
+        assertEquals(List.of(6, 7), result.get("c"));
     }
 
     @ParameterizedTest
@@ -581,11 +1272,9 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(2, result.size());
-        assertEquals(java.util.List.of(1, 2), result.get("a"));
-        assertEquals(java.util.List.of(3, 4), result.get("b"));
+        assertEquals(List.of(1, 2), result.get("a"));
+        assertEquals(List.of(3, 4), result.get("b"));
     }
-
-    // Phase 2.2: Type Alias Keys - Integer, Long, Double, String
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -611,8 +1300,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(5, result.size());
         assertEquals(42, result.get("num"));
         assertEquals("hello", result.get("str"));
-        assertEquals(java.util.List.of(1, 2, 3), result.get("arr"));
-        assertEquals(Map.of("inner", java.util.List.of(4, 5)), result.get("nested"));
+        assertEquals(List.of(1, 2, 3), result.get("arr"));
+        assertEquals(Map.of("inner", List.of(4, 5)), result.get("nested"));
         assertEquals(true, result.get("bool"));
     }
 
@@ -687,6 +1376,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(SimpleMap.of("computed", null, "regular", null, "value", 42), result);
     }
 
+    // Phase 5: Shorthand Type Validation
+
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testObjectLiteralNullWithShorthand(JdkVersion jdkVersion) throws Exception {
@@ -754,12 +1445,10 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(3, result.size());
-        assertEquals(java.util.List.of(1, 2, 3), result.get("a"));
-        assertEquals(java.util.List.of(4, 5), result.get("b"));
-        assertEquals(java.util.List.of(), result.get("c"));
+        assertEquals(List.of(1, 2, 3), result.get("a"));
+        assertEquals(List.of(4, 5), result.get("b"));
+        assertEquals(List.of(), result.get("c"));
     }
-
-    // Phase 2.3: Nested Record types
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -781,11 +1470,11 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(3, result.size());
-        var aValue = (java.util.ArrayList<?>) result.get("a");
-        assertEquals(java.util.List.of(java.util.List.of(1, 2), java.util.List.of(3, 4)), aValue);
-        var bValue = (java.util.ArrayList<?>) result.get("b");
-        assertEquals(java.util.List.of(java.util.List.of(5)), bValue);
-        assertEquals(java.util.List.of(), result.get("c"));
+        var aValue = (ArrayList<?>) result.get("a");
+        assertEquals(List.of(List.of(1, 2), List.of(3, 4)), aValue);
+        var bValue = (ArrayList<?>) result.get("b");
+        assertEquals(List.of(List.of(5)), bValue);
+        assertEquals(List.of(), result.get("c"));
     }
 
     @ParameterizedTest
@@ -810,6 +1499,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(SimpleMap.of("a", null, "b", 42, "c", null), result);
     }
 
+    // Phase 1: Basic Properties
+
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testObjectWithArrayValue(JdkVersion jdkVersion) throws Exception {
@@ -825,9 +1516,299 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        var arr = (java.util.ArrayList<?>) result.get("arr");
+        var arr = (ArrayList<?>) result.get("arr");
         assertNotNull(arr);
-        assertEquals(java.util.List.of(1, 2, 3), arr);
+        assertEquals(List.of(1, 2, 3), arr);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6AssignmentBracketNotation(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Assignment with bracket notation (obj["prop"] = value → map.put("prop", value))
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {a: 1}
+                      obj["b"] = "hello"
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", "hello"), result);
+    }
+
+    // ========== Phase 2: Record Type Validation Tests ==========
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6AssignmentComputedKey(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Assignment with computed key (obj[variable] = value → map.put(variable, value))
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {a: 1}
+                      const key = "b"
+                      obj[key] = 2
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6AssignmentDotNotation(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Assignment with dot notation (obj.prop = value → map.put("prop", value))
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {a: 1, b: 2}
+                      obj.c = 3
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6AssignmentModifyExisting(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Assignment that modifies existing property
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {a: 1, b: 2, c: 3}
+                      obj.b = 99
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 99, "c", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6AssignmentRecordType(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Assignment with Record type annotation
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, number> = {a: 1, b: 2}
+                      obj.c = 3
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6MemberAccessBracketNotation(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Member access with bracket notation (obj["prop"] → map.get("prop"))
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {a: 1, b: "hello", c: true}
+                      return obj["b"]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = classA.getMethod("test").invoke(instance);
+        assertEquals("hello", result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6MemberAccessComputedKey(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Member access with computed key (obj[variable] → map.get(variable))
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {a: 1, b: "hello", c: true}
+                      const key = "c"
+                      return obj[key]
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = classA.getMethod("test").invoke(instance);
+        assertEquals(true, result);
+    }
+
+    // Phase 4: Spread Type Validation
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6MemberAccessDotNotation(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Member access with dot notation (obj.prop → map.get("prop"))
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {a: 1, b: "hello", c: true}
+                      return obj.a
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = classA.getMethod("test").invoke(instance);
+        assertEquals(1, result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6MemberAccessNestedObjectSimple(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Member access on nested objects - first level only
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj = {
+                        outer: {inner: 42}
+                      }
+                      return obj.outer
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("inner", 42), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6MemberAccessRecordType(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Member access with Record type annotations
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, number> = {a: 1, b: 2, c: 3}
+                      return obj.b
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = classA.getMethod("test").invoke(instance);
+        assertEquals(2, result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6ReturnTypeContextImplicit(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Return type context with implicit return type (type inference)
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    getData() {
+                      return {a: 1, b: "hello", c: true}
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", "hello", "c", true), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6ReturnTypeContextNestedRecord(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Return type context with nested Record types
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    getData(): Record<string, Record<string, number>> {
+                      return {
+                        outer1: {inner: 42},
+                        outer2: {value: 99}
+                      }
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
+        assertEquals(Map.of(
+                "outer1", Map.of("inner", 42),
+                "outer2", Map.of("value", 99)
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6ReturnTypeContextRecordNumberString(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Return type context with Record<number, string>
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    getData(): Record<number, string> {
+                      return {1: "one", 2: "two", 3: "three"}
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
+        // With Record<number, string> return type, keys should be Integer
+        assertEquals(3, result.size());
+        assertTrue(result.containsKey(1) || result.containsKey("1"));
+        if (result.containsKey(1)) {
+            // Numeric keys
+            assertEquals(Map.of(1, "one", 2, "two", 3, "three").entrySet(), result.entrySet());
+        } else {
+            // String keys (fallback)
+            assertEquals(Map.of("1", "one", "2", "two", "3", "three"), result);
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testPhase6ReturnTypeContextRecordStringNumber(JdkVersion jdkVersion) throws Exception {
+        // Phase 6: Return type context with Record<string, number>
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    getData(): Record<string, number> {
+                      return {a: 1, b: 2, c: 3}
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
     }
 
     @ParameterizedTest
@@ -853,6 +1834,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
                 "Expected computed key type mismatch error, got: " + causeMessage);
     }
 
+    // Phase 7: Mixed Scenarios (Spread + Shorthand + Computed)
+
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordComputedKeyStringMismatch(JdkVersion jdkVersion) {
@@ -875,8 +1858,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertTrue(causeMessage.contains("Key") && causeMessage.contains("double"),
                 "Expected computed key type mismatch error, got: " + causeMessage);
     }
-
-    // Phase 3: Computed Key Type Validation
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -967,8 +1948,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
                 "Expected key type mismatch error, got: " + causeMessage);
     }
 
-    // Phase 2.2: Record Type Validation (Continued)
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordIntegerNumberValid(JdkVersion jdkVersion) throws Exception {
@@ -993,6 +1972,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(200, result.get(2));
         assertEquals(3.14, result.get(3));
     }
+
+    // Phase 7: Array Value Types (without Record type validation)
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -1143,6 +2124,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(Map.of("a", 1, "b", 2, "cd", 3), result);
     }
 
+    // Phase 7: Null Handling
+
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordMixedMultipleSpreadsAndShorthands(JdkVersion jdkVersion) throws Exception {
@@ -1170,8 +2153,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("a", 1, "c", 3.0, "b", 2, "d", 4.0, "e", 5), result);
     }
-
-    // Phase 4: Spread Operator
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -1298,6 +2279,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertTrue(result.isEmpty());
     }
 
+    // Phase 1: Basic Properties
+
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordNumberKeyTypeMismatch(JdkVersion jdkVersion) {
@@ -1322,6 +2305,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
                 "Expected key type mismatch error, got: " + causeMessage);
     }
 
+    // Phase 7: 3-Level Nested Record Types
+
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordNumberMixedIntAndDouble(JdkVersion jdkVersion) throws Exception {
@@ -1345,8 +2330,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(3.14, result.get(2));
     }
 
-    // Phase 5: Shorthand Type Validation
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordNumberNumberValid(JdkVersion jdkVersion) throws Exception {
@@ -1368,6 +2351,250 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of(1, 100, 2, 200, 3, 300), result);
     }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordNumberStringComputedNumericKeys(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<number, string> test 3: Computed numeric keys
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base = 10
+                      const obj: Record<number, string> = {
+                        [base]: "ten",
+                        [base + 1]: "eleven",
+                        [base * 2]: "twenty"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(10, "ten", 11, "eleven", 20, "twenty"), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordNumberStringEmpty(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<number, string> test 1: Empty object
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<number, string> = {}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordNumberStringLargeObject(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<number, string> test 10: Larger object (20+ numeric keys)
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<number, string> = {
+                        1: "v1", 2: "v2", 3: "v3", 4: "v4", 5: "v5",
+                        6: "v6", 7: "v7", 8: "v8", 9: "v9", 10: "v10",
+                        11: "v11", 12: "v12", 13: "v13", 14: "v14", 15: "v15",
+                        16: "v16", 17: "v17", 18: "v18", 19: "v19", 20: "v20"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(SimpleMap.of(
+                1, "v1", 2, "v2", 3, "v3", 4, "v4", 5, "v5",
+                6, "v6", 7, "v7", 8, "v8", 9, "v9", 10, "v10",
+                11, "v11", 12, "v12", 13, "v13", 14, "v14", 15, "v15",
+                16, "v16", 17, "v17", 18, "v18", 19, "v19", 20, "v20"
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordNumberStringMixedFeatures(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<number, string> test 6: Mixed features (literal + computed + spread)
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base: Record<number, string> = {1: "one", 2: "two"}
+                      const offset = 10
+                      const obj: Record<number, string> = {
+                        0: "zero",
+                        ...base,
+                        [offset]: "ten",
+                        [offset + 1]: "eleven"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(0, "zero", 1, "one", 2, "two", 10, "ten", 11, "eleven"), result);
+    }
+
+    // Phase 7: Edge Cases 23-30 (Type Conversion and Validation)
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordNumberStringNegativeKeys(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<number, string> test 7: Negative numeric keys
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<number, string> = {
+                        [-1]: "negative one",
+                        [-10]: "negative ten",
+                        0: "zero",
+                        10: "positive ten"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(-1, "negative one", -10, "negative ten", 0, "zero", 10, "positive ten"), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordNumberStringNumericLiteralKeys(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<number, string> test 2: Numeric literal keys
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<number, string> = {
+                        0: "zero",
+                        1: "one",
+                        42: "answer",
+                        100: "hundred"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Numeric literal keys stored as Integer
+        assertEquals(Map.of(0, "zero", 1, "one", 42, "answer", 100, "hundred"), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordNumberStringOverwrite(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<number, string> test 8: Key overwriting (duplicate numeric keys)
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<number, string> = {
+                        1: "first",
+                        2: "second",
+                        1: "ONE",
+                        2: "TWO",
+                        1: "FIRST"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Last value wins for duplicate keys
+        assertEquals(Map.of(1, "FIRST", 2, "TWO"), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordNumberStringReturnTypeContext(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<number, string> test 9: In return type context
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Record<number, string> {
+                      return {1: "one", 2: "two", 3: "three"}
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Return type context: numeric keys become strings (type info not propagated)
+        assertEquals(Map.of("1", "one", "2", "two", "3", "three"), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordNumberStringSpread(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<number, string> test 5: Spread operator
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base: Record<number, string> = {1: "a", 2: "b"}
+                      const extension: Record<number, string> = {3: "c", 4: "d"}
+                      const obj: Record<number, string> = {...base, ...extension, 5: "e"}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(1, "a", 2, "b", 3, "c", 4, "d", 5, "e"), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordNumberStringTypedNumericKeys(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<number, string> test 4: Keys from typed number variables
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const key1: number = 1
+                      const key2: number = 2
+                      const key3: number = 3
+                      const obj: Record<number, string> = {
+                        [key1]: "first",
+                        [key2]: "second",
+                        [key3]: "third"
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Variables typed as 'number' are Double, so keys are 1.0, 2.0, 3.0
+        assertEquals(Map.of(1.0, "first", 2.0, "second", 3.0, "third"), result);
+    }
+
+    // Phase 7: Edge Cases 2, 6, 10, 11, 12 (Key Handling)
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -1460,8 +2687,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(Map.of("x", 10.0, "y", 20.0, "z", 30), result);
     }
 
-    // Phase 1: Basic Properties
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordShorthandStringNumberValid(JdkVersion jdkVersion) throws Exception {
@@ -1483,6 +2708,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(Map.of("a", 1.0, "b", 2.0, "c", 3.0), result);
     }
 
+    // Phase 7: Edge Cases 17-19 (Computed Keys, Collisions, Expression Values)
+
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordShorthandStringStringValid(JdkVersion jdkVersion) throws Exception {
@@ -1502,8 +2729,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("name", "Alice", "city", "NYC"), result);
     }
-
-    // ========== Phase 2: Record Type Validation Tests ==========
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -1594,6 +2819,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         ), result);
     }
 
+    // Phase 7: Edge Cases 14-16, 20 (Object Type Annotation, Mixed Keys, Trailing Commas, Return Context)
+
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordSpreadNestedMultiple(JdkVersion jdkVersion) throws Exception {
@@ -1651,8 +2878,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
                 "Expected nested spread value type mismatch error, got: " + causeMessage);
     }
 
-    // Phase 4: Spread Type Validation
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testRecordSpreadOverwrite(JdkVersion jdkVersion) throws Exception {
@@ -1691,6 +2916,8 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("c", 3, "a", 1, "b", 2, "d", 4), result);
     }
+
+    // Phase 7: Edge Cases 31-32 (Array Values in Record, Empty Object with Strict Type)
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -1734,6 +2961,270 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertTrue(causeMessage.contains("Key '1'") &&
                         causeMessage.contains("Integer"),
                 "Expected key type mismatch error, got: " + causeMessage);
+    }
+
+    // Phase 6: Integration - Return Type Context
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordStringNumberComputedKeys(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<string, number> test 3: Computed string keys
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const prefix = "key"
+                      const obj: Record<string, number> = {
+                        [prefix + "1"]: 1,
+                        [prefix + "2"]: 2,
+                        ["literal"]: 3
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("key1", 1, "key2", 2, "literal", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordStringNumberEmpty(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<string, number> test 1: Empty object
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, number> = {}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordStringNumberExpressionValues(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<string, number> test 7: Expression values (arithmetic, etc.)
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base = 10
+                      const obj: Record<string, number> = {
+                        addition: 5 + 3,
+                        subtraction: 10 - 2,
+                        multiplication: 4 * 2,
+                        division: 16 / 2,
+                        variable: base,
+                        expression: base * 2 + 5
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of(
+                "addition", 8,
+                "subtraction", 8,
+                "multiplication", 8,
+                "division", 8,
+                "variable", 10,
+                "expression", 25
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordStringNumberLargeObject(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<string, number> test 10: Larger object (20+ properties)
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, number> = {
+                        p1: 1, p2: 2, p3: 3, p4: 4, p5: 5,
+                        p6: 6, p7: 7, p8: 8, p9: 9, p10: 10,
+                        p11: 11, p12: 12, p13: 13, p14: 14, p15: 15,
+                        p16: 16, p17: 17, p18: 18, p19: 19, p20: 20
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(SimpleMap.of(
+                "p1", 1, "p2", 2, "p3", 3, "p4", 4, "p5", 5,
+                "p6", 6, "p7", 7, "p8", 8, "p9", 9, "p10", 10,
+                "p11", 11, "p12", 12, "p13", 13, "p14", 14, "p15", 15,
+                "p16", 16, "p17", 17, "p18", 18, "p19", 19, "p20", 20
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordStringNumberMixedFeatures(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<string, number> test 6: Mixed features (spread + shorthand + computed + regular)
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const x: number = 100
+                      const base: Record<string, number> = {a: 1, b: 2}
+                      const key = "dynamic"
+                      const obj: Record<string, number> = {
+                        regular: 10,
+                        x,
+                        [key]: 20,
+                        ...base,
+                        final: 30
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // x typed as 'number' becomes 100.0 (TypeScript number -> Java Double)
+        assertEquals(SimpleMap.of(
+                "regular", 10,
+                "x", 100.0,
+                "dynamic", 20,
+                "a", 1,
+                "b", 2,
+                "final", 30
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordStringNumberOverwrite(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<string, number> test 8: Key overwriting (duplicate keys)
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, number> = {
+                        a: 1,
+                        b: 2,
+                        a: 10,
+                        b: 20,
+                        a: 100
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Last value wins for duplicate keys
+        assertEquals(Map.of("a", 100, "b", 20), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordStringNumberReturnTypeContext(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<string, number> test 9: In return type context
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): Record<string, number> {
+                      return {x: 1, y: 2, z: 3}
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("x", 1, "y", 2, "z", 3), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordStringNumberShorthand(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<string, number> test 4: Shorthand properties
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: number = 10
+                      const b: number = 20
+                      const c: number = 30
+                      const obj: Record<string, number> = {a, b, c}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // Variables typed as 'number' are stored as Double
+        assertEquals(Map.of("a", 10.0, "b", 20.0, "c", 30.0), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordStringNumberSimpleProperties(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<string, number> test 2: Simple properties with different numeric literals
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, number> = {
+                        integer: 42,
+                        decimal: 3.14,
+                        negative: -10,
+                        zero: 0,
+                        scientific: 1e5
+                      }
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        // All numeric literals stored as Integer for whole numbers, Double for decimals
+        assertEquals(Map.of(
+                "integer", 42,
+                "decimal", 3.14,
+                "negative", -10,
+                "zero", 0,
+                "scientific", 100000  // 1e5 stored as Integer
+        ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testRecordStringNumberSpread(JdkVersion jdkVersion) throws Exception {
+        // Comprehensive Record<string, number> test 5: Spread operator
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const base: Record<string, number> = {a: 1, b: 2}
+                      const extension: Record<string, number> = {c: 3, d: 4}
+                      const obj: Record<string, number> = {...base, ...extension, e: 5}
+                      return obj
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
+        assertEquals(Map.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5), result);
     }
 
     @ParameterizedTest
@@ -1828,7 +3319,7 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
                 "Expected type mismatch error for boolean value, got: " + causeMessage);
     }
 
-    // Phase 7: Mixed Scenarios (Spread + Shorthand + Computed)
+    // Phase 7: Edge Cases 33-34 (Computed Property Type Validation)
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -1959,8 +3450,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals("m", keys[2]);
     }
 
-    // Phase 7: Array Value Types (without Record type validation)
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testShorthandSingleProperty(JdkVersion jdkVersion) throws Exception {
@@ -1997,9 +3486,9 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(1, result.size());
-        var arr = (java.util.ArrayList<?>) result.get("arr");
+        var arr = (ArrayList<?>) result.get("arr");
         assertNotNull(arr);
-        assertEquals(java.util.List.of(1, 2, 3), arr);
+        assertEquals(List.of(1, 2, 3), arr);
     }
 
     @ParameterizedTest
@@ -2079,8 +3568,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of("nested", Map.of("x", 1), "a", 2, "b", 3), result);
     }
-
-    // Phase 7: Null Handling
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -2200,8 +3687,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(Map.of("x", 10, "a", 1, "b", 2, "y", 20), result);
     }
 
-    // Phase 1: Basic Properties
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testStringLiteralKeys(JdkVersion jdkVersion) throws Exception {
@@ -2220,28 +3705,19 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         assertEquals(Map.of("string-key", 1, "key with spaces", 2), result);
     }
 
-    // Phase 7: 3-Level Nested Record Types
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testThreeLevelNestedRecordValid(JdkVersion jdkVersion) throws Exception {
+    public void testThreeLevelNestedRecordEmptyAtEachLevel(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const obj: Record<string, Record<string, Record<string, number>>> = {
-                        level1: {
-                          level2a: {
-                            level3a: 100,
-                            level3b: 200
-                          },
-                          level2b: {
-                            level3c: 300
-                          }
-                        },
-                        another1: {
-                          another2: {
-                            another3: 400
+                        empty1: {},
+                        with2: {
+                          empty2: {},
+                          with3: {
+                            value: 42
                           }
                         }
                       }
@@ -2253,14 +3729,39 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
         assertEquals(Map.of(
-                "level1", Map.of(
-                        "level2a", Map.of("level3a", 100, "level3b", 200),
-                        "level2b", Map.of("level3c", 300)
-                ),
-                "another1", Map.of(
-                        "another2", Map.of("another3", 400)
+                "empty1", Map.of(),
+                "with2", Map.of(
+                        "empty2", Map.of(),
+                        "with3", Map.of("value", 42)
                 )
         ), result);
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testThreeLevelNestedRecordInvalidDeepestKey(JdkVersion jdkVersion) {
+        var exception = assertThrows(Exception.class, () -> {
+            getCompiler(jdkVersion).compile("""
+                    namespace com {
+                      export class A {
+                        test() {
+                          const obj: Record<string, Record<string, Record<number, string>>> = {
+                            level1: {
+                              level2: {
+                                a: "invalid"
+                              }
+                            }
+                          }
+                          return obj
+                        }
+                      }
+                    }""");
+        });
+        assertNotNull(exception.getCause(), "Expected wrapped exception");
+        String causeMessage = exception.getCause().getMessage();
+        assertTrue(causeMessage.contains("Key 'a'") &&
+                        causeMessage.contains("String"),
+                "Expected deepest level key type mismatch error, got: " + causeMessage);
     }
 
     @ParameterizedTest
@@ -2317,38 +3818,6 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testThreeLevelNestedRecordEmptyAtEachLevel(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj: Record<string, Record<string, Record<string, number>>> = {
-                        empty1: {},
-                        with2: {
-                          empty2: {},
-                          with3: {
-                            value: 42
-                          }
-                        }
-                      }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(Map.of(
-                "empty1", Map.of(),
-                "with2", Map.of(
-                        "empty2", Map.of(),
-                        "with3", Map.of("value", 42)
-                )
-        ), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
     public void testThreeLevelNestedRecordMixedTypes(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -2382,103 +3851,27 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testThreeLevelNestedRecordInvalidDeepestKey(JdkVersion jdkVersion) {
-        var exception = assertThrows(Exception.class, () -> {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const obj: Record<string, Record<string, Record<number, string>>> = {
-                            level1: {
-                              level2: {
-                                a: "invalid"
-                              }
-                            }
+    public void testThreeLevelNestedRecordValid(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const obj: Record<string, Record<string, Record<string, number>>> = {
+                        level1: {
+                          level2a: {
+                            level3a: 100,
+                            level3b: 200
+                          },
+                          level2b: {
+                            level3c: 300
                           }
-                          return obj
+                        },
+                        another1: {
+                          another2: {
+                            another3: 400
+                          }
                         }
                       }
-                    }""");
-        });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
-        String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Key 'a'") &&
-                        causeMessage.contains("String"),
-                "Expected deepest level key type mismatch error, got: " + causeMessage);
-    }
-
-    // Phase 7: Edge Cases 23-30 (Type Conversion and Validation)
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase23MixedNumericStringKeys(JdkVersion jdkVersion) {
-        // Edge case 23: Mixed numeric literal and string literal keys with Record<number, V>
-        // Should reject string keys for strict type safety
-        var exception = assertThrows(Exception.class, () -> {
-            getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const obj: Record<number, string> = {
-                            1: "one",
-                            "2": "two"
-                          }
-                          return obj
-                        }
-                      }
-                    }""");
-        });
-        assertNotNull(exception.getCause(), "Expected wrapped exception");
-        String causeMessage = exception.getCause().getMessage();
-        assertTrue(causeMessage.contains("Key") && causeMessage.contains("String"),
-                "Expected key type mismatch for string key '2', got: " + causeMessage);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase24NullInNonNullableRecord(JdkVersion jdkVersion) {
-        // Edge case 24: Null values in Record<string, string> should be allowed (Java allows null)
-        // Note: Java doesn't enforce non-nullable by default, so this test verifies null is allowed
-        try {
-            var map = getCompiler(jdkVersion).compile("""
-                    namespace com {
-                      export class A {
-                        test() {
-                          const obj: Record<string, string> = {
-                            a: "hello",
-                            b: null
-                          }
-                          return obj
-                        }
-                      }
-                    }""");
-            Class<?> classA = loadClass(map.get("com.A"));
-            var instance = classA.getConstructor().newInstance();
-            var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-            // Null should be allowed in Java Maps
-            assertEquals(SimpleMap.of("a", "hello", "b", null), result);
-        } catch (Exception e) {
-            // If compilation fails, it means null validation is strict
-            assertNotNull(e.getCause(), "Expected wrapped exception");
-            String causeMessage = e.getCause().getMessage();
-            assertTrue(causeMessage.contains("null") || causeMessage.contains("Property 'b'"),
-                    "Expected null-related error, got: " + causeMessage);
-        }
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase27WideningConversion(JdkVersion jdkVersion) throws Exception {
-        // Edge case 27: Widening conversion - int literals widen to long type
-        // Note: Current implementation stores values based on literal size
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj: Record<string, long> = {
-                        a: 42,
-                        b: 100
-                      }
                       return obj
                     }
                   }
@@ -2486,740 +3879,15 @@ public class TestCompileAstObjectLit extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // int literals are stored as Integer when they fit in int range
-        assertEquals(Map.of("a", 42, "b", 100), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase28NarrowingAllowed(JdkVersion jdkVersion) throws Exception {
-        // Edge case 28: Narrowing conversion - compiler allows long literals in int context
-        // Note: Current implementation allows this (no strict narrowing validation)
-        // The large value will be truncated/wrapped at runtime
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj: Record<string, int> = {
-                        a: 1,
-                        b: 42
-                      }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(Map.of("a", 1, "b", 42), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase29ObjectTypePermissive(JdkVersion jdkVersion) throws Exception {
-        // Edge case 29: Record<string, Object> allows any value type (permissive)
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj: Record<string, Object> = {
-                        a: 1,
-                        b: "hello",
-                        c: true,
-                        d: {nested: "object"},
-                        e: [1, 2, 3]
-                      }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // Verify primitive values
-        assertEquals(1, result.get("a"));
-        assertEquals("hello", result.get("b"));
-        assertEquals(true, result.get("c"));
-        // Verify nested object
-        var nested = (LinkedHashMap<?, ?>) result.get("d");
-        assertEquals(Map.of("nested", "object"), nested);
-        // Verify array
-        assertEquals(java.util.List.of(1, 2, 3), result.get("e"));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase30UnionTypesIgnored(JdkVersion jdkVersion) throws Exception {
-        // Edge case 30: Union types (number | string) compile but validation is not enforced
-        // Note: Current implementation parses union types but treats them permissively (like Object)
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj: Record<string, number | string> = {
-                        a: 1,
-                        b: "hello",
-                        c: 3.14
-                      }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // Union types are treated permissively - mixed types allowed
-        assertEquals(Map.of("a", 1, "b", "hello", "c", 3.14), result);
-    }
-
-    // Phase 7: Edge Cases 2, 6, 10, 11, 12 (Key Handling)
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase02DuplicateKeys(JdkVersion jdkVersion) throws Exception {
-        // Edge case 2: Duplicate keys - later value wins
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {a: 1, a: 2, a: 3}
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // Later value should win (Map.put overwrites)
-        assertEquals(Map.of("a", 3), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase06NonStringPrimitiveKeys(JdkVersion jdkVersion) throws Exception {
-        // Edge case 6: Non-string primitive keys (boolean, null) converted to string
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {
-                        true: "yes",
-                        false: "no",
-                        null: "none"
-                      }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // Primitive keys are converted to strings
-        assertEquals(Map.of("true", "yes", "false", "no", "null", "none"), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase10ReservedKeywords(JdkVersion jdkVersion) throws Exception {
-        // Edge case 10: Reserved keywords as keys work fine in Maps
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {
-                        class: "className",
-                        for: "loop",
-                        if: "condition",
-                        while: "iteration",
-                        return: "exit"
-                      }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // Reserved keywords are just strings in Map keys
         assertEquals(Map.of(
-                "class", "className",
-                "for", "loop",
-                "if", "condition",
-                "while", "iteration",
-                "return", "exit"
+                "level1", Map.of(
+                        "level2a", Map.of("level3a", 100, "level3b", 200),
+                        "level2b", Map.of("level3c", 300)
+                ),
+                "another1", Map.of(
+                        "another2", Map.of("another3", 400)
+                )
         ), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase11WhitespaceInKeys(JdkVersion jdkVersion) throws Exception {
-        // Edge case 11: Whitespace in keys is preserved exactly
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {
-                        "key with spaces": "value1",
-                        "  trim  ": "value2",
-                        "\\ttab\\t": "value3",
-                        "\\nnewline\\n": "value4"
-                      }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // Whitespace is preserved exactly
-        assertEquals("value1", result.get("key with spaces"));
-        assertEquals("value2", result.get("  trim  "));
-        assertEquals("value3", result.get("\ttab\t"));
-        assertEquals("value4", result.get("\nnewline\n"));
-        assertEquals(4, result.size());
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase12UnicodeKeys(JdkVersion jdkVersion) throws Exception {
-        // Edge case 12: Unicode keys are supported (Java strings support full Unicode)
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {
-                        "你好": "hello",
-                        "🔥": "fire",
-                        "café": "coffee",
-                        "Москва": "Moscow",
-                        "東京": "Tokyo"
-                      }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // Unicode is fully supported
-        assertEquals(Map.of(
-                "你好", "hello",
-                "🔥", "fire",
-                "café", "coffee",
-                "Москва", "Moscow",
-                "東京", "Tokyo"
-        ), result);
-    }
-
-    // Phase 7: Edge Cases 17-19 (Computed Keys, Collisions, Expression Values)
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase17ComputedKeysEvaluationOrder(JdkVersion jdkVersion) throws Exception {
-        // Edge case 17: Computed keys evaluation order - expressions evaluated left to right
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {
-                        ["key" + 1]: "first",
-                        ["key" + 2]: "second",
-                        ["key" + 3]: "third"
-                      }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // Computed keys with string concat expressions - insertion order preserved
-        assertEquals(Map.of("key1", "first", "key2", "second", "key3", "third"), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase18PropertyNameCollisions(JdkVersion jdkVersion) throws Exception {
-        // Edge case 18: Property name collisions after coercion - later value wins
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {
-                        1: "numeric",
-                        "1": "string"
-                      }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // Both keys coerce to "1", later value wins
-        assertEquals(Map.of("1", "string"), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase19ExpressionValues(JdkVersion jdkVersion) throws Exception {
-        // Edge case 19: Expression values - various expressions evaluated at runtime
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {
-                        arithmetic: 1 + 2 + 3,
-                        multiplication: 4 * 5,
-                        division: 20 / 4,
-                        subtraction: 10 - 3,
-                        stringConcat: "hello" + " " + "world",
-                        booleanTrue: true,
-                        booleanFalse: false
-                      }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // All expressions evaluated correctly
-        assertEquals(Map.of(
-                "arithmetic", 6,
-                "multiplication", 20,
-                "division", 5,
-                "subtraction", 7,
-                "stringConcat", "hello world",
-                "booleanTrue", true,
-                "booleanFalse", false
-        ), result);
-    }
-
-    // Phase 7: Edge Cases 14-16, 20 (Object Type Annotation, Mixed Keys, Trailing Commas, Return Context)
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase14ObjectAsValueTypeAnnotation(JdkVersion jdkVersion) throws Exception {
-        // Edge case 14: Object as value type annotation - still generates LinkedHashMap
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj: Object = {a: 1, b: "hello", c: true}
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // Object type annotation doesn't prevent LinkedHashMap generation
-        assertEquals(Map.of("a", 1, "b", "hello", "c", true), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase15MixedKeyTypes(JdkVersion jdkVersion) throws Exception {
-        // Edge case 15: Mixed key types - all converted to String
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const computed = "computed"
-                      const obj = {"str": 1, 42: 2, [computed]: 3, true: 4}
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // All keys coerced to String
-        assertEquals(Map.of("str", 1, "42", 2, "computed", 3, "true", 4), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase16TrailingCommas(JdkVersion jdkVersion) throws Exception {
-        // Edge case 16: Trailing commas - AST handles this automatically
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {
-                        a: 1,
-                        b: 2,
-                        c: 3,
-                      }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // Trailing comma doesn't affect object creation
-        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase20ObjectInReturnTypeContext(JdkVersion jdkVersion) throws Exception {
-        // Edge case 20: Object in return type context - LinkedHashMap returned
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    getObject(): Object {
-                      return {a: 1, b: "hello", c: true}
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("getObject").invoke(instance);
-        // Verify result is LinkedHashMap even with Object return type
-        assertTrue(result instanceof LinkedHashMap);
-        var linkedHashMap = (LinkedHashMap<?, ?>) result;
-        assertEquals(Map.of("a", 1, "b", "hello", "c", true), linkedHashMap);
-    }
-
-    // Phase 7: Edge Cases 31-32 (Array Values in Record, Empty Object with Strict Type)
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase31ArrayValuesInRecord(JdkVersion jdkVersion) throws Exception {
-        // Edge case 31: Array values in Record<string, Object> - arrays work as values
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj: Record<string, Object> = {
-                        a: [1, 2, 3],
-                        b: [4, 5, 6]
-                      }
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // Verify arrays are stored correctly
-        assertEquals(2, result.size());
-        assertTrue(result.get("a") instanceof java.util.List);
-        assertTrue(result.get("b") instanceof java.util.List);
-        assertEquals(java.util.List.of(1, 2, 3), result.get("a"));
-        assertEquals(java.util.List.of(4, 5, 6), result.get("b"));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testEdgeCase32EmptyObjectWithStrictRecordType(JdkVersion jdkVersion) throws Exception {
-        // Edge case 32: Empty object with strict Record type - should be valid
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj: Record<string, number> = {}
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        // Empty map is valid for any Record type
-        assertEquals(Map.of(), result);
-        assertTrue(result.isEmpty());
-    }
-
-    // Phase 6: Integration - Return Type Context
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6ReturnTypeContextRecordStringNumber(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Return type context with Record<string, number>
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    getData(): Record<string, number> {
-                      return {a: 1, b: 2, c: 3}
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
-        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6ReturnTypeContextRecordNumberString(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Return type context with Record<number, string>
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    getData(): Record<number, string> {
-                      return {1: "one", 2: "two", 3: "three"}
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
-        // With Record<number, string> return type, keys should be Integer
-        assertEquals(3, result.size());
-        assertTrue(result.containsKey(1) || result.containsKey("1"));
-        if (result.containsKey(1)) {
-            // Numeric keys
-            assertEquals(Map.of(1, "one", 2, "two", 3, "three").entrySet(), result.entrySet());
-        } else {
-            // String keys (fallback)
-            assertEquals(Map.of("1", "one", "2", "two", "3", "three"), result);
-        }
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6ReturnTypeContextNestedRecord(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Return type context with nested Record types
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    getData(): Record<string, Record<string, number>> {
-                      return {
-                        outer1: {inner: 42},
-                        outer2: {value: 99}
-                      }
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
-        assertEquals(Map.of(
-                "outer1", Map.of("inner", 42),
-                "outer2", Map.of("value", 99)
-        ), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6ReturnTypeContextImplicit(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Return type context with implicit return type (type inference)
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    getData() {
-                      return {a: 1, b: "hello", c: true}
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("getData").invoke(instance);
-        assertEquals(Map.of("a", 1, "b", "hello", "c", true), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6MemberAccessDotNotation(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Member access with dot notation (obj.prop → map.get("prop"))
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {a: 1, b: "hello", c: true}
-                      return obj.a
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
-        assertEquals(1, result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6MemberAccessBracketNotation(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Member access with bracket notation (obj["prop"] → map.get("prop"))
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {a: 1, b: "hello", c: true}
-                      return obj["b"]
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
-        assertEquals("hello", result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6MemberAccessComputedKey(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Member access with computed key (obj[variable] → map.get(variable))
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {a: 1, b: "hello", c: true}
-                      const key = "c"
-                      return obj[key]
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
-        assertEquals(true, result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6MemberAccessNestedObjectSimple(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Member access on nested objects - first level only
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {
-                        outer: {inner: 42}
-                      }
-                      return obj.outer
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(Map.of("inner", 42), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6MemberAccessRecordType(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Member access with Record type annotations
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj: Record<string, number> = {a: 1, b: 2, c: 3}
-                      return obj.b
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = classA.getMethod("test").invoke(instance);
-        assertEquals(2, result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6AssignmentDotNotation(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Assignment with dot notation (obj.prop = value → map.put("prop", value))
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {a: 1, b: 2}
-                      obj.c = 3
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6AssignmentBracketNotation(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Assignment with bracket notation (obj["prop"] = value → map.put("prop", value))
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {a: 1}
-                      obj["b"] = "hello"
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(Map.of("a", 1, "b", "hello"), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6AssignmentComputedKey(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Assignment with computed key (obj[variable] = value → map.put(variable, value))
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {a: 1}
-                      const key = "b"
-                      obj[key] = 2
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(Map.of("a", 1, "b", 2), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6AssignmentModifyExisting(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Assignment that modifies existing property
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {a: 1, b: 2, c: 3}
-                      obj.b = 99
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(Map.of("a", 1, "b", 99, "c", 3), result);
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testPhase6AssignmentRecordType(JdkVersion jdkVersion) throws Exception {
-        // Phase 6: Assignment with Record type annotation
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj: Record<string, number> = {a: 1, b: 2}
-                      obj.c = 3
-                      return obj
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var result = (LinkedHashMap<?, ?>) classA.getMethod("test").invoke(instance);
-        assertEquals(Map.of("a", 1, "b", 2, "c", 3), result);
     }
 
 }

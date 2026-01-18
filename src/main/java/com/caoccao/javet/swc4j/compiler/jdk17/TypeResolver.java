@@ -630,7 +630,6 @@ public final class TypeResolver {
     }
 
 
-
     /**
      * Check if a primitive type can be widened to another primitive type.
      * <p>

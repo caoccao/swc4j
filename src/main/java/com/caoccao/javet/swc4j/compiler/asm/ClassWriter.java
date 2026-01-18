@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026. caoccao.com Sam Cao
+ * Copyright (c) 2026-2026. caoccao.com Sam Cao
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.asm;
+package com.caoccao.javet.swc4j.compiler.asm;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;

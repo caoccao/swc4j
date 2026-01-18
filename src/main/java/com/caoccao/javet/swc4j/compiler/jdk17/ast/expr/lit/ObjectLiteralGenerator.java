@@ -16,8 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit;
 
-import com.caoccao.javet.swc4j.asm.ClassWriter;
-import com.caoccao.javet.swc4j.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
+import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstKeyValueProp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
@@ -221,7 +221,7 @@ public final class ObjectLiteralGenerator {
             StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
 
         // Phase 2.1: Check if we should generate primitive wrapper keys (not String)
-        boolean nonStringKeys = expectedKeyType != null && isPrimitiveKeyType(expectedKeyType);
+        boolean nonStringKeys = isPrimitiveKeyType(expectedKeyType);
 
         if (key instanceof Swc4jAstIdentName identName) {
             // Identifier key: {name: value} → "name"

@@ -16,8 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 
-import com.caoccao.javet.swc4j.asm.ClassWriter;
-import com.caoccao.javet.swc4j.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
+import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 
 import java.util.Set;
 

@@ -16,8 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
 
-import com.caoccao.javet.swc4j.asm.ClassWriter;
-import com.caoccao.javet.swc4j.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
+import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;

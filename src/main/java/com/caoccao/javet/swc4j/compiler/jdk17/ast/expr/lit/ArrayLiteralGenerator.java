@@ -16,8 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit;
 
-import com.caoccao.javet.swc4j.asm.ClassWriter;
-import com.caoccao.javet.swc4j.asm.CodeBuilder;
+import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
+import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
