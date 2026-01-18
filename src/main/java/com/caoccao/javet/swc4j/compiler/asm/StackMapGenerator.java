@@ -46,7 +46,6 @@ public class StackMapGenerator {
     private Map<Integer, Frame> computeFramesDataFlow() {
         Map<Integer, Frame> frames = new HashMap<>();
         Queue<WorkItem> workQueue = new LinkedList<>();
-        Set<Integer> visited = new HashSet<>();
 
         // Start with initial frame at offset 0
         Frame initialFrame = createInitialFrame();
@@ -57,16 +56,28 @@ public class StackMapGenerator {
             int pc = item.offset;
 
             if (pc >= bytecode.length) continue;
-            if (visited.contains(pc)) continue;
-            visited.add(pc);
 
-            // Save frame at this offset
-            frames.put(pc, item.frame.copy());
+            // Check if we already have a frame at this offset
+            Frame existingFrame = frames.get(pc);
+            if (existingFrame != null) {
+                // Merge frames - if already visited, merge and check if changed
+                Frame mergedFrame = mergeFrames(existingFrame, item.frame);
+                if (framesEqual(mergedFrame, existingFrame)) {
+                    continue; // No change, don't reprocess
+                }
+                frames.put(pc, mergedFrame);
+            } else {
+                // First visit - save the frame
+                frames.put(pc, item.frame.copy());
+            }
+
+            // Get the current frame at this offset for simulation
+            Frame currentFrame = frames.get(pc);
 
             // Execute instruction and get next offsets
             List<Integer> nextOffsets = getNextOffsets(pc);
             for (int nextPc : nextOffsets) {
-                Frame nextFrame = simulateInstruction(item.frame, pc);
+                Frame nextFrame = simulateInstruction(currentFrame, pc);
                 workQueue.add(new WorkItem(nextPc, nextFrame));
             }
         }
@@ -127,6 +138,13 @@ public class StackMapGenerator {
         return targets;
     }
 
+    /**
+     * Check if two frames are equal.
+     */
+    private boolean framesEqual(Frame frame1, Frame frame2) {
+        return frame1.locals.equals(frame2.locals) && frame1.stack.equals(frame2.stack);
+    }
+
     public List<ClassWriter.StackMapEntry> generate() {
         // Find branch targets
         Set<Integer> branchTargets = findBranchTargets();
@@ -163,6 +181,7 @@ public class StackMapGenerator {
     private int getInstructionSize(int pc, int opcode) {
         switch (opcode) {
             case 0x10:
+            case 0x12: // ldc (1 byte index)
             case 0x15:
             case 0x16:
             case 0x17:
@@ -175,6 +194,9 @@ public class StackMapGenerator {
             case 0x3A: // *store
                 return 2;
             case 0x11: // sipush
+            case 0x13: // ldc_w (2 byte index)
+            case 0x14: // ldc2_w (2 byte index)
+            case 0x84: // iinc (1 byte index + 1 byte const)
             case 0x99:
             case 0x9A:
             case 0x9B:
@@ -234,6 +256,54 @@ public class StackMapGenerator {
         return offsets;
     }
 
+    /**
+     * Merge two frames at a control flow merge point.
+     * Uses the common supertype for each slot.
+     */
+    private Frame mergeFrames(Frame frame1, Frame frame2) {
+        List<Integer> mergedLocals = new ArrayList<>();
+        List<Integer> mergedStack = new ArrayList<>();
+
+        // Merge locals
+        int maxLocals = Math.max(frame1.locals.size(), frame2.locals.size());
+        for (int i = 0; i < maxLocals; i++) {
+            int type1 = i < frame1.locals.size() ? frame1.locals.get(i) : TOP;
+            int type2 = i < frame2.locals.size() ? frame2.locals.get(i) : TOP;
+            mergedLocals.add(mergeTypes(type1, type2));
+        }
+
+        // Merge stack - must be same size for valid merge
+        int stackSize = Math.max(frame1.stack.size(), frame2.stack.size());
+        for (int i = 0; i < stackSize; i++) {
+            int type1 = i < frame1.stack.size() ? frame1.stack.get(i) : TOP;
+            int type2 = i < frame2.stack.size() ? frame2.stack.get(i) : TOP;
+            mergedStack.add(mergeTypes(type1, type2));
+        }
+
+        return new Frame(mergedLocals, mergedStack);
+    }
+
+    /**
+     * Merge two verification types into their common supertype.
+     */
+    private int mergeTypes(int type1, int type2) {
+        if (type1 == type2) {
+            return type1;
+        }
+        // TOP absorbs everything
+        if (type1 == TOP) return type2;
+        if (type2 == TOP) return type1;
+        // NULL merges with OBJECT to OBJECT
+        if (type1 == NULL && type2 == OBJECT) return OBJECT;
+        if (type1 == OBJECT && type2 == NULL) return OBJECT;
+        // Different primitives can't merge (shouldn't happen in valid bytecode)
+        // Default to OBJECT for reference type merging
+        if (type1 == NULL || type2 == NULL) return OBJECT;
+        if (type1 == OBJECT || type2 == OBJECT) return OBJECT;
+        // For incompatible primitives, return TOP (invalid state)
+        return TOP;
+    }
+
     private List<Integer> removeExplicitTops(List<Integer> types) {
         List<Integer> result = new ArrayList<>();
         for (int i = 0; i < types.size(); i++) {
@@ -270,6 +340,15 @@ public class StackMapGenerator {
             case 0x10:
             case 0x11: // bipush, sipush
                 stack.add(INTEGER);
+                break;
+            case 0x12: // ldc (String, int, float, Class, etc.)
+            case 0x13: // ldc_w (wide index version)
+                // Conservative: assume it's loading a reference type (String/Class)
+                stack.add(OBJECT);
+                break;
+            case 0x14: // ldc2_w (long or double)
+                // Assume double (most common in our tests)
+                stack.add(DOUBLE);
                 break;
 
             // Loads
@@ -401,6 +480,12 @@ public class StackMapGenerator {
                 }
                 break;
 
+            // iinc - increment local variable (doesn't affect stack)
+            case 0x84:
+                // iinc <index> <const> - just increments a local variable
+                // Stack is unchanged, local stays INTEGER type
+                break;
+
             // Conditional branches - pop operands
             case 0x99:
             case 0x9A:
@@ -430,23 +515,30 @@ public class StackMapGenerator {
             case 0xB6:
             case 0xB7:
             case 0xB8: // invoke*
-                stack.add(INTEGER); // Simplified: assume returns int
+                // Conservative: assume returns Object (works for boxing methods and most cases)
+                stack.add(OBJECT);
                 break;
 
             // Type conversions
             case 0x85: // i2l
+            case 0x8C: // f2l
+            case 0x8F: // d2l
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
                     stack.add(LONG);
                 }
                 break;
             case 0x86: // i2f
+            case 0x89: // l2f
+            case 0x90: // d2f
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
                     stack.add(FLOAT);
                 }
                 break;
             case 0x87: // i2d
+            case 0x8A: // l2d
+            case 0x8D: // f2d
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
                     stack.add(DOUBLE);

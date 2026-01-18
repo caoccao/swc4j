@@ -290,8 +290,8 @@ public class ClassWriter {
 
     private void writeVerificationType(DataOutputStream out, int type, String className) throws IOException {
         out.writeByte(type);
-        if (type == 7) { // OBJECT - needs constant pool index
-            int classIndex = constantPool.addClass(className);
+        if (type == 7) { // OBJECT - use java/lang/Object for compatibility with all reference types
+            int classIndex = constantPool.addClass("java/lang/Object");
             out.writeShort(classIndex);
         }
         // Other types (INTEGER, LONG, FLOAT, DOUBLE, etc.) don't need additional data

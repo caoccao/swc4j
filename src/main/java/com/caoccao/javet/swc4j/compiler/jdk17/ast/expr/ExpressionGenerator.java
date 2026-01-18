@@ -68,6 +68,8 @@ public final class ExpressionGenerator {
             UnaryExpressionGenerator.generate(code, cp, unaryExpr, returnTypeInfo, context, options);
         } else if (expr instanceof Swc4jAstUpdateExpr updateExpr) {
             UpdateExpressionGenerator.generate(code, cp, updateExpr, returnTypeInfo, context, options);
+        } else if (expr instanceof Swc4jAstCondExpr condExpr) {
+            ConditionalExpressionGenerator.generate(code, cp, condExpr, returnTypeInfo, context, options);
         } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
             ParenExpressionGenerator.generate(code, cp, parenExpr, returnTypeInfo, context, options, ExpressionGenerator::generate);
         }

@@ -149,6 +149,52 @@ public final class TypeResolver {
         return "Ljava/lang/Object;"; // Default
     }
 
+    /**
+     * Find the common type between two types for conditional expressions.
+     * Implements JVM type widening rules.
+     * <p>
+     * Note: For reference types, we conservatively return Object to ensure
+     * compatibility with StackMapTable verification, since the stack map
+     * generator cannot track precise reference types.
+     *
+     * @param type1 first type descriptor
+     * @param type2 second type descriptor
+     * @return common type that can represent both types
+     */
+    public static String findCommonType(String type1, String type2) {
+        // Handle null types (e.g., null literal)
+        if (type1 == null && type2 == null) {
+            return null;
+        }
+        if (type1 == null) {
+            // null with any type -> Object (for stackmap compatibility)
+            return "Ljava/lang/Object;";
+        }
+        if (type2 == null) {
+            // any type with null -> Object (for stackmap compatibility)
+            return "Ljava/lang/Object;";
+        }
+
+        // Same type - no conversion needed
+        if (type1.equals(type2)) {
+            // For primitives, keep the specific type
+            if (TypeConversionUtils.isPrimitiveType(type1)) {
+                return type1;
+            }
+            // For reference types, use Object for stackmap compatibility
+            return "Ljava/lang/Object;";
+        }
+
+        // Both primitives - use numeric widening
+        if (TypeConversionUtils.isPrimitiveType(type1) && TypeConversionUtils.isPrimitiveType(type2)) {
+            return getWidenedType(type1, type2);
+        }
+
+        // One primitive, one reference - result is Object
+        // (either boxing the primitive or finding common supertype)
+        return "Ljava/lang/Object;";
+    }
+
     private static String getPrimitiveType(String type) {
         return switch (type) {
             case "Ljava/lang/Boolean;" -> "Z";
@@ -286,7 +332,12 @@ public final class TypeResolver {
             ISwc4jAstExpr expr,
             CompilationContext context,
             ByteCodeCompilerOptions options) {
-        if (expr instanceof Swc4jAstTsAsExpr asExpr) {
+        if (expr instanceof Swc4jAstCondExpr condExpr) {
+            // Conditional expression: infer type from both branches and find common type
+            String consType = inferTypeFromExpr(condExpr.getCons(), context, options);
+            String altType = inferTypeFromExpr(condExpr.getAlt(), context, options);
+            return findCommonType(consType, altType);
+        } else if (expr instanceof Swc4jAstTsAsExpr asExpr) {
             // Explicit type cast - return the cast target type
             var tsType = asExpr.getTypeAnn();
             if (tsType instanceof Swc4jAstTsTypeRef typeRef) {
@@ -631,7 +682,6 @@ public final class TypeResolver {
         // For now, we only support the common cases above
         return false;
     }
-
 
     /**
      * Check if a primitive type can be widened to another primitive type.
