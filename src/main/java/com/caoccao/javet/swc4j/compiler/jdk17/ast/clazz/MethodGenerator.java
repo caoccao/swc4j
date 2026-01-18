@@ -19,21 +19,14 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
-import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUpdateExpr;
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.*;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
-import com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt.VarDeclGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt.StatementGenerator;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.CodeGeneratorUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -131,49 +124,7 @@ public final class MethodGenerator {
 
         // Process statements in the method body
         for (ISwc4jAstStmt stmt : body.getStmts()) {
-            // Add line number information if debug is enabled
-            if (options.debug() && stmt.getSpan() != null) {
-                code.setLineNumber(stmt.getSpan().getLine());
-            }
-
-            if (stmt instanceof Swc4jAstVarDecl varDecl) {
-                VarDeclGenerator.generate(code, cp, varDecl, context, options);
-            } else if (stmt instanceof Swc4jAstExprStmt exprStmt) {
-                // Expression statement - evaluate the expression and discard result if any
-                ISwc4jAstExpr expr = exprStmt.getExpr();
-                ExpressionGenerator.generate(code, cp, expr, null, context, options);
-
-                // Assignment and update expressions leave values on the stack that need to be popped
-                // Call expressions handle their own return values (already popped if needed)
-                if (expr instanceof Swc4jAstAssignExpr || expr instanceof Swc4jAstUpdateExpr) {
-                    // Assignment and update expressions leave the value on the stack
-                    String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
-                    if (exprType != null && !("V".equals(exprType))) {
-                        // Expression leaves a value, pop it
-                        // Use pop2 for wide types (double, long)
-                        if ("D".equals(exprType) || "J".equals(exprType)) {
-                            code.pop2();
-                        } else {
-                            code.pop();
-                        }
-                    }
-                }
-                // Note: CallExpr already pops its return value in generateCallExpr
-            } else if (stmt instanceof Swc4jAstReturnStmt returnStmt) {
-                if (returnStmt.getArg().isPresent()) {
-                    ExpressionGenerator.generate(code, cp, returnStmt.getArg().get(), returnTypeInfo, context, options);
-                }
-
-                // Generate appropriate return instruction
-                switch (returnTypeInfo.type()) {
-                    case VOID -> code.returnVoid();
-                    case INT, SHORT, CHAR, BOOLEAN, BYTE -> code.ireturn();
-                    case LONG -> code.lreturn();
-                    case FLOAT -> code.freturn();
-                    case DOUBLE -> code.dreturn();
-                    case STRING, OBJECT -> code.areturn();
-                }
-            }
+            StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
         }
 
         return code;
