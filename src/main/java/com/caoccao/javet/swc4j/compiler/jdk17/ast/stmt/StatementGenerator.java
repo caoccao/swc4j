@@ -16,7 +16,8 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
-import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAst;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUpdateExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
@@ -126,18 +127,22 @@ public final class StatementGenerator {
         ISwc4jAstExpr expr = exprStmt.getExpr();
         ExpressionGenerator.generate(code, cp, expr, null, context, options);
 
-        // Pop the result if the expression leaves a value on the stack
-        // Determine if we need to pop based on expression type inference
-        String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
-        if (exprType != null) {
-            if ("J".equals(exprType) || "D".equals(exprType)) {
-                // Long and double take 2 stack slots
-                code.pop2();
-            } else {
-                // All other types take 1 stack slot
-                code.pop();
+        // Assignment and update expressions leave values on the stack that need to be popped
+        // Call expressions handle their own return values (already popped if needed)
+        if (expr instanceof Swc4jAstAssignExpr || expr instanceof Swc4jAstUpdateExpr) {
+            // Assignment and update expressions leave the value on the stack
+            String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
+            if (exprType != null && !("V".equals(exprType))) {
+                // Expression leaves a value, pop it
+                // Use pop2 for wide types (double, long)
+                if ("D".equals(exprType) || "J".equals(exprType)) {
+                    code.pop2();
+                } else {
+                    code.pop();
+                }
             }
         }
+        // Note: CallExpr already pops its return value in generateCallExpr
     }
 
     /**
