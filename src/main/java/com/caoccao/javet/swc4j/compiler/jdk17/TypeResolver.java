@@ -353,6 +353,9 @@ public final class TypeResolver {
             return inferTypeFromExpr(assignExpr.getRight(), context, options);
         } else if (expr instanceof Swc4jAstIdent ident) {
             return context.getInferredTypes().getOrDefault(ident.getSym(), "Ljava/lang/Object;");
+        } else if (expr instanceof Swc4jAstUpdateExpr updateExpr) {
+            // Update expression (++/--) returns the type of the operand
+            return inferTypeFromExpr(updateExpr.getArg(), context, options);
         } else if (expr instanceof Swc4jAstBinExpr binExpr) {
             switch (binExpr.getOp()) {
                 case Add -> {

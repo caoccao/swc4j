@@ -573,6 +573,21 @@ public class CodeBuilder {
         return this;
     }
 
+    /**
+     * Increment local variable by constant.
+     * Generates iinc instruction (opcode 0x84).
+     *
+     * @param index the local variable index (0-255)
+     * @param delta the increment value (-128 to 127)
+     * @return this CodeBuilder
+     */
+    public CodeBuilder iinc(int index, int delta) {
+        code.add((byte) (0x84)); // iinc
+        code.add((byte) (index));
+        code.add((byte) (delta));
+        return this;
+    }
+
     public CodeBuilder iload(int index) {
         switch (index) {
             case 0 -> code.add((byte) (0x1A));

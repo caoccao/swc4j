@@ -22,6 +22,7 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUpdateExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
@@ -142,10 +143,10 @@ public final class MethodGenerator {
                 ISwc4jAstExpr expr = exprStmt.getExpr();
                 ExpressionGenerator.generate(code, cp, expr, null, context, options);
 
-                // Assignment expressions leave values on the stack that need to be popped
+                // Assignment and update expressions leave values on the stack that need to be popped
                 // Call expressions handle their own return values (already popped if needed)
-                if (expr instanceof Swc4jAstAssignExpr) {
-                    // Assignment expressions leave the assigned value on the stack
+                if (expr instanceof Swc4jAstAssignExpr || expr instanceof Swc4jAstUpdateExpr) {
+                    // Assignment and update expressions leave the value on the stack
                     String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
                     if (exprType != null && !("V".equals(exprType))) {
                         // Expression leaves a value, pop it
