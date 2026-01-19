@@ -102,6 +102,9 @@ public final class VariableAnalyzer {
             if (ifStmt.getAlt().isPresent()) {
                 analyzeStatement(ifStmt.getAlt().get(), context, options);
             }
+        } else if (stmt instanceof Swc4jAstLabeledStmt labeledStmt) {
+            // Recursively analyze labeled statement body
+            analyzeStatement(labeledStmt.getBody(), context, options);
         } else if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
             // Recursively analyze block statements
             for (ISwc4jAstStmt childStmt : blockStmt.getStmts()) {

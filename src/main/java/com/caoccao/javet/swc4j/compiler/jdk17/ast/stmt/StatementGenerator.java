@@ -75,6 +75,8 @@ public final class StatementGenerator {
             BreakStatementGenerator.generate(code, cp, breakStmt, context, options);
         } else if (stmt instanceof Swc4jAstContinueStmt continueStmt) {
             ContinueStatementGenerator.generate(code, cp, continueStmt, context, options);
+        } else if (stmt instanceof Swc4jAstLabeledStmt labeledStmt) {
+            LabeledStatementGenerator.generate(code, cp, labeledStmt, returnTypeInfo, context, options);
         } else if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
             generateBlockStmt(code, cp, blockStmt, returnTypeInfo, context, options);
         } else {

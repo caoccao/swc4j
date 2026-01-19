@@ -49,6 +49,38 @@ public class CompilationContext {
         return inferredTypes;
     }
 
+    /**
+     * Find a labeled break target by searching the stack from innermost to outermost.
+     *
+     * @param labelName the label name to find
+     * @return the label info, or null if not found
+     */
+    public LoopLabelInfo getLabeledBreakLabel(String labelName) {
+        for (int i = breakLabels.size() - 1; i >= 0; i--) {
+            LoopLabelInfo labelInfo = breakLabels.get(i);
+            if (labelName.equals(labelInfo.getLabelName())) {
+                return labelInfo;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Find a labeled continue target by searching the stack from innermost to outermost.
+     *
+     * @param labelName the label name to find
+     * @return the label info, or null if not found
+     */
+    public LoopLabelInfo getLabeledContinueLabel(String labelName) {
+        for (int i = continueLabels.size() - 1; i >= 0; i--) {
+            LoopLabelInfo labelInfo = continueLabels.get(i);
+            if (labelName.equals(labelInfo.getLabelName())) {
+                return labelInfo;
+            }
+        }
+        return null;
+    }
+
     public LocalVariableTable getLocalVariableTable() {
         return localVariableTable;
     }
@@ -121,7 +153,7 @@ public class CompilationContext {
          * @param offsetPos Position of the offset bytes
          * @param opcodePos Position of the opcode
          */
-                public record PatchInfo(int offsetPos, int opcodePos) {
+        public record PatchInfo(int offsetPos, int opcodePos) {
         }
     }
 }

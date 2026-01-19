@@ -55,19 +55,26 @@ public final class ContinueStatementGenerator {
             CompilationContext context,
             ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
 
-        // Get the current continue label from context
-        CompilationContext.LoopLabelInfo continueLabel = context.getCurrentContinueLabel();
-
-        if (continueLabel == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    "Continue statement outside of loop");
-        }
+        CompilationContext.LoopLabelInfo continueLabel;
 
         // Check if this is a labeled continue
         if (continueStmt.getLabel().isPresent()) {
-            // TODO: Implement labeled continue support (Phase 6)
-            throw new Swc4jByteCodeCompilerException(
-                    "Labeled continue statements are not yet supported");
+            // Labeled continue - search for the labeled loop
+            String labelName = continueStmt.getLabel().get().getSym();
+            continueLabel = context.getLabeledContinueLabel(labelName);
+
+            if (continueLabel == null) {
+                throw new Swc4jByteCodeCompilerException(
+                        "Label '" + labelName + "' not found for continue statement");
+            }
+        } else {
+            // Unlabeled continue - use innermost loop
+            continueLabel = context.getCurrentContinueLabel();
+
+            if (continueLabel == null) {
+                throw new Swc4jByteCodeCompilerException(
+                        "Continue statement outside of loop");
+            }
         }
 
         // Generate goto with placeholder (will be patched later)

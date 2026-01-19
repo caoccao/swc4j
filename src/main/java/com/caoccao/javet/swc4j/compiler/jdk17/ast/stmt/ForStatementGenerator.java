@@ -42,7 +42,7 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
  *   TEST_LABEL:            // Loop entry point
  *   [load left operand]
  *   [load right operand]
- *   if_icmpge END_LABEL    // Direct comparison jump (for i < 10: if i >= 10, exit)
+ *   if_icmpge END_LABEL    // Direct comparison jump (for i &lt; 10: if i &gt;= 10, exit)
  *   [body statements]
  *   [update: iinc]         // Execute update
  *   goto TEST_LABEL        // Jump back to test (backward jump)
@@ -98,7 +98,7 @@ public final class ForStatementGenerator {
     }
 
     /**
-     * Generate bytecode for a for statement.
+     * Generate bytecode for a for statement (unlabeled).
      *
      * @param code           the code builder
      * @param cp             the constant pool
@@ -112,6 +112,29 @@ public final class ForStatementGenerator {
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstForStmt forStmt,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+        generate(code, cp, forStmt, null, returnTypeInfo, context, options);
+    }
+
+    /**
+     * Generate bytecode for a for statement (potentially labeled).
+     *
+     * @param code           the code builder
+     * @param cp             the constant pool
+     * @param forStmt        the for statement AST node
+     * @param labelName      the label name (null for unlabeled loops)
+     * @param returnTypeInfo return type information for the enclosing method
+     * @param context        compilation context
+     * @param options        compilation options
+     * @throws Swc4jByteCodeCompilerException if code generation fails
+     */
+    public static void generate(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstForStmt forStmt,
+            String labelName,
             ReturnTypeInfo returnTypeInfo,
             CompilationContext context,
             ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
@@ -157,8 +180,8 @@ public final class ForStatementGenerator {
         }
 
         // 4. Create label info for break and continue
-        CompilationContext.LoopLabelInfo breakLabel = new CompilationContext.LoopLabelInfo(null);
-        CompilationContext.LoopLabelInfo continueLabel = new CompilationContext.LoopLabelInfo(null);
+        CompilationContext.LoopLabelInfo breakLabel = new CompilationContext.LoopLabelInfo(labelName);
+        CompilationContext.LoopLabelInfo continueLabel = new CompilationContext.LoopLabelInfo(labelName);
 
         // Push labels onto stack before generating body
         context.pushBreakLabel(breakLabel);

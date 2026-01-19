@@ -54,19 +54,26 @@ public final class BreakStatementGenerator {
             CompilationContext context,
             ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
 
-        // Get the current break label from context
-        CompilationContext.LoopLabelInfo breakLabel = context.getCurrentBreakLabel();
-
-        if (breakLabel == null) {
-            throw new Swc4jByteCodeCompilerException(
-                    "Break statement outside of loop or switch");
-        }
+        CompilationContext.LoopLabelInfo breakLabel;
 
         // Check if this is a labeled break
         if (breakStmt.getLabel().isPresent()) {
-            // TODO: Implement labeled break support (Phase 6)
-            throw new Swc4jByteCodeCompilerException(
-                    "Labeled break statements are not yet supported");
+            // Labeled break - search for the labeled loop
+            String labelName = breakStmt.getLabel().get().getSym();
+            breakLabel = context.getLabeledBreakLabel(labelName);
+
+            if (breakLabel == null) {
+                throw new Swc4jByteCodeCompilerException(
+                        "Label '" + labelName + "' not found for break statement");
+            }
+        } else {
+            // Unlabeled break - use innermost loop
+            breakLabel = context.getCurrentBreakLabel();
+
+            if (breakLabel == null) {
+                throw new Swc4jByteCodeCompilerException(
+                        "Break statement outside of loop or switch");
+            }
         }
 
         // Generate goto with placeholder (will be patched later)

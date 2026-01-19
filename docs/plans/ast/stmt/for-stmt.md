@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting for loops in TypeScript to JVM bytecode compilation. For loops provide iterative execution of code blocks based on initialization, condition testing, and update operations.
 
-**Current Status:** 🟡 **IN PROGRESS** - Core implementation complete, debugging bytecode verification issue
+**Current Status:** ✅ **COMPLETE** - All phases implemented and tested
 
 **Syntax:**
 ```typescript
@@ -1322,19 +1322,19 @@ CompilationContext must track:
 
 ## Success Criteria
 
-- [ ] All 7 phases implemented
-- [ ] 57+ comprehensive tests covering all edge cases
-- [ ] Proper stack map frame generation at loop entry and exit
-- [ ] Support for break and continue statements
-- [ ] Support for labeled break and continue
-- [ ] Correct backward jump generation
-- [ ] Proper variable scoping (loop variables not visible after loop)
-- [ ] Support for nested loops (5+ levels deep)
-- [ ] Support for all optional components (init, test, update)
-- [ ] Integration with expression generator for all expressions
-- [ ] Complete documentation
-- [ ] All tests passing
-- [ ] Javadoc builds successfully
+- [x] All 7 phases implemented
+- [x] 94+ comprehensive test methods covering all edge cases
+- [x] Proper stack map frame generation at loop entry and exit
+- [x] Support for break and continue statements (unlabeled and labeled)
+- [x] Support for labeled break and continue
+- [x] Correct backward jump generation
+- [x] Proper variable scoping (loop variables not visible after loop)
+- [x] Support for nested loops (5+ levels deep tested)
+- [x] Support for all optional components (init, test, update)
+- [x] Integration with expression generator for all expressions
+- [x] Complete documentation
+- [x] All tests passing
+- [x] Javadoc builds successfully
 
 ---
 
@@ -1352,45 +1352,45 @@ CompilationContext must track:
 ## Implementation Checklist
 
 ### Code Generation
-- [ ] Create `ForStatementGenerator.java`
-- [ ] Create `BreakStatementGenerator.java`
-- [ ] Create `ContinueStatementGenerator.java`
-- [ ] Implement `generate()` method for for loops
-- [ ] Handle optional init, test, update components
-- [ ] Handle break and continue statements
-- [ ] Implement labeled break and continue
-- [ ] Generate proper backward jumps
-- [ ] Implement stack map frame generation at loop entry
-- [ ] Add break/continue label stack to CompilationContext
+- [x] Create `ForStatementGenerator.java`
+- [x] Create `BreakStatementGenerator.java`
+- [x] Create `ContinueStatementGenerator.java`
+- [x] Implement `generate()` method for for loops
+- [x] Handle optional init, test, update components
+- [x] Handle break and continue statements
+- [x] Implement labeled break and continue
+- [x] Generate proper backward jumps
+- [x] Implement stack map frame generation at loop entry
+- [x] Add break/continue label stack to CompilationContext
 
 ### Integration
-- [ ] Add ForStmt case to StatementGenerator dispatch
-- [ ] Add BreakStmt case to StatementGenerator dispatch
-- [ ] Add ContinueStmt case to StatementGenerator dispatch
-- [ ] Ensure expression generator works for init/test/update
-- [ ] Handle VarDecl in init
-- [ ] Track loop variable scopes
-- [ ] Handle nested loops correctly
-- [ ] Add debug/line number information
+- [x] Add ForStmt case to StatementGenerator dispatch
+- [x] Add BreakStmt case to StatementGenerator dispatch
+- [x] Add ContinueStmt case to StatementGenerator dispatch
+- [x] Ensure expression generator works for init/test/update
+- [x] Handle VarDecl in init
+- [x] Track loop variable scopes
+- [x] Handle nested loops correctly
+- [x] Add debug/line number information
 
 ### Testing
-- [ ] Create test directory `forstmt/`
-- [ ] Create `TestCompileAstForStmtBasic.java`
-- [ ] Create `TestCompileAstForStmtOptional.java`
-- [ ] Create `TestCompileAstForStmtBreakContinue.java`
-- [ ] Create `TestCompileAstForStmtComplex.java`
-- [ ] Create `TestCompileAstForStmtNested.java`
-- [ ] Create `TestCompileAstForStmtLabeled.java`
-- [ ] Create `TestCompileAstForStmtEdgeCases.java`
-- [ ] Add Phase 1 tests (basic for loops)
-- [ ] Add Phase 2 tests (optional components)
-- [ ] Add Phase 3 tests (break/continue)
-- [ ] Add Phase 4 tests (complex init/update)
-- [ ] Add Phase 5 tests (nested loops)
-- [ ] Add Phase 6 tests (labeled break/continue)
-- [ ] Add Phase 7 tests (edge cases)
-- [ ] Verify all tests pass
-- [ ] Verify javadoc builds
+- [x] Create test directory `forstmt/`
+- [x] Create `TestCompileAstForStmtBasic.java`
+- [x] Create `TestCompileAstForStmtOptional.java`
+- [x] Create `TestCompileAstForStmtBreakContinue.java`
+- [x] Create `TestCompileAstForStmtComplex.java`
+- [x] Create `TestCompileAstForStmtNested.java`
+- [x] Create `TestCompileAstForStmtLabeled.java`
+- [x] Create `TestCompileAstForStmtEdgeCases.java`
+- [x] Add Phase 1 tests (basic for loops)
+- [x] Add Phase 2 tests (optional components)
+- [x] Add Phase 3 tests (break/continue)
+- [x] Add Phase 4 tests (complex init/update)
+- [x] Add Phase 5 tests (nested loops)
+- [x] Add Phase 6 tests (labeled break/continue)
+- [x] Add Phase 7 tests (edge cases)
+- [x] Verify all tests pass
+- [x] Verify javadoc builds
 
 ---
 
@@ -1425,7 +1425,7 @@ CompilationContext must track:
 
 ## Implementation Status
 
-### Completed (2026-01-18)
+### Completed (2026-01-19)
 
 ✅ **Core Implementation:**
 - Created `ForStatementGenerator.java` with full for loop code generation
@@ -1433,46 +1433,58 @@ CompilationContext must track:
 - Created `ContinueStatementGenerator.java` for continue statement support
 - Updated `CompilationContext.java` with break/continue label stacks and patch tracking
 - Updated `StatementGenerator.java` to dispatch ForStmt, BreakStmt, ContinueStmt
-- Updated `VariableAnalyzer.java` to recursively analyze for loop variable declarations
+- Updated `VariableAnalyzer.java` to recursively analyze for loop variable declarations with scoping support
+- Implemented scope stack in `LocalVariableTable` for proper variable shadowing
+- Fixed `TypeResolver.inferTypeFromExpr` for compound assignments
+- Fixed `StackMapGenerator.findBranchTargets` to properly skip instruction operands
+- Fixed `IfStatementGenerator` to detect break/continue as unconditional jumps
+- Created `LabeledStatementGenerator` for labeled statement support
+- Updated `BreakStatementGenerator` and `ContinueStatementGenerator` to handle labeled jumps
+- Added label search methods to `CompilationContext`
+- Updated `VariableAnalyzer` to analyze labeled statement bodies
 
 ✅ **Test Suite Created:**
-- `TestCompileAstForStmtBasic.java` - 10 tests (Phase 1: Basic for loops)
-- `TestCompileAstForStmtOptional.java` - 11 tests (Phase 2: Optional components)
-- `TestCompileAstForStmtBreakContinue.java` - 13 tests (Phase 3: Break/continue)
-- `TestCompileAstForStmtComplex.java` - 13 tests (Phase 4: Complex init/update)
-- `TestCompileAstForStmtNested.java` - 15 tests (Phase 5: Nested loops)
-- `TestCompileAstForStmtEdgeCases.java` - 25 tests (Phase 7: Edge cases)
-- **Total: 87 comprehensive tests covering phases 1-5 and 7**
+- `TestCompileAstForStmtBasic.java` - 10 test methods (Phase 1: Basic for loops)
+- `TestCompileAstForStmtOptional.java` - 11 test methods (Phase 2: Optional components)
+- `TestCompileAstForStmtBreakContinue.java` - 13 test methods (Phase 3: Break/continue)
+- `TestCompileAstForStmtComplex.java` - 13 test methods (Phase 4: Complex init/update)
+- `TestCompileAstForStmtNested.java` - 15 test methods (Phase 5: Nested loops)
+- `TestCompileAstForStmtLabeled.java` - 9 test methods (Phase 6: Labeled break/continue)
+- `TestCompileAstForStmtEdgeCases.java` - 23 test methods (Phase 7: Edge cases)
+- **Total: 94 comprehensive test methods covering all phases 1-7**
+- **All tests passing ✅**
 
-### In Progress
+✅ **Javadoc:**
+- All javadoc builds successfully with no errors
 
-🟡 **Debugging:**
-- JVM VerifyError: "Inconsistent stackmap frames at branch target"
-- Issue appears to be related to stack map frame generation for backward jumps
-- Bytecode structure is correct, but stack map verification is failing
-- Likely needs adjustment to how loop entry point stack frames are generated
+✅ **Features Implemented:**
+- Basic for loops with all components (init, test, update, body)
+- Optional components (loops with missing init, test, or update)
+- Break and continue statements (unlabeled and labeled)
+- Labeled loops with labeled break and continue
+- Complex initialization and updates (multiple variables, expressions)
+- Nested loops (tested up to 5 levels deep)
+- Variable scoping and shadowing
+- Direct conditional jumps matching javac output
+- Proper stack map frame generation
+- All numeric types (int, long, float, double, byte, short)
+- Edge cases (empty loops, infinite loops, returns in loops, etc.)
 
-### Not Yet Implemented
+### Resolved Issues
 
-🔴 **Phase 6: Labeled Break/Continue** (generators throw exception)
-- Labeled loops
-- Labeled break statements
-- Labeled continue statements
+All previously reported issues have been resolved:
 
-### Known Issues
+1. ✅ **testFloatLoop Operand stack underflow** - Fixed by correcting TypeResolver for compound assignments
+2. ✅ **testConditionalBreakMultiplePaths VerifyError** - Fixed by improving bytecode scanning and dead code detection
+3. ✅ **testVariableShadowing assertion** - Fixed by implementing scope stack in LocalVariableTable
+4. ✅ **testLoopWithLocalVarDeclaration NPE** - Fixed by adding variables to current scope during code generation
 
-1. **VerifyError on Loop Execution:** Tests compile but fail at runtime with stack map frame inconsistency
-   - Error occurs at the goto instruction (backward jump to loop test)
-   - Stack is empty at goto, but stack map frame expects integer at target
-   - May need special handling for backward jump verification in StackMapGenerator
+### Architecture Improvements
 
-### Next Steps
-
-1. Debug and fix the VerifyError in for loop bytecode generation
-2. Investigate StackMapGenerator handling of backward jumps
-3. Test all 87 test cases once bytecode issue is resolved
-4. Implement Phase 6 (labeled loops) if needed
-5. Update documentation with final test results
+1. **LocalVariableTable Scope Stack:** Replaced single HashMap with List of Maps for proper lexical scoping
+2. **Two-Phase Variable Management:** Analysis phase allocates slots, generation phase adds to current scope
+3. **Dead Code Elimination:** Properly detects unreachable code after break/continue/return
+4. **Bytecode Scanning:** Fixed instruction size calculation for accurate branch target detection
 
 ---
 
