@@ -21,6 +21,8 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.lang.reflect.InvocationTargetException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -265,7 +267,7 @@ public class TestCompileAstUpdateExprEdgeCases extends BaseTestCompileSuite {
                 }"""));
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = assertDoesNotThrow(() -> classA.getConstructor().newInstance());
-        assertThrows(java.lang.reflect.InvocationTargetException.class, () -> {
+        assertThrows(InvocationTargetException.class, () -> {
             classA.getMethod("test").invoke(instance);
         });
     }

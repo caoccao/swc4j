@@ -344,7 +344,7 @@ public final class ArrayApiUtils {
 
         // Sort the copy (requires elements to be Comparable)
         // Using raw type to avoid compilation error
-        Collections.sort((java.util.List) result);
+        Collections.sort((List) result);
 
         return result;
     }
