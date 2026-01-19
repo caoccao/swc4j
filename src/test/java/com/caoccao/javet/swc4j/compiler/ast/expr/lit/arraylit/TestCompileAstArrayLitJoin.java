@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.ast.expr.updateexpr;
+package com.caoccao.javet.swc4j.compiler.ast.expr.lit.arraylit;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
@@ -24,155 +24,192 @@ import org.junit.jupiter.params.provider.EnumSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Test suite for update expressions (++ and --) on object properties.
- * Tests increment/decrement operations on object properties including nested properties
- * and computed property access.
+ * Tests for the Array.join() method.
  */
-public class TestCompileAstUpdateExprObjectProperties extends BaseTestCompileSuite {
+public class TestCompileAstArrayLitJoin extends BaseTestCompileSuite {
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNestedPropertyIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayJoin(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const obj = {inner: {count: 10}}
-                      const result = obj.inner.count++
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.join(",")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(10, classA.getMethod("test").invoke(instance));
+        assertEquals("1,2,3,4,5", classA.getMethod("test").invoke(instance));
     }
 
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNestedPropertyModifiesValue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const obj = {inner: {count: 10}}
-                      obj.inner.count++
-                      return obj.inner.count
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(11, classA.getMethod("test").invoke(instance));
-    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testObjectComputedPropertyIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayJoinAfterModification(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const obj = {count: 5}
-                      const key: string = "count"
-                      const result = ++obj[key]
-                      return result
+                      const arr = [1, 2]
+                      arr.push(3)
+                      arr.unshift(0)
+                      return arr.join("-")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals("0-1-2-3", classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testObjectPropertyModifiesValue(JdkVersion jdkVersion) throws Exception {
+    public void testArrayJoinCustomSeparator(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const obj = {x: 5}
-                      obj.x++
-                      obj.x++
-                      return obj.x
+                      const arr = ["apple", "banana", "cherry"]
+                      return arr.join(" - ")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(7, classA.getMethod("test").invoke(instance));
+        assertEquals("apple - banana - cherry", classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testObjectPropertyPostfixDecrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayJoinDefaultSeparator(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const obj = {value: 10}
-                      const result = obj.value--
-                      return result
+                      const arr = [1, 2, 3]
+                      return arr.join()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(10, classA.getMethod("test").invoke(instance));
+        assertEquals("1,2,3", classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testObjectPropertyPostfixIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayJoinEmpty(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const obj = {count: 5}
-                      const result = obj.count++
-                      return result
+                      const arr = [1, 2, 3]
+                      arr.pop()
+                      arr.pop()
+                      arr.pop()
+                      return arr.join(",")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(5, classA.getMethod("test").invoke(instance));
+        assertEquals("", classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testObjectPropertyPrefixDecrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayJoinEmptySeparator(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const obj = {value: 10}
-                      const result = --obj.value
-                      return result
+                      const arr = ["a", "b", "c"]
+                      return arr.join("")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(9, classA.getMethod("test").invoke(instance));
+        assertEquals("abc", classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testObjectPropertyPrefixIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayJoinMixedTypes(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const obj = {count: 5}
-                      const result = ++obj.count
-                      return result
+                      const arr = [1, "hello", true, 3.14]
+                      return arr.join("|")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals("1|hello|true|3.14", classA.getMethod("test").invoke(instance));
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayJoinMultiCharSeparator(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = ["one", "two", "three"]
+                      return arr.join(" and ")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("one and two and three", classA.getMethod("test").invoke(instance));
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayJoinNumbers(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [10, 20, 30, 40, 50]
+                      return arr.join(" ")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("10 20 30 40 50", classA.getMethod("test").invoke(instance));
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayJoinSingleElement(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [42]
+                      return arr.join(",")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals("42", classA.getMethod("test").invoke(instance));
     }
 }

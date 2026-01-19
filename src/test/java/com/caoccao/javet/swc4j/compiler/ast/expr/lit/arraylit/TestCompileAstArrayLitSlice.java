@@ -14,237 +14,242 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.ast.expr.updateexpr;
+package com.caoccao.javet.swc4j.compiler.ast.expr.lit.arraylit;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Test suite for update expressions (++ and --) on native Java typed arrays.
- * Tests increment/decrement operations on elements of native Java arrays (int[], long[], byte[], etc.).
+ * Tests for the Array.slice() method.
  */
-public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
+public class TestCompileAstArrayLitSlice extends BaseTestCompileSuite {
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeByteArrayIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArraySlice(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: byte[] = [10, 20, 30]
-                      const result = ++arr[0]
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.slice(1, 4)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals((byte) 11, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(2, 3, 4), classA.getMethod("test").invoke(instance));
     }
 
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNativeDoubleArrayIncrement(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const arr: double[] = [1.5, 2.5, 3.5]
-                      const result = ++arr[0]
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(2.5, (Double) classA.getMethod("test").invoke(instance), 0.001);
-    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeFloatArrayDecrement(JdkVersion jdkVersion) throws Exception {
+    public void testArraySliceChaining(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: float[] = [5.5, 10.5, 15.5]
-                      const result = arr[1]--
-                      return result
+                      const arr = [1, 2, 3, 4, 5, 6, 7, 8]
+                      return arr.slice(1, 6).slice(1, 4)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(10.5f, (Float) classA.getMethod("test").invoke(instance), 0.001f);
+        assertEquals(List.of(3, 4, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayComputedIndex(JdkVersion jdkVersion) throws Exception {
+    public void testArraySliceEmpty(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [10, 20, 30, 40]
-                      const i: int = 1
-                      const result = arr[i + 1]++
-                      return result
+                      const arr = [1, 2, 3]
+                      arr.pop()
+                      arr.pop()
+                      arr.pop()
+                      return arr.slice()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(30, classA.getMethod("test").invoke(instance)); // arr[2] before increment
+        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayModifiesValue(JdkVersion jdkVersion) throws Exception {
+    public void testArraySliceNegativeBoth(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [5, 10, 15]
-                      arr[1]++
-                      arr[1]++
-                      return arr[1]
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.slice(-4, -1)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(12, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(2, 3, 4), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayPostfixDecrement(JdkVersion jdkVersion) throws Exception {
+    public void testArraySliceNegativeEnd(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [10, 20, 30]
-                      const result = arr[0]--
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.slice(1, -1)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(10, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(2, 3, 4), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayPostfixIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArraySliceNegativeStart(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [1, 2, 3]
-                      const result = arr[1]++
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.slice(-3)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(2, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(3, 4, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayPrefixDecrement(JdkVersion jdkVersion) throws Exception {
+    public void testArraySliceNoArgs(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [10, 20, 30]
-                      const result = --arr[0]
-                      return result
+                      const arr = [1, 2, 3]
+                      const copy = arr.slice()
+                      arr.push(4)
+                      return copy
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(9, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayPrefixIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArraySliceNoEnd(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [1, 2, 3]
-                      const result = ++arr[1]
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.slice(2)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(3, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(3, 4, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayWithVariableIndex(JdkVersion jdkVersion) throws Exception {
+    public void testArraySliceOutOfBounds(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [1, 2, 3, 4, 5]
-                      const i: int = 2
-                      const result = ++arr[i]
-                      return result
+                      const arr = [1, 2, 3]
+                      return arr.slice(1, 10)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(4, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(2, 3), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeLongArrayIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArraySliceReturnsNewArray(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: long[] = [100, 200, 300]
-                      const result = ++arr[1]
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      const sliced = arr.slice(1, 3)
+                      arr.push(6)
+                      return sliced
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(201L, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(2, 3), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeShortArrayDecrement(JdkVersion jdkVersion) throws Exception {
+    public void testArraySliceStartGreaterThanEnd(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: short[] = [100, 200, 300]
-                      const result = --arr[2]
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.slice(3, 1)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals((short) 299, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArraySliceStrings(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = ["a", "b", "c", "d", "e"]
+                      return arr.slice(1, 3)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of("b", "c"), classA.getMethod("test").invoke(instance));
     }
 }

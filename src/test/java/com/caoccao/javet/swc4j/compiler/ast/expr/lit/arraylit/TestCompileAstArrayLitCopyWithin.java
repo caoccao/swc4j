@@ -14,237 +14,264 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.ast.expr.updateexpr;
+package com.caoccao.javet.swc4j.compiler.ast.expr.lit.arraylit;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Test suite for update expressions (++ and --) on native Java typed arrays.
- * Tests increment/decrement operations on elements of native Java arrays (int[], long[], byte[], etc.).
+ * Tests for the Array.copyWithin() method.
  */
-public class TestCompileAstUpdateExprNativeArrays extends BaseTestCompileSuite {
+public class TestCompileAstArrayLitCopyWithin extends BaseTestCompileSuite {
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeByteArrayIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayCopyWithinAllNegative(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: byte[] = [10, 20, 30]
-                      const result = ++arr[0]
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.copyWithin(-4, -3, -1)
+                      return arr
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals((byte) 11, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 3, 4, 4, 5), classA.getMethod("test").invoke(instance));
     }
 
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNativeDoubleArrayIncrement(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const arr: double[] = [1.5, 2.5, 3.5]
-                      const result = ++arr[0]
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(2.5, (Double) classA.getMethod("test").invoke(instance), 0.001);
-    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeFloatArrayDecrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayCopyWithinBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: float[] = [5.5, 10.5, 15.5]
-                      const result = arr[1]--
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.copyWithin(0, 3)
+                      return arr
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(10.5f, (Float) classA.getMethod("test").invoke(instance), 0.001f);
+        assertEquals(List.of(4, 5, 3, 4, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayComputedIndex(JdkVersion jdkVersion) throws Exception {
+    public void testArrayCopyWithinEmptyArray(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [10, 20, 30, 40]
-                      const i: int = 1
-                      const result = arr[i + 1]++
-                      return result
+                      const arr = []
+                      arr.copyWithin(0, 0)
+                      return arr
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(30, classA.getMethod("test").invoke(instance)); // arr[2] before increment
+        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayModifiesValue(JdkVersion jdkVersion) throws Exception {
+    public void testArrayCopyWithinMethodChaining(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [5, 10, 15]
-                      arr[1]++
-                      arr[1]++
-                      return arr[1]
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.copyWithin(0, 3).reverse()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(12, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(5, 4, 3, 5, 4), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayPostfixDecrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayCopyWithinNegativeEnd(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [10, 20, 30]
-                      const result = arr[0]--
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.copyWithin(0, 1, -1)
+                      return arr
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(10, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(2, 3, 4, 4, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayPostfixIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayCopyWithinNegativeStart(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [1, 2, 3]
-                      const result = arr[1]++
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.copyWithin(0, -2)
+                      return arr
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(2, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(4, 5, 3, 4, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayPrefixDecrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayCopyWithinNegativeTarget(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [10, 20, 30]
-                      const result = --arr[0]
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.copyWithin(-2, 0)
+                      return arr
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(9, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3, 1, 2), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayPrefixIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayCopyWithinOutOfBoundsStart(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [1, 2, 3]
-                      const result = ++arr[1]
-                      return result
+                      const arr = [1, 2, 3]
+                      arr.copyWithin(0, 10)
+                      return arr
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(3, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeIntArrayWithVariableIndex(JdkVersion jdkVersion) throws Exception {
+    public void testArrayCopyWithinOutOfBoundsTarget(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: int[] = [1, 2, 3, 4, 5]
-                      const i: int = 2
-                      const result = ++arr[i]
-                      return result
+                      const arr = [1, 2, 3]
+                      arr.copyWithin(10, 0)
+                      return arr
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(4, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeLongArrayIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayCopyWithinOverlapping(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: long[] = [100, 200, 300]
-                      const result = ++arr[1]
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.copyWithin(1, 0, 4)
+                      return arr
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(201L, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 1, 2, 3, 4), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNativeShortArrayDecrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayCopyWithinReturnsArray(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const arr: short[] = [100, 200, 300]
-                      const result = --arr[2]
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.copyWithin(0, 3, 5)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals((short) 299, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(4, 5, 3, 4, 5), classA.getMethod("test").invoke(instance));
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayCopyWithinToEnd(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.copyWithin(4, 0, 2)
+                      return arr
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(1, 2, 3, 4, 1), classA.getMethod("test").invoke(instance));
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayCopyWithinWithEnd(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = [1, 2, 3, 4, 5]
+                      arr.copyWithin(0, 3, 4)
+                      return arr
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of(4, 2, 3, 4, 5), classA.getMethod("test").invoke(instance));
     }
 }

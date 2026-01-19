@@ -14,832 +14,835 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.ast.expr.updateexpr;
+package com.caoccao.javet.swc4j.compiler.ast.expr.lit.arraylit;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Test suite for update expressions (++ and --) on primitive variables and wrapper types.
- * Tests basic increment/decrement operations on local variables including int, long, double,
- * float, byte, short, and their wrapper types.
+ * Tests for non-mutating array methods (toReversed, toSorted, toSpliced, with).
  */
-public class TestCompileAstUpdateExprPrimitives extends BaseTestCompileSuite {
+public class TestCompileAstArrayLitNonMutating extends BaseTestCompileSuite {
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testDecrementDoubleZero(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToReversedAfterModification(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: double = 0.0
-                      let result: double = --x
-                      return result
+                      const arr = [1, 2, 3]
+                      arr.push(4)
+                      arr.unshift(0)
+                      return arr.toReversed()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(-1.0, (Double) classA.getMethod("test").invoke(instance), 0.001);
+        assertEquals(List.of(4, 3, 2, 1, 0), classA.getMethod("test").invoke(instance));
     }
 
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testDecrementNegative(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      let x: int = -5
-                      let result: int = --x
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(-6, classA.getMethod("test").invoke(instance));
-    }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testDecrementToNegative(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToReversedBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 0
-                      const result = x--
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.toReversed()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(5, 4, 3, 2, 1), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testDecrementZero(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToReversedDoesNotMutateOriginal(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 0
-                      let result: int = --x
-                      return result
+                      const arr = [1, 2, 3]
+                      const reversed = arr.toReversed()
+                      return arr
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(-1, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIncrementFloatZero(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToReversedEmpty(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: float = 0.0
-                      let result: float = ++x
-                      return result
+                      const arr = []
+                      return arr.toReversed()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1.0f, (Float) classA.getMethod("test").invoke(instance), 0.001f);
+        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIncrementNegative(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToReversedMethodChaining(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = -5
-                      let result: int = ++x
-                      return result
+                      const arr = [3, 1, 2]
+                      return arr.toReversed().sort()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(-4, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIncrementNegativeFloat(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToReversedMixedTypes(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: float = -2.5
-                      let result: float = ++x
-                      return result
+                      const arr = [1, "hello", true]
+                      return arr.toReversed()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(-1.5f, (Float) classA.getMethod("test").invoke(instance), 0.001f);
+        assertEquals(List.of(true, "hello", 1), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIncrementZero(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToReversedReturnsNewArray(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 0
-                      let result: int = ++x
-                      return result
+                      const arr = [10, 20, 30]
+                      return arr.toReversed()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(30, 20, 10), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPostfixDecrementDouble(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToReversedSingleElement(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: double = 5.5
-                      let result: double = x--
-                      return result
+                      const arr = [42]
+                      return arr.toReversed()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(5.5, (Double) classA.getMethod("test").invoke(instance), 0.001);
+        assertEquals(List.of(42), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPostfixDecrementInt(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToReversedStrings(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 10
-                      let result: int = x--
-                      return result
+                      const arr = ["hello", "world", "test"]
+                      return arr.toReversed()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(10, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of("test", "world", "hello"), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPostfixDecrementInteger(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSortedAlreadySorted(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: Integer = 50
-                      let result: Integer = x--
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.toSorted()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(50, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3, 4, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPostfixDecrementLong(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSortedBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: long = 100
-                      let result: long = x--
-                      return result
+                      const arr = [3, 1, 4, 2, 5]
+                      return arr.toSorted()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(100L, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3, 4, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPostfixIncrementDouble(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSortedDoesNotMutateOriginal(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: double = 2.5
-                      let result: double = x++
-                      return result
+                      const arr = [3, 1, 2]
+                      const sorted = arr.toSorted()
+                      return arr
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(2.5, (Double) classA.getMethod("test").invoke(instance), 0.001);
+        assertEquals(List.of(3, 1, 2), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPostfixIncrementInBinaryExpression(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSortedEmpty(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      let result: int = (x++) + 10
-                      return result
+                      const arr = []
+                      return arr.toSorted()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(15, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPostfixIncrementInt(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSortedMethodChaining(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      let result: int = x++
-                      return result
+                      const arr = [3, 1, 2]
+                      return arr.toSorted().reverse()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(5, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(3, 2, 1), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPostfixIncrementInteger(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSortedReturnsNewArray(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: Integer = 42
-                      let result: Integer = x++
-                      return result
+                      const arr = [5, 3, 1, 4, 2]
+                      return arr.toSorted()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(42, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3, 4, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPostfixIncrementLong(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSortedReverseSorted(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: long = 100
-                      let result: long = x++
-                      return result
+                      const arr = [5, 4, 3, 2, 1]
+                      return arr.toSorted()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(100L, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3, 4, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPostfixIncrementModifiesVariable(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSortedSingleElement(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      x++
-                      x++
-                      return x
+                      const arr = [42]
+                      return arr.toSorted()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(7, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(42), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPostfixReturnsCorrectValueInComplexExpression(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSortedStrings(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      let y: int = 10
-                      let result: int = x++ + y++
-                      return result
+                      const arr = ["cherry", "apple", "banana"]
+                      return arr.toSorted()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(15, classA.getMethod("test").invoke(instance)); // 5 + 10
+        assertEquals(List.of("apple", "banana", "cherry"), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixDecrementDouble(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSortedWithDuplicates(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: double = 5.5
-                      let result: double = --x
-                      return result
+                      const arr = [3, 1, 4, 1, 5, 9, 2, 6, 5]
+                      return arr.toSorted()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(4.5, (Double) classA.getMethod("test").invoke(instance), 0.001);
+        assertEquals(List.of(1, 1, 2, 3, 4, 5, 5, 6, 9), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixDecrementInt(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSplicedBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 10
-                      let result: int = --x
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.toSpliced(2, 2)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(9, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixDecrementInteger(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSplicedDoesNotMutateOriginal(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: Integer = 50
-                      let result: Integer = --x
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      const spliced = arr.toSpliced(1, 2)
+                      return arr
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(49, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3, 4, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixDecrementLong(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSplicedEmpty(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: long = 100
-                      let result: long = --x
-                      return result
+                      const arr = []
+                      return arr.toSpliced(0, 0)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(99L, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixIncrementByte(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSplicedInsertItems(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: byte = 10
-                      let result: byte = ++x
-                      return result
+                      const arr = [1, 2, 5]
+                      return arr.toSpliced(2, 0, 3, 4)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals((byte) 11, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3, 4, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixIncrementDouble(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSplicedInsertWhileDeleting(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: double = 2.5
-                      let result: double = ++x
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.toSpliced(2, 2, 99, 100)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(3.5, (Double) classA.getMethod("test").invoke(instance), 0.001);
+        assertEquals(List.of(1, 2, 99, 100, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixIncrementDoubleWrapper(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSplicedMethodChaining(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: Double = 1.5
-                      let result: Double = ++x
-                      return result
+                      const arr = [3, 1, 4, 2, 5]
+                      return arr.toSpliced(1, 2).sort()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(2.5, (Double) classA.getMethod("test").invoke(instance), 0.001);
+        assertEquals(List.of(2, 3, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixIncrementFloat(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSplicedNegativeStart(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: float = 3.14
-                      let result: float = ++x
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.toSpliced(-2, 1)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(4.14f, (Float) classA.getMethod("test").invoke(instance), 0.001f);
+        assertEquals(List.of(1, 2, 3, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixIncrementFloatWrapper(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSplicedNoArguments(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: Float = 2.25
-                      let result: Float = ++x
-                      return result
+                      const arr = [1, 2, 3]
+                      return arr.toSpliced()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(3.25f, (Float) classA.getMethod("test").invoke(instance), 0.001f);
+        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixIncrementInBinaryExpression(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSplicedOnlyStart(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      let result: int = (++x) + 10
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.toSpliced(2)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(16, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixIncrementInt(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSplicedOutOfBounds(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      let result: int = ++x
-                      return result
+                      const arr = [1, 2, 3]
+                      return arr.toSpliced(10, 2)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixIncrementInteger(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSplicedReturnsNewArray(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: Integer = 42
-                      let result: Integer = ++x
-                      return result
+                      const arr = [10, 20, 30, 40]
+                      return arr.toSpliced(1, 2, 99)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(43, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(10, 99, 40), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixIncrementLong(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSplicedSingleElement(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: long = 100
-                      let result: long = ++x
-                      return result
+                      const arr = [42]
+                      return arr.toSpliced(0, 1, 99)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(101L, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(99), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixIncrementLongWrapper(JdkVersion jdkVersion) throws Exception {
+    public void testArrayToSplicedStrings(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: Long = 999
-                      let result: Long = ++x
-                      return result
+                      const arr = ["hello", "world", "test"]
+                      return arr.toSpliced(1, 1, "beautiful")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1000L, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of("hello", "beautiful", "test"), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixIncrementModifiesVariable(JdkVersion jdkVersion) throws Exception {
+    public void testArrayWithBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      ++x
-                      ++x
-                      return x
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.with(2, 99)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(7, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 99, 4, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixIncrementShort(JdkVersion jdkVersion) throws Exception {
+    public void testArrayWithDoesNotMutateOriginal(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: short = 100
-                      let result: short = ++x
-                      return result
+                      const arr = [1, 2, 3]
+                      const modified = arr.with(1, 99)
+                      return arr
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals((short) 101, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPrefixReturnsCorrectValueInComplexExpression(JdkVersion jdkVersion) throws Exception {
+    public void testArrayWithEmpty(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      let y: int = 10
-                      let result: int = ++x + ++y
-                      return result
+                      const arr = []
+                      return arr.with(0, 99)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(17, classA.getMethod("test").invoke(instance)); // 6 + 11
+        assertEquals(List.of(), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStandalonePostfixDecrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayWithFirstElement(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 10
-                      x--
-                      return x
+                      const arr = [10, 20, 30]
+                      return arr.with(0, 99)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(9, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(99, 20, 30), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStandalonePostfixIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayWithLastElement(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      x++
-                      return x
+                      const arr = [10, 20, 30, 40]
+                      return arr.with(3, 99)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(10, 20, 30, 99), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStandalonePrefixDecrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayWithMethodChaining(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 10
-                      --x
-                      return x
+                      const arr = [3, 1, 2]
+                      return arr.with(0, 10).sort()
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(9, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 10), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testStandalonePrefixIncrement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayWithMixedTypes(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      ++x
-                      return x
+                      const arr = [1, "hello", true]
+                      return arr.with(1, "world")
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, "world", true), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testUpdateInBinaryExpression(JdkVersion jdkVersion) throws Exception {
+    public void testArrayWithNegativeIndex(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      const result = x++ + 10
-                      return result
+                      const arr = [1, 2, 3, 4, 5]
+                      return arr.with(-2, 99)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(15, classA.getMethod("test").invoke(instance)); // 5 + 10
+        assertEquals(List.of(1, 2, 3, 99, 5), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testUpdateInBinaryExpressionPrefix(JdkVersion jdkVersion) throws Exception {
+    public void testArrayWithNegativeIndexLast(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      const result = ++x + 10
-                      return result
+                      const arr = [10, 20, 30]
+                      return arr.with(-1, 99)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(16, classA.getMethod("test").invoke(instance)); // 6 + 10
+        assertEquals(List.of(10, 20, 99), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testUpdateInReturnStatement(JdkVersion jdkVersion) throws Exception {
+    public void testArrayWithOutOfBounds(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      return x++
+                      const arr = [1, 2, 3]
+                      return arr.with(10, 99)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(5, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(1, 2, 3), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testUpdateInReturnStatementPrefix(JdkVersion jdkVersion) throws Exception {
+    public void testArrayWithReturnsNewArray(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      return ++x
+                      const arr = [10, 20, 30]
+                      return arr.with(1, 99)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(6, classA.getMethod("test").invoke(instance));
+        assertEquals(List.of(10, 99, 30), classA.getMethod("test").invoke(instance));
     }
+
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testVariablesModifiedAfterUpdateExpression(JdkVersion jdkVersion) throws Exception {
+    public void testArrayWithSingleElement(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      let x: int = 5
-                      let y: int = 10
-                      let result: int = x++ + y++
-                      return x + y
+                      const arr = [42]
+                      return arr.with(0, 99)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(17, classA.getMethod("test").invoke(instance)); // 6 + 11 (variables incremented)
+        assertEquals(List.of(99), classA.getMethod("test").invoke(instance));
+    }
+
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testArrayWithStrings(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const arr = ["hello", "world", "test"]
+                      return arr.with(1, "universe")
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(List.of("hello", "universe", "test"), classA.getMethod("test").invoke(instance));
     }
 }
