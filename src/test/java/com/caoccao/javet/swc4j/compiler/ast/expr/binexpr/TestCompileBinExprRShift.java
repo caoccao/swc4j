@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.ast.expr;
+package com.caoccao.javet.swc4j.compiler.ast.expr.binexpr;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
@@ -23,137 +23,156 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestCompileBinExprLShift extends BaseTestCompileSuite {
+public class TestCompileBinExprRShift extends BaseTestCompileSuite {
 
     // Basic primitive type tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testBasicIntLeftShift(JdkVersion jdkVersion) throws Exception {
+    public void testBasicIntRightShift(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 5
+                      const a: int = 20
                       const b: int = 2
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(20, classA.getMethod("test").invoke(instance)); // 5 << 2 = 20
+        assertEquals(5, classA.getMethod("test").invoke(instance)); // 20 >> 2 = 5
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testByteLeftShift(JdkVersion jdkVersion) throws Exception {
+    public void testByteObjectRightShiftIntObject(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: byte = 3
-                      const b: byte = 2
-                      const c = a << b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(12, classA.getMethod("test").invoke(instance)); // 3 << 2 = 12
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testByteLeftShiftInt(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: byte = 7
-                      const b: int = 3
-                      const c = a << b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(56, classA.getMethod("test").invoke(instance)); // 7 << 3 = 56
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testByteObjectLeftShiftIntObject(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Byte = 5
+                      const a: Byte = 80
                       const b: Integer = 4
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(80, classA.getMethod("test").invoke(instance)); // 5 << 4 = 80
+        assertEquals(5, classA.getMethod("test").invoke(instance)); // 80 >> 4 = 5
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testChainedLeftShift(JdkVersion jdkVersion) throws Exception {
+    public void testByteRightShift(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 1
+                      const a: byte = 12
+                      const b: byte = 2
+                      const c = a >> b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(3, classA.getMethod("test").invoke(instance)); // 12 >> 2 = 3
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testByteRightShiftInt(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: byte = 56
+                      const b: int = 3
+                      const c = a >> b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(7, classA.getMethod("test").invoke(instance)); // 56 >> 3 = 7
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testChainedRightShift(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: int = 32
                       const b: int = 2
-                      const c: int = 3
-                      return a << b << c
+                      const c: int = 1
+                      return a >> b >> c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        // First: 1 << 2 = 4, then: 4 << 3 = 32
-        assertEquals(32, classA.getMethod("test").invoke(instance));
+        // First: 32 >> 2 = 8, then: 8 >> 1 = 4
+        assertEquals(4, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testCharLeftShift(JdkVersion jdkVersion) throws Exception {
+    public void testCharRightShift(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: char = 'A'
+                      const a: char = 130
                       const b: int = 1
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(130, classA.getMethod("test").invoke(instance)); // 65 << 1 = 130
+        assertEquals(65, classA.getMethod("test").invoke(instance)); // 130 >> 1 = 65
     }
 
     // Wrapper type tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntLeftShiftBy0(JdkVersion jdkVersion) throws Exception {
+    public void testDivideByPowerOf2(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: int = 1024
+                      const b: int = 10
+                      const c = a >> b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(1, classA.getMethod("test").invoke(instance)); // 1024 >> 10 = 1
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testIntRightShiftBy0(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: int = 12345
                       const b: int = 0
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
@@ -165,33 +184,35 @@ public class TestCompileBinExprLShift extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntLeftShiftBy31(JdkVersion jdkVersion) throws Exception {
+    public void testIntRightShiftBy31(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 1
+                      const a: int = -1024
                       const b: int = 31
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(Integer.MIN_VALUE, classA.getMethod("test").invoke(instance)); // 1 << 31 = -2147483648
+        assertEquals(-1, classA.getMethod("test").invoke(instance)); // Any negative >> 31 = -1
     }
+
+    // Shift amount masking tests (JVM masks to 5 bits for int, 6 bits for long)
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntLeftShiftBy32SameAs0(JdkVersion jdkVersion) throws Exception {
+    public void testIntRightShiftBy32SameAs0(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: int = 100
                       const b: int = 32
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
@@ -202,18 +223,16 @@ public class TestCompileBinExprLShift extends BaseTestCompileSuite {
         assertEquals(100, classA.getMethod("test").invoke(instance));
     }
 
-    // Shift amount masking tests (JVM masks to 5 bits for int, 6 bits for long)
-
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntLeftShiftBy33SameAs1(JdkVersion jdkVersion) throws Exception {
+    public void testIntRightShiftBy33SameAs1(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 50
+                      const a: int = 100
                       const b: int = 33
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
@@ -221,38 +240,38 @@ public class TestCompileBinExprLShift extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         // 33 & 0x1F = 1, so shifting by 33 is same as shifting by 1
-        assertEquals(100, classA.getMethod("test").invoke(instance));
+        assertEquals(50, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntLeftShiftByByte(JdkVersion jdkVersion) throws Exception {
+    public void testIntRightShiftByByte(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 42
+                      const a: int = 336
                       const b: byte = 3
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(336, classA.getMethod("test").invoke(instance)); // 42 << 3 = 336
+        assertEquals(42, classA.getMethod("test").invoke(instance)); // 336 >> 3 = 42
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntLeftShiftByNegative(JdkVersion jdkVersion) throws Exception {
+    public void testIntRightShiftByNegative(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 1
+                      const a: int = -1024
                       const b: int = -1
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
@@ -260,160 +279,178 @@ public class TestCompileBinExprLShift extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         // -1 & 0x1F = 31, so shifting by -1 is same as shifting by 31
-        // 1 << 31 = -2147483648 (sets the sign bit)
-        assertEquals(-2147483648, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testIntLeftShiftOverflow(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: int = 1000000000
-                      const b: int = 10
-                      const c = a << b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // Overflow wraps around in JVM
-        assertEquals(1797783552, classA.getMethod("test").invoke(instance));
+        // -1024 >> 31 = -1 (arithmetic shift preserves sign)
+        assertEquals(-1, classA.getMethod("test").invoke(instance));
     }
 
     // Negative shift amount tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntLeftShiftWithExplicitCastToInt(JdkVersion jdkVersion) throws Exception {
+    public void testIntRightShiftWithExplicitCastToInt(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      const a: int = 7
+                      const a: int = 56
                       const b: int = 3
-                      return (a << b) as int
+                      return (a >> b) as int
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(56, classA.getMethod("test").invoke(instance));
+        assertEquals(7, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntLeftShiftWithExplicitCastToLong(JdkVersion jdkVersion) throws Exception {
+    public void testIntRightShiftWithExplicitCastToLong(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): long {
-                      const a: int = 100
+                      const a: int = 3200
                       const b: int = 5
-                      return (a << b) as long
+                      return (a >> b) as long
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(3200L, classA.getMethod("test").invoke(instance));
+        assertEquals(100L, classA.getMethod("test").invoke(instance));
     }
 
     // Shift by 0 tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntegerObjectLeftShift(JdkVersion jdkVersion) throws Exception {
+    public void testIntegerObjectRightShift(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: Integer = 8
+                      const a: Integer = 32
                       const b: Integer = 2
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(32, classA.getMethod("test").invoke(instance)); // 8 << 2 = 32
+        assertEquals(8, classA.getMethod("test").invoke(instance)); // 32 >> 2 = 8
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLargeIntLeftShift(JdkVersion jdkVersion) throws Exception {
+    public void testLargeIntRightShift(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 100000
+                      const a: int = 102400000
                       const b: int = 10
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(102400000, classA.getMethod("test").invoke(instance)); // 100000 << 10 = 102400000
+        assertEquals(100000, classA.getMethod("test").invoke(instance)); // 102400000 >> 10 = 100000
     }
 
-    // Edge case: shifting 1 to create powers of 2
+    // Power of 2 division using right shift
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLargeLongLeftShift(JdkVersion jdkVersion) throws Exception {
+    public void testLargeLongRightShift(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: long = 1000000000
+                      const a: long = 1048576000000000
                       const b: int = 20
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1048576000000000L, classA.getMethod("test").invoke(instance)); // 1000000000 << 20
+        assertEquals(1000000000L, classA.getMethod("test").invoke(instance)); // 1048576000000000 >> 20 = 1000000000
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLongLeftShift(JdkVersion jdkVersion) throws Exception {
+    public void testLongDivideByPowerOf2(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: long = 1000000
-                      const b: int = 3
-                      const c = a << b
+                      const a: long = 1099511627776
+                      const b: int = 40
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(8000000L, classA.getMethod("test").invoke(instance)); // 1000000 << 3 = 8000000
+        assertEquals(1L, classA.getMethod("test").invoke(instance)); // 1099511627776 >> 40 = 1
     }
 
-    // Negative operand tests
+    // Negative operand tests (arithmetic shift preserves sign)
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLongLeftShiftBy0(JdkVersion jdkVersion) throws Exception {
+    public void testLongObjectRightShift(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Long = 395040
+                      const b: Integer = 5
+                      const c = a >> b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(12345L, classA.getMethod("test").invoke(instance)); // 395040 >> 5 = 12345
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testLongRightShift(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: long = 8000000
+                      const b: int = 3
+                      const c = a >> b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(1000000L, classA.getMethod("test").invoke(instance)); // 8000000 >> 3 = 1000000
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testLongRightShiftBy0(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: long = 999999
                       const b: int = 0
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
@@ -425,35 +462,35 @@ public class TestCompileBinExprLShift extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLongLeftShiftBy63(JdkVersion jdkVersion) throws Exception {
+    public void testLongRightShiftBy63(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: long = 1
+                      const a: long = -1024
                       const b: int = 63
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(Long.MIN_VALUE, classA.getMethod("test").invoke(instance)); // 1 << 63 = -9223372036854775808
+        assertEquals(-1L, classA.getMethod("test").invoke(instance)); // Any negative >> 63 = -1
     }
 
     // Explicit cast tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLongLeftShiftBy64SameAs0(JdkVersion jdkVersion) throws Exception {
+    public void testLongRightShiftBy64SameAs0(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: long = 1000
                       const b: int = 64
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
@@ -466,14 +503,14 @@ public class TestCompileBinExprLShift extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLongLeftShiftBy65SameAs1(JdkVersion jdkVersion) throws Exception {
+    public void testLongRightShiftBy65SameAs1(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: long = 777
+                      const a: long = 1554
                       const b: int = 65
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
@@ -481,19 +518,19 @@ public class TestCompileBinExprLShift extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         // 65 & 0x3F = 1, so shifting by 65 is same as shifting by 1
-        assertEquals(1554L, classA.getMethod("test").invoke(instance));
+        assertEquals(777L, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLongLeftShiftByNegative(JdkVersion jdkVersion) throws Exception {
+    public void testLongRightShiftByNegative(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: long = 1
+                      const a: long = -1024
                       const b: int = -1
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
@@ -501,187 +538,231 @@ public class TestCompileBinExprLShift extends BaseTestCompileSuite {
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
         // -1 & 0x3F = 63, so shifting by -1 is same as shifting by 63
-        assertEquals(Long.MIN_VALUE, classA.getMethod("test").invoke(instance));
+        // -1024 >> 63 = -1 (arithmetic shift preserves sign)
+        assertEquals(-1L, classA.getMethod("test").invoke(instance));
     }
 
     // Chained shift operations
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLongLeftShiftOverflow(JdkVersion jdkVersion) throws Exception {
+    public void testLongRightShiftWithExplicitCastToInt(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test() {
-                      const a: long = 1000000000000
-                      const b: int = 40
-                      const c = a << b
-                      return c
+                    test(): int {
+                      const a: long = 100
+                      const b: int = 2
+                      return (a >> b) as int
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        // Overflow wraps around in JVM
-        assertEquals(-6552737457824071680L, classA.getMethod("test").invoke(instance));
+        assertEquals(25, classA.getMethod("test").invoke(instance));
     }
 
     // Mixed type tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLongLeftShiftWithExplicitCastToInt(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      const a: long = 25
-                      const b: int = 2
-                      return (a << b) as int
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(100, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testLongObjectLeftShift(JdkVersion jdkVersion) throws Exception {
+    public void testNegativeIntRightShift(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: Long = 12345
-                      const b: Integer = 5
-                      const c = a << b
+                      const a: int = -20
+                      const b: int = 2
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(395040L, classA.getMethod("test").invoke(instance)); // 12345 << 5 = 395040
+        assertEquals(-5, classA.getMethod("test").invoke(instance)); // -20 >> 2 = -5 (sign extended)
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNegativeIntRightShiftBy31(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: int = -1000
+                      const b: int = 31
+                      const c = a >> b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // Shifting negative by 31 fills with 1s, resulting in -1
+        assertEquals(-1, classA.getMethod("test").invoke(instance));
     }
 
     // Large value tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLongPowerOfTwo(JdkVersion jdkVersion) throws Exception {
+    public void testNegativeLongRightShift(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: long = 1
-                      const b: int = 40
-                      const c = a << b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(1099511627776L, classA.getMethod("test").invoke(instance)); // 1 << 40 = 1099511627776
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNegativeIntLeftShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: int = -5
-                      const b: int = 2
-                      const c = a << b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(-20, classA.getMethod("test").invoke(instance)); // -5 << 2 = -20
-    }
-
-    // Overflow tests
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testNegativeLongLeftShift(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: long = -100
+                      const a: long = -800
                       const b: int = 3
-                      const c = a << b
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(-800L, classA.getMethod("test").invoke(instance)); // -100 << 3 = -800
+        assertEquals(-100L, classA.getMethod("test").invoke(instance)); // -800 >> 3 = -100 (sign extended)
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testPowerOfTwo(JdkVersion jdkVersion) throws Exception {
+    public void testNegativeLongRightShiftBy63(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 1
-                      const b: int = 10
-                      const c = a << b
+                      const a: long = -1000
+                      const b: int = 63
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(1024, classA.getMethod("test").invoke(instance)); // 1 << 10 = 1024
+        // Shifting negative by 63 fills with 1s, resulting in -1
+        assertEquals(-1L, classA.getMethod("test").invoke(instance));
     }
 
     // Maximum shift amount tests (for int: 31, for long: 63)
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testShortLeftShift(JdkVersion jdkVersion) throws Exception {
+    public void testPositiveIntRightShiftBy31(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: short = 10
-                      const b: short = 2
-                      const c = a << b
+                      const a: int = 2147483647
+                      const b: int = 31
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(40, classA.getMethod("test").invoke(instance)); // 10 << 2 = 40
+        assertEquals(0, classA.getMethod("test").invoke(instance)); // Integer.MAX_VALUE >> 31 = 0
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testShortLeftShiftByLong(JdkVersion jdkVersion) throws Exception {
+    public void testPositiveLongRightShiftBy63(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: short = 15
-                      const b: long = 2
-                      const c = a << b
+                      const a: long = 1024
+                      const b: int = 63
+                      const c = a >> b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(60, classA.getMethod("test").invoke(instance)); // 15 << 2 = 60
+        assertEquals(0L, classA.getMethod("test").invoke(instance)); // Any positive small value >> 63 = 0
+    }
+
+    // Positive value shifted by maximum amount
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testShortRightShift(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: short = 40
+                      const b: short = 2
+                      const c = a >> b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(10, classA.getMethod("test").invoke(instance)); // 40 >> 2 = 10
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testShortRightShiftByLong(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: short = 60
+                      const b: long = 2
+                      const c = a >> b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(15, classA.getMethod("test").invoke(instance)); // 60 >> 2 = 15
+    }
+
+    // Test sign extension with specific values
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSignExtensionInt(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: int = -1
+                      const b: int = 1
+                      const c = a >> b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // -1 in binary is all 1s, shifting right still all 1s, so -1
+        assertEquals(-1, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSignExtensionLong(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: long = -1
+                      const b: int = 1
+                      const c = a >> b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // -1 in binary is all 1s, shifting right still all 1s, so -1
+        assertEquals(-1L, classA.getMethod("test").invoke(instance));
     }
 }

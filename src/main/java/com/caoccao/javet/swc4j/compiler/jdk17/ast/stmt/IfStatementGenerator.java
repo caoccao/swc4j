@@ -55,6 +55,25 @@ public final class IfStatementGenerator {
     }
 
     /**
+     * Check if a statement ends with a return statement.
+     *
+     * @param stmt the statement to check
+     * @return true if the statement ends with a return
+     */
+    private static boolean endsWithReturn(ISwc4jAstStmt stmt) {
+        if (stmt instanceof Swc4jAstReturnStmt) {
+            return true;
+        }
+        if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
+            var stmts = blockStmt.getStmts();
+            if (!stmts.isEmpty()) {
+                return endsWithReturn(stmts.get(stmts.size() - 1));
+            }
+        }
+        return false;
+    }
+
+    /**
      * Generate bytecode for an if statement.
      *
      * @param code           the code builder
@@ -83,41 +102,6 @@ public final class IfStatementGenerator {
             // If-else
             generateIfElse(code, cp, ifStmt, returnTypeInfo, context, options);
         }
-    }
-
-    /**
-     * Generate bytecode for simple if statement (no else clause).
-     *
-     * @param code           the code builder
-     * @param cp             the constant pool
-     * @param ifStmt         the if statement AST node
-     * @param returnTypeInfo return type information
-     * @param context        compilation context
-     * @param options        compilation options
-     * @throws Swc4jByteCodeCompilerException if code generation fails
-     */
-    private static void generateSimpleIf(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstIfStmt ifStmt,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-
-        // Jump to end if condition is false (0)
-        code.ifeq(0); // Placeholder, will patch offset later
-        int ifeqOffsetPos = code.getCurrentOffset() - 2;
-        int ifeqOpcodePos = code.getCurrentOffset() - 3;
-
-        // Generate consequent (then branch)
-        StatementGenerator.generate(code, cp, ifStmt.getCons(), returnTypeInfo, context, options);
-
-        // End of if statement
-        int endLabel = code.getCurrentOffset();
-
-        // Calculate and patch the ifeq offset
-        int ifeqOffset = endLabel - ifeqOpcodePos;
-        code.patchShort(ifeqOffsetPos, ifeqOffset);
     }
 
     /**
@@ -179,21 +163,37 @@ public final class IfStatementGenerator {
     }
 
     /**
-     * Check if a statement ends with a return statement.
+     * Generate bytecode for simple if statement (no else clause).
      *
-     * @param stmt the statement to check
-     * @return true if the statement ends with a return
+     * @param code           the code builder
+     * @param cp             the constant pool
+     * @param ifStmt         the if statement AST node
+     * @param returnTypeInfo return type information
+     * @param context        compilation context
+     * @param options        compilation options
+     * @throws Swc4jByteCodeCompilerException if code generation fails
      */
-    private static boolean endsWithReturn(ISwc4jAstStmt stmt) {
-        if (stmt instanceof Swc4jAstReturnStmt) {
-            return true;
-        }
-        if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
-            var stmts = blockStmt.getStmts();
-            if (!stmts.isEmpty()) {
-                return endsWithReturn(stmts.get(stmts.size() - 1));
-            }
-        }
-        return false;
+    private static void generateSimpleIf(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstIfStmt ifStmt,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        // Jump to end if condition is false (0)
+        code.ifeq(0); // Placeholder, will patch offset later
+        int ifeqOffsetPos = code.getCurrentOffset() - 2;
+        int ifeqOpcodePos = code.getCurrentOffset() - 3;
+
+        // Generate consequent (then branch)
+        StatementGenerator.generate(code, cp, ifStmt.getCons(), returnTypeInfo, context, options);
+
+        // End of if statement
+        int endLabel = code.getCurrentOffset();
+
+        // Calculate and patch the ifeq offset
+        int ifeqOffset = endLabel - ifeqOpcodePos;
+        code.patchShort(ifeqOffsetPos, ifeqOffset);
     }
 }

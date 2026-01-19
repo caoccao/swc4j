@@ -20,16 +20,11 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUpdateExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstExprStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstIfStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
+import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
-import com.caoccao.javet.swc4j.compiler.jdk17.ReturnType;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
@@ -110,11 +105,11 @@ public final class StatementGenerator {
     /**
      * Generate bytecode for an expression statement.
      *
-     * @param code      the code builder
-     * @param cp        the constant pool
-     * @param exprStmt  the expression statement
-     * @param context   compilation context
-     * @param options   compilation options
+     * @param code     the code builder
+     * @param cp       the constant pool
+     * @param exprStmt the expression statement
+     * @param context  compilation context
+     * @param options  compilation options
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     private static void generateExprStmt(

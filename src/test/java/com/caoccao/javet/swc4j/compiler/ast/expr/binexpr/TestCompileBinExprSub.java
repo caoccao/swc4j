@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.ast.expr;
+package com.caoccao.javet.swc4j.compiler.ast.expr.binexpr;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
@@ -23,140 +23,79 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestCompileBinExprMul extends BaseTestCompileSuite {
+public class TestCompileBinExprSub extends BaseTestCompileSuite {
 
     // Basic primitive type tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testByteMultiplicationPromotion(JdkVersion jdkVersion) throws Exception {
+    public void testByteMinusInt(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: byte = 30
+                      const b: int = 10
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(20, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testByteObjectMinusLongObject(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Byte = 50
+                      const b: Long = 20
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(30L, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testByteSubtractionPromotion(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: byte = 127
-                      const b: byte = 2
-                      const c = a * b
+                      const b: byte = -128
+                      const c = a - b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(254, classA.getMethod("test").invoke(instance)); // byte promotes to int for operations
+        assertEquals(255, classA.getMethod("test").invoke(instance)); // byte promotes to int for operations
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testByteMultiplyInt(JdkVersion jdkVersion) throws Exception {
+    public void testChainedSubtraction(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: byte = 3
-                      const b: int = 10
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(30, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testByteObjectMultiplyLongObject(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Byte = 5
-                      const b: Long = 4
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(20L, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testChainedMultiplication(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: int = 2
-                      const b: int = 3
-                      const c: int = 4
+                      const a: int = 100
+                      const b: int = 20
+                      const c: int = 15
                       const d: int = 5
-                      return a * b * c * d
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(120, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testCharMultiplyChar(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: char = 'C'
-                      const b: char = '\\u0002'
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(134, classA.getMethod("test").invoke(instance)); // 'C' (67) * 2 = 134
-    }
-
-    // Mixed primitive type tests
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testCharacterMultiplyCharacter(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Character = '\\u0005'
-                      const b: Character = '\\u0003'
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(15, classA.getMethod("test").invoke(instance)); // 5 * 3 = 15
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testComplexExpressionWithMultipleMultiplications(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      const a: int = 5
-                      const b: int = 4
-                      const c: int = 3
-                      const prod = a * b
-                      const result = prod * c
-                      return result
+                      return a - b - c - d
                     }
                   }
                 }""");
@@ -167,40 +106,101 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testDoubleMultiplicationPrecision(JdkVersion jdkVersion) throws Exception {
+    public void testCharMinusChar(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: double = 0.1
-                      const b: double = 0.2
-                      const c = a * b
+                      const a: char = 'Z'
+                      const b: char = 'A'
+                      const c = a - b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0.02, (double) classA.getMethod("test").invoke(instance), 0.00001);
+        assertEquals(25, classA.getMethod("test").invoke(instance)); // 'Z' (90) - 'A' (65) = 25
+    }
+
+    // Mixed primitive type tests
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testCharacterMinusCharacter(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Character = '5'
+                      const b: Character = '1'
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(4, classA.getMethod("test").invoke(instance)); // '5' (53) - '1' (49) = 4
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testDoubleObjectMultiplyDoubleObject(JdkVersion jdkVersion) throws Exception {
+    public void testComplexExpressionWithMultipleSubtractions(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      const a: int = 100
+                      const b: int = 20
+                      const c: int = 15
+                      const diff = a - b
+                      const result = diff - c
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(65, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDoubleObjectMinusDoubleObject(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: Double = 10.5
-                      const b: Double = 2.5
-                      const c = a * b
+                      const a: Double = 100.5
+                      const b: Double = 24.5
+                      const c = a - b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(26.25, classA.getMethod("test").invoke(instance));
+        assertEquals(76.0, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDoubleSubtractionPrecision(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: double = 0.3
+                      const b: double = 0.1
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(0.2, (double) classA.getMethod("test").invoke(instance), 0.00001);
     }
 
     @ParameterizedTest
@@ -210,15 +210,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: byte = 7
-                      const b: byte = 5
-                      return (a as double) * (b as double)
+                      const a: byte = 35
+                      const b: byte = 13
+                      return (a as double) - (b as double)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(35.0, classA.getMethod("test").invoke(instance));
+        assertEquals(22.0, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -228,15 +228,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: byte = 6
-                      const b: byte = 4
-                      return (a as float) * (b as float)
+                      const a: byte = 30
+                      const b: byte = 12
+                      return (a as float) - (b as float)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(24.0f, classA.getMethod("test").invoke(instance));
+        assertEquals(18.0f, classA.getMethod("test").invoke(instance));
     }
 
     // Wrapper type tests
@@ -248,15 +248,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: byte = 8
-                      const b: byte = 5
-                      return (a as int) * (b as int)
+                      const a: byte = 40
+                      const b: byte = 15
+                      return (a as int) - (b as int)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(40, classA.getMethod("test").invoke(instance));
+        assertEquals(25, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -266,15 +266,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: Byte = 10
-                      const b: Byte = 4
-                      return (a as int) * (b as int)
+                      const a: Byte = 50
+                      const b: Byte = 20
+                      return (a as int) - (b as int)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(40, classA.getMethod("test").invoke(instance));
+        assertEquals(30, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -284,15 +284,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: byte = 9
-                      const b: byte = 3
-                      return (a as long) * (b as long)
+                      const a: byte = 40
+                      const b: byte = 18
+                      return (a as long) - (b as long)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(27L, classA.getMethod("test").invoke(instance));
+        assertEquals(22L, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -302,15 +302,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: Byte = 12
-                      const b: Byte = 3
-                      return (a as Long) * (b as Long)
+                      const a: Byte = 60
+                      const b: Byte = 22
+                      return (a as Long) - (b as Long)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(36L, classA.getMethod("test").invoke(instance));
+        assertEquals(38L, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -320,15 +320,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: double = 6.5
-                      const b: double = 3.0
-                      return (a as float) * (b as float)
+                      const a: double = 60.5
+                      const b: double = 30.5
+                      return (a as float) - (b as float)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(19.5f, classA.getMethod("test").invoke(instance));
+        assertEquals(30.0f, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -338,15 +338,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: double = 5.9
-                      const b: double = 4.3
-                      return (a as int) * (b as int)
+                      const a: double = 50.9
+                      const b: double = 20.3
+                      return (a as int) - (b as int)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(20, classA.getMethod("test").invoke(instance));
+        assertEquals(30, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -356,15 +356,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: double = 5.8
-                      const b: double = 4.3
-                      return (a as long) * (b as long)
+                      const a: double = 50.8
+                      const b: double = 20.3
+                      return (a as long) - (b as long)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(20L, classA.getMethod("test").invoke(instance));
+        assertEquals(30L, classA.getMethod("test").invoke(instance));
     }
 
     // Mixed primitive and wrapper tests
@@ -376,15 +376,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: Double = 6.5
-                      const b: Double = 2.5
-                      return (a as float) * (b as float)
+                      const a: Double = 60.5
+                      const b: Double = 20.5
+                      return (a as float) - (b as float)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(16.25f, classA.getMethod("test").invoke(instance));
+        assertEquals(40.0f, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -394,15 +394,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: float = 5.5
-                      const b: float = 2.5
-                      return (a as double) * (b as double)
+                      const a: float = 50.5
+                      const b: float = 20.5
+                      return (a as double) - (b as double)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(13.75, (double) classA.getMethod("test").invoke(instance), 0.0001);
+        assertEquals(30.0, (double) classA.getMethod("test").invoke(instance), 0.0001);
     }
 
     @ParameterizedTest
@@ -412,15 +412,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: Float = 2.5
-                      const b: Float = 1.5
-                      return (a as Double) * (b as Double)
+                      const a: Float = 28.5
+                      const b: Float = 11.5
+                      return (a as Double) - (b as Double)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(3.75, (double) classA.getMethod("test").invoke(instance), 0.0001);
+        assertEquals(17.0, (double) classA.getMethod("test").invoke(instance), 0.0001);
     }
 
     @ParameterizedTest
@@ -430,15 +430,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: float = 4.9
-                      const b: float = 3.1
-                      return (a as int) * (b as int)
+                      const a: float = 40.9
+                      const b: float = 18.1
+                      return (a as int) - (b as int)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(12, classA.getMethod("test").invoke(instance));
+        assertEquals(22, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -448,15 +448,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: float = 6.6
-                      const b: float = 4.4
-                      return (a as long) * (b as long)
+                      const a: float = 60.6
+                      const b: float = 28.4
+                      return (a as long) - (b as long)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(24L, classA.getMethod("test").invoke(instance));
+        assertEquals(32L, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -466,15 +466,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: Float = 5.5
-                      const b: Float = 1.5
-                      return (a as double) * (b as double)
+                      const a: Float = 50.5
+                      const b: Float = 18.5
+                      return (a as double) - (b as double)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(8.25, (double) classA.getMethod("test").invoke(instance), 0.0001);
+        assertEquals(32.0, (double) classA.getMethod("test").invoke(instance), 0.0001);
     }
 
     @ParameterizedTest
@@ -484,15 +484,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 8
-                      const b: float = 3
-                      return (a as double) * (b as double)
+                      const a: int = 80
+                      const b: float = 30
+                      return (a as double) - (b as double)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(24.0, classA.getMethod("test").invoke(instance));
+        assertEquals(50.0, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -502,15 +502,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 5
-                      const b: int = 3
-                      return (a as float) * (b as float)
+                      const a: int = 50
+                      const b: int = 15
+                      return (a as float) - (b as float)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(15.0f, classA.getMethod("test").invoke(instance));
+        assertEquals(35.0f, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -520,15 +520,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 10
-                      const b: int = 3
-                      return ((((a as long)))) * (((b as long)))
+                      const a: int = 100
+                      const b: int = 30
+                      return ((((a as long)))) - (((b as long)))
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(30L, classA.getMethod("test").invoke(instance));
+        assertEquals(70L, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -538,15 +538,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: Integer = 15
-                      const b: Integer = 5
-                      return (a as double) * (b as double)
+                      const a: Integer = 75
+                      const b: Integer = 35
+                      return (a as double) - (b as double)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(75.0, classA.getMethod("test").invoke(instance));
+        assertEquals(40.0, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -556,15 +556,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: Integer = 13
-                      const b: Integer = 5
-                      return (a as Double) * (b as Double)
+                      const a: Integer = 65
+                      const b: Integer = 25
+                      return (a as Double) - (b as Double)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(65.0, classA.getMethod("test").invoke(instance));
+        assertEquals(40.0, classA.getMethod("test").invoke(instance));
     }
 
     // Explicit type cast tests - Widening conversions
@@ -576,15 +576,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: Integer = 20
-                      const b: Integer = 10
-                      return (a as long) * (b as long)
+                      const a: Integer = 200
+                      const b: Integer = 100
+                      return (a as long) - (b as long)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(200L, classA.getMethod("test").invoke(instance));
+        assertEquals(100L, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -594,15 +594,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: Integer = 18
-                      const b: Integer = 6
-                      return (a as Long) * (b as Long)
+                      const a: Integer = 180
+                      const b: Integer = 60
+                      return (a as Long) - (b as Long)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(108L, classA.getMethod("test").invoke(instance));
+        assertEquals(120L, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -612,9 +612,9 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: long = 100
-                      const b: long = 7
-                      return (a as double) * (b as double)
+                      const a: long = 1000
+                      const b: long = 300
+                      return (a as double) - (b as double)
                     }
                   }
                 }""");
@@ -630,15 +630,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: long = 20
-                      const b: int = 11
-                      return (a as float) * (b as float)
+                      const a: long = 200
+                      const b: int = 77
+                      return (a as float) - (b as float)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(220.0f, classA.getMethod("test").invoke(instance));
+        assertEquals(123.0f, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -648,15 +648,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: long = 100
-                      const b: long = 4
-                      return (a as int) * (b as int)
+                      const a: long = 1000
+                      const b: long = 200
+                      return (a as int) - (b as int)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(400, classA.getMethod("test").invoke(instance));
+        assertEquals(800, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -666,15 +666,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: Long = 300
-                      const b: Long = 10
-                      return (a as double) * (b as double)
+                      const a: Long = 3000
+                      const b: Long = 1000
+                      return (a as double) - (b as double)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(3000.0, classA.getMethod("test").invoke(instance));
+        assertEquals(2000.0, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -684,15 +684,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: Long = 70
-                      const b: Long = 3
-                      return (a as Float) * (b as Float)
+                      const a: Long = 700
+                      const b: Long = 300
+                      return (a as Float) - (b as Float)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(210.0f, classA.getMethod("test").invoke(instance));
+        assertEquals(400.0f, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -702,10 +702,10 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: byte = 10
-                      const b: short = 3
-                      const c: int = 2
-                      return (a as double) * (b as double) * (c as double)
+                      const a: byte = 100
+                      const b: short = 30
+                      const c: int = 10
+                      return (a as double) - (b as double) - (c as double)
                     }
                   }
                 }""");
@@ -721,9 +721,9 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: short = 24
-                      const b: short = 5
-                      return (a as double) * (b as double)
+                      const a: short = 240
+                      const b: short = 120
+                      return (a as double) - (b as double)
                     }
                   }
                 }""");
@@ -739,15 +739,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: Short = 18
-                      const b: Short = 5
-                      return (a as Double) * (b as Double)
+                      const a: Short = 180
+                      const b: Short = 80
+                      return (a as Double) - (b as Double)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(90.0, classA.getMethod("test").invoke(instance));
+        assertEquals(100.0, classA.getMethod("test").invoke(instance));
     }
 
     // Explicit cast tests - Narrowing conversions
@@ -759,9 +759,9 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: short = 15
-                      const b: short = 5
-                      return (a as float) * (b as float)
+                      const a: short = 150
+                      const b: short = 75
+                      return (a as float) - (b as float)
                     }
                   }
                 }""");
@@ -777,15 +777,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: short = 30
-                      const b: short = 10
-                      return (a as int) * (b as int)
+                      const a: short = 300
+                      const b: short = 100
+                      return (a as int) - (b as int)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(300, classA.getMethod("test").invoke(instance));
+        assertEquals(200, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -795,15 +795,15 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: Short = 30
-                      const b: Short = 10
-                      return (a as int) * (b as int)
+                      const a: Short = 300
+                      const b: Short = 100
+                      return (a as int) - (b as int)
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(300, classA.getMethod("test").invoke(instance));
+        assertEquals(200, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -813,9 +813,9 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
                 namespace com {
                   export class A {
                     test() {
-                      const a: short = 50
-                      const b: short = 5
-                      return (a as long) * (b as long)
+                      const a: short = 500
+                      const b: short = 250
+                      return (a as long) - (b as long)
                     }
                   }
                 }""");
@@ -826,512 +826,168 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testFloatMultiplicationPrecision(JdkVersion jdkVersion) throws Exception {
+    public void testFloatMinusDouble(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: float = 0.3
-                      const b: float = 0.3
-                      const c = a * b
+                      const a: float = 30.5
+                      const b: double = 10.5
+                      const c = a - b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0.09f, (float) classA.getMethod("test").invoke(instance), 0.00001f);
+        assertEquals(20.0, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testFloatMultiplyDouble(JdkVersion jdkVersion) throws Exception {
+    public void testFloatMinusDoubleObject(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: float = 3.5
-                      const b: double = 2.0
-                      const c = a * b
+                      const a: float = 40.5
+                      const b: Double = 20.5
+                      const c = a - b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(7.0, classA.getMethod("test").invoke(instance));
+        assertEquals(20.0, classA.getMethod("test").invoke(instance));
     }
 
     // Explicit cast tests - Wrapper to primitive conversions
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testFloatMultiplyDoubleObject(JdkVersion jdkVersion) throws Exception {
+    public void testFloatObjectMinusDouble(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: float = 4.5
-                      const b: Double = 2.0
-                      const c = a * b
+                      const a: Float = 30.5
+                      const b: double = 10.5
+                      const c = a - b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(9.0, classA.getMethod("test").invoke(instance));
+        assertEquals(20.0, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testFloatObjectMultiplyDouble(JdkVersion jdkVersion) throws Exception {
+    public void testFloatObjectMinusDoubleObject(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: Float = 3.5
-                      const b: double = 2.0
-                      const c = a * b
+                      const a: Float = 50.5
+                      const b: Double = 30.5
+                      const c = a - b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(7.0, classA.getMethod("test").invoke(instance));
+        assertEquals(20.0, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testFloatObjectMultiplyDoubleObject(JdkVersion jdkVersion) throws Exception {
+    public void testFloatObjectMinusFloatObject(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: Float = 5.5
-                      const b: Double = 3.0
-                      const c = a * b
+                      const a: Float = 100.5
+                      const b: Float = 24.5
+                      const c = a - b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(16.5, classA.getMethod("test").invoke(instance));
+        assertEquals(76.0f, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testFloatObjectMultiplyFloatObject(JdkVersion jdkVersion) throws Exception {
+    public void testFloatSubtractionPrecision(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: Float = 10.5
-                      const b: Float = 2.5
-                      const c = a * b
+                      const a: float = 0.9
+                      const b: float = 0.3
+                      const c = a - b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(26.25f, classA.getMethod("test").invoke(instance));
+        assertEquals(0.6f, (float) classA.getMethod("test").invoke(instance), 0.00001f);
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntMultiplyDouble(JdkVersion jdkVersion) throws Exception {
+    public void testIntMinusDouble(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 5
-                      const b: double = 2.5
-                      const c = a * b
+                      const a: int = 50
+                      const b: double = 20.5
+                      const c = a - b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(12.5, classA.getMethod("test").invoke(instance));
+        assertEquals(29.5, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntMultiplyFloat(JdkVersion jdkVersion) throws Exception {
+    public void testIntMinusFloat(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 3
-                      const b: float = 2.5
-                      const c = a * b
+                      const a: int = 30
+                      const b: float = 10.5
+                      const c = a - b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(7.5f, classA.getMethod("test").invoke(instance));
+        assertEquals(19.5f, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntMultiplyInt(JdkVersion jdkVersion) throws Exception {
+    public void testIntMinusInt(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 3
+                      const a: int = 30
                       const b: int = 10
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(30, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testIntMultiplyLong(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: int = 5
-                      const b: long = 4
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(20L, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testIntMultiplyLongObject(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: int = 6
-                      const b: Long = 4
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(24L, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testIntegerMultiplyDouble(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Integer = 6
-                      const b: Double = 2.5
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(15.0, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testIntegerMultiplyFloat(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Integer = 5
-                      const b: Float = 2.5
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(12.5f, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testIntegerMultiplyLong(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Integer = 10
-                      const b: Long = 4
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(40L, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testIntegerObjectMultiplyIntegerObject(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Integer = 5
-                      const b: Integer = 5
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(25, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testIntegerObjectMultiplyLong(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Integer = 10
-                      const b: long = 7
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(70L, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testLongMultiplyDouble(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: long = 10
-                      const b: double = 2.5
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(25.0, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testLongMultiplyFloat(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: long = 10
-                      const b: float = 2.5
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(25.0f, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testLongObjectMultiplyDoubleObject(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Long = 15
-                      const b: Double = 3.5
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(52.5, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testLongObjectMultiplyFloatObject(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Long = 15
-                      const b: Float = 2.5
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(37.5f, classA.getMethod("test").invoke(instance));
-    }
-
-    // Edge case tests
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testLongObjectMultiplyLongObject(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Long = 20
-                      const b: Long = 11
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(220L, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testMultiplicationResultingInZero(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: int = 42
-                      const b: int = 0
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testMultiplicationWithLargeValues(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: int = 30000
-                      const b: int = 1
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(30000, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testMultiplicationWithNegativeOperands(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: int = -10
-                      const b: int = -3
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(30, classA.getMethod("test").invoke(instance)); // -10 * -3 = 30
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testMultiplicationWithParentheses(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: int = 10
-                      const b: int = 2
-                      const c: int = 3
-                      return a * (b * c)
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(60, classA.getMethod("test").invoke(instance)); // 10 * (2 * 3) = 10 * 6 = 60
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testMultiplicationWithSmallNegativeValues(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: int = -30000
-                      const b: int = 1
-                      const c = a * b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(-30000, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testShortMultiplyInt(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: short = 5
-                      const b: int = 4
-                      const c = a * b
+                      const c = a - b
                       return c
                     }
                   }
@@ -1343,57 +999,420 @@ public class TestCompileBinExprMul extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testShortMultiplyLong(JdkVersion jdkVersion) throws Exception {
+    public void testIntMinusLong(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: Short = 8
-                      const b: Long = 6
-                      const c = a * b
+                      const a: int = 50
+                      const b: long = 20
+                      const c = a - b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(48L, classA.getMethod("test").invoke(instance));
+        assertEquals(30L, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testShortMultiplyShort(JdkVersion jdkVersion) throws Exception {
+    public void testIntMinusLongObject(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: int = 60
+                      const b: Long = 20
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(40L, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testIntegerMinusDouble(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Integer = 60
+                      const b: Double = 20.5
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(39.5, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testIntegerMinusFloat(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Integer = 50
+                      const b: Float = 20.5
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(29.5f, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testIntegerMinusLong(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Integer = 100
+                      const b: Long = 40
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(60L, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testIntegerObjectMinusIntegerObject(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Integer = 25
+                      const b: Integer = 10
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(15, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testIntegerObjectMinusLong(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Integer = 100
+                      const b: long = 30
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(70L, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testLongMinusDouble(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: long = 100
+                      const b: double = 23.5
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(76.5, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testLongMinusFloat(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: long = 100
+                      const b: float = 23.5
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(76.5f, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testLongObjectMinusDoubleObject(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Long = 150
+                      const b: Double = 37.5
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(112.5, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testLongObjectMinusFloatObject(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Long = 150
+                      const b: Float = 37.5
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(112.5f, classA.getMethod("test").invoke(instance));
+    }
+
+    // Edge case tests
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testLongObjectMinusLongObject(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Long = 200
+                      const b: Long = 77
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(123L, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testShortMinusInt(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: short = 50
+                      const b: int = 20
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(30, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testShortMinusLong(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Short = 80
+                      const b: Long = 30
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(50L, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testShortMinusShort(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): short {
-                      const a: short = 10
-                      const b: short = 5
-                      return a * b
+                      const a: short = 100
+                      const b: short = 25
+                      return a - b
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(50, (short) classA.getMethod("test").invoke(instance));
+        assertEquals(75, (short) classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testShortObjectMultiplyShortObject(JdkVersion jdkVersion) throws Exception {
+    public void testShortObjectMinusShortObject(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: Short = 10
-                      const b: Short = 5
-                      const c = a * b
+                      const a: Short = 100
+                      const b: Short = 25
+                      const c = a - b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(50, classA.getMethod("test").invoke(instance));
+        assertEquals(75, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubtractionResultingInNegative(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: int = 10
+                      const b: int = 50
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(-40, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubtractionResultingInZero(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: int = 42
+                      const b: int = 42
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(0, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubtractionWithLargeValues(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: int = 30000
+                      const b: int = 1
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(29999, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubtractionWithNegativeOperands(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: int = -10
+                      const b: int = -30
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(20, classA.getMethod("test").invoke(instance)); // -10 - (-30) = 20
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubtractionWithParentheses(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: int = 100
+                      const b: int = 20
+                      const c: int = 15
+                      return a - (b - c)
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(95, classA.getMethod("test").invoke(instance)); // 100 - (20 - 15) = 100 - 5 = 95
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSubtractionWithSmallNegativeValues(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: int = -30000
+                      const b: int = -1
+                      const c = a - b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(-29999, classA.getMethod("test").invoke(instance));
     }
 }

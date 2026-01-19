@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.ast.expr;
+package com.caoccao.javet.swc4j.compiler.ast.expr.binexpr;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
@@ -23,51 +23,52 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestCompileBinExprBitXor extends BaseTestCompileSuite {
+public class TestCompileBinExprBitOr extends BaseTestCompileSuite {
 
     // Basic primitive type tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testBasicIntBitXor(JdkVersion jdkVersion) throws Exception {
+    public void testBasicIntBitOr(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: int = 12
                       const b: int = 10
-                      const c = a ^ b
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(6, classA.getMethod("test").invoke(instance)); // 12 ^ 10 = 6
+        assertEquals(14, classA.getMethod("test").invoke(instance)); // 12 | 10 = 14
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testBitXorDoubleApplication(JdkVersion jdkVersion) throws Exception {
+    public void testBitOrFlagCombination(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 100
-                      const mask: int = 0xFF
-                      const c = (a ^ mask) ^ mask
-                      return c
+                      const flag1: int = 1
+                      const flag2: int = 2
+                      const flag3: int = 4
+                      const flags = flag1 | flag2 | flag3
+                      return flags
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(100, classA.getMethod("test").invoke(instance)); // (a ^ b) ^ b = a (reversible)
+        assertEquals(7, classA.getMethod("test").invoke(instance)); // Combine flags: 1 | 2 | 4 = 7
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testBitXorInExpression(JdkVersion jdkVersion) throws Exception {
+    public void testBitOrInExpression(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
@@ -75,368 +76,349 @@ public class TestCompileBinExprBitXor extends BaseTestCompileSuite {
                       const a: int = 16
                       const b: int = 8
                       const c: int = 4
-                      const d = (a ^ b) + (b ^ c)
+                      const d = (a | b) + (b | c)
                       return d
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(36, classA.getMethod("test").invoke(instance)); // (16 ^ 8) + (8 ^ 4) = 24 + 12 = 36
+        assertEquals(36, classA.getMethod("test").invoke(instance)); // (16 | 8) + (8 | 4) = 24 + 12 = 36
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testBitXorLongPattern(JdkVersion jdkVersion) throws Exception {
+    public void testBitOrLongCombination(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: long = 0xAAAAAAAA
-                      const b: long = 0x55555555
-                      const c = a ^ b
+                      const a: long = 0xFF000000
+                      const b: long = 0x00FF0000
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0xFFFFFFFFL, classA.getMethod("test").invoke(instance)); // Alternating bits XOR = all ones
+        assertEquals(0xFFFF0000L, classA.getMethod("test").invoke(instance)); // Combine bits
     }
 
     // Wrapper type tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testBitXorSameValue(JdkVersion jdkVersion) throws Exception {
+    public void testBitOrSameValue(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: int = 789
                       const b: int = 789
-                      const c = a ^ b
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(0, classA.getMethod("test").invoke(instance)); // 789 ^ 789 = 0 (cancel out)
+        assertEquals(789, classA.getMethod("test").invoke(instance)); // 789 | 789 = 789 (idempotent)
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testBitXorSwapPattern(JdkVersion jdkVersion) throws Exception {
+    public void testBitOrSetLowBits(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: int = 42
-                      const b: int = 17
-                      const c = a ^ b
+                      const a: int = 0xFF00
+                      const b: int = 0x00FF
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(59, classA.getMethod("test").invoke(instance)); // 42 ^ 17 = 59
+        assertEquals(0xFFFF, classA.getMethod("test").invoke(instance)); // Combine high and low bytes
     }
 
     // Mixed type tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testBitXorToggleBits(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: int = 0xF0F0
-                      const mask: int = 0xFFFF
-                      const c = a ^ mask
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(0x0F0F, classA.getMethod("test").invoke(instance)); // Toggle all bits
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testBitXorWithAllOnes(JdkVersion jdkVersion) throws Exception {
+    public void testBitOrWithAllOnes(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: int = 456
                       const b: int = -1
-                      const c = a ^ b
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(-457, classA.getMethod("test").invoke(instance)); // 456 ^ -1 = -457 (bitwise NOT)
+        assertEquals(-1, classA.getMethod("test").invoke(instance)); // 456 | -1 = -1 (all bits set)
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testBitXorWithZero(JdkVersion jdkVersion) throws Exception {
+    public void testBitOrWithZero(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: int = 123
                       const b: int = 0
-                      const c = a ^ b
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(123, classA.getMethod("test").invoke(instance)); // 123 ^ 0 = 123
+        assertEquals(123, classA.getMethod("test").invoke(instance)); // 123 | 0 = 123
     }
-
-    // Negative number tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testBothNegativeBitXor(JdkVersion jdkVersion) throws Exception {
+    public void testBothNegativeBitOr(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: int = -10
                       const b: int = -5
-                      const c = a ^ b
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(13, classA.getMethod("test").invoke(instance)); // -10 ^ -5 = 13
+        assertEquals(-1, classA.getMethod("test").invoke(instance)); // -10 | -5 = -1
     }
+
+    // Negative number tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testByteBitXor(JdkVersion jdkVersion) throws Exception {
+    public void testByteBitOr(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: byte = 15
+                      const a: byte = 8
                       const b: byte = 7
-                      const c = a ^ b
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(8, classA.getMethod("test").invoke(instance)); // 15 ^ 7 = 8
+        assertEquals(15, classA.getMethod("test").invoke(instance)); // 8 | 7 = 15
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testByteBitXorInt(JdkVersion jdkVersion) throws Exception {
+    public void testByteBitOrInt(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: byte = 25
+                      const a: byte = 16
                       const b: int = 15
-                      const c = a ^ b
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(22, classA.getMethod("test").invoke(instance)); // 25 ^ 15 = 22
+        assertEquals(31, classA.getMethod("test").invoke(instance)); // 16 | 15 = 31
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testByteObjectBitOrIntObject(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Byte = 10
+                      const b: Integer = 20
+                      const c = a | b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(30, classA.getMethod("test").invoke(instance)); // 10 | 20 = 30
     }
 
     // Edge case tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testByteObjectBitXorIntObject(JdkVersion jdkVersion) throws Exception {
+    public void testChainedBitOr(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: Byte = 30
-                      const b: Integer = 20
-                      const c = a ^ b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(10, classA.getMethod("test").invoke(instance)); // 30 ^ 20 = 10
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testChainedBitXor(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: int = 255
-                      const b: int = 127
-                      const c: int = 63
-                      const d = a ^ b ^ c
+                      const a: int = 1
+                      const b: int = 2
+                      const c: int = 4
+                      const d = a | b | c
                       return d
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(191, classA.getMethod("test").invoke(instance)); // 255 ^ 127 ^ 63 = 191
+        assertEquals(7, classA.getMethod("test").invoke(instance)); // 1 | 2 | 4 = 7
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntBitXorLong(JdkVersion jdkVersion) throws Exception {
+    public void testIntBitOrLong(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: int = 200
                       const b: long = 150
-                      const c = a ^ b
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(94L, classA.getMethod("test").invoke(instance)); // 200 ^ 150 = 94 (widened to long)
+        assertEquals(222L, classA.getMethod("test").invoke(instance)); // 200 | 150 = 222 (widened to long)
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testIntegerObjectBitOr(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: Integer = 16
+                      const b: Integer = 12
+                      const c = a | b
+                      return c
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(28, classA.getMethod("test").invoke(instance)); // 16 | 12 = 28
     }
 
     // Chained operations
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testIntegerObjectBitXor(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: Integer = 28
-                      const b: Integer = 12
-                      const c = a ^ b
-                      return c
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(16, classA.getMethod("test").invoke(instance)); // 28 ^ 12 = 16
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testLongBitXor(JdkVersion jdkVersion) throws Exception {
+    public void testLongBitOr(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: long = 255
                       const b: long = 127
-                      const c = a ^ b
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(128L, classA.getMethod("test").invoke(instance)); // 255 ^ 127 = 128
+        assertEquals(255L, classA.getMethod("test").invoke(instance)); // 255 | 127 = 255
     }
-
-    // XOR properties tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLongObjectBitXor(JdkVersion jdkVersion) throws Exception {
+    public void testLongObjectBitOr(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: Long = 1000
                       const b: Long = 500
-                      const c = a ^ b
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(540L, classA.getMethod("test").invoke(instance)); // 1000 ^ 500 = 540
+        assertEquals(1020L, classA.getMethod("test").invoke(instance)); // 1000 | 500 = 1020
     }
+
+    // Bit setting tests
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNegativeIntBitXor(JdkVersion jdkVersion) throws Exception {
+    public void testNegativeIntBitOr(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: int = -20
                       const b: int = 15
-                      const c = a ^ b
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(-29, classA.getMethod("test").invoke(instance)); // -20 ^ 15 = -29
+        assertEquals(-17, classA.getMethod("test").invoke(instance)); // -20 | 15 = -17
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNegativeLongBitXor(JdkVersion jdkVersion) throws Exception {
+    public void testNegativeLongBitOr(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: long = -800
                       const b: long = 255
-                      const c = a ^ b
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(-993L, classA.getMethod("test").invoke(instance)); // -800 ^ 255 = -993
+        assertEquals(-769L, classA.getMethod("test").invoke(instance)); // -800 | 255 = -769
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testShortBitXor(JdkVersion jdkVersion) throws Exception {
+    public void testShortBitOr(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: short = 100
                       const b: short = 50
-                      const c = a ^ b
+                      const c = a | b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(86, classA.getMethod("test").invoke(instance)); // 100 ^ 50 = 86
+        assertEquals(118, classA.getMethod("test").invoke(instance)); // 100 | 50 = 118
     }
 }

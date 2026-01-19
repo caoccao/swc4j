@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.caoccao.javet.swc4j.compiler.ast.expr;
+package com.caoccao.javet.swc4j.compiler.ast.expr.binexpr;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
@@ -23,7 +23,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestCompileBinExprLogicalOr extends BaseTestCompileSuite {
+public class TestCompileBinExprLogicalAnd extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
@@ -34,14 +34,14 @@ public class TestCompileBinExprLogicalOr extends BaseTestCompileSuite {
                     test() {
                       const a: boolean = false
                       const b: boolean = false
-                      const c = a || b
+                      const c = a && b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance)); // false || false = false
+        assertEquals(false, classA.getMethod("test").invoke(instance)); // false && false = false
     }
 
     @ParameterizedTest
@@ -53,180 +53,180 @@ public class TestCompileBinExprLogicalOr extends BaseTestCompileSuite {
                     test() {
                       const a: boolean = true
                       const b: boolean = true
-                      const c = a || b
+                      const c = a && b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance)); // true || true = true
+        assertEquals(true, classA.getMethod("test").invoke(instance)); // true && true = true
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testComparisonOrComparison(JdkVersion jdkVersion) throws Exception {
+    public void testComparisonAndComparison(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const x: int = 5
                       const y: int = 10
-                      const c = (x > y) || (x > 0)
+                      const c = (x < y) && (x > 0)
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance)); // (5 > 10) || (5 > 0) = false || true = true
+        assertEquals(true, classA.getMethod("test").invoke(instance)); // (5 < 10) && (5 > 0) = true && true = true
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testComparisonOrComparisonFalse(JdkVersion jdkVersion) throws Exception {
+    public void testComparisonAndComparisonFalse(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const x: int = 5
                       const y: int = 10
-                      const c = (x > y) || (x < 0)
+                      const c = (x > y) && (x > 0)
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance)); // (5 > 10) || (5 < 0) = false || false = false
+        assertEquals(false, classA.getMethod("test").invoke(instance)); // (5 > 10) && (5 > 0) = false && true = false
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testEqualityOrInequality(JdkVersion jdkVersion) throws Exception {
+    public void testEqualityAndInequality(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const x: int = 5
-                      const c = (x == 10) || (x != 0)
+                      const c = (x == 5) && (x != 10)
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance)); // (5 == 10) || (5 != 0) = false || true = true
+        assertEquals(true, classA.getMethod("test").invoke(instance)); // (5 == 5) && (5 != 10) = true && true = true
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testFalseOrTrue(JdkVersion jdkVersion) throws Exception {
+    public void testFalseAndTrue(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: boolean = false
                       const b: boolean = true
-                      const c = a || b
+                      const c = a && b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance)); // false || true = true
+        assertEquals(false, classA.getMethod("test").invoke(instance)); // false && true = false
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLiteralFalseOrFalse(JdkVersion jdkVersion) throws Exception {
+    public void testLiteralFalseShortCircuit(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const c = false || false
+                      const c = false && true
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance)); // false || false = false
+        assertEquals(false, classA.getMethod("test").invoke(instance)); // false && true = false (short-circuit)
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLiteralTrueOrFalse(JdkVersion jdkVersion) throws Exception {
+    public void testLiteralTrueAndFalse(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const c = true || false
+                      const c = true && false
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance)); // true || false = true (short-circuit)
+        assertEquals(false, classA.getMethod("test").invoke(instance)); // true && false = false
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLiteralTrueOrTrue(JdkVersion jdkVersion) throws Exception {
+    public void testLiteralTrueAndTrue(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const c = true || true
+                      const c = true && true
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance)); // true || true = true
+        assertEquals(true, classA.getMethod("test").invoke(instance)); // true && true = true
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testMultipleOr(JdkVersion jdkVersion) throws Exception {
+    public void testMultipleAnd(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
-                      const a: boolean = false
+                      const a: boolean = true
+                      const b: boolean = true
+                      const c: boolean = true
+                      const d = a && b && c
+                      return d
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(true, classA.getMethod("test").invoke(instance)); // true && true && true = true
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testMultipleAndWithFalse(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test() {
+                      const a: boolean = true
                       const b: boolean = false
                       const c: boolean = true
-                      const d = a || b || c
+                      const d = a && b && c
                       return d
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance)); // false || false || true = true
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testMultipleOrAllFalse(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test() {
-                      const a: boolean = false
-                      const b: boolean = false
-                      const c: boolean = false
-                      const d = a || b || c
-                      return d
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        assertEquals(false, classA.getMethod("test").invoke(instance)); // false || false || false = false
+        assertEquals(false, classA.getMethod("test").invoke(instance)); // true && false && true = false
     }
 
     @ParameterizedTest
@@ -239,70 +239,70 @@ public class TestCompileBinExprLogicalOr extends BaseTestCompileSuite {
                       const x: int = 5
                       const y: int = 10
                       const z: int = 15
-                      const c = ((x > y) || (y > z)) || (x < z)
+                      const c = ((x < y) && (y < z)) && (x < z)
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance)); // Last comparison is true
+        assertEquals(true, classA.getMethod("test").invoke(instance)); // All comparisons true
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testTrueOrFalse(JdkVersion jdkVersion) throws Exception {
+    public void testTrueAndFalse(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: boolean = true
                       const b: boolean = false
-                      const c = a || b
+                      const c = a && b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance)); // true || false = true
+        assertEquals(false, classA.getMethod("test").invoke(instance)); // true && false = false
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testTrueShortCircuit(JdkVersion jdkVersion) throws Exception {
+    public void testWithNegation(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const a: boolean = true
                       const b: boolean = false
-                      const c = a || b
+                      const c = a && !b
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance)); // true || false = true (short-circuit, b not evaluated)
+        assertEquals(true, classA.getMethod("test").invoke(instance)); // true && !false = true && true = true
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testZeroOrNonZero(JdkVersion jdkVersion) throws Exception {
+    public void testZeroAndNonZero(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test() {
                       const x: int = 0
                       const y: int = 5
-                      const c = (x != 0) || (y != 0)
+                      const c = (x == 0) && (y != 0)
                       return c
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(true, classA.getMethod("test").invoke(instance)); // (0 != 0) || (5 != 0) = false || true = true
+        assertEquals(true, classA.getMethod("test").invoke(instance)); // (0 == 0) && (5 != 0) = true && true = true
     }
 }
