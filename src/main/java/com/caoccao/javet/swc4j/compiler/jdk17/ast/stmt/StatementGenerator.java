@@ -73,6 +73,8 @@ public final class StatementGenerator {
             ForStatementGenerator.generate(code, cp, forStmt, returnTypeInfo, context, options);
         } else if (stmt instanceof Swc4jAstWhileStmt whileStmt) {
             WhileStatementGenerator.generate(code, cp, whileStmt, returnTypeInfo, context, options);
+        } else if (stmt instanceof Swc4jAstDoWhileStmt doWhileStmt) {
+            DoWhileStatementGenerator.generate(code, cp, doWhileStmt, returnTypeInfo, context, options);
         } else if (stmt instanceof Swc4jAstBreakStmt breakStmt) {
             BreakStatementGenerator.generate(code, cp, breakStmt, context, options);
         } else if (stmt instanceof Swc4jAstContinueStmt continueStmt) {

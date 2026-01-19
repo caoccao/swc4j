@@ -105,6 +105,9 @@ public final class VariableAnalyzer {
         } else if (stmt instanceof Swc4jAstWhileStmt whileStmt) {
             // Recursively analyze while loop body
             analyzeStatement(whileStmt.getBody(), context, options);
+        } else if (stmt instanceof Swc4jAstDoWhileStmt doWhileStmt) {
+            // Recursively analyze do-while loop body
+            analyzeStatement(doWhileStmt.getBody(), context, options);
         } else if (stmt instanceof Swc4jAstLabeledStmt labeledStmt) {
             // Recursively analyze labeled statement body
             analyzeStatement(labeledStmt.getBody(), context, options);

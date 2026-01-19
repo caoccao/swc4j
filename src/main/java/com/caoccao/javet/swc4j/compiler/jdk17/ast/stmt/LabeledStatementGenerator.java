@@ -16,6 +16,7 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstDoWhileStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstForStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstLabeledStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstWhileStmt;
@@ -75,6 +76,9 @@ public final class LabeledStatementGenerator {
         } else if (body instanceof Swc4jAstWhileStmt whileStmt) {
             // Generate labeled while loop
             WhileStatementGenerator.generate(code, cp, whileStmt, labelName, returnTypeInfo, context, options);
+        } else if (body instanceof Swc4jAstDoWhileStmt doWhileStmt) {
+            // Generate labeled do-while loop
+            DoWhileStatementGenerator.generate(code, cp, doWhileStmt, labelName, returnTypeInfo, context, options);
         } else {
             // For other statement types, just generate the body
             // (labels on non-loop statements are allowed but don't affect code generation)
