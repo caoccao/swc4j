@@ -23,10 +23,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
-import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
-import com.caoccao.javet.swc4j.compiler.jdk17.GenericTypeInfo;
-import com.caoccao.javet.swc4j.compiler.jdk17.LocalVariable;
-import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
+import com.caoccao.javet.swc4j.compiler.jdk17.*;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -44,7 +41,13 @@ public final class VarDeclGenerator {
             ISwc4jAstPat name = declarator.getName();
             if (name instanceof Swc4jAstBindingIdent bindingIdent) {
                 String varName = bindingIdent.getId().getSym();
+                // First try to get the variable from the current scope chain
                 LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
+                // If not found in current scope, try to add it from the pre-allocated variables
+                if (localVar == null) {
+                    String varType = TypeResolver.extractType(bindingIdent, declarator.getInit(), context, options);
+                    localVar = context.getLocalVariableTable().addExistingVariableToCurrentScope(varName, varType);
+                }
 
                 if (declarator.getInit().isPresent()) {
                     var init = declarator.getInit().get();

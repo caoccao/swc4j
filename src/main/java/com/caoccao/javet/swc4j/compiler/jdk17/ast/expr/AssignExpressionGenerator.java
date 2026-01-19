@@ -17,6 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAssignOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstAssignExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
@@ -231,7 +232,7 @@ public final class AssignExpressionGenerator {
                 }
             }
         } else if (left instanceof Swc4jAstBindingIdent bindingIdent) {
-            // Simple variable assignment: x = value
+            // Variable assignment: x = value or compound like x += value
             String varName = bindingIdent.getId().getSym();
             LocalVariable var = context.getLocalVariableTable().getVariable(varName);
 
@@ -239,21 +240,126 @@ public final class AssignExpressionGenerator {
                 throw new Swc4jByteCodeCompilerException("Undefined variable: " + varName);
             }
 
-            // Generate the right-hand side expression
-            ExpressionGenerator.generate(code, cp, assignExpr.getRight(), null, context, options);
-
-            // Convert to the variable's type if needed
-            String valueType = TypeResolver.inferTypeFromExpr(assignExpr.getRight(), context, options);
             String varType = var.type();
+            Swc4jAstAssignOp op = assignExpr.getOp();
 
-            if (valueType != null && !valueType.equals(varType)) {
-                // Unbox if needed
-                TypeConversionUtils.unboxWrapperType(code, cp, valueType);
-                String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
+            if (op == Swc4jAstAssignOp.Assign) {
+                // Simple assignment: x = value
+                ExpressionGenerator.generate(code, cp, assignExpr.getRight(), null, context, options);
 
-                // Convert between primitive types if needed
-                if (valuePrimitive != null && !valuePrimitive.equals(varType)) {
-                    TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, varType);
+                // Convert to the variable's type if needed
+                String valueType = TypeResolver.inferTypeFromExpr(assignExpr.getRight(), context, options);
+                if (valueType != null && !valueType.equals(varType)) {
+                    TypeConversionUtils.unboxWrapperType(code, cp, valueType);
+                    String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
+                    if (valuePrimitive != null && !valuePrimitive.equals(varType)) {
+                        TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, varType);
+                    }
+                }
+            } else {
+                // Compound assignment: x += value, x -= value, etc.
+                // Load current value of variable
+                switch (varType) {
+                    case "I", "Z", "B", "C", "S" -> code.iload(var.index());
+                    case "J" -> code.lload(var.index());
+                    case "F" -> code.fload(var.index());
+                    case "D" -> code.dload(var.index());
+                    default -> code.aload(var.index());
+                }
+
+                // Generate the right-hand side expression
+                ExpressionGenerator.generate(code, cp, assignExpr.getRight(), null, context, options);
+
+                // Convert to the variable's type if needed
+                String valueType = TypeResolver.inferTypeFromExpr(assignExpr.getRight(), context, options);
+                if (valueType != null && !valueType.equals(varType)) {
+                    TypeConversionUtils.unboxWrapperType(code, cp, valueType);
+                    String valuePrimitive = TypeConversionUtils.getPrimitiveType(valueType);
+                    if (valuePrimitive != null && !valuePrimitive.equals(varType)) {
+                        TypeConversionUtils.convertPrimitiveType(code, valuePrimitive, varType);
+                    }
+                }
+
+                // Perform the operation based on the compound operator
+                switch (op) {
+                    case AddAssign -> {
+                        switch (varType) {
+                            case "I" -> code.iadd();
+                            case "J" -> code.ladd();
+                            case "F" -> code.fadd();
+                            case "D" -> code.dadd();
+                        }
+                    }
+                    case SubAssign -> {
+                        switch (varType) {
+                            case "I" -> code.isub();
+                            case "J" -> code.lsub();
+                            case "F" -> code.fsub();
+                            case "D" -> code.dsub();
+                        }
+                    }
+                    case MulAssign -> {
+                        switch (varType) {
+                            case "I" -> code.imul();
+                            case "J" -> code.lmul();
+                            case "F" -> code.fmul();
+                            case "D" -> code.dmul();
+                        }
+                    }
+                    case DivAssign -> {
+                        switch (varType) {
+                            case "I" -> code.idiv();
+                            case "J" -> code.ldiv();
+                            case "F" -> code.fdiv();
+                            case "D" -> code.ddiv();
+                        }
+                    }
+                    case ModAssign -> {
+                        switch (varType) {
+                            case "I" -> code.irem();
+                            case "J" -> code.lrem();
+                            case "F" -> code.frem();
+                            case "D" -> code.drem();
+                        }
+                    }
+                    case BitAndAssign -> {
+                        switch (varType) {
+                            case "I" -> code.iand();
+                            case "J" -> code.land();
+                        }
+                    }
+                    case BitOrAssign -> {
+                        switch (varType) {
+                            case "I" -> code.ior();
+                            case "J" -> code.lor();
+                        }
+                    }
+                    case BitXorAssign -> {
+                        switch (varType) {
+                            case "I" -> code.ixor();
+                            case "J" -> code.lxor();
+                        }
+                    }
+                    case LShiftAssign -> {
+                        switch (varType) {
+                            case "I" -> code.ishl();
+                            case "J" -> code.lshl();
+                        }
+                    }
+                    case RShiftAssign -> {
+                        switch (varType) {
+                            case "I" -> code.ishr();
+                            case "J" -> code.lshr();
+                        }
+                    }
+                    case ZeroFillRShiftAssign -> {
+                        switch (varType) {
+                            case "I" -> code.iushr();
+                            case "J" -> code.lushr();
+                        }
+                    }
+                    default ->
+                            throw new Swc4jByteCodeCompilerException("Compound assignment not yet supported: " + op.getName());
                 }
             }
 

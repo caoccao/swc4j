@@ -72,6 +72,10 @@ public final class ExpressionGenerator {
             ConditionalExpressionGenerator.generate(code, cp, condExpr, returnTypeInfo, context, options);
         } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
             ParenExpressionGenerator.generate(code, cp, parenExpr, returnTypeInfo, context, options, ExpressionGenerator::generate);
+        } else if (expr instanceof Swc4jAstSeqExpr seqExpr) {
+            SeqExpressionGenerator.generate(code, cp, seqExpr, returnTypeInfo, context, options);
+        } else {
+            throw new Swc4jByteCodeCompilerException("Unsupported expression type: " + expr.getClass().getSimpleName());
         }
     }
 }

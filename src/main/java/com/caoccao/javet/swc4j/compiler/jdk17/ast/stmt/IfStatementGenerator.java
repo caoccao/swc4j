@@ -17,9 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstIfStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstReturnStmt;
+import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -55,20 +53,35 @@ public final class IfStatementGenerator {
     }
 
     /**
-     * Check if a statement ends with a return statement.
+     * Check if a statement ends with an unconditional control transfer (return, break, continue).
+     * These statements don't fall through to the next instruction.
      *
      * @param stmt the statement to check
-     * @return true if the statement ends with a return
+     * @return true if the statement ends with an unconditional control transfer
      */
-    private static boolean endsWithReturn(ISwc4jAstStmt stmt) {
+    private static boolean endsWithUnconditionalJump(ISwc4jAstStmt stmt) {
         if (stmt instanceof Swc4jAstReturnStmt) {
+            return true;
+        }
+        if (stmt instanceof Swc4jAstBreakStmt) {
+            return true;
+        }
+        if (stmt instanceof Swc4jAstContinueStmt) {
             return true;
         }
         if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
             var stmts = blockStmt.getStmts();
             if (!stmts.isEmpty()) {
-                return endsWithReturn(stmts.get(stmts.size() - 1));
+                return endsWithUnconditionalJump(stmts.get(stmts.size() - 1));
             }
+        }
+        if (stmt instanceof Swc4jAstIfStmt ifStmt) {
+            // If-else ends with unconditional jump only if BOTH branches end with unconditional jump
+            if (ifStmt.getAlt().isEmpty()) {
+                return false; // No else branch means fall-through is possible
+            }
+            return endsWithUnconditionalJump(ifStmt.getCons()) &&
+                    endsWithUnconditionalJump(ifStmt.getAlt().get());
         }
         return false;
     }
@@ -131,14 +144,14 @@ public final class IfStatementGenerator {
         // Generate consequent (then branch)
         StatementGenerator.generate(code, cp, ifStmt.getCons(), returnTypeInfo, context, options);
 
-        // Check if consequent ends with return - if so, no need for goto
-        boolean consEndsWithReturn = endsWithReturn(ifStmt.getCons());
+        // Check if consequent ends with unconditional jump - if so, no need for goto
+        boolean consEndsWithJump = endsWithUnconditionalJump(ifStmt.getCons());
 
         int gotoOffsetPos = -1;
         int gotoOpcodePos = -1;
 
-        if (!consEndsWithReturn) {
-            // Jump over the alternate branch (only if consequent doesn't return)
+        if (!consEndsWithJump) {
+            // Jump over the alternate branch (only if consequent doesn't have unconditional jump)
             code.gotoLabel(0); // Placeholder for goto
             gotoOffsetPos = code.getCurrentOffset() - 2;
             gotoOpcodePos = code.getCurrentOffset() - 3;
@@ -156,7 +169,7 @@ public final class IfStatementGenerator {
         code.patchShort(ifeqOffsetPos, ifeqOffset);
 
         // Calculate and patch the goto offset (only if it was generated)
-        if (!consEndsWithReturn) {
+        if (!consEndsWithJump) {
             int gotoOffset = endLabel - gotoOpcodePos;
             code.patchShort(gotoOffsetPos, gotoOffset);
         }

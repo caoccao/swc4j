@@ -115,7 +115,8 @@ public class StackMapGenerator {
 
     private Set<Integer> findBranchTargets() {
         Set<Integer> targets = new TreeSet<>();
-        for (int i = 0; i < bytecode.length; i++) {
+        int i = 0;
+        while (i < bytecode.length) {
             int opcode = bytecode[i] & 0xFF;
 
             if (opcode >= 0x99 && opcode <= 0xA6) { // Conditional branches
@@ -134,6 +135,8 @@ public class StackMapGenerator {
                     targets.add(i + offset);
                 }
             }
+            // Properly skip to the next instruction
+            i += getInstructionSize(i, opcode);
         }
         return targets;
     }
@@ -285,14 +288,18 @@ public class StackMapGenerator {
 
     /**
      * Merge two verification types into their common supertype.
+     * For local variables: if a variable is undefined (TOP) on any path,
+     * it should be TOP at the merge point (can't guarantee it's valid).
      */
     private int mergeTypes(int type1, int type2) {
         if (type1 == type2) {
             return type1;
         }
-        // TOP absorbs everything
-        if (type1 == TOP) return type2;
-        if (type2 == TOP) return type1;
+        // TOP means undefined/unusable - if either is TOP, result is TOP
+        // This handles variable scoping: a variable not defined on all paths is unusable
+        if (type1 == TOP || type2 == TOP) {
+            return TOP;
+        }
         // NULL merges with OBJECT to OBJECT
         if (type1 == NULL && type2 == OBJECT) return OBJECT;
         if (type1 == OBJECT && type2 == NULL) return OBJECT;
@@ -314,6 +321,10 @@ public class StackMapGenerator {
                 i++; // Skip the next TOP
             }
         }
+        // Remove trailing TOPs (variables out of scope)
+        while (!result.isEmpty() && result.get(result.size() - 1) == TOP) {
+            result.remove(result.size() - 1);
+        }
         return result;
     }
 
@@ -334,8 +345,21 @@ public class StackMapGenerator {
             case 0x05:
             case 0x06:
             case 0x07:
-            case 0x08: // iconst_*
+            case 0x08: // iconst_m1 to iconst_5
                 stack.add(INTEGER);
+                break;
+            case 0x09:
+            case 0x0a: // lconst_0, lconst_1
+                stack.add(LONG);
+                break;
+            case 0x0b:
+            case 0x0c:
+            case 0x0d: // fconst_0, fconst_1, fconst_2
+                stack.add(FLOAT);
+                break;
+            case 0x0e:
+            case 0x0f: // dconst_0, dconst_1
+                stack.add(DOUBLE);
                 break;
             case 0x10:
             case 0x11: // bipush, sipush
@@ -452,6 +476,7 @@ public class StackMapGenerator {
                 break;
 
             // Arithmetic - pop 2, push 1
+            // Int operations: iadd(0x60), isub(0x64), imul(0x68), idiv(0x6C), irem(0x70), iand(0x7E), ior(0x80), ixor(0x82)
             case 0x60:
             case 0x64:
             case 0x68:
@@ -459,11 +484,50 @@ public class StackMapGenerator {
             case 0x70:
             case 0x7E:
             case 0x80:
-            case 0x82: // int ops
+            case 0x82:
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1);
                     stack.remove(stack.size() - 1);
                     stack.add(INTEGER);
+                }
+                break;
+            // Long operations: ladd(0x61), lsub(0x65), lmul(0x69), ldiv(0x6D), lrem(0x71), land(0x7F), lor(0x81), lxor(0x83)
+            case 0x61:
+            case 0x65:
+            case 0x69:
+            case 0x6D:
+            case 0x71:
+            case 0x7F:
+            case 0x81:
+            case 0x83:
+                if (stack.size() >= 2) {
+                    stack.remove(stack.size() - 1);
+                    stack.remove(stack.size() - 1);
+                    stack.add(LONG);
+                }
+                break;
+            // Float operations: fadd(0x62), fsub(0x66), fmul(0x6A), fdiv(0x6E), frem(0x72)
+            case 0x62:
+            case 0x66:
+            case 0x6A:
+            case 0x6E:
+            case 0x72:
+                if (stack.size() >= 2) {
+                    stack.remove(stack.size() - 1);
+                    stack.remove(stack.size() - 1);
+                    stack.add(FLOAT);
+                }
+                break;
+            // Double operations: dadd(0x63), dsub(0x67), dmul(0x6B), ddiv(0x6F), drem(0x73)
+            case 0x63:
+            case 0x67:
+            case 0x6B:
+            case 0x6F:
+            case 0x73:
+                if (stack.size() >= 2) {
+                    stack.remove(stack.size() - 1);
+                    stack.remove(stack.size() - 1);
+                    stack.add(DOUBLE);
                 }
                 break;
 
@@ -484,6 +548,48 @@ public class StackMapGenerator {
             case 0x84:
                 // iinc <index> <const> - just increments a local variable
                 // Stack is unchanged, local stays INTEGER type
+                break;
+
+            // Stack manipulation
+            case 0x57: // pop
+                if (!stack.isEmpty()) stack.remove(stack.size() - 1);
+                break;
+            case 0x58: // pop2
+                // pop2 removes either one category-2 value or two category-1 values
+                if (!stack.isEmpty()) {
+                    int topType = stack.remove(stack.size() - 1);
+                    // If it wasn't a category-2 type, pop another
+                    if (topType != LONG && topType != DOUBLE && !stack.isEmpty()) {
+                        stack.remove(stack.size() - 1);
+                    }
+                }
+                break;
+            case 0x59: // dup
+                if (!stack.isEmpty()) {
+                    stack.add(stack.get(stack.size() - 1));
+                }
+                break;
+            case 0x5C: // dup2
+                if (!stack.isEmpty()) {
+                    int topType = stack.get(stack.size() - 1);
+                    if (topType == LONG || topType == DOUBLE) {
+                        // Category 2: duplicate one value
+                        stack.add(topType);
+                    } else if (stack.size() >= 2) {
+                        // Category 1: duplicate two values
+                        int second = stack.get(stack.size() - 2);
+                        stack.add(second);
+                        stack.add(topType);
+                    }
+                }
+                break;
+            case 0x5F: // swap
+                if (stack.size() >= 2) {
+                    int top = stack.remove(stack.size() - 1);
+                    int second = stack.remove(stack.size() - 1);
+                    stack.add(top);
+                    stack.add(second);
+                }
                 break;
 
             // Conditional branches - pop operands

@@ -69,6 +69,12 @@ public final class StatementGenerator {
             generateReturnStmt(code, cp, returnStmt, returnTypeInfo, context, options);
         } else if (stmt instanceof Swc4jAstIfStmt ifStmt) {
             IfStatementGenerator.generate(code, cp, ifStmt, returnTypeInfo, context, options);
+        } else if (stmt instanceof Swc4jAstForStmt forStmt) {
+            ForStatementGenerator.generate(code, cp, forStmt, returnTypeInfo, context, options);
+        } else if (stmt instanceof Swc4jAstBreakStmt breakStmt) {
+            BreakStatementGenerator.generate(code, cp, breakStmt, context, options);
+        } else if (stmt instanceof Swc4jAstContinueStmt continueStmt) {
+            ContinueStatementGenerator.generate(code, cp, continueStmt, context, options);
         } else if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
             generateBlockStmt(code, cp, blockStmt, returnTypeInfo, context, options);
         } else {
@@ -97,8 +103,14 @@ public final class StatementGenerator {
             ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
 
         // Generate code for each statement in the block
+        // Stop generating code after a terminal control flow statement (break, continue, return)
         for (ISwc4jAstStmt stmt : blockStmt.getStmts()) {
             generate(code, cp, stmt, returnTypeInfo, context, options);
+
+            // Check if this was a terminal statement - subsequent statements are unreachable
+            if (isTerminalStatement(stmt)) {
+                break;
+            }
         }
     }
 
@@ -181,5 +193,18 @@ public final class StatementGenerator {
             // Void return
             code.returnVoid();
         }
+    }
+
+    /**
+     * Check if a statement is a terminal control flow statement (break, continue, return).
+     * Statements after a terminal statement are unreachable and should not be generated.
+     *
+     * @param stmt the statement to check
+     * @return true if the statement is terminal
+     */
+    private static boolean isTerminalStatement(ISwc4jAstStmt stmt) {
+        return stmt instanceof Swc4jAstBreakStmt ||
+                stmt instanceof Swc4jAstContinueStmt ||
+                stmt instanceof Swc4jAstReturnStmt;
     }
 }

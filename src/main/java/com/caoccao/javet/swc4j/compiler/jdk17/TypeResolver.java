@@ -400,7 +400,18 @@ public final class TypeResolver {
         } else if (expr instanceof Swc4jAstStr) {
             return "Ljava/lang/String;";
         } else if (expr instanceof Swc4jAstAssignExpr assignExpr) {
-            // Assignment expression returns the type of the value being assigned
+            // For compound assignments (+=, -=, etc.), the result is the type of the left operand
+            // For simple assignment (=), the result is the type of the right operand
+            if (assignExpr.getOp() != com.caoccao.javet.swc4j.ast.enums.Swc4jAstAssignOp.Assign) {
+                // Compound assignment - result type is the left operand (variable) type
+                var left = assignExpr.getLeft();
+                if (left instanceof Swc4jAstBindingIdent bindingIdent) {
+                    String varName = bindingIdent.getId().getSym();
+                    return context.getInferredTypes().getOrDefault(varName, "Ljava/lang/Object;");
+                }
+                return inferTypeFromExpr(assignExpr.getRight(), context, options);
+            }
+            // Simple assignment - result type is the right operand type
             return inferTypeFromExpr(assignExpr.getRight(), context, options);
         } else if (expr instanceof Swc4jAstIdent ident) {
             return context.getInferredTypes().getOrDefault(ident.getSym(), "Ljava/lang/Object;");
@@ -577,6 +588,13 @@ public final class TypeResolver {
                 }
             }
             return "Ljava/lang/Object;";
+        } else if (expr instanceof Swc4jAstSeqExpr seqExpr) {
+            // Sequence expression returns the type of the last expression
+            var exprs = seqExpr.getExprs();
+            if (!exprs.isEmpty()) {
+                return inferTypeFromExpr(exprs.get(exprs.size() - 1), context, options);
+            }
+            return "V"; // Empty sequence - void
         }
         return "Ljava/lang/Object;";
     }

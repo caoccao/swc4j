@@ -16,24 +16,58 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class LocalVariableTable {
-    private final Map<String, LocalVariable> variables = new HashMap<>();
+    // All allocated variables for maxLocals calculation
+    private final List<LocalVariable> allVariables = new ArrayList<>();
+    // List of scope maps - index 0 is outermost, last index is innermost (current) scope
+    // Variables are looked up from innermost to outermost - no copying needed
+    private final List<Map<String, LocalVariable>> scopes = new ArrayList<>();
     private int nextIndex = 1; // 0 is reserved for 'this'
+
+    public LocalVariableTable() {
+        // Initialize with a base scope
+        scopes.add(new HashMap<>());
+    }
+
+    public LocalVariable addExistingVariableToCurrentScope(String name, String type) {
+        // Find matching variable from allVariables (reverse order for shadowing)
+        for (int i = allVariables.size() - 1; i >= 0; i--) {
+            LocalVariable var = allVariables.get(i);
+            if (var.name().equals(name) && var.type().equals(type)) {
+                LocalVariable existing = getVariable(name);
+                if (existing == null || existing.index() != var.index()) {
+                    scopes.get(scopes.size() - 1).put(name, var);
+                    return var;
+                }
+            }
+        }
+        return null;
+    }
 
     public int allocateVariable(String name, String type) {
         int index = nextIndex;
-        variables.put(name, new LocalVariable(name, type, index));
+        LocalVariable var = new LocalVariable(name, type, index);
+        scopes.get(scopes.size() - 1).put(name, var);
+        allVariables.add(var);
         // Doubles and longs take 2 slots
         nextIndex += (type.equals("D") || type.equals("J")) ? 2 : 1;
         return index;
     }
 
+    public void enterScope() {
+        scopes.add(new HashMap<>());
+    }
+
+    public void exitScope() {
+        if (scopes.size() > 1) {
+            scopes.remove(scopes.size() - 1);
+        }
+    }
+
     public Collection<LocalVariable> getAllVariables() {
-        return variables.values();
+        return allVariables;
     }
 
     public int getMaxLocals() {
@@ -41,6 +75,13 @@ public class LocalVariableTable {
     }
 
     public LocalVariable getVariable(String name) {
-        return variables.get(name);
+        // Search from innermost scope to outermost
+        for (int i = scopes.size() - 1; i >= 0; i--) {
+            LocalVariable var = scopes.get(i).get(name);
+            if (var != null) {
+                return var;
+            }
+        }
+        return null;
     }
 }

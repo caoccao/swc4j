@@ -20,11 +20,10 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
-import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
+import com.caoccao.javet.swc4j.ast.stmt.*;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 
 public final class VariableAnalyzer {
@@ -61,28 +60,92 @@ public final class VariableAnalyzer {
         }
     }
 
+    /**
+     * Recursively analyze a statement for variable declarations.
+     * This handles variable declarations in:
+     * - Direct variable declarations
+     * - For loop init sections
+     * - Block statements
+     * - If statement branches
+     *
+     * @param stmt    the statement to analyze
+     * @param context compilation context
+     * @param options compilation options
+     */
+    private static void analyzeStatement(
+            ISwc4jAstStmt stmt,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) {
+
+        if (stmt instanceof Swc4jAstVarDecl varDecl) {
+            // Analyze variable declaration
+            analyzeVarDecl(varDecl, context, options);
+        } else if (stmt instanceof Swc4jAstForStmt forStmt) {
+            // For loops create a new scope for their loop variable
+            context.getLocalVariableTable().enterScope();
+
+            // Analyze for loop init section - use shadowing-aware allocation
+            if (forStmt.getInit().isPresent()) {
+                ISwc4jAstVarDeclOrExpr init = forStmt.getInit().get();
+                if (init instanceof Swc4jAstVarDecl varDecl) {
+                    analyzeVarDecl(varDecl, context, options);
+                }
+            }
+            // Recursively analyze for loop body
+            analyzeStatement(forStmt.getBody(), context, options);
+
+            // Exit the for loop scope - restores shadowed variables
+            context.getLocalVariableTable().exitScope();
+        } else if (stmt instanceof Swc4jAstIfStmt ifStmt) {
+            // Recursively analyze if statement branches
+            analyzeStatement(ifStmt.getCons(), context, options);
+            if (ifStmt.getAlt().isPresent()) {
+                analyzeStatement(ifStmt.getAlt().get(), context, options);
+            }
+        } else if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
+            // Recursively analyze block statements
+            for (ISwc4jAstStmt childStmt : blockStmt.getStmts()) {
+                analyzeStatement(childStmt, context, options);
+            }
+        }
+    }
+
+    /**
+     * Analyze a variable declaration and allocate local variable slots.
+     *
+     * @param varDecl the variable declaration
+     * @param context compilation context
+     * @param options compilation options
+     */
+    private static void analyzeVarDecl(
+            Swc4jAstVarDecl varDecl,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) {
+
+        for (Swc4jAstVarDeclarator declarator : varDecl.getDecls()) {
+            ISwc4jAstPat name = declarator.getName();
+            if (name instanceof Swc4jAstBindingIdent bindingIdent) {
+                String varName = bindingIdent.getId().getSym();
+                String varType = TypeResolver.extractType(bindingIdent, declarator.getInit(), context, options);
+                context.getLocalVariableTable().allocateVariable(varName, varType);
+                context.getInferredTypes().put(varName, varType);
+
+                // Phase 2: Extract GenericTypeInfo for Record types
+                GenericTypeInfo genericTypeInfo = TypeResolver.extractGenericTypeInfo(bindingIdent, options);
+                if (genericTypeInfo != null) {
+                    context.getGenericTypeInfoMap().put(varName, genericTypeInfo);
+                }
+            }
+        }
+    }
+
     public static void analyzeVariableDeclarations(
             Swc4jAstBlockStmt body,
             CompilationContext context,
             ByteCodeCompilerOptions options) {
         for (ISwc4jAstStmt stmt : body.getStmts()) {
-            if (stmt instanceof Swc4jAstVarDecl varDecl) {
-                for (Swc4jAstVarDeclarator declarator : varDecl.getDecls()) {
-                    ISwc4jAstPat name = declarator.getName();
-                    if (name instanceof Swc4jAstBindingIdent bindingIdent) {
-                        String varName = bindingIdent.getId().getSym();
-                        String varType = TypeResolver.extractType(bindingIdent, declarator.getInit(), context, options);
-                        context.getLocalVariableTable().allocateVariable(varName, varType);
-                        context.getInferredTypes().put(varName, varType);
-
-                        // Phase 2: Extract GenericTypeInfo for Record types
-                        GenericTypeInfo genericTypeInfo = TypeResolver.extractGenericTypeInfo(bindingIdent, options);
-                        if (genericTypeInfo != null) {
-                            context.getGenericTypeInfoMap().put(varName, genericTypeInfo);
-                        }
-                    }
-                }
-            }
+            analyzeStatement(stmt, context, options);
         }
     }
+
 }

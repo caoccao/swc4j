@@ -18,6 +18,8 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -412,15 +414,24 @@ public final class BinaryExpressionGenerator {
                                 leftPrimitive.equals("C") || leftPrimitive.equals("Z"));
 
                 if (isPrimitiveComparison) {
-                    // Generate left operand
-                    ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                    TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
+                    // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
+                    ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(comparisonType);
 
-                    // Generate right operand
-                    ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                    // Generate left operand with type hint
+                    ExpressionGenerator.generate(code, cp, binExpr.getLeft(), compTypeInfo, context, options);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    // Skip conversion for number literals - they're already generated in the target type
+                    if (!isNumberLiteralWithTypeHint(binExpr.getLeft(), comparisonType)) {
+                        TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
+                    }
+
+                    // Generate right operand with type hint
+                    ExpressionGenerator.generate(code, cp, binExpr.getRight(), compTypeInfo, context, options);
                     TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                    TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
+                    // Skip conversion for number literals - they're already generated in the target type
+                    if (!isNumberLiteralWithTypeHint(binExpr.getRight(), comparisonType)) {
+                        TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
+                    }
 
                     // Use direct bytecode comparison instructions
                     // Pattern: if not equal, jump to iconst_0, else fall through to iconst_1
@@ -495,15 +506,24 @@ public final class BinaryExpressionGenerator {
                                 leftPrimitive.equals("C") || leftPrimitive.equals("Z"));
 
                 if (isPrimitiveComparison) {
-                    // Generate left operand
-                    ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                    TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
+                    // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
+                    ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(comparisonType);
 
-                    // Generate right operand
-                    ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                    // Generate left operand with type hint
+                    ExpressionGenerator.generate(code, cp, binExpr.getLeft(), compTypeInfo, context, options);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    // Skip conversion for number literals - they're already generated in the target type
+                    if (!isNumberLiteralWithTypeHint(binExpr.getLeft(), comparisonType)) {
+                        TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
+                    }
+
+                    // Generate right operand with type hint
+                    ExpressionGenerator.generate(code, cp, binExpr.getRight(), compTypeInfo, context, options);
                     TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                    TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
+                    // Skip conversion for number literals - they're already generated in the target type
+                    if (!isNumberLiteralWithTypeHint(binExpr.getRight(), comparisonType)) {
+                        TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
+                    }
 
                     // Use direct bytecode comparison instructions (inverted logic from EqEq)
                     // Pattern: if equal, jump to iconst_0, else fall through to iconst_1
@@ -583,15 +603,24 @@ public final class BinaryExpressionGenerator {
                                 leftPrimitive.equals("C"));
 
                 if (isPrimitiveComparison) {
-                    // Generate left operand
-                    ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                    TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
+                    // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
+                    ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(comparisonType);
 
-                    // Generate right operand
-                    ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                    // Generate left operand with type hint
+                    ExpressionGenerator.generate(code, cp, binExpr.getLeft(), compTypeInfo, context, options);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    // Skip conversion for number literals - they're already generated in the target type
+                    if (!isNumberLiteralWithTypeHint(binExpr.getLeft(), comparisonType)) {
+                        TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
+                    }
+
+                    // Generate right operand with type hint
+                    ExpressionGenerator.generate(code, cp, binExpr.getRight(), compTypeInfo, context, options);
                     TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                    TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
+                    // Skip conversion for number literals - they're already generated in the target type
+                    if (!isNumberLiteralWithTypeHint(binExpr.getRight(), comparisonType)) {
+                        TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
+                    }
 
                     // Use direct bytecode comparison instructions
                     // Pattern: if condition is FALSE, jump to iconst_0, else fall through to iconst_1
@@ -676,15 +705,24 @@ public final class BinaryExpressionGenerator {
                                 leftPrimitive.equals("C"));
 
                 if (isPrimitiveComparison) {
-                    // Generate left operand
-                    ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
-                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
-                    TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
+                    // Create ReturnTypeInfo for the comparison type to generate operands directly in the right type
+                    ReturnTypeInfo compTypeInfo = ReturnTypeInfo.of(comparisonType);
 
-                    // Generate right operand
-                    ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+                    // Generate left operand with type hint
+                    ExpressionGenerator.generate(code, cp, binExpr.getLeft(), compTypeInfo, context, options);
+                    TypeConversionUtils.unboxWrapperType(code, cp, leftType);
+                    // Skip conversion for number literals - they're already generated in the target type
+                    if (!isNumberLiteralWithTypeHint(binExpr.getLeft(), comparisonType)) {
+                        TypeConversionUtils.convertPrimitiveType(code, leftPrimitive, comparisonType);
+                    }
+
+                    // Generate right operand with type hint
+                    ExpressionGenerator.generate(code, cp, binExpr.getRight(), compTypeInfo, context, options);
                     TypeConversionUtils.unboxWrapperType(code, cp, rightType);
-                    TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
+                    // Skip conversion for number literals - they're already generated in the target type
+                    if (!isNumberLiteralWithTypeHint(binExpr.getRight(), comparisonType)) {
+                        TypeConversionUtils.convertPrimitiveType(code, rightPrimitive, comparisonType);
+                    }
 
                     // Use direct bytecode comparison instructions
                     // Pattern: if condition is FALSE, jump to iconst_0, else fall through to iconst_1
@@ -870,5 +908,17 @@ public final class BinaryExpressionGenerator {
                 TypeConversionUtils.convertPrimitiveType(code, resultType, targetType);
             }
         }
+    }
+
+    /**
+     * Check if an expression is a number literal that will be generated directly in the target type
+     * when a type hint is provided. In this case, we should skip post-generation type conversion
+     * because the literal was already generated in the target type.
+     */
+    private static boolean isNumberLiteralWithTypeHint(ISwc4jAstExpr expr, String targetType) {
+        // Number literals are generated directly in the target type when a primitive type hint is given
+        return expr instanceof Swc4jAstNumber &&
+                (targetType.equals("I") || targetType.equals("J") ||
+                        targetType.equals("F") || targetType.equals("D"));
     }
 }
