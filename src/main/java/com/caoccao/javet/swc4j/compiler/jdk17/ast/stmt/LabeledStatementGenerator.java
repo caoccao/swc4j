@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstForStmt;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstLabeledStmt;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstWhileStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -71,6 +72,9 @@ public final class LabeledStatementGenerator {
         if (body instanceof Swc4jAstForStmt forStmt) {
             // Generate labeled for loop
             ForStatementGenerator.generate(code, cp, forStmt, labelName, returnTypeInfo, context, options);
+        } else if (body instanceof Swc4jAstWhileStmt whileStmt) {
+            // Generate labeled while loop
+            WhileStatementGenerator.generate(code, cp, whileStmt, labelName, returnTypeInfo, context, options);
         } else {
             // For other statement types, just generate the body
             // (labels on non-loop statements are allowed but don't affect code generation)
