@@ -33,14 +33,16 @@ public class StackMapGenerator {
     private static final int UNINITIALIZED_THIS = 6;
     private final byte[] bytecode;
     private final String className;
+    private final String descriptor;
     private final boolean isStatic;
     private final int maxLocals;
 
-    public StackMapGenerator(byte[] bytecode, int maxLocals, boolean isStatic, String className) {
+    public StackMapGenerator(byte[] bytecode, int maxLocals, boolean isStatic, String className, String descriptor) {
         this.bytecode = bytecode;
         this.maxLocals = maxLocals;
         this.isStatic = isStatic;
         this.className = className;
+        this.descriptor = descriptor;
     }
 
     private Map<Integer, Frame> computeFramesDataFlow() {
@@ -90,7 +92,60 @@ public class StackMapGenerator {
         if (!isStatic) {
             locals.add(OBJECT); // 'this'
         }
-        // Don't pre-populate locals - they get added when stored to
+
+        // Parse method descriptor to add parameters to initial frame
+        if (descriptor != null && descriptor.startsWith("(")) {
+            int endParams = descriptor.indexOf(')');
+            if (endParams > 0) {
+                String params = descriptor.substring(1, endParams);
+                int i = 0;
+                while (i < params.length()) {
+                    char c = params.charAt(i);
+                    switch (c) {
+                        case 'B', 'C', 'S', 'I', 'Z' -> {
+                            locals.add(INTEGER);
+                            i++;
+                        }
+                        case 'J' -> {
+                            locals.add(LONG);
+                            locals.add(TOP); // Long takes 2 slots
+                            i++;
+                        }
+                        case 'F' -> {
+                            locals.add(FLOAT);
+                            i++;
+                        }
+                        case 'D' -> {
+                            locals.add(DOUBLE);
+                            locals.add(TOP); // Double takes 2 slots
+                            i++;
+                        }
+                        case 'L' -> {
+                            // Object type - skip until ';'
+                            locals.add(OBJECT);
+                            i = params.indexOf(';', i) + 1;
+                        }
+                        case '[' -> {
+                            // Array type - skip entire array descriptor
+                            locals.add(OBJECT);
+                            i++;
+                            while (i < params.length() && params.charAt(i) == '[') {
+                                i++;
+                            }
+                            if (i < params.length()) {
+                                if (params.charAt(i) == 'L') {
+                                    i = params.indexOf(';', i) + 1;
+                                } else {
+                                    i++;
+                                }
+                            }
+                        }
+                        default -> i++; // Skip unknown
+                    }
+                }
+            }
+        }
+
         return new Frame(locals, new ArrayList<>());
     }
 

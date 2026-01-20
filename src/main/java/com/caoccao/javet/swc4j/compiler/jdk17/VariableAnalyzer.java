@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
+import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstSwitchCase;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.*;
@@ -111,6 +112,13 @@ public final class VariableAnalyzer {
         } else if (stmt instanceof Swc4jAstLabeledStmt labeledStmt) {
             // Recursively analyze labeled statement body
             analyzeStatement(labeledStmt.getBody(), context, options);
+        } else if (stmt instanceof Swc4jAstSwitchStmt switchStmt) {
+            // Recursively analyze switch case bodies
+            for (Swc4jAstSwitchCase switchCase : switchStmt.getCases()) {
+                for (ISwc4jAstStmt caseStmt : switchCase.getCons()) {
+                    analyzeStatement(caseStmt, context, options);
+                }
+            }
         } else if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
             // Recursively analyze block statements
             for (ISwc4jAstStmt childStmt : blockStmt.getStmts()) {

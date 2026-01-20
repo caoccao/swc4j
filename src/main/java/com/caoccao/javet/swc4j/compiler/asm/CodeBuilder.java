@@ -408,9 +408,9 @@ public class CodeBuilder {
      * @param className the class name for 'this' reference type
      * @return list of stack map entries, or null if not needed
      */
-    public java.util.List<ClassWriter.StackMapEntry> generateStackMapTable(int maxLocals, boolean isStatic, String className) {
+    public java.util.List<ClassWriter.StackMapEntry> generateStackMapTable(int maxLocals, boolean isStatic, String className, String descriptor) {
         byte[] bytecode = toByteArray();
-        StackMapGenerator generator = new StackMapGenerator(bytecode, maxLocals, isStatic, className);
+        StackMapGenerator generator = new StackMapGenerator(bytecode, maxLocals, isStatic, className, descriptor);
         return generator.generate();
     }
 

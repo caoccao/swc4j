@@ -24,55 +24,22 @@ import org.junit.jupiter.params.provider.EnumSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Test suite for basic integer switch statements (Phase 1)
- * Tests simple switch with constant integer cases and break statements
+ * Test suite for default clause in switch statements (Phase 2)
+ * Tests default clause in various positions and behaviors
  */
-public class TestCompileAstSwitchStmtBasic extends BaseTestCompileSuite {
+public class TestCompileAstSwitchStmtDefault extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSwitchBasicThreeCases(JdkVersion jdkVersion) throws Exception {
+    public void testSwitchDefaultAtBeginning(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
                       let result: int = 0
                       switch (x) {
-                        case 1:
-                          result = 10
-                          break
-                        case 2:
-                          result = 20
-                          break
-                        case 3:
-                          result = 30
-                          break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
-
-        assertEquals(10, testMethod.invoke(instance, 1));
-        assertEquals(20, testMethod.invoke(instance, 2));
-        assertEquals(30, testMethod.invoke(instance, 3));
-        assertEquals(0, testMethod.invoke(instance, 4)); // No match
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchDenseCases(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(x: int): int {
-                      let result: int = 0
-                      switch (x) {
-                        case 0:
-                          result = 0
+                        default:
+                          result = -1
                           break
                         case 1:
                           result = 1
@@ -80,9 +47,6 @@ public class TestCompileAstSwitchStmtBasic extends BaseTestCompileSuite {
                         case 2:
                           result = 2
                           break
-                        case 3:
-                          result = 3
-                          break
                       }
                       return result
                     }
@@ -92,182 +56,28 @@ public class TestCompileAstSwitchStmtBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
-        assertEquals(0, testMethod.invoke(instance, 0));
         assertEquals(1, testMethod.invoke(instance, 1));
         assertEquals(2, testMethod.invoke(instance, 2));
-        assertEquals(3, testMethod.invoke(instance, 3));
-        assertEquals(0, testMethod.invoke(instance, 4)); // No match
+        assertEquals(-1, testMethod.invoke(instance, 99)); // Default case
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSwitchFirstCase(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let result: int = 0
-                      switch (1) {
-                        case 1:
-                          result = 100
-                          break
-                        case 2:
-                          result = 200
-                          break
-                        case 3:
-                          result = 300
-                          break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test");
-
-        assertEquals(100, testMethod.invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchLastCase(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let result: int = 0
-                      switch (3) {
-                        case 1:
-                          result = 100
-                          break
-                        case 2:
-                          result = 200
-                          break
-                        case 3:
-                          result = 300
-                          break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test");
-
-        assertEquals(300, testMethod.invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchNegativeCases(JdkVersion jdkVersion) throws Exception {
+    public void testSwitchDefaultAtEnd(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(x: int): int {
                       let result: int = 0
                       switch (x) {
-                        case -5:
-                          result = 5
-                          break
-                        case -3:
-                          result = 3
-                          break
-                        case 0:
-                          result = 0
-                          break
-                        case 3:
-                          result = -3
-                          break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
-
-        assertEquals(5, testMethod.invoke(instance, -5));
-        assertEquals(3, testMethod.invoke(instance, -3));
-        assertEquals(0, testMethod.invoke(instance, 0));
-        assertEquals(-3, testMethod.invoke(instance, 3));
-        assertEquals(0, testMethod.invoke(instance, 99)); // No match
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchNoMatch(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let result: int = -1
-                      switch (99) {
                         case 1:
                           result = 1
                           break
                         case 2:
                           result = 2
                           break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test");
-
-        assertEquals(-1, testMethod.invoke(instance)); // No match, result unchanged
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchSingleCase(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(x: int): int {
-                      let result: int = -1
-                      switch (x) {
-                        case 5:
-                          result = 50
-                          break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
-
-        assertEquals(50, testMethod.invoke(instance, 5));
-        assertEquals(-1, testMethod.invoke(instance, 1)); // No match
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchSparseCases(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(x: int): int {
-                      let result: int = 0
-                      switch (x) {
-                        case 1:
-                          result = 1
-                          break
-                        case 10:
-                          result = 10
-                          break
-                        case 100:
-                          result = 100
-                          break
-                        case 1000:
-                          result = 1000
+                        default:
+                          result = -1
                           break
                       }
                       return result
@@ -279,46 +89,13 @@ public class TestCompileAstSwitchStmtBasic extends BaseTestCompileSuite {
         var testMethod = classA.getMethod("test", int.class);
 
         assertEquals(1, testMethod.invoke(instance, 1));
-        assertEquals(10, testMethod.invoke(instance, 10));
-        assertEquals(100, testMethod.invoke(instance, 100));
-        assertEquals(1000, testMethod.invoke(instance, 1000));
-        assertEquals(0, testMethod.invoke(instance, 50)); // No match
+        assertEquals(2, testMethod.invoke(instance, 2));
+        assertEquals(-1, testMethod.invoke(instance, 99)); // Default case
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSwitchWithExpressionDiscriminant(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(x: int): int {
-                      let result: int = 0
-                      switch (x * 2) {
-                        case 5:
-                          result = 5
-                          break
-                        case 10:
-                          result = 10
-                          break
-                        case 15:
-                          result = 15
-                          break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
-
-        assertEquals(10, testMethod.invoke(instance, 5)); // 5 * 2 = 10
-        assertEquals(0, testMethod.invoke(instance, 3)); // 3 * 2 = 6, no match
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchWithVariableInCase(JdkVersion jdkVersion) throws Exception {
+    public void testSwitchDefaultInMiddle(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
@@ -326,12 +103,13 @@ public class TestCompileAstSwitchStmtBasic extends BaseTestCompileSuite {
                       let result: int = 0
                       switch (x) {
                         case 1:
-                          const y: int = 10
-                          result = y
+                          result = 1
+                          break
+                        default:
+                          result = -1
                           break
                         case 2:
-                          const z: int = 20
-                          result = z
+                          result = 2
                           break
                       }
                       return result
@@ -342,8 +120,146 @@ public class TestCompileAstSwitchStmtBasic extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", int.class);
 
-        assertEquals(10, testMethod.invoke(instance, 1));
-        assertEquals(20, testMethod.invoke(instance, 2));
-        assertEquals(0, testMethod.invoke(instance, 3));
+        assertEquals(1, testMethod.invoke(instance, 1));
+        assertEquals(2, testMethod.invoke(instance, 2));
+        assertEquals(-1, testMethod.invoke(instance, 99)); // Default case
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSwitchDefaultNoBreak(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(x: int): int {
+                      let result: int = 0
+                      switch (x) {
+                        case 1:
+                          result = 1
+                          break
+                        default:
+                          result = -1
+                        case 2:
+                          result += 10
+                          break
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", int.class);
+
+        assertEquals(1, testMethod.invoke(instance, 1));
+        assertEquals(10, testMethod.invoke(instance, 2));
+        assertEquals(9, testMethod.invoke(instance, 99)); // Default sets -1, falls to case 2 which adds 10
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSwitchDefaultOnly(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(x: int): int {
+                      let result: int = 0
+                      switch (x) {
+                        default:
+                          result = 100
+                          break
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", int.class);
+
+        assertEquals(100, testMethod.invoke(instance, 1));
+        assertEquals(100, testMethod.invoke(instance, 99));
+        assertEquals(100, testMethod.invoke(instance, -5));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSwitchDefaultWithMultipleStatements(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(x: int): int {
+                      let result: int = 0
+                      switch (x) {
+                        case 1:
+                          result = 1
+                          break
+                        default:
+                          const tmp: int = x * 2
+                          result = tmp + 10
+                          break
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", int.class);
+
+        assertEquals(1, testMethod.invoke(instance, 1));
+        assertEquals(30, testMethod.invoke(instance, 10)); // 10 * 2 + 10 = 30
+        assertEquals(18, testMethod.invoke(instance, 4));  // 4 * 2 + 10 = 18
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSwitchDefaultWithReturn(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(x: int): int {
+                      switch (x) {
+                        case 1:
+                          return 1
+                        default:
+                          return -1
+                      }
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", int.class);
+
+        assertEquals(1, testMethod.invoke(instance, 1));
+        assertEquals(-1, testMethod.invoke(instance, 99));
+        assertEquals(-1, testMethod.invoke(instance, 5));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSwitchEmptyDefault(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(x: int): int {
+                      let result: int = -1
+                      switch (x) {
+                        case 1:
+                          result = 1
+                          break
+                        default:
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", int.class);
+
+        assertEquals(1, testMethod.invoke(instance, 1));
+        assertEquals(-1, testMethod.invoke(instance, 99)); // Empty default does nothing
     }
 }

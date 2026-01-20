@@ -99,12 +99,12 @@ public final class MethodGenerator {
 
                     // Generate stack map table for methods with branches (required for Java 7+)
                     boolean isStatic = (accessFlags & 0x0008) != 0;
-                    var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName());
+                    var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName(), descriptor);
                     classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
                             lineNumbers, localVariableTable, stackMapTable);
                 } else {
                     boolean isStatic = (accessFlags & 0x0008) != 0;
-                    var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName());
+                    var stackMapTable = code.generateStackMapTable(maxLocals, isStatic, classWriter.getClassName(), descriptor);
                     classWriter.addMethod(accessFlags, methodName, descriptor, code.toByteArray(), maxStack, maxLocals,
                             null, null, stackMapTable);
                 }

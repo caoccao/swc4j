@@ -172,6 +172,18 @@ public final class SwitchStatementGenerator {
      * Returns null if not a constant integer.
      */
     private static Integer extractConstantIntValue(ISwc4jAstExpr expr) {
+        // Handle unary minus for negative numbers
+        if (expr instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr unaryExpr) {
+            if (unaryExpr.getOp() == com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp.Minus) {
+                Integer value = extractConstantIntValue(unaryExpr.getArg());
+                return value != null ? -value : null;
+            }
+            if (unaryExpr.getOp() == com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp.Plus) {
+                return extractConstantIntValue(unaryExpr.getArg());
+            }
+            return null;
+        }
+
         if (expr instanceof Swc4jAstNumber number) {
             String raw = number.getRaw().orElse("0");
             try {
