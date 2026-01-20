@@ -220,8 +220,8 @@ public final class SwitchStatementGenerator {
 
     /**
      * Generate bytecode for a string switch statement.
-     * Uses two-phase approach: comparisons first, then case bodies.
-     * This avoids complex control flow and frame merging issues.
+     * Uses simple if-else chain that jumps directly to case bodies.
+     * Handles fall-through and empty cases correctly.
      */
     private static void generateStringSwitch(
             CodeBuilder code,
@@ -241,8 +241,10 @@ public final class SwitchStatementGenerator {
             return;
         }
 
-        // 2. Evaluate discriminant and keep on stack
+        // 2. Store discriminant in local variable
+        int strLocal = context.getLocalVariableTable().allocateVariable("$switch$str", "Ljava/lang/String;");
         ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+        code.astore(strLocal);
 
         // 3. Set up break label
         CompilationContext.LoopLabelInfo breakLabel = new CompilationContext.LoopLabelInfo(null);
@@ -250,56 +252,54 @@ public final class SwitchStatementGenerator {
 
         int equalsRef = cp.addMethodRef("java/lang/String", "equals", "(Ljava/lang/Object;)Z");
         StringCaseInfo defaultCase = null;
-
-        // 4. Phase 1: Generate all comparisons with conditional jumps to case bodies
-        List<Integer> caseBodyGotoPositions = new ArrayList<>();
         List<StringCaseInfo> regularCases = new ArrayList<>();
 
+        // Separate regular cases from default
         for (StringCaseInfo caseInfo : stringCases) {
             if (caseInfo.caseValue != null) {
-                // if (str.equals("caseValue")) goto caseBody
-                code.dup(); // Duplicate the discriminant string on stack
-                code.ldc(cp.addString(caseInfo.caseValue));
-                code.invokevirtual(equalsRef);
-
-                int ifnePos = code.getCurrentOffset();
-                code.ifne(0); // if true (!=0), jump to case body - placeholder
-                caseBodyGotoPositions.add(ifnePos + 1); // Remember position to patch
                 regularCases.add(caseInfo);
             } else {
                 defaultCase = caseInfo;
             }
         }
 
-        // Pop the discriminant string (no longer needed) and jump to default/end
-        code.pop();
-        int defaultGotoPos = code.getCurrentOffset();
-        code.gotoLabel(0); // Placeholder, will be patched
+        // 4. Phase 1: Generate comparisons with conditional jumps to case bodies
+        List<Integer> ifnePositions = new ArrayList<>();
 
-        // 5. Phase 2: Generate case bodies and patch jumps
+        for (StringCaseInfo caseInfo : regularCases) {
+            // if (str.equals("caseValue")) goto caseBody
+            code.aload(strLocal);
+            code.ldc(cp.addString(caseInfo.caseValue));
+            code.invokevirtual(equalsRef);
+
+            int ifnePos = code.getCurrentOffset();
+            code.ifne(0); // if true, jump to case body - will be patched
+            ifnePositions.add(ifnePos);
+        }
+
+        // After all comparisons, jump to default (or end)
+        int gotoDefaultPos = code.getCurrentOffset();
+        code.gotoLabel(0); // Will be patched
+
+        // 5. Phase 2: Generate case bodies sequentially (allows fall-through)
         for (int i = 0; i < regularCases.size(); i++) {
             StringCaseInfo caseInfo = regularCases.get(i);
 
-            // Patch the ifne from phase 1 to jump here
+            // Patch the ifne to jump here
             int caseBodyStart = code.getCurrentOffset();
-            int gotoPos = caseBodyGotoPositions.get(i);
-            code.patchShort(gotoPos, caseBodyStart - (gotoPos - 1));
-
-            // Pop the discriminant string (it's still on stack when we jump here)
-            code.pop();
+            int ifnePos = ifnePositions.get(i);
+            code.patchShort(ifnePos + 1, caseBodyStart - ifnePos);
 
             // Generate case body
             for (ISwc4jAstStmt stmt : caseInfo.statements) {
                 StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
             }
-
-            // If this case can fall through to the next, continue to next case body
-            // (fall-through is automatic - no explicit goto needed)
+            // Fall-through is automatic - no goto unless break was generated
         }
 
         // 6. Generate default case
         int defaultStart = code.getCurrentOffset();
-        code.patchShort(defaultGotoPos + 1, defaultStart - defaultGotoPos);
+        code.patchShort(gotoDefaultPos + 1, defaultStart - gotoDefaultPos);
 
         if (defaultCase != null) {
             for (ISwc4jAstStmt stmt : defaultCase.statements) {

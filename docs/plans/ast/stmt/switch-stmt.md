@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for supporting switch statements in TypeScript to JVM bytecode compilation. Switch statements provide multi-way branching based on the value of an expression, with support for fall-through semantics and default cases.
 
-**Current Status:** 🟢 **MOSTLY IMPLEMENTED** (2026-01-20)
+**Current Status:** 🟢 **FULLY IMPLEMENTED** (2026-01-20)
 
 **Implementation Progress:**
 - ✅ **Phase 1**: Basic Integer Switch (10/10 tests passing)
@@ -13,27 +13,17 @@ This document outlines the implementation plan for supporting switch statements 
 - ✅ **Phase 5**: Nested Switches (8/8 tests passing)
 - ✅ **Phase 6**: Break and Continue (9/9 tests passing)
 - ✅ **Phase 7**: Edge Cases (12/12 tests passing)
-- 🟡 **Phase 4**: String Switches (8/10 tests) - **MOSTLY IMPLEMENTED**
+- ✅ **Phase 4**: String Switches (10/10 tests) - **FULLY IMPLEMENTED**
 
-**Total: 67/69 tests passing (97.1%)**
+**Total: 69/69 tests passing (100%)**
 
-**Note:** String switches are implemented using a stack-based comparison approach. Most features work correctly (8/10 tests passing), with known limitations for fall-through between string cases and multiple empty case labels. Integer switches are fully functional with optimal tableswitch/lookupswitch selection.
-
-**String Switch Known Limitations:**
-- ❌ Fall-through between string cases (test: `testSwitchStringFallThrough`)
-- ❌ Multiple empty case labels sharing a body (test: `testSwitchStringMultipleMatches`)
-- ✅ Basic string matching with break statements
-- ✅ Default clauses
-- ✅ Empty string cases
-- ✅ Case sensitivity
-- ✅ Hash collision handling
-- ✅ Special characters and Unicode strings
+**Note:** String switches are implemented using an if-else chain approach that jumps directly to case bodies, properly supporting fall-through and multiple empty case labels. Integer switches use optimal tableswitch/lookupswitch selection based on case density.
 
 **Dependencies:** ✅ TypeScript enum support (TsEnumDecl) - COMPLETED (2026-01-19)
 
 **Currently Supported Discriminant Types:**
 1. ✅ **int** - Direct tableswitch/lookupswitch (FULLY IMPLEMENTED - 59/59 tests)
-2. 🟡 **String** - Stack-based comparison approach (MOSTLY IMPLEMENTED - 8/10 tests)
+2. ✅ **String** - If-else chain with equals() checks (FULLY IMPLEMENTED - 10/10 tests)
 3. 🔴 **enum** - Uses ordinal() values (NOT YET TESTED)
 4. 🔴 **byte, short, char** - Promoted to int (NOT YET TESTED)
 5. 🔴 **Boxed types** - Unboxed then promoted to int (NOT YET TESTED)
@@ -100,20 +90,32 @@ switch (expression) {
 - ✅ Expression discriminants (evaluated once)
 - ✅ Variable declarations in case bodies
 
-**Test Coverage (59 tests total):**
+**Test Coverage (69 tests total):**
 - ✅ `TestCompileAstSwitchStmtBasic.java` - 10 tests for basic integer switches
 - ✅ `TestCompileAstSwitchStmtDefault.java` - 8 tests for default clause
 - ✅ `TestCompileAstSwitchStmtFallThrough.java` - 12 tests for fall-through behavior
 - ✅ `TestCompileAstSwitchStmtNested.java` - 8 tests for nested switches
 - ✅ `TestCompileAstSwitchStmtBreak.java` - 9 tests for break/continue interaction
 - ✅ `TestCompileAstSwitchStmtEdgeCases.java` - 12 tests for edge cases and boundary conditions
+- ✅ `TestCompileAstSwitchStmtString.java` - 10 tests for string switches
 
 All tests are parameterized with `JdkVersion.class` to ensure compatibility across JDK versions.
+
+### What Works
+
+**Fully Implemented Features:**
+- ✅ Integer switches with optimal tableswitch/lookupswitch selection
+- ✅ String switches with if-else chain and String.equals() checks
+- ✅ Fall-through semantics for both integer and string switches
+- ✅ Multiple empty case labels sharing a body
+- ✅ Default clause in any position
+- ✅ Break statements
+- ✅ Nested switches
+- ✅ All edge cases (empty switches, negative values, expression discriminants, etc.)
 
 ### What's Not Yet Implemented
 
 **Deferred Features:**
-- 🔴 String switches (requires hash-based two-stage implementation)
 - 🔴 Enum switches (requires ordinal() extraction)
 - 🔴 Boxed type switches (requires unboxing)
 - 🔴 Primitive promotion (byte, short, char → int)

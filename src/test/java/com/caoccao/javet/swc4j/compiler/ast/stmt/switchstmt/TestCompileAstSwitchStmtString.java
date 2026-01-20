@@ -18,7 +18,6 @@ package com.caoccao.javet.swc4j.compiler.ast.stmt.switchstmt;
 
 import com.caoccao.javet.swc4j.compiler.BaseTestCompileSuite;
 import com.caoccao.javet.swc4j.compiler.JdkVersion;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -185,7 +184,6 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
         assertEquals(0, testMethod.invoke(instance, "other"));
     }
 
-    @Disabled
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchStringFallThrough(JdkVersion jdkVersion) throws Exception {
@@ -217,7 +215,6 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
         assertEquals(100, testMethod.invoke(instance, "c")); // 100
     }
 
-    @Disabled
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
     public void testSwitchStringMultipleMatches(JdkVersion jdkVersion) throws Exception {
