@@ -106,6 +106,23 @@ public class ClassWriter {
                 // Add debug attribute names if present
                 if (method.stackMapTable != null && !method.stackMapTable.isEmpty()) {
                     constantPool.addUtf8("StackMapTable");
+                    // Pre-add class names from StackMapTable entries to constant pool
+                    for (StackMapEntry entry : method.stackMapTable) {
+                        if (entry.localClassNames != null) {
+                            for (String className : entry.localClassNames) {
+                                if (className != null) {
+                                    constantPool.addClass(className);
+                                }
+                            }
+                        }
+                        if (entry.stackClassNames != null) {
+                            for (String className : entry.stackClassNames) {
+                                if (className != null) {
+                                    constantPool.addClass(className);
+                                }
+                            }
+                        }
+                    }
                 }
                 if (method.lineNumberTable != null && !method.lineNumberTable.isEmpty()) {
                     constantPool.addUtf8("LineNumberTable");

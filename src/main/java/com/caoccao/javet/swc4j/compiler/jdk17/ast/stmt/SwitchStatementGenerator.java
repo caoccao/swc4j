@@ -220,8 +220,10 @@ public final class SwitchStatementGenerator {
 
     /**
      * Generate bytecode for a string switch statement.
-     * Uses simple if-else chain that jumps directly to case bodies.
-     * Handles fall-through and empty cases correctly.
+     * Uses JDK-style 2-phase approach:
+     * Phase 1: Switch on hashCode() to compute string position
+     * Phase 2: Switch on computed position with original case bodies
+     * This properly handles hash collisions and fall-through semantics.
      */
     private static void generateStringSwitch(
             CodeBuilder code,
@@ -241,74 +243,221 @@ public final class SwitchStatementGenerator {
             return;
         }
 
-        // 2. Store discriminant in local variable
+        // 2. Build data structures for 2-phase compilation
+        // Map from string case label to its position (0-based index of non-default cases)
+        Map<String, Integer> caseLabelToPosition = new LinkedHashMap<>();
+        // Map from hash code to set of strings with that hash
+        Map<Integer, Set<String>> hashToStrings = new LinkedHashMap<>();
+        // Track default case position
+        int defaultCasePosition = -1;
+        StringCaseInfo defaultCaseInfo = null;
+
+        int position = 0;
+        for (StringCaseInfo caseInfo : stringCases) {
+            if (caseInfo.caseValue == null) {
+                // Default case
+                defaultCaseInfo = caseInfo;
+                defaultCasePosition = position;
+            } else {
+                // Regular string case
+                caseLabelToPosition.put(caseInfo.caseValue, position);
+                int hashCode = caseInfo.caseValue.hashCode();
+                hashToStrings.computeIfAbsent(hashCode, k -> new LinkedHashSet<>()).add(caseInfo.caseValue);
+            }
+            position++;
+        }
+
+        // 3. Store discriminant in local variable
         int strLocal = context.getLocalVariableTable().allocateVariable("$switch$str", "Ljava/lang/String;");
         ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
         code.astore(strLocal);
 
-        // 3. Set up break label
+        // 4. Create temp variable for position, initialized to -1
+        int posLocal = context.getLocalVariableTable().allocateVariable("$switch$pos", "I");
+        code.iconst(-1);
+        code.istore(posLocal);
+
+        // 5. Phase 1: Switch on hashCode() to determine position
+        if (!hashToStrings.isEmpty()) {
+            generatePhase1HashSwitch(code, cp, strLocal, posLocal, hashToStrings, caseLabelToPosition);
+        }
+
+        // 6. Phase 2: Switch on position with original case bodies
+        generatePhase2PositionSwitch(code, cp, posLocal, stringCases, defaultCasePosition,
+                returnTypeInfo, context, options);
+    }
+
+    /**
+     * Phase 1: Generate switch on hashCode() to compute string position.
+     * For each hash code, generates if-else chain with equals() checks.
+     */
+    private static void generatePhase1HashSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            int strLocal,
+            int posLocal,
+            Map<Integer, Set<String>> hashToStrings,
+            Map<String, Integer> caseLabelToPosition) {
+
+        int hashCodeRef = cp.addMethodRef("java/lang/String", "hashCode", "()I");
+        int equalsRef = cp.addMethodRef("java/lang/String", "equals", "(Ljava/lang/Object;)Z");
+
+        // Generate hashCode() call
+        code.aload(strLocal);
+        code.invokevirtual(hashCodeRef);
+
+        // Determine whether to use tableswitch or lookupswitch for hash codes
+        List<Integer> hashCodes = new ArrayList<>(hashToStrings.keySet());
+        Collections.sort(hashCodes);
+
+        boolean useTableSwitch = shouldUseTableSwitchForHashCodes(hashCodes);
+
+        // Reserve space for the switch instruction
+        int switchStart = code.getCurrentOffset();
+        int switchInstrSize = useTableSwitch
+                ? calculateTableSwitchSizeForHashes(hashCodes, switchStart)
+                : calculateLookupSwitchSizeForHashes(hashCodes.size(), switchStart);
+
+        for (int i = 0; i < switchInstrSize; i++) {
+            code.emitByte(0);
+        }
+
+        // Generate hash case bodies and record their offsets
+        Map<Integer, Integer> hashToOffset = new LinkedHashMap<>();
+        List<Integer> breakPatchPositions = new ArrayList<>();
+
+        for (int hashCode : hashCodes) {
+            int caseOffset = code.getCurrentOffset();
+            hashToOffset.put(hashCode, caseOffset);
+
+            Set<String> stringsWithHash = hashToStrings.get(hashCode);
+
+            // Generate if-else chain for strings with this hash
+            for (String str : stringsWithHash) {
+                // if (str.equals("label")) { pos = position; break; }
+                code.aload(strLocal);
+                code.ldc(cp.addString(str));
+                code.invokevirtual(equalsRef);
+
+                int ifeqPos = code.getCurrentOffset();
+                code.ifeq(0); // if false, skip to next comparison - will be patched
+
+                // Assign position
+                code.iconst(caseLabelToPosition.get(str));
+                code.istore(posLocal);
+
+                // Break out of switch1
+                int gotoBreakPos = code.getCurrentOffset();
+                code.gotoLabel(0); // will be patched to end of switch1
+                breakPatchPositions.add(gotoBreakPos);
+
+                // Patch ifeq to jump here (to next comparison)
+                int nextComparisonOffset = code.getCurrentOffset();
+                code.patchShort(ifeqPos + 1, nextComparisonOffset - ifeqPos);
+            }
+
+            // End of this hash case - break (fall-through to next case or end)
+            int gotoEndPos = code.getCurrentOffset();
+            code.gotoLabel(0);
+            breakPatchPositions.add(gotoEndPos);
+        }
+
+        // Default case (no match) - just falls through to phase 2
+        int defaultOffset = code.getCurrentOffset();
+
+        // Patch all breaks to here
+        for (int patchPos : breakPatchPositions) {
+            code.patchShort(patchPos + 1, defaultOffset - patchPos);
+        }
+
+        // Patch the switch instruction
+        if (useTableSwitch) {
+            patchTableSwitchForHashes(code, switchStart, defaultOffset, hashCodes, hashToOffset);
+        } else {
+            patchLookupSwitchForHashes(code, switchStart, defaultOffset, hashCodes, hashToOffset);
+        }
+    }
+
+    /**
+     * Phase 2: Generate switch on position with original case bodies.
+     * This preserves the exact structure of the original switch for proper fall-through.
+     */
+    private static void generatePhase2PositionSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            int posLocal,
+            List<StringCaseInfo> stringCases,
+            int defaultCasePosition,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        // Set up break label for the switch
         CompilationContext.LoopLabelInfo breakLabel = new CompilationContext.LoopLabelInfo(null);
         context.pushBreakLabel(breakLabel);
 
-        int equalsRef = cp.addMethodRef("java/lang/String", "equals", "(Ljava/lang/Object;)Z");
-        StringCaseInfo defaultCase = null;
-        List<StringCaseInfo> regularCases = new ArrayList<>();
+        // Load position variable
+        code.iload(posLocal);
 
-        // Separate regular cases from default
-        for (StringCaseInfo caseInfo : stringCases) {
-            if (caseInfo.caseValue != null) {
-                regularCases.add(caseInfo);
-            } else {
-                defaultCase = caseInfo;
+        // Build position-based switch
+        // Positions are 0, 1, 2, ... for each case in source order
+        // Default case doesn't have a position in the switch - it maps to -1 or any unmatched value
+
+        List<Integer> positions = new ArrayList<>();
+        for (int i = 0; i < stringCases.size(); i++) {
+            if (stringCases.get(i).caseValue != null) {
+                positions.add(i);
             }
         }
 
-        // 4. Phase 1: Generate comparisons with conditional jumps to case bodies
-        List<Integer> ifnePositions = new ArrayList<>();
+        // Reserve space for switch2 instruction
+        int switch2Start = code.getCurrentOffset();
+        boolean useTableSwitch = !positions.isEmpty() && shouldUseTableSwitchForPositions(positions);
+        int switch2Size = useTableSwitch
+                ? calculateTableSwitchSize(positions, switch2Start)
+                : calculateLookupSwitchSize(positions.size(), switch2Start);
 
-        for (StringCaseInfo caseInfo : regularCases) {
-            // if (str.equals("caseValue")) goto caseBody
-            code.aload(strLocal);
-            code.ldc(cp.addString(caseInfo.caseValue));
-            code.invokevirtual(equalsRef);
-
-            int ifnePos = code.getCurrentOffset();
-            code.ifne(0); // if true, jump to case body - will be patched
-            ifnePositions.add(ifnePos);
+        for (int i = 0; i < switch2Size; i++) {
+            code.emitByte(0);
         }
 
-        // After all comparisons, jump to default (or end)
-        int gotoDefaultPos = code.getCurrentOffset();
-        code.gotoLabel(0); // Will be patched
+        // Generate case bodies and record their offsets
+        Map<Integer, Integer> positionToOffset = new LinkedHashMap<>();
+        int defaultBodyOffset = -1;
 
-        // 5. Phase 2: Generate case bodies sequentially (allows fall-through)
-        for (int i = 0; i < regularCases.size(); i++) {
-            StringCaseInfo caseInfo = regularCases.get(i);
+        for (int i = 0; i < stringCases.size(); i++) {
+            StringCaseInfo caseInfo = stringCases.get(i);
+            int caseOffset = code.getCurrentOffset();
 
-            // Patch the ifne to jump here
-            int caseBodyStart = code.getCurrentOffset();
-            int ifnePos = ifnePositions.get(i);
-            code.patchShort(ifnePos + 1, caseBodyStart - ifnePos);
+            if (caseInfo.caseValue == null) {
+                // Default case
+                defaultBodyOffset = caseOffset;
+            } else {
+                positionToOffset.put(i, caseOffset);
+            }
 
             // Generate case body
             for (ISwc4jAstStmt stmt : caseInfo.statements) {
                 StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
             }
-            // Fall-through is automatic - no goto unless break was generated
+            // Fall-through is automatic
         }
 
-        // 6. Generate default case
-        int defaultStart = code.getCurrentOffset();
-        code.patchShort(gotoDefaultPos + 1, defaultStart - gotoDefaultPos);
-
-        if (defaultCase != null) {
-            for (ISwc4jAstStmt stmt : defaultCase.statements) {
-                StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
-            }
-        }
-
-        // 7. End of switch
+        // End of switch
         int endLabel = code.getCurrentOffset();
+
+        // If no default case, default jumps to end
+        if (defaultBodyOffset == -1) {
+            defaultBodyOffset = endLabel;
+        }
+
+        // Patch the switch2 instruction
+        if (useTableSwitch && !positions.isEmpty()) {
+            patchTableSwitch(code, switch2Start, defaultBodyOffset, positions, positionToOffset);
+        } else {
+            patchLookupSwitch(code, switch2Start, defaultBodyOffset,
+                    new ArrayList<>(positionToOffset.keySet()), positionToOffset);
+        }
 
         // Patch break statements
         for (CompilationContext.LoopLabelInfo.PatchInfo patchInfo : breakLabel.getPatchPositions()) {
@@ -317,6 +466,106 @@ public final class SwitchStatementGenerator {
         }
 
         context.popBreakLabel();
+    }
+
+    /**
+     * Determine whether to use tableswitch for hash codes.
+     */
+    private static boolean shouldUseTableSwitchForHashCodes(List<Integer> hashCodes) {
+        if (hashCodes.isEmpty() || hashCodes.size() == 1) {
+            return hashCodes.size() == 1;
+        }
+
+        int min = hashCodes.get(0);
+        int max = hashCodes.get(hashCodes.size() - 1);
+        long range = (long) max - (long) min + 1;
+
+        if (range <= 0 || range > MAX_TABLE_SWITCH_RANGE) {
+            return false;
+        }
+
+        double density = (double) hashCodes.size() / (double) range;
+        return density >= DENSITY_THRESHOLD;
+    }
+
+    /**
+     * Calculate tableswitch size for hash codes.
+     */
+    private static int calculateTableSwitchSizeForHashes(List<Integer> hashCodes, int startOffset) {
+        if (hashCodes.isEmpty()) {
+            return 0;
+        }
+        int min = hashCodes.get(0);
+        int max = hashCodes.get(hashCodes.size() - 1);
+        int numEntries = max - min + 1;
+        int padding = (4 - ((startOffset + 1) % 4)) % 4;
+        return 1 + padding + 12 + (numEntries * 4);
+    }
+
+    /**
+     * Calculate lookupswitch size for hash codes.
+     */
+    private static int calculateLookupSwitchSizeForHashes(int numCases, int startOffset) {
+        int padding = (4 - ((startOffset + 1) % 4)) % 4;
+        return 1 + padding + 8 + (numCases * 8);
+    }
+
+    /**
+     * Patch tableswitch instruction for hash codes.
+     */
+    private static void patchTableSwitchForHashes(
+            CodeBuilder code,
+            int switchStart,
+            int defaultOffset,
+            List<Integer> hashCodes,
+            Map<Integer, Integer> hashToOffset) {
+
+        List<Byte> switchBytes = new ArrayList<>();
+
+        int min = hashCodes.get(0);
+        int max = hashCodes.get(hashCodes.size() - 1);
+
+        int[] jumpOffsets = new int[max - min + 1];
+        for (int i = 0; i < jumpOffsets.length; i++) {
+            int hashCode = min + i;
+            jumpOffsets[i] = hashToOffset.getOrDefault(hashCode, defaultOffset);
+        }
+
+        buildTableSwitch(switchBytes, switchStart, defaultOffset, min, max, jumpOffsets);
+
+        byte[] bytes = new byte[switchBytes.size()];
+        for (int i = 0; i < switchBytes.size(); i++) {
+            bytes[i] = switchBytes.get(i);
+        }
+        code.patchBytes(switchStart, bytes);
+    }
+
+    /**
+     * Patch lookupswitch instruction for hash codes.
+     */
+    private static void patchLookupSwitchForHashes(
+            CodeBuilder code,
+            int switchStart,
+            int defaultOffset,
+            List<Integer> hashCodes,
+            Map<Integer, Integer> hashToOffset) {
+
+        List<Byte> switchBytes = new ArrayList<>();
+
+        int[][] matchOffsets = new int[hashCodes.size()][2];
+        for (int i = 0; i < hashCodes.size(); i++) {
+            int hashCode = hashCodes.get(i);
+            matchOffsets[i][0] = hashCode;
+            matchOffsets[i][1] = hashToOffset.get(hashCode);
+        }
+
+        buildLookupSwitch(switchBytes, switchStart, defaultOffset, matchOffsets);
+
+        byte[] bytes = new byte[switchBytes.size()];
+        for (int i = 0; i < switchBytes.size(); i++) {
+            bytes[i] = switchBytes.get(i);
+        }
+        code.patchBytes(switchStart, bytes);
     }
 
     /**

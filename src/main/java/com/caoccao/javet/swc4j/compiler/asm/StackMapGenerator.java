@@ -270,12 +270,14 @@ public class StackMapGenerator {
             FrameData localsData = convertVerificationTypes(frame.locals);
             FrameData stackData = convertVerificationTypes(frame.stack);
 
-            // Use backward-compatible constructor without class names
+            // Pass class names for proper OBJECT type handling in StackMapTable
             entries.add(new ClassWriter.StackMapEntry(
                     offsetDelta,
                     255,
                     localsData.types,
-                    stackData.types));
+                    stackData.types,
+                    localsData.classNames,
+                    stackData.classNames));
             previousOffset = offset;
         }
 
@@ -479,9 +481,11 @@ public class StackMapGenerator {
         if (type1.tag == NULL && type2.tag == OBJECT) return type2;
         if (type1.tag == OBJECT && type2.tag == NULL) return type1;
 
-        // Two different OBJECT types merge to their common supertype
-        // For simplicity, use java/lang/Object as the common supertype
+        // Two OBJECT types - if same class, preserve it; otherwise use common supertype
         if (type1.tag == OBJECT && type2.tag == OBJECT) {
+            if (Objects.equals(type1.className, type2.className)) {
+                return type1; // Same class, preserve it
+            }
             return VerificationType.object("java/lang/Object");
         }
 

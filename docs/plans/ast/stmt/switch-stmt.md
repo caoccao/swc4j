@@ -17,13 +17,17 @@ This document outlines the implementation plan for supporting switch statements 
 
 **Total: 69/69 tests passing (100%)**
 
-**Note:** String switches are implemented using an if-else chain approach that jumps directly to case bodies, properly supporting fall-through and multiple empty case labels. Integer switches use optimal tableswitch/lookupswitch selection based on case density.
+**Note:** String switches are implemented using the JDK 2-phase approach:
+- **Phase 1:** Switch on `String.hashCode()` to compute case position (handles hash collisions with `equals()` checks)
+- **Phase 2:** Switch on computed position with original case bodies (preserves fall-through semantics)
+
+Integer switches use optimal tableswitch/lookupswitch selection based on case density.
 
 **Dependencies:** ✅ TypeScript enum support (TsEnumDecl) - COMPLETED (2026-01-19)
 
 **Currently Supported Discriminant Types:**
 1. ✅ **int** - Direct tableswitch/lookupswitch (FULLY IMPLEMENTED - 59/59 tests)
-2. ✅ **String** - If-else chain with equals() checks (FULLY IMPLEMENTED - 10/10 tests)
+2. ✅ **String** - JDK 2-phase approach: hashCode() switch + position switch (FULLY IMPLEMENTED - 10/10 tests)
 3. 🔴 **enum** - Uses ordinal() values (NOT YET TESTED)
 4. 🔴 **byte, short, char** - Promoted to int (NOT YET TESTED)
 5. 🔴 **Boxed types** - Unboxed then promoted to int (NOT YET TESTED)
@@ -105,7 +109,7 @@ All tests are parameterized with `JdkVersion.class` to ensure compatibility acro
 
 **Fully Implemented Features:**
 - ✅ Integer switches with optimal tableswitch/lookupswitch selection
-- ✅ String switches with if-else chain and String.equals() checks
+- ✅ String switches using JDK 2-phase approach (hashCode() switch + position switch)
 - ✅ Fall-through semantics for both integer and string switches
 - ✅ Multiple empty case labels sharing a body
 - ✅ Default clause in any position
@@ -255,49 +259,71 @@ Choose tableswitch when:
 
 Otherwise use lookupswitch.
 
-### String Switches (Java 7+)
+### String Switches (Java 7+ / JDK 2-Phase Approach)
 
-String switches compile to a two-stage process:
+String switches compile to a two-phase process that properly supports fall-through:
+
 ```
-// switch (str) { case "foo": ...; case "bar": ...; }
+// switch (str) { case "foo": ...; case "bar": ...; default: ...; }
 
-// Stage 1: Hash code switch
-iload_1                    // Load string reference
+// Phase 1: Hash code switch to compute position
+String s$ = str;           // Store discriminant
+int pos$ = -1;             // Position variable
+aload s$
 invokevirtual String.hashCode()
 lookupswitch {
   hash("foo"): HASH_FOO
   hash("bar"): HASH_BAR
+  default: END_PHASE1
+}
+
+HASH_FOO:
+  aload s$
+  ldc "foo"
+  invokevirtual String.equals()
+  ifeq NEXT_FOO            // If not equal, try next
+  iconst 0                 // Position for "foo" is 0
+  istore pos$
+  goto END_PHASE1
+NEXT_FOO:
+  goto END_PHASE1          // No match for this hash
+
+HASH_BAR:
+  aload s$
+  ldc "bar"
+  invokevirtual String.equals()
+  ifeq NEXT_BAR
+  iconst 1                 // Position for "bar" is 1
+  istore pos$
+  goto END_PHASE1
+NEXT_BAR:
+  goto END_PHASE1
+
+END_PHASE1:
+
+// Phase 2: Position-based switch with original case bodies
+iload pos$
+tableswitch {              // Positions are sequential: 0, 1, ...
+  0: CASE_FOO
+  1: CASE_BAR
   default: DEFAULT
 }
 
-// Stage 2: Equality checks (handle hash collisions)
-HASH_FOO:
-  aload_1                  // Load string again
-  ldc "foo"
-  invokevirtual String.equals()
-  ifne CASE_FOO_LABEL
-  goto DEFAULT             // Hash collision, not actually "foo"
-
-CASE_FOO_LABEL:
-  [case "foo" body]
-  goto END
-
-HASH_BAR:
-  aload_1
-  ldc "bar"
-  invokevirtual String.equals()
-  ifne CASE_BAR_LABEL
-  goto DEFAULT
-
-CASE_BAR_LABEL:
+CASE_FOO:
+  [case "foo" body]        // Fall-through works naturally
+CASE_BAR:
   [case "bar" body]
   goto END
-
 DEFAULT:
   [default body]
-
 END:
 ```
+
+**Key benefits of the 2-phase approach:**
+1. **Efficient hash lookup**: O(1) average case via lookupswitch on hashCode()
+2. **Proper hash collision handling**: Multiple strings with same hash are checked with equals()
+3. **Correct fall-through semantics**: Phase 2 uses sequential positions, allowing natural fall-through
+4. **Multiple empty case labels**: Empty cases share the same position in Phase 2
 
 ---
 
@@ -1811,18 +1837,30 @@ NULL_LABEL:
   // Handle null case or throw NullPointerException
 ```
 
-### String Switch Compilation
+### String Switch Compilation (JDK 2-Phase Approach)
 
-**Step 1: Generate hash map:**
+The implementation follows the JDK 17 compiler's approach (see `com.sun.tools.javac.comp.Lower.visitStringSwitch`):
+
+**Phase 1: Build data structures**
 ```java
-Map<Integer, List<CaseInfo>> hashMap = new HashMap<>();
-for (CaseInfo caseInfo : cases) {
-    int hash = caseInfo.stringValue.hashCode();
-    hashMap.computeIfAbsent(hash, k -> new ArrayList<>()).add(caseInfo);
+// Map from string case label to its position in the case list
+Map<String, Integer> caseLabelToPosition = new LinkedHashMap<>();
+// Map from hash code to set of strings with that hash
+Map<Integer, Set<String>> hashToStrings = new LinkedHashMap<>();
+
+int position = 0;
+for (StringCaseInfo caseInfo : stringCases) {
+    if (caseInfo.caseValue != null) {
+        caseLabelToPosition.put(caseInfo.caseValue, position);
+        int hashCode = caseInfo.caseValue.hashCode();
+        hashToStrings.computeIfAbsent(hashCode, k -> new LinkedHashSet<>())
+                     .add(caseInfo.caseValue);
+    }
+    position++;
 }
 ```
 
-**Step 2: Generate hash switch:**
+**Phase 2: Generate hashCode switch to compute position**
 ```
 aload <string var>
 invokevirtual String.hashCode()
@@ -1830,25 +1868,50 @@ lookupswitch {
   hash1: HASH_BLOCK_1
   hash2: HASH_BLOCK_2
   ...
-  default: DEFAULT_LABEL
+  default: END_PHASE1
 }
-```
 
-**Step 3: Generate equality checks for each hash block:**
-```
 HASH_BLOCK_1:
+  // For each string with this hash, check equals() and assign position
   aload <string var>
-  ldc "first string with this hash"
+  ldc "string1"
   invokevirtual String.equals()
-  ifne CASE_LABEL_1
+  ifeq NEXT_1
+  iconst <position of "string1">
+  istore <pos var>
+  goto END_PHASE1
+NEXT_1:
+  goto END_PHASE1
 
-  aload <string var>
-  ldc "second string with same hash"
-  invokevirtual String.equals()
-  ifne CASE_LABEL_2
+...
 
-  goto DEFAULT_LABEL
+END_PHASE1:
 ```
+
+**Phase 3: Generate position-based switch with original case bodies**
+```
+iload <pos var>
+tableswitch {   // Positions are 0, 1, 2, ... (sequential)
+  0: CASE_0
+  1: CASE_1
+  ...
+  default: DEFAULT
+}
+
+CASE_0:
+  [original case body - fall-through works naturally]
+CASE_1:
+  [original case body]
+  ...
+DEFAULT:
+  [default case body]
+END:
+```
+
+This approach properly handles:
+- Hash collisions via equals() checks in Phase 1
+- Fall-through semantics via sequential positions in Phase 2
+- Multiple empty case labels sharing a body
 
 ### Fall-Through Implementation
 
