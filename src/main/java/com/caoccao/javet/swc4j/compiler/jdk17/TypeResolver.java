@@ -35,7 +35,6 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public final class TypeResolver {
@@ -195,22 +194,6 @@ public final class TypeResolver {
         // One primitive, one reference - result is Object
         // (either boxing the primitive or finding common supertype)
         return "Ljava/lang/Object;";
-    }
-
-    /**
-     * Get all registered enum names from EnumRegistry.
-     * Uses reflection to access the private registry.
-     */
-    private static java.util.Set<String> getAllRegisteredEnumNames() {
-        try {
-            java.lang.reflect.Field field = EnumRegistry.class.getDeclaredField("enumRegistry");
-            field.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            Map<String, ?> registry = (Map<String, ?>) field.get(null);
-            return registry.keySet();
-        } catch (Exception e) {
-            return java.util.Collections.emptySet();
-        }
     }
 
     private static String getPrimitiveType(String type) {
@@ -898,7 +881,7 @@ public final class TypeResolver {
 
         // Try to find the enum in the registry by checking if any member exists
         // We use a dummy member name since we just want to know if the enum exists
-        for (String qualifiedName : getAllRegisteredEnumNames()) {
+        for (String qualifiedName : EnumRegistry.getEnumNameSet()) {
             if (qualifiedName.endsWith("." + typeName)) {
                 return qualifiedName;
             }

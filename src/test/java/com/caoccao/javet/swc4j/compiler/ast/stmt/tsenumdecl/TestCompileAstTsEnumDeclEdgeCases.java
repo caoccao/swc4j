@@ -6,6 +6,8 @@ import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.lang.reflect.InvocationTargetException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -71,7 +73,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
         assertThrows(Exception.class, () -> {
             try {
                 fromValueMethod.invoke(null, 999);
-            } catch (java.lang.reflect.InvocationTargetException e) {
+            } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
         });
@@ -113,7 +115,7 @@ public class TestCompileAstTsEnumDeclEdgeCases extends BaseTestCompileSuite {
         assertThrows(Exception.class, () -> {
             try {
                 valueOfMethod.invoke(null, "Z");
-            } catch (java.lang.reflect.InvocationTargetException e) {
+            } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
         });

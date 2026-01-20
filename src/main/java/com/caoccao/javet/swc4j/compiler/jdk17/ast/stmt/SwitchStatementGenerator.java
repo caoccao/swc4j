@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
+import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstSwitchCase;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstSwitchStmt;
@@ -309,14 +310,14 @@ public final class SwitchStatementGenerator {
      */
     private static Integer extractEnumMemberOrdinal(Swc4jAstMemberExpr memberExpr) {
         // Get enum name from object
-        com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr obj = memberExpr.getObj();
+        ISwc4jAstExpr obj = memberExpr.getObj();
         if (!(obj instanceof Swc4jAstIdent astIdent)) {
             return null;
         }
         String enumName = astIdent.getSym();
 
         // Get member name from property - can be either Swc4jAstIdent or Swc4jAstIdentName
-        com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp prop = memberExpr.getProp();
+        ISwc4jAstMemberProp prop = memberExpr.getProp();
         String memberName = null;
         if (prop instanceof Swc4jAstIdent ident) {
             memberName = ident.getSym();

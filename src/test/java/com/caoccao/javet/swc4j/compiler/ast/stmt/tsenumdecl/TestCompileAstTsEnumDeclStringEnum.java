@@ -5,6 +5,8 @@ import com.caoccao.javet.swc4j.compiler.JdkVersion;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import java.lang.reflect.InvocationTargetException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -79,7 +81,7 @@ public class TestCompileAstTsEnumDeclStringEnum extends BaseTestCompileSuite {
         assertThrows(Exception.class, () -> {
             try {
                 fromValueMethod.invoke(null, "INVALID");
-            } catch (java.lang.reflect.InvocationTargetException e) {
+            } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
         });

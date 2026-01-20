@@ -28,10 +28,7 @@ import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsEnumMember;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Registry for enum declarations and their member ordinals.
@@ -97,6 +94,10 @@ public final class EnumRegistry {
                 }
             }
         }
+    }
+
+    public static Set<String> getEnumNameSet() {
+        return enumRegistry.keySet();
     }
 
     /**
