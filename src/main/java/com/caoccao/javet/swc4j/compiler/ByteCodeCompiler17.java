@@ -38,16 +38,16 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
 
         if (program instanceof Swc4jAstModule module) {
             // First pass: collect type aliases and enum declarations
-            TypeAliasCollector.collectFromModuleItems(module.getBody(), options);
+            TypeAliasCollector.collectFromModuleItems(this, module.getBody());
             EnumRegistry.collectFromModuleItems(module.getBody(), options.packagePrefix());
             // Second pass: generate bytecode
-            AstProcessor.processModuleItems(module.getBody(), options.packagePrefix(), byteCodeMap, options);
+            AstProcessor.processModuleItems(this, module.getBody(), options.packagePrefix(), byteCodeMap);
         } else if (program instanceof Swc4jAstScript script) {
             // First pass: collect type aliases and enum declarations
-            TypeAliasCollector.collectFromStmts(script.getBody(), options);
+            TypeAliasCollector.collectFromStmts(this, script.getBody());
             EnumRegistry.collectFromStmts(script.getBody(), options.packagePrefix());
             // Second pass: generate bytecode
-            AstProcessor.processStmts(script.getBody(), options.packagePrefix(), byteCodeMap, options);
+            AstProcessor.processStmts(this, script.getBody(), options.packagePrefix(), byteCodeMap);
         }
 
         return byteCodeMap;

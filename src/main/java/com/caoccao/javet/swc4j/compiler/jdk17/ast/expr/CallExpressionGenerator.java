@@ -19,7 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstCallExpr;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
-import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
@@ -32,14 +32,14 @@ public final class CallExpressionGenerator {
     }
 
     public static void generate(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstCallExpr callExpr,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
         // Handle method calls on arrays (e.g., arr.push(value))
         if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
-            String objType = TypeResolver.inferTypeFromExpr(memberExpr.getObj(), context, options);
+            String objType = TypeResolver.inferTypeFromExpr(compiler, memberExpr.getObj(), context);
 
             if (objType != null && objType.startsWith("[")) {
                 // Java array - method calls not supported
@@ -50,7 +50,7 @@ public final class CallExpressionGenerator {
                 throw new Swc4jByteCodeCompilerException("Method '" + methodName + "()' not supported on Java arrays - arrays have fixed size");
             } else if ("Ljava/util/ArrayList;".equals(objType)) {
                 // Generate code for the object (ArrayList)
-                ExpressionGenerator.generate(code, cp, memberExpr.getObj(), null, context, options);
+                ExpressionGenerator.generate(compiler, code, cp, memberExpr.getObj(), null, context);
 
                 // Get the method name
                 String methodName = null;
@@ -63,9 +63,9 @@ public final class CallExpressionGenerator {
                         // arr.push(value) -> arr.add(value)
                         if (!callExpr.getArgs().isEmpty()) {
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null, context);
                             // Box if primitive
-                            String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
+                            String argType = TypeResolver.inferTypeFromExpr(compiler, arg.getExpr(), context);
                             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
                                 TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
                             }
@@ -107,9 +107,9 @@ public final class CallExpressionGenerator {
                             code.iconst(0); // Index 0
 
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null, context);
                             // Box if primitive
-                            String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
+                            String argType = TypeResolver.inferTypeFromExpr(compiler, arg.getExpr(), context);
                             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
                                 TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
                             }
@@ -124,9 +124,9 @@ public final class CallExpressionGenerator {
                         // Returns int: index or -1 if not found
                         if (!callExpr.getArgs().isEmpty()) {
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null, context);
                             // Box argument if primitive
-                            String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
+                            String argType = TypeResolver.inferTypeFromExpr(compiler, arg.getExpr(), context);
                             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
                                 TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
                             }
@@ -145,9 +145,9 @@ public final class CallExpressionGenerator {
                         // Returns int: last index or -1 if not found
                         if (!callExpr.getArgs().isEmpty()) {
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null, context);
                             // Box argument if primitive
-                            String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
+                            String argType = TypeResolver.inferTypeFromExpr(compiler, arg.getExpr(), context);
                             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
                                 TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
                             }
@@ -166,9 +166,9 @@ public final class CallExpressionGenerator {
                         // Returns boolean: true if element exists, false otherwise
                         if (!callExpr.getArgs().isEmpty()) {
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null, context);
                             // Box argument if primitive
-                            String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
+                            String argType = TypeResolver.inferTypeFromExpr(compiler, arg.getExpr(), context);
                             if (argType != null && TypeConversionUtils.isPrimitiveType(argType)) {
                                 TypeConversionUtils.boxPrimitiveType(code, cp, argType, TypeConversionUtils.getWrapperType(argType));
                             }
@@ -241,10 +241,10 @@ public final class CallExpressionGenerator {
 
                         // Generate index argument
                         var indexArg = callExpr.getArgs().get(0);
-                        ExpressionGenerator.generate(code, cp, indexArg.getExpr(), null, context, options);
+                        ExpressionGenerator.generate(compiler, code, cp, indexArg.getExpr(), null, context);
 
                         // Unbox index if needed
-                        String indexType = TypeResolver.inferTypeFromExpr(indexArg.getExpr(), context, options);
+                        String indexType = TypeResolver.inferTypeFromExpr(compiler, indexArg.getExpr(), context);
                         if ("Ljava/lang/Integer;".equals(indexType)) {
                             int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                             code.invokevirtual(intValueMethod);
@@ -252,10 +252,10 @@ public final class CallExpressionGenerator {
 
                         // Generate value argument
                         var valueArg = callExpr.getArgs().get(1);
-                        ExpressionGenerator.generate(code, cp, valueArg.getExpr(), null, context, options);
+                        ExpressionGenerator.generate(compiler, code, cp, valueArg.getExpr(), null, context);
 
                         // Box value if primitive
-                        String valueType = TypeResolver.inferTypeFromExpr(valueArg.getExpr(), context, options);
+                        String valueType = TypeResolver.inferTypeFromExpr(compiler, valueArg.getExpr(), context);
                         if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
                             TypeConversionUtils.boxPrimitiveType(code, cp, valueType, TypeConversionUtils.getWrapperType(valueType));
                         }
@@ -284,10 +284,10 @@ public final class CallExpressionGenerator {
                         } else if (argCount == 1) {
                             // One argument: toSpliced(start) - remove from start to end
                             var startArg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null, context);
 
                             // Unbox if Integer
-                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            String startType = TypeResolver.inferTypeFromExpr(compiler, startArg.getExpr(), context);
                             if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
@@ -304,10 +304,10 @@ public final class CallExpressionGenerator {
                             // Two or more arguments: toSpliced(start, deleteCount, ...items)
                             // Generate start parameter
                             var startArg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null, context);
 
                             // Unbox if Integer
-                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            String startType = TypeResolver.inferTypeFromExpr(compiler, startArg.getExpr(), context);
                             if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
@@ -316,10 +316,10 @@ public final class CallExpressionGenerator {
 
                             // Generate deleteCount parameter
                             var deleteCountArg = callExpr.getArgs().get(1);
-                            ExpressionGenerator.generate(code, cp, deleteCountArg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, deleteCountArg.getExpr(), null, context);
 
                             // Unbox if Integer
-                            String deleteCountType = TypeResolver.inferTypeFromExpr(deleteCountArg.getExpr(), context, options);
+                            String deleteCountType = TypeResolver.inferTypeFromExpr(compiler, deleteCountArg.getExpr(), context);
                             if ("Ljava/lang/Integer;".equals(deleteCountType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
@@ -344,11 +344,11 @@ public final class CallExpressionGenerator {
                                     // Stack: ArrayList, start, deleteCount, itemsList, itemsList
 
                                     var itemArg = callExpr.getArgs().get(i);
-                                    ExpressionGenerator.generate(code, cp, itemArg.getExpr(), null, context, options);
+                                    ExpressionGenerator.generate(compiler, code, cp, itemArg.getExpr(), null, context);
                                     // Stack: ArrayList, start, deleteCount, itemsList, itemsList, item
 
                                     // Box if primitive
-                                    String itemType = TypeResolver.inferTypeFromExpr(itemArg.getExpr(), context, options);
+                                    String itemType = TypeResolver.inferTypeFromExpr(compiler, itemArg.getExpr(), context);
                                     if (itemType != null && TypeConversionUtils.isPrimitiveType(itemType)) {
                                         TypeConversionUtils.boxPrimitiveType(code, cp, itemType, TypeConversionUtils.getWrapperType(itemType));
                                     }
@@ -384,10 +384,10 @@ public final class CallExpressionGenerator {
                         } else {
                             // Get separator argument
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null, context);
 
                             // If the separator is not a String, convert it
-                            String argType = TypeResolver.inferTypeFromExpr(arg.getExpr(), context, options);
+                            String argType = TypeResolver.inferTypeFromExpr(compiler, arg.getExpr(), context);
                             if (argType != null && !"Ljava/lang/String;".equals(argType)) {
                                 // Convert to string using String.valueOf()
                                 int valueOfMethod = cp.addMethodRef("java/lang/String", "valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
@@ -409,7 +409,7 @@ public final class CallExpressionGenerator {
                         if (!callExpr.getArgs().isEmpty()) {
                             // Get the second array argument
                             var arg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(code, cp, arg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, arg.getExpr(), null, context);
 
                             // Call ArrayApiUtils.concat(ArrayList, ArrayList)
                             int concatMethod = cp.addMethodRef("com/caoccao/javet/swc4j/compiler/jdk17/ast/utils/ArrayApiUtils", "concat",
@@ -477,11 +477,11 @@ public final class CallExpressionGenerator {
                             // Stack: ArrayList
 
                             var startArg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null, context);
                             // Stack: ArrayList, start
 
                             // Need to unbox if Integer
-                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            String startType = TypeResolver.inferTypeFromExpr(compiler, startArg.getExpr(), context);
                             if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
@@ -522,11 +522,11 @@ public final class CallExpressionGenerator {
                             // Stack: ArrayList
 
                             var startArg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null, context);
                             // Stack: ArrayList, start
 
                             // Unbox if Integer
-                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            String startType = TypeResolver.inferTypeFromExpr(compiler, startArg.getExpr(), context);
                             if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
@@ -534,11 +534,11 @@ public final class CallExpressionGenerator {
                             // Stack: ArrayList, start
 
                             var endArg = callExpr.getArgs().get(1);
-                            ExpressionGenerator.generate(code, cp, endArg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, endArg.getExpr(), null, context);
                             // Stack: ArrayList, start, end
 
                             // Unbox if Integer
-                            String endType = TypeResolver.inferTypeFromExpr(endArg.getExpr(), context, options);
+                            String endType = TypeResolver.inferTypeFromExpr(compiler, endArg.getExpr(), context);
                             if ("Ljava/lang/Integer;".equals(endType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
@@ -572,10 +572,10 @@ public final class CallExpressionGenerator {
                         } else if (argCount == 1) {
                             // One argument: splice(start) - remove from start to end
                             var startArg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null, context);
 
                             // Unbox if Integer
-                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            String startType = TypeResolver.inferTypeFromExpr(compiler, startArg.getExpr(), context);
                             if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
@@ -593,10 +593,10 @@ public final class CallExpressionGenerator {
                             // Two or more arguments: splice(start, deleteCount, ...items)
                             // Generate start parameter
                             var startArg = callExpr.getArgs().get(0);
-                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null, context);
 
                             // Unbox if Integer
-                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            String startType = TypeResolver.inferTypeFromExpr(compiler, startArg.getExpr(), context);
                             if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
@@ -605,10 +605,10 @@ public final class CallExpressionGenerator {
 
                             // Generate deleteCount parameter
                             var deleteCountArg = callExpr.getArgs().get(1);
-                            ExpressionGenerator.generate(code, cp, deleteCountArg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, deleteCountArg.getExpr(), null, context);
 
                             // Unbox if Integer
-                            String deleteCountType = TypeResolver.inferTypeFromExpr(deleteCountArg.getExpr(), context, options);
+                            String deleteCountType = TypeResolver.inferTypeFromExpr(compiler, deleteCountArg.getExpr(), context);
                             if ("Ljava/lang/Integer;".equals(deleteCountType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
@@ -633,11 +633,11 @@ public final class CallExpressionGenerator {
                                     // Stack: ArrayList, ArrayList, start, deleteCount, itemsList, itemsList
 
                                     var itemArg = callExpr.getArgs().get(i);
-                                    ExpressionGenerator.generate(code, cp, itemArg.getExpr(), null, context, options);
+                                    ExpressionGenerator.generate(compiler, code, cp, itemArg.getExpr(), null, context);
                                     // Stack: ArrayList, ArrayList, start, deleteCount, itemsList, itemsList, item
 
                                     // Box if primitive
-                                    String itemType = TypeResolver.inferTypeFromExpr(itemArg.getExpr(), context, options);
+                                    String itemType = TypeResolver.inferTypeFromExpr(compiler, itemArg.getExpr(), context);
                                     if (itemType != null && TypeConversionUtils.isPrimitiveType(itemType)) {
                                         TypeConversionUtils.boxPrimitiveType(code, cp, itemType, TypeConversionUtils.getWrapperType(itemType));
                                     }
@@ -682,11 +682,11 @@ public final class CallExpressionGenerator {
 
                         // Generate the value argument
                         var valueArg = callExpr.getArgs().get(0);
-                        ExpressionGenerator.generate(code, cp, valueArg.getExpr(), null, context, options);
+                        ExpressionGenerator.generate(compiler, code, cp, valueArg.getExpr(), null, context);
                         // Stack: ArrayList, value
 
                         // Box primitive value if needed
-                        String valueType = TypeResolver.inferTypeFromExpr(valueArg.getExpr(), context, options);
+                        String valueType = TypeResolver.inferTypeFromExpr(compiler, valueArg.getExpr(), context);
                         if (valueType != null && TypeConversionUtils.isPrimitiveType(valueType)) {
                             TypeConversionUtils.boxPrimitiveType(code, cp, valueType, TypeConversionUtils.getWrapperType(valueType));
                         }
@@ -703,11 +703,11 @@ public final class CallExpressionGenerator {
                         } else if (argCount == 2) {
                             // fill(value, start) - fill from start to end
                             var startArg = callExpr.getArgs().get(1);
-                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null, context);
                             // Stack: ArrayList, value, start
 
                             // Unbox if needed
-                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            String startType = TypeResolver.inferTypeFromExpr(compiler, startArg.getExpr(), context);
                             if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
@@ -722,10 +722,10 @@ public final class CallExpressionGenerator {
                         } else {
                             // fill(value, start, end) - three arguments
                             var startArg = callExpr.getArgs().get(1);
-                            ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null, context);
 
                             // Unbox start if needed
-                            String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                            String startType = TypeResolver.inferTypeFromExpr(compiler, startArg.getExpr(), context);
                             if ("Ljava/lang/Integer;".equals(startType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
@@ -733,10 +733,10 @@ public final class CallExpressionGenerator {
                             // Stack: ArrayList, value, start
 
                             var endArg = callExpr.getArgs().get(2);
-                            ExpressionGenerator.generate(code, cp, endArg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, endArg.getExpr(), null, context);
 
                             // Unbox end if needed
-                            String endType = TypeResolver.inferTypeFromExpr(endArg.getExpr(), context, options);
+                            String endType = TypeResolver.inferTypeFromExpr(compiler, endArg.getExpr(), context);
                             if ("Ljava/lang/Integer;".equals(endType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);
@@ -766,11 +766,11 @@ public final class CallExpressionGenerator {
 
                         // Generate the target argument
                         var targetArg = callExpr.getArgs().get(0);
-                        ExpressionGenerator.generate(code, cp, targetArg.getExpr(), null, context, options);
+                        ExpressionGenerator.generate(compiler, code, cp, targetArg.getExpr(), null, context);
                         // Stack: ArrayList, target
 
                         // Unbox target if needed
-                        String targetType = TypeResolver.inferTypeFromExpr(targetArg.getExpr(), context, options);
+                        String targetType = TypeResolver.inferTypeFromExpr(compiler, targetArg.getExpr(), context);
                         if ("Ljava/lang/Integer;".equals(targetType)) {
                             int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                             code.invokevirtual(intValueMethod);
@@ -779,11 +779,11 @@ public final class CallExpressionGenerator {
 
                         // Generate the start argument
                         var startArg = callExpr.getArgs().get(1);
-                        ExpressionGenerator.generate(code, cp, startArg.getExpr(), null, context, options);
+                        ExpressionGenerator.generate(compiler, code, cp, startArg.getExpr(), null, context);
                         // Stack: ArrayList, target, start
 
                         // Unbox start if needed
-                        String startType = TypeResolver.inferTypeFromExpr(startArg.getExpr(), context, options);
+                        String startType = TypeResolver.inferTypeFromExpr(compiler, startArg.getExpr(), context);
                         if ("Ljava/lang/Integer;".equals(startType)) {
                             int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                             code.invokevirtual(intValueMethod);
@@ -802,10 +802,10 @@ public final class CallExpressionGenerator {
                         } else {
                             // copyWithin(target, start, end) - three arguments
                             var endArg = callExpr.getArgs().get(2);
-                            ExpressionGenerator.generate(code, cp, endArg.getExpr(), null, context, options);
+                            ExpressionGenerator.generate(compiler, code, cp, endArg.getExpr(), null, context);
 
                             // Unbox end if needed
-                            String endType = TypeResolver.inferTypeFromExpr(endArg.getExpr(), context, options);
+                            String endType = TypeResolver.inferTypeFromExpr(compiler, endArg.getExpr(), context);
                             if ("Ljava/lang/Integer;".equals(endType)) {
                                 int intValueMethod = cp.addMethodRef("java/lang/Integer", "intValue", "()I");
                                 code.invokevirtual(intValueMethod);

@@ -28,12 +28,15 @@ import java.util.Map;
 
 public sealed abstract class ByteCodeCompiler permits
         ByteCodeCompiler17 {
+    protected final ByteCodeCompilerMemory memory;
     protected final ByteCodeCompilerOptions options;
     protected final Swc4jParseOptions parseOptions;
     protected final Swc4j swc4j;
 
     ByteCodeCompiler(ByteCodeCompilerOptions options) {
         this.options = AssertionUtils.notNull(options, "options");
+        memory = new ByteCodeCompilerMemory();
+        memory.getTypeAliasMap().putAll(options.typeAliasMap());
         parseOptions = new Swc4jParseOptions()
                 .setCaptureAst(true);
         swc4j = new Swc4j();
@@ -52,4 +55,12 @@ public sealed abstract class ByteCodeCompiler permits
     }
 
     abstract Map<String, byte[]> compileProgram(ISwc4jAstProgram<?> program) throws Swc4jByteCodeCompilerException;
+
+    public ByteCodeCompilerMemory getMemory() {
+        return memory;
+    }
+
+    public ByteCodeCompilerOptions getOptions() {
+        return options;
+    }
 }

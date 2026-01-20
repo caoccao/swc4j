@@ -23,6 +23,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
@@ -38,10 +39,10 @@ public final class MethodGenerator {
     }
 
     public static void generate(
+            ByteCodeCompiler compiler,
             ClassWriter classWriter,
             ClassWriter.ConstantPool cp,
-            Swc4jAstClassMethod method,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            Swc4jAstClassMethod method) throws Swc4jByteCodeCompilerException {
         ISwc4jAstPropName key = method.getKey();
         String methodName = CodeGeneratorUtils.getMethodName(key);
         Swc4jAstFunction function = method.getFunction();
@@ -54,15 +55,15 @@ public final class MethodGenerator {
                 CompilationContext context = new CompilationContext();
 
                 // Analyze function parameters and allocate local variable slots
-                VariableAnalyzer.analyzeParameters(function, context, options);
+                VariableAnalyzer.analyzeParameters(compiler, function, context);
 
                 // Analyze variable declarations and infer types
-                VariableAnalyzer.analyzeVariableDeclarations(body, context, options);
+                VariableAnalyzer.analyzeVariableDeclarations(compiler, body, context);
 
                 // Determine return type from method body or explicit annotation
-                ReturnTypeInfo returnTypeInfo = TypeResolver.analyzeReturnType(function, body, context, options);
-                String descriptor = generateDescriptor(function, returnTypeInfo, options);
-                CodeBuilder code = generateCode(cp, body, returnTypeInfo, context, options);
+                ReturnTypeInfo returnTypeInfo = TypeResolver.analyzeReturnType(compiler, function, body, context);
+                String descriptor = generateDescriptor(compiler, function, returnTypeInfo);
+                CodeBuilder code = generateCode(compiler, cp, body, returnTypeInfo, context);
 
                 int accessFlags = 0x0001; // ACC_PUBLIC
                 if (method.isStatic()) {
@@ -82,7 +83,7 @@ public final class MethodGenerator {
                 int maxLocals = context.getLocalVariableTable().getMaxLocals();
 
                 // Add debug information if enabled
-                if (options.debug()) {
+                if (compiler.getOptions().debug()) {
                     List<ClassWriter.LineNumberEntry> lineNumbers = code.getLineNumbers();
                     List<ClassWriter.LocalVariableEntry> localVariableTable = new java.util.ArrayList<>();
 
@@ -116,26 +117,29 @@ public final class MethodGenerator {
     }
 
     public static CodeBuilder generateCode(
+            ByteCodeCompiler compiler,
             ClassWriter.ConstantPool cp,
             Swc4jAstBlockStmt body,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
         CodeBuilder code = new CodeBuilder();
 
         // Process statements in the method body
         for (ISwc4jAstStmt stmt : body.getStmts()) {
-            StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
+            StatementGenerator.generate(compiler, code, cp, stmt, returnTypeInfo, context);
         }
 
         return code;
     }
 
-    public static String generateDescriptor(Swc4jAstFunction function, ReturnTypeInfo returnTypeInfo, ByteCodeCompilerOptions options) {
+    public static String generateDescriptor(
+            ByteCodeCompiler compiler,
+            Swc4jAstFunction function,
+            ReturnTypeInfo returnTypeInfo) {
         // Build parameter descriptors
         StringBuilder paramDescriptors = new StringBuilder();
         for (Swc4jAstParam param : function.getParams()) {
-            String paramType = TypeResolver.extractParameterType(param.getPat(), options);
+            String paramType = TypeResolver.extractParameterType(compiler, param.getPat());
             paramDescriptors.append(paramType);
         }
 

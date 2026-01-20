@@ -23,7 +23,7 @@ import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.stmt.*;
-import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
@@ -103,44 +103,44 @@ public final class DoWhileStatementGenerator {
     /**
      * Generate bytecode for a do-while statement (unlabeled).
      *
+     * @param compiler       the compiler
      * @param code           the code builder
      * @param cp             the constant pool
      * @param doWhileStmt    the do-while statement AST node
      * @param returnTypeInfo return type information for the enclosing method
      * @param context        compilation context
-     * @param options        compilation options
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     public static void generate(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstDoWhileStmt doWhileStmt,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-        generate(code, cp, doWhileStmt, null, returnTypeInfo, context, options);
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
+        generate(compiler, code, cp, doWhileStmt, null, returnTypeInfo, context);
     }
 
     /**
      * Generate bytecode for a do-while statement (potentially labeled).
      *
+     * @param compiler       the compiler
      * @param code           the code builder
      * @param cp             the constant pool
      * @param doWhileStmt    the do-while statement AST node
      * @param labelName      the label name (null for unlabeled loops)
      * @param returnTypeInfo return type information for the enclosing method
      * @param context        compilation context
-     * @param options        compilation options
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     public static void generate(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstDoWhileStmt doWhileStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         // 1. Mark body label (loop entry point - body executes first)
         int bodyLabel = code.getCurrentOffset();
@@ -154,7 +154,7 @@ public final class DoWhileStatementGenerator {
         context.pushContinueLabel(continueLabel);
 
         // 3. Generate body and check if it can fall through
-        StatementGenerator.generate(code, cp, doWhileStmt.getBody(), returnTypeInfo, context, options);
+        StatementGenerator.generate(compiler, code, cp, doWhileStmt.getBody(), returnTypeInfo, context);
         boolean bodyCanFallThrough = canFallThrough(doWhileStmt.getBody());
 
         // 4. Mark test label (continue target - before test evaluation)
@@ -172,10 +172,10 @@ public final class DoWhileStatementGenerator {
             if (!isInfiniteLoop) {
                 // Generate conditional test - jump BACK to body if TRUE (inverted from while)
                 if (testExpr instanceof Swc4jAstBinExpr binExpr) {
-                    boolean generated = generateDirectConditionalJumpToBody(code, cp, binExpr, bodyLabel, context, options);
+                    boolean generated = generateDirectConditionalJumpToBody(compiler, code, cp, binExpr, bodyLabel, context);
                     if (!generated) {
                         // Fallback: generate boolean expression and use ifne (jump if TRUE)
-                        ExpressionGenerator.generate(code, cp, testExpr, null, context, options);
+                        ExpressionGenerator.generate(compiler, code, cp, testExpr, null, context);
                         code.ifne(0); // Placeholder - jump back if TRUE
                         int backwardJumpOffsetPos = code.getCurrentOffset() - 2;
                         int backwardJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -184,7 +184,7 @@ public final class DoWhileStatementGenerator {
                     }
                 } else {
                     // Non-binary expression: generate as boolean and use ifne
-                    ExpressionGenerator.generate(code, cp, testExpr, null, context, options);
+                    ExpressionGenerator.generate(compiler, code, cp, testExpr, null, context);
                     code.ifne(0); // Placeholder - jump back if TRUE
                     int backwardJumpOffsetPos = code.getCurrentOffset() - 2;
                     int backwardJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -231,12 +231,12 @@ public final class DoWhileStatementGenerator {
      * @return true if direct jump was generated, false if caller should use fallback
      */
     private static boolean generateDirectConditionalJumpToBody(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstBinExpr binExpr,
             int bodyLabel,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         Swc4jAstBinaryOp op = binExpr.getOp();
 
@@ -246,8 +246,8 @@ public final class DoWhileStatementGenerator {
         }
 
         // Get operand types
-        String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
-        String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+        String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft(), context);
+        String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight(), context);
 
         // Only handle int comparisons for now (most common case)
         if (!"I".equals(leftType) || !"I".equals(rightType)) {
@@ -255,10 +255,10 @@ public final class DoWhileStatementGenerator {
         }
 
         // Generate left operand
-        ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+        ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null, context);
 
         // Generate right operand
-        ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+        ExpressionGenerator.generate(compiler, code, cp, binExpr.getRight(), null, context);
 
         // Generate comparison - jump BACK to body if condition is TRUE (inverted from while)
         // For do-while with "i < 10", we want to jump back if "i < 10" is TRUE, so use if_icmplt

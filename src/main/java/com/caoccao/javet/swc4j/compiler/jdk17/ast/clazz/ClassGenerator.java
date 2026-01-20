@@ -19,7 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClass;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstClassMethod;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstClassMember;
-import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
@@ -31,9 +31,9 @@ public final class ClassGenerator {
     }
 
     public static byte[] generateBytecode(
+            ByteCodeCompiler compiler,
             String internalClassName,
-            Swc4jAstClass clazz,
-            ByteCodeCompilerOptions options) throws IOException, Swc4jByteCodeCompilerException {
+            Swc4jAstClass clazz) throws IOException, Swc4jByteCodeCompilerException {
         ClassWriter classWriter = new ClassWriter(internalClassName);
         ClassWriter.ConstantPool cp = classWriter.getConstantPool();
 
@@ -43,7 +43,7 @@ public final class ClassGenerator {
         // Generate methods
         for (ISwc4jAstClassMember member : clazz.getBody()) {
             if (member instanceof Swc4jAstClassMethod method) {
-                MethodGenerator.generate(classWriter, cp, method, options);
+                MethodGenerator.generate(compiler, classWriter, cp, method);
             }
         }
 

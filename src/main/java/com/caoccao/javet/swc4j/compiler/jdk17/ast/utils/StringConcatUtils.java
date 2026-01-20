@@ -19,7 +19,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.utils;
 import com.caoccao.javet.swc4j.ast.enums.Swc4jAstBinaryOp;
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstBinExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
@@ -127,29 +127,30 @@ public final class StringConcatUtils {
     }
 
     public static void collectOperands(
+            ByteCodeCompiler compiler,
             ISwc4jAstExpr expr,
             List<ISwc4jAstExpr> operands,
             List<String> operandTypes,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) {
+            CompilationContext context) {
         // If this expression is a binary Add that results in a String, collect its operands
         if (expr instanceof Swc4jAstBinExpr binExpr && binExpr.getOp() == Swc4jAstBinaryOp.Add) {
-            String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
+            String exprType = TypeResolver.inferTypeFromExpr(compiler, expr, context);
             if ("Ljava/lang/String;".equals(exprType)) {
                 // This is a string concatenation - collect operands recursively
-                collectOperands(binExpr.getLeft(), operands, operandTypes, context, options);
-                collectOperands(binExpr.getRight(), operands, operandTypes, context, options);
+                collectOperands(compiler, binExpr.getLeft(), operands, operandTypes, context);
+                collectOperands(compiler, binExpr.getRight(), operands, operandTypes, context);
                 return;
             }
         }
         // Not a string concatenation - add this expression as an operand
         operands.add(expr);
-        String operandType = TypeResolver.inferTypeFromExpr(expr, context, options);
+        String operandType = TypeResolver.inferTypeFromExpr(compiler, expr, context);
         // If type is null (e.g., for null literal), default to Object
         operandTypes.add(operandType != null ? operandType : "Ljava/lang/Object;");
     }
 
     public static void generateConcat(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             ISwc4jAstExpr left,
@@ -157,7 +158,6 @@ public final class StringConcatUtils {
             String leftType,
             String rightType,
             CompilationContext context,
-            ByteCodeCompilerOptions options,
             ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
         // Use StringBuilder for string concatenation
         // new StringBuilder
@@ -177,7 +177,7 @@ public final class StringConcatUtils {
         List<String> operandTypes = new ArrayList<>();
 
         // Collect operands from left side
-        collectOperands(left, operands, operandTypes, context, options);
+        collectOperands(compiler, left, operands, operandTypes, context);
 
         // Add right operand
         operands.add(right);
@@ -185,7 +185,7 @@ public final class StringConcatUtils {
 
         // Append all operands
         for (int i = 0; i < operands.size(); i++) {
-            callback.generateExpr(code, cp, operands.get(i), null, context, options);
+            callback.generateExpr(compiler, code, cp, operands.get(i), null, context);
             appendOperandToStringBuilder(code, cp, operandTypes.get(i), appendString, appendInt, appendChar);
         }
 
@@ -196,11 +196,11 @@ public final class StringConcatUtils {
     @FunctionalInterface
     public interface ExpressionGeneratorCallback {
         void generateExpr(
+                ByteCodeCompiler compiler,
                 CodeBuilder code,
                 ClassWriter.ConstantPool cp,
                 ISwc4jAstExpr expr,
                 ReturnTypeInfo returnTypeInfo,
-                CompilationContext context,
-                ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException;
+                CompilationContext context) throws Swc4jByteCodeCompilerException;
     }
 }

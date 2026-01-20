@@ -18,7 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.stmt.*;
-import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
@@ -89,52 +89,41 @@ public final class IfStatementGenerator {
     /**
      * Generate bytecode for an if statement.
      *
+     * @param compiler       the compiler
      * @param code           the code builder
      * @param cp             the constant pool
      * @param ifStmt         the if statement AST node
      * @param returnTypeInfo return type information for the enclosing method
      * @param context        compilation context
-     * @param options        compilation options
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     public static void generate(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstIfStmt ifStmt,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         // Evaluate the test condition
-        ExpressionGenerator.generate(code, cp, ifStmt.getTest(), null, context, options);
+        ExpressionGenerator.generate(compiler, code, cp, ifStmt.getTest(), null, context);
 
         if (ifStmt.getAlt().isEmpty()) {
             // Simple if without else
-            generateSimpleIf(code, cp, ifStmt, returnTypeInfo, context, options);
+            generateSimpleIf(compiler, code, cp, ifStmt, returnTypeInfo, context);
         } else {
             // If-else
-            generateIfElse(code, cp, ifStmt, returnTypeInfo, context, options);
+            generateIfElse(compiler, code, cp, ifStmt, returnTypeInfo, context);
         }
     }
 
-    /**
-     * Generate bytecode for if-else statement.
-     *
-     * @param code           the code builder
-     * @param cp             the constant pool
-     * @param ifStmt         the if statement AST node
-     * @param returnTypeInfo return type information
-     * @param context        compilation context
-     * @param options        compilation options
-     * @throws Swc4jByteCodeCompilerException if code generation fails
-     */
     private static void generateIfElse(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstIfStmt ifStmt,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         // Jump to else branch if condition is false (0)
         code.ifeq(0); // Placeholder
@@ -142,7 +131,7 @@ public final class IfStatementGenerator {
         int ifeqOpcodePos = code.getCurrentOffset() - 3;
 
         // Generate consequent (then branch)
-        StatementGenerator.generate(code, cp, ifStmt.getCons(), returnTypeInfo, context, options);
+        StatementGenerator.generate(compiler, code, cp, ifStmt.getCons(), returnTypeInfo, context);
 
         // Check if consequent ends with unconditional jump - if so, no need for goto
         boolean consEndsWithJump = endsWithUnconditionalJump(ifStmt.getCons());
@@ -159,7 +148,7 @@ public final class IfStatementGenerator {
 
         // Generate alternate (else branch)
         int elseLabel = code.getCurrentOffset();
-        StatementGenerator.generate(code, cp, ifStmt.getAlt().get(), returnTypeInfo, context, options);
+        StatementGenerator.generate(compiler, code, cp, ifStmt.getAlt().get(), returnTypeInfo, context);
 
         // End of if-else statement
         int endLabel = code.getCurrentOffset();
@@ -175,24 +164,13 @@ public final class IfStatementGenerator {
         }
     }
 
-    /**
-     * Generate bytecode for simple if statement (no else clause).
-     *
-     * @param code           the code builder
-     * @param cp             the constant pool
-     * @param ifStmt         the if statement AST node
-     * @param returnTypeInfo return type information
-     * @param context        compilation context
-     * @param options        compilation options
-     * @throws Swc4jByteCodeCompilerException if code generation fails
-     */
     private static void generateSimpleIf(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstIfStmt ifStmt,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         // Jump to end if condition is false (0)
         code.ifeq(0); // Placeholder, will patch offset later
@@ -200,7 +178,7 @@ public final class IfStatementGenerator {
         int ifeqOpcodePos = code.getCurrentOffset() - 3;
 
         // Generate consequent (then branch)
-        StatementGenerator.generate(code, cp, ifStmt.getCons(), returnTypeInfo, context, options);
+        StatementGenerator.generate(compiler, code, cp, ifStmt.getCons(), returnTypeInfo, context);
 
         // End of if statement
         int endLabel = code.getCurrentOffset();

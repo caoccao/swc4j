@@ -18,7 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.lit;
 
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstArrayLit;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
-import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
@@ -35,12 +35,12 @@ public final class ArrayLiteralGenerator {
     }
 
     public static void generate(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstArrayLit arrayLit,
             ReturnTypeInfo returnTypeInfo,
             CompilationContext context,
-            ByteCodeCompilerOptions options,
             StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
         // Check if we should generate a Java array or ArrayList
         boolean isJavaArray = returnTypeInfo != null &&
@@ -49,7 +49,7 @@ public final class ArrayLiteralGenerator {
 
         if (isJavaArray) {
             // Generate Java array
-            generateJavaArray(code, cp, arrayLit, returnTypeInfo.descriptor(), context, options, callback);
+            generateJavaArray(compiler, code, cp, arrayLit, returnTypeInfo.descriptor(), context, callback);
         } else {
             // Array literal - convert to ArrayList
             int arrayListClass = cp.addClass("java/util/ArrayList");
@@ -74,7 +74,7 @@ public final class ArrayLiteralGenerator {
                         ISwc4jAstExpr elemExpr = elem.getExpr();
 
                         // Generate code for the spread expression (should be an array/collection)
-                        callback.generateExpr(code, cp, elemExpr, null, context, options);
+                        callback.generateExpr(compiler, code, cp, elemExpr, null, context);
 
                         // Call ArrayList.addAll(Collection) to add all elements
                         code.invokevirtual(arrayListAddAll);
@@ -84,10 +84,10 @@ public final class ArrayLiteralGenerator {
                         code.dup(); // Duplicate ArrayList reference
                         // Generate code for the element expression - ensure it's boxed
                         ISwc4jAstExpr elemExpr = elem.getExpr();
-                        String elemType = TypeResolver.inferTypeFromExpr(elemExpr, context, options);
+                        String elemType = TypeResolver.inferTypeFromExpr(compiler, elemExpr, context);
                         if (elemType == null) elemType = "Ljava/lang/Object;";
 
-                        callback.generateExpr(code, cp, elemExpr, null, context, options);
+                        callback.generateExpr(compiler, code, cp, elemExpr, null, context);
 
                         // Box primitives to objects
                         if ("I".equals(elemType) || "Z".equals(elemType) || "B".equals(elemType) ||
@@ -107,12 +107,12 @@ public final class ArrayLiteralGenerator {
     }
 
     private static void generateJavaArray(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstArrayLit arrayLit,
             String arrayDescriptor,
             CompilationContext context,
-            ByteCodeCompilerOptions options,
             StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
         // Extract element type from array descriptor (e.g., "[I" -> "I", "[Ljava/lang/String;" -> "Ljava/lang/String;")
         String elemType = arrayDescriptor.substring(1);
@@ -152,10 +152,10 @@ public final class ArrayLiteralGenerator {
                 code.iconst(index);  // Push index
 
                 // Generate the element value
-                String exprType = TypeResolver.inferTypeFromExpr(elemExpr, context, options);
+                String exprType = TypeResolver.inferTypeFromExpr(compiler, elemExpr, context);
                 if (exprType == null) exprType = "Ljava/lang/Object;";
 
-                callback.generateExpr(code, cp, elemExpr, null, context, options);
+                callback.generateExpr(compiler, code, cp, elemExpr, null, context);
 
                 // Unbox if needed
                 TypeConversionUtils.unboxWrapperType(code, cp, exprType);

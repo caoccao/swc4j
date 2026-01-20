@@ -22,7 +22,7 @@ import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsTypeAliasDecl;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsQualifiedName;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
-import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 
 import java.util.List;
 
@@ -30,28 +30,32 @@ public final class TypeAliasCollector {
     private TypeAliasCollector() {
     }
 
-    public static void collectFromModuleItems(List<ISwc4jAstModuleItem> items, ByteCodeCompilerOptions options) {
+    public static void collectFromModuleItems(
+            ByteCodeCompiler compiler,
+            List<ISwc4jAstModuleItem> items) {
         for (ISwc4jAstModuleItem item : items) {
             if (item instanceof Swc4jAstExportDecl exportDecl) {
                 ISwc4jAstDecl decl = exportDecl.getDecl();
                 if (decl instanceof Swc4jAstTsTypeAliasDecl typeAliasDecl) {
-                    processTypeAlias(typeAliasDecl, options);
+                    processTypeAlias(compiler, typeAliasDecl);
                 }
             } else if (item instanceof Swc4jAstTsTypeAliasDecl typeAliasDecl) {
-                processTypeAlias(typeAliasDecl, options);
+                processTypeAlias(compiler, typeAliasDecl);
             }
         }
     }
 
-    public static void collectFromStmts(List<ISwc4jAstStmt> stmts, ByteCodeCompilerOptions options) {
+    public static void collectFromStmts(ByteCodeCompiler compiler, List<ISwc4jAstStmt> stmts) {
         for (ISwc4jAstStmt stmt : stmts) {
             if (stmt instanceof Swc4jAstTsTypeAliasDecl typeAliasDecl) {
-                processTypeAlias(typeAliasDecl, options);
+                processTypeAlias(compiler, typeAliasDecl);
             }
         }
     }
 
-    private static void processTypeAlias(Swc4jAstTsTypeAliasDecl typeAliasDecl, ByteCodeCompilerOptions options) {
+    private static void processTypeAlias(
+            ByteCodeCompiler compiler,
+            Swc4jAstTsTypeAliasDecl typeAliasDecl) {
         String aliasName = typeAliasDecl.getId().getSym();
         ISwc4jAstTsType typeAnn = typeAliasDecl.getTypeAnn();
 
@@ -60,8 +64,8 @@ public final class TypeAliasCollector {
 
             String targetType = resolveEntityName(entityName);
             // Resolve the target type if it's also an alias
-            String resolvedType = options.typeAliasMap().getOrDefault(targetType, targetType);
-            options.typeAliasMap().put(aliasName, resolvedType);
+            String resolvedType = compiler.getMemory().getTypeAliasMap().getOrDefault(targetType, targetType);
+            compiler.getMemory().getTypeAliasMap().put(aliasName, resolvedType);
         }
     }
 

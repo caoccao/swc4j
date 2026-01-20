@@ -20,7 +20,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPat;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstVarDeclarator;
-import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.*;
@@ -32,11 +32,11 @@ public final class VarDeclGenerator {
     }
 
     public static void generate(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstVarDecl varDecl,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
         for (Swc4jAstVarDeclarator declarator : varDecl.getDecls()) {
             ISwc4jAstPat name = declarator.getName();
             if (name instanceof Swc4jAstBindingIdent bindingIdent) {
@@ -45,7 +45,7 @@ public final class VarDeclGenerator {
                 LocalVariable localVar = context.getLocalVariableTable().getVariable(varName);
                 // If not found in current scope, try to add it from the pre-allocated variables
                 if (localVar == null) {
-                    String varType = TypeResolver.extractType(bindingIdent, declarator.getInit(), context, options);
+                    String varType = TypeResolver.extractType(compiler, bindingIdent, declarator.getInit(), context);
                     localVar = context.getLocalVariableTable().addExistingVariableToCurrentScope(varName, varType);
                 }
 
@@ -56,7 +56,7 @@ public final class VarDeclGenerator {
                     GenericTypeInfo genericTypeInfo = context.getGenericTypeInfoMap().get(varName);
                     ReturnTypeInfo varTypeInfo = ReturnTypeInfo.of(localVar.type(), genericTypeInfo);
 
-                    ExpressionGenerator.generate(code, cp, init, varTypeInfo, context, options);
+                    ExpressionGenerator.generate(compiler, code, cp, init, varTypeInfo, context);
 
                     // Store the value in the local variable
                     switch (localVar.type()) {

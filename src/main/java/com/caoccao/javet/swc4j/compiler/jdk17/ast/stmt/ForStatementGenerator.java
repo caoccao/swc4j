@@ -24,7 +24,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstVarDeclOrExpr;
 import com.caoccao.javet.swc4j.ast.pat.Swc4jAstBindingIdent;
 import com.caoccao.javet.swc4j.ast.stmt.*;
-import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
@@ -100,51 +100,51 @@ public final class ForStatementGenerator {
     /**
      * Generate bytecode for a for statement (unlabeled).
      *
+     * @param compiler       the compiler
      * @param code           the code builder
      * @param cp             the constant pool
      * @param forStmt        the for statement AST node
      * @param returnTypeInfo return type information for the enclosing method
      * @param context        compilation context
-     * @param options        compilation options
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     public static void generate(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstForStmt forStmt,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-        generate(code, cp, forStmt, null, returnTypeInfo, context, options);
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
+        generate(compiler, code, cp, forStmt, null, returnTypeInfo, context);
     }
 
     /**
      * Generate bytecode for a for statement (potentially labeled).
      *
+     * @param compiler       the compiler
      * @param code           the code builder
      * @param cp             the constant pool
      * @param forStmt        the for statement AST node
      * @param labelName      the label name (null for unlabeled loops)
      * @param returnTypeInfo return type information for the enclosing method
      * @param context        compilation context
-     * @param options        compilation options
      * @throws Swc4jByteCodeCompilerException if code generation fails
      */
     public static void generate(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstForStmt forStmt,
             String labelName,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         // Enter scope for for-loop variables (matches the scope entered during analysis)
         context.getLocalVariableTable().enterScope();
 
         // 1. Generate init (if present)
         if (forStmt.getInit().isPresent()) {
-            generateInit(code, cp, forStmt.getInit().get(), context, options);
+            generateInit(compiler, code, cp, forStmt.getInit().get(), context);
         }
 
         // 2. Mark test label (loop entry point)
@@ -159,20 +159,20 @@ public final class ForStatementGenerator {
 
             // Try to generate direct conditional jump (like javac does)
             if (testExpr instanceof Swc4jAstBinExpr binExpr) {
-                boolean generated = generateDirectConditionalJump(code, cp, binExpr, context, options);
+                boolean generated = generateDirectConditionalJump(compiler, code, cp, binExpr, context);
                 if (generated) {
                     condJumpOffsetPos = code.getCurrentOffset() - 2;
                     condJumpOpcodePos = code.getCurrentOffset() - 3;
                 } else {
                     // Fallback: generate boolean expression and use ifeq
-                    ExpressionGenerator.generate(code, cp, testExpr, null, context, options);
+                    ExpressionGenerator.generate(compiler, code, cp, testExpr, null, context);
                     code.ifeq(0); // Placeholder
                     condJumpOffsetPos = code.getCurrentOffset() - 2;
                     condJumpOpcodePos = code.getCurrentOffset() - 3;
                 }
             } else {
                 // Non-binary expression: generate as boolean and use ifeq
-                ExpressionGenerator.generate(code, cp, testExpr, null, context, options);
+                ExpressionGenerator.generate(compiler, code, cp, testExpr, null, context);
                 code.ifeq(0); // Placeholder
                 condJumpOffsetPos = code.getCurrentOffset() - 2;
                 condJumpOpcodePos = code.getCurrentOffset() - 3;
@@ -189,7 +189,7 @@ public final class ForStatementGenerator {
 
         // 5. Generate body and track if it can fall through
         boolean bodyCanFallThrough = generateBodyAndCheckFallThrough(
-                code, cp, forStmt.getBody(), returnTypeInfo, context, options);
+                compiler, code, cp, forStmt.getBody(), returnTypeInfo, context);
 
         // 6. Mark update label (continue jumps here)
         int updateLabel = code.getCurrentOffset();
@@ -203,7 +203,7 @@ public final class ForStatementGenerator {
         if (bodyCanFallThrough || hasContinue) {
             // Generate update (if present)
             if (forStmt.getUpdate().isPresent()) {
-                generateUpdate(code, cp, forStmt.getUpdate().get(), context, options);
+                generateUpdate(compiler, code, cp, forStmt.getUpdate().get(), context);
             }
 
             // Jump back to test (backward jump)
@@ -253,15 +253,15 @@ public final class ForStatementGenerator {
      * @return true if body can fall through to update section
      */
     private static boolean generateBodyAndCheckFallThrough(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             ISwc4jAstStmt body,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         // Generate the body
-        StatementGenerator.generate(code, cp, body, returnTypeInfo, context, options);
+        StatementGenerator.generate(compiler, code, cp, body, returnTypeInfo, context);
 
         // Check if the body can fall through
         return canFallThrough(body);
@@ -274,11 +274,11 @@ public final class ForStatementGenerator {
      * @return true if direct jump was generated, false if caller should use fallback
      */
     private static boolean generateDirectConditionalJump(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstBinExpr binExpr,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         Swc4jAstBinaryOp op = binExpr.getOp();
 
@@ -288,8 +288,8 @@ public final class ForStatementGenerator {
         }
 
         // Get operand types
-        String leftType = TypeResolver.inferTypeFromExpr(binExpr.getLeft(), context, options);
-        String rightType = TypeResolver.inferTypeFromExpr(binExpr.getRight(), context, options);
+        String leftType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getLeft(), context);
+        String rightType = TypeResolver.inferTypeFromExpr(compiler, binExpr.getRight(), context);
 
         // Only handle int comparisons for now (most common case)
         if (!"I".equals(leftType) || !"I".equals(rightType)) {
@@ -297,10 +297,10 @@ public final class ForStatementGenerator {
         }
 
         // Generate left operand
-        ExpressionGenerator.generate(code, cp, binExpr.getLeft(), null, context, options);
+        ExpressionGenerator.generate(compiler, code, cp, binExpr.getLeft(), null, context);
 
         // Generate right operand
-        ExpressionGenerator.generate(code, cp, binExpr.getRight(), null, context, options);
+        ExpressionGenerator.generate(compiler, code, cp, binExpr.getRight(), null, context);
 
         // Generate inverted comparison (jump to end if condition is FALSE)
         // For "i < 10", we want to exit if "i >= 10", so use if_icmpge
@@ -323,11 +323,11 @@ public final class ForStatementGenerator {
      * Generate bytecode for the init section of a for loop.
      */
     private static void generateInit(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             ISwc4jAstVarDeclOrExpr init,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         if (init instanceof Swc4jAstVarDecl varDecl) {
             // Add loop variables to the current scope before generating code
@@ -336,16 +336,16 @@ public final class ForStatementGenerator {
                 ISwc4jAstPat name = declarator.getName();
                 if (name instanceof Swc4jAstBindingIdent bindingIdent) {
                     String varName = bindingIdent.getId().getSym();
-                    String varType = TypeResolver.extractType(bindingIdent, declarator.getInit(), context, options);
+                    String varType = TypeResolver.extractType(compiler, bindingIdent, declarator.getInit(), context);
                     context.getLocalVariableTable().addExistingVariableToCurrentScope(varName, varType);
                 }
             }
-            VarDeclGenerator.generate(code, cp, varDecl, context, options);
+            VarDeclGenerator.generate(compiler, code, cp, varDecl, context);
         } else if (init instanceof ISwc4jAstExpr expr) {
-            ExpressionGenerator.generate(code, cp, expr, null, context, options);
+            ExpressionGenerator.generate(compiler, code, cp, expr, null, context);
 
             // Pop the result of the init expression if it leaves a value on the stack
-            String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
+            String exprType = TypeResolver.inferTypeFromExpr(compiler, expr, context);
             if (exprType != null && !"V".equals(exprType)) {
                 if ("D".equals(exprType) || "J".equals(exprType)) {
                     code.pop2();
@@ -360,17 +360,17 @@ public final class ForStatementGenerator {
      * Generate bytecode for the update section of a for loop.
      */
     private static void generateUpdate(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             ISwc4jAstExpr updateExpr,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
-        ExpressionGenerator.generate(code, cp, updateExpr, null, context, options);
+        ExpressionGenerator.generate(compiler, code, cp, updateExpr, null, context);
 
         // Pop the result of the update expression if it leaves a value on the stack
         // This includes AssignExpr (i = 5), UpdateExpr (i++), and SeqExpr (i++, j--)
-        String updateType = TypeResolver.inferTypeFromExpr(updateExpr, context, options);
+        String updateType = TypeResolver.inferTypeFromExpr(compiler, updateExpr, context);
         if (updateType != null && !"V".equals(updateType)) {
             if ("D".equals(updateType) || "J".equals(updateType)) {
                 code.pop2();

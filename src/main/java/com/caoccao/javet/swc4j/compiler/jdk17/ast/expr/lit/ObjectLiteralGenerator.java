@@ -26,7 +26,7 @@ import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstObjectLit;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
-import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
@@ -58,22 +58,22 @@ public final class ObjectLiteralGenerator {
      * Phase 1-4: Basic implementation with computed property names, shorthand, and spread - no type annotation, default to {@code LinkedHashMap<String, Object>}
      * Phase 2: Type validation for {@code Record<K, V>} types
      *
+     * @param compiler       the compiler
      * @param code           code builder for bytecode generation
      * @param cp             constant pool
      * @param objectLit      object literal AST node
      * @param returnTypeInfo return type information (used for Record type validation in Phase 2)
      * @param context        compilation context
-     * @param options        compiler options
      * @param callback       callback for generating nested expressions
      * @throws Swc4jByteCodeCompilerException if generation fails or type validation fails
      */
     public static void generate(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstObjectLit objectLit,
             ReturnTypeInfo returnTypeInfo,
             CompilationContext context,
-            ByteCodeCompilerOptions options,
             StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
 
         // Phase 2: Extract generic type info for Record type validation
@@ -95,7 +95,7 @@ public final class ObjectLiteralGenerator {
             if (prop instanceof Swc4jAstKeyValueProp kvProp) {
                 // Phase 2: Validate key and value types against Record<K, V> if present
                 if (genericTypeInfo != null) {
-                    validateKeyValueProperty(kvProp, genericTypeInfo, context, options);
+                    validateKeyValueProperty(compiler, kvProp, genericTypeInfo, context);
                 }
 
                 // Duplicate map reference for put() call
@@ -103,12 +103,12 @@ public final class ObjectLiteralGenerator {
 
                 // Generate key
                 String expectedKeyType = genericTypeInfo != null ? genericTypeInfo.getKeyType() : null;
-                generateKey(code, cp, kvProp.getKey(), expectedKeyType, context, options, callback);
+                generateKey(compiler, code, cp, kvProp.getKey(), expectedKeyType, context, callback);
                 // Stack: [map, map, key]
 
                 // Generate value
                 ISwc4jAstExpr valueExpr = kvProp.getValue();
-                String valueType = TypeResolver.inferTypeFromExpr(valueExpr, context, options);
+                String valueType = TypeResolver.inferTypeFromExpr(compiler, valueExpr, context);
                 if (valueType == null) {
                     valueType = "Ljava/lang/Object;";
                 }
@@ -120,7 +120,7 @@ public final class ObjectLiteralGenerator {
                     valueReturnType = ReturnTypeInfo.of("Ljava/util/LinkedHashMap;", genericTypeInfo.getNestedTypeInfo());
                 }
 
-                callback.generateExpr(code, cp, valueExpr, valueReturnType, context, options);
+                callback.generateExpr(compiler, code, cp, valueExpr, valueReturnType, context);
                 // Stack: [map, map, key, value]
 
                 // Box primitive values to Object
@@ -139,7 +139,7 @@ public final class ObjectLiteralGenerator {
 
                 // Phase 2: Validate shorthand property types against Record<K, V> if present
                 if (genericTypeInfo != null) {
-                    validateShorthandProperty(ident, genericTypeInfo, context, options);
+                    validateShorthandProperty(compiler, ident, genericTypeInfo, context);
                 }
 
                 code.dup(); // Stack: [map, map]
@@ -151,12 +151,12 @@ public final class ObjectLiteralGenerator {
                 // Stack: [map, map, key]
 
                 // Generate value - the identifier refers to a variable with that name
-                String valueType = TypeResolver.inferTypeFromExpr(ident, context, options);
+                String valueType = TypeResolver.inferTypeFromExpr(compiler, ident, context);
                 if (valueType == null) {
                     valueType = "Ljava/lang/Object;";
                 }
 
-                callback.generateExpr(code, cp, ident, null, context, options);
+                callback.generateExpr(compiler, code, cp, ident, null, context);
                 // Stack: [map, map, key, value]
 
                 // Box primitive values to Object
@@ -175,14 +175,14 @@ public final class ObjectLiteralGenerator {
 
                 // Phase 4: Validate spread source type against Record<K, V> if present
                 if (genericTypeInfo != null) {
-                    validateSpreadElement(spread, genericTypeInfo, context, options);
+                    validateSpreadElement(compiler, spread, genericTypeInfo, context);
                 }
 
                 code.dup(); // Stack: [map, map]
 
                 // Generate the spread expression (should evaluate to a Map)
                 ISwc4jAstExpr spreadExpr = spread.getExpr();
-                callback.generateExpr(code, cp, spreadExpr, null, context, options);
+                callback.generateExpr(compiler, code, cp, spreadExpr, null, context);
                 // Stack: [map, map, spreadMap]
 
                 // Call map.putAll(spreadMap) to merge all properties
@@ -197,27 +197,13 @@ public final class ObjectLiteralGenerator {
         // LinkedHashMap instance is left on stack for return/assignment
     }
 
-    /**
-     * Generate bytecode for property key.
-     * Phase 1-2: Support IdentName, Str, Number, and Computed keys (all converted to String by default)
-     * Phase 2.1: Support primitive wrapper keys when Record<T, V> is declared with non-String key type
-     *
-     * @param code            code builder
-     * @param cp              constant pool
-     * @param key             property key AST node
-     * @param expectedKeyType expected key type descriptor from Record type (may be null)
-     * @param context         compilation context
-     * @param options         compiler options
-     * @param callback        callback for generating computed keys
-     * @throws Swc4jByteCodeCompilerException if key generation fails
-     */
     private static void generateKey(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             ISwc4jAstPropName key,
             String expectedKeyType,
             CompilationContext context,
-            ByteCodeCompilerOptions options,
             StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
 
         // Phase 2.1: Check if we should generate primitive wrapper keys (not String)
@@ -248,13 +234,13 @@ public final class ObjectLiteralGenerator {
             // Computed property name: {[expr]: value}
             // Phase 2.1: Generate expression and convert to appropriate type (String or Number)
             ISwc4jAstExpr expr = computed.getExpr();
-            String exprType = TypeResolver.inferTypeFromExpr(expr, context, options);
+            String exprType = TypeResolver.inferTypeFromExpr(compiler, expr, context);
             if (exprType == null) {
                 exprType = "Ljava/lang/Object;";
             }
 
             // Generate the expression
-            callback.generateExpr(code, cp, expr, null, context, options);
+            callback.generateExpr(compiler, code, cp, expr, null, context);
             // Stack: [expr_result]
 
             // Phase 2.1: Convert to appropriate key type based on Record type
@@ -448,27 +434,17 @@ public final class ObjectLiteralGenerator {
                 "C".equals(typeDescriptor);
     }
 
-    /**
-     * Validate a key-value property against Record<K, V> type constraints.
-     * Phase 2: Type validation for object literal properties
-     *
-     * @param kvProp          key-value property to validate
-     * @param genericTypeInfo Record type information (key and value type constraints)
-     * @param context         compilation context
-     * @param options         compiler options
-     * @throws Swc4jByteCodeCompilerException if key or value type doesn't match Record constraints
-     */
     private static void validateKeyValueProperty(
+            ByteCodeCompiler compiler,
             Swc4jAstKeyValueProp kvProp,
             GenericTypeInfo genericTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         ISwc4jAstPropName key = kvProp.getKey();
         ISwc4jAstExpr valueExpr = kvProp.getValue();
 
         // Validate key type
-        String actualKeyType = TypeResolver.inferKeyType(key, context, options);
+        String actualKeyType = TypeResolver.inferKeyType(compiler, key, context);
         String expectedKeyType = genericTypeInfo.getKeyType();
 
         // Special handling for primitive wrapper keys: if expected type is a primitive wrapper,
@@ -492,7 +468,7 @@ public final class ObjectLiteralGenerator {
         }
 
         // Validate value type
-        String actualValueType = TypeResolver.inferTypeFromExpr(valueExpr, context, options);
+        String actualValueType = TypeResolver.inferTypeFromExpr(compiler, valueExpr, context);
         if (actualValueType == null) {
             actualValueType = "Ljava/lang/Object;";
         }
@@ -505,9 +481,9 @@ public final class ObjectLiteralGenerator {
             GenericTypeInfo nestedTypeInfo = genericTypeInfo.getNestedTypeInfo();
             for (var nestedProp : nestedObjLit.getProps()) {
                 if (nestedProp instanceof Swc4jAstKeyValueProp nestedKvProp) {
-                    validateKeyValueProperty(nestedKvProp, nestedTypeInfo, context, options);
+                    validateKeyValueProperty(compiler, nestedKvProp, nestedTypeInfo, context);
                 } else if (nestedProp instanceof Swc4jAstIdent nestedIdent) {
-                    validateShorthandProperty(nestedIdent, nestedTypeInfo, context, options);
+                    validateShorthandProperty(compiler, nestedIdent, nestedTypeInfo, context);
                 }
                 // Spread elements in nested objects would need special handling
                 // For now, we skip validation for spread (will use runtime types)
@@ -527,21 +503,11 @@ public final class ObjectLiteralGenerator {
         }
     }
 
-    /**
-     * Validate a shorthand property against Record<K, V> type constraints.
-     * Phase 2: Type validation for shorthand properties like {x, y}
-     *
-     * @param ident           identifier in shorthand property
-     * @param genericTypeInfo Record type information
-     * @param context         compilation context
-     * @param options         compiler options
-     * @throws Swc4jByteCodeCompilerException if property type doesn't match Record constraints
-     */
     private static void validateShorthandProperty(
+            ByteCodeCompiler compiler,
             Swc4jAstIdent ident,
             GenericTypeInfo genericTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         String propertyName = ident.getSym();
 
@@ -559,7 +525,7 @@ public final class ObjectLiteralGenerator {
         }
 
         // Validate value type (the identifier's inferred type)
-        String actualValueType = TypeResolver.inferTypeFromExpr(ident, context, options);
+        String actualValueType = TypeResolver.inferTypeFromExpr(compiler, ident, context);
         if (actualValueType == null) {
             actualValueType = "Ljava/lang/Object;";
         }
@@ -576,26 +542,16 @@ public final class ObjectLiteralGenerator {
         }
     }
 
-    /**
-     * Validate a spread element against Record<K, V> type constraints.
-     * Phase 4: Type validation for spread properties like {...other}
-     *
-     * @param spread          spread element AST node
-     * @param genericTypeInfo Record type information
-     * @param context         compilation context
-     * @param options         compiler options
-     * @throws Swc4jByteCodeCompilerException if spread source type doesn't match Record constraints
-     */
     private static void validateSpreadElement(
+            ByteCodeCompiler compiler,
             Swc4jAstSpreadElement spread,
             GenericTypeInfo genericTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         ISwc4jAstExpr spreadExpr = spread.getExpr();
 
         // Infer the type of the spread expression
-        String spreadType = TypeResolver.inferTypeFromExpr(spreadExpr, context, options);
+        String spreadType = TypeResolver.inferTypeFromExpr(compiler, spreadExpr, context);
         if (spreadType == null) {
             spreadType = "Ljava/lang/Object;";
         }

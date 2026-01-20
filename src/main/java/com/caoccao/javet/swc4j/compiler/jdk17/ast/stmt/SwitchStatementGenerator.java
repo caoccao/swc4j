@@ -27,7 +27,7 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstSwitchCase;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstSwitchStmt;
-import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
@@ -339,39 +339,39 @@ public final class SwitchStatementGenerator {
      * Supports integer, string, enum, boxed types, and primitive promotion.
      */
     public static void generate(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstSwitchStmt switchStmt,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         // 1. Determine discriminant type
-        String discriminantType = TypeResolver.inferTypeFromExpr(switchStmt.getDiscriminant(), context, options);
+        String discriminantType = TypeResolver.inferTypeFromExpr(compiler, switchStmt.getDiscriminant(), context);
 
         // 2. Route to appropriate generator based on type
 
         // String switches use 2-phase hash approach
         if ("Ljava/lang/String;".equals(discriminantType)) {
-            generateStringSwitch(code, cp, switchStmt, returnTypeInfo, context, options);
+            generateStringSwitch(compiler, code, cp, switchStmt, returnTypeInfo, context);
             return;
         }
 
         // Boxed type switches: unbox then use integer switch
         if ("Ljava/lang/Integer;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Integer", "intValue", "()I", returnTypeInfo, context, options);
+            generateBoxedIntegerSwitch(compiler, code, cp, switchStmt, "java/lang/Integer", "intValue", "()I", returnTypeInfo, context);
             return;
         }
         if ("Ljava/lang/Byte;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Byte", "byteValue", "()B", returnTypeInfo, context, options);
+            generateBoxedIntegerSwitch(compiler, code, cp, switchStmt, "java/lang/Byte", "byteValue", "()B", returnTypeInfo, context);
             return;
         }
         if ("Ljava/lang/Short;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Short", "shortValue", "()S", returnTypeInfo, context, options);
+            generateBoxedIntegerSwitch(compiler, code, cp, switchStmt, "java/lang/Short", "shortValue", "()S", returnTypeInfo, context);
             return;
         }
         if ("Ljava/lang/Character;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Character", "charValue", "()C", returnTypeInfo, context, options);
+            generateBoxedIntegerSwitch(compiler, code, cp, switchStmt, "java/lang/Character", "charValue", "()C", returnTypeInfo, context);
             return;
         }
 
@@ -379,12 +379,12 @@ public final class SwitchStatementGenerator {
         // Check if it's an object type (starts with L) but not a known type
         if (discriminantType != null && discriminantType.startsWith("L") && discriminantType.endsWith(";")) {
             // Likely an enum type - call ordinal()
-            generateEnumSwitch(code, cp, switchStmt, discriminantType, returnTypeInfo, context, options);
+            generateEnumSwitch(compiler, code, cp, switchStmt, discriminantType, returnTypeInfo, context);
             return;
         }
 
         // 3. Integer switch (int, byte, short, char - primitives are auto-promoted to int)
-        generateIntegerSwitch(code, cp, switchStmt, returnTypeInfo, context, options);
+        generateIntegerSwitch(compiler, code, cp, switchStmt, returnTypeInfo, context);
     }
 
     /**
@@ -392,6 +392,7 @@ public final class SwitchStatementGenerator {
      * Unboxes the value using the appropriate *Value() method, then uses integer switch.
      */
     private static void generateBoxedIntegerSwitch(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstSwitchStmt switchStmt,
@@ -399,11 +400,10 @@ public final class SwitchStatementGenerator {
             String unboxMethod,
             String methodDescriptor,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         // Generate discriminant expression (boxed value on stack)
-        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+        ExpressionGenerator.generate(compiler, code, cp, switchStmt.getDiscriminant(), null, context);
 
         // Call appropriate unboxing method
         int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
@@ -411,7 +411,7 @@ public final class SwitchStatementGenerator {
 
         // For byte, short, char, the value is already promoted to int on the stack by JVM
         // Now use integer switch with the unboxed value on stack
-        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, returnTypeInfo, context, options);
+        generateIntegerSwitchWithDiscriminantOnStack(compiler, code, cp, switchStmt, returnTypeInfo, context);
     }
 
     /**
@@ -419,16 +419,16 @@ public final class SwitchStatementGenerator {
      * Calls ordinal() on the enum value, then uses integer switch.
      */
     private static void generateEnumSwitch(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstSwitchStmt switchStmt,
             String enumType,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         // Generate discriminant expression
-        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+        ExpressionGenerator.generate(compiler, code, cp, switchStmt.getDiscriminant(), null, context);
 
         // Call ordinal() method to get int value
         // ordinal() is defined in java.lang.Enum and returns int
@@ -436,25 +436,25 @@ public final class SwitchStatementGenerator {
         code.invokevirtual(ordinalRef);
 
         // Now use integer switch with the ordinal value on stack
-        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, returnTypeInfo, context, options);
+        generateIntegerSwitchWithDiscriminantOnStack(compiler, code, cp, switchStmt, returnTypeInfo, context);
     }
 
     /**
      * Generate bytecode for an integer switch statement.
      */
     private static void generateIntegerSwitch(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstSwitchStmt switchStmt,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         // 1. Analyze cases
         List<CaseInfo> cases = analyzeCases(switchStmt);
 
         // 2. Evaluate discriminant (push value onto stack)
-        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+        ExpressionGenerator.generate(compiler, code, cp, switchStmt.getDiscriminant(), null, context);
 
         if (cases.isEmpty()) {
             // Empty switch - just pop the discriminant value
@@ -482,7 +482,7 @@ public final class SwitchStatementGenerator {
         for (CaseInfo caseInfo : cases) {
             caseInfo.labelOffset = code.getCurrentOffset();
             for (ISwc4jAstStmt stmt : caseInfo.statements) {
-                StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
+                StatementGenerator.generate(compiler, code, cp, stmt, returnTypeInfo, context);
             }
         }
 
@@ -516,12 +516,12 @@ public final class SwitchStatementGenerator {
      * Used by enum and boxed type switches.
      */
     private static void generateIntegerSwitchWithDiscriminantOnStack(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstSwitchStmt switchStmt,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         // Discriminant is already on stack (as int)
         // Proceed with rest of integer switch logic without re-evaluating discriminant
@@ -586,7 +586,7 @@ public final class SwitchStatementGenerator {
 
             // Generate case body
             for (ISwc4jAstStmt stmt : caseInfo.statements) {
-                StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
+                StatementGenerator.generate(compiler, code, cp, stmt, returnTypeInfo, context);
             }
             // Fall-through is automatic - no goto unless break was generated
         }
@@ -711,14 +711,14 @@ public final class SwitchStatementGenerator {
      * This preserves the exact structure of the original switch for proper fall-through.
      */
     private static void generatePhase2PositionSwitch(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             int posLocal,
             List<StringCaseInfo> stringCases,
             int defaultCasePosition,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         // Set up break label for the switch
         CompilationContext.LoopLabelInfo breakLabel = new CompilationContext.LoopLabelInfo(null);
@@ -766,7 +766,7 @@ public final class SwitchStatementGenerator {
 
             // Generate case body
             for (ISwc4jAstStmt stmt : caseInfo.statements) {
-                StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
+                StatementGenerator.generate(compiler, code, cp, stmt, returnTypeInfo, context);
             }
             // Fall-through is automatic
         }
@@ -804,19 +804,19 @@ public final class SwitchStatementGenerator {
      * This properly handles hash collisions and fall-through semantics.
      */
     private static void generateStringSwitch(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstSwitchStmt switchStmt,
             ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
 
         // 1. Analyze string cases
         List<StringCaseInfo> stringCases = analyzeStringCases(switchStmt);
 
         if (stringCases.isEmpty()) {
             // Empty switch - just evaluate discriminant for side effects
-            ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+            ExpressionGenerator.generate(compiler, code, cp, switchStmt.getDiscriminant(), null, context);
             code.pop();
             return;
         }
@@ -847,7 +847,7 @@ public final class SwitchStatementGenerator {
 
         // 3. Store discriminant in local variable
         int strLocal = context.getLocalVariableTable().allocateVariable("$switch$str", "Ljava/lang/String;");
-        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+        ExpressionGenerator.generate(compiler, code, cp, switchStmt.getDiscriminant(), null, context);
         code.astore(strLocal);
 
         // 4. Create temp variable for position, initialized to -1
@@ -861,8 +861,8 @@ public final class SwitchStatementGenerator {
         }
 
         // 6. Phase 2: Switch on position with original case bodies
-        generatePhase2PositionSwitch(code, cp, posLocal, stringCases, defaultCasePosition,
-                returnTypeInfo, context, options);
+        generatePhase2PositionSwitch(compiler, code, cp, posLocal, stringCases, defaultCasePosition,
+                returnTypeInfo, context);
     }
 
     /**

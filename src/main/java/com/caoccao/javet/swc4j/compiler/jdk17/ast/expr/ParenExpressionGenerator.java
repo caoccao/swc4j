@@ -17,7 +17,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.expr;
 
 import com.caoccao.javet.swc4j.ast.expr.Swc4jAstParenExpr;
-import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
@@ -30,14 +30,14 @@ public final class ParenExpressionGenerator {
     }
 
     public static void generate(
+            ByteCodeCompiler compiler,
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstParenExpr parenExpr,
             ReturnTypeInfo returnTypeInfo,
             CompilationContext context,
-            ByteCodeCompilerOptions options,
             StringConcatUtils.ExpressionGeneratorCallback callback) throws Swc4jByteCodeCompilerException {
         // For parenthesized expressions, generate code for the inner expression
-        callback.generateExpr(code, cp, parenExpr.getExpr(), returnTypeInfo, context, options);
+        callback.generateExpr(compiler, code, cp, parenExpr.getExpr(), returnTypeInfo, context);
     }
 }

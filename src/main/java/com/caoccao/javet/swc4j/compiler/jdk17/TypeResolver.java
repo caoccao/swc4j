@@ -30,7 +30,7 @@ import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsArrayType;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsKeywordType;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeParamInstantiation;
 import com.caoccao.javet.swc4j.ast.ts.Swc4jAstTsTypeRef;
-import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
+import com.caoccao.javet.swc4j.compiler.ByteCodeCompiler;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -42,16 +42,16 @@ public final class TypeResolver {
     }
 
     public static ReturnTypeInfo analyzeReturnType(
+            ByteCodeCompiler compiler,
             Swc4jAstFunction function,
             Swc4jAstBlockStmt body,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+            CompilationContext context) throws Swc4jByteCodeCompilerException {
         // Check for explicit return type annotation first
         var returnTypeOpt = function.getReturnType();
         if (returnTypeOpt.isPresent()) {
             var returnTypeAnn = returnTypeOpt.get();
             var tsType = returnTypeAnn.getTypeAnn();
-            String descriptor = mapTsTypeToDescriptor(tsType, options);
+            String descriptor = mapTsTypeToDescriptor(compiler, tsType);
             return ReturnTypeInfo.of(descriptor);
         }
 
@@ -62,7 +62,7 @@ public final class TypeResolver {
                 if (argOpt.isPresent()) {
                     ISwc4jAstExpr arg = argOpt.get();
                     // Use inferTypeFromExpr for general type inference
-                    String type = inferTypeFromExpr(arg, context, options);
+                    String type = inferTypeFromExpr(compiler, arg, context);
                     // If type is null (e.g., for null literal), default to Object
                     if (type == null) {
                         type = "Ljava/lang/Object;";
@@ -79,13 +79,13 @@ public final class TypeResolver {
      * Extract GenericTypeInfo from a BindingIdent's type annotation if it's a Record type.
      * Phase 2: Support for {@code Record<K, V>} type validation
      *
+     * @param compiler     the compiler
      * @param bindingIdent binding identifier with potential type annotation
-     * @param options      compiler options
      * @return GenericTypeInfo if the type annotation is a Record type, null otherwise
      */
     public static GenericTypeInfo extractGenericTypeInfo(
-            Swc4jAstBindingIdent bindingIdent,
-            ByteCodeCompilerOptions options) {
+            ByteCodeCompiler compiler,
+            Swc4jAstBindingIdent bindingIdent) {
         var typeAnn = bindingIdent.getTypeAnn();
         if (typeAnn.isEmpty()) {
             return null;
@@ -95,15 +95,15 @@ public final class TypeResolver {
 
         // Check if it's a Record type by calling parseRecordType
         // parseRecordType returns null if it's not a Record type
-        return parseRecordType(tsType, options);
+        return parseRecordType(compiler, tsType);
     }
 
     /**
      * Extract type from parameter pattern (regular param or varargs).
      */
     public static String extractParameterType(
-            ISwc4jAstPat pat,
-            ByteCodeCompilerOptions options) {
+            ByteCodeCompiler compiler,
+            ISwc4jAstPat pat) {
         if (pat instanceof Swc4jAstRestPat restPat) {
             // Varargs parameter - extract type from RestPat's type annotation
             var typeAnn = restPat.getTypeAnn();
@@ -111,7 +111,7 @@ public final class TypeResolver {
                 ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
                 // RestPat type annotation is already an array type (int[])
                 // We need to map it to the corresponding JVM array descriptor
-                return mapTsTypeToDescriptor(tsType, options);
+                return mapTsTypeToDescriptor(compiler, tsType);
             }
             // Default to Object[] for untyped varargs
             return "[Ljava/lang/Object;";
@@ -120,7 +120,7 @@ public final class TypeResolver {
             var typeAnn = bindingIdent.getTypeAnn();
             if (typeAnn.isPresent()) {
                 ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
-                return mapTsTypeToDescriptor(tsType, options);
+                return mapTsTypeToDescriptor(compiler, tsType);
             }
             // Default to Object for untyped parameters
             return "Ljava/lang/Object;";
@@ -129,20 +129,20 @@ public final class TypeResolver {
     }
 
     public static String extractType(
+            ByteCodeCompiler compiler,
             Swc4jAstBindingIdent bindingIdent,
             Optional<ISwc4jAstExpr> init,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) {
+            CompilationContext context) {
         // Check for explicit type annotation
         var typeAnn = bindingIdent.getTypeAnn();
         if (typeAnn.isPresent()) {
             ISwc4jAstTsType tsType = typeAnn.get().getTypeAnn();
-            return mapTsTypeToDescriptor(tsType, options);
+            return mapTsTypeToDescriptor(compiler, tsType);
         }
 
         // Type inference from initializer
         if (init.isPresent()) {
-            String type = inferTypeFromExpr(init.get(), context, options);
+            String type = inferTypeFromExpr(compiler, init.get(), context);
             // If type is null (e.g., for null literal), default to Object
             return type != null ? type : "Ljava/lang/Object;";
         }
@@ -266,15 +266,15 @@ public final class TypeResolver {
      * - BigInt → Long or BigInteger based on size
      * - ComputedPropName → Inferred from the computed expression
      *
-     * @param key     Property name AST node
-     * @param context Compilation context
-     * @param options Compiler options
+     * @param compiler the compiler
+     * @param key      Property name AST node
+     * @param context  Compilation context
      * @return JVM type descriptor (e.g., "Ljava/lang/String;", "Ljava/lang/Integer;", "D")
      */
     public static String inferKeyType(
+            ByteCodeCompiler compiler,
             ISwc4jAstPropName key,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) {
+            CompilationContext context) {
         if (key == null) {
             return "Ljava/lang/String;"; // Default to String
         }
@@ -321,7 +321,7 @@ public final class TypeResolver {
         // Computed property names - infer from expression
         if (key instanceof Swc4jAstComputedPropName computed) {
             ISwc4jAstExpr expr = computed.getExpr();
-            String inferredType = inferTypeFromExpr(expr, context, options);
+            String inferredType = inferTypeFromExpr(compiler, expr, context);
             return inferredType != null ? inferredType : "Ljava/lang/String;";
         }
 
@@ -330,13 +330,13 @@ public final class TypeResolver {
     }
 
     public static String inferTypeFromExpr(
+            ByteCodeCompiler compiler,
             ISwc4jAstExpr expr,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) {
+            CompilationContext context) {
         if (expr instanceof Swc4jAstCondExpr condExpr) {
             // Conditional expression: infer type from both branches and find common type
-            String consType = inferTypeFromExpr(condExpr.getCons(), context, options);
-            String altType = inferTypeFromExpr(condExpr.getAlt(), context, options);
+            String consType = inferTypeFromExpr(compiler, condExpr.getCons(), context);
+            String altType = inferTypeFromExpr(compiler, condExpr.getAlt(), context);
             return findCommonType(consType, altType);
         } else if (expr instanceof Swc4jAstTsAsExpr asExpr) {
             // Explicit type cast - return the cast target type
@@ -345,11 +345,11 @@ public final class TypeResolver {
                 ISwc4jAstTsEntityName entityName = typeRef.getTypeName();
                 if (entityName instanceof Swc4jAstIdent ident) {
                     String typeName = ident.getSym();
-                    return mapTypeNameToDescriptor(typeName, options);
+                    return mapTypeNameToDescriptor(compiler, typeName);
                 }
             }
             // If we can't determine the cast type, fall back to inferring from the expression
-            return inferTypeFromExpr(asExpr.getExpr(), context, options);
+            return inferTypeFromExpr(compiler, asExpr.getExpr(), context);
         } else if (expr instanceof Swc4jAstNumber number) {
             double value = number.getValue();
             if (value == Math.floor(value) && !Double.isInfinite(value) && !Double.isNaN(value)) {
@@ -370,7 +370,7 @@ public final class TypeResolver {
             return "Ljava/util/LinkedHashMap;";
         } else if (expr instanceof Swc4jAstMemberExpr memberExpr) {
             // Member expression - handle array-like properties
-            String objType = inferTypeFromExpr(memberExpr.getObj(), context, options);
+            String objType = inferTypeFromExpr(compiler, memberExpr.getObj(), context);
 
             if (objType != null && objType.startsWith("[")) {
                 // Java array operations
@@ -410,20 +410,20 @@ public final class TypeResolver {
                     String varName = bindingIdent.getId().getSym();
                     return context.getInferredTypes().getOrDefault(varName, "Ljava/lang/Object;");
                 }
-                return inferTypeFromExpr(assignExpr.getRight(), context, options);
+                return inferTypeFromExpr(compiler, assignExpr.getRight(), context);
             }
             // Simple assignment - result type is the right operand type
-            return inferTypeFromExpr(assignExpr.getRight(), context, options);
+            return inferTypeFromExpr(compiler, assignExpr.getRight(), context);
         } else if (expr instanceof Swc4jAstIdent ident) {
             return context.getInferredTypes().getOrDefault(ident.getSym(), "Ljava/lang/Object;");
         } else if (expr instanceof Swc4jAstUpdateExpr updateExpr) {
             // Update expression (++/--) returns the type of the operand
-            return inferTypeFromExpr(updateExpr.getArg(), context, options);
+            return inferTypeFromExpr(compiler, updateExpr.getArg(), context);
         } else if (expr instanceof Swc4jAstBinExpr binExpr) {
             switch (binExpr.getOp()) {
                 case Add -> {
-                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
-                    String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -435,8 +435,8 @@ public final class TypeResolver {
                     return getWidenedType(leftType, rightType);
                 }
                 case Sub -> {
-                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
-                    String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -444,8 +444,8 @@ public final class TypeResolver {
                     return getWidenedType(leftType, rightType);
                 }
                 case Mul -> {
-                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
-                    String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -453,8 +453,8 @@ public final class TypeResolver {
                     return getWidenedType(leftType, rightType);
                 }
                 case Div -> {
-                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
-                    String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -462,8 +462,8 @@ public final class TypeResolver {
                     return getWidenedType(leftType, rightType);
                 }
                 case Mod -> {
-                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
-                    String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -477,7 +477,7 @@ public final class TypeResolver {
                 case LShift -> {
                     // Left shift returns the type of the left operand (int or long)
                     // For JavaScript semantics, we convert to int (ToInt32), but JVM supports both
-                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     // Get primitive type
@@ -491,7 +491,7 @@ public final class TypeResolver {
                 case RShift -> {
                     // Right shift returns the type of the left operand (int or long)
                     // Same semantics as left shift
-                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     // Get primitive type
@@ -505,7 +505,7 @@ public final class TypeResolver {
                 case ZeroFillRShift -> {
                     // Zero-fill right shift returns the type of the left operand (int or long)
                     // Same semantics as other shift operations
-                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     // Get primitive type
@@ -518,8 +518,8 @@ public final class TypeResolver {
                 }
                 case BitAnd -> {
                     // Bitwise AND uses type widening - result is wider of the two operand types
-                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
-                    String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -528,8 +528,8 @@ public final class TypeResolver {
                 }
                 case BitOr -> {
                     // Bitwise OR uses type widening - result is wider of the two operand types
-                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
-                    String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -538,8 +538,8 @@ public final class TypeResolver {
                 }
                 case BitXor -> {
                     // Bitwise XOR uses type widening - result is wider of the two operand types
-                    String leftType = inferTypeFromExpr(binExpr.getLeft(), context, options);
-                    String rightType = inferTypeFromExpr(binExpr.getRight(), context, options);
+                    String leftType = inferTypeFromExpr(compiler, binExpr.getLeft(), context);
+                    String rightType = inferTypeFromExpr(compiler, binExpr.getRight(), context);
                     // Handle null types - default to Object for null literals
                     if (leftType == null) leftType = "Ljava/lang/Object;";
                     if (rightType == null) rightType = "Ljava/lang/Object;";
@@ -553,14 +553,14 @@ public final class TypeResolver {
             }
         } else if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
             // For unary expressions, infer type from the argument
-            return inferTypeFromExpr(unaryExpr.getArg(), context, options);
+            return inferTypeFromExpr(compiler, unaryExpr.getArg(), context);
         } else if (expr instanceof Swc4jAstParenExpr parenExpr) {
             // For parenthesized expressions, infer type from the inner expression
-            return inferTypeFromExpr(parenExpr.getExpr(), context, options);
+            return inferTypeFromExpr(compiler, parenExpr.getExpr(), context);
         } else if (expr instanceof Swc4jAstCallExpr callExpr) {
             // For call expressions, try to infer the return type
             if (callExpr.getCallee() instanceof Swc4jAstMemberExpr memberExpr) {
-                String objType = inferTypeFromExpr(memberExpr.getObj(), context, options);
+                String objType = inferTypeFromExpr(compiler, memberExpr.getObj(), context);
 
                 // ArrayList methods
                 if ("Ljava/util/ArrayList;".equals(objType)) {
@@ -593,7 +593,7 @@ public final class TypeResolver {
             // Sequence expression returns the type of the last expression
             var exprs = seqExpr.getExprs();
             if (!exprs.isEmpty()) {
-                return inferTypeFromExpr(exprs.get(exprs.size() - 1), context, options);
+                return inferTypeFromExpr(compiler, exprs.get(exprs.size() - 1), context);
             }
             return "V"; // Empty sequence - void
         }
@@ -746,10 +746,12 @@ public final class TypeResolver {
         };
     }
 
-    public static String mapTsTypeToDescriptor(ISwc4jAstTsType tsType, ByteCodeCompilerOptions options) {
+    public static String mapTsTypeToDescriptor(
+            ByteCodeCompiler compiler,
+            ISwc4jAstTsType tsType) {
         if (tsType instanceof Swc4jAstTsArrayType arrayType) {
             // type[] syntax - maps to Java array
-            String elemType = mapTsTypeToDescriptor(arrayType.getElemType(), options);
+            String elemType = mapTsTypeToDescriptor(compiler, arrayType.getElemType());
             return "[" + elemType;
         } else if (tsType instanceof Swc4jAstTsKeywordType keywordType) {
             // Handle TypeScript keyword types (boolean, number, string, etc.)
@@ -775,16 +777,18 @@ public final class TypeResolver {
                     // Record<K, V> syntax - maps to LinkedHashMap
                     return "Ljava/util/LinkedHashMap;";
                 }
-                return mapTypeNameToDescriptor(typeName, options);
+                return mapTypeNameToDescriptor(compiler, typeName);
             }
         }
         // Default to Object for unknown types
         return "Ljava/lang/Object;";
     }
 
-    public static String mapTypeNameToDescriptor(String typeName, ByteCodeCompilerOptions options) {
+    public static String mapTypeNameToDescriptor(
+            ByteCodeCompiler compiler,
+            String typeName) {
         // Resolve type alias first
-        String resolvedType = options.typeAliasMap().getOrDefault(typeName, typeName);
+        String resolvedType = compiler.getMemory().getTypeAliasMap().getOrDefault(typeName, typeName);
 
         return switch (resolvedType) {
             case "int" -> "I";
@@ -800,7 +804,7 @@ public final class TypeResolver {
             case "void" -> "V";
             default -> {
                 // Check if this is an enum type - resolve to fully qualified name
-                String qualifiedName = resolveEnumTypeName(resolvedType, options);
+                String qualifiedName = resolveEnumTypeName(compiler, resolvedType);
                 yield "L" + qualifiedName.replace('.', '/') + ";";
             }
         };
@@ -814,11 +818,13 @@ public final class TypeResolver {
      * - {@code Record<number, string>} → GenericTypeInfo.of("Ljava/lang/Integer;", "Ljava/lang/String;")
      * - {@code Record<string, Record<string, number>>} → GenericTypeInfo.ofNested(...)
      *
-     * @param tsType  TypeScript type annotation (expected to be TsTypeRef with type params)
-     * @param options compiler options
+     * @param compiler the compiler
+     * @param tsType   TypeScript type annotation (expected to be TsTypeRef with type params)
      * @return GenericTypeInfo containing key and value type descriptors, or null if not a Record type
      */
-    public static GenericTypeInfo parseRecordType(ISwc4jAstTsType tsType, ByteCodeCompilerOptions options) {
+    public static GenericTypeInfo parseRecordType(
+            ByteCodeCompiler compiler,
+            ISwc4jAstTsType tsType) {
         if (!(tsType instanceof Swc4jAstTsTypeRef typeRef)) {
             return null;
         }
@@ -851,20 +857,20 @@ public final class TypeResolver {
 
         // Parse key type (first parameter)
         ISwc4jAstTsType keyTsType = params.get(0);
-        String keyType = mapTsTypeToDescriptor(keyTsType, options);
+        String keyType = mapTsTypeToDescriptor(compiler, keyTsType);
 
         // Parse value type (second parameter)
         ISwc4jAstTsType valueTsType = params.get(1);
 
         // Check if value type is a nested Record
-        GenericTypeInfo nestedInfo = parseRecordType(valueTsType, options);
+        GenericTypeInfo nestedInfo = parseRecordType(compiler, valueTsType);
         if (nestedInfo != null) {
             // Nested Record type: Record<K, Record<K2, V2>>
             return GenericTypeInfo.ofNested(keyType, nestedInfo);
         }
 
         // Simple Record type: Record<K, V>
-        String valueType = mapTsTypeToDescriptor(valueTsType, options);
+        String valueType = mapTsTypeToDescriptor(compiler, valueTsType);
         return GenericTypeInfo.of(keyType, valueType);
     }
 
@@ -873,7 +879,9 @@ public final class TypeResolver {
      * If the type is an enum registered in EnumRegistry, returns the qualified name.
      * Otherwise, returns the type name as-is with package prefix if available.
      */
-    private static String resolveEnumTypeName(String typeName, ByteCodeCompilerOptions options) {
+    private static String resolveEnumTypeName(
+            ByteCodeCompiler compiler,
+            String typeName) {
         // If already qualified (contains '.'), return as-is
         if (typeName.contains(".")) {
             return typeName;
@@ -888,7 +896,7 @@ public final class TypeResolver {
         }
 
         // Not an enum or not registered yet - add package prefix if available
-        String packagePrefix = options.packagePrefix();
+        String packagePrefix = compiler.getOptions().packagePrefix();
         if (!packagePrefix.isEmpty()) {
             return packagePrefix + "." + typeName;
         }
