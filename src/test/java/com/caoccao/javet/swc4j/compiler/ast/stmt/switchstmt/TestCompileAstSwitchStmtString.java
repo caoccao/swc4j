@@ -64,21 +64,21 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSwitchStringWithDefault(JdkVersion jdkVersion) throws Exception {
+    public void testSwitchStringCaseSensitive(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(str: string): int {
                       let result: int = 0
                       switch (str) {
-                        case "apple":
+                        case "Foo":
                           result = 1
                           break
-                        case "banana":
+                        case "foo":
                           result = 2
                           break
-                        default:
-                          result = -1
+                        case "FOO":
+                          result = 3
                           break
                       }
                       return result
@@ -89,9 +89,9 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", String.class);
 
-        assertEquals(1, testMethod.invoke(instance, "apple"));
-        assertEquals(2, testMethod.invoke(instance, "banana"));
-        assertEquals(-1, testMethod.invoke(instance, "xyz"));
+        assertEquals(1, testMethod.invoke(instance, "Foo"));
+        assertEquals(2, testMethod.invoke(instance, "foo"));
+        assertEquals(3, testMethod.invoke(instance, "FOO"));
     }
 
     @ParameterizedTest
@@ -124,21 +124,20 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSwitchStringCaseSensitive(JdkVersion jdkVersion) throws Exception {
+    public void testSwitchStringFallThrough(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(str: string): int {
                       let result: int = 0
                       switch (str) {
-                        case "Foo":
-                          result = 1
+                        case "a":
+                          result += 1
+                        case "b":
+                          result += 10
                           break
-                        case "foo":
-                          result = 2
-                          break
-                        case "FOO":
-                          result = 3
+                        case "c":
+                          result += 100
                           break
                       }
                       return result
@@ -149,9 +148,9 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", String.class);
 
-        assertEquals(1, testMethod.invoke(instance, "Foo"));
-        assertEquals(2, testMethod.invoke(instance, "foo"));
-        assertEquals(3, testMethod.invoke(instance, "FOO"));
+        assertEquals(11, testMethod.invoke(instance, "a")); // 1 + 10 = 11
+        assertEquals(10, testMethod.invoke(instance, "b")); // 10
+        assertEquals(100, testMethod.invoke(instance, "c")); // 100
     }
 
     @ParameterizedTest
@@ -186,20 +185,18 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSwitchStringFallThrough(JdkVersion jdkVersion) throws Exception {
+    public void testSwitchStringLongStrings(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(str: string): int {
                       let result: int = 0
                       switch (str) {
-                        case "a":
-                          result += 1
-                        case "b":
-                          result += 10
+                        case "a very long string literal that exceeds normal length":
+                          result = 1
                           break
-                        case "c":
-                          result += 100
+                        case "another long string":
+                          result = 2
                           break
                       }
                       return result
@@ -210,9 +207,8 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         var testMethod = classA.getMethod("test", String.class);
 
-        assertEquals(11, testMethod.invoke(instance, "a")); // 1 + 10 = 11
-        assertEquals(10, testMethod.invoke(instance, "b")); // 10
-        assertEquals(100, testMethod.invoke(instance, "c")); // 100
+        assertEquals(1, testMethod.invoke(instance, "a very long string literal that exceeds normal length"));
+        assertEquals(2, testMethod.invoke(instance, "another long string"));
     }
 
     @ParameterizedTest
@@ -279,34 +275,6 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSwitchStringLongStrings(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(str: string): int {
-                      let result: int = 0
-                      switch (str) {
-                        case "a very long string literal that exceeds normal length":
-                          result = 1
-                          break
-                        case "another long string":
-                          result = 2
-                          break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", String.class);
-
-        assertEquals(1, testMethod.invoke(instance, "a very long string literal that exceeds normal length"));
-        assertEquals(2, testMethod.invoke(instance, "another long string"));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
     public void testSwitchStringUnicode(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -335,5 +303,37 @@ public class TestCompileAstSwitchStmtString extends BaseTestCompileSuite {
         assertEquals(1, testMethod.invoke(instance, "你好"));
         assertEquals(2, testMethod.invoke(instance, "مرحبا"));
         assertEquals(3, testMethod.invoke(instance, "🚀"));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSwitchStringWithDefault(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(str: string): int {
+                      let result: int = 0
+                      switch (str) {
+                        case "apple":
+                          result = 1
+                          break
+                        case "banana":
+                          result = 2
+                          break
+                        default:
+                          result = -1
+                          break
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", String.class);
+
+        assertEquals(1, testMethod.invoke(instance, "apple"));
+        assertEquals(2, testMethod.invoke(instance, "banana"));
+        assertEquals(-1, testMethod.invoke(instance, "xyz"));
     }
 }

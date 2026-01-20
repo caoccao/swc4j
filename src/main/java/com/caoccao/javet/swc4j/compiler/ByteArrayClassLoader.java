@@ -16,7 +16,12 @@
 
 package com.caoccao.javet.swc4j.compiler;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ByteArrayClassLoader extends ClassLoader {
+    private final Map<String, byte[]> classBytes = new HashMap<>();
+
     public ByteArrayClassLoader(String name, ClassLoader parent) {
         super(name, parent);
     }
@@ -27,6 +32,19 @@ public class ByteArrayClassLoader extends ClassLoader {
 
     public ByteArrayClassLoader() {
         super();
+    }
+
+    public void addClass(String name, byte[] bytes) {
+        classBytes.put(name, bytes);
+    }
+
+    @Override
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
+        byte[] bytes = classBytes.get(name);
+        if (bytes != null) {
+            return defineClass(name, bytes, 0, bytes.length);
+        }
+        return super.findClass(name);
     }
 
     public Class<?> loadClassFromBytes(byte[] bytes) {

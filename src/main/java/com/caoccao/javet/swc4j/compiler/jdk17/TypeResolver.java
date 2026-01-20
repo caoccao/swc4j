@@ -18,6 +18,7 @@ package com.caoccao.javet.swc4j.compiler.jdk17;
 
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstComputedPropName;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstAssignOp;
 import com.caoccao.javet.swc4j.ast.expr.*;
 import com.caoccao.javet.swc4j.ast.expr.lit.*;
 import com.caoccao.javet.swc4j.ast.interfaces.*;
@@ -34,6 +35,7 @@ import com.caoccao.javet.swc4j.compiler.jdk17.ast.utils.TypeConversionUtils;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public final class TypeResolver {
@@ -193,6 +195,22 @@ public final class TypeResolver {
         // One primitive, one reference - result is Object
         // (either boxing the primitive or finding common supertype)
         return "Ljava/lang/Object;";
+    }
+
+    /**
+     * Get all registered enum names from EnumRegistry.
+     * Uses reflection to access the private registry.
+     */
+    private static java.util.Set<String> getAllRegisteredEnumNames() {
+        try {
+            java.lang.reflect.Field field = EnumRegistry.class.getDeclaredField("enumRegistry");
+            field.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            Map<String, ?> registry = (Map<String, ?>) field.get(null);
+            return registry.keySet();
+        } catch (Exception e) {
+            return java.util.Collections.emptySet();
+        }
     }
 
     private static String getPrimitiveType(String type) {
@@ -402,7 +420,7 @@ public final class TypeResolver {
         } else if (expr instanceof Swc4jAstAssignExpr assignExpr) {
             // For compound assignments (+=, -=, etc.), the result is the type of the left operand
             // For simple assignment (=), the result is the type of the right operand
-            if (assignExpr.getOp() != com.caoccao.javet.swc4j.ast.enums.Swc4jAstAssignOp.Assign) {
+            if (assignExpr.getOp() != Swc4jAstAssignOp.Assign) {
                 // Compound assignment - result type is the left operand (variable) type
                 var left = assignExpr.getLeft();
                 if (left instanceof Swc4jAstBindingIdent bindingIdent) {
@@ -797,7 +815,11 @@ public final class TypeResolver {
             case "java.lang.String", "String" -> "Ljava/lang/String;";
             case "java.lang.Object", "Object" -> "Ljava/lang/Object;";
             case "void" -> "V";
-            default -> "L" + resolvedType.replace('.', '/') + ";";
+            default -> {
+                // Check if this is an enum type - resolve to fully qualified name
+                String qualifiedName = resolveEnumTypeName(resolvedType, options);
+                yield "L" + qualifiedName.replace('.', '/') + ";";
+            }
         };
     }
 
@@ -861,5 +883,33 @@ public final class TypeResolver {
         // Simple Record type: Record<K, V>
         String valueType = mapTsTypeToDescriptor(valueTsType, options);
         return GenericTypeInfo.of(keyType, valueType);
+    }
+
+    /**
+     * Resolve an enum type name to its fully qualified name.
+     * If the type is an enum registered in EnumRegistry, returns the qualified name.
+     * Otherwise, returns the type name as-is with package prefix if available.
+     */
+    private static String resolveEnumTypeName(String typeName, ByteCodeCompilerOptions options) {
+        // If already qualified (contains '.'), return as-is
+        if (typeName.contains(".")) {
+            return typeName;
+        }
+
+        // Try to find the enum in the registry by checking if any member exists
+        // We use a dummy member name since we just want to know if the enum exists
+        for (String qualifiedName : getAllRegisteredEnumNames()) {
+            if (qualifiedName.endsWith("." + typeName)) {
+                return qualifiedName;
+            }
+        }
+
+        // Not an enum or not registered yet - add package prefix if available
+        String packagePrefix = options.packagePrefix();
+        if (!packagePrefix.isEmpty()) {
+            return packagePrefix + "." + typeName;
+        }
+
+        return typeName;
     }
 }

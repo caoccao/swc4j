@@ -31,6 +31,139 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testSwitchAllCasesReturn(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(x: int): int {
+                      switch (x) {
+                        case 1:
+                          return 1
+                        case 2:
+                          return 2
+                        default:
+                          return -1
+                      }
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", int.class);
+
+        assertEquals(1, testMethod.invoke(instance, 1));
+        assertEquals(2, testMethod.invoke(instance, 2));
+        assertEquals(-1, testMethod.invoke(instance, 99));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSwitchComplexFallThroughPattern(JdkVersion jdkVersion) throws Exception {
+        // Simulating weekday classification
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(day: int): boolean {
+                      let isWeekend: boolean = false
+                      switch (day) {
+                        case 0:
+                        case 6:
+                          isWeekend = true
+                          break
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                          isWeekend = false
+                          break
+                      }
+                      return isWeekend
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", int.class);
+
+        assertEquals(true, testMethod.invoke(instance, 0));  // Sunday
+        assertEquals(false, testMethod.invoke(instance, 1)); // Monday
+        assertEquals(false, testMethod.invoke(instance, 5)); // Friday
+        assertEquals(true, testMethod.invoke(instance, 6));  // Saturday
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSwitchDensityBoundary(JdkVersion jdkVersion) throws Exception {
+        // Cases: 0, 1, 2, 4 (missing 3)
+        // Density = 4/5 = 80% (above 50% threshold, should use tableswitch)
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(x: int): int {
+                      let result: int = 0
+                      switch (x) {
+                        case 0:
+                          result = 0
+                          break
+                        case 1:
+                          result = 1
+                          break
+                        case 2:
+                          result = 2
+                          break
+                        case 4:
+                          result = 4
+                          break
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", int.class);
+
+        assertEquals(0, testMethod.invoke(instance, 0));
+        assertEquals(1, testMethod.invoke(instance, 1));
+        assertEquals(2, testMethod.invoke(instance, 2));
+        assertEquals(0, testMethod.invoke(instance, 3)); // Missing case
+        assertEquals(4, testMethod.invoke(instance, 4));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSwitchDiscriminantSideEffect(JdkVersion jdkVersion) throws Exception {
+        // Verify discriminant expression evaluation (already covered by testSwitchWithExpressionDiscriminant)
+        // This test verifies that complex expressions work as discriminants
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(a: int, b: int): int {
+                      let result: int = 0
+                      let temp: int = a + b
+                      switch (temp) {
+                        case 5:
+                          result = 1
+                          break
+                        case 10:
+                          result = 2
+                          break
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", int.class, int.class);
+
+        assertEquals(1, testMethod.invoke(instance, 2, 3)); // 2+3 = 5
+        assertEquals(2, testMethod.invoke(instance, 7, 3)); // 7+3 = 10
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testSwitchEmpty(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -49,6 +182,69 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
         var testMethod = classA.getMethod("test", int.class);
 
         assertEquals(1, testMethod.invoke(instance, 5)); // Switch does nothing
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSwitchEmptyBlock(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(x: int): int {
+                      let result: int = 0
+                      switch (x) {
+                        case 1:
+                        case 2:
+                          result = 2
+                          break
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", int.class);
+
+        assertEquals(2, testMethod.invoke(instance, 1)); // Empty case 1 falls to case 2
+        assertEquals(2, testMethod.invoke(instance, 2));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSwitchHexOctalBinaryCases(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(x: int): int {
+                      let result: int = 0
+                      switch (x) {
+                        case 0x10:
+                          result = 1
+                          break
+                        case 0o24:
+                          result = 2
+                          break
+                        case 0b100000:
+                          result = 3
+                          break
+                        case 64:
+                          result = 4
+                          break
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", int.class);
+
+        // 0x10 = 16, 0o24 = 20, 0b100000 = 32
+        assertEquals(1, testMethod.invoke(instance, 16));  // Hex
+        assertEquals(2, testMethod.invoke(instance, 20));  // Octal
+        assertEquals(3, testMethod.invoke(instance, 32));  // Binary
+        assertEquals(4, testMethod.invoke(instance, 64));  // Decimal
     }
 
     @ParameterizedTest
@@ -184,202 +380,6 @@ public class TestCompileAstSwitchStmtEdgeCases extends BaseTestCompileSuite {
 
         assertEquals(10, testMethod.invoke(instance, 1));
         assertEquals(20, testMethod.invoke(instance, 2));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchComplexFallThroughPattern(JdkVersion jdkVersion) throws Exception {
-        // Simulating weekday classification
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(day: int): boolean {
-                      let isWeekend: boolean = false
-                      switch (day) {
-                        case 0:
-                        case 6:
-                          isWeekend = true
-                          break
-                        case 1:
-                        case 2:
-                        case 3:
-                        case 4:
-                        case 5:
-                          isWeekend = false
-                          break
-                      }
-                      return isWeekend
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
-
-        assertEquals(true, testMethod.invoke(instance, 0));  // Sunday
-        assertEquals(false, testMethod.invoke(instance, 1)); // Monday
-        assertEquals(false, testMethod.invoke(instance, 5)); // Friday
-        assertEquals(true, testMethod.invoke(instance, 6));  // Saturday
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchDensityBoundary(JdkVersion jdkVersion) throws Exception {
-        // Cases: 0, 1, 2, 4 (missing 3)
-        // Density = 4/5 = 80% (above 50% threshold, should use tableswitch)
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(x: int): int {
-                      let result: int = 0
-                      switch (x) {
-                        case 0:
-                          result = 0
-                          break
-                        case 1:
-                          result = 1
-                          break
-                        case 2:
-                          result = 2
-                          break
-                        case 4:
-                          result = 4
-                          break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
-
-        assertEquals(0, testMethod.invoke(instance, 0));
-        assertEquals(1, testMethod.invoke(instance, 1));
-        assertEquals(2, testMethod.invoke(instance, 2));
-        assertEquals(0, testMethod.invoke(instance, 3)); // Missing case
-        assertEquals(4, testMethod.invoke(instance, 4));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchDiscriminantSideEffect(JdkVersion jdkVersion) throws Exception {
-        // Verify discriminant expression evaluation (already covered by testSwitchWithExpressionDiscriminant)
-        // This test verifies that complex expressions work as discriminants
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(a: int, b: int): int {
-                      let result: int = 0
-                      let temp: int = a + b
-                      switch (temp) {
-                        case 5:
-                          result = 1
-                          break
-                        case 10:
-                          result = 2
-                          break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class, int.class);
-
-        assertEquals(1, testMethod.invoke(instance, 2, 3)); // 2+3 = 5
-        assertEquals(2, testMethod.invoke(instance, 7, 3)); // 7+3 = 10
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchAllCasesReturn(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(x: int): int {
-                      switch (x) {
-                        case 1:
-                          return 1
-                        case 2:
-                          return 2
-                        default:
-                          return -1
-                      }
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
-
-        assertEquals(1, testMethod.invoke(instance, 1));
-        assertEquals(2, testMethod.invoke(instance, 2));
-        assertEquals(-1, testMethod.invoke(instance, 99));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchEmptyBlock(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(x: int): int {
-                      let result: int = 0
-                      switch (x) {
-                        case 1:
-                        case 2:
-                          result = 2
-                          break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
-
-        assertEquals(2, testMethod.invoke(instance, 1)); // Empty case 1 falls to case 2
-        assertEquals(2, testMethod.invoke(instance, 2));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchHexOctalBinaryCases(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(x: int): int {
-                      let result: int = 0
-                      switch (x) {
-                        case 0x10:
-                          result = 1
-                          break
-                        case 0o24:
-                          result = 2
-                          break
-                        case 0b100000:
-                          result = 3
-                          break
-                        case 64:
-                          result = 4
-                          break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", int.class);
-
-        // 0x10 = 16, 0o24 = 20, 0b100000 = 32
-        assertEquals(1, testMethod.invoke(instance, 16));  // Hex
-        assertEquals(2, testMethod.invoke(instance, 20));  // Octal
-        assertEquals(3, testMethod.invoke(instance, 32));  // Binary
-        assertEquals(4, testMethod.invoke(instance, 64));  // Decimal
     }
 
     @ParameterizedTest

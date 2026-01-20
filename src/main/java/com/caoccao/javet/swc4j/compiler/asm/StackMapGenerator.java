@@ -87,6 +87,42 @@ public class StackMapGenerator {
         return frames;
     }
 
+    /**
+     * Convert verification types to the format needed by ClassWriter.StackMapEntry.
+     * Returns type tags and corresponding class names for OBJECT types.
+     */
+    private FrameData convertVerificationTypes(List<VerificationType> types) {
+        List<Integer> resultTypes = new ArrayList<>();
+        List<String> resultClassNames = new ArrayList<>();
+
+        for (int i = 0; i < types.size(); i++) {
+            VerificationType type = types.get(i);
+
+            // Skip the next TOP if current type is LONG or DOUBLE (implicit in JVM spec)
+            if ((type.tag == LONG || type.tag == DOUBLE) && i + 1 < types.size() && types.get(i + 1).tag == TOP) {
+                resultTypes.add(type.tag);
+                // LONG and DOUBLE don't have class names
+                i++; // Skip the next TOP
+            } else {
+                resultTypes.add(type.tag);
+                // Only add class names for OBJECT types (ClassWriter expects sparse list)
+                if (type.tag == OBJECT) {
+                    // Every OBJECT type must have a className
+                    String className = (type.className != null) ? type.className : "java/lang/Object";
+                    resultClassNames.add(className);
+                }
+            }
+        }
+
+        // Remove trailing TOPs (variables out of scope)
+        // Note: resultClassNames only contains entries for OBJECT types, so we don't remove from it
+        while (!resultTypes.isEmpty() && resultTypes.get(resultTypes.size() - 1) == TOP) {
+            resultTypes.remove(resultTypes.size() - 1);
+        }
+
+        return new FrameData(resultTypes, resultClassNames);
+    }
+
     private Frame createInitialFrame() {
         List<VerificationType> locals = new ArrayList<>();
         if (!isStatic) {
@@ -506,48 +542,6 @@ public class StackMapGenerator {
                 (bytecode[offset + 3] & 0xFF);
     }
 
-    /**
-     * Helper record to hold both type tags and class names.
-     */
-    private record FrameData(List<Integer> types, List<String> classNames) {
-    }
-
-    /**
-     * Convert verification types to the format needed by ClassWriter.StackMapEntry.
-     * Returns type tags and corresponding class names for OBJECT types.
-     */
-    private FrameData convertVerificationTypes(List<VerificationType> types) {
-        List<Integer> resultTypes = new ArrayList<>();
-        List<String> resultClassNames = new ArrayList<>();
-
-        for (int i = 0; i < types.size(); i++) {
-            VerificationType type = types.get(i);
-
-            // Skip the next TOP if current type is LONG or DOUBLE (implicit in JVM spec)
-            if ((type.tag == LONG || type.tag == DOUBLE) && i + 1 < types.size() && types.get(i + 1).tag == TOP) {
-                resultTypes.add(type.tag);
-                // LONG and DOUBLE don't have class names
-                i++; // Skip the next TOP
-            } else {
-                resultTypes.add(type.tag);
-                // Only add class names for OBJECT types (ClassWriter expects sparse list)
-                if (type.tag == OBJECT) {
-                    // Every OBJECT type must have a className
-                    String className = (type.className != null) ? type.className : "java/lang/Object";
-                    resultClassNames.add(className);
-                }
-            }
-        }
-
-        // Remove trailing TOPs (variables out of scope)
-        // Note: resultClassNames only contains entries for OBJECT types, so we don't remove from it
-        while (!resultTypes.isEmpty() && resultTypes.get(resultTypes.size() - 1) == TOP) {
-            resultTypes.remove(resultTypes.size() - 1);
-        }
-
-        return new FrameData(resultTypes, resultClassNames);
-    }
-
     private Frame simulateInstruction(Frame frame, int pc) {
         Frame newFrame = frame.copy();
         int opcode = bytecode[pc] & 0xFF;
@@ -901,13 +895,26 @@ public class StackMapGenerator {
         return newFrame;
     }
 
+    private record Frame(List<VerificationType> locals, List<VerificationType> stack) {
+
+        Frame copy() {
+            return new Frame(new ArrayList<>(locals), new ArrayList<>(stack));
+        }
+    }
+
+    /**
+     * Helper record to hold both type tags and class names.
+     */
+    private record FrameData(List<Integer> types, List<String> classNames) {
+    }
+
     /**
      * Represents a verification type in the stackmap table.
      * Can be a primitive type (int, float, etc.) or an object type with class name.
      */
     private static class VerificationType {
-        final int tag; // TOP, INTEGER, FLOAT, LONG, DOUBLE, NULL, UNINITIALIZED_THIS, OBJECT, etc.
         final String className; // For OBJECT types, the internal class name (e.g., "java/lang/String")
+        final int tag; // TOP, INTEGER, FLOAT, LONG, DOUBLE, NULL, UNINITIALIZED_THIS, OBJECT, etc.
 
         VerificationType(int tag) {
             this.tag = tag;
@@ -919,36 +926,36 @@ public class StackMapGenerator {
             this.className = className;
         }
 
-        static VerificationType top() {
-            return new VerificationType(TOP);
-        }
-
-        static VerificationType integer() {
-            return new VerificationType(INTEGER);
+        static VerificationType double_() {
+            return new VerificationType(DOUBLE);
         }
 
         static VerificationType float_() {
             return new VerificationType(FLOAT);
         }
 
-        static VerificationType long_() {
-            return new VerificationType(LONG);
+        static VerificationType integer() {
+            return new VerificationType(INTEGER);
         }
 
-        static VerificationType double_() {
-            return new VerificationType(DOUBLE);
+        static VerificationType long_() {
+            return new VerificationType(LONG);
         }
 
         static VerificationType null_() {
             return new VerificationType(NULL);
         }
 
-        static VerificationType uninitializedThis() {
-            return new VerificationType(UNINITIALIZED_THIS);
-        }
-
         static VerificationType object(String className) {
             return new VerificationType(OBJECT, className);
+        }
+
+        static VerificationType top() {
+            return new VerificationType(TOP);
+        }
+
+        static VerificationType uninitializedThis() {
+            return new VerificationType(UNINITIALIZED_THIS);
         }
 
         @Override
@@ -978,13 +985,6 @@ public class StackMapGenerator {
                 case UNINITIALIZED_THIS -> "UninitializedThis";
                 default -> "Unknown(" + tag + ")";
             };
-        }
-    }
-
-    private record Frame(List<VerificationType> locals, List<VerificationType> stack) {
-
-        Frame copy() {
-            return new Frame(new ArrayList<>(locals), new ArrayList<>(stack));
         }
     }
 

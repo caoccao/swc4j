@@ -21,6 +21,7 @@ import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstFunction;
 import com.caoccao.javet.swc4j.ast.clazz.Swc4jAstParam;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstPropName;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
+import com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstBlockStmt;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
@@ -70,7 +71,7 @@ public final class MethodGenerator {
                 // Check if method has varargs (RestPat in last parameter)
                 if (!function.getParams().isEmpty()) {
                     Swc4jAstParam lastParam = function.getParams().get(function.getParams().size() - 1);
-                    if (lastParam.getPat() instanceof com.caoccao.javet.swc4j.ast.pat.Swc4jAstRestPat) {
+                    if (lastParam.getPat() instanceof Swc4jAstRestPat) {
                         accessFlags |= 0x0080; // ACC_VARARGS
                     }
                 }

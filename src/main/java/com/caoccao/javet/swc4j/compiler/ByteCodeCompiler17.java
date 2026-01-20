@@ -36,13 +36,15 @@ public final class ByteCodeCompiler17 extends ByteCodeCompiler {
         Map<String, byte[]> byteCodeMap = new HashMap<>();
 
         if (program instanceof Swc4jAstModule module) {
-            // First pass: collect type aliases
+            // First pass: collect type aliases and enum declarations
             TypeAliasCollector.collectFromModuleItems(module.getBody(), options);
+            com.caoccao.javet.swc4j.compiler.jdk17.EnumRegistry.collectFromModuleItems(module.getBody(), options.packagePrefix());
             // Second pass: generate bytecode
             AstProcessor.processModuleItems(module.getBody(), options.packagePrefix(), byteCodeMap, options);
         } else if (program instanceof Swc4jAstScript script) {
-            // First pass: collect type aliases
+            // First pass: collect type aliases and enum declarations
             TypeAliasCollector.collectFromStmts(script.getBody(), options);
+            com.caoccao.javet.swc4j.compiler.jdk17.EnumRegistry.collectFromStmts(script.getBody(), options.packagePrefix());
             // Second pass: generate bytecode
             AstProcessor.processStmts(script.getBody(), options.packagePrefix(), byteCodeMap, options);
         }

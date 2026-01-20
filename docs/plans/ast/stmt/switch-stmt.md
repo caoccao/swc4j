@@ -16,8 +16,9 @@ This document outlines the implementation plan for supporting switch statements 
 - ✅ **Phase 4**: String Switches (10/10 tests) - **FULLY IMPLEMENTED**
 - ✅ **Phase 8**: Boxed Type Switches (9/9 tests) - **FULLY IMPLEMENTED**
 - ✅ **Phase 9**: Primitive Type Switches (10/10 tests) - **FULLY IMPLEMENTED**
+- ✅ **Phase 10**: Enum Switches (8/8 tests) - **FULLY IMPLEMENTED**
 
-**Total: 88/88 tests passing (100%)**
+**Total: 96/96 tests passing (100%)**
 
 **Note:** String switches are implemented using the JDK 2-phase approach:
 - **Phase 1:** Switch on `String.hashCode()` to compute case position (handles hash collisions with `equals()` checks)
@@ -32,7 +33,7 @@ Integer switches use optimal tableswitch/lookupswitch selection based on case de
 2. ✅ **String** - JDK 2-phase approach: hashCode() switch + position switch (FULLY IMPLEMENTED - 10/10 tests)
 3. ✅ **byte, short, char** - Promoted to int (FULLY IMPLEMENTED - 10/10 tests)
 4. ✅ **Integer, Byte, Short, Character** - Unboxed then promoted to int (FULLY IMPLEMENTED - 9/9 tests)
-5. 🟡 **enum** - Uses ordinal() values (IMPLEMENTED - requires integer case labels)
+5. ✅ **enum** - Uses ordinal() values (FULLY IMPLEMENTED - supports enum member expression case labels)
 
 **Unsupported types:** long, float, double, boolean, Object, or any other reference types
 
@@ -106,6 +107,7 @@ switch (expression) {
 - ✅ `TestCompileAstSwitchStmtString.java` - 10 tests for string switches
 - ✅ `TestCompileAstSwitchStmtBoxed.java` - 9 tests for boxed type switches (Integer, Byte, Short, Character)
 - ✅ `TestCompileAstSwitchStmtPrimitive.java` - 10 tests for primitive type switches (byte, short, char)
+- ✅ `TestCompileAstSwitchStmtEnum.java` - 8 tests for enum switches with member expression case labels
 
 All tests are parameterized with `JdkVersion.class` to ensure compatibility across JDK versions.
 
@@ -117,7 +119,7 @@ All tests are parameterized with `JdkVersion.class` to ensure compatibility acro
 - ✅ Boxed type switches (Integer, Byte, Short, Character) with automatic unboxing
 - ✅ Primitive type switches (byte, short, char) with automatic promotion to int
 - ✅ Character literal case labels (e.g., `case 'a':`)
-- ✅ Enum switches using ordinal() conversion
+- ✅ Enum switches using ordinal() conversion with enum member expression case labels (e.g., `case Color.RED:`)
 - ✅ Fall-through semantics for all switch types
 - ✅ Multiple empty case labels sharing a body
 - ✅ Default clause in any position
@@ -128,10 +130,9 @@ All tests are parameterized with `JdkVersion.class` to ensure compatibility acro
 ### What's Not Yet Implemented
 
 **Limitations:**
-- 🟡 Enum member expression case labels (e.g., `case Color.RED:`) - enum switches work but currently require integer ordinal case labels (e.g., `case 0:`)
+- 🔴 **Labeled break from switch** - Not supported. Unlabeled break works, but labeled break targeting the switch itself (e.g., `break mySwitch;`) is not implemented.
 
 **Not Yet Tested:**
-- 🔴 Labeled break from switch (requires label management enhancement)
 - 🔴 Complex edge cases (very large switches, integer overflow, etc.)
 
 ---
@@ -489,11 +490,13 @@ switch (x) {
 outer: switch (x) {
   case 1:
     inner: for (let i = 0; i < 10; i++) {
-      if (i == 5) break outer;  // Breaks from switch
-      if (i == 3) break inner;  // Breaks from for
+      if (i == 5) break outer;  // Breaks from switch (NOT SUPPORTED)
+      if (i == 3) break inner;  // Breaks from for (works)
     }
 }
 ```
+
+**Note:** Labeled break targeting a switch label is not currently supported. You can use labeled break from a loop inside a switch case, but you cannot use labeled break to exit a labeled switch.
 
 ---
 
@@ -1070,7 +1073,7 @@ outer: switch (x) {
     ```
     Expected: x==1 → 110 (0+1+2+3+4 + 100)
 
-46. **testSwitchLabeledBreak** - Labeled break from nested switch
+46. **testSwitchLabeledBreak** - Labeled break from nested switch (NOT SUPPORTED)
     ```typescript
     let result = 0;
     outer: switch (x) {
@@ -1078,10 +1081,10 @@ outer: switch (x) {
         switch (y) {
           case 10:
             result = 10;
-            break outer;  // Breaks outer switch
+            break outer;  // Breaks outer switch (NOT SUPPORTED)
           case 20:
             result = 20;
-            break;        // Breaks inner switch
+            break;        // Breaks inner switch (works)
         }
         result += 100;
         break;
@@ -1089,6 +1092,7 @@ outer: switch (x) {
     }
     ```
     Expected: x==1,y==10 → 10; x==1,y==20 → 120
+    **Note:** This test case is documented but not implemented. Labeled break from switch is not currently supported.
 
 47. **testSwitchNestedFallThrough** - Fall-through in nested switch
     ```typescript
@@ -1162,19 +1166,20 @@ outer: switch (x) {
     ```
     Expected: x==1,y>5 → 100; x==1,y<=5 → 60
 
-51. **testSwitchLabeledBreakToSwitch** - Labeled break to switch
+51. **testSwitchLabeledBreakToSwitch** - Labeled break to switch (NOT SUPPORTED)
     ```typescript
     let result = 0;
     mySwitch: switch (x) {
       case 1:
         result = 1;
-        break mySwitch;
+        break mySwitch;  // NOT SUPPORTED - use unlabeled break instead
       case 2:
         result = 2;
         break;
     }
     ```
     Expected: Same as unlabeled break
+    **Note:** This test case is documented but not implemented. Use unlabeled break instead.
 
 52. **testSwitchLabeledBreakToOuter** - Break to outer label
     ```typescript
@@ -2030,3 +2035,4 @@ context.getLocalVariableTable().exitScope();
 - **Unreachable code:** Code after return/break in a case is unreachable but may still be in AST. Handle gracefully.
 - **Hash collisions:** String switches must handle hash collisions correctly with equals() checks.
 - **Stack map frames:** May need frames at case labels for JVM verifier.
+- **Labeled break limitation:** Labeled break targeting a switch label (e.g., `break mySwitch;`) is not currently supported. Use unlabeled break to exit a switch. Labeled break from loops inside switch cases works normally.

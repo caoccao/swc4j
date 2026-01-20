@@ -15,6 +15,11 @@
 
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
+import com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdent;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstIdentName;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstMemberExpr;
+import com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
@@ -25,6 +30,7 @@ import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
+import com.caoccao.javet.swc4j.compiler.jdk17.EnumRegistry;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
 import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
@@ -59,7 +65,7 @@ public final class SwitchStatementGenerator {
                     throw new Swc4jByteCodeCompilerException("Duplicate default case in switch statement");
                 }
                 hasDefault = true;
-                cases.add(new CaseInfo((Integer) null, switchCase.getCons(), true));
+                cases.add(new CaseInfo(null, switchCase.getCons(), true));
             } else {
                 // Regular case
                 ISwc4jAstExpr testExpr = switchCase.getTest().get();
@@ -81,6 +87,26 @@ public final class SwitchStatementGenerator {
         return cases;
     }
 
+    /**
+     * Analyze string cases and build StringCaseInfo list.
+     */
+    private static List<StringCaseInfo> analyzeStringCases(Swc4jAstSwitchStmt switchStmt) {
+        List<StringCaseInfo> result = new ArrayList<>();
+
+        for (Swc4jAstSwitchCase switchCase : switchStmt.getCases()) {
+            Optional<ISwc4jAstExpr> testOpt = switchCase.getTest();
+            String caseValue = null;
+
+            if (testOpt.isPresent()) {
+                caseValue = extractConstantStringValue(testOpt.get());
+            }
+
+            StringCaseInfo info = new StringCaseInfo(caseValue, switchCase.getCons());
+            result.add(info);
+        }
+
+        return result;
+    }
 
     /**
      * Build lookupswitch instruction bytes.
@@ -133,6 +159,22 @@ public final class SwitchStatementGenerator {
     }
 
     /**
+     * Calculate size of lookupswitch instruction.
+     */
+    private static int calculateLookupSwitchSize(int numCases, int startOffset) {
+        int padding = (4 - ((startOffset + 1) % 4)) % 4;
+        return 1 + padding + 8 + (numCases * 8); // opcode + padding + default + count + (match-offset pairs)
+    }
+
+    /**
+     * Calculate lookupswitch size for hash codes.
+     */
+    private static int calculateLookupSwitchSizeForHashes(int numCases, int startOffset) {
+        int padding = (4 - ((startOffset + 1) % 4)) % 4;
+        return 1 + padding + 8 + (numCases * 8);
+    }
+
+    /**
      * Calculate the size of the switch instruction in bytes.
      */
     private static int calculateSwitchInstructionSize(List<CaseInfo> cases, boolean useTableSwitch, int switchStart) {
@@ -171,17 +213,45 @@ public final class SwitchStatementGenerator {
     }
 
     /**
+     * Calculate size of tableswitch instruction for position range.
+     */
+    private static int calculateTableSwitchSize(List<Integer> positions, int startOffset) {
+        if (positions.isEmpty()) {
+            return 0;
+        }
+        int min = positions.get(0);
+        int max = positions.get(positions.size() - 1);
+        int numEntries = max - min + 1;
+        int padding = (4 - ((startOffset + 1) % 4)) % 4;
+        return 1 + padding + 12 + (numEntries * 4); // opcode + padding + default + low + high + offsets
+    }
+
+    /**
+     * Calculate tableswitch size for hash codes.
+     */
+    private static int calculateTableSwitchSizeForHashes(List<Integer> hashCodes, int startOffset) {
+        if (hashCodes.isEmpty()) {
+            return 0;
+        }
+        int min = hashCodes.get(0);
+        int max = hashCodes.get(hashCodes.size() - 1);
+        int numEntries = max - min + 1;
+        int padding = (4 - ((startOffset + 1) % 4)) % 4;
+        return 1 + padding + 12 + (numEntries * 4);
+    }
+
+    /**
      * Extract constant integer value from expression.
      * Returns null if not a constant integer.
      */
     private static Integer extractConstantIntValue(ISwc4jAstExpr expr) {
         // Handle unary minus for negative numbers
-        if (expr instanceof com.caoccao.javet.swc4j.ast.expr.Swc4jAstUnaryExpr unaryExpr) {
-            if (unaryExpr.getOp() == com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp.Minus) {
+        if (expr instanceof Swc4jAstUnaryExpr unaryExpr) {
+            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Minus) {
                 Integer value = extractConstantIntValue(unaryExpr.getArg());
                 return value != null ? -value : null;
             }
-            if (unaryExpr.getOp() == com.caoccao.javet.swc4j.ast.enums.Swc4jAstUnaryOp.Plus) {
+            if (unaryExpr.getOp() == Swc4jAstUnaryOp.Plus) {
                 return extractConstantIntValue(unaryExpr.getArg());
             }
             return null;
@@ -214,6 +284,11 @@ public final class SwitchStatementGenerator {
             }
         }
 
+        // Handle enum member expressions (e.g., Color.RED)
+        if (expr instanceof Swc4jAstMemberExpr memberExpr) {
+            return extractEnumMemberOrdinal(memberExpr);
+        }
+
         return null;
     }
 
@@ -229,13 +304,40 @@ public final class SwitchStatementGenerator {
     }
 
     /**
-     * Generate bytecode for a string switch statement.
-     * Uses JDK-style 2-phase approach:
-     * Phase 1: Switch on hashCode() to compute string position
-     * Phase 2: Switch on computed position with original case bodies
-     * This properly handles hash collisions and fall-through semantics.
+     * Extract ordinal value from enum member expression.
+     * E.g., Color.RED -> 0 (if RED is first member of Color enum)
      */
-    private static void generateStringSwitch(
+    private static Integer extractEnumMemberOrdinal(Swc4jAstMemberExpr memberExpr) {
+        // Get enum name from object
+        com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr obj = memberExpr.getObj();
+        if (!(obj instanceof Swc4jAstIdent astIdent)) {
+            return null;
+        }
+        String enumName = astIdent.getSym();
+
+        // Get member name from property - can be either Swc4jAstIdent or Swc4jAstIdentName
+        com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstMemberProp prop = memberExpr.getProp();
+        String memberName = null;
+        if (prop instanceof Swc4jAstIdent ident) {
+            memberName = ident.getSym();
+        } else if (prop instanceof Swc4jAstIdentName identName) {
+            memberName = identName.getSym();
+        }
+
+        if (memberName == null) {
+            return null;
+        }
+
+        // Look up in enum registry
+        Integer ordinal = EnumRegistry.getMemberOrdinal(enumName, memberName);
+        return ordinal;
+    }
+
+    /**
+     * Generate bytecode for a switch statement.
+     * Supports integer, string, enum, boxed types, and primitive promotion.
+     */
+    public static void generate(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstSwitchStmt switchStmt,
@@ -243,58 +345,273 @@ public final class SwitchStatementGenerator {
             CompilationContext context,
             ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
 
-        // 1. Analyze string cases
-        List<StringCaseInfo> stringCases = analyzeStringCases(switchStmt);
+        // 1. Determine discriminant type
+        String discriminantType = TypeResolver.inferTypeFromExpr(switchStmt.getDiscriminant(), context, options);
 
-        if (stringCases.isEmpty()) {
-            // Empty switch - just evaluate discriminant for side effects
-            ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+        // 2. Route to appropriate generator based on type
+
+        // String switches use 2-phase hash approach
+        if ("Ljava/lang/String;".equals(discriminantType)) {
+            generateStringSwitch(code, cp, switchStmt, returnTypeInfo, context, options);
+            return;
+        }
+
+        // Boxed type switches: unbox then use integer switch
+        if ("Ljava/lang/Integer;".equals(discriminantType)) {
+            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Integer", "intValue", "()I", returnTypeInfo, context, options);
+            return;
+        }
+        if ("Ljava/lang/Byte;".equals(discriminantType)) {
+            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Byte", "byteValue", "()B", returnTypeInfo, context, options);
+            return;
+        }
+        if ("Ljava/lang/Short;".equals(discriminantType)) {
+            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Short", "shortValue", "()S", returnTypeInfo, context, options);
+            return;
+        }
+        if ("Ljava/lang/Character;".equals(discriminantType)) {
+            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Character", "charValue", "()C", returnTypeInfo, context, options);
+            return;
+        }
+
+        // Enum switches: call ordinal() to get int, then use integer switch
+        // Check if it's an object type (starts with L) but not a known type
+        if (discriminantType != null && discriminantType.startsWith("L") && discriminantType.endsWith(";")) {
+            // Likely an enum type - call ordinal()
+            generateEnumSwitch(code, cp, switchStmt, discriminantType, returnTypeInfo, context, options);
+            return;
+        }
+
+        // 3. Integer switch (int, byte, short, char - primitives are auto-promoted to int)
+        generateIntegerSwitch(code, cp, switchStmt, returnTypeInfo, context, options);
+    }
+
+    /**
+     * Generate bytecode for a boxed type switch.
+     * Unboxes the value using the appropriate *Value() method, then uses integer switch.
+     */
+    private static void generateBoxedIntegerSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String className,
+            String unboxMethod,
+            String methodDescriptor,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        // Generate discriminant expression (boxed value on stack)
+        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+
+        // Call appropriate unboxing method
+        int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
+        code.invokevirtual(unboxRef);
+
+        // For byte, short, char, the value is already promoted to int on the stack by JVM
+        // Now use integer switch with the unboxed value on stack
+        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, returnTypeInfo, context, options);
+    }
+
+    /**
+     * Generate bytecode for an enum switch.
+     * Calls ordinal() on the enum value, then uses integer switch.
+     */
+    private static void generateEnumSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String enumType,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        // Generate discriminant expression
+        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+
+        // Call ordinal() method to get int value
+        // ordinal() is defined in java.lang.Enum and returns int
+        int ordinalRef = cp.addMethodRef("java/lang/Enum", "ordinal", "()I");
+        code.invokevirtual(ordinalRef);
+
+        // Now use integer switch with the ordinal value on stack
+        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, returnTypeInfo, context, options);
+    }
+
+    /**
+     * Generate bytecode for an integer switch statement.
+     */
+    private static void generateIntegerSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        // 1. Analyze cases
+        List<CaseInfo> cases = analyzeCases(switchStmt);
+
+        // 2. Evaluate discriminant (push value onto stack)
+        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+
+        if (cases.isEmpty()) {
+            // Empty switch - just pop the discriminant value
             code.pop();
             return;
         }
 
-        // 2. Build data structures for 2-phase compilation
-        // Map from string case label to its position (0-based index of non-default cases)
-        Map<String, Integer> caseLabelToPosition = new LinkedHashMap<>();
-        // Map from hash code to set of strings with that hash
-        Map<Integer, Set<String>> hashToStrings = new LinkedHashMap<>();
-        // Track default case position
-        int defaultCasePosition = -1;
-        StringCaseInfo defaultCaseInfo = null;
+        // 3. Determine tableswitch vs lookupswitch
+        boolean useTableSwitch = shouldUseTableSwitch(cases);
 
-        int position = 0;
-        for (StringCaseInfo caseInfo : stringCases) {
-            if (caseInfo.caseValue == null) {
-                // Default case
-                defaultCaseInfo = caseInfo;
-                defaultCasePosition = position;
-            } else {
-                // Regular string case
-                caseLabelToPosition.put(caseInfo.caseValue, position);
-                int hashCode = caseInfo.caseValue.hashCode();
-                hashToStrings.computeIfAbsent(hashCode, k -> new LinkedHashSet<>()).add(caseInfo.caseValue);
+        // 4. Mark switch start and reserve space for switch instruction
+        int switchStart = code.getCurrentOffset();
+        int switchInstrSize = calculateSwitchInstructionSize(cases, useTableSwitch, switchStart);
+
+        // Emit placeholder bytes for the switch instruction
+        for (int i = 0; i < switchInstrSize; i++) {
+            code.emitByte(0);
+        }
+
+        // 5. Push break label and generate case bodies directly to main builder
+        CompilationContext.LoopLabelInfo breakLabel = new CompilationContext.LoopLabelInfo(null);
+        context.pushBreakLabel(breakLabel);
+
+        // Generate case bodies and record their offsets
+        for (CaseInfo caseInfo : cases) {
+            caseInfo.labelOffset = code.getCurrentOffset();
+            for (ISwc4jAstStmt stmt : caseInfo.statements) {
+                StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
             }
-            position++;
         }
 
-        // 3. Store discriminant in local variable
-        int strLocal = context.getLocalVariableTable().allocateVariable("$switch$str", "Ljava/lang/String;");
-        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
-        code.astore(strLocal);
+        // 6. Mark end label
+        int endLabel = code.getCurrentOffset();
 
-        // 4. Create temp variable for position, initialized to -1
-        int posLocal = context.getLocalVariableTable().allocateVariable("$switch$pos", "I");
-        code.iconst(-1);
-        code.istore(posLocal);
-
-        // 5. Phase 1: Switch on hashCode() to determine position
-        if (!hashToStrings.isEmpty()) {
-            generatePhase1HashSwitch(code, cp, strLocal, posLocal, hashToStrings, caseLabelToPosition);
+        // Patch break statements
+        for (CompilationContext.LoopLabelInfo.PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchShort(patchInfo.offsetPos(), offset);
         }
 
-        // 6. Phase 2: Switch on position with original case bodies
-        generatePhase2PositionSwitch(code, cp, posLocal, stringCases, defaultCasePosition,
-                returnTypeInfo, context, options);
+        context.popBreakLabel();
+
+        // 7. Determine default offset
+        int defaultCaseOffset = -1;
+        for (CaseInfo caseInfo : cases) {
+            if (caseInfo.isDefault) {
+                defaultCaseOffset = caseInfo.labelOffset;
+                break;
+            }
+        }
+        int defaultOffset = defaultCaseOffset != -1 ? defaultCaseOffset : endLabel;
+
+        // 8. Patch the switch instruction with correct offsets
+        patchSwitchInstructionInPlace(code, switchStart, cases, useTableSwitch, defaultOffset);
+    }
+
+    /**
+     * Helper method for integer switch when discriminant is already on stack.
+     * Used by enum and boxed type switches.
+     */
+    private static void generateIntegerSwitchWithDiscriminantOnStack(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        // Discriminant is already on stack (as int)
+        // Proceed with rest of integer switch logic without re-evaluating discriminant
+
+        // Analyze cases
+        List<CaseInfo> cases = analyzeCases(switchStmt);
+
+        if (cases.isEmpty()) {
+            // Empty switch - discriminant already evaluated and on stack, just pop it
+            code.pop();
+            return;
+        }
+
+        // Set up break label
+        CompilationContext.LoopLabelInfo breakLabel = new CompilationContext.LoopLabelInfo(null);
+        context.pushBreakLabel(breakLabel);
+
+        // Determine switch type
+        boolean useTableSwitch = shouldUseTableSwitch(cases);
+
+        // Collect unique case values (excluding default)
+        List<Integer> caseValues = new ArrayList<>();
+        CaseInfo defaultCase = null;
+
+        for (CaseInfo caseInfo : cases) {
+            if (caseInfo.caseValue == null) {
+                defaultCase = caseInfo;
+            } else {
+                if (!caseValues.contains(caseInfo.caseValue)) {
+                    caseValues.add(caseInfo.caseValue);
+                }
+            }
+        }
+
+        Collections.sort(caseValues);
+
+        // Reserve space for switch instruction
+        int switchStart = code.getCurrentOffset();
+        int switchSize = useTableSwitch
+                ? calculateTableSwitchSize(caseValues, switchStart)
+                : calculateLookupSwitchSize(caseValues.size(), switchStart);
+
+        for (int i = 0; i < switchSize; i++) {
+            code.emitByte(0);
+        }
+
+        // Generate case bodies and record their offsets
+        Map<Integer, Integer> valueToOffset = new LinkedHashMap<>();
+        int defaultBodyOffset = -1;
+
+        for (CaseInfo caseInfo : cases) {
+            int caseOffset = code.getCurrentOffset();
+
+            if (caseInfo.caseValue == null) {
+                defaultBodyOffset = caseOffset;
+            } else {
+                // Only record first occurrence of each value (for empty cases that share bodies)
+                if (!valueToOffset.containsKey(caseInfo.caseValue)) {
+                    valueToOffset.put(caseInfo.caseValue, caseOffset);
+                }
+            }
+
+            // Generate case body
+            for (ISwc4jAstStmt stmt : caseInfo.statements) {
+                StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
+            }
+            // Fall-through is automatic - no goto unless break was generated
+        }
+
+        // End of switch
+        int endLabel = code.getCurrentOffset();
+
+        // If no default case, default jumps to end
+        if (defaultBodyOffset == -1) {
+            defaultBodyOffset = endLabel;
+        }
+
+        // Patch the switch instruction
+        if (useTableSwitch) {
+            patchTableSwitch(code, switchStart, defaultBodyOffset, caseValues, valueToOffset);
+        } else {
+            patchLookupSwitch(code, switchStart, defaultBodyOffset, caseValues, valueToOffset);
+        }
+
+        // Patch break statements
+        for (CompilationContext.LoopLabelInfo.PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchShort(patchInfo.offsetPos(), offset);
+        }
+
+        context.popBreakLabel();
     }
 
     /**
@@ -479,163 +796,72 @@ public final class SwitchStatementGenerator {
     }
 
     /**
-     * Determine whether to use tableswitch for hash codes.
+     * Generate bytecode for a string switch statement.
+     * Uses JDK-style 2-phase approach:
+     * Phase 1: Switch on hashCode() to compute string position
+     * Phase 2: Switch on computed position with original case bodies
+     * This properly handles hash collisions and fall-through semantics.
      */
-    private static boolean shouldUseTableSwitchForHashCodes(List<Integer> hashCodes) {
-        if (hashCodes.isEmpty() || hashCodes.size() == 1) {
-            return hashCodes.size() == 1;
-        }
-
-        int min = hashCodes.get(0);
-        int max = hashCodes.get(hashCodes.size() - 1);
-        long range = (long) max - (long) min + 1;
-
-        if (range <= 0 || range > MAX_TABLE_SWITCH_RANGE) {
-            return false;
-        }
-
-        double density = (double) hashCodes.size() / (double) range;
-        return density >= DENSITY_THRESHOLD;
-    }
-
-    /**
-     * Calculate tableswitch size for hash codes.
-     */
-    private static int calculateTableSwitchSizeForHashes(List<Integer> hashCodes, int startOffset) {
-        if (hashCodes.isEmpty()) {
-            return 0;
-        }
-        int min = hashCodes.get(0);
-        int max = hashCodes.get(hashCodes.size() - 1);
-        int numEntries = max - min + 1;
-        int padding = (4 - ((startOffset + 1) % 4)) % 4;
-        return 1 + padding + 12 + (numEntries * 4);
-    }
-
-    /**
-     * Calculate lookupswitch size for hash codes.
-     */
-    private static int calculateLookupSwitchSizeForHashes(int numCases, int startOffset) {
-        int padding = (4 - ((startOffset + 1) % 4)) % 4;
-        return 1 + padding + 8 + (numCases * 8);
-    }
-
-    /**
-     * Patch tableswitch instruction for hash codes.
-     */
-    private static void patchTableSwitchForHashes(
+    private static void generateStringSwitch(
             CodeBuilder code,
-            int switchStart,
-            int defaultOffset,
-            List<Integer> hashCodes,
-            Map<Integer, Integer> hashToOffset) {
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
 
-        List<Byte> switchBytes = new ArrayList<>();
+        // 1. Analyze string cases
+        List<StringCaseInfo> stringCases = analyzeStringCases(switchStmt);
 
-        int min = hashCodes.get(0);
-        int max = hashCodes.get(hashCodes.size() - 1);
-
-        int[] jumpOffsets = new int[max - min + 1];
-        for (int i = 0; i < jumpOffsets.length; i++) {
-            int hashCode = min + i;
-            jumpOffsets[i] = hashToOffset.getOrDefault(hashCode, defaultOffset);
+        if (stringCases.isEmpty()) {
+            // Empty switch - just evaluate discriminant for side effects
+            ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+            code.pop();
+            return;
         }
 
-        buildTableSwitch(switchBytes, switchStart, defaultOffset, min, max, jumpOffsets);
+        // 2. Build data structures for 2-phase compilation
+        // Map from string case label to its position (0-based index of non-default cases)
+        Map<String, Integer> caseLabelToPosition = new LinkedHashMap<>();
+        // Map from hash code to set of strings with that hash
+        Map<Integer, Set<String>> hashToStrings = new LinkedHashMap<>();
+        // Track default case position
+        int defaultCasePosition = -1;
+        StringCaseInfo defaultCaseInfo = null;
 
-        byte[] bytes = new byte[switchBytes.size()];
-        for (int i = 0; i < switchBytes.size(); i++) {
-            bytes[i] = switchBytes.get(i);
-        }
-        code.patchBytes(switchStart, bytes);
-    }
-
-    /**
-     * Patch lookupswitch instruction for hash codes.
-     */
-    private static void patchLookupSwitchForHashes(
-            CodeBuilder code,
-            int switchStart,
-            int defaultOffset,
-            List<Integer> hashCodes,
-            Map<Integer, Integer> hashToOffset) {
-
-        List<Byte> switchBytes = new ArrayList<>();
-
-        int[][] matchOffsets = new int[hashCodes.size()][2];
-        for (int i = 0; i < hashCodes.size(); i++) {
-            int hashCode = hashCodes.get(i);
-            matchOffsets[i][0] = hashCode;
-            matchOffsets[i][1] = hashToOffset.get(hashCode);
-        }
-
-        buildLookupSwitch(switchBytes, switchStart, defaultOffset, matchOffsets);
-
-        byte[] bytes = new byte[switchBytes.size()];
-        for (int i = 0; i < switchBytes.size(); i++) {
-            bytes[i] = switchBytes.get(i);
-        }
-        code.patchBytes(switchStart, bytes);
-    }
-
-    /**
-     * Analyze string cases and build StringCaseInfo list.
-     */
-    private static List<StringCaseInfo> analyzeStringCases(Swc4jAstSwitchStmt switchStmt) {
-        List<StringCaseInfo> result = new ArrayList<>();
-
-        for (Swc4jAstSwitchCase switchCase : switchStmt.getCases()) {
-            Optional<ISwc4jAstExpr> testOpt = switchCase.getTest();
-            String caseValue = null;
-
-            if (testOpt.isPresent()) {
-                caseValue = extractConstantStringValue(testOpt.get());
+        int position = 0;
+        for (StringCaseInfo caseInfo : stringCases) {
+            if (caseInfo.caseValue == null) {
+                // Default case
+                defaultCaseInfo = caseInfo;
+                defaultCasePosition = position;
+            } else {
+                // Regular string case
+                caseLabelToPosition.put(caseInfo.caseValue, position);
+                int hashCode = caseInfo.caseValue.hashCode();
+                hashToStrings.computeIfAbsent(hashCode, k -> new LinkedHashSet<>()).add(caseInfo.caseValue);
             }
-
-            StringCaseInfo info = new StringCaseInfo(caseValue, switchCase.getCons());
-            result.add(info);
+            position++;
         }
 
-        return result;
-    }
+        // 3. Store discriminant in local variable
+        int strLocal = context.getLocalVariableTable().allocateVariable("$switch$str", "Ljava/lang/String;");
+        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+        code.astore(strLocal);
 
-    /**
-     * Check if table switch should be used for position-based switch.
-     */
-    private static boolean shouldUseTableSwitchForPositions(List<Integer> positions) {
-        if (positions.isEmpty()) {
-            return false;
+        // 4. Create temp variable for position, initialized to -1
+        int posLocal = context.getLocalVariableTable().allocateVariable("$switch$pos", "I");
+        code.iconst(-1);
+        code.istore(posLocal);
+
+        // 5. Phase 1: Switch on hashCode() to determine position
+        if (!hashToStrings.isEmpty()) {
+            generatePhase1HashSwitch(code, cp, strLocal, posLocal, hashToStrings, caseLabelToPosition);
         }
 
-        int min = positions.get(0);
-        int max = positions.get(positions.size() - 1);
-        long tableSize = (long) max - min + 1;
-        long lookupSize = positions.size();
-
-        // Use tableswitch if range is reasonable and space-efficient
-        return tableSize <= lookupSize * 2 && tableSize <= 256;
-    }
-
-    /**
-     * Calculate size of lookupswitch instruction.
-     */
-    private static int calculateLookupSwitchSize(int numCases, int startOffset) {
-        int padding = (4 - ((startOffset + 1) % 4)) % 4;
-        return 1 + padding + 8 + (numCases * 8); // opcode + padding + default + count + (match-offset pairs)
-    }
-
-    /**
-     * Calculate size of tableswitch instruction for position range.
-     */
-    private static int calculateTableSwitchSize(List<Integer> positions, int startOffset) {
-        if (positions.isEmpty()) {
-            return 0;
-        }
-        int min = positions.get(0);
-        int max = positions.get(positions.size() - 1);
-        int numEntries = max - min + 1;
-        int padding = (4 - ((startOffset + 1) % 4)) % 4;
-        return 1 + padding + 12 + (numEntries * 4); // opcode + padding + default + low + high + offsets
+        // 6. Phase 2: Switch on position with original case bodies
+        generatePhase2PositionSwitch(code, cp, posLocal, stringCases, defaultCasePosition,
+                returnTypeInfo, context, options);
     }
 
     /**
@@ -670,334 +896,31 @@ public final class SwitchStatementGenerator {
     }
 
     /**
-     * Patch tableswitch instruction for position-based switch using byte list approach.
+     * Patch lookupswitch instruction for hash codes.
      */
-    private static void patchTableSwitch(
+    private static void patchLookupSwitchForHashes(
             CodeBuilder code,
             int switchStart,
             int defaultOffset,
-            List<Integer> positions,
-            Map<Integer, Integer> positionToOffset) {
+            List<Integer> hashCodes,
+            Map<Integer, Integer> hashToOffset) {
 
         List<Byte> switchBytes = new ArrayList<>();
 
-        int min = positions.get(0);
-        int max = positions.get(positions.size() - 1);
-
-        // Build jump offsets array
-        int[] jumpOffsets = new int[max - min + 1];
-        for (int i = 0; i < jumpOffsets.length; i++) {
-            int position = min + i;
-            jumpOffsets[i] = positionToOffset.getOrDefault(position, defaultOffset);
+        int[][] matchOffsets = new int[hashCodes.size()][2];
+        for (int i = 0; i < hashCodes.size(); i++) {
+            int hashCode = hashCodes.get(i);
+            matchOffsets[i][0] = hashCode;
+            matchOffsets[i][1] = hashToOffset.get(hashCode);
         }
 
-        // Build the tableswitch instruction
-        buildTableSwitch(switchBytes, switchStart, defaultOffset, min, max, jumpOffsets);
+        buildLookupSwitch(switchBytes, switchStart, defaultOffset, matchOffsets);
 
-        // Convert to byte array and patch
         byte[] bytes = new byte[switchBytes.size()];
         for (int i = 0; i < switchBytes.size(); i++) {
             bytes[i] = switchBytes.get(i);
         }
         code.patchBytes(switchStart, bytes);
-    }
-
-    /**
-     * Information about a string case.
-     */
-    private static class StringCaseInfo {
-        String caseValue;        // null for default case
-        List<ISwc4jAstStmt> statements;
-        int gotoPosition;        // position of the conditional jump instruction
-        int bodyOffset;          // offset of the case body
-
-        StringCaseInfo(String caseValue, List<ISwc4jAstStmt> statements) {
-            this.caseValue = caseValue;
-            this.statements = statements;
-            this.gotoPosition = -1;
-            this.bodyOffset = -1;
-        }
-    }
-
-    /**
-     * Generate bytecode for a switch statement.
-     * Supports integer, string, enum, boxed types, and primitive promotion.
-     */
-    public static void generate(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstSwitchStmt switchStmt,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-
-        // 1. Determine discriminant type
-        String discriminantType = TypeResolver.inferTypeFromExpr(switchStmt.getDiscriminant(), context, options);
-
-        // 2. Route to appropriate generator based on type
-
-        // String switches use 2-phase hash approach
-        if ("Ljava/lang/String;".equals(discriminantType)) {
-            generateStringSwitch(code, cp, switchStmt, returnTypeInfo, context, options);
-            return;
-        }
-
-        // Boxed type switches: unbox then use integer switch
-        if ("Ljava/lang/Integer;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Integer", "intValue", "()I", returnTypeInfo, context, options);
-            return;
-        }
-        if ("Ljava/lang/Byte;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Byte", "byteValue", "()B", returnTypeInfo, context, options);
-            return;
-        }
-        if ("Ljava/lang/Short;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Short", "shortValue", "()S", returnTypeInfo, context, options);
-            return;
-        }
-        if ("Ljava/lang/Character;".equals(discriminantType)) {
-            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Character", "charValue", "()C", returnTypeInfo, context, options);
-            return;
-        }
-
-        // Enum switches: call ordinal() to get int, then use integer switch
-        // Check if it's an object type (starts with L) but not a known type
-        if (discriminantType != null && discriminantType.startsWith("L") && discriminantType.endsWith(";")) {
-            // Likely an enum type - call ordinal()
-            generateEnumSwitch(code, cp, switchStmt, discriminantType, returnTypeInfo, context, options);
-            return;
-        }
-
-        // 3. Integer switch (int, byte, short, char - primitives are auto-promoted to int)
-        generateIntegerSwitch(code, cp, switchStmt, returnTypeInfo, context, options);
-    }
-
-    /**
-     * Generate bytecode for an enum switch.
-     * Calls ordinal() on the enum value, then uses integer switch.
-     */
-    private static void generateEnumSwitch(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstSwitchStmt switchStmt,
-            String enumType,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-
-        // Generate discriminant expression
-        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
-
-        // Call ordinal() method to get int value
-        // ordinal() is defined in java.lang.Enum and returns int
-        int ordinalRef = cp.addMethodRef("java/lang/Enum", "ordinal", "()I");
-        code.invokevirtual(ordinalRef);
-
-        // Now use integer switch with the ordinal value on stack
-        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, returnTypeInfo, context, options);
-    }
-
-    /**
-     * Generate bytecode for a boxed type switch.
-     * Unboxes the value using the appropriate *Value() method, then uses integer switch.
-     */
-    private static void generateBoxedIntegerSwitch(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstSwitchStmt switchStmt,
-            String className,
-            String unboxMethod,
-            String methodDescriptor,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-
-        // Generate discriminant expression (boxed value on stack)
-        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
-
-        // Call appropriate unboxing method
-        int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
-        code.invokevirtual(unboxRef);
-
-        // For byte, short, char, the value is already promoted to int on the stack by JVM
-        // Now use integer switch with the unboxed value on stack
-        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, returnTypeInfo, context, options);
-    }
-
-    /**
-     * Helper method for integer switch when discriminant is already on stack.
-     * Used by enum and boxed type switches.
-     */
-    private static void generateIntegerSwitchWithDiscriminantOnStack(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstSwitchStmt switchStmt,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-
-        // Discriminant is already on stack (as int)
-        // Proceed with rest of integer switch logic without re-evaluating discriminant
-
-        // Analyze cases
-        List<CaseInfo> cases = analyzeCases(switchStmt);
-
-        if (cases.isEmpty()) {
-            // Empty switch - discriminant already evaluated and on stack, just pop it
-            code.pop();
-            return;
-        }
-
-        // Set up break label
-        CompilationContext.LoopLabelInfo breakLabel = new CompilationContext.LoopLabelInfo(null);
-        context.pushBreakLabel(breakLabel);
-
-        // Determine switch type
-        boolean useTableSwitch = shouldUseTableSwitch(cases);
-
-        // Collect unique case values (excluding default)
-        List<Integer> caseValues = new ArrayList<>();
-        CaseInfo defaultCase = null;
-
-        for (CaseInfo caseInfo : cases) {
-            if (caseInfo.caseValue == null) {
-                defaultCase = caseInfo;
-            } else {
-                if (!caseValues.contains(caseInfo.caseValue)) {
-                    caseValues.add(caseInfo.caseValue);
-                }
-            }
-        }
-
-        Collections.sort(caseValues);
-
-        // Reserve space for switch instruction
-        int switchStart = code.getCurrentOffset();
-        int switchSize = useTableSwitch
-                ? calculateTableSwitchSize(caseValues, switchStart)
-                : calculateLookupSwitchSize(caseValues.size(), switchStart);
-
-        for (int i = 0; i < switchSize; i++) {
-            code.emitByte(0);
-        }
-
-        // Generate case bodies and record their offsets
-        Map<Integer, Integer> valueToOffset = new LinkedHashMap<>();
-        int defaultBodyOffset = -1;
-
-        for (CaseInfo caseInfo : cases) {
-            int caseOffset = code.getCurrentOffset();
-
-            if (caseInfo.caseValue == null) {
-                defaultBodyOffset = caseOffset;
-            } else {
-                // Only record first occurrence of each value (for empty cases that share bodies)
-                if (!valueToOffset.containsKey(caseInfo.caseValue)) {
-                    valueToOffset.put(caseInfo.caseValue, caseOffset);
-                }
-            }
-
-            // Generate case body
-            for (ISwc4jAstStmt stmt : caseInfo.statements) {
-                StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
-            }
-            // Fall-through is automatic - no goto unless break was generated
-        }
-
-        // End of switch
-        int endLabel = code.getCurrentOffset();
-
-        // If no default case, default jumps to end
-        if (defaultBodyOffset == -1) {
-            defaultBodyOffset = endLabel;
-        }
-
-        // Patch the switch instruction
-        if (useTableSwitch) {
-            patchTableSwitch(code, switchStart, defaultBodyOffset, caseValues, valueToOffset);
-        } else {
-            patchLookupSwitch(code, switchStart, defaultBodyOffset, caseValues, valueToOffset);
-        }
-
-        // Patch break statements
-        for (CompilationContext.LoopLabelInfo.PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
-        }
-
-        context.popBreakLabel();
-    }
-
-    /**
-     * Generate bytecode for an integer switch statement.
-     */
-    private static void generateIntegerSwitch(
-            CodeBuilder code,
-            ClassWriter.ConstantPool cp,
-            Swc4jAstSwitchStmt switchStmt,
-            ReturnTypeInfo returnTypeInfo,
-            CompilationContext context,
-            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
-
-        // 1. Analyze cases
-        List<CaseInfo> cases = analyzeCases(switchStmt);
-
-        // 2. Evaluate discriminant (push value onto stack)
-        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
-
-        if (cases.isEmpty()) {
-            // Empty switch - just pop the discriminant value
-            code.pop();
-            return;
-        }
-
-        // 3. Determine tableswitch vs lookupswitch
-        boolean useTableSwitch = shouldUseTableSwitch(cases);
-
-        // 4. Mark switch start and reserve space for switch instruction
-        int switchStart = code.getCurrentOffset();
-        int switchInstrSize = calculateSwitchInstructionSize(cases, useTableSwitch, switchStart);
-
-        // Emit placeholder bytes for the switch instruction
-        for (int i = 0; i < switchInstrSize; i++) {
-            code.emitByte(0);
-        }
-
-        // 5. Push break label and generate case bodies directly to main builder
-        CompilationContext.LoopLabelInfo breakLabel = new CompilationContext.LoopLabelInfo(null);
-        context.pushBreakLabel(breakLabel);
-
-        // Generate case bodies and record their offsets
-        for (CaseInfo caseInfo : cases) {
-            caseInfo.labelOffset = code.getCurrentOffset();
-            for (ISwc4jAstStmt stmt : caseInfo.statements) {
-                StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
-            }
-        }
-
-        // 6. Mark end label
-        int endLabel = code.getCurrentOffset();
-
-        // Patch break statements
-        for (CompilationContext.LoopLabelInfo.PatchInfo patchInfo : breakLabel.getPatchPositions()) {
-            int offset = endLabel - patchInfo.opcodePos();
-            code.patchShort(patchInfo.offsetPos(), offset);
-        }
-
-        context.popBreakLabel();
-
-        // 7. Determine default offset
-        int defaultCaseOffset = -1;
-        for (CaseInfo caseInfo : cases) {
-            if (caseInfo.isDefault) {
-                defaultCaseOffset = caseInfo.labelOffset;
-                break;
-            }
-        }
-        int defaultOffset = defaultCaseOffset != -1 ? defaultCaseOffset : endLabel;
-
-        // 8. Patch the switch instruction with correct offsets
-        patchSwitchInstructionInPlace(code, switchStart, cases, useTableSwitch, defaultOffset);
     }
 
     /**
@@ -1068,6 +991,69 @@ public final class SwitchStatementGenerator {
     }
 
     /**
+     * Patch tableswitch instruction for position-based switch using byte list approach.
+     */
+    private static void patchTableSwitch(
+            CodeBuilder code,
+            int switchStart,
+            int defaultOffset,
+            List<Integer> positions,
+            Map<Integer, Integer> positionToOffset) {
+
+        List<Byte> switchBytes = new ArrayList<>();
+
+        int min = positions.get(0);
+        int max = positions.get(positions.size() - 1);
+
+        // Build jump offsets array
+        int[] jumpOffsets = new int[max - min + 1];
+        for (int i = 0; i < jumpOffsets.length; i++) {
+            int position = min + i;
+            jumpOffsets[i] = positionToOffset.getOrDefault(position, defaultOffset);
+        }
+
+        // Build the tableswitch instruction
+        buildTableSwitch(switchBytes, switchStart, defaultOffset, min, max, jumpOffsets);
+
+        // Convert to byte array and patch
+        byte[] bytes = new byte[switchBytes.size()];
+        for (int i = 0; i < switchBytes.size(); i++) {
+            bytes[i] = switchBytes.get(i);
+        }
+        code.patchBytes(switchStart, bytes);
+    }
+
+    /**
+     * Patch tableswitch instruction for hash codes.
+     */
+    private static void patchTableSwitchForHashes(
+            CodeBuilder code,
+            int switchStart,
+            int defaultOffset,
+            List<Integer> hashCodes,
+            Map<Integer, Integer> hashToOffset) {
+
+        List<Byte> switchBytes = new ArrayList<>();
+
+        int min = hashCodes.get(0);
+        int max = hashCodes.get(hashCodes.size() - 1);
+
+        int[] jumpOffsets = new int[max - min + 1];
+        for (int i = 0; i < jumpOffsets.length; i++) {
+            int hashCode = min + i;
+            jumpOffsets[i] = hashToOffset.getOrDefault(hashCode, defaultOffset);
+        }
+
+        buildTableSwitch(switchBytes, switchStart, defaultOffset, min, max, jumpOffsets);
+
+        byte[] bytes = new byte[switchBytes.size()];
+        for (int i = 0; i < switchBytes.size(); i++) {
+            bytes[i] = switchBytes.get(i);
+        }
+        code.patchBytes(switchStart, bytes);
+    }
+
+    /**
      * Determine whether to use tableswitch or lookupswitch.
      */
     private static boolean shouldUseTableSwitch(List<CaseInfo> cases) {
@@ -1100,6 +1086,43 @@ public final class SwitchStatementGenerator {
     }
 
     /**
+     * Determine whether to use tableswitch for hash codes.
+     */
+    private static boolean shouldUseTableSwitchForHashCodes(List<Integer> hashCodes) {
+        if (hashCodes.isEmpty() || hashCodes.size() == 1) {
+            return hashCodes.size() == 1;
+        }
+
+        int min = hashCodes.get(0);
+        int max = hashCodes.get(hashCodes.size() - 1);
+        long range = (long) max - (long) min + 1;
+
+        if (range <= 0 || range > MAX_TABLE_SWITCH_RANGE) {
+            return false;
+        }
+
+        double density = (double) hashCodes.size() / (double) range;
+        return density >= DENSITY_THRESHOLD;
+    }
+
+    /**
+     * Check if table switch should be used for position-based switch.
+     */
+    private static boolean shouldUseTableSwitchForPositions(List<Integer> positions) {
+        if (positions.isEmpty()) {
+            return false;
+        }
+
+        int min = positions.get(0);
+        int max = positions.get(positions.size() - 1);
+        long tableSize = (long) max - min + 1;
+        long lookupSize = positions.size();
+
+        // Use tableswitch if range is reasonable and space-efficient
+        return tableSize <= lookupSize * 2 && tableSize <= 256;
+    }
+
+    /**
      * Write a 32-bit integer to the byte list.
      */
     private static void writeInt(List<Byte> bytes, int value) {
@@ -1123,6 +1146,23 @@ public final class SwitchStatementGenerator {
             this.statements = statements;
             this.isDefault = isDefault;
             this.labelOffset = -1;
+        }
+    }
+
+    /**
+     * Information about a string case.
+     */
+    private static class StringCaseInfo {
+        int bodyOffset;          // offset of the case body
+        String caseValue;        // null for default case
+        int gotoPosition;        // position of the conditional jump instruction
+        List<ISwc4jAstStmt> statements;
+
+        StringCaseInfo(String caseValue, List<ISwc4jAstStmt> statements) {
+            this.caseValue = caseValue;
+            this.statements = statements;
+            this.gotoPosition = -1;
+            this.bodyOffset = -1;
         }
     }
 

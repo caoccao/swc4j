@@ -31,39 +31,6 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSwitchIntegerBasic(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(x: Integer): int {
-                      let result: int = 0
-                      switch (x) {
-                        case 1:
-                          result = 10
-                          break
-                        case 2:
-                          result = 20
-                          break
-                        case 3:
-                          result = 30
-                          break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", Integer.class);
-
-        assertEquals(10, testMethod.invoke(instance, 1));
-        assertEquals(20, testMethod.invoke(instance, 2));
-        assertEquals(30, testMethod.invoke(instance, 3));
-        assertEquals(0, testMethod.invoke(instance, 4)); // No match
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
     public void testSwitchByteBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -97,20 +64,20 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSwitchShortBasic(JdkVersion jdkVersion) throws Exception {
+    public void testSwitchByteNegativeValues(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(x: Short): int {
+                    test(x: Byte): int {
                       let result: int = 0
                       switch (x) {
-                        case 100:
+                        case -1:
                           result = 1
                           break
-                        case 200:
+                        case 0:
                           result = 2
                           break
-                        case 300:
+                        case 1:
                           result = 3
                           break
                       }
@@ -120,12 +87,11 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", Short.class);
+        var testMethod = classA.getMethod("test", Byte.class);
 
-        assertEquals(1, testMethod.invoke(instance, (short) 100));
-        assertEquals(2, testMethod.invoke(instance, (short) 200));
-        assertEquals(3, testMethod.invoke(instance, (short) 300));
-        assertEquals(0, testMethod.invoke(instance, (short) 400)); // No match
+        assertEquals(1, testMethod.invoke(instance, (byte) -1));
+        assertEquals(2, testMethod.invoke(instance, (byte) 0));
+        assertEquals(3, testMethod.invoke(instance, (byte) 1));
     }
 
     @ParameterizedTest
@@ -163,7 +129,44 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSwitchIntegerWithDefault(JdkVersion jdkVersion) throws Exception {
+    public void testSwitchCharacterDigits(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(x: Character): int {
+                      let result: int = 0
+                      switch (x) {
+                        case '0':
+                          result = 0
+                          break
+                        case '1':
+                          result = 1
+                          break
+                        case '2':
+                          result = 2
+                          break
+                        default:
+                          result = -1
+                          break
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", Character.class);
+
+        assertEquals(0, testMethod.invoke(instance, '0'));
+        assertEquals(1, testMethod.invoke(instance, '1'));
+        assertEquals(2, testMethod.invoke(instance, '2'));
+        assertEquals(-1, testMethod.invoke(instance, '3')); // Default
+        assertEquals(-1, testMethod.invoke(instance, 'a')); // Default
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSwitchIntegerBasic(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
@@ -176,8 +179,8 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
                         case 2:
                           result = 20
                           break
-                        default:
-                          result = 99
+                        case 3:
+                          result = 30
                           break
                       }
                       return result
@@ -190,8 +193,8 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
 
         assertEquals(10, testMethod.invoke(instance, 1));
         assertEquals(20, testMethod.invoke(instance, 2));
-        assertEquals(99, testMethod.invoke(instance, 3)); // Default
-        assertEquals(99, testMethod.invoke(instance, 100)); // Default
+        assertEquals(30, testMethod.invoke(instance, 3));
+        assertEquals(0, testMethod.invoke(instance, 4)); // No match
     }
 
     @ParameterizedTest
@@ -227,20 +230,53 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testSwitchByteNegativeValues(JdkVersion jdkVersion) throws Exception {
+    public void testSwitchIntegerWithDefault(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
-                    test(x: Byte): int {
+                    test(x: Integer): int {
                       let result: int = 0
                       switch (x) {
-                        case -1:
+                        case 1:
+                          result = 10
+                          break
+                        case 2:
+                          result = 20
+                          break
+                        default:
+                          result = 99
+                          break
+                      }
+                      return result
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        var testMethod = classA.getMethod("test", Integer.class);
+
+        assertEquals(10, testMethod.invoke(instance, 1));
+        assertEquals(20, testMethod.invoke(instance, 2));
+        assertEquals(99, testMethod.invoke(instance, 3)); // Default
+        assertEquals(99, testMethod.invoke(instance, 100)); // Default
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testSwitchShortBasic(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(x: Short): int {
+                      let result: int = 0
+                      switch (x) {
+                        case 100:
                           result = 1
                           break
-                        case 0:
+                        case 200:
                           result = 2
                           break
-                        case 1:
+                        case 300:
                           result = 3
                           break
                       }
@@ -250,48 +286,12 @@ public class TestCompileAstSwitchStmtBoxed extends BaseTestCompileSuite {
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", Byte.class);
+        var testMethod = classA.getMethod("test", Short.class);
 
-        assertEquals(1, testMethod.invoke(instance, (byte) -1));
-        assertEquals(2, testMethod.invoke(instance, (byte) 0));
-        assertEquals(3, testMethod.invoke(instance, (byte) 1));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testSwitchCharacterDigits(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(x: Character): int {
-                      let result: int = 0
-                      switch (x) {
-                        case '0':
-                          result = 0
-                          break
-                        case '1':
-                          result = 1
-                          break
-                        case '2':
-                          result = 2
-                          break
-                        default:
-                          result = -1
-                          break
-                      }
-                      return result
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        var testMethod = classA.getMethod("test", Character.class);
-
-        assertEquals(0, testMethod.invoke(instance, '0'));
-        assertEquals(1, testMethod.invoke(instance, '1'));
-        assertEquals(2, testMethod.invoke(instance, '2'));
-        assertEquals(-1, testMethod.invoke(instance, '3')); // Default
-        assertEquals(-1, testMethod.invoke(instance, 'a')); // Default
+        assertEquals(1, testMethod.invoke(instance, (short) 100));
+        assertEquals(2, testMethod.invoke(instance, (short) 200));
+        assertEquals(3, testMethod.invoke(instance, (short) 300));
+        assertEquals(0, testMethod.invoke(instance, (short) 400)); // No match
     }
 
     @ParameterizedTest
