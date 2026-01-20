@@ -4,16 +4,39 @@
 
 This document outlines the implementation plan for supporting switch statements in TypeScript to JVM bytecode compilation. Switch statements provide multi-way branching based on the value of an expression, with support for fall-through semantics and default cases.
 
-**Current Status:** 🔴 **NOT STARTED**
+**Current Status:** 🟢 **MOSTLY IMPLEMENTED** (2026-01-20)
+
+**Implementation Progress:**
+- ✅ **Phase 1**: Basic Integer Switch (10/10 tests passing)
+- ✅ **Phase 2**: Default Clause (8/8 tests passing)
+- ✅ **Phase 3**: Fall-Through Behavior (12/12 tests passing)
+- ✅ **Phase 5**: Nested Switches (8/8 tests passing)
+- ✅ **Phase 6**: Break and Continue (9/9 tests passing)
+- ✅ **Phase 7**: Edge Cases (12/12 tests passing)
+- 🟡 **Phase 4**: String Switches (8/10 tests) - **MOSTLY IMPLEMENTED**
+
+**Total: 67/69 tests passing (97.1%)**
+
+**Note:** String switches are implemented using a stack-based comparison approach. Most features work correctly (8/10 tests passing), with known limitations for fall-through between string cases and multiple empty case labels. Integer switches are fully functional with optimal tableswitch/lookupswitch selection.
+
+**String Switch Known Limitations:**
+- ❌ Fall-through between string cases (test: `testSwitchStringFallThrough`)
+- ❌ Multiple empty case labels sharing a body (test: `testSwitchStringMultipleMatches`)
+- ✅ Basic string matching with break statements
+- ✅ Default clauses
+- ✅ Empty string cases
+- ✅ Case sensitivity
+- ✅ Hash collision handling
+- ✅ Special characters and Unicode strings
 
 **Dependencies:** ✅ TypeScript enum support (TsEnumDecl) - COMPLETED (2026-01-19)
 
-**Supported Discriminant Types (in priority order):**
-1. **enum** (highest priority) - Uses ordinal() values
-2. **int** - Direct tableswitch/lookupswitch
-3. **String** - Hash-based two-stage switch
-4. **byte, short, char** - Promoted to int
-5. **Byte, Short, Character, Integer** - Unboxed then promoted to int
+**Currently Supported Discriminant Types:**
+1. ✅ **int** - Direct tableswitch/lookupswitch (FULLY IMPLEMENTED - 59/59 tests)
+2. 🟡 **String** - Stack-based comparison approach (MOSTLY IMPLEMENTED - 8/10 tests)
+3. 🔴 **enum** - Uses ordinal() values (NOT YET TESTED)
+4. 🔴 **byte, short, char** - Promoted to int (NOT YET TESTED)
+5. 🔴 **Boxed types** - Unboxed then promoted to int (NOT YET TESTED)
 
 **Unsupported types:** long, float, double, boolean, Object, or any other reference types
 
@@ -32,11 +55,73 @@ switch (expression) {
 }
 ```
 
-**Implementation File:** `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/SwitchStatementGenerator.java` (to be created)
+**Implementation File:** ✅ `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/SwitchStatementGenerator.java` (CREATED)
 
-**Test Files:** `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/switchstmt/TestCompileAstSwitchStmt*.java` (to be created)
+**Test Files:** ✅ `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/switchstmt/TestCompileAstSwitchStmt*.java` (6 files created)
 
 **AST Definition:** [Swc4jAstSwitchStmt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstSwitchStmt.java)
+
+---
+
+## Implementation Summary (2026-01-20)
+
+### What's Been Implemented
+
+**Core Infrastructure:**
+1. ✅ `SwitchStatementGenerator.java` - Main generator for switch statements
+   - tableswitch vs lookupswitch selection (density threshold: 50%)
+   - Case analysis and duplicate detection
+   - Fall-through detection and proper bytecode generation
+   - Default clause handling in any position
+
+2. ✅ `StackMapGenerator` enhancements
+   - Added tableswitch (0xAA) and lookupswitch (0xAB) instruction support
+   - Proper branch target identification for all case labels
+   - Fixed method parameter initialization in initial frames
+
+3. ✅ `VariableAnalyzer` updates
+   - Switch case body analysis for variable declarations
+   - Proper scope handling for variables declared in cases
+
+4. ✅ `CodeBuilder` additions
+   - Bytecode generation for tableswitch and lookupswitch
+   - Byte patching for forward reference resolution
+
+**Features Working:**
+- ✅ Integer switch statements (int discriminant)
+- ✅ Dense cases use tableswitch (O(1) lookup)
+- ✅ Sparse cases use lookupswitch (O(log n) binary search)
+- ✅ Default clause in any position (beginning, middle, end)
+- ✅ Fall-through semantics (cases without break)
+- ✅ Case grouping (multiple empty cases sharing body)
+- ✅ Nested switches (switch in switch, switch in loop, loop in switch)
+- ✅ Break statement handling for switch exit
+- ✅ Negative case values
+- ✅ Expression discriminants (evaluated once)
+- ✅ Variable declarations in case bodies
+
+**Test Coverage (59 tests total):**
+- ✅ `TestCompileAstSwitchStmtBasic.java` - 10 tests for basic integer switches
+- ✅ `TestCompileAstSwitchStmtDefault.java` - 8 tests for default clause
+- ✅ `TestCompileAstSwitchStmtFallThrough.java` - 12 tests for fall-through behavior
+- ✅ `TestCompileAstSwitchStmtNested.java` - 8 tests for nested switches
+- ✅ `TestCompileAstSwitchStmtBreak.java` - 9 tests for break/continue interaction
+- ✅ `TestCompileAstSwitchStmtEdgeCases.java` - 12 tests for edge cases and boundary conditions
+
+All tests are parameterized with `JdkVersion.class` to ensure compatibility across JDK versions.
+
+### What's Not Yet Implemented
+
+**Deferred Features:**
+- 🔴 String switches (requires hash-based two-stage implementation)
+- 🔴 Enum switches (requires ordinal() extraction)
+- 🔴 Boxed type switches (requires unboxing)
+- 🔴 Primitive promotion (byte, short, char → int)
+
+**Not Yet Tested:**
+- 🔴 Labeled break from switch (requires label management enhancement)
+- 🔴 Complex edge cases (very large switches, integer overflow, etc.)
+- 🔴 Error conditions (duplicate cases, non-constant values, etc.)
 
 ---
 

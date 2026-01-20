@@ -16,6 +16,7 @@
 package com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt;
 
 import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstNumber;
+import com.caoccao.javet.swc4j.ast.expr.lit.Swc4jAstStr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstExpr;
 import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstStmt;
 import com.caoccao.javet.swc4j.ast.miscs.Swc4jAstSwitchCase;
@@ -25,6 +26,7 @@ import com.caoccao.javet.swc4j.compiler.asm.ClassWriter;
 import com.caoccao.javet.swc4j.compiler.asm.CodeBuilder;
 import com.caoccao.javet.swc4j.compiler.jdk17.CompilationContext;
 import com.caoccao.javet.swc4j.compiler.jdk17.ReturnTypeInfo;
+import com.caoccao.javet.swc4j.compiler.jdk17.TypeResolver;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.expr.ExpressionGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
@@ -43,7 +45,7 @@ public final class SwitchStatementGenerator {
     }
 
     /**
-     * Analyze switch cases and extract case information.
+     * Analyze switch cases and extract case information (integer switches).
      */
     private static List<CaseInfo> analyzeCases(Swc4jAstSwitchStmt switchStmt) throws Swc4jByteCodeCompilerException {
         List<CaseInfo> cases = new ArrayList<>();
@@ -57,7 +59,7 @@ public final class SwitchStatementGenerator {
                     throw new Swc4jByteCodeCompilerException("Duplicate default case in switch statement");
                 }
                 hasDefault = true;
-                cases.add(new CaseInfo(null, switchCase.getCons(), true));
+                cases.add(new CaseInfo((Integer) null, switchCase.getCons(), true));
             } else {
                 // Regular case
                 ISwc4jAstExpr testExpr = switchCase.getTest().get();
@@ -78,6 +80,7 @@ public final class SwitchStatementGenerator {
 
         return cases;
     }
+
 
     /**
      * Build lookupswitch instruction bytes.
@@ -205,9 +208,287 @@ public final class SwitchStatementGenerator {
     }
 
     /**
+     * Extract constant string value from expression.
+     * Returns null if not a constant string.
+     */
+    private static String extractConstantStringValue(ISwc4jAstExpr expr) {
+        if (expr instanceof Swc4jAstStr strExpr) {
+            return strExpr.getValue();
+        }
+        return null;
+    }
+
+    /**
+     * Generate bytecode for a string switch statement.
+     * Uses two-phase approach: comparisons first, then case bodies.
+     * This avoids complex control flow and frame merging issues.
+     */
+    private static void generateStringSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        // 1. Analyze string cases
+        List<StringCaseInfo> stringCases = analyzeStringCases(switchStmt);
+
+        if (stringCases.isEmpty()) {
+            // Empty switch - just evaluate discriminant for side effects
+            ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+            code.pop();
+            return;
+        }
+
+        // 2. Evaluate discriminant and keep on stack
+        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+
+        // 3. Set up break label
+        CompilationContext.LoopLabelInfo breakLabel = new CompilationContext.LoopLabelInfo(null);
+        context.pushBreakLabel(breakLabel);
+
+        int equalsRef = cp.addMethodRef("java/lang/String", "equals", "(Ljava/lang/Object;)Z");
+        StringCaseInfo defaultCase = null;
+
+        // 4. Phase 1: Generate all comparisons with conditional jumps to case bodies
+        List<Integer> caseBodyGotoPositions = new ArrayList<>();
+        List<StringCaseInfo> regularCases = new ArrayList<>();
+
+        for (StringCaseInfo caseInfo : stringCases) {
+            if (caseInfo.caseValue != null) {
+                // if (str.equals("caseValue")) goto caseBody
+                code.dup(); // Duplicate the discriminant string on stack
+                code.ldc(cp.addString(caseInfo.caseValue));
+                code.invokevirtual(equalsRef);
+
+                int ifnePos = code.getCurrentOffset();
+                code.ifne(0); // if true (!=0), jump to case body - placeholder
+                caseBodyGotoPositions.add(ifnePos + 1); // Remember position to patch
+                regularCases.add(caseInfo);
+            } else {
+                defaultCase = caseInfo;
+            }
+        }
+
+        // Pop the discriminant string (no longer needed) and jump to default/end
+        code.pop();
+        int defaultGotoPos = code.getCurrentOffset();
+        code.gotoLabel(0); // Placeholder, will be patched
+
+        // 5. Phase 2: Generate case bodies and patch jumps
+        for (int i = 0; i < regularCases.size(); i++) {
+            StringCaseInfo caseInfo = regularCases.get(i);
+
+            // Patch the ifne from phase 1 to jump here
+            int caseBodyStart = code.getCurrentOffset();
+            int gotoPos = caseBodyGotoPositions.get(i);
+            code.patchShort(gotoPos, caseBodyStart - (gotoPos - 1));
+
+            // Pop the discriminant string (it's still on stack when we jump here)
+            code.pop();
+
+            // Generate case body
+            for (ISwc4jAstStmt stmt : caseInfo.statements) {
+                StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
+            }
+
+            // If this case can fall through to the next, continue to next case body
+            // (fall-through is automatic - no explicit goto needed)
+        }
+
+        // 6. Generate default case
+        int defaultStart = code.getCurrentOffset();
+        code.patchShort(defaultGotoPos + 1, defaultStart - defaultGotoPos);
+
+        if (defaultCase != null) {
+            for (ISwc4jAstStmt stmt : defaultCase.statements) {
+                StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
+            }
+        }
+
+        // 7. End of switch
+        int endLabel = code.getCurrentOffset();
+
+        // Patch break statements
+        for (CompilationContext.LoopLabelInfo.PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchShort(patchInfo.offsetPos(), offset);
+        }
+
+        context.popBreakLabel();
+    }
+
+    /**
+     * Analyze string cases and build StringCaseInfo list.
+     */
+    private static List<StringCaseInfo> analyzeStringCases(Swc4jAstSwitchStmt switchStmt) {
+        List<StringCaseInfo> result = new ArrayList<>();
+
+        for (Swc4jAstSwitchCase switchCase : switchStmt.getCases()) {
+            Optional<ISwc4jAstExpr> testOpt = switchCase.getTest();
+            String caseValue = null;
+
+            if (testOpt.isPresent()) {
+                caseValue = extractConstantStringValue(testOpt.get());
+            }
+
+            StringCaseInfo info = new StringCaseInfo(caseValue, switchCase.getCons());
+            result.add(info);
+        }
+
+        return result;
+    }
+
+    /**
+     * Check if table switch should be used for position-based switch.
+     */
+    private static boolean shouldUseTableSwitchForPositions(List<Integer> positions) {
+        if (positions.isEmpty()) {
+            return false;
+        }
+
+        int min = positions.get(0);
+        int max = positions.get(positions.size() - 1);
+        long tableSize = (long) max - min + 1;
+        long lookupSize = positions.size();
+
+        // Use tableswitch if range is reasonable and space-efficient
+        return tableSize <= lookupSize * 2 && tableSize <= 256;
+    }
+
+    /**
+     * Calculate size of lookupswitch instruction.
+     */
+    private static int calculateLookupSwitchSize(int numCases, int startOffset) {
+        int padding = (4 - ((startOffset + 1) % 4)) % 4;
+        return 1 + padding + 8 + (numCases * 8); // opcode + padding + default + count + (match-offset pairs)
+    }
+
+    /**
+     * Calculate size of tableswitch instruction for position range.
+     */
+    private static int calculateTableSwitchSize(List<Integer> positions, int startOffset) {
+        if (positions.isEmpty()) {
+            return 0;
+        }
+        int min = positions.get(0);
+        int max = positions.get(positions.size() - 1);
+        int numEntries = max - min + 1;
+        int padding = (4 - ((startOffset + 1) % 4)) % 4;
+        return 1 + padding + 12 + (numEntries * 4); // opcode + padding + default + low + high + offsets
+    }
+
+    /**
+     * Patch lookupswitch instruction using byte list approach.
+     */
+    private static void patchLookupSwitch(
+            CodeBuilder code,
+            int switchStart,
+            int defaultOffset,
+            List<Integer> keys,
+            Map<Integer, Integer> keyToOffset) {
+
+        List<Byte> switchBytes = new ArrayList<>();
+
+        // Build match-offset pairs
+        int[][] matchOffsets = new int[keys.size()][2];
+        for (int i = 0; i < keys.size(); i++) {
+            int key = keys.get(i);
+            matchOffsets[i][0] = key;
+            matchOffsets[i][1] = keyToOffset.get(key);
+        }
+
+        // Build the lookupswitch instruction
+        buildLookupSwitch(switchBytes, switchStart, defaultOffset, matchOffsets);
+
+        // Convert to byte array and patch
+        byte[] bytes = new byte[switchBytes.size()];
+        for (int i = 0; i < switchBytes.size(); i++) {
+            bytes[i] = switchBytes.get(i);
+        }
+        code.patchBytes(switchStart, bytes);
+    }
+
+    /**
+     * Patch tableswitch instruction for position-based switch using byte list approach.
+     */
+    private static void patchTableSwitch(
+            CodeBuilder code,
+            int switchStart,
+            int defaultOffset,
+            List<Integer> positions,
+            Map<Integer, Integer> positionToOffset) {
+
+        List<Byte> switchBytes = new ArrayList<>();
+
+        int min = positions.get(0);
+        int max = positions.get(positions.size() - 1);
+
+        // Build jump offsets array
+        int[] jumpOffsets = new int[max - min + 1];
+        for (int i = 0; i < jumpOffsets.length; i++) {
+            int position = min + i;
+            jumpOffsets[i] = positionToOffset.getOrDefault(position, defaultOffset);
+        }
+
+        // Build the tableswitch instruction
+        buildTableSwitch(switchBytes, switchStart, defaultOffset, min, max, jumpOffsets);
+
+        // Convert to byte array and patch
+        byte[] bytes = new byte[switchBytes.size()];
+        for (int i = 0; i < switchBytes.size(); i++) {
+            bytes[i] = switchBytes.get(i);
+        }
+        code.patchBytes(switchStart, bytes);
+    }
+
+    /**
+     * Information about a string case.
+     */
+    private static class StringCaseInfo {
+        String caseValue;        // null for default case
+        List<ISwc4jAstStmt> statements;
+        int gotoPosition;        // position of the conditional jump instruction
+        int bodyOffset;          // offset of the case body
+
+        StringCaseInfo(String caseValue, List<ISwc4jAstStmt> statements) {
+            this.caseValue = caseValue;
+            this.statements = statements;
+            this.gotoPosition = -1;
+            this.bodyOffset = -1;
+        }
+    }
+
+    /**
      * Generate bytecode for a switch statement.
+     * Supports both integer and string switches.
      */
     public static void generate(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        // 1. Determine discriminant type
+        String discriminantType = TypeResolver.inferTypeFromExpr(switchStmt.getDiscriminant(), context, options);
+
+        // 2. Route to appropriate generator
+        if ("Ljava/lang/String;".equals(discriminantType)) {
+            generateStringSwitch(code, cp, switchStmt, returnTypeInfo, context, options);
+            return;
+        }
+
+        // 3. Integer switch (default)
+        generateIntegerSwitch(code, cp, switchStmt, returnTypeInfo, context, options);
+    }
+
+    /**
+     * Generate bytecode for an integer switch statement.
+     */
+    private static void generateIntegerSwitch(
             CodeBuilder code,
             ClassWriter.ConstantPool cp,
             Swc4jAstSwitchStmt switchStmt,
@@ -386,7 +667,7 @@ public final class SwitchStatementGenerator {
     }
 
     /**
-     * Case information for switch generation.
+     * Case information for integer switch generation.
      */
     private static class CaseInfo {
         Integer caseValue;       // null for default case
@@ -401,4 +682,5 @@ public final class SwitchStatementGenerator {
             this.labelOffset = -1;
         }
     }
+
 }

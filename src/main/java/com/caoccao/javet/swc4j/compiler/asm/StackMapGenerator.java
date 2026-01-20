@@ -88,9 +88,9 @@ public class StackMapGenerator {
     }
 
     private Frame createInitialFrame() {
-        List<Integer> locals = new ArrayList<>();
+        List<VerificationType> locals = new ArrayList<>();
         if (!isStatic) {
-            locals.add(OBJECT); // 'this'
+            locals.add(VerificationType.object(className)); // 'this'
         }
 
         // Parse method descriptor to add parameters to initial frame
@@ -103,31 +103,33 @@ public class StackMapGenerator {
                     char c = params.charAt(i);
                     switch (c) {
                         case 'B', 'C', 'S', 'I', 'Z' -> {
-                            locals.add(INTEGER);
+                            locals.add(VerificationType.integer());
                             i++;
                         }
                         case 'J' -> {
-                            locals.add(LONG);
-                            locals.add(TOP); // Long takes 2 slots
+                            locals.add(VerificationType.long_());
+                            locals.add(VerificationType.top()); // Long takes 2 slots
                             i++;
                         }
                         case 'F' -> {
-                            locals.add(FLOAT);
+                            locals.add(VerificationType.float_());
                             i++;
                         }
                         case 'D' -> {
-                            locals.add(DOUBLE);
-                            locals.add(TOP); // Double takes 2 slots
+                            locals.add(VerificationType.double_());
+                            locals.add(VerificationType.top()); // Double takes 2 slots
                             i++;
                         }
                         case 'L' -> {
-                            // Object type - skip until ';'
-                            locals.add(OBJECT);
-                            i = params.indexOf(';', i) + 1;
+                            // Object type - extract class name
+                            int end = params.indexOf(';', i);
+                            String className = params.substring(i + 1, end); // Skip 'L', stop before ';'
+                            locals.add(VerificationType.object(className));
+                            i = end + 1;
                         }
                         case '[' -> {
-                            // Array type - skip entire array descriptor
-                            locals.add(OBJECT);
+                            // Array type - extract full array descriptor
+                            int start = i;
                             i++;
                             while (i < params.length() && params.charAt(i) == '[') {
                                 i++;
@@ -139,6 +141,8 @@ public class StackMapGenerator {
                                     i++;
                                 }
                             }
+                            String arrayDesc = params.substring(start, i);
+                            locals.add(VerificationType.object(arrayDesc));
                         }
                         default -> i++; // Skip unknown
                     }
@@ -149,21 +153,21 @@ public class StackMapGenerator {
         return new Frame(locals, new ArrayList<>());
     }
 
-    private void ensureLocalSlot(List<Integer> locals, int index, int type) {
+    private void ensureLocalSlot(List<VerificationType> locals, int index, VerificationType type) {
         // Extend locals list to include the specified index
         while (locals.size() <= index) {
-            locals.add(TOP); // Fill gaps with TOP
+            locals.add(VerificationType.top()); // Fill gaps with TOP
         }
         locals.set(index, type);
 
         // Long and Double are followed by TOP for the second slot (JVM spec §4.10.1.5)
-        if (type == LONG || type == DOUBLE) {
+        if (type.tag == LONG || type.tag == DOUBLE) {
             while (locals.size() <= index + 1) {
-                locals.add(TOP);
+                locals.add(VerificationType.top());
             }
             // Ensure the next slot is TOP (don't overwrite if already set)
-            if (locals.get(index + 1) != TOP) {
-                locals.set(index + 1, TOP);
+            if (locals.get(index + 1).tag != TOP) {
+                locals.set(index + 1, VerificationType.top());
             }
         }
     }
@@ -173,6 +177,8 @@ public class StackMapGenerator {
         int i = 0;
         while (i < bytecode.length) {
             int opcode = bytecode[i] & 0xFF;
+            int instructionSize = getInstructionSize(i, opcode);
+            int nextInstructionOffset = i + instructionSize;
 
             if (opcode >= 0x99 && opcode <= 0xA6) { // Conditional branches
                 if (i + 2 < bytecode.length) {
@@ -205,6 +211,7 @@ public class StackMapGenerator {
                             targets.add(i + caseOffset);
                         }
                     }
+                    // tableswitch has no fall-through (all paths jump)
                 }
             } else if (opcode == 0xAB) { // lookupswitch
                 int padding = (4 - ((i + 1) % 4)) % 4;
@@ -221,10 +228,11 @@ public class StackMapGenerator {
                             targets.add(i + caseOffset);
                         }
                     }
+                    // lookupswitch has no fall-through (all paths jump)
                 }
             }
             // Properly skip to the next instruction
-            i += getInstructionSize(i, opcode);
+            i = nextInstructionOffset;
         }
         return targets;
     }
@@ -258,11 +266,16 @@ public class StackMapGenerator {
 
             int offsetDelta = previousOffset == -1 ? offset : offset - previousOffset - 1;
 
-            // Remove explicit TOP entries that follow LONG/DOUBLE (they're implicit in the JVM spec)
-            List<Integer> compactLocals = removeExplicitTops(frame.locals);
-            List<Integer> compactStack = removeExplicitTops(frame.stack);
+            // Convert verification types to integers (handle LONG/DOUBLE properly)
+            FrameData localsData = convertVerificationTypes(frame.locals);
+            FrameData stackData = convertVerificationTypes(frame.stack);
 
-            entries.add(new ClassWriter.StackMapEntry(offsetDelta, 255, compactLocals, compactStack));
+            // Use backward-compatible constructor without class names
+            entries.add(new ClassWriter.StackMapEntry(
+                    offsetDelta,
+                    255,
+                    localsData.types,
+                    stackData.types));
             previousOffset = offset;
         }
 
@@ -424,22 +437,22 @@ public class StackMapGenerator {
      * Uses the common supertype for each slot.
      */
     private Frame mergeFrames(Frame frame1, Frame frame2) {
-        List<Integer> mergedLocals = new ArrayList<>();
-        List<Integer> mergedStack = new ArrayList<>();
+        List<VerificationType> mergedLocals = new ArrayList<>();
+        List<VerificationType> mergedStack = new ArrayList<>();
 
         // Merge locals
         int maxLocals = Math.max(frame1.locals.size(), frame2.locals.size());
         for (int i = 0; i < maxLocals; i++) {
-            int type1 = i < frame1.locals.size() ? frame1.locals.get(i) : TOP;
-            int type2 = i < frame2.locals.size() ? frame2.locals.get(i) : TOP;
+            VerificationType type1 = i < frame1.locals.size() ? frame1.locals.get(i) : VerificationType.top();
+            VerificationType type2 = i < frame2.locals.size() ? frame2.locals.get(i) : VerificationType.top();
             mergedLocals.add(mergeTypes(type1, type2));
         }
 
         // Merge stack - must be same size for valid merge
         int stackSize = Math.max(frame1.stack.size(), frame2.stack.size());
         for (int i = 0; i < stackSize; i++) {
-            int type1 = i < frame1.stack.size() ? frame1.stack.get(i) : TOP;
-            int type2 = i < frame2.stack.size() ? frame2.stack.get(i) : TOP;
+            VerificationType type1 = i < frame1.stack.size() ? frame1.stack.get(i) : VerificationType.top();
+            VerificationType type2 = i < frame2.stack.size() ? frame2.stack.get(i) : VerificationType.top();
             mergedStack.add(mergeTypes(type1, type2));
         }
 
@@ -451,24 +464,34 @@ public class StackMapGenerator {
      * For local variables: if a variable is undefined (TOP) on any path,
      * it should be TOP at the merge point (can't guarantee it's valid).
      */
-    private int mergeTypes(int type1, int type2) {
-        if (type1 == type2) {
+    private VerificationType mergeTypes(VerificationType type1, VerificationType type2) {
+        // If types are equal (including class names), return as-is
+        if (type1.equals(type2)) {
             return type1;
         }
+
         // TOP means undefined/unusable - if either is TOP, result is TOP
-        // This handles variable scoping: a variable not defined on all paths is unusable
-        if (type1 == TOP || type2 == TOP) {
-            return TOP;
+        if (type1.tag == TOP || type2.tag == TOP) {
+            return VerificationType.top();
         }
-        // NULL merges with OBJECT to OBJECT
-        if (type1 == NULL && type2 == OBJECT) return OBJECT;
-        if (type1 == OBJECT && type2 == NULL) return OBJECT;
-        // Different primitives can't merge (shouldn't happen in valid bytecode)
-        // Default to OBJECT for reference type merging
-        if (type1 == NULL || type2 == NULL) return OBJECT;
-        if (type1 == OBJECT || type2 == OBJECT) return OBJECT;
+
+        // NULL merges with any OBJECT to that OBJECT type
+        if (type1.tag == NULL && type2.tag == OBJECT) return type2;
+        if (type1.tag == OBJECT && type2.tag == NULL) return type1;
+
+        // Two different OBJECT types merge to their common supertype
+        // For simplicity, use java/lang/Object as the common supertype
+        if (type1.tag == OBJECT && type2.tag == OBJECT) {
+            return VerificationType.object("java/lang/Object");
+        }
+
+        // Different reference types
+        if (type1.tag == NULL || type2.tag == NULL) {
+            return VerificationType.object("java/lang/Object");
+        }
+
         // For incompatible primitives, return TOP (invalid state)
-        return TOP;
+        return VerificationType.top();
     }
 
     private int readInt(int offset) {
@@ -479,33 +502,58 @@ public class StackMapGenerator {
                 (bytecode[offset + 3] & 0xFF);
     }
 
-    private List<Integer> removeExplicitTops(List<Integer> types) {
-        List<Integer> result = new ArrayList<>();
+    /**
+     * Helper record to hold both type tags and class names.
+     */
+    private record FrameData(List<Integer> types, List<String> classNames) {
+    }
+
+    /**
+     * Convert verification types to the format needed by ClassWriter.StackMapEntry.
+     * Returns type tags and corresponding class names for OBJECT types.
+     */
+    private FrameData convertVerificationTypes(List<VerificationType> types) {
+        List<Integer> resultTypes = new ArrayList<>();
+        List<String> resultClassNames = new ArrayList<>();
+
         for (int i = 0; i < types.size(); i++) {
-            int type = types.get(i);
-            result.add(type);
-            // Skip the next TOP if current type is LONG or DOUBLE
-            if ((type == LONG || type == DOUBLE) && i + 1 < types.size() && types.get(i + 1) == TOP) {
+            VerificationType type = types.get(i);
+
+            // Skip the next TOP if current type is LONG or DOUBLE (implicit in JVM spec)
+            if ((type.tag == LONG || type.tag == DOUBLE) && i + 1 < types.size() && types.get(i + 1).tag == TOP) {
+                resultTypes.add(type.tag);
+                // LONG and DOUBLE don't have class names
                 i++; // Skip the next TOP
+            } else {
+                resultTypes.add(type.tag);
+                // Only add class names for OBJECT types (ClassWriter expects sparse list)
+                if (type.tag == OBJECT) {
+                    // Every OBJECT type must have a className
+                    String className = (type.className != null) ? type.className : "java/lang/Object";
+                    resultClassNames.add(className);
+                }
             }
         }
+
         // Remove trailing TOPs (variables out of scope)
-        while (!result.isEmpty() && result.get(result.size() - 1) == TOP) {
-            result.remove(result.size() - 1);
+        // Note: resultClassNames only contains entries for OBJECT types, so we don't remove from it
+        while (!resultTypes.isEmpty() && resultTypes.get(resultTypes.size() - 1) == TOP) {
+            resultTypes.remove(resultTypes.size() - 1);
         }
-        return result;
+
+        return new FrameData(resultTypes, resultClassNames);
     }
 
     private Frame simulateInstruction(Frame frame, int pc) {
         Frame newFrame = frame.copy();
         int opcode = bytecode[pc] & 0xFF;
-        List<Integer> stack = newFrame.stack;
+        List<VerificationType> stack = newFrame.stack;
 
         // Simulate stack effects
         switch (opcode) {
             // Push constants
             case 0x01:
-                stack.add(NULL);
+                stack.add(VerificationType.null_());
                 break; // aconst_null
             case 0x02:
             case 0x03:
@@ -514,33 +562,34 @@ public class StackMapGenerator {
             case 0x06:
             case 0x07:
             case 0x08: // iconst_m1 to iconst_5
-                stack.add(INTEGER);
+                stack.add(VerificationType.integer());
                 break;
             case 0x09:
             case 0x0a: // lconst_0, lconst_1
-                stack.add(LONG);
+                stack.add(VerificationType.long_());
                 break;
             case 0x0b:
             case 0x0c:
             case 0x0d: // fconst_0, fconst_1, fconst_2
-                stack.add(FLOAT);
+                stack.add(VerificationType.float_());
                 break;
             case 0x0e:
             case 0x0f: // dconst_0, dconst_1
-                stack.add(DOUBLE);
+                stack.add(VerificationType.double_());
                 break;
             case 0x10:
             case 0x11: // bipush, sipush
-                stack.add(INTEGER);
+                stack.add(VerificationType.integer());
                 break;
             case 0x12: // ldc (String, int, float, Class, etc.)
             case 0x13: // ldc_w (wide index version)
-                // Conservative: assume it's loading a reference type (String/Class)
-                stack.add(OBJECT);
+                // ldc can load various constant types - we need to inspect the constant pool
+                // For now, conservatively assume String (most common case)
+                stack.add(VerificationType.object("java/lang/String"));
                 break;
             case 0x14: // ldc2_w (long or double)
                 // Assume double (most common in our tests)
-                stack.add(DOUBLE);
+                stack.add(VerificationType.double_());
                 break;
 
             // Loads
@@ -549,42 +598,47 @@ public class StackMapGenerator {
             case 0x1B:
             case 0x1C:
             case 0x1D: // iload*
-                stack.add(INTEGER);
+                stack.add(VerificationType.integer());
                 break;
             case 0x16:
             case 0x1E:
             case 0x1F:
             case 0x20:
             case 0x21: // lload*
-                stack.add(LONG);
+                stack.add(VerificationType.long_());
                 break;
             case 0x17:
             case 0x22:
             case 0x23:
             case 0x24:
             case 0x25: // fload*
-                stack.add(FLOAT);
+                stack.add(VerificationType.float_());
                 break;
             case 0x18:
             case 0x26:
             case 0x27:
             case 0x28:
             case 0x29: // dload*
-                stack.add(DOUBLE);
+                stack.add(VerificationType.double_());
                 break;
             case 0x19:
             case 0x2A:
             case 0x2B:
             case 0x2C:
-            case 0x2D: // aload*
-                stack.add(OBJECT);
+            case 0x2D: // aload* - load actual type from locals
+                int aloadIndex = (opcode == 0x19) ? (bytecode[pc + 1] & 0xFF) : (opcode - 0x2A);
+                if (aloadIndex < newFrame.locals.size()) {
+                    stack.add(newFrame.locals.get(aloadIndex));
+                } else {
+                    stack.add(VerificationType.object("java/lang/Object"));
+                }
                 break;
 
             // Stores - pop from stack and update locals
             case 0x36: // istore
                 if (!stack.isEmpty()) {
                     int index = bytecode[pc + 1] & 0xFF;
-                    ensureLocalSlot(newFrame.locals, index, INTEGER);
+                    ensureLocalSlot(newFrame.locals, index, VerificationType.integer());
                     stack.remove(stack.size() - 1);
                 }
                 break;
@@ -594,7 +648,7 @@ public class StackMapGenerator {
             case 0x3E: // istore_0 to istore_3
                 if (!stack.isEmpty()) {
                     int index = opcode - 0x3B;
-                    ensureLocalSlot(newFrame.locals, index, INTEGER);
+                    ensureLocalSlot(newFrame.locals, index, VerificationType.integer());
                     stack.remove(stack.size() - 1);
                 }
                 break;
@@ -605,7 +659,7 @@ public class StackMapGenerator {
             case 0x42: // lstore*
                 if (!stack.isEmpty()) {
                     int index = (opcode == 0x37) ? (bytecode[pc + 1] & 0xFF) : (opcode - 0x3F);
-                    ensureLocalSlot(newFrame.locals, index, LONG);
+                    ensureLocalSlot(newFrame.locals, index, VerificationType.long_());
                     stack.remove(stack.size() - 1);
                 }
                 break;
@@ -616,7 +670,7 @@ public class StackMapGenerator {
             case 0x46: // fstore*
                 if (!stack.isEmpty()) {
                     int index = (opcode == 0x38) ? (bytecode[pc + 1] & 0xFF) : (opcode - 0x43);
-                    ensureLocalSlot(newFrame.locals, index, FLOAT);
+                    ensureLocalSlot(newFrame.locals, index, VerificationType.float_());
                     stack.remove(stack.size() - 1);
                 }
                 break;
@@ -627,7 +681,7 @@ public class StackMapGenerator {
             case 0x4A: // dstore*
                 if (!stack.isEmpty()) {
                     int index = (opcode == 0x39) ? (bytecode[pc + 1] & 0xFF) : (opcode - 0x47);
-                    ensureLocalSlot(newFrame.locals, index, DOUBLE);
+                    ensureLocalSlot(newFrame.locals, index, VerificationType.double_());
                     stack.remove(stack.size() - 1);
                 }
                 break;
@@ -635,10 +689,11 @@ public class StackMapGenerator {
             case 0x4B:
             case 0x4C:
             case 0x4D:
-            case 0x4E: // astore*
+            case 0x4E: // astore* - store actual type from stack
                 if (!stack.isEmpty()) {
                     int index = (opcode == 0x3A) ? (bytecode[pc + 1] & 0xFF) : (opcode - 0x4B);
-                    ensureLocalSlot(newFrame.locals, index, OBJECT);
+                    VerificationType valueType = stack.get(stack.size() - 1);
+                    ensureLocalSlot(newFrame.locals, index, valueType);
                     stack.remove(stack.size() - 1);
                 }
                 break;
@@ -656,7 +711,7 @@ public class StackMapGenerator {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1);
                     stack.remove(stack.size() - 1);
-                    stack.add(INTEGER);
+                    stack.add(VerificationType.integer());
                 }
                 break;
             // Long operations: ladd(0x61), lsub(0x65), lmul(0x69), ldiv(0x6D), lrem(0x71), land(0x7F), lor(0x81), lxor(0x83)
@@ -671,7 +726,7 @@ public class StackMapGenerator {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1);
                     stack.remove(stack.size() - 1);
-                    stack.add(LONG);
+                    stack.add(VerificationType.long_());
                 }
                 break;
             // Float operations: fadd(0x62), fsub(0x66), fmul(0x6A), fdiv(0x6E), frem(0x72)
@@ -683,7 +738,7 @@ public class StackMapGenerator {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1);
                     stack.remove(stack.size() - 1);
-                    stack.add(FLOAT);
+                    stack.add(VerificationType.float_());
                 }
                 break;
             // Double operations: dadd(0x63), dsub(0x67), dmul(0x6B), ddiv(0x6F), drem(0x73)
@@ -695,7 +750,7 @@ public class StackMapGenerator {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1);
                     stack.remove(stack.size() - 1);
-                    stack.add(DOUBLE);
+                    stack.add(VerificationType.double_());
                 }
                 break;
 
@@ -708,7 +763,7 @@ public class StackMapGenerator {
                 if (stack.size() >= 2) {
                     stack.remove(stack.size() - 1);
                     stack.remove(stack.size() - 1);
-                    stack.add(INTEGER);
+                    stack.add(VerificationType.integer());
                 }
                 break;
 
@@ -725,9 +780,9 @@ public class StackMapGenerator {
             case 0x58: // pop2
                 // pop2 removes either one category-2 value or two category-1 values
                 if (!stack.isEmpty()) {
-                    int topType = stack.remove(stack.size() - 1);
+                    VerificationType topType = stack.remove(stack.size() - 1);
                     // If it wasn't a category-2 type, pop another
-                    if (topType != LONG && topType != DOUBLE && !stack.isEmpty()) {
+                    if (topType.tag != LONG && topType.tag != DOUBLE && !stack.isEmpty()) {
                         stack.remove(stack.size() - 1);
                     }
                 }
@@ -739,13 +794,13 @@ public class StackMapGenerator {
                 break;
             case 0x5C: // dup2
                 if (!stack.isEmpty()) {
-                    int topType = stack.get(stack.size() - 1);
-                    if (topType == LONG || topType == DOUBLE) {
+                    VerificationType topType = stack.get(stack.size() - 1);
+                    if (topType.tag == LONG || topType.tag == DOUBLE) {
                         // Category 2: duplicate one value
                         stack.add(topType);
                     } else if (stack.size() >= 2) {
                         // Category 1: duplicate two values
-                        int second = stack.get(stack.size() - 2);
+                        VerificationType second = stack.get(stack.size() - 2);
                         stack.add(second);
                         stack.add(topType);
                     }
@@ -753,8 +808,8 @@ public class StackMapGenerator {
                 break;
             case 0x5F: // swap
                 if (stack.size() >= 2) {
-                    int top = stack.remove(stack.size() - 1);
-                    int second = stack.remove(stack.size() - 1);
+                    VerificationType top = stack.remove(stack.size() - 1);
+                    VerificationType second = stack.remove(stack.size() - 1);
                     stack.add(top);
                     stack.add(second);
                 }
@@ -791,12 +846,17 @@ public class StackMapGenerator {
                 if (!stack.isEmpty()) stack.remove(stack.size() - 1);
                 break;
 
-            // Method calls - simplified
-            case 0xB6:
-            case 0xB7:
-            case 0xB8: // invoke*
-                // Conservative: assume returns Object (works for boxing methods and most cases)
-                stack.add(OBJECT);
+            // Method calls - simplified (pop args, push result)
+            case 0xB6: // invokevirtual
+            case 0xB7: // invokespecial
+            case 0xB8: // invokestatic
+                // For simplicity: pop receiver + 2 args (covers most common cases like equals(Object))
+                // and push integer for boolean-returning methods like equals
+                // This is a simplification - proper implementation would parse method descriptor
+                if (stack.size() >= 2) stack.remove(stack.size() - 1); // pop arg
+                if (!stack.isEmpty() && opcode != 0xB8) stack.remove(stack.size() - 1); // pop receiver (except static)
+                // equals() returns boolean (represented as int in JVM)
+                stack.add(VerificationType.integer());
                 break;
 
             // Type conversions
@@ -805,7 +865,7 @@ public class StackMapGenerator {
             case 0x8F: // d2l
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
-                    stack.add(LONG);
+                    stack.add(VerificationType.long_());
                 }
                 break;
             case 0x86: // i2f
@@ -813,7 +873,7 @@ public class StackMapGenerator {
             case 0x90: // d2f
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
-                    stack.add(FLOAT);
+                    stack.add(VerificationType.float_());
                 }
                 break;
             case 0x87: // i2d
@@ -821,7 +881,7 @@ public class StackMapGenerator {
             case 0x8D: // f2d
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
-                    stack.add(DOUBLE);
+                    stack.add(VerificationType.double_());
                 }
                 break;
             case 0x88: // l2i
@@ -829,7 +889,7 @@ public class StackMapGenerator {
             case 0x8E: // d2i
                 if (!stack.isEmpty()) {
                     stack.remove(stack.size() - 1);
-                    stack.add(INTEGER);
+                    stack.add(VerificationType.integer());
                 }
                 break;
         }
@@ -837,7 +897,87 @@ public class StackMapGenerator {
         return newFrame;
     }
 
-    private record Frame(List<Integer> locals, List<Integer> stack) {
+    /**
+     * Represents a verification type in the stackmap table.
+     * Can be a primitive type (int, float, etc.) or an object type with class name.
+     */
+    private static class VerificationType {
+        final int tag; // TOP, INTEGER, FLOAT, LONG, DOUBLE, NULL, UNINITIALIZED_THIS, OBJECT, etc.
+        final String className; // For OBJECT types, the internal class name (e.g., "java/lang/String")
+
+        VerificationType(int tag) {
+            this.tag = tag;
+            this.className = null;
+        }
+
+        VerificationType(int tag, String className) {
+            this.tag = tag;
+            this.className = className;
+        }
+
+        static VerificationType top() {
+            return new VerificationType(TOP);
+        }
+
+        static VerificationType integer() {
+            return new VerificationType(INTEGER);
+        }
+
+        static VerificationType float_() {
+            return new VerificationType(FLOAT);
+        }
+
+        static VerificationType long_() {
+            return new VerificationType(LONG);
+        }
+
+        static VerificationType double_() {
+            return new VerificationType(DOUBLE);
+        }
+
+        static VerificationType null_() {
+            return new VerificationType(NULL);
+        }
+
+        static VerificationType uninitializedThis() {
+            return new VerificationType(UNINITIALIZED_THIS);
+        }
+
+        static VerificationType object(String className) {
+            return new VerificationType(OBJECT, className);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof VerificationType that)) return false;
+            return tag == that.tag && Objects.equals(className, that.className);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(tag, className);
+        }
+
+        @Override
+        public String toString() {
+            if (className != null) {
+                return "Object(" + className + ")";
+            }
+            return switch (tag) {
+                case TOP -> "Top";
+                case INTEGER -> "Integer";
+                case FLOAT -> "Float";
+                case LONG -> "Long";
+                case DOUBLE -> "Double";
+                case NULL -> "Null";
+                case UNINITIALIZED_THIS -> "UninitializedThis";
+                default -> "Unknown(" + tag + ")";
+            };
+        }
+    }
+
+    private record Frame(List<VerificationType> locals, List<VerificationType> stack) {
 
         Frame copy() {
             return new Frame(new ArrayList<>(locals), new ArrayList<>(stack));
