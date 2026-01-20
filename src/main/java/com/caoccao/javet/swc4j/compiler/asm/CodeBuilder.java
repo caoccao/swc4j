@@ -63,6 +63,19 @@ public class CodeBuilder {
         return this;
     }
 
+    /**
+     * Append bytes from another code segment.
+     *
+     * @param bytes the bytes to append
+     * @return this CodeBuilder
+     */
+    public CodeBuilder append(byte[] bytes) {
+        for (byte b : bytes) {
+            code.add(b);
+        }
+        return this;
+    }
+
     public CodeBuilder areturn() {
         code.add((byte) (0xB0)); // areturn
         return this;
@@ -261,6 +274,17 @@ public class CodeBuilder {
         return this;
     }
 
+    /**
+     * Emit a raw byte (for placeholders).
+     *
+     * @param value the byte value
+     * @return this CodeBuilder
+     */
+    public CodeBuilder emitByte(int value) {
+        code.add((byte) value);
+        return this;
+    }
+
     public CodeBuilder f2d() {
         code.add((byte) (0x8D)); // f2d
         return this;
@@ -388,6 +412,24 @@ public class CodeBuilder {
         byte[] bytecode = toByteArray();
         StackMapGenerator generator = new StackMapGenerator(bytecode, maxLocals, isStatic, className);
         return generator.generate();
+    }
+
+    /**
+     * Get a copy of bytes from start (inclusive) to end (exclusive).
+     *
+     * @param start start offset
+     * @param end   end offset
+     * @return byte array
+     */
+    public byte[] getBytes(int start, int end) {
+        if (start < 0 || end > code.size() || start > end) {
+            throw new IllegalArgumentException("Invalid range: " + start + " to " + end);
+        }
+        byte[] bytes = new byte[end - start];
+        for (int i = 0; i < bytes.length; i++) {
+            bytes[i] = code.get(start + i);
+        }
+        return bytes;
     }
 
     public int getCurrentOffset() {
@@ -838,6 +880,41 @@ public class CodeBuilder {
         return this;
     }
 
+    /**
+     * lookupswitch instruction for sparse case values.
+     *
+     * @param defaultOffset offset to default label
+     * @param matchOffsets  array of [key, offset] pairs, must be sorted by key
+     * @return this CodeBuilder
+     */
+    public CodeBuilder lookupswitch(int defaultOffset, int[][] matchOffsets) {
+        int lookupSwitchStart = code.size();
+        code.add((byte) (0xAB)); // lookupswitch opcode
+
+        // Add padding to align to 4-byte boundary
+        int padding = (4 - ((lookupSwitchStart + 1) % 4)) % 4;
+        for (int i = 0; i < padding; i++) {
+            code.add((byte) 0);
+        }
+
+        // Write default offset
+        writeInt(defaultOffset - lookupSwitchStart);
+
+        // Write npairs
+        writeInt(matchOffsets.length);
+
+        // Write match-offset pairs (must be sorted by match value)
+        for (int[] pair : matchOffsets) {
+            if (pair.length != 2) {
+                throw new IllegalArgumentException("Each match-offset pair must have exactly 2 elements");
+            }
+            writeInt(pair[0]); // match value (key)
+            writeInt(pair[1] - lookupSwitchStart); // offset
+        }
+
+        return this;
+    }
+
     public CodeBuilder lor() {
         code.add((byte) (0x81)); // lor
         return this;
@@ -906,6 +983,24 @@ public class CodeBuilder {
         code.add((byte) (0xBC)); // newarray
         code.add((byte) (typeCode));
         return this;
+    }
+
+    /**
+     * Patches a sequence of bytes at the specified position.
+     * This is used for complex instructions like switch that need
+     * to be rewritten after target offsets are known.
+     *
+     * @param position the byte position where patching starts
+     * @param bytes    the bytes to write
+     */
+    public void patchBytes(int position, byte[] bytes) {
+        if (position < 0 || position + bytes.length > code.size()) {
+            throw new IllegalArgumentException(
+                    "Patch position out of bounds: " + position + " + " + bytes.length + " > " + code.size());
+        }
+        for (int i = 0; i < bytes.length; i++) {
+            code.set(position + i, bytes[i]);
+        }
     }
 
     /**
@@ -983,12 +1078,74 @@ public class CodeBuilder {
         return this;
     }
 
+    /**
+     * tableswitch instruction for dense case values.
+     *
+     * @param defaultOffset offset to default label
+     * @param low           minimum case value
+     * @param high          maximum case value
+     * @param jumpOffsets   array of jump offsets for each case from low to high
+     * @return this CodeBuilder
+     */
+    public CodeBuilder tableswitch(int defaultOffset, int low, int high, int[] jumpOffsets) {
+        if (jumpOffsets.length != (high - low + 1)) {
+            throw new IllegalArgumentException(
+                    "jumpOffsets length must equal (high - low + 1): expected " +
+                            (high - low + 1) + " but got " + jumpOffsets.length);
+        }
+
+        int tableSwitchStart = code.size();
+        code.add((byte) (0xAA)); // tableswitch opcode
+
+        // Add padding to align to 4-byte boundary
+        int padding = (4 - ((tableSwitchStart + 1) % 4)) % 4;
+        for (int i = 0; i < padding; i++) {
+            code.add((byte) 0);
+        }
+
+        // Write default offset
+        writeInt(defaultOffset - tableSwitchStart);
+
+        // Write low and high
+        writeInt(low);
+        writeInt(high);
+
+        // Write jump offsets
+        for (int offset : jumpOffsets) {
+            writeInt(offset - tableSwitchStart);
+        }
+
+        return this;
+    }
+
     public byte[] toByteArray() {
         byte[] bytes = new byte[code.size()];
         for (int i = 0; i < code.size(); i++) {
             bytes[i] = code.get(i);
         }
         return bytes;
+    }
+
+    /**
+     * Truncate the code to the specified offset.
+     * Warning: This discards all bytes after the offset.
+     *
+     * @param offset the offset to truncate to
+     */
+    public void truncate(int offset) {
+        if (offset < 0 || offset > code.size()) {
+            throw new IllegalArgumentException("Offset out of bounds: " + offset);
+        }
+        while (code.size() > offset) {
+            code.remove(code.size() - 1);
+        }
+    }
+
+    private void writeInt(int value) {
+        code.add((byte) ((value >> 24) & 0xFF));
+        code.add((byte) ((value >> 16) & 0xFF));
+        code.add((byte) ((value >> 8) & 0xFF));
+        code.add((byte) (value & 0xFF));
     }
 
     private void writeShort(int value) {

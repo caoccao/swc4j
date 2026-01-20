@@ -83,6 +83,8 @@ public final class StatementGenerator {
             LabeledStatementGenerator.generate(code, cp, labeledStmt, returnTypeInfo, context, options);
         } else if (stmt instanceof Swc4jAstBlockStmt blockStmt) {
             generateBlockStmt(code, cp, blockStmt, returnTypeInfo, context, options);
+        } else if (stmt instanceof Swc4jAstSwitchStmt switchStmt) {
+            SwitchStatementGenerator.generate(code, cp, switchStmt, returnTypeInfo, context, options);
         } else {
             throw new Swc4jByteCodeCompilerException(
                     "Unsupported statement type: " + stmt.getClass().getSimpleName());

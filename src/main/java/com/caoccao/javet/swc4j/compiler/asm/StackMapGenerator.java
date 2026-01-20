@@ -134,6 +134,39 @@ public class StackMapGenerator {
                     short offset = (short) (((bytecode[i + 1] & 0xFF) << 8) | (bytecode[i + 2] & 0xFF));
                     targets.add(i + offset);
                 }
+            } else if (opcode == 0xAA) { // tableswitch
+                int padding = (4 - ((i + 1) % 4)) % 4;
+                int dataStart = i + 1 + padding;
+                if (dataStart + 12 <= bytecode.length) {
+                    int defaultOffset = readInt(dataStart);
+                    int low = readInt(dataStart + 4);
+                    int high = readInt(dataStart + 8);
+
+                    targets.add(i + defaultOffset);
+
+                    for (int j = 0; j <= high - low; j++) {
+                        if (dataStart + 12 + (j * 4) + 4 <= bytecode.length) {
+                            int caseOffset = readInt(dataStart + 12 + (j * 4));
+                            targets.add(i + caseOffset);
+                        }
+                    }
+                }
+            } else if (opcode == 0xAB) { // lookupswitch
+                int padding = (4 - ((i + 1) % 4)) % 4;
+                int dataStart = i + 1 + padding;
+                if (dataStart + 8 <= bytecode.length) {
+                    int defaultOffset = readInt(dataStart);
+                    int npairs = readInt(dataStart + 4);
+
+                    targets.add(i + defaultOffset);
+
+                    for (int j = 0; j < npairs; j++) {
+                        if (dataStart + 8 + (j * 8) + 8 <= bytecode.length) {
+                            int caseOffset = readInt(dataStart + 8 + (j * 8) + 4);
+                            targets.add(i + caseOffset);
+                        }
+                    }
+                }
             }
             // Properly skip to the next instruction
             i += getInstructionSize(i, opcode);
@@ -222,9 +255,28 @@ public class StackMapGenerator {
             case 0xC6:
             case 0xC7: // ifnull, ifnonnull
                 return 3;
+            case 0xAA: // tableswitch
+                return getTableSwitchSize(pc);
+            case 0xAB: // lookupswitch
+                return getLookupSwitchSize(pc);
             default:
                 return 1;
         }
+    }
+
+    private int getLookupSwitchSize(int pc) {
+        // lookupswitch: opcode + padding + default + npairs + npairs * 8
+        int padding = (4 - ((pc + 1) % 4)) % 4;
+        int baseSize = 1 + padding + 4 + 4; // opcode + padding + default + npairs
+
+        // Read npairs to determine table size
+        int dataStart = pc + 1 + padding;
+        if (dataStart + 8 > bytecode.length) return 1; // Invalid, return minimal size
+
+        int npairs = readInt(dataStart + 4);
+        int pairsSize = npairs * 8;
+
+        return baseSize + pairsSize;
     }
 
     private List<Integer> getNextOffsets(int pc) {
@@ -249,6 +301,43 @@ public class StackMapGenerator {
                 offsets.add(pc + offset); // Branch target
                 offsets.add(pc + 3); // Fall-through
             }
+        } else if (opcode == 0xAA) { // tableswitch
+            int padding = (4 - ((pc + 1) % 4)) % 4;
+            int dataStart = pc + 1 + padding;
+            if (dataStart + 12 <= bytecode.length) {
+                int defaultOffset = readInt(dataStart);
+                int low = readInt(dataStart + 4);
+                int high = readInt(dataStart + 8);
+
+                // Add default target
+                offsets.add(pc + defaultOffset);
+
+                // Add all case targets
+                for (int i = 0; i <= high - low; i++) {
+                    if (dataStart + 12 + (i * 4) + 4 <= bytecode.length) {
+                        int caseOffset = readInt(dataStart + 12 + (i * 4));
+                        offsets.add(pc + caseOffset);
+                    }
+                }
+            }
+        } else if (opcode == 0xAB) { // lookupswitch
+            int padding = (4 - ((pc + 1) % 4)) % 4;
+            int dataStart = pc + 1 + padding;
+            if (dataStart + 8 <= bytecode.length) {
+                int defaultOffset = readInt(dataStart);
+                int npairs = readInt(dataStart + 4);
+
+                // Add default target
+                offsets.add(pc + defaultOffset);
+
+                // Add all case targets
+                for (int i = 0; i < npairs; i++) {
+                    if (dataStart + 8 + (i * 8) + 8 <= bytecode.length) {
+                        int caseOffset = readInt(dataStart + 8 + (i * 8) + 4); // Skip match value, read offset
+                        offsets.add(pc + caseOffset);
+                    }
+                }
+            }
         } else if (opcode >= 0xAC && opcode <= 0xB1) { // return instructions
             // No next offset
         } else {
@@ -257,6 +346,22 @@ public class StackMapGenerator {
         }
 
         return offsets;
+    }
+
+    private int getTableSwitchSize(int pc) {
+        // tableswitch: opcode + padding + default + low + high + (high - low + 1) * 4
+        int padding = (4 - ((pc + 1) % 4)) % 4;
+        int baseSize = 1 + padding + 4 + 4 + 4; // opcode + padding + default + low + high
+
+        // Read low and high to determine table size
+        int dataStart = pc + 1 + padding;
+        if (dataStart + 12 > bytecode.length) return 1; // Invalid, return minimal size
+
+        int low = readInt(dataStart + 4);
+        int high = readInt(dataStart + 8);
+        int tableSize = (high - low + 1) * 4;
+
+        return baseSize + tableSize;
     }
 
     /**
@@ -309,6 +414,14 @@ public class StackMapGenerator {
         if (type1 == OBJECT || type2 == OBJECT) return OBJECT;
         // For incompatible primitives, return TOP (invalid state)
         return TOP;
+    }
+
+    private int readInt(int offset) {
+        if (offset + 4 > bytecode.length) return 0;
+        return ((bytecode[offset] & 0xFF) << 24) |
+                ((bytecode[offset + 1] & 0xFF) << 16) |
+                ((bytecode[offset + 2] & 0xFF) << 8) |
+                (bytecode[offset + 3] & 0xFF);
     }
 
     private List<Integer> removeExplicitTops(List<Integer> types) {
@@ -615,6 +728,12 @@ public class StackMapGenerator {
                     stack.remove(stack.size() - 1);
                     stack.remove(stack.size() - 1);
                 }
+                break;
+
+            // Switch instructions - pop int
+            case 0xAA: // tableswitch
+            case 0xAB: // lookupswitch
+                if (!stack.isEmpty()) stack.remove(stack.size() - 1);
                 break;
 
             // Method calls - simplified

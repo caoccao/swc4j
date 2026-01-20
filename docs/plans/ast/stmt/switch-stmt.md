@@ -6,6 +6,17 @@ This document outlines the implementation plan for supporting switch statements 
 
 **Current Status:** 🔴 **NOT STARTED**
 
+**Dependencies:** ✅ TypeScript enum support (TsEnumDecl) - COMPLETED (2026-01-19)
+
+**Supported Discriminant Types (in priority order):**
+1. **enum** (highest priority) - Uses ordinal() values
+2. **int** - Direct tableswitch/lookupswitch
+3. **String** - Hash-based two-stage switch
+4. **byte, short, char** - Promoted to int
+5. **Byte, Short, Character, Integer** - Unboxed then promoted to int
+
+**Unsupported types:** long, float, double, boolean, Object, or any other reference types
+
 **Syntax:**
 ```typescript
 switch (expression) {
@@ -208,9 +219,11 @@ END:
 ### Overall Approach
 
 1. **Analyze discriminant type:**
-   - int/byte/short/char → Use tableswitch or lookupswitch
-   - String → Use hash-based two-stage approach
-   - Other types → May need if-else chain (fallback)
+   - **enum** → Use ordinal() to get int, then tableswitch or lookupswitch
+   - **int/byte/short/char** → Use tableswitch or lookupswitch directly
+   - **Integer/Byte/Short/Character** → Unbox to primitive, then tableswitch or lookupswitch
+   - **String** → Use hash-based two-stage approach
+   - **Unsupported types** → Compilation error
 
 2. **Collect case information:**
    - Extract all case values (must be compile-time constants)
@@ -1133,7 +1146,7 @@ outer: switch (x) {
     ```
     Expected: Always returns from switch
 
-### Phase 7: Edge Cases (18+ test cases)
+### Phase 7: Edge Cases (22+ test cases)
 
 **Goal:** Handle unusual patterns, error conditions, and boundary cases.
 
@@ -1145,7 +1158,8 @@ outer: switch (x) {
 - Maximum integer values
 - Variable scope edge cases
 - Unreachable code
-- Type coercion edge cases
+- Type validation (supported and unsupported types)
+- Null handling for String and boxed types
 
 **Test Cases:**
 
@@ -1416,9 +1430,36 @@ outer: switch (x) {
     ```
     Expected: Compilation error
 
+81. **Unsupported discriminant type (long):**
+    ```typescript
+    let x: long = 5L;
+    switch (x) {  // ERROR: long not supported
+      case 1L: result = 1; break;
+    }
+    ```
+    Expected: Compilation error
+
+82. **Unsupported discriminant type (boolean):**
+    ```typescript
+    switch (flag) {  // ERROR: boolean not supported
+      case true: result = 1; break;
+      case false: result = 2; break;
+    }
+    ```
+    Expected: Compilation error
+
+83. **Unsupported discriminant type (float/double):**
+    ```typescript
+    switch (x) {  // ERROR: float/double not supported
+      case 1.0: result = 1; break;
+      case 2.5: result = 2; break;
+    }
+    ```
+    Expected: Compilation error
+
 ### Runtime Edge Cases
 
-81. **Null discriminant (if applicable):**
+84. **Null discriminant (String):**
     ```typescript
     let str: string = null;
     switch (str) {
@@ -1427,18 +1468,18 @@ outer: switch (x) {
       default: result = 3; break;
     }
     ```
-    Expected: Depends on null handling policy
+    Expected: NullPointerException when calling hashCode() on null, or compile-time null check
 
-82. **Switch on boolean:**
+85. **Null boxed Integer:**
     ```typescript
-    switch (flag) {
-      case true: result = 1; break;
-      case false: result = 2; break;
+    let i: Integer = null;
+    switch (i) {  // NullPointerException when unboxing
+      case 1: result = 1; break;
     }
     ```
-    Expected: Works (boolean converts to int in JVM)
+    Expected: NullPointerException when unboxing null, or compile-time null check
 
-83. **Switch on char:**
+86. **Switch on char:**
     ```typescript
     let c: char = 'A';
     switch (c) {
@@ -1446,9 +1487,9 @@ outer: switch (x) {
       case 'B': result = 2; break;
     }
     ```
-    Expected: Works (char is int-compatible)
+    Expected: Works (char promotes to int)
 
-84. **Switch on byte/short:**
+87. **Switch on byte/short:**
     ```typescript
     let b: byte = 5;
     switch (b) {
@@ -1458,7 +1499,17 @@ outer: switch (x) {
     ```
     Expected: Works (promotes to int)
 
-85. **Switch on enum (if supported):**
+88. **Switch on boxed Integer:**
+    ```typescript
+    let i: Integer = 5;
+    switch (i) {
+      case 1: result = 1; break;
+      case 5: result = 5; break;
+    }
+    ```
+    Expected: Works (unboxes to int, then switch)
+
+89. **Switch on enum:**
     ```typescript
     enum Color { RED, GREEN, BLUE }
     switch (color) {
@@ -1467,7 +1518,7 @@ outer: switch (x) {
       case Color.BLUE: result = 3; break;
     }
     ```
-    Expected: Uses ordinal() if enums supported
+    Expected: Uses enum ordinal() values for switch cases (TypeScript enums compile to Java enums with ordinal() method)
 
 ---
 
@@ -1520,9 +1571,9 @@ outer: switch (x) {
 4. **TestCompileAstSwitchStmtString.java** - Phase 4 (10 tests)
 5. **TestCompileAstSwitchStmtNested.java** - Phase 5 (8 tests)
 6. **TestCompileAstSwitchStmtBreak.java** - Phase 6 (9 tests)
-7. **TestCompileAstSwitchStmtEdgeCases.java** - Phase 7 (18+ tests)
+7. **TestCompileAstSwitchStmtEdgeCases.java** - Phase 7 (22+ tests)
 
-**Total: 75+ test cases**
+**Total: 79+ test cases**
 
 ---
 
@@ -1585,6 +1636,92 @@ if (density >= 0.5) {  // 50% threshold
 } else {
     return LOOKUPSWITCH;
 }
+```
+
+### Enum Switch Compilation
+
+Enum switches have **highest priority** and use ordinal() values:
+
+**Step 1: Detect enum type:**
+```java
+if (discriminantType instanceof EnumType) {
+    // Switch on enum - use ordinal() values
+    return generateEnumSwitch(switchStmt, discriminantType);
+}
+```
+
+**Step 2: Generate ordinal() call:**
+```
+aload <enum var>
+invokevirtual <EnumClass>.ordinal()I  // Returns int
+```
+
+**Step 3: Map case values to ordinal values:**
+```java
+// Case values are enum constants like Color.RED
+// Convert to ordinal values at compile time
+Map<Integer, CaseInfo> ordinalMap = new HashMap<>();
+for (CaseInfo caseInfo : cases) {
+    EnumConstant enumConst = (EnumConstant) caseInfo.value;
+    int ordinal = enumConst.getOrdinal();  // Known at compile time
+    ordinalMap.put(ordinal, caseInfo);
+}
+```
+
+**Step 4: Generate tableswitch or lookupswitch:**
+```
+// After ordinal() call, switch stack has int value
+// Use standard int switch logic (tableswitch or lookupswitch)
+tableswitch {
+  min: 0
+  max: 2
+  0: CASE_RED      // Color.RED (ordinal 0)
+  1: CASE_GREEN    // Color.GREEN (ordinal 1)
+  2: CASE_BLUE     // Color.BLUE (ordinal 2)
+  default: DEFAULT
+}
+```
+
+**Benefits:**
+- O(1) lookup (tableswitch for small enum ranges)
+- Type-safe at compile time
+- No runtime type checking needed
+- Leverages existing int switch infrastructure
+
+### Boxed Type Switch Compilation
+
+Boxed types (Integer, Byte, Short, Character) require unboxing:
+
+**Step 1: Detect boxed type:**
+```java
+if (discriminantType.equals("Integer") || discriminantType.equals("Byte") ||
+    discriminantType.equals("Short") || discriminantType.equals("Character")) {
+    // Need to unbox before switch
+}
+```
+
+**Step 2: Generate unboxing call:**
+```
+aload <boxed var>
+invokevirtual Integer.intValue()I  // Or byteValue, shortValue, charValue
+// Stack now has primitive int value
+```
+
+**Step 3: Use standard int switch:**
+```
+// After unboxing, proceed with tableswitch or lookupswitch
+// Same as primitive int switch
+```
+
+**Null handling:**
+```
+// Option 1: Add null check before unboxing
+aload <boxed var>
+ifnull NULL_LABEL
+invokevirtual Integer.intValue()I
+// ... switch code ...
+NULL_LABEL:
+  // Handle null case or throw NullPointerException
 ```
 
 ### String Switch Compilation
@@ -1695,6 +1832,11 @@ context.getLocalVariableTable().exitScope();
 - CompilationContext label stacks (already implemented)
 - ExpressionGenerator (for discriminant and case expressions)
 - TypeResolver (for type checking)
+- **TsEnumDecl support (COMPLETED 2026-01-19):**
+  - TypeScript enums compile to Java enums with ordinal() method
+  - Switch on enum uses ordinal() values (int) for cases
+  - Enum implementation: `EnumGenerator.java` generates full Java enum bytecode
+  - 66 passing tests covering numeric, string, const enums, and edge cases
 
 **Complexity: HIGH**
 - Two different bytecode instructions (tableswitch vs lookupswitch)
@@ -1719,8 +1861,14 @@ context.getLocalVariableTable().exitScope();
 ## Notes
 
 - **Constant case values:** All case expressions must be compile-time constants in Java. TypeScript may be more permissive, but JVM bytecode requires constants.
-- **Type restrictions:** JVM switch works with int, byte, short, char, and (Java 7+) String. Enum switches use ordinal values.
-- **Null handling:** String switches require null checks to avoid NullPointerException.
+- **Type restrictions:**
+  - **Supported:** enum (highest priority), int, String, byte, short, char, Byte, Short, Character, Integer
+  - **Unsupported:** long, float, double, boolean, Object, or any other reference types
+  - Enum switches use ordinal() values (int)
+  - Boxed types (Byte, Short, Character, Integer) are unboxed to primitives
+  - Primitives (byte, short, char) are promoted to int
+- **Type priority:** enum > int > String > byte/short/char > boxed types
+- **Null handling:** String switches require null checks to avoid NullPointerException. Boxed types may need null checks before unboxing.
 - **Performance:** tableswitch is O(1), lookupswitch is O(log n). Choose wisely based on case distribution.
 - **Fall-through is intentional:** Unlike other languages, Java/JavaScript fall-through is a feature, not a bug. Properly handle it in bytecode.
 - **Default position:** Default can appear anywhere in source, but always acts as fallback in bytecode.
