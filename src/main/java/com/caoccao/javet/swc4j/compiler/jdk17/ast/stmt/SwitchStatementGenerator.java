@@ -204,6 +204,16 @@ public final class SwitchStatementGenerator {
                 return null;
             }
         }
+
+        // Handle character literals (represented as Swc4jAstStr with single character)
+        if (expr instanceof Swc4jAstStr strExpr) {
+            String value = strExpr.getValue();
+            if (value != null && value.length() == 1) {
+                // Single character - convert to int (char value)
+                return (int) value.charAt(0);
+            }
+        }
+
         return null;
     }
 
@@ -711,7 +721,7 @@ public final class SwitchStatementGenerator {
 
     /**
      * Generate bytecode for a switch statement.
-     * Supports both integer and string switches.
+     * Supports integer, string, enum, boxed types, and primitive promotion.
      */
     public static void generate(
             CodeBuilder code,
@@ -724,14 +734,198 @@ public final class SwitchStatementGenerator {
         // 1. Determine discriminant type
         String discriminantType = TypeResolver.inferTypeFromExpr(switchStmt.getDiscriminant(), context, options);
 
-        // 2. Route to appropriate generator
+        // 2. Route to appropriate generator based on type
+
+        // String switches use 2-phase hash approach
         if ("Ljava/lang/String;".equals(discriminantType)) {
             generateStringSwitch(code, cp, switchStmt, returnTypeInfo, context, options);
             return;
         }
 
-        // 3. Integer switch (default)
+        // Boxed type switches: unbox then use integer switch
+        if ("Ljava/lang/Integer;".equals(discriminantType)) {
+            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Integer", "intValue", "()I", returnTypeInfo, context, options);
+            return;
+        }
+        if ("Ljava/lang/Byte;".equals(discriminantType)) {
+            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Byte", "byteValue", "()B", returnTypeInfo, context, options);
+            return;
+        }
+        if ("Ljava/lang/Short;".equals(discriminantType)) {
+            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Short", "shortValue", "()S", returnTypeInfo, context, options);
+            return;
+        }
+        if ("Ljava/lang/Character;".equals(discriminantType)) {
+            generateBoxedIntegerSwitch(code, cp, switchStmt, "java/lang/Character", "charValue", "()C", returnTypeInfo, context, options);
+            return;
+        }
+
+        // Enum switches: call ordinal() to get int, then use integer switch
+        // Check if it's an object type (starts with L) but not a known type
+        if (discriminantType != null && discriminantType.startsWith("L") && discriminantType.endsWith(";")) {
+            // Likely an enum type - call ordinal()
+            generateEnumSwitch(code, cp, switchStmt, discriminantType, returnTypeInfo, context, options);
+            return;
+        }
+
+        // 3. Integer switch (int, byte, short, char - primitives are auto-promoted to int)
         generateIntegerSwitch(code, cp, switchStmt, returnTypeInfo, context, options);
+    }
+
+    /**
+     * Generate bytecode for an enum switch.
+     * Calls ordinal() on the enum value, then uses integer switch.
+     */
+    private static void generateEnumSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String enumType,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        // Generate discriminant expression
+        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+
+        // Call ordinal() method to get int value
+        // ordinal() is defined in java.lang.Enum and returns int
+        int ordinalRef = cp.addMethodRef("java/lang/Enum", "ordinal", "()I");
+        code.invokevirtual(ordinalRef);
+
+        // Now use integer switch with the ordinal value on stack
+        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, returnTypeInfo, context, options);
+    }
+
+    /**
+     * Generate bytecode for a boxed type switch.
+     * Unboxes the value using the appropriate *Value() method, then uses integer switch.
+     */
+    private static void generateBoxedIntegerSwitch(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            String className,
+            String unboxMethod,
+            String methodDescriptor,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        // Generate discriminant expression (boxed value on stack)
+        ExpressionGenerator.generate(code, cp, switchStmt.getDiscriminant(), null, context, options);
+
+        // Call appropriate unboxing method
+        int unboxRef = cp.addMethodRef(className, unboxMethod, methodDescriptor);
+        code.invokevirtual(unboxRef);
+
+        // For byte, short, char, the value is already promoted to int on the stack by JVM
+        // Now use integer switch with the unboxed value on stack
+        generateIntegerSwitchWithDiscriminantOnStack(code, cp, switchStmt, returnTypeInfo, context, options);
+    }
+
+    /**
+     * Helper method for integer switch when discriminant is already on stack.
+     * Used by enum and boxed type switches.
+     */
+    private static void generateIntegerSwitchWithDiscriminantOnStack(
+            CodeBuilder code,
+            ClassWriter.ConstantPool cp,
+            Swc4jAstSwitchStmt switchStmt,
+            ReturnTypeInfo returnTypeInfo,
+            CompilationContext context,
+            ByteCodeCompilerOptions options) throws Swc4jByteCodeCompilerException {
+
+        // Discriminant is already on stack (as int)
+        // Proceed with rest of integer switch logic without re-evaluating discriminant
+
+        // Analyze cases
+        List<CaseInfo> cases = analyzeCases(switchStmt);
+
+        if (cases.isEmpty()) {
+            // Empty switch - discriminant already evaluated and on stack, just pop it
+            code.pop();
+            return;
+        }
+
+        // Set up break label
+        CompilationContext.LoopLabelInfo breakLabel = new CompilationContext.LoopLabelInfo(null);
+        context.pushBreakLabel(breakLabel);
+
+        // Determine switch type
+        boolean useTableSwitch = shouldUseTableSwitch(cases);
+
+        // Collect unique case values (excluding default)
+        List<Integer> caseValues = new ArrayList<>();
+        CaseInfo defaultCase = null;
+
+        for (CaseInfo caseInfo : cases) {
+            if (caseInfo.caseValue == null) {
+                defaultCase = caseInfo;
+            } else {
+                if (!caseValues.contains(caseInfo.caseValue)) {
+                    caseValues.add(caseInfo.caseValue);
+                }
+            }
+        }
+
+        Collections.sort(caseValues);
+
+        // Reserve space for switch instruction
+        int switchStart = code.getCurrentOffset();
+        int switchSize = useTableSwitch
+                ? calculateTableSwitchSize(caseValues, switchStart)
+                : calculateLookupSwitchSize(caseValues.size(), switchStart);
+
+        for (int i = 0; i < switchSize; i++) {
+            code.emitByte(0);
+        }
+
+        // Generate case bodies and record their offsets
+        Map<Integer, Integer> valueToOffset = new LinkedHashMap<>();
+        int defaultBodyOffset = -1;
+
+        for (CaseInfo caseInfo : cases) {
+            int caseOffset = code.getCurrentOffset();
+
+            if (caseInfo.caseValue == null) {
+                defaultBodyOffset = caseOffset;
+            } else {
+                // Only record first occurrence of each value (for empty cases that share bodies)
+                if (!valueToOffset.containsKey(caseInfo.caseValue)) {
+                    valueToOffset.put(caseInfo.caseValue, caseOffset);
+                }
+            }
+
+            // Generate case body
+            for (ISwc4jAstStmt stmt : caseInfo.statements) {
+                StatementGenerator.generate(code, cp, stmt, returnTypeInfo, context, options);
+            }
+            // Fall-through is automatic - no goto unless break was generated
+        }
+
+        // End of switch
+        int endLabel = code.getCurrentOffset();
+
+        // If no default case, default jumps to end
+        if (defaultBodyOffset == -1) {
+            defaultBodyOffset = endLabel;
+        }
+
+        // Patch the switch instruction
+        if (useTableSwitch) {
+            patchTableSwitch(code, switchStart, defaultBodyOffset, caseValues, valueToOffset);
+        } else {
+            patchLookupSwitch(code, switchStart, defaultBodyOffset, caseValues, valueToOffset);
+        }
+
+        // Patch break statements
+        for (CompilationContext.LoopLabelInfo.PatchInfo patchInfo : breakLabel.getPatchPositions()) {
+            int offset = endLabel - patchInfo.opcodePos();
+            code.patchShort(patchInfo.offsetPos(), offset);
+        }
+
+        context.popBreakLabel();
     }
 
     /**

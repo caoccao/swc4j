@@ -14,8 +14,10 @@ This document outlines the implementation plan for supporting switch statements 
 - ✅ **Phase 6**: Break and Continue (9/9 tests passing)
 - ✅ **Phase 7**: Edge Cases (12/12 tests passing)
 - ✅ **Phase 4**: String Switches (10/10 tests) - **FULLY IMPLEMENTED**
+- ✅ **Phase 8**: Boxed Type Switches (9/9 tests) - **FULLY IMPLEMENTED**
+- ✅ **Phase 9**: Primitive Type Switches (10/10 tests) - **FULLY IMPLEMENTED**
 
-**Total: 69/69 tests passing (100%)**
+**Total: 88/88 tests passing (100%)**
 
 **Note:** String switches are implemented using the JDK 2-phase approach:
 - **Phase 1:** Switch on `String.hashCode()` to compute case position (handles hash collisions with `equals()` checks)
@@ -28,9 +30,9 @@ Integer switches use optimal tableswitch/lookupswitch selection based on case de
 **Currently Supported Discriminant Types:**
 1. ✅ **int** - Direct tableswitch/lookupswitch (FULLY IMPLEMENTED - 59/59 tests)
 2. ✅ **String** - JDK 2-phase approach: hashCode() switch + position switch (FULLY IMPLEMENTED - 10/10 tests)
-3. 🔴 **enum** - Uses ordinal() values (NOT YET TESTED)
-4. 🔴 **byte, short, char** - Promoted to int (NOT YET TESTED)
-5. 🔴 **Boxed types** - Unboxed then promoted to int (NOT YET TESTED)
+3. ✅ **byte, short, char** - Promoted to int (FULLY IMPLEMENTED - 10/10 tests)
+4. ✅ **Integer, Byte, Short, Character** - Unboxed then promoted to int (FULLY IMPLEMENTED - 9/9 tests)
+5. 🟡 **enum** - Uses ordinal() values (IMPLEMENTED - requires integer case labels)
 
 **Unsupported types:** long, float, double, boolean, Object, or any other reference types
 
@@ -51,7 +53,7 @@ switch (expression) {
 
 **Implementation File:** ✅ `src/main/java/com/caoccao/javet/swc4j/compiler/jdk17/ast/stmt/SwitchStatementGenerator.java` (CREATED)
 
-**Test Files:** ✅ `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/switchstmt/TestCompileAstSwitchStmt*.java` (6 files created)
+**Test Files:** ✅ `src/test/java/com/caoccao/javet/swc4j/compiler/ast/stmt/switchstmt/TestCompileAstSwitchStmt*.java` (8 files created)
 
 **AST Definition:** [Swc4jAstSwitchStmt.java](../../../../../src/main/java/com/caoccao/javet/swc4j/ast/stmt/Swc4jAstSwitchStmt.java)
 
@@ -94,7 +96,7 @@ switch (expression) {
 - ✅ Expression discriminants (evaluated once)
 - ✅ Variable declarations in case bodies
 
-**Test Coverage (69 tests total):**
+**Test Coverage (88 tests total):**
 - ✅ `TestCompileAstSwitchStmtBasic.java` - 10 tests for basic integer switches
 - ✅ `TestCompileAstSwitchStmtDefault.java` - 8 tests for default clause
 - ✅ `TestCompileAstSwitchStmtFallThrough.java` - 12 tests for fall-through behavior
@@ -102,6 +104,8 @@ switch (expression) {
 - ✅ `TestCompileAstSwitchStmtBreak.java` - 9 tests for break/continue interaction
 - ✅ `TestCompileAstSwitchStmtEdgeCases.java` - 12 tests for edge cases and boundary conditions
 - ✅ `TestCompileAstSwitchStmtString.java` - 10 tests for string switches
+- ✅ `TestCompileAstSwitchStmtBoxed.java` - 9 tests for boxed type switches (Integer, Byte, Short, Character)
+- ✅ `TestCompileAstSwitchStmtPrimitive.java` - 10 tests for primitive type switches (byte, short, char)
 
 All tests are parameterized with `JdkVersion.class` to ensure compatibility across JDK versions.
 
@@ -110,7 +114,11 @@ All tests are parameterized with `JdkVersion.class` to ensure compatibility acro
 **Fully Implemented Features:**
 - ✅ Integer switches with optimal tableswitch/lookupswitch selection
 - ✅ String switches using JDK 2-phase approach (hashCode() switch + position switch)
-- ✅ Fall-through semantics for both integer and string switches
+- ✅ Boxed type switches (Integer, Byte, Short, Character) with automatic unboxing
+- ✅ Primitive type switches (byte, short, char) with automatic promotion to int
+- ✅ Character literal case labels (e.g., `case 'a':`)
+- ✅ Enum switches using ordinal() conversion
+- ✅ Fall-through semantics for all switch types
 - ✅ Multiple empty case labels sharing a body
 - ✅ Default clause in any position
 - ✅ Break statements
@@ -119,15 +127,12 @@ All tests are parameterized with `JdkVersion.class` to ensure compatibility acro
 
 ### What's Not Yet Implemented
 
-**Deferred Features:**
-- 🔴 Enum switches (requires ordinal() extraction)
-- 🔴 Boxed type switches (requires unboxing)
-- 🔴 Primitive promotion (byte, short, char → int)
+**Limitations:**
+- 🟡 Enum member expression case labels (e.g., `case Color.RED:`) - enum switches work but currently require integer ordinal case labels (e.g., `case 0:`)
 
 **Not Yet Tested:**
 - 🔴 Labeled break from switch (requires label management enhancement)
 - 🔴 Complex edge cases (very large switches, integer overflow, etc.)
-- 🔴 Error conditions (duplicate cases, non-constant values, etc.)
 
 ---
 
