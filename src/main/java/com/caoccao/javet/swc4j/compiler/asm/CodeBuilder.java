@@ -91,6 +91,11 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder athrow() {
+        code.add((byte) (0xBF)); // athrow
+        return this;
+    }
+
     public CodeBuilder baload() {
         code.add((byte) (0x33)); // baload
         return this;
@@ -98,6 +103,15 @@ public class CodeBuilder {
 
     public CodeBuilder bastore() {
         code.add((byte) (0x54)); // bastore
+        return this;
+    }
+
+    public CodeBuilder bipush(int value) {
+        if (value < -128 || value > 127) {
+            throw new IllegalArgumentException("bipush value must be in range -128 to 127: " + value);
+        }
+        code.add((byte) (0x10)); // bipush
+        code.add((byte) (value));
         return this;
     }
 
@@ -384,9 +398,32 @@ public class CodeBuilder {
         return lineNumbers;
     }
 
+    public int getOffset() {
+        return code.size();
+    }
+
+    public CodeBuilder getfield(int fieldRefIndex) {
+        code.add((byte) (0xB4)); // getfield
+        writeShort(fieldRefIndex);
+        return this;
+    }
+
+    public CodeBuilder getstatic(int fieldRefIndex) {
+        code.add((byte) (0xB2)); // getstatic
+        writeShort(fieldRefIndex);
+        return this;
+    }
+
     public CodeBuilder gotoLabel(int offset) {
         code.add((byte) (0xA7)); // goto
         writeShort(offset);
+        return this;
+    }
+
+    public CodeBuilder goto_(int targetOffset) {
+        int gotoOffset = getOffset(); // save offset before adding opcode
+        code.add((byte) (0xA7)); // goto
+        writeShort(targetOffset - gotoOffset); // calculate offset from goto opcode position
         return this;
     }
 
@@ -898,6 +935,18 @@ public class CodeBuilder {
         return this;
     }
 
+    public CodeBuilder putfield(int fieldRefIndex) {
+        code.add((byte) (0xB5)); // putfield
+        writeShort(fieldRefIndex);
+        return this;
+    }
+
+    public CodeBuilder putstatic(int fieldRefIndex) {
+        code.add((byte) (0xB3)); // putstatic
+        writeShort(fieldRefIndex);
+        return this;
+    }
+
     public CodeBuilder returnVoid() {
         code.add((byte) (0xB1)); // return
         return this;
@@ -918,6 +967,15 @@ public class CodeBuilder {
             currentLine = lineNumber;
             lineNumbers.add(new ClassWriter.LineNumberEntry(getCurrentOffset(), lineNumber));
         }
+    }
+
+    public CodeBuilder sipush(int value) {
+        if (value < -32768 || value > 32767) {
+            throw new IllegalArgumentException("sipush value must be in range -32768 to 32767: " + value);
+        }
+        code.add((byte) (0x11)); // sipush
+        writeShort(value);
+        return this;
     }
 
     public CodeBuilder swap() {

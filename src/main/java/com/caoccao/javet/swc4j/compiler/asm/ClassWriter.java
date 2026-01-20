@@ -34,8 +34,10 @@ public class ClassWriter {
     private static final int MINOR_VERSION = 0;
     private final String className;
     private final ConstantPool constantPool;
+    private final List<FieldInfo> fields = new ArrayList<>();
     private final List<MethodInfo> methods = new ArrayList<>();
     private final String superClassName;
+    private int accessFlags = 0x0021; // ACC_PUBLIC | ACC_SUPER (default)
 
     public ClassWriter(String className) {
         this(className, "java/lang/Object");
@@ -45,6 +47,10 @@ public class ClassWriter {
         this.className = className;
         this.superClassName = superClassName;
         this.constantPool = new ConstantPool();
+    }
+
+    public void addField(int accessFlags, String name, String descriptor) {
+        fields.add(new FieldInfo(accessFlags, name, descriptor));
     }
 
     public void addMethod(int accessFlags, String name, String descriptor, byte[] code, int maxStack, int maxLocals) {
@@ -68,6 +74,10 @@ public class ClassWriter {
 
     public ConstantPool getConstantPool() {
         return constantPool;
+    }
+
+    public void setAccessFlags(int accessFlags) {
+        this.accessFlags = accessFlags;
     }
 
     public byte[] toByteArray() throws IOException {
@@ -111,11 +121,17 @@ public class ClassWriter {
             }
         }
 
+        // Add field names and descriptors to constant pool
+        for (FieldInfo field : fields) {
+            constantPool.addUtf8(field.name);
+            constantPool.addUtf8(field.descriptor);
+        }
+
         // Write constant pool
         constantPool.write(out);
 
-        // Access flags (public class)
-        out.writeShort(0x0021); // ACC_PUBLIC | ACC_SUPER
+        // Access flags (use configured access flags)
+        out.writeShort(accessFlags);
 
         // This class
         out.writeShort(thisClassIndex);
@@ -127,7 +143,12 @@ public class ClassWriter {
         out.writeShort(0);
 
         // Fields count
-        out.writeShort(0);
+        out.writeShort(fields.size());
+
+        // Fields
+        for (FieldInfo field : fields) {
+            writeField(out, field);
+        }
 
         // Methods count
         out.writeShort(methods.size());
@@ -141,6 +162,20 @@ public class ClassWriter {
         out.writeShort(0);
 
         return baos.toByteArray();
+    }
+
+    private void writeField(DataOutputStream out, FieldInfo field) throws IOException {
+        // Access flags
+        out.writeShort(field.accessFlags);
+
+        // Name index
+        out.writeShort(constantPool.getUtf8Index(field.name));
+
+        // Descriptor index
+        out.writeShort(constantPool.getUtf8Index(field.descriptor));
+
+        // Attributes count (no attributes for basic fields)
+        out.writeShort(0);
     }
 
     private void writeMethod(DataOutputStream out, MethodInfo method) throws IOException {
@@ -242,14 +277,24 @@ public class ClassWriter {
                         stackMapOut.writeShort(entry.offset);
                         stackMapOut.writeShort(entry.locals != null ? entry.locals.size() : 0);
                         if (entry.locals != null) {
+                            int classNameIndex = 0;
                             for (int local : entry.locals) {
-                                writeVerificationType(stackMapOut, local, className);
+                                String specificClass = null;
+                                if (local == 7 && entry.localClassNames != null && classNameIndex < entry.localClassNames.size()) {
+                                    specificClass = entry.localClassNames.get(classNameIndex++);
+                                }
+                                writeVerificationType(stackMapOut, local, specificClass);
                             }
                         }
                         stackMapOut.writeShort(entry.stack != null ? entry.stack.size() : 0);
                         if (entry.stack != null) {
+                            int classNameIndex = 0;
                             for (int stackItem : entry.stack) {
-                                writeVerificationType(stackMapOut, stackItem, className);
+                                String specificClass = null;
+                                if (stackItem == 7 && entry.stackClassNames != null && classNameIndex < entry.stackClassNames.size()) {
+                                    specificClass = entry.stackClassNames.get(classNameIndex++);
+                                }
+                                writeVerificationType(stackMapOut, stackItem, specificClass);
                             }
                         }
                     }
@@ -288,10 +333,11 @@ public class ClassWriter {
         }
     }
 
-    private void writeVerificationType(DataOutputStream out, int type, String className) throws IOException {
+    private void writeVerificationType(DataOutputStream out, int type, String classNameForObject) throws IOException {
         out.writeByte(type);
-        if (type == 7) { // OBJECT - use java/lang/Object for compatibility with all reference types
-            int classIndex = constantPool.addClass("java/lang/Object");
+        if (type == 7) { // OBJECT - use specified class or java/lang/Object for compatibility
+            String classToUse = (classNameForObject != null) ? classNameForObject : "java/lang/Object";
+            int classIndex = constantPool.addClass(classToUse);
             out.writeShort(classIndex);
         }
         // Other types (INTEGER, LONG, FLOAT, DOUBLE, etc.) don't need additional data
@@ -329,6 +375,17 @@ public class ClassWriter {
                 constants.add(new DoubleInfo(v));
                 // Double and Long constants take two slots in the constant pool
                 constants.add(null);
+                return index;
+            });
+        }
+
+        public int addFieldRef(String className, String fieldName, String descriptor) {
+            String key = "field:" + className + "." + fieldName + ":" + descriptor;
+            return methodRefCache.computeIfAbsent(key, k -> {
+                int classIndex = addClass(className);
+                int nameAndTypeIndex = addNameAndType(fieldName, descriptor);
+                int index = constants.size();
+                constants.add(new FieldRefInfo(classIndex, nameAndTypeIndex));
                 return index;
             });
         }
@@ -431,6 +488,10 @@ public class ClassWriter {
                     out.writeByte(12); // CONSTANT_NameAndType
                     out.writeShort(nameAndType.nameIndex);
                     out.writeShort(nameAndType.descriptorIndex);
+                } else if (constant instanceof FieldRefInfo fieldRef) {
+                    out.writeByte(9); // CONSTANT_Fieldref
+                    out.writeShort(fieldRef.classIndex);
+                    out.writeShort(fieldRef.nameAndTypeIndex);
                 } else if (constant instanceof MethodRefInfo methodRef) {
                     out.writeByte(10); // CONSTANT_Methodref
                     out.writeShort(methodRef.classIndex);
@@ -466,6 +527,9 @@ public class ClassWriter {
         private record DoubleInfo(double value) {
         }
 
+        private record FieldRefInfo(int classIndex, int nameAndTypeIndex) {
+        }
+
         private record FloatInfo(float value) {
         }
 
@@ -491,6 +555,9 @@ public class ClassWriter {
         }
     }
 
+    private record FieldInfo(int accessFlags, String name, String descriptor) {
+    }
+
     public record LineNumberEntry(int startPc, int lineNumber) {
     }
 
@@ -502,6 +569,11 @@ public class ClassWriter {
                               List<LocalVariableEntry> localVariableTable, List<StackMapEntry> stackMapTable) {
     }
 
-    public record StackMapEntry(int offset, int frameType, List<Integer> locals, List<Integer> stack) {
+    public record StackMapEntry(int offset, int frameType, List<Integer> locals, List<Integer> stack,
+                                List<String> localClassNames, List<String> stackClassNames) {
+        // Backwards-compatible constructor
+        public StackMapEntry(int offset, int frameType, List<Integer> locals, List<Integer> stack) {
+            this(offset, frameType, locals, stack, null, null);
+        }
     }
 }

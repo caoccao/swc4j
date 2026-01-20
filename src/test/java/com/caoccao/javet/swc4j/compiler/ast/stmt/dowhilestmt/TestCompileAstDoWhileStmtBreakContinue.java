@@ -80,6 +80,35 @@ public class TestCompileAstDoWhileStmtBreakContinue extends BaseTestCompileSuite
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testDoWhileBreakAndContinue(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let sum: int = 0
+                      let i: int = 0
+                      do {
+                        i++
+                        if (i % 2 == 0) {
+                          continue
+                        }
+                        if (i > 7) {
+                          break
+                        }
+                        sum += i
+                      } while (i < 20)
+                      return sum
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // sum = 1 + 3 + 5 + 7 = 16, then i=9 triggers break
+        assertEquals(16, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testDoWhileBreakInNestedIf(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -136,6 +165,55 @@ public class TestCompileAstDoWhileStmtBreakContinue extends BaseTestCompileSuite
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
+    public void testDoWhileContinueWithUpdate(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let sum: int = 0
+                      let i: int = 0
+                      do {
+                        i++
+                        if (i == 5) {
+                          i = i + 2
+                          continue
+                        }
+                        sum += i
+                      } while (i < 10)
+                      return sum
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // sum = 1 + 2 + 3 + 4 + (skip when i=5, i becomes 7) + 8 + 9 + 10 = 37
+        assertEquals(37, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDoWhileImmediateBreak(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let count: int = 0
+                      do {
+                        count++
+                        break
+                      } while (true)
+                      return count
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // Executes once, then breaks
+        assertEquals(1, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
     public void testDoWhileMultipleBreaks(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -187,83 +265,5 @@ public class TestCompileAstDoWhileStmtBreakContinue extends BaseTestCompileSuite
         var instance = classA.getConstructor().newInstance();
         // sum = 1 + 3 + 5 = 9
         assertEquals(9, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testDoWhileBreakAndContinue(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let sum: int = 0
-                      let i: int = 0
-                      do {
-                        i++
-                        if (i % 2 == 0) {
-                          continue
-                        }
-                        if (i > 7) {
-                          break
-                        }
-                        sum += i
-                      } while (i < 20)
-                      return sum
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // sum = 1 + 3 + 5 + 7 = 16, then i=9 triggers break
-        assertEquals(16, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testDoWhileContinueWithUpdate(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let sum: int = 0
-                      let i: int = 0
-                      do {
-                        i++
-                        if (i == 5) {
-                          i = i + 2
-                          continue
-                        }
-                        sum += i
-                      } while (i < 10)
-                      return sum
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // sum = 1 + 2 + 3 + 4 + (skip when i=5, i becomes 7) + 8 + 9 + 10 = 37
-        assertEquals(37, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testDoWhileImmediateBreak(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let count: int = 0
-                      do {
-                        count++
-                        break
-                      } while (true)
-                      return count
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // Executes once, then breaks
-        assertEquals(1, classA.getMethod("test").invoke(instance));
     }
 }

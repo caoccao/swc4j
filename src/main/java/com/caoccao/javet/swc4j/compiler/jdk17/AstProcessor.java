@@ -24,9 +24,11 @@ import com.caoccao.javet.swc4j.ast.interfaces.ISwc4jAstTsModuleName;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstExportDecl;
 import com.caoccao.javet.swc4j.ast.module.Swc4jAstTsModuleBlock;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstClassDecl;
+import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsEnumDecl;
 import com.caoccao.javet.swc4j.ast.stmt.Swc4jAstTsModuleDecl;
 import com.caoccao.javet.swc4j.compiler.ByteCodeCompilerOptions;
 import com.caoccao.javet.swc4j.compiler.jdk17.ast.clazz.ClassGenerator;
+import com.caoccao.javet.swc4j.compiler.jdk17.ast.stmt.EnumGenerator;
 import com.caoccao.javet.swc4j.exceptions.Swc4jByteCodeCompilerException;
 
 import java.io.IOException;
@@ -61,6 +63,24 @@ public final class AstProcessor {
         }
     }
 
+    public static void processEnumDecl(
+            Swc4jAstTsEnumDecl enumDecl,
+            String currentPackage,
+            Map<String, byte[]> byteCodeMap) throws Swc4jByteCodeCompilerException {
+        String enumName = enumDecl.getId().getSym();
+        String fullClassName = currentPackage.isEmpty() ? enumName : currentPackage + "." + enumName;
+        String internalClassName = fullClassName.replace('.', '/');
+
+        try {
+            byte[] bytecode = EnumGenerator.generateBytecode(internalClassName, enumDecl);
+            if (bytecode != null) {  // null means ambient declaration
+                byteCodeMap.put(fullClassName, bytecode);
+            }
+        } catch (IOException e) {
+            throw new Swc4jByteCodeCompilerException("Failed to generate bytecode for enum: " + fullClassName, e);
+        }
+    }
+
     public static void processModuleItems(
             List<ISwc4jAstModuleItem> items,
             String currentPackage,
@@ -75,6 +95,8 @@ public final class AstProcessor {
                     processClassDecl(classDecl, currentPackage, byteCodeMap, options);
                 } else if (decl instanceof Swc4jAstTsModuleDecl tsModuleDecl) {
                     processTsModuleDecl(tsModuleDecl, currentPackage, byteCodeMap, options);
+                } else if (decl instanceof Swc4jAstTsEnumDecl enumDecl) {
+                    processEnumDecl(enumDecl, currentPackage, byteCodeMap);
                 }
             } else if (item instanceof ISwc4jAstStmt stmt) {
                 processStmt(stmt, currentPackage, byteCodeMap, options);
@@ -91,6 +113,8 @@ public final class AstProcessor {
             processTsModuleDecl(moduleDecl, currentPackage, byteCodeMap, options);
         } else if (stmt instanceof Swc4jAstClassDecl classDecl) {
             processClassDecl(classDecl, currentPackage, byteCodeMap, options);
+        } else if (stmt instanceof Swc4jAstTsEnumDecl enumDecl) {
+            processEnumDecl(enumDecl, currentPackage, byteCodeMap);
         }
     }
 

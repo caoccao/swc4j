@@ -54,51 +54,6 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testDoWhileOrCondition(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let i: int = 0
-                      let j: int = 0
-                      do {
-                        i++
-                        j = j + 2
-                      } while (i < 3 || j < 10)
-                      return i * 10 + j
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // Continues until both conditions false: i>=3 AND j>=10
-        // Stops when i=5, j=10
-        assertEquals(60, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testDoWhileNotCondition(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let i: int = 10
-                      do {
-                        i--
-                      } while (!(i <= 5))
-                      return i
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // Stops when i <= 5, so i = 5
-        assertEquals(5, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
     public void testDoWhileComplexExpression(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -119,30 +74,6 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
         // (i < 5 && j > 5) || i < 3
         // Stops when i=5, j=5
         assertEquals(55, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testDoWhileMultipleComparisons(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let a: int = 0
-                      let b: int = 10
-                      let c: int = 5
-                      do {
-                        a++
-                        b--
-                      } while (a < c && b > c)
-                      return a * 100 + b
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // Stops when a=5, b=5 (both equal to c)
-        assertEquals(505, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -185,5 +116,74 @@ public class TestCompileAstDoWhileStmtComplex extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         // Stops when i < 5, so i = 4
         assertEquals(4, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDoWhileMultipleComparisons(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let a: int = 0
+                      let b: int = 10
+                      let c: int = 5
+                      do {
+                        a++
+                        b--
+                      } while (a < c && b > c)
+                      return a * 100 + b
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // Stops when a=5, b=5 (both equal to c)
+        assertEquals(505, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDoWhileNotCondition(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let i: int = 10
+                      do {
+                        i--
+                      } while (!(i <= 5))
+                      return i
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // Stops when i <= 5, so i = 5
+        assertEquals(5, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDoWhileOrCondition(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let i: int = 0
+                      let j: int = 0
+                      do {
+                        i++
+                        j = j + 2
+                      } while (i < 3 || j < 10)
+                      return i * 10 + j
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // Continues until both conditions false: i>=3 AND j>=10
+        // Stops when i=5, j=10
+        assertEquals(60, classA.getMethod("test").invoke(instance));
     }
 }

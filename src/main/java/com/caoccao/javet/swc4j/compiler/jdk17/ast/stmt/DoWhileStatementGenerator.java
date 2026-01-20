@@ -57,21 +57,6 @@ public final class DoWhileStatementGenerator {
     }
 
     /**
-     * Check if the test expression is a constant true.
-     * This includes boolean literal true and numeric constant 1.
-     */
-    private static boolean isConstantTrue(ISwc4jAstExpr testExpr) {
-        if (testExpr instanceof Swc4jAstBool bool) {
-            return bool.isValue();
-        }
-        if (testExpr instanceof Swc4jAstNumber number) {
-            // Any non-zero number is truthy
-            return number.getRaw().equals("1");
-        }
-        return false;
-    }
-
-    /**
      * Check if a statement can fall through (complete normally).
      * A statement cannot fall through if it always ends with break, return, or throw.
      * Note: continue CAN fall through to the test, so it's not considered terminal here.
@@ -310,5 +295,20 @@ public final class DoWhileStatementGenerator {
                 op == Swc4jAstBinaryOp.EqEqEq ||
                 op == Swc4jAstBinaryOp.NotEq ||
                 op == Swc4jAstBinaryOp.NotEqEq;
+    }
+
+    /**
+     * Check if the test expression is a constant true.
+     * This includes boolean literal true and numeric constant 1.
+     */
+    private static boolean isConstantTrue(ISwc4jAstExpr testExpr) {
+        if (testExpr instanceof Swc4jAstBool bool) {
+            return bool.isValue();
+        }
+        if (testExpr instanceof Swc4jAstNumber number) {
+            // Any non-zero number is truthy
+            return number.getRaw().equals("1");
+        }
+        return false;
     }
 }

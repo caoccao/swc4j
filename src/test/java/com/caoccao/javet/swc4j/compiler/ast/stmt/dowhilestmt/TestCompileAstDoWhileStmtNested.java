@@ -31,29 +31,27 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNestedDoWhile(JdkVersion jdkVersion) throws Exception {
+    public void testDoWhileInFor(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
                       let sum: int = 0
-                      let i: int = 0
-                      do {
+                      for (let i: int = 0; i < 3; i++) {
                         let j: int = 0
                         do {
                           sum++
                           j++
-                        } while (j < 3)
-                        i++
-                      } while (i < 3)
+                        } while (j < 2)
+                      }
                       return sum
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        // Outer: 3 iterations, Inner: 3 iterations each = 9 total
-        assertEquals(9, classA.getMethod("test").invoke(instance));
+        // For loop: 3 iterations, do-while: 2 iterations each = 6 total
+        assertEquals(6, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -85,58 +83,6 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testWhileInDoWhile(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let sum: int = 0
-                      let i: int = 0
-                      do {
-                        let j: int = 0
-                        while (j < 2) {
-                          sum++
-                          j++
-                        }
-                        i++
-                      } while (i < 3)
-                      return sum
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // Outer do-while: 3 iterations, Inner while: 2 iterations each = 6 total
-        assertEquals(6, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testDoWhileInFor(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let sum: int = 0
-                      for (let i: int = 0; i < 3; i++) {
-                        let j: int = 0
-                        do {
-                          sum++
-                          j++
-                        } while (j < 2)
-                      }
-                      return sum
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // For loop: 3 iterations, do-while: 2 iterations each = 6 total
-        assertEquals(6, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
     public void testForInDoWhile(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -158,6 +104,33 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         // do-while: 3 iterations, for: 2 iterations each = 6 total
         assertEquals(6, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedDoWhile(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let sum: int = 0
+                      let i: int = 0
+                      do {
+                        let j: int = 0
+                        do {
+                          sum++
+                          j++
+                        } while (j < 3)
+                        i++
+                      } while (i < 3)
+                      return sum
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // Outer: 3 iterations, Inner: 3 iterations each = 9 total
+        assertEquals(9, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -191,6 +164,33 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
         // Second outer: sum = 4, 5 (break), then i=2
         // Continue with i=2,3,4: sum increments once each = 8 total
         assertEquals(8, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testNestedDoWhileWithComplexCondition(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let sum: int = 0
+                      let i: int = 0
+                      do {
+                        let j: int = 0
+                        do {
+                          sum = sum + i + j
+                          j++
+                        } while (j < 2 && sum < 20)
+                        i++
+                      } while (i < 5 && sum < 10)
+                      return sum
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // Complex nested loops with early exit
+        assertEquals(16, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -256,7 +256,7 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNestedDoWhileWithComplexCondition(JdkVersion jdkVersion) throws Exception {
+    public void testWhileInDoWhile(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
@@ -265,19 +265,19 @@ public class TestCompileAstDoWhileStmtNested extends BaseTestCompileSuite {
                       let i: int = 0
                       do {
                         let j: int = 0
-                        do {
-                          sum = sum + i + j
+                        while (j < 2) {
+                          sum++
                           j++
-                        } while (j < 2 && sum < 20)
+                        }
                         i++
-                      } while (i < 5 && sum < 10)
+                      } while (i < 3)
                       return sum
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        // Complex nested loops with early exit
-        assertEquals(16, classA.getMethod("test").invoke(instance));
+        // Outer do-while: 3 iterations, Inner while: 2 iterations each = 6 total
+        assertEquals(6, classA.getMethod("test").invoke(instance));
     }
 }

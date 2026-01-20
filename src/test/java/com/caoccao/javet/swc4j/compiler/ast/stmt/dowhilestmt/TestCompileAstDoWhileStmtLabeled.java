@@ -92,7 +92,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testNestedLabeledDoWhile(JdkVersion jdkVersion) throws Exception {
+    public void testLabeledDoWhileWithContinueOuter(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
@@ -100,29 +100,27 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                       let sum: int = 0
                       let i: int = 0
                       outer: do {
-                        let j: int = 0
-                        inner: do {
-                          sum++
-                          if (sum == 3) {
-                            break inner
-                          }
-                          if (sum == 7) {
-                            break outer
-                          }
-                          j++
-                        } while (j < 3)
                         i++
-                      } while (i < 5)
+                        if (i == 2) {
+                          continue outer
+                        }
+                        let j: int = 0
+                        do {
+                          sum = sum + i
+                          j++
+                        } while (j < 2)
+                      } while (i < 4)
                       return sum
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        // First outer: sum=1,2,3 (break inner), i=1
-        // Second outer: sum=4,5,6 (j=0,1,2), i=2
-        // Third outer: sum=7 (break outer)
-        assertEquals(7, classA.getMethod("test").invoke(instance));
+        // i=1: sum = 1+1 = 2
+        // i=2: continue (skip inner)
+        // i=3: sum = 2+3+3 = 8
+        // i=4: sum = 8+4+4 = 16
+        assertEquals(16, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -161,7 +159,7 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testLabeledDoWhileWithContinueOuter(JdkVersion jdkVersion) throws Exception {
+    public void testNestedLabeledDoWhile(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
@@ -169,26 +167,28 @@ public class TestCompileAstDoWhileStmtLabeled extends BaseTestCompileSuite {
                       let sum: int = 0
                       let i: int = 0
                       outer: do {
-                        i++
-                        if (i == 2) {
-                          continue outer
-                        }
                         let j: int = 0
-                        do {
-                          sum = sum + i
+                        inner: do {
+                          sum++
+                          if (sum == 3) {
+                            break inner
+                          }
+                          if (sum == 7) {
+                            break outer
+                          }
                           j++
-                        } while (j < 2)
-                      } while (i < 4)
+                        } while (j < 3)
+                        i++
+                      } while (i < 5)
                       return sum
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        // i=1: sum = 1+1 = 2
-        // i=2: continue (skip inner)
-        // i=3: sum = 2+3+3 = 8
-        // i=4: sum = 8+4+4 = 16
-        assertEquals(16, classA.getMethod("test").invoke(instance));
+        // First outer: sum=1,2,3 (break inner), i=1
+        // Second outer: sum=4,5,6 (j=0,1,2), i=2
+        // Third outer: sum=7 (break outer)
+        assertEquals(7, classA.getMethod("test").invoke(instance));
     }
 }

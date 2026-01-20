@@ -52,47 +52,47 @@ public class TestCompileAstDoWhileStmtConstant extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testDoWhileTrue(JdkVersion jdkVersion) throws Exception {
+    public void testDoWhileFalseWithMultipleStatements(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      let count: int = 0
+                      let a: int = 0
+                      let b: int = 0
                       do {
-                        count++
-                        if (count >= 5) {
-                          break
-                        }
-                      } while (true)
-                      return count
+                        a = 10
+                        b = 20
+                      } while (false)
+                      return a + b
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        // Infinite loop, but exits via break after 5 iterations
-        assertEquals(5, classA.getMethod("test").invoke(instance));
+        assertEquals(30, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testDoWhileZero(JdkVersion jdkVersion) throws Exception {
+    public void testDoWhileFalseWithVariableAccumulation(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      let count: int = 0
+                      let sum: int = 0
+                      let i: int = 5
                       do {
-                        count++
-                      } while (0)
-                      return count
+                        sum += i
+                        i += 5
+                      } while (false)
+                      return sum
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        // 0 is falsy, body executes once
-        assertEquals(1, classA.getMethod("test").invoke(instance));
+        // Only one execution: sum = 5
+        assertEquals(5, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -121,24 +121,26 @@ public class TestCompileAstDoWhileStmtConstant extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testDoWhileFalseWithMultipleStatements(JdkVersion jdkVersion) throws Exception {
+    public void testDoWhileTrue(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      let a: int = 0
-                      let b: int = 0
+                      let count: int = 0
                       do {
-                        a = 10
-                        b = 20
-                      } while (false)
-                      return a + b
+                        count++
+                        if (count >= 5) {
+                          break
+                        }
+                      } while (true)
+                      return count
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(30, classA.getMethod("test").invoke(instance));
+        // Infinite loop, but exits via break after 5 iterations
+        assertEquals(5, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -166,24 +168,22 @@ public class TestCompileAstDoWhileStmtConstant extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testDoWhileFalseWithVariableAccumulation(JdkVersion jdkVersion) throws Exception {
+    public void testDoWhileZero(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      let sum: int = 0
-                      let i: int = 5
+                      let count: int = 0
                       do {
-                        sum += i
-                        i += 5
-                      } while (false)
-                      return sum
+                        count++
+                      } while (0)
+                      return count
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        // Only one execution: sum = 5
-        assertEquals(5, classA.getMethod("test").invoke(instance));
+        // 0 is falsy, body executes once
+        assertEquals(1, classA.getMethod("test").invoke(instance));
     }
 }

@@ -31,21 +31,32 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testDoWhileEmptyBody(JdkVersion jdkVersion) throws Exception {
+    public void testDoWhileComplexBreakPattern(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
                   export class A {
                     test(): int {
-                      let i: int = 5
+                      let sum: int = 0
+                      let i: int = 0
                       do {
-                      } while (false)
-                      return i
+                        i++
+                        if (i > 10) {
+                          break
+                        }
+                        if (i % 3 == 0) {
+                          continue
+                        }
+                        sum = sum + i
+                      } while (i < 100)
+                      return sum
                     }
                   }
                 }""");
         Class<?> classA = loadClass(map.get("com.A"));
         var instance = classA.getConstructor().newInstance();
-        assertEquals(5, classA.getMethod("test").invoke(instance));
+        // i=1,2,4,5,7,8,10 (skip 3,6,9, break at 11)
+        // sum = 1+2+4+5+7+8+10 = 37
+        assertEquals(37, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -73,6 +84,25 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
         // Iteration 4: count=4, test: 3<3 (false), i=4
         // count=4, i=4
         assertEquals(44, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDoWhileEmptyBody(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let i: int = 5
+                      do {
+                      } while (false)
+                      return i
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        assertEquals(5, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -119,6 +149,32 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         // Executes once, then breaks (test is unreachable)
         assertEquals(42, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDoWhileVariableScope(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let sum: int = 0
+                      let i: int = 0
+                      do {
+                        const x: int = i * 2
+                        const y: int = x + 1
+                        sum = sum + y
+                        i++
+                      } while (i < 3)
+                      return sum
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // i=0: y=1, i=1: y=3, i=2: y=5
+        // sum = 1 + 3 + 5 = 9
+        assertEquals(9, classA.getMethod("test").invoke(instance));
     }
 
     @ParameterizedTest
@@ -180,83 +236,6 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
 
     @ParameterizedTest
     @EnumSource(JdkVersion.class)
-    public void testDoWhileVariableScope(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let sum: int = 0
-                      let i: int = 0
-                      do {
-                        const x: int = i * 2
-                        const y: int = x + 1
-                        sum = sum + y
-                        i++
-                      } while (i < 3)
-                      return sum
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // i=0: y=1, i=1: y=3, i=2: y=5
-        // sum = 1 + 3 + 5 = 9
-        assertEquals(9, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testDoWhileZeroIterationsImpossible(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let executed: int = 0
-                      do {
-                        executed = 1
-                      } while (false)
-                      return executed
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // Unlike while, do-while ALWAYS executes at least once
-        assertEquals(1, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
-    public void testDoWhileComplexBreakPattern(JdkVersion jdkVersion) throws Exception {
-        var map = getCompiler(jdkVersion).compile("""
-                namespace com {
-                  export class A {
-                    test(): int {
-                      let sum: int = 0
-                      let i: int = 0
-                      do {
-                        i++
-                        if (i > 10) {
-                          break
-                        }
-                        if (i % 3 == 0) {
-                          continue
-                        }
-                        sum = sum + i
-                      } while (i < 100)
-                      return sum
-                    }
-                  }
-                }""");
-        Class<?> classA = loadClass(map.get("com.A"));
-        var instance = classA.getConstructor().newInstance();
-        // i=1,2,4,5,7,8,10 (skip 3,6,9, break at 11)
-        // sum = 1+2+4+5+7+8+10 = 37
-        assertEquals(37, classA.getMethod("test").invoke(instance));
-    }
-
-    @ParameterizedTest
-    @EnumSource(JdkVersion.class)
     public void testDoWhileWithMultipleReturns(JdkVersion jdkVersion) throws Exception {
         var map = getCompiler(jdkVersion).compile("""
                 namespace com {
@@ -280,5 +259,26 @@ public class TestCompileAstDoWhileStmtEdgeCases extends BaseTestCompileSuite {
         var instance = classA.getConstructor().newInstance();
         // Returns 100 when i=3
         assertEquals(100, classA.getMethod("test").invoke(instance));
+    }
+
+    @ParameterizedTest
+    @EnumSource(JdkVersion.class)
+    public void testDoWhileZeroIterationsImpossible(JdkVersion jdkVersion) throws Exception {
+        var map = getCompiler(jdkVersion).compile("""
+                namespace com {
+                  export class A {
+                    test(): int {
+                      let executed: int = 0
+                      do {
+                        executed = 1
+                      } while (false)
+                      return executed
+                    }
+                  }
+                }""");
+        Class<?> classA = loadClass(map.get("com.A"));
+        var instance = classA.getConstructor().newInstance();
+        // Unlike while, do-while ALWAYS executes at least once
+        assertEquals(1, classA.getMethod("test").invoke(instance));
     }
 }
